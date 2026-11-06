@@ -28,17 +28,21 @@ Le jeu est une page web en plusieurs fichiers (`src/`), **sans étape d'assembla
 2. Vérifier le rendu quand c'est visuel : `python3 outils/captures.py DOSSIER t1 t2 …` (le jeu est lu directement dans
    `src/` ; captures de l'intro à ces instants, contrôle de fin d'intro et des erreurs). Fluidité : `python3 outils/perf.py`.
 3. **Mettre à jour `docs/conception.md`** (section concernée) pour décrire le nouveau comportement.
-4. **Commit** en français (message court décrivant le changement pour un joueur), puis **push sur `main`**.
+4. **Commit** en français (message court décrivant le changement pour un joueur), puis **push sur la branche
+   `claude/NOM-COURT`** (la session ne peut pousser que sur des branches `claude/…`, jamais sur `main` ni sur des tags :
+   erreur 403 sinon). L'utilisateur fusionne dans `main` par pull request (lien affiché par git, ou `gh pr create` s'il le demande).
 5. **Publier** sur l'artefact existant, toujours le même (https://claude.ai/artifact/NL3Dn842a32JiGimprg8cm), avec
    `publish_files` depuis le disque : `src/index.html` → `index.html`, `src/style.css` → `style.css`,
    `src/js/*.js` → `js/…`, mode `replace`, slug et `base_version` de l'artefact. Ne pas passer le contenu par la conversation.
-6. **Étiqueter la version publiée** : `git tag vAAAA-MM-JJ-n` (ex. `v2026-11-06-1`) puis `git push --tags`.
+6. **Marquer la version publiée** : pousser une branche `claude/version-AAAA-MM-JJ-n` (ex. `claude/version-2026-11-06-1`)
+   qui pointe sur le commit publié (`git push origin HEAD:refs/heads/claude/version-AAAA-MM-JJ-n`). Ne pas utiliser de tags.
    Ne plus synchroniser de HTML dans le projet claude.ai « GAME » ; mettre à jour seulement
    `claude/noyau-profond-conception.md` (copie de `docs/conception.md`) quand ce document change.
 
 ## Revenir à une version précédente
-`git tag` liste les versions publiées. Pour revenir : `git checkout TAG -- src/`, republier (étape 5), puis commit
-« Retour à la version TAG ». Ne jamais réécrire l'historique de `main`. Avant une grosse modification, poser un tag.
+`git branch -r | grep version` liste les versions publiées. Pour revenir : `git checkout origin/claude/version-… -- src/`,
+republier (étape 5), puis commit « Retour à la version … ». Ne jamais réécrire l'historique de `main`. Avant une grosse
+modification, marquer la version actuelle. Dernière version à fichier unique : branche `claude/version-avant-fichiers-separes`.
 
 ## Règles à ne pas casser
 - Les réglages du joueur (palettes, tuiles retouchées, intro déjà vue…) vivent dans le `localStorage` du navigateur

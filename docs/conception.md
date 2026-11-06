@@ -3,7 +3,7 @@
 État du projet au 5 novembre 2026. Ce document résume les règles, les valeurs et les choix déjà validés, pour reprendre le travail dans une nouvelle conversation ou dans Claude Code.
 
 - **Jeu jouable** : https://claude.ai/artifact/NL3Dn842a32JiGimprg8cm (artefact privé, capacité `db` déclarée)
-- **Sources** : dépôt GitHub queauem-eqeq/DEEPCORE, dossier `src/` (page `index.html`, `style.css`, scripts `js/NN-nom.js` chargés par balises `<script>`, sans assemblage). Depuis le 6 novembre 2026 le jeu n'est plus un fichier unique ; l'artefact est publié en plusieurs fichiers et chaque version publiée porte un tag git (`vAAAA-MM-JJ-n`) pour pouvoir y revenir. Dernière version à fichier unique : tag `v-avant-fichiers-separes`.
+- **Sources** : dépôt GitHub queauem-eqeq/DEEPCORE, dossier `src/` (page `index.html`, `style.css`, scripts `js/NN-nom.js` chargés par balises `<script>`, sans assemblage). Depuis le 6 novembre 2026 le jeu n'est plus un fichier unique ; l'artefact est publié en plusieurs fichiers et chaque version publiée est marquée par une branche git `claude/version-AAAA-MM-JJ-n` pour pouvoir y revenir (la session ne peut pas pousser de tags). Dernière version à fichier unique : branche `claude/version-avant-fichiers-separes`.
 - **Planche de sprites** (propositions archivées) : https://claude.ai/artifact/9q4nEBMjc2r2TCaWPuKUXu
 
 ## 1. Concept
