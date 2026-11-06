@@ -141,7 +141,7 @@ Roguelike au tour par tour dans une esthétique inspirée de Cogmind et de Brogu
 - Aperçu : la tuile en grand, puis en pavage (terrain) ou posée sur le sol (foreuse, faune, objets, viseur).
 - Retouches mémorisées dans le navigateur (`np-tiles`). « Enregistrer les réglages » les écrit dans la base (champ `tuiles`) et en fait la nouvelle référence (`np-tiles-base`) ; au chargement, les tuiles de la base deviennent aussi la référence.
 
-- Export / import texte : essayé puis retiré le 6 novembre 2026 (« on verra plus tard »). Le fichier `noyau-profond-tuiles.txt` du projet garde la copie des tuiles de la base faite à ce moment-là.
+- Export / import texte : essayé puis retiré le 6 novembre 2026 (« on verra plus tard »).
 
 ### Touches
 ZQSD / flèches / pavé numérique : déplacer · A E W C : diagonales · Souris : survol = inspection, clic = y aller · X : inspection au clavier · F : forer · Espace / 5 : attendre · B : brouillard de guerre · ! : son · M : mode carte (déplacements = défilement, Maj = plus vite, Échap ou M pour revenir).
