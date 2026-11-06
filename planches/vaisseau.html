@@ -1,0 +1,161 @@
+<title>Vaisseau U-7</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;700&family=JetBrains+Mono:wght@400;700&display=swap">
+<style>
+/* Planche de propositions : trois vaisseaux côte à côte, chacun posé sur la carte, en vol et en emprise de cases. Même univers sombre que le jeu. */
+:root{
+  --black:#000;--void:#020605;--line:#16302c;--fg:#d6efe8;--dim:#5f8a82;
+  --c1:#8fe6cf;--c2:#4fb8ff;--c3:#ffa53a;
+  --display:"Chakra Petch","Segoe UI",system-ui,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--black);color:var(--fg);font:13px/1.5 var(--mono)}
+main{max-width:1180px;margin:0 auto;padding-block:28px 40px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:22px}
+header{display:grid;gap:6px}
+.tag{font-size:11px;letter-spacing:.25em;color:var(--c3);text-transform:uppercase}
+h1{font-family:var(--display);font-size:clamp(24px,4vw,34px);letter-spacing:.12em;margin:0;color:var(--c1);text-transform:uppercase;text-wrap:balance}
+header p{margin:0;color:var(--dim);max-width:78ch}
+.bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+button{font:inherit;font-size:11px;color:var(--c3);background:transparent;border:1px solid var(--c3);padding:2px 8px;cursor:pointer;letter-spacing:.14em;text-transform:uppercase}
+button[aria-pressed="false"]{border-color:var(--line);color:var(--dim)}
+button:hover{background:rgba(255,255,255,.06)}
+button:focus-visible{outline:2px solid var(--c3);outline-offset:2px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(330px,1fr));gap:16px}
+.card{border:1px solid var(--line);padding:16px;display:grid;gap:12px;min-width:0;align-content:start}
+.card h2{font-family:var(--display);font-size:16px;letter-spacing:.18em;margin:0;text-transform:uppercase;display:flex;gap:10px;align-items:baseline}
+.card h2 b{color:var(--c3);font-weight:700}
+.card p{margin:0;color:#b9d6cf}
+.views{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-start}
+figure{margin:0;display:grid;gap:4px}
+figcaption{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--dim)}
+canvas{display:block;image-rendering:pixelated;max-width:100%;outline:1px solid var(--line)}
+.facts{display:grid;grid-template-columns:auto 1fr;gap:2px 12px;font-size:12px;font-variant-numeric:tabular-nums}
+.facts dt{color:var(--dim)}.facts dd{margin:0}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:11px;color:var(--dim)}
+.legend i{display:inline-block;width:10px;height:10px;margin-right:6px;vertical-align:-1px}
+@media (prefers-reduced-motion:reduce){.anim-note{display:none}}
+</style>
+
+<main>
+  <header>
+    <div class="tag">Noyau Profond · intro · étape 1</div>
+    <h1>Vaisseau de la foreuse</h1>
+    <p>Trois propositions de vaisseau en vue de dessus, nez vers le haut. Chacune tient dans un cœur de 3 × 5 cases avec un intérieur de 1 × 3 cases et une porte à l’arrière, plus quelques cases pour la silhouette. Tuiles 16 × 16 affichées en 32 × 32, couleurs de la palette Origine : coque en accent, détails techniques en bio, porte en monde.</p>
+  </header>
+  <div class="bar">
+    <button id="gridBtn" aria-pressed="false">Grille des cases</button>
+    <button id="flameBtn" aria-pressed="true">Réacteurs allumés</button>
+    <div class="legend"><span><i style="background:#8fe6cf"></i>coque (infranchissable)</span><span><i style="background:#0b2a2f;outline:1px solid #4fb8ff"></i>intérieur (praticable)</span><span><i style="background:#ffa53a"></i>porte arrière</span></div>
+  </div>
+  <div class="grid" id="cards"></div>
+</main>
+
+<script>
+(()=>{
+const COL={'1':'#8fe6cf','2':'#4fb8ff','3':'#ffa53a','w':'#ffffff','0':'#020605'};
+// Codes de case : H coque, I intérieur, D porte, E réacteur, P nacelle latérale, . vide
+const DESIGNS=[
+  {id:'A',name:'Cargo',desc:'Nez en pointe, cabine vitrée, ailes courtes à mi-longueur et deux réacteurs qui encadrent la porte. La silhouette la plus lisible à petite taille.',
+   grid:['..H..','.HIH.','HHIHH','HHIHH','.HDH.','.E.E.']},
+  {id:'B',name:'Delta',desc:'Fuselage étroit qui s’élargit vers l’arrière en aile delta ; réacteurs aux deux pointes. Allure plus rapide, porte bien dégagée au centre.',
+   grid:['..H..','.HIH.','.HIH.','HHIHH','HHDHH','E...E']},
+  {id:'C',name:'Bloc minier',desc:'Caisson trapu à proue plate, deux paires de nacelles latérales et deux réacteurs. Plus utilitaire, dans l’esprit de la foreuse.',
+   grid:['.HHH.','PHIHP','.HIH.','PHIHP','.HDH.','.E.E.']}
+];
+const SHIP=new Set(['H','I','D','E','P']);
+// Dessin pixel par pixel d'un vaisseau (codes 0/1/2/3/w) à partir de sa grille de cases
+function shipPixels(g){
+  const cw=g[0].length,ch=g.length,W=cw*16,H=ch*16,cell=(cx,cy)=>(g[cy]||'')[cx]||'.',isS=(cx,cy)=>SHIP.has(cell(cx,cy));
+  const mask=Array.from({length:H},()=>new Uint8Array(W));
+  for(let cy=0;cy<ch;cy++)for(let cx=0;cx<cw;cx++){const t=cell(cx,cy);if(!SHIP.has(t))continue;
+    for(let j=0;j<16;j++)for(let i=0;i<16;i++){let on=true;
+      if(t==='E'){on=j<10?(i>=3&&i<=12):(i>=5&&i<=10)&&j<=13;}
+      else if(t==='P'){const left=!isS(cx-1,cy);on=j>=3&&j<=12&&(left?i>=4:i<=11);}
+      else{ // chanfrein des coins saillants
+        const cut=(ox,oy,ax,ay)=>!isS(cx+ox,cy)&&!isS(cx,cy+oy)&&!isS(cx+ox,cy+oy)&&(ax+ay)<5;
+        if(cut(-1,-1,i,j)||cut(1,-1,15-i,j)||cut(-1,1,i,15-j)||cut(1,1,15-i,15-j))on=false;}
+      if(on)mask[cy*16+j][cx*16+i]=1;}}
+  const px=Array.from({length:H},()=>Array(W).fill('.'));
+  const inM=(x,y)=>x>=0&&y>=0&&x<W&&y<H&&mask[y][x];
+  // sol intérieur : cases I et D, en retrait de 2 pixels de la coque
+  const floor=Array.from({length:H},()=>new Uint8Array(W));
+  for(let cy=0;cy<ch;cy++)for(let cx=0;cx<cw;cx++){const t=cell(cx,cy);if(t!=='I'&&t!=='D')continue;
+    const up=cell(cx,cy-1),dn=cell(cx,cy+1);
+    for(let j=0;j<16;j++)for(let i=3;i<=12;i++){
+      if(j<3&&up!=='I'&&up!=='D')continue;
+      if(t==='D'&&j>12)continue;
+      if(t==='I'&&j>12&&dn!=='I'&&dn!=='D')continue;
+      floor[cy*16+j][cx*16+i]=1;}}
+  for(let y=0;y<H;y++)for(let x=0;x<W;x++){if(!mask[y][x])continue;
+    const edge=!inM(x-1,y)||!inM(x+1,y)||!inM(x,y-1)||!inM(x,y+1);
+    const cx=(x/16)|0,cy=(y/16)|0,lx=x%16,ly=y%16,t=cell(cx,cy);
+    if(edge){px[y][x]='1';continue;}
+    if(floor[y][x]){px[y][x]=(lx%4===1&&ly%4===1)?'2':'0';continue;}
+    const nearFloor=[[1,0],[-1,0],[0,1],[0,-1]].some(([dx,dy])=>floor[y+dy]&&floor[y+dy][x+dx]);
+    if(nearFloor){px[y][x]='1';continue;}
+    // coutures de panneaux et rivets
+    if((lx===0&&isS(cx-1,cy)||ly===0&&isS(cx,cy-1))&&(x+y)%2===0){px[y][x]='2';continue;}
+    if(t==='H'&&((lx===3||lx===12)&&(ly===3||ly===12))&&!floor[y][x]){px[y][x]='2';continue;}
+    px[y][x]='0';}
+  // porte arrière : volet en bandes ambre
+  for(let cy=0;cy<ch;cy++)for(let cx=0;cx<cw;cx++)if(cell(cx,cy)==='D')
+    for(let j=13;j<=15;j++)for(let i=4;i<=11;i++)px[cy*16+j][cx*16+i]=(j===14||i%3===0)?'3':'0';
+  // réacteurs : tuyères bio
+  for(let cy=0;cy<ch;cy++)for(let cx=0;cx<cw;cx++)if(cell(cx,cy)==='E')
+    for(let j=10;j<=13;j++)for(let i=6;i<=9;i++)px[cy*16+j][cx*16+i]=j===13?'1':(i===6||i===9)?'2':'0';
+  // nacelles : feu de position
+  for(let cy=0;cy<ch;cy++)for(let cx=0;cx<cw;cx++)if(cell(cx,cy)==='P'){const left=!isS(cx-1,cy),lx=left?6:9;px[cy*16+7][cx*16+lx]='3';px[cy*16+8][cx*16+lx]='3';}
+  // cabine : verrière à l'avant du premier intérieur
+  const top=g.findIndex(r=>r.includes('I')),tx=g[top].indexOf('I'),ny=top-1;
+  if(ny>=0){const narrow=cell(tx-1,ny)!=='H';
+    for(let j=narrow?8:7;j<=13;j++)for(let i=5;i<=10;i++){const k=narrow?(j-8):(j-7);if(Math.abs(i-7.5)<=k*0.6+1.2)px[ny*16+j][tx*16+i]=(i===6&&j===(narrow?10:9))?'w':'2';}}
+  return {px,W,H,cw,ch};}
+// Foreuse (même sprite que le jeu), pointe vers la porte
+const DRILL=[".......22.......",".......22.......","......2222......","......2222......",".....222222.....",".....222222.....","....22222222....","....22222222....",
+  "...1111111111...","..112222222211..","..12.2.22.2.21..","..12.2.22.2.21..","..112222222211..","...1111111111...","....2......2....","....2......2...."];
+const drillDown=(x,y)=>DRILL[15-y][15-x];
+function seeded(n){return ()=>{n=(n*1664525+1013904223)>>>0;return n/4294967296;};}
+function drawGround(x,w,h,S){x.fillStyle='#020605';x.fillRect(0,0,w,h);x.globalAlpha=.08;x.fillStyle=COL['3'];x.fillRect(0,0,w,h);x.globalAlpha=.6;
+  const R=seeded(7),p=S/16;for(let k=0;k<w*h/(S*S)*3;k++){x.fillRect(Math.floor(R()*w/p)*p,Math.floor(R()*h/p)*p,p,p);}x.globalAlpha=1;}
+function blit(x,px,ox,oy,p){for(let y=0;y<px.length;y++)for(let i=0;i<px[y].length;i++){const c=px[y][i];if(c==='.')continue;x.fillStyle=COL[c];x.fillRect(ox+i*p,oy+y*p,p,p);}}
+let showGrid=false,flames=true,t0=performance.now();
+const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const cards=$=>document.getElementById($);
+const built=DESIGNS.map(d=>{const s=shipPixels(d.grid);
+  const count=k=>d.grid.join('').split('').filter(c=>k.includes(c)).length;
+  const el=document.createElement('section');el.className='card';
+  el.innerHTML=`<h2><b>${d.id}</b>${d.name}</h2><p>${d.desc}</p>
+    <div class="views"><figure><canvas class="land"></canvas><figcaption>Posé sur la carte</figcaption></figure>
+    <figure><canvas class="fly"></canvas><figcaption>En vol</figcaption></figure></div>
+    <dl class="facts"><dt>Emprise</dt><dd>${s.cw} × ${s.ch} cases, dont ${count('HEP')} de coque</dd><dt>Intérieur</dt><dd>${count('I')} cases + la porte</dd><dt>Sortie</dt><dd>porte à l’arrière, vers le bas</dd></dl>`;
+  document.getElementById('cards').append(el);
+  return {d,s,land:el.querySelector('.land'),fly:el.querySelector('.fly')};});
+function drawLand(b){const S=32,p=2,m=1,cv=b.land,w=(b.s.cw+2*m)*S,h=(b.s.ch+2*m)*S;cv.width=w;cv.height=h;cv.style.width=w+'px';
+  const x=cv.getContext('2d');x.imageSmoothingEnabled=false;drawGround(x,w,h,S);blit(x,b.s.px,m*S,m*S,p);
+  // foreuse dans la case intérieure du milieu
+  const g=b.d.grid,rows=g.map((r,i)=>r.includes('I')?i:-1).filter(i=>i>=0),ry=rows[1],rx=g[ry].indexOf('I');
+  for(let j=0;j<16;j++)for(let i=0;i<16;i++){const c=drillDown(i,j);if(c==='.')continue;x.fillStyle=COL[c];x.fillRect((m+rx)*S+i*p,(m+ry)*S+j*p,p,p);}
+  if(showGrid){for(let cy=0;cy<b.s.ch;cy++)for(let cx=0;cx<b.s.cw;cx++){const t=g[cy][cx];if(t==='.')continue;
+    x.strokeStyle=t==='D'?COL['3']:t==='I'?COL['2']:'rgba(143,230,207,.55)';x.lineWidth=1;x.strokeRect((m+cx)*S+.5,(m+cy)*S+.5,S-1,S-1);}
+    const dy=g.findIndex(r=>r.includes('D'));x.fillStyle=COL['3'];x.font='bold 11px "JetBrains Mono",monospace';x.textAlign='center';x.fillText('▼ sortie',(m+g[dy].indexOf('D'))*S+S/2,(m+dy+1)*S+S*0.62);}}
+function drawFly(b,t){const S=32,p=2,cv=b.fly,w=b.s.cw*S+64,h=b.s.ch*S+96;if(cv.width!==w){cv.width=w;cv.height=h;cv.style.width=w+'px';}
+  const x=cv.getContext('2d');x.imageSmoothingEnabled=false;x.fillStyle='#020605';x.fillRect(0,0,w,h);
+  // étoiles en parallaxe : trois couches, les plus grosses défilent le plus vite
+  [[1,40,22,.45],[2,80,14,.7],[3,150,6,1]].forEach(([sz,spd,n,a],L)=>{const R=seeded(31+L*17);x.globalAlpha=a;x.fillStyle=L===2?'#ffffff':COL['1'];
+    for(let k=0;k<n;k++){const sx=Math.floor(R()*w/2)*2,sy=((R()*h+(reduced?0:t*spd/1000))%h);x.fillRect(sx,Math.floor(sy/2)*2,sz*2,sz*2);}});x.globalAlpha=1;
+  const ox=32,oy=24;
+  if(flames){const g=b.d.grid,f=reduced?0:Math.floor(t/90)%3;
+    for(let cy=0;cy<g.length;cy++)for(let cx=0;cx<g[cy].length;cx++)if(g[cy][cx]==='E'){const bx=ox+cx*S,by=oy+(cy+1)*S-6;
+      const len=10+f*3;for(let j=0;j<len;j++){const half=Math.max(1,4-Math.floor(j/4));
+        for(let i=-half;i<half;i++){x.fillStyle=j<4?'#ffffff':j<9?COL['3']:COL['3'];x.globalAlpha=j<9?1:.55;x.fillRect(bx+S/2+i*p,by+j*p,p,p);}}x.globalAlpha=1;}}
+  blit(x,b.s.px,ox,oy,p);}
+function drawAll(){built.forEach(drawLand);}
+function loop(t){built.forEach(b=>drawFly(b,t-t0));if(!reduced)requestAnimationFrame(loop);}
+document.getElementById('gridBtn').onclick=e=>{showGrid=!showGrid;e.currentTarget.setAttribute('aria-pressed',showGrid);drawAll();};
+document.getElementById('flameBtn').onclick=e=>{flames=!flames;e.currentTarget.setAttribute('aria-pressed',flames);if(reduced)built.forEach(b=>drawFly(b,0));};
+drawAll();requestAnimationFrame(loop);
+})();
+</script>

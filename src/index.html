@@ -1,0 +1,106 @@
+<title>Noyau Profond</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;700&family=JetBrains+Mono:wght@400;700&display=swap">
+<style>
+/*@@CSS@@*/
+</style>
+
+<div class="modal" id="bestiary" role="dialog" aria-modal="true" aria-labelledby="bestTitle" hidden>
+  <div class="mcard">
+    <div class="mhead"><h2 id="bestTitle">Bestiaire</h2><button id="bestClose" aria-label="Fermer le bestiaire">Fermer</button></div>
+    <p class="mnote">Les modifications s’appliquent immédiatement à la partie en cours et restent mémorisées.</p>
+    <div class="beasts" id="bestList"></div>
+    <div class="mfoot"><button id="bestReset">Valeurs par défaut</button></div>
+  </div>
+</div>
+<div class="modal" id="viseurs" role="dialog" aria-modal="true" aria-labelledby="curTitle" hidden>
+  <div class="mcard wide">
+    <div class="mhead"><h2 id="curTitle">Tile editor</h2><button id="curClose" aria-label="Fermer le Tile editor">Fermer</button></div>
+    <p class="mnote">Choisissez une tuile, puis retouchez-la pixel par pixel : clic pour peindre, clic droit pour effacer. Les changements s’appliquent tout de suite au jeu et restent mémorisés. Les variantes suivent la tuile de base (orientations de la foreuse, animaux tournés à gauche, herbe basse, eau animée).</p>
+    <div class="cur-wrap">
+      <div class="cur-groups" id="curList"></div>
+      <div class="cur-ed">
+        <div class="ed-name" id="edName"></div>
+        <canvas id="curEd" width="256" height="256" aria-label="Éditeur de tuile : grille de 16 sur 16 pixels"></canvas>
+        <div class="cur-tools" id="curInks">
+          <button class="ink" data-ink="3" aria-pressed="true" aria-label="Monde" title="Monde"><i></i></button><button class="ink" data-ink="2" aria-pressed="false" aria-label="Bio" title="Bio"><i></i></button><button class="ink" data-ink="1" aria-pressed="false" aria-label="Accent" title="Accent"><i></i></button><button class="ink" data-ink="w" aria-pressed="false" aria-label="Blanc" title="Blanc"><i></i></button><button class="ink" data-ink="0" aria-pressed="false" aria-label="Noir" title="Noir"><i></i></button><button class="ink" data-ink="r" aria-pressed="false" aria-label="Rouge" title="Rouge"><i></i></button><button class="ink" data-ink="." aria-pressed="false" aria-label="Gomme" title="Gomme"><i class="er"></i></button>
+        </div>
+        <div class="cur-tools" id="curSyms"><button id="symH" aria-pressed="false">Miroir ↔</button><button id="symV" aria-pressed="false">Miroir ↕</button></div>
+        <div class="cur-tools"><button id="curOutline">Contour auto</button><button id="curClear">Vider</button><button id="curReset" title="Revenir à la tuile de référence (le dessin d’origine, ou la dernière version chargée de la base)">Rétablir</button></div>
+        <canvas id="curPrev" width="256" height="96" aria-label="Aperçu de la tuile sur le terrain"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+<canvas class="intro" id="introCv" hidden aria-label="Cinématique d’arrivée sur la planète"></canvas>
+<div class="introskip" id="introSkip" hidden>Échap : passer · clic : activer le son</div>
+<div class="game">
+  <div class="left">
+  <section class="view" id="mapwrap">
+    <canvas id="view" aria-label="Vue du terrain autour du robot"></canvas>
+    <div class="camtag" id="inspTag" hidden>INSPECTION · déplacements = viseur (<kbd>Maj</kbd> plus vite) · <kbd>Entrée</kbd> y aller · <kbd>X</kbd> ou <kbd>Échap</kbd> pour quitter</div>
+    <div class="camtag" id="camTag" hidden>MODE CARTE · déplacements = défilement · mini-carte : clic = recentrer, glisser = défiler · <kbd>M</kbd> pour revenir</div>
+    <div class="overlay" id="overlay" hidden><div class="card" id="card"></div></div>
+  </section>
+  <section class="log" aria-label="Journal de bord"><ul id="log" aria-live="polite"></ul></section>
+  </div>
+  <aside class="col">
+    <div>
+      <h2>Statut</h2>
+      <div class="rows">
+        <div class="bar2"><span>Vie</span><span class="abar life" role="meter" aria-label="Vie" id="lifeT"></span></div>
+        <div class="bar2"><span>Énergie</span><span class="abar energy" role="meter" aria-label="Énergie" id="enT"></span></div>
+      </div>
+    </div>
+    <details class="fold" id="fd-stats">
+      <summary><h2>Statistiques</h2></summary>
+      <div class="stats2" id="stats"></div>
+    </details>
+    <div class="pad" id="pad">
+      <div class="dpad">
+        <button data-d="-1,-1" aria-label="Haut gauche">↖</button><button data-d="0,-1" aria-label="Haut">↑</button><button data-d="1,-1" aria-label="Haut droite">↗</button>
+        <button data-d="-1,0" aria-label="Gauche">←</button><button id="waitPad" aria-label="Attendre un tour" title="Attendre un tour">·</button><button data-d="1,0" aria-label="Droite">→</button>
+        <button data-d="-1,1" aria-label="Bas gauche">↙</button><button data-d="0,1" aria-label="Bas">↓</button><button data-d="1,1" aria-label="Bas droite">↘</button>
+      </div>
+    </div>
+    <canvas id="mini" aria-label="Mini-carte des zones explorées"></canvas>
+    <div class="seenwrap"><div class="seen" id="msg" role="region" aria-label="En vue"></div></div>
+    <div class="foldwrap">
+      <details class="fold" id="fd-gen">
+        <summary><h2>Génération</h2><button class="go regen" id="restart" title="Générer une nouvelle planète avec ces réglages">REGEN</button></summary>
+        <div class="gen" id="gen"></div>
+      </details>
+      <details class="fold" id="fd-life">
+        <summary><h2>Life</h2></summary>
+        <div class="gen" id="life"></div>
+      </details>
+    </div>
+    <details class="fold" id="fd-pal">
+      <summary><h2>Palette</h2></summary>
+      <div class="pal">
+        <label for="pc3">#1 Monde <button class="swb" id="pc3" data-k="3" aria-expanded="false" aria-label="Couleur 1 : monde"></button></label>
+        <label for="pc2">#2 Bio <button class="swb" id="pc2" data-k="2" aria-expanded="false" aria-label="Couleur 2 : bio"></button></label>
+        <label for="pc1">#3 Accent <button class="swb" id="pc1" data-k="1" aria-expanded="false" aria-label="Couleur 3 : accent"></button></label>
+        <div class="cgrid" id="cgrid" role="listbox" aria-label="Palette de 64 couleurs" hidden></div>
+        <div class="pnm"><span id="palName">Origine</span><button id="palReset" title="Rétablir les couleurs d’origine de cette palette">Rétablir</button></div>
+        <div class="presets" id="presets"></div>
+      </div>
+    </details>
+    <details class="fold" id="fd-lab">
+      <summary><h2>Lab</h2></summary>
+      <div class="foldwrap">
+        <div class="labbtns">
+          <button id="bestBtn">Bestiaire</button>
+          <button id="curBtn">Tile editor</button>
+          <button id="introBtn" title="Générer une nouvelle planète et rejouer la cinématique d’arrivée">Intro</button>
+        </div>
+        <p class="keys"><kbd>ZQSD</kbd> <kbd>↑↓←→</kbd> pavé num. · <kbd>A</kbd><kbd>E</kbd><kbd>W</kbd><kbd>C</kbd> diagonales · Souris : survol = inspection, clic = y aller · <kbd>X</kbd> inspection au clavier (<kbd>Entrée</kbd> pour y aller) · <kbd>F</kbd> forer · <kbd>Espace</kbd> <kbd>5</kbd> attendre un tour · <kbd>B</kbd> brouillard de guerre · <kbd>!</kbd> son · <kbd>M</kbd> mode carte (déplacements = défilement, <kbd>Maj</kbd> pour aller plus vite, mini-carte : clic pour recentrer, glisser le cadre pour défiler)</p>
+      </div>
+    </details>
+  </aside>
+</div>
+
+<script>
+/*@@JS@@*/
+</script>
