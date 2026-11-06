@@ -10,7 +10,7 @@ async def main():
     b=await p.chromium.launch()
     pg=await b.new_page(viewport={'width':1600,'height':1000},device_scale_factor=2)
     await pg.add_init_script(INIT)
-    await pg.goto(__import__('pathlib').Path(__file__).resolve().parent.parent.joinpath('dist/noyau-profond.html').as_uri())
+    await pg.goto(__import__('pathlib').Path(__file__).resolve().parent.parent.joinpath('src/index.html').as_uri())
     await pg.wait_for_timeout(10500)
     T=await pg.evaluate("window.__T")
     t0=T[0][0]

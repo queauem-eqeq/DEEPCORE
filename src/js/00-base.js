@@ -1,4 +1,3 @@
-(()=>{
 const W=96,H=64,NSITES=5,S=32;
 // Échelle de génération : 1 pour une planète de 96 × 64 (taille actuelle) ; les tailles de relief, lacs et distances suivent
 const F=W/96,SZ=(v,mn)=>Math.max(mn||2,Math.round(v*F));

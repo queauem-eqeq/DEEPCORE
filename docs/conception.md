@@ -3,7 +3,7 @@
 État du projet au 5 novembre 2026. Ce document résume les règles, les valeurs et les choix déjà validés, pour reprendre le travail dans une nouvelle conversation ou dans Claude Code.
 
 - **Jeu jouable** : https://claude.ai/artifact/NL3Dn842a32JiGimprg8cm (artefact privé, capacité `db` déclarée)
-- **Fichier source** : `noyau-profond.html` (fichier unique, HTML + CSS + JavaScript, environ 120 Ko), enregistré dans ce projet à côté de ce document
+- **Sources** : dépôt GitHub queauem-eqeq/DEEPCORE, dossier `src/` (page `index.html`, `style.css`, scripts `js/NN-nom.js` chargés par balises `<script>`, sans assemblage). Depuis le 6 novembre 2026 le jeu n'est plus un fichier unique ; l'artefact est publié en plusieurs fichiers et chaque version publiée est marquée par une branche git `claude/version-AAAA-MM-JJ-n` pour pouvoir y revenir (la session ne peut pas pousser de tags). Dernière version à fichier unique : branche `claude/version-avant-fichiers-separes`.
 - **Planche de sprites** (propositions archivées) : https://claude.ai/artifact/9q4nEBMjc2r2TCaWPuKUXu
 
 ## 1. Concept
@@ -141,7 +141,7 @@ Roguelike au tour par tour dans une esthétique inspirée de Cogmind et de Brogu
 - Aperçu : la tuile en grand, puis en pavage (terrain) ou posée sur le sol (foreuse, faune, objets, viseur).
 - Retouches mémorisées dans le navigateur (`np-tiles`). « Enregistrer les réglages » les écrit dans la base (champ `tuiles`) et en fait la nouvelle référence (`np-tiles-base`) ; au chargement, les tuiles de la base deviennent aussi la référence.
 
-- Export / import texte : essayé puis retiré le 6 novembre 2026 (« on verra plus tard »). Le fichier `noyau-profond-tuiles.txt` du projet garde la copie des tuiles de la base faite à ce moment-là.
+- Export / import texte : essayé puis retiré le 6 novembre 2026 (« on verra plus tard »).
 
 ### Touches
 ZQSD / flèches / pavé numérique : déplacer · A E W C : diagonales · Souris : survol = inspection, clic = y aller · X : inspection au clavier · F : forer · Espace / 5 : attendre · B : brouillard de guerre · ! : son · M : mode carte (déplacements = défilement, Maj = plus vite, Échap ou M pour revenir).
@@ -196,4 +196,4 @@ Décisions validées le 6 novembre 2026 :
 - Brancher la vitesse du robot (sprint coûtant de l'énergie).
 - Source de soin limitée (kits, forage qui répare).
 - Exploration automatique façon Brogue (vers la zone inexplorée la plus proche), sur le même moteur de trajet.
-- Passer le projet sous Claude Code : découper le fichier unique en modules (génération, faune, rendu, interface, sons, tuiles) et le versionner avec git.
+- Fait le 6 novembre 2026 : projet sous git, fichiers séparés par thème. Reste possible : passer à de vrais modules ES (imports) si la portée globale partagée devient gênante (niveau 2).
