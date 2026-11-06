@@ -231,4 +231,3 @@ function start(data){
 try{window.claude&&window.claude.hot&&window.claude.hot.snapshot&&window.claude.hot.snapshot(()=>({G,started}));}catch(e){}
 const hot=window.claude&&window.claude.hot;
 hot&&hot.ready?hot.ready(start):start((hot&&hot.data)||{});
-})();
