@@ -39,6 +39,10 @@ Le jeu est une page web en plusieurs fichiers (`src/`), **sans étape d'assembla
    Ne plus synchroniser de HTML dans le projet claude.ai « GAME » ; mettre à jour seulement
    `claude/noyau-profond-conception.md` (copie de `docs/conception.md`) quand ce document change.
 
+## Publication sur GitHub Pages
+Le workflow `.github/workflows/pages.yml` publie `src/` sur https://queauem-eqeq.github.io/DEEPCORE/ à chaque fusion dans `main`.
+Pas de réglages d'artefact (base `db`) là-bas : les réglages du joueur restent dans le navigateur (`localStorage`).
+
 ## Revenir à une version précédente
 `git branch -r | grep version` liste les versions publiées. Pour revenir : `git checkout origin/claude/version-… -- src/`,
 republier (étape 5), puis commit « Retour à la version … ». Ne jamais réécrire l'historique de `main`. Avant une grosse
