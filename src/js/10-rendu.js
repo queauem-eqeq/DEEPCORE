@@ -12,6 +12,14 @@ let FX=[],fxRaf=0;
    Particules en pixels de carte (case × S) : la fumée qui s'élève reste sur place quand la foreuse avance (traînée).
    Pixel art strict : grains opaques de 1 ou 2 pixels de tuile, sans fondu ni agrandissement ; chacun disparaît d'un coup. */
 const SMOKE={p:[],raf:0,last:0,acc:0,accF:0};
+// Giclée de sang à la mort d'un ennemi : une trentaine de gouttes (pixels de tuile, opaques) projetées en l'air ;
+// en retombant elles restent collées au sol (G.splat, pixels de carte), sauf dans l'eau ou un gouffre. Au plus SPLAT_MAX gouttes gardées.
+const SPLAT_MAX=1500,BLOOD_COLS=['#b8242a','#b8242a','#8a1a20','#d8333a'];
+function gore(x,y){const cx=(x+.5)*S,cy=(y+.5)*S,n=24+((Math.random()*12)|0);
+  for(let j=0;j<n;j++){const an=Math.random()*Math.PI*2,v=30+Math.random()*110;
+    SMOKE.p.push({x:cx,y:cy,z:4+Math.random()*6,vx:Math.cos(an)*v,vy:Math.sin(an)*v*.8,vz:60+Math.random()*130,a:0,l:9,sz:Math.random()<.2?4:2,
+      c:BLOOD_COLS[(Math.random()*BLOOD_COLS.length)|0],blood:true});}
+  smokeKick();}
 function smokeOn(){return G&&!G.over&&G.st&&G.st.vie<50&&$('introCv').hidden;}
 function smokeKick(){if(!SMOKE.raf&&(smokeOn()||SMOKE.p.length)){SMOKE.last=performance.now();SMOKE.raf=requestAnimationFrame(smokeStep);}}
 function smokeStep(now){const dt=Math.min(.05,(now-SMOKE.last)/1000);SMOKE.last=now;const on=smokeOn(),fire=on&&G.st.vie<20;
@@ -22,11 +30,16 @@ function smokeStep(now){const dt=Math.min(.05,(now-SMOKE.last)/1000);SMOKE.last=
     if(fire){SMOKE.accF+=dt*14;while(SMOKE.accF>=1){SMOKE.accF--;
       SMOKE.p.push({x:cx+(Math.random()-.5)*S*.55,y:cy+(Math.random()-.3)*S*.4,vx:(Math.random()-.5)*8,vy:-(18+Math.random()*22),
         a:0,l:.2+Math.random()*.35,sz:2,c:['#ffe066','#ff9a1f','#ff9a1f','#e8432a'][(Math.random()*4)|0],smoke:false});}}}
-  fctx.clearRect(0,0,vw,vh);let n=0;
-  for(const q of SMOKE.p){q.a+=dt;if(q.a>=q.l)continue;q.x+=(q.vx+Math.sin(now/600+q.l*9)*4)*dt;q.y+=q.vy*dt;if(q.smoke)q.vy*=Math.exp(-.6*dt);
+  fctx.clearRect(0,0,vw,vh);let n=0,landed=false;
+  for(const q of SMOKE.p){q.a+=dt;if(q.a>=q.l)continue;
+    if(q.blood){q.x+=q.vx*dt;q.y+=q.vy*dt;q.vz-=600*dt;q.z+=q.vz*dt;
+      if(q.z<=0){const mx=Math.floor(q.x/S),my=Math.floor(q.y/S),t=mx>=0&&my>=0&&mx<W&&my<H?G.t[idx(mx,my)]:ROCK;
+        if(t!==LIQ&&t!==DEEP&&t!==CHASM&&!blocks(t)){G.splat=G.splat||[];G.splat.push([Math.round(q.x/2)*2,Math.round(q.y/2)*2,q.c,q.sz]);
+          if(G.splat.length>SPLAT_MAX)G.splat.splice(0,G.splat.length-SPLAT_MAX);landed=true;}continue;}
+      SMOKE.p[n++]=q;fctx.fillStyle=q.c;fctx.fillRect(Math.round((q.x-camX*S)/2)*2,Math.round((q.y-q.z-camY*S)/2)*2,q.sz,q.sz);continue;}q.x+=(q.vx+Math.sin(now/600+q.l*9)*4)*dt;q.y+=q.vy*dt;if(q.smoke)q.vy*=Math.exp(-.6*dt);
     SMOKE.p[n++]=q;   // pixel art strict : taille fixe, opaque, calé sur la grille des pixels de tuile (2 px), disparaît d'un coup
     fctx.fillStyle=q.c;fctx.fillRect(Math.round((q.x-camX*S)/2)*2,Math.round((q.y-camY*S)/2)*2,q.sz,q.sz);}
-  SMOKE.p.length=n;fctx.globalAlpha=1;
+  SMOKE.p.length=n;fctx.globalAlpha=1;if(landed)render();
   SMOKE.raf=(on||n)?requestAnimationFrame(smokeStep):0;if(!SMOKE.raf)fctx.clearRect(0,0,vw,vh);}
 /* ---------- Explosion de la foreuse (mort) ----------
    Comme la poussière d'atterrissage : des centaines d'éclats (couleurs de la foreuse) projetés en l'air, qui retombent,
@@ -117,6 +130,9 @@ function render(){
     const i=+k;if(tr.i==null||(fog&&!vis[i]))continue;put(TL[`tk${tr.i}${tr.o}${Math.max(0,age)}`],i%W,(i/W)|0,.6);}
   if(G.gems)for(const k in G.gems){if(G.gems[k]!=='visible')continue;const i=+k;if(fog&&!G.seen[i])continue;put(TL.gemDim,i%W,(i/W)|0,fog&&!vis[i]?.35:1);}
   if(G.ore)for(const k in G.ore){if(!oreSol(G.ore[k]))continue;const i=+k;if(fog&&!G.seen[i])continue;put(oreTile(G.ore[k],true),i%W,(i/W)|0,fog&&!vis[i]?.35:1);}
+  if(G.splat)for(const [px,py,c,sz] of G.splat){const i=idx(Math.floor(px/S),Math.floor(py/S));if(fog&&!G.seen[i])continue;   // gouttes de sang au sol
+    ctx.globalAlpha=fog&&!vis[i]?.3:1;ctx.fillStyle=c;ctx.fillRect(px-camX*S,py-camY*S,sz,sz);}
+  ctx.globalAlpha=1;
   if(G.blood)for(const k in G.blood){const i=+k,bx=i%W,by=(i/W)|0;if(fog&&!G.seen[i])continue;put(TL['blood'+G.blood[k]],bx,by,fog&&!vis[i]?.3:.9);}
   for(const s of G.sites){if(fog&&!G.seen[idx(s.x,s.y)])continue;put(s.known?TL['site'+s.depth]:TL.siteUnknown,s.x,s.y,!fog||vis[idx(s.x,s.y)]?1:.35);}
   drawPath();

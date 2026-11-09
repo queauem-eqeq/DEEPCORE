@@ -151,5 +151,5 @@ function raiseAlarm(b){const sp=BEASTS[b.sp];let n=0;
   for(const a of (G.animals||[]))if(Math.max(Math.abs(a.x-b.x),Math.abs(a.y-b.y))<=ALARM_R){if(!a.aware)n++;a.aware=10;}
   if(beastVisible(b)||n){addFx({kind:'num',x:b.x,y:b.y,txt:'!',col:PAL['3'],dur:900});SFX.screech();
     sayMore(`Un cafar pousse un cri d’alerte${n?` : ${n} ennemi${n>1?'s':''} alerté${n>1?'s':''}`:''} !`,'warn');}}
-function bleed(x,y){G.blood=G.blood||{};G.blood[idx(x,y)]=rnd(0,1);}
+function bleed(x,y){G.blood=G.blood||{};G.blood[idx(x,y)]=rnd(0,1);gore(x,y);}
 
