@@ -26,6 +26,7 @@ const SFX={
   whoosh(){noiz(.16,.12,1200,'bandpass',0,3000);},
   blocked(){tone(110,.07,'square',.06,90);},
   crack(){noiz(.07,.3,3000,'highpass');tone(140,.1,'square',.1,60);noiz(.12,.12,900,'lowpass',.04);},
+  explode(){noiz(1.1,.5,900,'lowpass',0,120);tone(70,.9,'sawtooth',.16,28);noiz(.35,.3,4000,'highpass',.02);noiz(.6,.18,600,'bandpass',.25,200);},
   break(){noiz(.45,.35,1500,'lowpass',0,200);tone(95,.35,'sawtooth',.12,35);noiz(.2,.15,3500,'highpass',.05);},
   spot(){tone(880,.07,'square',.05);tone(1320,.09,'square',.05,null,.08);},
   analyse(){[660,880,1100,1320].forEach((f,i)=>tone(f,.08,'triangle',.07,null,i*.07));},

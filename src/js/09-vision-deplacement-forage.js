@@ -92,12 +92,10 @@ function askDrill(){
 function drill(s){drilling=true;let k=0;const n=12;
   const step=()=>{$('card').innerHTML=`<div class="tag">Forage en cours · site ${s.id}</div><h2>DESCENTE</h2><p class="prog">${'▮'.repeat(k)}${'·'.repeat(n-k)}</p>`;
     if(k<n){SFX.drill(k);k++;setTimeout(step,reduced?0:110);}else{SFX.done();end(s);}};step();}
-function dead(){
-  $('card').innerHTML=`<div class="tag">Signal perdu</div><h2>FOREUSE<br>DÉTRUITE</h2>
-    <div class="stats"><span>${G.turn} tours · ${G.dist} cases parcourues</span></div>
-    <p>Les prédateurs ont eu raison de la foreuse. Une nouvelle planète vous attend.</p>
-    <button class="go" id="again">Nouvelle planète</button>`;
-  $('overlay').hidden=false;$('again').onclick=()=>{unlock();SFX.start();newGame();$('overlay').hidden=true;render();};$('again').focus();
+// Mort : la foreuse explose (voir explode, rendu), puis un seul bouton pour repartir
+function dead(){if(G.over.boom)return;G.over.boom=true;if(TRAV)stopTravel();
+  explode(()=>{$('card').innerHTML=`<button class="go" id="again">Nouvelle exploration</button>`;
+    $('overlay').hidden=false;$('again').onclick=()=>{unlock();SFX.start();newGame();$('overlay').hidden=true;render();};$('again').focus();});
 }
 function end(s){
   drilling=false;G.over={site:s.id};const known=G.sites.filter(x=>x.known).length;

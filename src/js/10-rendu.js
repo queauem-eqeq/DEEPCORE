@@ -7,6 +7,32 @@ const hash=(x,y)=>((x*73856093)^(y*19349663))>>>0;
 let ox=0,oy=0;
 /* ---------- Effets de percussion ---------- */
 let FX=[],fxRaf=0;
+/* ---------- Explosion de la foreuse (mort) ----------
+   Comme la poussière d'atterrissage : des centaines d'éclats (couleurs de la foreuse) projetés en l'air, qui retombent,
+   rebondissent au sol, ricochent sur les obstacles, tombent dans les gouffres et disparaissent d'un coup, chacun à son
+   heure. Positions en cases de carte ; z = hauteur. Quand tout est retombé, done() est appelé. */
+let BOOM=null;
+function explode(done){
+  const cols=[PAL['1'],PAL['1'],PAL['2'],PAL['2'],PAL['2'],'#ffffff'],p=[],cx=G.px+.5,cy=G.py+.5;
+  for(let j=0;j<520;j++){const an=Math.random()*Math.PI*2,v=1.5+Math.random()*11;
+    p.push({x:cx+Math.cos(an)*.2,y:cy+Math.sin(an)*.2,z:.1+Math.random()*.3,vx:Math.cos(an)*v,vy:Math.sin(an)*v,vz:2+Math.random()*9,
+      l:.6+Math.random()*1.6,a:0,sz:2+(Math.random()<.3?1:0)+(Math.random()<.06?2:0),c:cols[(Math.random()*cols.length)|0]});}
+  BOOM={p,last:performance.now(),t0:performance.now(),done};SFX.explode();addFx({kind:'shake',amp:10,dur:600});
+  if(reduced){BOOM=null;render();setTimeout(done,400);return;}
+  const hard=(x,y)=>{const a=Math.floor(x),b=Math.floor(y);if(a<0||b<0||a>=W||b>=H)return true;const v=G.t[idx(a,b)];return v===ROCK||v===MOUNT||v===SHIP;};
+  const step=now=>{if(!BOOM)return;const dt=Math.min(.05,(now-BOOM.last)/1000);BOOM.last=now;let n=0;
+    for(const q of BOOM.p){q.a+=dt;if(q.a>=q.l)continue;const air=q.z>0||q.vz>0,dr=Math.exp(-(air?1:7)*dt);q.vx*=dr;q.vy*=dr;
+      const nx=q.x+q.vx*dt,ny=q.y+q.vy*dt;
+      if(hard(nx,ny)){const hx=hard(nx,q.y),hy=hard(q.x,ny);if(hx)q.vx*=-.55;if(hy)q.vy*=-.55;if(!hx&&!hy){q.vx*=-.55;q.vy*=-.55;}}else{q.x=nx;q.y=ny;}
+      if(air){q.vz-=28*dt;q.z+=q.vz*dt;if(q.z<=0){q.z=0;if(G.t[idx(Math.floor(q.x),Math.floor(q.y))]===CHASM)continue;   // tombe dans le gouffre
+        if(q.vz<-1.2){q.vz=-q.vz*.45;q.vx*=.75;q.vy*=.75;}else q.vz=0;}}
+      BOOM.p[n++]=q;}
+    BOOM.p.length=n;render();
+    if(n)requestAnimationFrame(step);else{const d=BOOM.done;BOOM=null;render();setTimeout(d,250);}};
+  requestAnimationFrame(step);}
+function drawBoom(){const fl=1-(performance.now()-BOOM.t0)/180;
+  if(fl>0){ctx.globalAlpha=fl*.8;ctx.fillStyle='#ffffff';ctx.beginPath();ctx.arc((G.px+.5-camX)*S,(G.py+.5-camY)*S,S*1.6,0,Math.PI*2);ctx.fill();}   // éclair de l'explosion
+  ctx.globalAlpha=1;for(const q of BOOM.p){ctx.fillStyle=q.c;ctx.fillRect(Math.round((q.x-camX)*S/2)*2,Math.round((q.y-q.z-camY)*S/2)*2,q.sz,q.sz);}}
 function addFx(f){f.t0=performance.now();if(f.kind==='num')f.stack=FX.filter(o=>o.kind==='num'&&o.x===f.x&&o.y===f.y&&fxP(o)<.5).length;FX.push(f);if(!fxRaf)fxRaf=requestAnimationFrame(fxLoop);}
 function fxLoop(){const now=performance.now();FX=FX.filter(f=>now-f.t0<f.dur);render();fxRaf=FX.length?requestAnimationFrame(fxLoop):0;}
 const fxP=f=>Math.min(1,(performance.now()-f.t0)/f.dur);
@@ -79,12 +105,14 @@ function render(){
     ctx.globalAlpha=1;ctx.drawImage(img,px,py,S,S);
     const fl=FX.find(f=>f.kind==='flash'&&f.beast===b);if(fl){ctx.globalCompositeOperation='lighter';ctx.globalAlpha=1-fxP(fl);ctx.drawImage(img,px,py,S,S);ctx.drawImage(img,px,py,S,S);ctx.globalCompositeOperation='source-over';ctx.globalAlpha=1;}
     const pv=BEASTS[b.sp].pv;if(b.hp<pv){const w=S-6;ctx.fillStyle='#000';ctx.fillRect(px+3,py-4,w,3);ctx.fillStyle='#ff3b3b';ctx.fillRect(px+3,py-4,Math.round(w*b.hp/pv),3);}}
-  {const [lx,ly]=lungeOff(f=>f.kind==='lunge'&&f.robot);ctx.globalAlpha=1;ctx.drawImage(TL['robot_'+(G.face||'u')],(G.px-camX)*S+lx,(G.py-camY)*S+ly,S,S);}
-  const ht=G.t[idx(G.px,G.py)];if(ht===LIQ)put(TL.wade,G.px,G.py,.95);else if(ht===DEEP)put(TL.wadeDeep,G.px,G.py,.95);
+  const wreck=BOOM||(G.over&&G.over.dead);   // foreuse détruite : plus dessinée
+  if(!wreck){const [lx,ly]=lungeOff(f=>f.kind==='lunge'&&f.robot);ctx.globalAlpha=1;ctx.drawImage(TL['robot_'+(G.face||'u')],(G.px-camX)*S+lx,(G.py-camY)*S+ly,S,S);}
+  const ht=G.t[idx(G.px,G.py)];if(wreck){}else if(ht===LIQ)put(TL.wade,G.px,G.py,.95);else if(ht===DEEP)put(TL.wadeDeep,G.px,G.py,.95);
   for(const f of FX){if(f.kind!=='num')continue;const p=fxP(f),rise=reduced?0:p*14;
     ctx.globalAlpha=p<.6?1:1-(p-.6)/.4;ctx.font='bold 14px "JetBrains Mono", ui-monospace, monospace';ctx.textAlign='center';ctx.textBaseline='bottom';
     const tx=(f.x-camX)*S+S/2,ty=(f.y-camY)*S-2-rise-(f.stack||0)*14;ctx.fillStyle='#000';ctx.fillText(f.txt,tx+1,ty+1);ctx.fillStyle=f.col;ctx.fillText(f.txt,tx,ty);}
   ctx.globalAlpha=1;
+  if(BOOM)drawBoom();
   ctx.restore();
   if(HOV&&CURT&&!busy()){const ok=(x,y)=>{const i=idx(x,y);return (!fog||G.seen[i])&&(getPath()||Math.max(Math.abs(x-G.px),Math.abs(y-G.py))<=1);};
     ctx.globalAlpha=1;ctx.drawImage(ok(HOV.x,HOV.y)?CURT:CURT_DIM,(HOV.x-camX)*S,(HOV.y-camY)*S,S,S);}
