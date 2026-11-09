@@ -97,7 +97,7 @@ Roguelike au tour par tour dans une esthétique inspirée de Cogmind et de Brogu
 |---|---|---|---|---|---|---|---|
 | Insectoïde | 6 | 5 | 10 | 3 | 60 | 30 | 21 |
 | Crabos | 5 | 5 | 25 | 5 | 70 | 15 | 15 |
-| Cafar | 5 | 4 | 10 | 5 | 60 | 0 | 12 (bandes de 3 à 6) |
+| Cafar | 5 | 4 | 10 | 5 | 60 | 0 | 12 (bandes de 2 à 5 : tirage parmi 2, 3, 4, 4, 5) |
 
 (Valeurs par défaut du code. Les valeurs réellement utilisées sont celles enregistrées par le joueur — voir § 10.)
 

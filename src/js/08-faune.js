@@ -68,11 +68,12 @@ const beastVisible=b=>!fog||FOOT.some(([dx,dy])=>vis[idx(b.x+dx,b.y+dy)]);
 function spawnBeasts(){G.beasts=[];G.beastSeen={};G.packs={};let packId=0;
   const tryPut=(sp,x,y,pack)=>{const b={sp,x,y,hp:BEASTS[sp].pv,mp:Math.random(),hunt:0,dir:-1,pack};if(!beastFits(b,x,y))return false;G.beasts.push(b);return true;};
   for(let k=0,t=0;k<LIFE.crabos&&t<LIFE.crabos*400+500;t++){const x=rnd(2,W-4),y=rnd(2,H-4);if(Math.hypot(x-G.px,y-G.py)<SZ(20,6))continue;if(tryPut(0,x,y,-1))k++;}
-  // cafars : bandes de 3 à 6 individus regroupés autour d'un point
-  let left=LIFE.cafar||0;
+  // cafars : bandes de 2 à 5 individus regroupés autour d'un point (tirage dans PACK_SIZES : 4 deux fois plus fréquent)
+  const PACK_SIZES=[2,3,4,4,5];let left=LIFE.cafar||0;
   for(let t=0;left>0&&t<400;t++){const cx=rnd(3,W-4),cy=rnd(3,H-4);if(Math.hypot(cx-G.px,cy-G.py)<SZ(20,6))continue;
-    let n=Math.min(left,rnd(3,6));if(left-n>0&&left-n<3)n=left<=6?left:n-(3-(left-n));let put=0;
+    let n=Math.min(left,PACK_SIZES[rnd(0,PACK_SIZES.length-1)]);if(left-n===1)n=left<=5?left:n-1;let put=0;   // jamais de cafar seul restant
     for(let u=0;u<60&&put<n;u++){if(tryPut(1,cx+rnd(-2,2),cy+rnd(-2,2),packId))put++;}
+    if(put===1){G.beasts.pop();put=0;}   // pas de place pour la bande : on essaie ailleurs
     if(put){left-=put;packId++;}}}
 function robotDist(swim){const d=new Int16Array(W*H).fill(-1),q=[idx(G.px,G.py)];d[q[0]]=0;
   for(let k=0;k<q.length;k++){const c=q[k],x=c%W,y=(c/W)|0;for(const[dx,dy]of DIRS){const a=x+dx,b=y+dy;if(a<1||b<1||a>=W-1||b>=H-1)continue;const j=idx(a,b),v=G.t[j];if(d[j]>=0||!canWalk(v,swim))continue;d[j]=d[c]+1;q.push(j);}}return d;}
