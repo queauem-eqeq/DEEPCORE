@@ -26,7 +26,7 @@ let INTRO_CLOUD_AT=null;
 // toute la carte pré-composée une fois, à la résolution des motifs (16 px par case) : pendant l'intro, chaque tuile affichée
 // n'est plus qu'une copie, au lieu de 2 à 4 dessins avec changements d'opacité (l'intro ramait)
 /* Éclair en pixel art, sur toute la hauteur de l'écran : tronc par déplacement des points milieux (zigzags à toutes les
-   échelles), branches qui se ramifient une fois, tracés sur une grille de 2 px (un pixel de tuile), tout en couleur bio :
+   échelles), branches qui se ramifient une fois, tracés sur une grille de 2 px (un pixel de tuile), tout en couleur accent :
    tronc de 2 pixels, branches et rameaux d'un pixel.
    Opaque, sans lissage ; dessiné une fois dans une image de la taille de l'écran. */
 function boltImage(x0,y1,w,h){const P=2,trunk=new Set(),branch=new Set();
@@ -41,7 +41,7 @@ function boltImage(x0,y1,w,h){const P=2,trunk=new Set(),branch=new Set();
       const down=Math.atan2(by-ay,bx-ax),ang=down+(Math.random()<.5?-1:1)*(.3+Math.random()*.55),len=Math.hypot(bx-ax,by-ay)*(level===0?.22+Math.random()*.25:.1+Math.random()*.12);
       path(qx,qy,qx+Math.cos(ang)*len,qy+Math.sin(ang)*len,level===0?5:4,level+1);}};
   path(x0,-8,x0+(Math.random()*2-1)*w*.2,y1,8,0);
-  const c=document.createElement('canvas');c.width=w;c.height=h;const g=c.getContext('2d');g.fillStyle=PAL['2'];   // tout en couleur bio
+  const c=document.createElement('canvas');c.width=w;c.height=h;const g=c.getContext('2d');g.fillStyle=PAL['1'];   // tout en couleur accent
   for(const k of new Set([...trunk,...branch])){const [x,y]=k.split(',').map(Number);g.fillRect(x*P,y*P,P,P);}
   return c;}
 function introMapImg(){ensureChasmOv();const c=document.createElement('canvas');c.width=W*16;c.height=H*16;const x=c.getContext('2d');
