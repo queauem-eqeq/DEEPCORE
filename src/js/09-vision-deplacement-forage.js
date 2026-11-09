@@ -22,7 +22,7 @@ const siteAt=(x,y)=>G.sites.find(s=>s.x===x&&s.y===y);
 function drift(){
   if(G.t[idx(G.px,G.py)]!==DEEP)return;
   const k=rnd(0,7),[dx,dy]=DIRS[k],nx=G.px+dx,ny=G.py+dy,v=G.t[idx(nx,ny)];
-  if(v===ROCK||v===MOUNT||v===CHASM||beastAt(nx,ny)||animalAt(nx,ny)){SFX.thud();sayMore(`Le courant plaque le robot contre un obstacle (${DIRN[k]}).`,'warn');return;}
+  if(v===ROCK||v===MOUNT||v===CHASM||!diagOk(G.px,G.py,dx,dy)||beastAt(nx,ny)||animalAt(nx,ny)){SFX.thud();sayMore(`Le courant plaque le robot contre un obstacle (${DIRN[k]}).`,'warn');return;}
   G.px=nx;G.py=ny;G.lastDir=null;if(v===GRASS)G.t[idx(nx,ny)]=FLAT;
   SFX.drift();sayMore(`Eau profonde : le courant entraîne le robot vers ${['l’est','l’ouest','le sud','le nord','le sud-est','le nord-est','le sud-ouest','le nord-ouest'][k]}.`,'warn');
 }
@@ -30,6 +30,7 @@ function tryMove(dx,dy){
   if(G.over||drilling)return;const nx=G.px+dx,ny=G.py+dy;if(nx<0||ny<0||nx>=W||ny>=H)return;
   const v=G.t[idx(nx,ny)];
   G.face=dx>0?'r':dx<0?'l':dy>0?'d':'u';
+  if(!diagOk(G.px,G.py,dx,dy)){say('Coin de paroi : pas de passage en diagonale.');SFX.blocked();render();return;}
   const bz=beastAt(nx,ny);
   if(bz){if(!spend())return;const sp=BEASTS[bz.sp];G.turn++;G.msg=null;
     {const ch=hitChance(G.st.pre,sp.esq+terrMod(nx,ny));if(!roll(ch)){bz.hunt=1;spot(bz);addFx({kind:'lunge',robot:true,dx,dy,dur:180});addFx({kind:'num',x:nx,y:ny,txt:'0',col:'#8aa9a2',dur:750});

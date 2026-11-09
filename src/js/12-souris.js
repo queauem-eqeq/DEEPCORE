@@ -13,7 +13,7 @@ function findPath(tx,ty,explore){
   if(!tUnk&&(v===ROCK||v===MOUNT)&&(tx===0||ty===0||tx===W-1||ty===H-1))return null;
   const N=W*H,dist=new Float64Array(N).fill(Infinity),prev=new Int32Array(N).fill(-1),hp=heap(),s0=idx(G.px,G.py);dist[s0]=0;hp.push(s0,0);
   while(hp.size){const [d,c]=hp.pop();if(d>dist[c])continue;if(c===ti)break;const x=c%W,y=(c/W)|0;
-    for(const [dx,dy] of DIRS){const a=x+dx,b=y+dy;if(a<0||b<0||a>=W||b>=H)continue;const j=idx(a,b);
+    for(const [dx,dy] of DIRS){const a=x+dx,b=y+dy;if(a<0||b<0||a>=W||b>=H)continue;const j=idx(a,b);if(!diagOk(x,y,dx,dy)&&(!fog||(G.seen[idx(x+dx,y)]&&G.seen[idx(x,y+dy)])))continue;   // coin connu seulement
       const unk=fog&&!G.seen[j];
       if(j!==ti&&(unk?!explore:(blocks(G.t[j])||occupant(a,b))))continue;
       const w=G.t[j],nd=d+(dx&&dy?1.001:1)+(unk?.3:w===DEEP?6:w===LIQ?.4:0);
