@@ -101,7 +101,7 @@ function inspectHTML(){const {x,y}=HOV;if(x<0||y<0||x>=W||y>=H)return '';
     `<div class="kv"><span>Vie <b>${Math.ceil(st.vie)}/${st.vieMax}</b></span><span>Énergie <b>${Math.floor(st.energie)}/${st.energieMax}</b></span><span>ESQ <b>${robotEsq()}</b></span></div>`);}
   else if(occ){const isB=(G.beasts||[]).includes(occ),sp=isB?BEASTS[occ.sp]:SPECIES[occ.sp],key=isB?(occ.sp===0?'crabos':'cafar'):'insectoide',hp=Math.max(0,occ.hp??sp.pv);
     const P=isB&&sp.pack&&G.packs?G.packs[occ.pack]:null;
-    const state=isB?(occ.hunt>0?'en chasse':P?(P.pause>0?'au repos':'en route'):'erre'):({attack:'attaque',flee:'recule',follow:'suit',hold:'observe'}[occ.mode]||'ne vous a pas repéré');
+    const state=isB?(occ.hunt>0?(occ.sees?'en chasse':occ.search>0?'fouille les environs':'se dirige vers votre dernière position connue'):P?(P.pause>0?'au repos':'en route'):'erre'):({attack:'attaque',flee:'recule',follow:'suit',hold:'observe',seek:'se dirige vers votre dernière position connue',search:'fouille les environs'}[occ.mode]||'ne vous a pas repéré');
     const me=hitChance(G.st.pre,sp.esq+terrMod(x,y)),them=isB||occ.mode==='attack'?hitChance(sp.pre,robotEsq()):null;
     out.push(head(ICON[isB?'bz'+occ.sp+'r':'an'+occ.sp+'r'],sp.n,`${state} · ${dt}`),
       `<div class="kv"><span>PV <b>${hp}/${sp.pv}</b></span><span>DÉG <b>${sp.dmg}</b></span><span>PRE <b>${sp.pre}</b></span><span>ESQ <b>${sp.esq+terrMod(x,y)}</b></span><span>VIT <b>${sp.v}</b></span><span>DÉT <b>${sp.d}</b></span></div>`,

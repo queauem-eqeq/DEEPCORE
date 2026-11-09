@@ -16,34 +16,49 @@ const KEEP_MIN=1,KEEP_MAX=3,BACKUP_R=4;
 const cheb=(a,x,y)=>Math.max(Math.abs(a.x-x),Math.abs(a.y-y));
 function stepToward(a,dist){chaseStep(a,dist,animalOk);}
 // Distance à la foreuse en traitant les autres créatures comme des obstacles (soi-même exclu)
-function robotDistAvoid(self){const occ=new Uint8Array(W*H),swim=(G.beasts||[]).includes(self)&&!!BEASTS[self.sp].swim;
+function robotDistAvoid(self,tx=G.px,ty=G.py){const occ=new Uint8Array(W*H),swim=(G.beasts||[]).includes(self)&&!!BEASTS[self.sp].swim;
   for(const o of [...(G.beasts||[]),...(G.animals||[])])if(o!==self)occ[idx(o.x,o.y)]=1;
-  const d=new Int16Array(W*H).fill(-1),q=[idx(G.px,G.py)];d[q[0]]=0;
+  const d=new Int16Array(W*H).fill(-1),q=[idx(tx,ty)];d[q[0]]=0;
   for(let k=0;k<q.length;k++){const c=q[k],x=c%W,y=(c/W)|0;for(const[dx,dy]of DIRS){const a=x+dx,b=y+dy;if(a<1||b<1||a>=W-1||b>=H-1)continue;
     const j=idx(a,b),v=G.t[j];if(d[j]>=0||!canWalk(v,swim)||occ[j])continue;d[j]=d[c]+1;q.push(j);}}
   return d;}
 // Poursuite commune à tous les ennemis : avance par le plus court chemin ; si un autre ennemi bloque le passage,
 // contourne l'obstacle (détour de 10 cases au plus) vers une case libre autour de la foreuse, pour attaquer à plusieurs
 const DETOUR_MAX=10;
-function chaseStep(o,dist,fits){const h=dist[idx(o.x,o.y)],cur=h<0?9999:h;let best=null,bv=cur;
+function chaseStep(o,dist,fits,tx=G.px,ty=G.py){const h=dist[idx(o.x,o.y)],cur=h<0?9999:h;let best=null,bv=cur;
   for(const[dx,dy]of DIRS){const nx=o.x+dx,ny=o.y+dy;if(!fits(nx,ny))continue;const v=dist[idx(nx,ny)];if(v>=0&&v<bv){bv=v;best=[nx,ny,dx];}}
-  if(!best&&cur>1){const d2=robotDistAvoid(o),h2=d2[idx(o.x,o.y)];
+  if(!best&&cur>1){const d2=robotDistAvoid(o,tx,ty),h2=d2[idx(o.x,o.y)];
     if(h2>0&&h2<=cur+DETOUR_MAX){let b2=h2;
       for(const[dx,dy]of DIRS){const nx=o.x+dx,ny=o.y+dy;if(!fits(nx,ny))continue;const v=d2[idx(nx,ny)];if(v>=0&&v<b2){b2=v;best=[nx,ny,dx];}}}}
   if(best){o.x=best[0];o.y=best[1];if(best[2])o.dir=best[2]>0?1:-1;return true;}return false;}
+/* Mémoire des ennemis (10 novembre 2026) : un ennemi qui voit la foreuse retient sa position (o.mem) ; quand il ne la voit
+   plus, il se dirige vers cette dernière position connue — celle de son groupe pour une bande de cafars (partagée entre
+   membres, et transmise par le cri d'alerte). Arrivé, il fouille SEARCH_T tours autour, puis oublie et reprend son errance.
+   Plus aucune connaissance de la position réelle de la foreuse sans la voir. */
+const SEARCH_T=4;
+function spot(o){o.mem=[G.px,G.py];o.search=0;o.stuck=0;}                       // o vient de voir (ou de sentir) la foreuse
+function forget(o){o.mem=null;o.search=0;o.stuck=0;}
+// un pas vers la dernière position connue ; renvoie false quand il faut passer à la fouille
+function seekStep(o,swim,fits,DC){const [mx,my]=o.mem,k=mx+','+my+','+(swim?1:0),d=DC[k]||(DC[k]=distFrom(mx,my,swim)),h=d[idx(o.x,o.y)];
+  if(h<0){forget(o);return false;}if(h<=1){o.search=SEARCH_T;return false;}
+  if(chaseStep(o,d,fits,mx,my)){o.stuck=0;return true;}if(++o.stuck>2)o.search=SEARCH_T;return false;}
+function searchStep(o,fits){if(Math.random()<.6){const [dx,dy]=DIRS[rnd(0,7)];if(fits(o.x+dx,o.y+dy)){o.x+=dx;o.y+=dy;if(dx)o.dir=dx;}}}
 function stepAway(a){const cur=(a.x-G.px)**2+(a.y-G.py)**2;let best=null,bd=cur;
   for(const[dx,dy]of [...DIRS].sort(()=>Math.random()-.5)){const nx=a.x+dx,ny=a.y+dy;if(!animalOk(nx,ny))continue;const nd=(nx-G.px)**2+(ny-G.py)**2;if(nd>bd){bd=nd;best=[nx,ny,dx];}}
   if(best){a.x=best[0];a.y=best[1];if(best[2])a.dir=best[2]>0?1:-1;}}
 function animalsAct(){
-  if(!G.animals||G.over)return;let fled=null,swarm=null;const dist=robotDist(false);
+  if(!G.animals||G.over)return;let fled=null,swarm=null;const dist=robotDist(false),DC={};
   const backup=(G.beasts||[]).some(b=>b.hunt>0&&cheb(b,G.px,G.py)<=BACKUP_R);
   for(const a of G.animals){if(G.over)break;const sp=SPECIES[a.sp];a.mp=Math.min(2,a.mp+sp.v/5);
-    const d=Math.hypot(a.x-G.px,a.y-G.py),sees=d<=sp.d&&los(a.x,a.y,G.px,G.py),seeLong=d<=sp.d+5&&los(a.x,a.y,G.px,G.py);
-    if(sees)a.aware=10;else if(seeLong&&a.aware>0)a.aware=Math.max(a.aware,6);else if(a.aware>0)a.aware--;
+    // déjà alerté, il garde la foreuse en vue de plus loin (+5 cases)
+    const d=Math.hypot(a.x-G.px,a.y-G.py),sees=(d<=sp.d||(a.aware&&d<=sp.d+5))&&los(a.x,a.y,G.px,G.py);
+    if(sees){a.aware=1;spot(a);}
+    else if(a.aware&&a.search>0&&--a.search===0){a.aware=0;a.enraged=false;forget(a);}   // fouille terminée : il oublie
+    else if(a.aware&&!a.mem)a.aware=0;
     const prev=a.mode,c=cheb(a,G.px,G.py);
     // une fois passé à l'attaque, l'insectoïde ne recule plus jamais
-    if(a.aware&&backup)a.enraged=true;
-    a.mode=!a.aware?'':a.enraged?'attack':c<=KEEP_MIN?'flee':c>KEEP_MAX?'follow':'hold';
+    if(sees&&backup)a.enraged=true;
+    a.mode=!a.aware?'':!sees?(a.search>0?'search':'seek'):a.enraged?'attack':c<=KEEP_MIN?'flee':c>KEEP_MAX?'follow':'hold';
     if(a.mode==='attack'&&prev!=='attack'&&vis[idx(a.x,a.y)])swarm=swarm||sp;
     if(a.mode==='flee'&&prev!=='flee'&&vis[idx(a.x,a.y)])fled=fled||sp;
     if(a.mode==='attack'&&canHit(a)){hurtRobot(a,sp);continue;}
@@ -51,6 +66,8 @@ function animalsAct(){
       if(a.mode==='attack'){if(canHit(a)){a.mp=Math.min(a.mp,.99);break;}stepToward(a,dist);}
       else if(a.mode==='flee')stepAway(a);
       else if(a.mode==='follow')stepToward(a,dist);
+      else if(a.mode==='seek'){if(!seekStep(a,false,animalOk,DC)){a.mode=a.search>0?'search':'';break;}}
+      else if(a.mode==='search')searchStep(a,animalOk);
       else if(Math.random()<(a.mode==='hold'?.15:.3)){const [dx,dy]=DIRS[rnd(0,7)];const nx=a.x+dx,ny=a.y+dy;
         if(animalOk(nx,ny)&&(a.mode!=='hold'||cheb({x:nx,y:ny},G.px,G.py)>KEEP_MIN)){a.x=nx;a.y=ny;if(dx)a.dir=dx;}}
       else a.mp=Math.min(a.mp,.99);}
@@ -75,7 +92,8 @@ function spawnBeasts(){G.beasts=[];G.beastSeen={};G.packs={};let packId=0;
     for(let u=0;u<60&&put<n;u++){if(tryPut(1,cx+rnd(-2,2),cy+rnd(-2,2),packId))put++;}
     if(put===1){G.beasts.pop();put=0;}   // pas de place pour la bande : on essaie ailleurs
     if(put){left-=put;packId++;}}}
-function robotDist(swim){const d=new Int16Array(W*H).fill(-1),q=[idx(G.px,G.py)];d[q[0]]=0;
+function robotDist(swim){return distFrom(G.px,G.py,swim);}
+function distFrom(tx,ty,swim){const d=new Int16Array(W*H).fill(-1),q=[idx(tx,ty)];d[q[0]]=0;
   for(let k=0;k<q.length;k++){const c=q[k],x=c%W,y=(c/W)|0;for(const[dx,dy]of DIRS){const a=x+dx,b=y+dy;if(a<1||b<1||a>=W-1||b>=H-1)continue;const j=idx(a,b),v=G.t[j];if(d[j]>=0||!canWalk(v,swim))continue;d[j]=d[c]+1;q.push(j);}}return d;}
 const footDist=(x,y,d)=>Math.min(...FOOT.map(([dx,dy])=>{const v=d[idx(x+dx,y+dy)];return v<0?9999:v;}));
 const nearRobot=b=>canHit(b);
@@ -94,16 +112,22 @@ function hurtRobot(b,sp){sp=sp||BEASTS[b.sp];const le=sp.n.match(/^[aeiouyéèê
   addFx({kind:'shake',amp:5,dur:220});G.st.vie=Math.max(0,G.st.vie-sp.dmg);addFx({kind:'num',x:G.px,y:G.py,txt:'-'+sp.dmg,col:'#ff3b3b',dur:750});SFX.bite();sayMore(`${le}${sp.n.toLowerCase()} attaque : −${sp.dmg} vie.`,'warn');
   if(G.st.vie<=0){G.over={dead:true};}}
 function beastsAct(){
-  if(!G.beasts||!G.beasts.length||G.over)return;const distDry=robotDist(false),distWet=robotDist(true);let charged=null;const alarms=[];packTick();
+  if(!G.beasts||!G.beasts.length||G.over)return;const distDry=robotDist(false),distWet=robotDist(true),DC={};let charged=null;const alarms=[];packTick();
   for(const b of G.beasts){if(G.over)break;const sp=BEASTS[b.sp];b.mp=Math.min(2,b.mp+sp.v/5);
     const d=Math.hypot(b.x-G.px,b.y-G.py),sees=d<=sp.d&&los(b.x,b.y,G.px,G.py);
-    if(sees){if(!b.hunt&&sp.alarm)alarms.push(b);if(!b.hunt&&beastVisible(b))charged=charged||sp;b.hunt=8;if(G.px!==b.x)b.dir=Math.sign(G.px-b.x);}else if(b.hunt>0)b.hunt--;
+    if(sees){if(!b.hunt&&sp.alarm)alarms.push(b);if(!b.hunt&&beastVisible(b))charged=charged||sp;b.hunt=1;spot(b);if(G.px!==b.x)b.dir=Math.sign(G.px-b.x);
+      if(sp.pack)for(const o of mates(b)){o.hunt=1;spot(o);}}                        // la bande partage ce qu'un membre voit
+    else if(b.hunt&&b.search>0&&--b.search===0){b.hunt=0;forget(b);}                // fouille terminée : il oublie
+    else if(b.hunt&&!b.mem)b.hunt=0;
+    b.sees=sees;
     if(alarms.length&&alarms[alarms.length-1]===b)raiseAlarm(b);
     if(b.hunt>0&&nearRobot(b)){hurtRobot(b);continue;}
     while(b.mp>=1&&!G.over){b.mp-=1;
-      if(b.hunt>0){
+      if(b.hunt>0&&sees){
         if(nearRobot(b)){b.mp=Math.min(b.mp,.99);break;}
         chaseStep(b,sp.swim?distWet:distDry,(x,y)=>beastFits(b,x,y));}
+      else if(b.hunt>0&&b.search>0)searchStep(b,(x,y)=>beastFits(b,x,y));                // fouille autour du dernier point connu
+      else if(b.hunt>0){if(!seekStep(b,!!sp.swim,(x,y)=>beastFits(b,x,y),DC))break;}       // vers la dernière position connue
       else if(sp.pack){packMove(b);}
       else if(Math.random()<.25){const[dx,dy]=DIRS[rnd(0,7)];if(beastFits(b,b.x+dx,b.y+dy)&&(!sp.pack||packOk(b,b.x+dx,b.y+dy))){b.x+=dx;b.y+=dy;if(dx)b.dir=dx;}}
       else b.mp=Math.min(b.mp,.99);}
@@ -148,8 +172,8 @@ function packStep(b){const m=mates(b);if(!m.length)return false;const [cx,cy]=pa
 // Cri d'alerte : tous les ennemis à 5 cases ou moins du cafar se mettent en chasse
 const ALARM_R=5;
 function raiseAlarm(b){const sp=BEASTS[b.sp];let n=0;
-  for(const o of G.beasts)if(o!==b&&Math.max(Math.abs(o.x-b.x),Math.abs(o.y-b.y))<=ALARM_R){if(!o.hunt)n++;o.hunt=8;}
-  for(const a of (G.animals||[]))if(Math.max(Math.abs(a.x-b.x),Math.abs(a.y-b.y))<=ALARM_R){if(!a.aware)n++;a.aware=10;}
+  for(const o of G.beasts)if(o!==b&&Math.max(Math.abs(o.x-b.x),Math.abs(o.y-b.y))<=ALARM_R){if(!o.hunt)n++;o.hunt=1;spot(o);}   // le cri transmet la position de la foreuse
+  for(const a of (G.animals||[]))if(Math.max(Math.abs(a.x-b.x),Math.abs(a.y-b.y))<=ALARM_R){if(!a.aware)n++;a.aware=1;spot(a);}
   if(beastVisible(b)||n){addFx({kind:'num',x:b.x,y:b.y,txt:'!',col:PAL['3'],dur:900});SFX.screech();
     sayMore(`Un cafar pousse un cri d’alerte${n?` : ${n} ennemi${n>1?'s':''} alerté${n>1?'s':''}`:''} !`,'warn');}}
 function bleed(x,y){G.blood=G.blood||{};G.blood[idx(x,y)]=rnd(0,1);gore(x,y);}

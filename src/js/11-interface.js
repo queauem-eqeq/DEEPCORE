@@ -44,8 +44,8 @@ function seenHTML(){
   const ter=new Map(),out=[];
   for(let i=0;i<W*H;i++)if(vis[i]){const v=G.t[i];ter.set(v,(ter.get(v)||0)+1);}
   const near=(a,b)=>Math.hypot(a.x-G.px,a.y-G.py)-Math.hypot(b.x-G.px,b.y-G.py);
-  const ans=[...(G.beasts||[]).filter(b=>vis[idx(b.x,b.y)]).map(b=>({o:b,sp:BEASTS[b.sp],ic:'bz'+b.sp+'r',hp:b.hp,st:b.hunt>0?'en chasse':'',agg:true})),
-             ...(G.animals||[]).filter(a=>vis[idx(a.x,a.y)]).map(a=>({o:a,sp:SPECIES[a.sp],ic:'an'+a.sp+'r',hp:a.hp??SPECIES[a.sp].pv,st:{attack:'attaque',flee:'recule',follow:'suit',hold:'observe'}[a.mode]||'',agg:a.mode==='attack'}))]
+  const ans=[...(G.beasts||[]).filter(b=>vis[idx(b.x,b.y)]).map(b=>({o:b,sp:BEASTS[b.sp],ic:'bz'+b.sp+'r',hp:b.hp,st:b.hunt>0?(b.sees?'en chasse':b.search>0?'fouille':'cherche'):'',agg:true})),
+             ...(G.animals||[]).filter(a=>vis[idx(a.x,a.y)]).map(a=>({o:a,sp:SPECIES[a.sp],ic:'an'+a.sp+'r',hp:a.hp??SPECIES[a.sp].pv,st:{attack:'attaque',flee:'recule',follow:'suit',hold:'observe',seek:'cherche',search:'fouille'}[a.mode]||'',agg:a.mode==='attack'}))]
     .sort((p,q)=>near(p.o,q.o));
   if(ans.length){const max=6;
     const calc=e=>{const tmA=terrMod(e.o.x,e.o.y),tmR=terrMod(G.px,G.py),me=hitChance(G.st.pre,e.sp.esq+tmA),them=e.agg?hitChance(e.sp.pre,robotEsq()):null;return {tmA,tmR,me,them};};
