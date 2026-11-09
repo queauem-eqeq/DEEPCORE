@@ -48,8 +48,8 @@ Roguelike au tour par tour dans une esthétique inspirée de Cogmind et de Brogu
 | Terrain | Passage | Vue | Effet |
 |---|---|---|---|
 | Sol rocheux | oui | libre | des points de plus en plus denses à 9, 6 et 3 cases d'un site |
-| Rocher | brisé en 2 coups | libre | laisse des gravats ; 10 % contiennent des éclats de métal |
-| Montagne | brisée en 2 coups (sauf bord de carte) | bloquée | peut contenir le joyau |
+| Rocher | brisé en 2 coups | libre | laisse des gravats |
+| Montagne | brisée en 2 coups (sauf bord de carte) | bloquée | peut contenir le joyau ; 10 % contiennent des éclats de métal |
 | Eau peu profonde | oui | libre | −20 d'esquive ; évitée par les insectoïdes et les cafars, praticable pour les crabos |
 | Eau profonde | oui | libre | −20 d'esquive ; le courant déplace la foreuse d'une case au hasard à chaque tour ; seuls les crabos y entrent (sans dérive) |
 | Herbes hautes | oui | bloquée | se couchent au passage ; +10 d'esquive pour qui s'y trouve |
@@ -113,7 +113,7 @@ Roguelike au tour par tour dans une esthétique inspirée de Cogmind et de Brogu
 - 5 sites de forage, profondeur 1 à 5 (une de chaque), révélée en passant dessus. La profondeur n'a pas encore d'effet de jeu.
 - Forage : touche F sur un site → confirmation → descente → écran « Entrée niveau 2 ».
 - **1 joyau** par planète, au cœur d'un massif (8 voisines en roche, jamais en bordure), visible dès que la case est vue. Briser la roche, le ramasser → choix de **3 améliorations tirées au hasard** parmi : Vie max +10, Énergie max +10, EYE +1, DEG +5, PRE +5, ESQ +5, POW +1.
-- **Éclats de métal** (9 novembre 2026) : **10 % des rochers** (cases Rocher, hors bords de carte et joyau ; réglage `ORE_PCT` dans la génération) montrent des éclats de métal couleur bio. Briser le rocher les fait **tomber au sol** ; la foreuse qui passe dessus les ramasse et **regagne 20 PV** (sans dépasser la vie max ; réglage `ORE_PV`). Signalés dans « En vue » (« Roche à éclats · à briser », « Éclats de métal · +20 PV ») et dans la fiche de survol. Tuiles éditables : Éclats (roche), Éclats (sol).
+- **Éclats de métal** (9 novembre 2026) : **10 % des cases de montagne** (hors rangée extérieure indestructible et joyau ; réglage `ORE_PCT` dans la génération) montrent des éclats de métal couleur bio — ceux pris au cœur d'un massif ne se voient qu'en creusant jusqu'à eux. Briser la paroi les fait **tomber au sol** ; la foreuse qui passe dessus les ramasse et **regagne 20 PV** (sans dépasser la vie max ; réglage `ORE_PV`). Signalés dans « En vue » (« Montagne à éclats · à briser », « Éclats de métal · +20 PV ») et dans la fiche de survol. Tuiles éditables : Éclats (montagne), Éclats (sol).
 
 ## 9. Interface
 
@@ -135,7 +135,7 @@ Roguelike au tour par tour dans une esthétique inspirée de Cogmind et de Brogu
 - **Écran tactile** : premier appui = inspection et trajet, second appui sur la même case = déplacement.
 
 ### Tile editor (Lab → Tile editor)
-- Liste des tuiles éditables, par groupe : **Viseur** ; **Foreuse et faune** (Foreuse, Insectoïde, Crabos, Cafar) ; **Terrain** (Sol, Rocher, Rocher 2, Crête, Montagne, Eau A, Eau B, Eau profonde, Herbes hautes, Herbes couchées, Gravats, Fissures, Remous, Remous profond) ; **Objets** (Site, Joyau, Éclats (roche), Éclats (sol), Sang A, Sang B) ; **Vaisseau** (Cargo, édité d'un bloc : 80 × 96 pixels, pixels affichés en 4 × 4, limites des cases repérées ; sur la carte il est découpé case par case).
+- Liste des tuiles éditables, par groupe : **Viseur** ; **Foreuse et faune** (Foreuse, Insectoïde, Crabos, Cafar) ; **Terrain** (Sol, Rocher, Rocher 2, Crête, Montagne, Eau A, Eau B, Eau profonde, Herbes hautes, Herbes couchées, Gravats, Fissures, Remous, Remous profond) ; **Objets** (Site, Joyau, Éclats (montagne), Éclats (sol), Sang A, Sang B) ; **Vaisseau** (Cargo, édité d'un bloc : 80 × 96 pixels, pixels affichés en 4 × 4, limites des cases repérées ; sur la carte il est découpé case par case).
 - Les variantes suivent la tuile de base : 4 orientations de la foreuse, animaux tournés à gauche, 2e image de l'eau profonde, herbe basse (moitié inférieure des herbes hautes), joyau dans la roche et son liseré.
 - Non éditables pour l'instant : sol près des sites (points générés), sites analysés (chiffres), traces de chenilles, ancien sprite robot.
 - Éditeur 16 × 16 : encres en pastilles de couleur, sans nom (nom au survol) : **Monde, Bio, Accent** (suivent la palette active), **Blanc**, **Noir**, **Rouge** (#b8242a, celui du sang), Gomme (pastille hachurée) ; clic droit = effacer ; Miroir ↔ et Miroir ↕ (désactivés par défaut, les deux ensemble = symétrie ×4) ; boutons Contour auto, Vider, **Rétablir l'enregistré** : revient à la version enregistrée avec « Enregistrer les réglages » (ou au dessin d'origine si la tuile n'a jamais été enregistrée). Le titre de l'éditeur indique « enregistrée » ou « non enregistrée ».

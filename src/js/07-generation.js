@@ -207,11 +207,11 @@ const UPGRADES=[
   ['esq','ESQ (esquive)','+5',st=>{st.esq+=5;}],
   ['power','POW (énergie/tour)','+1',st=>{st.power+=1;}]
 ];
-// Éclats de métal : ORE_PCT % des cases de rocher (hors bords et joyaux) en contiennent ; brisée, la roche les laisse
+// Éclats de métal : ORE_PCT % des cases de montagne (hors rangée extérieure indestructible et joyau) en contiennent ; brisée, la roche les laisse
 // tomber au sol ; la foreuse qui passe dessus les ramasse et regagne ORE_PV points de vie
 const ORE_PCT=10,ORE_PV=20;
 function hideOre(){G.ore={};for(let i=0;i<W*H;i++){const x=i%W,y=(i/W)|0;
-  if(G.t[i]===ROCK&&x>0&&y>0&&x<W-1&&y<H-1&&!(G.gems&&G.gems[i])&&Math.random()*100<ORE_PCT)G.ore[i]='roche';}}
+  if(G.t[i]===MOUNT&&x>0&&y>0&&x<W-1&&y<H-1&&!(G.gems&&G.gems[i])&&Math.random()*100<ORE_PCT)G.ore[i]='roche';}}
 function hideGems(){G.gems={};
   // Toujours GEM_COUNT joyaux : d'abord au cœur des massifs (8 voisines en roche), sinon au plus profond disponible
   const deep=i=>DIRS.filter(([dx,dy])=>G.t[idx(i%W+dx,((i/W)|0)+dy)]===MOUNT).length;

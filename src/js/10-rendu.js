@@ -56,7 +56,7 @@ function render(){
     else if(t===MOUNT)put(y>0&&G.t[idx(x,y-1)]===MOUNT?TL.mtBody:TL.mtTop,x,y,.9*k);
     else if((t===SHIP||t===DECK)&&G.ship){const sk=TL['ship_'+(x-G.ship.x)+'_'+(y-G.ship.y)];if(sk)put(sk,x,y,k);}
     if((t===ROCK||t===MOUNT)&&G.gems&&G.gems[i]==='cache'){put(TL.gemHole,x,y,k);put(TL.gemDim,x,y,k);}
-    else if(t===ROCK&&G.ore&&G.ore[i]==='roche')put(TL.ore,x,y,k);
+    else if(t===MOUNT&&G.ore&&G.ore[i]==='roche')put(TL.ore,x,y,k);
     else if(t===LIQ){ctx.globalAlpha=.24*k;ctx.fillStyle=PAL['2'];ctx.fillRect((x-camX)*S,(y-camY)*S,S,S);put((liqFrame+(h%2))%2?TL.liq1:TL.liq0,x,y,.9*k);}
     else if(t===DEEP){ctx.globalAlpha=k;ctx.fillStyle='#01060c';ctx.fillRect((x-camX)*S,(y-camY)*S,S,S);ctx.globalAlpha=.08*k;ctx.fillStyle=PAL['2'];ctx.fillRect((x-camX)*S,(y-camY)*S,S,S);put((liqFrame+(h%2))%2?TL.deep1:TL.deep0,x,y,.4*k);}
     else if(t===CHASM){ctx.globalAlpha=1;ctx.fillStyle='#000';ctx.fillRect((x-camX)*S,(y-camY)*S,S,S);if(CHASM_OV){ctx.globalAlpha=k;ctx.drawImage(CHASM_OV,x*16,y*16,16,16,(x-camX)*S,(y-camY)*S,S,S);}}

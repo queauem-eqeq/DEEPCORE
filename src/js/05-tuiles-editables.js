@@ -8,7 +8,7 @@ const TILE_LIST=[
   ['Viseur',[['cursor','Viseur']]],
   ['Foreuse et faune',[['robot_u','Foreuse'],['an0r','Insectoïde'],['bz0r','Crabos'],['bz1r','Cafar']]],
   ['Terrain',[['ground0','Sol'],['rock','Rocher'],['rock2','Rocher 2'],['mtTop','Crête'],['mtBody','Montagne'],['liq0','Eau A'],['liq1','Eau B'],['deep0','Eau profonde'],['grass0','Herbes hautes'],['flat0','Herbes couchées'],['rubble','Gravats'],['crackH','Fissures'],['wade','Remous'],['wadeDeep','Remous profond']]],
-  ['Objets',[['siteUnknown','Site'],['gem','Joyau'],['ore','Éclats (roche)'],['oreSol','Éclats (sol)'],['blood0','Sang A'],['blood1','Sang B']]],
+  ['Objets',[['siteUnknown','Site'],['gem','Joyau'],['ore','Éclats (montagne)'],['oreSol','Éclats (sol)'],['blood0','Sang A'],['blood1','Sang B']]],
   ['Vaisseau',[['ship','Cargo']]],
   ['Intro',[['nuage0','Nuage plein'],['nuage1','Nuage texturé'],['nuage2','Bord diagonal'],['nuage3','Bord croisé'],['nuage4','Bord rayé'],['nuage5','Bord tramé']]]];
 const TILE_DEPS={robot_u:['robot_u','robot_r','robot_d','robot_l'],an0r:['an0r','an0l'],bz0r:['bz0r','bz0l'],bz1r:['bz1r','bz1l'],deep0:['deep0','deep1'],grass0:['grass0','low'],gem:['gem','gemDim','gemHole'],ship:['ship',...SHIP_KEYS]};
