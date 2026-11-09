@@ -55,7 +55,9 @@ function seenHTML(){
     +(ans.length>max?`<div class="none">+ ${ans.length-max} autre${ans.length-max>1?'s':''}</div>`:'')+'</div>');
   }
   {let ng=0,nr=0;if(G.gems)for(const k in G.gems){if(!vis[+k])continue;if(G.gems[k]==='visible')ng++;else nr++;}
-   const L=[];if(ng)L.push(`<div class="site k">Joyau${ng>1?' ×'+ng:''} · à ramasser</div>`);if(nr)L.push(`<div class="site">Roche à joyau${nr>1?' ×'+nr:''} · à briser</div>`);if(L.length)out.push(`<div class="grp">${L.join('')}</div>`);}
+   const L=[];if(ng)L.push(`<div class="site k">Joyau${ng>1?' ×'+ng:''} · à ramasser</div>`);if(nr)L.push(`<div class="site">Roche à joyau${nr>1?' ×'+nr:''} · à briser</div>`);
+   let os=0,opv=0,orr=0;if(G.ore)for(const k in G.ore){if(!vis[+k])continue;if(oreSol(G.ore[k])){os++;opv+=ORE_PV[oreLv(G.ore[k])];}else orr++;}
+   if(os)L.push(`<div class="site k">Éclats de métal${os>1?' ×'+os:''} · +${opv} PV</div>`);if(orr)L.push(`<div class="site">Montagne à éclats${orr>1?' ×'+orr:''} · à briser</div>`);if(L.length)out.push(`<div class="grp">${L.join('')}</div>`);}
   const sites=G.sites.filter(s=>vis[idx(s.x,s.y)]);
   if(sites.length)out.push('<div class="grp">'+sites.map(s=>`<div class="site${s.known?' k':''}">Site ${s.id} · ${s.known?'profondeur '+s.depth:'non analysé'}</div>`).join('')+'</div>');
   const ins=HOV&&!busy()?inspectHTML():'';
@@ -123,7 +125,7 @@ function applySaved(d){
     if(dbT>=localT){APPLYING=true;try{applySaved(data);}finally{APPLYING=false;}try{localStorage.setItem('np-maj',String(dbT));}catch(e){}}
     render();}}
   catch(e){}}).catch(()=>{});
-// Bouton « Enregistrer » retiré pour l'instant : les réglages restent dans le navigateur. La fonction est gardée pour plus tard.
+// Bouton « Enregistrer » du Tile editor : envoie tuiles et réglages dans la base de l'artefact (Claude peut ensuite les lire et les adopter)
 async function saveSettings(){
   if(!DB||!$('saveBtn'))return;const b=$('saveBtn'),m=$('saveMsg');b.disabled=true;b.textContent='Enregistrement…';m.className='saved';m.textContent='';
   const best={};BEST_LIST().forEach(e=>{best[e.key]={nom:e.o.n};BFIELDS.forEach(([f])=>best[e.key][f]=e.o[f]);});
@@ -134,6 +136,7 @@ async function saveSettings(){
   try{await DB.doc('reglages/courant').set(data);commitTileBase();try{localStorage.setItem('np-maj',String(Date.parse(data.enregistreLe)));}catch(e){}if(!$('viseurs').hidden)drawCurEd();const t=new Date();m.className='saved ok';m.textContent=`Réglages enregistrés à ${String(t.getHours()).padStart(2,'0')}:${String(t.getMinutes()).padStart(2,'0')}.`;}
   catch(e){m.className='saved err';m.textContent=e&&e.code==='invalid_argument'?'Vous n’avez pas le droit d’enregistrer sur cette page.':'Échec de l’enregistrement. Réessayez dans un instant.';}
   b.disabled=false;b.textContent='Enregistrer';}
+$('saveBtn').onclick=saveSettings;
 $('bestClose').onclick=closeBest;
 $('bestiary').addEventListener('click',e=>{if(e.target===$('bestiary'))closeBest();});
 $('bestList').addEventListener('change',e=>{const t=e.target;if(!t.dataset||!t.dataset.f)return;const ent=BEST_LIST().find(x=>x.key===t.dataset.k),fd=BFIELDS.find(x=>x[0]===t.dataset.f);
