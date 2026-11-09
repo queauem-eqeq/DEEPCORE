@@ -164,7 +164,7 @@ function genPlanet(){
     if(sites.length<NSITES&&!last)continue;
     const depths=[1,2,3,4,5].sort(()=>Math.random()-.5);
     G={t,seen:new Array(N).fill(0),px:sx,py:sy,turn:0,dist:0,over:null,msg:null,ship,face:'d',
-      st:{vie:100,vieMax:100,energie:100,energieMax:100,repar:0,power:3,vitesse:5,degats:10,capteur:15,cout:10,pre:80,esq:10},
+      st:{vie:100,vieMax:100,energie:100,energieMax:100,repar:0,power:3,vitesse:5,degats:10,capteur:12,cout:10,pre:80,esq:10},
       sites:sites.map((s,i)=>({x:s.x,y:s.y,depth:depths[i],id:LETTERS[i],seen:false,known:false}))};
     return;
   }
