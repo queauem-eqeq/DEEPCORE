@@ -48,7 +48,15 @@ const SFX={
     src.connect(fl);fl.connect(v);v.connect(MASTER);src.start(t);src.stop(t+dur+.05);
     const o=a.createOscillator(),g=a.createGain();o.type='sawtooth';o.frequency.setValueAtTime(36,t);o.frequency.linearRampToValueAtTime(64,t+pk);o.frequency.linearRampToValueAtTime(40,t+dur);
     g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.07,t+pk);g.gain.exponentialRampToValueAtTime(.0001,t+dur);o.connect(g);g.connect(MASTER);o.start(t);o.stop(t+dur+.05);},
-  thunder(){noiz(.12,.3,5000,'highpass');noiz(1.4,.32,320,'lowpass',.08,55);},
+  // tonnerre : claquement sec, craquements, puis long grondement qui roule (bouffées irrégulières de bruit grave)
+  thunder(){const a=audio();if(!a)return;noiz(.09,.45,4200,'highpass');noiz(.25,.35,1400,'bandpass',.02,500);
+    for(let k=0;k<5;k++)noiz(.06,.18,2500+Math.random()*2000,'highpass',.05+Math.random()*.35);   // craquements
+    const t=a.currentTime+.05,dur=3.4+Math.random()*.8,src=a.createBufferSource(),fl=a.createBiquadFilter(),v=a.createGain();
+    src.buffer=NB;src.loop=true;fl.type='lowpass';fl.Q.value=.7;fl.frequency.setValueAtTime(420,t);fl.frequency.exponentialRampToValueAtTime(70,t+dur);
+    v.gain.setValueAtTime(0.0001,t);v.gain.exponentialRampToValueAtTime(.55,t+.12);let u=t+.12;
+    while(u<t+dur-.4){u+=.25+Math.random()*.45;v.gain.linearRampToValueAtTime(Math.max(.05,.5*(1-(u-t)/dur))*(.45+Math.random()*.7),u);}   // roulements
+    v.gain.exponentialRampToValueAtTime(0.0001,t+dur);src.connect(fl);fl.connect(v);v.connect(MASTER);src.start(t,Math.random()*.5);src.stop(t+dur+.05);
+    tone(48,1.6,'sine',.22,30,.04);},
   thrust(){noiz(4,.12,900,'lowpass',0,160);tone(62,4,'square',.03,38);},
   touchdown(){tone(72,.35,'square',.13,38);noiz(.6,.22,700,'lowpass',0,90);noiz(.3,.08,3000,'highpass',.05);},
   done(){[440,554,659,880].forEach((f,i)=>tone(f,.35,'triangle',.06,null,i*.06));}
