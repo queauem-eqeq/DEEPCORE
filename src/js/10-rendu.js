@@ -19,7 +19,7 @@ function explode(done){
       l:.6+Math.random()*1.6,a:0,sz:2+(Math.random()<.3?1:0)+(Math.random()<.06?2:0),c:cols[(Math.random()*cols.length)|0]});}
   BOOM={p,last:performance.now(),t0:performance.now(),done};SFX.explode();addFx({kind:'shake',amp:10,dur:600});
   if(reduced){BOOM=null;render();setTimeout(done,400);return;}
-  const hard=(x,y)=>{const a=Math.floor(x),b=Math.floor(y);if(a<0||b<0||a>=W||b>=H)return true;const v=G.t[idx(a,b)];return v===ROCK||v===MOUNT||v===SHIP;};
+  const hard=(x,y)=>{const a=Math.floor(x),b=Math.floor(y);if(a<0||b<0||a>=W||b>=H)return true;const i=idx(a,b),v=G.t[i];return v===ROCK||v===MOUNT||v===SHIP||(fog&&!vis[i]);};   // la zone hors de vue arrête les éclats
   const step=now=>{if(!BOOM)return;const dt=Math.min(.05,(now-BOOM.last)/1000);BOOM.last=now;let n=0;
     for(const q of BOOM.p){q.a+=dt;if(q.a>=q.l)continue;const air=q.z>0||q.vz>0,dr=Math.exp(-(air?1:7)*dt);q.vx*=dr;q.vy*=dr;
       const nx=q.x+q.vx*dt,ny=q.y+q.vy*dt;

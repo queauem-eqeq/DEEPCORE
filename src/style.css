@@ -185,6 +185,12 @@ button:disabled{border-color:var(--line);color:var(--dim);cursor:not-allowed}
 .upg{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .upg button{display:flex;justify-content:space-between;gap:10px;text-transform:none;letter-spacing:0;border-color:var(--line);text-align:left}
 .upg button b{color:var(--c3)}
+.upg.one{grid-template-columns:1fr}
+.card h2.huge{font-size:clamp(40px,9vw,84px);letter-spacing:.1em}
+.off{position:fixed;inset:0;z-index:50;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px}
+.off[hidden]{display:none}
+.off p{margin:0;font-family:var(--display);letter-spacing:.3em;color:var(--dim);font-size:13px}
+.off button{opacity:.45;border-color:var(--line);color:var(--dim)}.off button:hover,.off button:focus-visible{opacity:1}
 .upg button:hover b,.upg button:focus-visible b{color:var(--fg)}
 .keys{color:var(--dim);font-size:11px;margin:0;line-height:1.7}
 kbd{font-family:var(--mono);color:var(--fg);border:1px solid var(--line);padding:0 4px}
