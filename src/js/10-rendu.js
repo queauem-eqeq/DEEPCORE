@@ -135,13 +135,13 @@ function render(){
   ctx.globalAlpha=1;
   if(G.blood)for(const k in G.blood){const i=+k,bx=i%W,by=(i/W)|0;if(fog&&!G.seen[i])continue;put(TL['blood'+G.blood[k]],bx,by,fog&&!vis[i]?.3:.9);}
   for(const s of G.sites){if(fog&&!G.seen[idx(s.x,s.y)])continue;put(s.known?TL['site'+s.depth]:TL.siteUnknown,s.x,s.y,!fog||vis[idx(s.x,s.y)]?1:.35);}
-  // touche V : champ de vision de chaque ennemi visible (cases qu'il peut voir : portée de détection et ligne de vue), blanc à 30 %
+  // touche V : champ de vision de chaque ennemi visible (cases qu'il peut voir : portée de détection et ligne de vue), blanc à 10 %
   if(SHOWVIS){const cells=new Set();
     for(const [o,r] of [...(G.beasts||[]).map(b=>[b,BEASTS[b.sp].d]),...(G.animals||[]).map(a=>[a,SPECIES[a.sp].d+(a.aware?5:0)])]){
       if(fog&&!vis[idx(o.x,o.y)])continue;
       for(let y=Math.max(0,o.y-r);y<=Math.min(H-1,o.y+r);y++)for(let x=Math.max(0,o.x-r);x<=Math.min(W-1,o.x+r);x++){
         const i=idx(x,y);if(cells.has(i)||Math.hypot(x-o.x,y-o.y)>r||(fog&&!G.seen[i]))continue;if(los(o.x,o.y,x,y))cells.add(i);}}
-    ctx.globalAlpha=.3;ctx.fillStyle='#ffffff';for(const i of cells)ctx.fillRect((i%W-camX)*S,(((i/W)|0)-camY)*S,S,S);ctx.globalAlpha=1;}
+    ctx.globalAlpha=.1;ctx.fillStyle='#ffffff';for(const i of cells)ctx.fillRect((i%W-camX)*S,(((i/W)|0)-camY)*S,S,S);ctx.globalAlpha=1;}
   drawPath();
   if(G.animals)for(const a of G.animals)if(!fog||vis[idx(a.x,a.y)]){const [lx,ly]=lungeOff(f=>f.kind==='lunge'&&f.beast===a);ctx.globalAlpha=1;ctx.drawImage(TL['an'+a.sp+(a.dir<0?'l':'r')],(a.x-camX)*S+lx,(a.y-camY)*S+ly,S,S);}
   if(G.beasts)for(const b of G.beasts){if(!beastVisible(b))continue;const [lx,ly]=lungeOff(f=>f.kind==='lunge'&&f.beast===b);
