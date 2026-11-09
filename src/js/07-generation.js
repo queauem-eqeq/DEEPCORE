@@ -12,6 +12,10 @@ function logPush(m,c){G.log=G.log||[];const last=G.log[G.log.length-1];
 function say(m,c){G.msg={m,c:c||''};logPush(m,c);}
 function sayMore(m,c){G.msg=G.msg?{m:G.msg.m+' '+m,c:c||G.msg.c}:{m,c:c||''};logPush(m,c);}
 const blocks=v=>v===ROCK||v===MOUNT||v===CHASM||v===SHIP;
+// Diagonales comme dans Brogue : un pas (ou un coup) en diagonale est impossible si l'une des deux cases voisines
+// orthogonales est une paroi (rocher, montagne, coque du vaisseau) — on ne coupe pas les coins. Vaut pour tout le monde.
+const wallish=v=>v===ROCK||v===MOUNT||v===SHIP;
+const diagOk=(x,y,dx,dy,t)=>{t=t||G.t;return !(dx&&dy)||(!wallish(t[idx(x+dx,y)])&&!wallish(t[idx(x,y+dy)]));};
 const sc=f=>{const a=new Float32Array(W*H);for(let y=0;y<H;y++)for(let x=0;x<W;x++)a[idx(x,y)]=f(x,y);return a;};
 function rankFill(t,score,n,val){const c=[];for(let i=0;i<W*H;i++)if(t[i]===GROUND)c.push(i);
   c.sort((a,b)=>score[b]-score[a]);const take=c.slice(0,Math.max(0,Math.min(n,c.length)));for(const i of take)t[i]=val;return take.length;}
@@ -32,7 +36,7 @@ function caBlob(w,h,fill,iters){
 // Toutes les cases franchissables sont-elles reliées ?
 function connectedAll(t){let s0=-1,tot=0;for(let i=0;i<W*H;i++)if(!blocks(t[i])){tot++;if(s0<0)s0=i;}
   if(s0<0)return true;const seen=new Uint8Array(W*H),q=[s0];seen[s0]=1;
-  for(let k=0;k<q.length;k++){const c=q[k],x=c%W,y=(c/W)|0;for(const[dx,dy]of DIRS){const a=x+dx,b=y+dy;if(a<0||b<0||a>=W||b>=H)continue;const j=idx(a,b);if(!seen[j]&&!blocks(t[j])){seen[j]=1;q.push(j);}}}
+  for(let k=0;k<q.length;k++){const c=q[k],x=c%W,y=(c/W)|0;for(const[dx,dy]of DIRS){const a=x+dx,b=y+dy;if(a<0||b<0||a>=W||b>=H)continue;const j=idx(a,b);if(!seen[j]&&!blocks(t[j])&&diagOk(x,y,dx,dy,t)){seen[j]=1;q.push(j);}}}
   return q.length===tot;}
 // Pose des blobs un par un ; avec check, un blob qui coupe la carte est refusé
 function placeBlobs(t,target,val,size,fill,iters,check){
@@ -79,7 +83,7 @@ function connect(t){
   for(let guard=0;guard<60;guard++){
     const lab=new Int32Array(W*H).fill(-1),regs=[];
     for(let i=0;i<W*H;i++){if(blocks(t[i])||lab[i]>=0)continue;const id=regs.length,q=[i];lab[i]=id;
-      for(let k=0;k<q.length;k++){const c=q[k],x=c%W,y=(c/W)|0;for(const[dx,dy]of DIRS){const a=x+dx,b=y+dy;if(a<0||b<0||a>=W||b>=H)continue;const j=idx(a,b);if(lab[j]<0&&!blocks(t[j])){lab[j]=id;q.push(j);}}}
+      for(let k=0;k<q.length;k++){const c=q[k],x=c%W,y=(c/W)|0;for(const[dx,dy]of DIRS){const a=x+dx,b=y+dy;if(a<0||b<0||a>=W||b>=H)continue;const j=idx(a,b);if(lab[j]<0&&!blocks(t[j])&&diagOk(x,y,dx,dy,t)){lab[j]=id;q.push(j);}}}
       regs.push(q);}
     if(regs.length<=1)return;
     let main=0;regs.forEach((r,i)=>{if(r.length>regs[main].length)main=i;});
@@ -155,7 +159,7 @@ function genPlanet(){
     tidyChasms(t);connect(t);tidyChasms(t);separateWater(t);
     const ship=placeShip(t),sx=ship.x+2,sy=ship.y+2,st=idx(sx,sy);   // la foreuse démarre au fond du couloir (case du haut), mèche vers la porte
     const d=new Int32Array(N).fill(-1),q=[st];d[st]=0;
-    for(let k=0;k<q.length;k++){const c=q[k],x=c%W,y=(c/W)|0;for(const[dx,dy]of DIRS){const n=idx(x+dx,y+dy);if(d[n]>=0||blocks(t[n]))continue;d[n]=d[c]+1;q.push(n);}}
+    for(let k=0;k<q.length;k++){const c=q[k],x=c%W,y=(c/W)|0;for(const[dx,dy]of DIRS){const n=idx(x+dx,y+dy);if(d[n]>=0||blocks(t[n])||!diagOk(x,y,dx,dy,t))continue;d[n]=d[c]+1;q.push(n);}}
     let cand=q.filter(c=>t[c]===GROUND&&d[c]>(relax?SZ(6,3):SZ(14,5)));
     if(last&&cand.length<NSITES)cand=q.filter(c=>c!==st&&t[c]!==DEEP);
     const sites=[],gap=relax?SZ(10,4):SZ(20,6);
@@ -164,7 +168,7 @@ function genPlanet(){
     if(sites.length<NSITES&&!last)continue;
     const depths=[1,2,3,4,5].sort(()=>Math.random()-.5);
     G={t,seen:new Array(N).fill(0),px:sx,py:sy,turn:0,dist:0,over:null,msg:null,ship,face:'d',
-      st:{vie:100,vieMax:100,energie:100,energieMax:100,repar:0,power:3,vitesse:5,degats:10,capteur:5,cout:10,pre:80,esq:10},
+      st:{vie:100,vieMax:100,energie:100,energieMax:100,repar:0,power:3,vitesse:5,degats:10,capteur:10,cout:10,pre:80,esq:10},
       sites:sites.map((s,i)=>({x:s.x,y:s.y,depth:depths[i],id:LETTERS[i],seen:false,known:false}))};
     return;
   }
@@ -181,7 +185,7 @@ function densLevel(i){
 
 /* ---------- Bestiaire : édition des statistiques ---------- */
 const BFIELDS=[['v','Vitesse',1,10],['d','Détection',1,15],['pv','PV',1,200],['dmg','Dégâts',0,100],['pre','Précision',0,100],['esq','Esquive',0,100]];
-const BEST_LIST=()=>[{key:'insectoide',o:SPECIES[0],ic:'an0r',role:'Suit à distance, attaque avec les crabos'},{key:'crabos',o:BEASTS[0],ic:'bz0r',role:'Chasse le robot'},{key:'cafar',o:BEASTS[1],ic:'bz1r',role:'En bande de 3 à 6, donne l’alerte'}];
+const BEST_LIST=()=>[{key:'insectoide',o:SPECIES[0],ic:'an0r',role:'Suit à distance, attaque avec les crabos'},{key:'crabos',o:BEASTS[0],ic:'bz0r',role:'Chasse le robot'},{key:'cafar',o:BEASTS[1],ic:'bz1r',role:'En bande de 2 à 5, donne l’alerte'}];
 const BEST_DEF={};BEST_LIST().forEach(e=>{BEST_DEF[e.key]={};BFIELDS.forEach(([f])=>BEST_DEF[e.key][f]=e.o[f]);});
 try{const b=JSON.parse(localStorage.getItem('np-best')||'null');if(b)BEST_LIST().forEach(e=>{if(b[e.key])BFIELDS.forEach(([f])=>{if(typeof b[e.key][f]==='number')e.o[f]=b[e.key][f];});});}catch(e){}
 function saveBest(){const o={};BEST_LIST().forEach(e=>{o[e.key]={};BFIELDS.forEach(([f])=>o[e.key][f]=e.o[f]);});try{localStorage.setItem('np-best',JSON.stringify(o));}catch(e){}touchLocal();}

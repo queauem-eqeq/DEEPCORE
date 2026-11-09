@@ -22,7 +22,7 @@ const siteAt=(x,y)=>G.sites.find(s=>s.x===x&&s.y===y);
 function drift(){
   if(G.t[idx(G.px,G.py)]!==DEEP)return;
   const k=rnd(0,7),[dx,dy]=DIRS[k],nx=G.px+dx,ny=G.py+dy,v=G.t[idx(nx,ny)];
-  if(v===ROCK||v===MOUNT||v===CHASM||beastAt(nx,ny)||animalAt(nx,ny)){SFX.thud();sayMore(`Le courant plaque le robot contre un obstacle (${DIRN[k]}).`,'warn');return;}
+  if(v===ROCK||v===MOUNT||v===CHASM||!diagOk(G.px,G.py,dx,dy)||beastAt(nx,ny)||animalAt(nx,ny)){SFX.thud();sayMore(`Le courant plaque le robot contre un obstacle (${DIRN[k]}).`,'warn');return;}
   G.px=nx;G.py=ny;G.lastDir=null;if(v===GRASS)G.t[idx(nx,ny)]=FLAT;
   SFX.drift();sayMore(`Eau profonde : le courant entraîne le robot vers ${['l’est','l’ouest','le sud','le nord','le sud-est','le nord-est','le sud-ouest','le nord-ouest'][k]}.`,'warn');
 }
@@ -30,22 +30,23 @@ function tryMove(dx,dy){
   if(G.over||drilling)return;const nx=G.px+dx,ny=G.py+dy;if(nx<0||ny<0||nx>=W||ny>=H)return;
   const v=G.t[idx(nx,ny)];
   G.face=dx>0?'r':dx<0?'l':dy>0?'d':'u';
+  if(!diagOk(G.px,G.py,dx,dy)){say('Coin de paroi : pas de passage en diagonale.');SFX.blocked();render();return;}
   const bz=beastAt(nx,ny);
   if(bz){if(!spend())return;const sp=BEASTS[bz.sp];G.turn++;G.msg=null;
-    {const ch=hitChance(G.st.pre,sp.esq+terrMod(nx,ny));if(!roll(ch)){bz.hunt=8;addFx({kind:'lunge',robot:true,dx,dy,dur:180});addFx({kind:'num',x:nx,y:ny,txt:'raté',col:'#8aa9a2',dur:750});
+    {const ch=hitChance(G.st.pre,sp.esq+terrMod(nx,ny));if(!roll(ch)){bz.hunt=1;spot(bz);addFx({kind:'lunge',robot:true,dx,dy,dur:180});addFx({kind:'num',x:nx,y:ny,txt:'0',col:'#8aa9a2',dur:750});
       say(`La foreuse rate le ${sp.n.toLowerCase()} (${ch} %).`);SFX.whoosh();drift();animalsAct();beastsAct();regen();computeFOV();render();if(G.over&&G.over.dead)dead();return;}}
-    const dm=G.st.degats;bz.hp-=dm;bz.hunt=8;addFx({kind:'num',x:nx,y:ny,txt:'-'+dm,col:PAL['3'],dur:750});
+    const dm=G.st.degats;bz.hp-=dm;bz.hunt=1;spot(bz);addFx({kind:'num',x:nx,y:ny,txt:'-'+dm,col:PAL['3'],dur:750});
     addFx({kind:'lunge',robot:true,dx,dy,dur:180});addFx({kind:'flash',beast:bz,dur:180});if(bz.hp<=0)addFx({kind:'shake',amp:4,dur:200});
     if(bz.hp<=0){G.beasts.splice(G.beasts.indexOf(bz),1);bleed(bz.x,bz.y);say(`La foreuse abat le ${sp.n.toLowerCase()}.`,'good');SFX.break();}
     else{say(`La foreuse percute le ${sp.n.toLowerCase()} : −${dm} PV (${bz.hp}/${sp.pv}).`,'warn');SFX.crack();}
     drift();animalsAct();beastsAct();regen();computeFOV();render();if(G.over&&G.over.dead)dead();return;}
   const an=animalAt(nx,ny);
   if(an){if(!spend())return;const sp=SPECIES[an.sp];G.turn++;G.msg=null;
-    {const ch=hitChance(G.st.pre,sp.esq+terrMod(nx,ny));if(!roll(ch)){an.aware=10;addFx({kind:'lunge',robot:true,dx,dy,dur:180});addFx({kind:'num',x:nx,y:ny,txt:'raté',col:'#8aa9a2',dur:750});
+    {const ch=hitChance(G.st.pre,sp.esq+terrMod(nx,ny));if(!roll(ch)){an.aware=1;spot(an);addFx({kind:'lunge',robot:true,dx,dy,dur:180});addFx({kind:'num',x:nx,y:ny,txt:'0',col:'#8aa9a2',dur:750});
       say(`La foreuse rate l’${sp.n.toLowerCase()} (${ch} %).`);SFX.whoosh();drift();animalsAct();beastsAct();regen();computeFOV();render();if(G.over&&G.over.dead)dead();return;}}
     an.hp=(an.hp??sp.pv)-G.st.degats;addFx({kind:'num',x:nx,y:ny,txt:'-'+G.st.degats,col:PAL['3'],dur:750});addFx({kind:'lunge',robot:true,dx,dy,dur:180});
     if(an.hp<=0){G.animals.splice(G.animals.indexOf(an),1);bleed(an.x,an.y);say(`La foreuse écrase l’${sp.n.toLowerCase()}.`,'warn');SFX.squish();}
-    else{an.aware=10;say(`La foreuse heurte l’${sp.n.toLowerCase()}.`);SFX.crack();}
+    else{an.aware=1;spot(an);say(`La foreuse heurte l’${sp.n.toLowerCase()}.`);SFX.crack();}
    drift();animalsAct();beastsAct();regen();computeFOV();render();if(G.over&&G.over.dead)dead();return;}
   if(v===CHASM){say('Gouffre : passage impossible.');SFX.blocked();render();return;}
   if(v===SHIP){say('Coque du vaisseau : indestructible.');SFX.blocked();render();return;}
@@ -68,6 +69,7 @@ function tryMove(dx,dy){
   if(doorway){SFX.door();say(v===DECK?'La porte du vaisseau s’ouvre : la foreuse rentre dans la soute.':'La porte du vaisseau s’ouvre : la foreuse sort.','info');}
   drift();animalsAct();beastsAct();regen();
   {const oi=idx(G.px,G.py);if(G.ore&&G.ore[oi]&&oreSol(G.ore[oi])){const l=oreLv(G.ore[oi]);delete G.ore[oi];const av=G.st.vie;G.st.vie=Math.min(G.st.vieMax,G.st.vie+ORE_PV[l]);
+    addFx({kind:'num',x:G.px,y:G.py,txt:'+'+(G.st.vie-av),col:PAL['2'],dur:750});   // affiché comme les dégâts, couleur des éclats
     sayMore(`Éclats de métal récupérés : +${G.st.vie-av} PV.`,'good');SFX.spot();}}
   {const gi=idx(G.px,G.py);if(G.gems&&G.gems[gi]==='visible'){delete G.gems[gi];computeFOV();render();SFX.analyse();chooseUpgrade();return;}}
   const s=siteAt(G.px,G.py);
@@ -92,13 +94,15 @@ function askDrill(){
 function drill(s){drilling=true;let k=0;const n=12;
   const step=()=>{$('card').innerHTML=`<div class="tag">Forage en cours · site ${s.id}</div><h2>DESCENTE</h2><p class="prog">${'▮'.repeat(k)}${'·'.repeat(n-k)}</p>`;
     if(k<n){SFX.drill(k);k++;setTimeout(step,reduced?0:110);}else{SFX.done();end(s);}};step();}
-function dead(){
-  $('card').innerHTML=`<div class="tag">Signal perdu</div><h2>FOREUSE<br>DÉTRUITE</h2>
-    <div class="stats"><span>${G.turn} tours · ${G.dist} cases parcourues</span></div>
-    <p>Les prédateurs ont eu raison de la foreuse. Une nouvelle planète vous attend.</p>
-    <button class="go" id="again">Nouvelle planète</button>`;
-  $('overlay').hidden=false;$('again').onclick=()=>{unlock();SFX.start();newGame();$('overlay').hidden=true;render();};$('again').focus();
+// Mort : la foreuse explose (voir explode, rendu), puis un seul bouton pour repartir
+function dead(){if(G.over.boom)return;G.over.boom=true;if(TRAV)stopTravel();
+  explode(()=>{$('card').innerHTML=`<h2 class="huge">FOREUSE<br>DÉTRUITE</h2>
+    <div class="upg one"><button id="again"><span>Nouvelle exploration</span><b>▶</b></button><button id="quit"><span>Quitter</span><b>■</b></button></div>`;
+    $('overlay').hidden=false;$('again').onclick=()=>{unlock();SFX.start();newGame();$('overlay').hidden=true;render();};$('quit').onclick=quitGame;$('again').focus();});
 }
+// Quitter : une page ne peut pas fermer son onglet ; tout s'éteint (écran noir, son coupé), un bouton discret rallume le jeu
+function quitGame(){$('overlay').hidden=true;$('off').hidden=false;try{if(AC)AC.suspend();}catch(e){}$('offOn').focus();}
+$('offOn').onclick=()=>{$('off').hidden=true;try{if(AC)AC.resume();}catch(e){}unlock();SFX.start();newGame();render();};
 function end(s){
   drilling=false;G.over={site:s.id};const known=G.sites.filter(x=>x.known).length;
   $('card').innerHTML=`<div class="tag">Niveau 1 terminé</div><h2>ENTRÉE<br>NIVEAU 2</h2>

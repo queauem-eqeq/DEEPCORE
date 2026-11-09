@@ -44,8 +44,8 @@ function seenHTML(){
   const ter=new Map(),out=[];
   for(let i=0;i<W*H;i++)if(vis[i]){const v=G.t[i];ter.set(v,(ter.get(v)||0)+1);}
   const near=(a,b)=>Math.hypot(a.x-G.px,a.y-G.py)-Math.hypot(b.x-G.px,b.y-G.py);
-  const ans=[...(G.beasts||[]).filter(b=>vis[idx(b.x,b.y)]).map(b=>({o:b,sp:BEASTS[b.sp],ic:'bz'+b.sp+'r',hp:b.hp,st:b.hunt>0?'en chasse':'',agg:true})),
-             ...(G.animals||[]).filter(a=>vis[idx(a.x,a.y)]).map(a=>({o:a,sp:SPECIES[a.sp],ic:'an'+a.sp+'r',hp:a.hp??SPECIES[a.sp].pv,st:{attack:'attaque',flee:'recule',follow:'suit',hold:'observe'}[a.mode]||'',agg:a.mode==='attack'}))]
+  const ans=[...(G.beasts||[]).filter(b=>vis[idx(b.x,b.y)]).map(b=>({o:b,sp:BEASTS[b.sp],ic:'bz'+b.sp+'r',hp:b.hp,st:b.hunt>0?(b.sees?'en chasse':b.search>0?'fouille':'cherche'):'',agg:true})),
+             ...(G.animals||[]).filter(a=>vis[idx(a.x,a.y)]).map(a=>({o:a,sp:SPECIES[a.sp],ic:'an'+a.sp+'r',hp:a.hp??SPECIES[a.sp].pv,st:{attack:'attaque',flee:'recule',follow:'suit',hold:'observe',seek:'cherche',search:'fouille'}[a.mode]||'',agg:a.mode==='attack'}))]
     .sort((p,q)=>near(p.o,q.o));
   if(ans.length){const max=6;
     const calc=e=>{const tmA=terrMod(e.o.x,e.o.y),tmR=terrMod(G.px,G.py),me=hitChance(G.st.pre,e.sp.esq+tmA),them=e.agg?hitChance(e.sp.pre,robotEsq()):null;return {tmA,tmR,me,them};};
@@ -126,8 +126,9 @@ function applySaved(d){
     render();}}
   catch(e){}}).catch(()=>{});
 // Bouton « Enregistrer » du Tile editor : envoie tuiles et réglages dans la base de l'artefact (Claude peut ensuite les lire et les adopter)
-async function saveSettings(){
-  if(!DB||!$('saveBtn'))return;const b=$('saveBtn'),m=$('saveMsg');b.disabled=true;b.textContent='Enregistrement…';m.className='saved';m.textContent='';
+// b, m : bouton et zone de message (Tile editor par défaut, ou Bestiaire)
+async function saveSettings(b,m){b=b instanceof HTMLElement?b:$('saveBtn');m=m||$('saveMsg');
+  if(!DB||!b)return;b.disabled=true;b.textContent='Enregistrement…';m.className='saved';m.textContent='';
   const best={};BEST_LIST().forEach(e=>{best[e.key]={nom:e.o.n};BFIELDS.forEach(([f])=>best[e.key][f]=e.o[f]);});
   const data={enregistreLe:new Date().toISOString(),bestiaire:best,life:Object.assign({},LIFE),generation:Object.assign({},GEN),
     planete:{largeur:W,hauteur:H,joyaux:GEM_COUNT},robot:G&&G.st?Object.assign({},G.st):null,
@@ -136,7 +137,8 @@ async function saveSettings(){
   try{await DB.doc('reglages/courant').set(data);commitTileBase();try{localStorage.setItem('np-maj',String(Date.parse(data.enregistreLe)));}catch(e){}if(!$('viseurs').hidden)drawCurEd();const t=new Date();m.className='saved ok';m.textContent=`Réglages enregistrés à ${String(t.getHours()).padStart(2,'0')}:${String(t.getMinutes()).padStart(2,'0')}.`;}
   catch(e){m.className='saved err';m.textContent=e&&e.code==='invalid_argument'?'Vous n’avez pas le droit d’enregistrer sur cette page.':'Échec de l’enregistrement. Réessayez dans un instant.';}
   b.disabled=false;b.textContent='Enregistrer';}
-$('saveBtn').onclick=saveSettings;
+$('saveBtn').onclick=()=>saveSettings();
+$('bestSave').onclick=()=>saveSettings($('bestSave'),$('bestMsg'));
 $('bestClose').onclick=closeBest;
 $('bestiary').addEventListener('click',e=>{if(e.target===$('bestiary'))closeBest();});
 $('bestList').addEventListener('change',e=>{const t=e.target;if(!t.dataset||!t.dataset.f)return;const ent=BEST_LIST().find(x=>x.key===t.dataset.k),fd=BFIELDS.find(x=>x[0]===t.dataset.f);

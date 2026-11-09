@@ -7,7 +7,18 @@
    jusqu'à un pic critique (tremblement, plasma, traînées, chaleur, alerte rouge) puis se calme.
    11,6-14 s posé : le vaisseau rejoint sa place, son ombre le rejoint, poussière ; brouillard de guerre puis fondu.
    La foreuse est dans la soute du début à la fin. Échap, Espace ou Entrée : passer. */
-const TH=1,TE0=.85,TE1=2.4,TZ0=1.6,TZ1=9,TL0=TZ1-1.6,TF0=TZ1+1.4,TF1=TF0+.6,T5=TF1+.1,TEND=T5+.5,PLANET_D=12;
+const TH=1,TE0=.85,TE1=2.4,TZ0=1.6,PLANET_D=12;
+// Chaque intro est un peu différente : durée de la descente, entrée dans l'atmosphère (début, pic, retombée),
+// nombre et rythme des éclairs, densité des nuages (tirés au lancement de l'intro, voir introTiming)
+let TZ1=9,TL0,TF0,TF1,T5,TEND,HS=.12,HP=.7,HF=.16,CLOUD_K=1,BOLTS=[.62,.68,.73];
+function introTiming(){const r=Math.random;
+  TZ1=TZ0+7.4*(.8+r()*.45);TL0=TZ1-1.6;TF0=TZ1+1.4;TF1=TF0+.6;T5=TF1+.1;TEND=T5+.5;   // descente de 5,9 à 9,3 s
+  HS=.05+r()*.15;HP=.6+r()*.16;HF=.1+r()*.14;                                          // chaleur : début, pic critique, retombée (en part de la descente)
+  CLOUD_K=.4+r()*1.3;                                                                   // densité des nuages : de très clairsemés à très chargés
+  const n=2+Math.floor(r()*5);BOLTS=[];                                                 // 2 à 6 éclairs, rythme irrégulier, parfois en doublé
+  while(BOLTS.length<n){const d=HP-.12+r()*.27;BOLTS.push(d);if(BOLTS.length<n&&r()<.3)BOLTS.push(d+.025+r()*.035);}
+  BOLTS.sort((a,b)=>a-b);}
+introTiming();
 // Nuages accrochés à la surface de la carte, à faible altitude. Altitude de la caméra : Z = 0,2 + 30 (k − 1)², où k est le nombre
 // de cases de carte par tuile affichée (k ≈ 5,3 quand la planète entre, 1 au sol). Vu de l'espace, Z est très grand devant
 // l'altitude des nuages : ils restent collés au sol. La parallaxe n'apparaît que quand la planète remplit presque l'écran (k < 1,6),
@@ -25,6 +36,25 @@ function shipShadow(){const c=document.createElement('canvas');c.width=TL.ship.w
 let INTRO_CLOUD_AT=null;
 // toute la carte pré-composée une fois, à la résolution des motifs (16 px par case) : pendant l'intro, chaque tuile affichée
 // n'est plus qu'une copie, au lieu de 2 à 4 dessins avec changements d'opacité (l'intro ramait)
+/* Éclair en pixel art, sur toute la hauteur de l'écran : tronc par déplacement des points milieux (zigzags à toutes les
+   échelles), branches qui se ramifient une fois, tracés sur une grille de 2 px (un pixel de tuile), tout en couleur accent :
+   tronc de 2 pixels, branches et rameaux d'un pixel.
+   Opaque, sans lissage ; dessiné une fois dans une image de la taille de l'écran. */
+function boltImage(x0,y1,w,h){const P=2,trunk=new Set(),branch=new Set();
+  const zig=(ax,ay,bx,by,rough,depth,out)=>{if(depth===0){out.push([bx,by]);return;}const mx=(ax+bx)/2,my=(ay+by)/2,dx=bx-ax,dy=by-ay,l=Math.hypot(dx,dy)||1,d=(Math.random()*2-1)*rough*l;
+    const px=mx-dy/l*d,py=my+dx/l*d;zig(ax,ay,px,py,rough,depth-1,out);zig(px,py,bx,by,rough,depth-1,out);};
+  const line=(a,c,b,d,set,wide)=>{let x=Math.round(a/P),y=Math.round(c/P);const X=Math.round(b/P),Y=Math.round(d/P),sx=x<X?1:-1,sy=y<Y?1:-1,ddx=Math.abs(X-x),ddy=-Math.abs(Y-y);let err=ddx+ddy;
+    for(;;){set.add(x+','+y);if(wide)set.add((x+1)+','+y);if(x===X&&y===Y)break;const e2=2*err;if(e2>=ddy){err+=ddy;x+=sx;}if(e2<=ddx){err+=ddx;y+=sy;}}};
+  // level 0 : tronc (2 pixels, cœur blanc) ; level 1 : branches ; level 2 : rameaux (1 pixel, couleur bio)
+  const path=(ax,ay,bx,by,depth,level)=>{const pts=[[ax,ay]];zig(ax,ay,bx,by,level?.28:.2,depth,pts);
+    for(let k=1;k<pts.length;k++)line(pts[k-1][0],pts[k-1][1],pts[k][0],pts[k][1],level?branch:trunk,level===0);
+    if(level<2)for(let k=3;k<pts.length-3;k++){if(Math.random()>(level===0?.045:.05))continue;const [qx,qy]=pts[k];
+      const down=Math.atan2(by-ay,bx-ax),ang=down+(Math.random()<.5?-1:1)*(.3+Math.random()*.55),len=Math.hypot(bx-ax,by-ay)*(level===0?.22+Math.random()*.25:.1+Math.random()*.12);
+      path(qx,qy,qx+Math.cos(ang)*len,qy+Math.sin(ang)*len,level===0?5:4,level+1);}};
+  path(x0,-8,x0+(Math.random()*2-1)*w*.2,y1,8,0);
+  const c=document.createElement('canvas');c.width=w;c.height=h;const g=c.getContext('2d');g.fillStyle=PAL['1'];   // tout en couleur accent
+  for(const k of new Set([...trunk,...branch])){const [x,y]=k.split(',').map(Number);g.fillRect(x*P,y*P,P,P);}
+  return c;}
 function introMapImg(){ensureChasmOv();const c=document.createElement('canvas');c.width=W*16;c.height=H*16;const x=c.getContext('2d');
   x.imageSmoothingEnabled=false;x.setTransform(16/S,0,0,16/S,0,0);
   for(let i=0;i<W*H;i++)introCell(x,i,(i%W)*S,((i/W)|0)*S);
@@ -32,12 +62,13 @@ function introMapImg(){ensureChasmOv();const c=document.createElement('canvas');
 function playIntro(){
   if(reduced||!G||!G.ship){markIntro();return;}
   if(TRAV)stopTravel();HOV=null;if(freeCam)setFreeCam(false);   // l'intro sort du mode carte : elle se pose sur la vue centrée sur la foreuse
+  introTiming();   // nouveaux tirages : durée, chaleur, éclairs, nuages
   const R=seeded((Math.random()*1e9)|0);
   // nuages : formes procédurales (union de disques) de 6 à 24 cases de carte, posées sur la carte. Ils sont échantillonnés
   // à chaque image sur la grille des tuiles affichées : la tuile garde toujours sa taille, un nuage proche est fait de plus de tuiles.
   // En plus des nuages dispersés, chaque couche en pose quelques-uns autour du point d'atterrissage, dans la zone que l'écran
   // couvre quand elle passe (les couches basses passent en dernier, de près : zone plus serrée) → des nuages jusqu'à la fin.
-  const cloudLayer=(i)=>{const circ=[],style=[],grid=Array.from({length:W*H},()=>[]),n=8+Math.floor(R()*4),near=4,rx=5+5*i,ry=3+3*i;
+  const cloudLayer=(i)=>{const circ=[],style=[],grid=Array.from({length:W*H},()=>[]),n=Math.round((8+Math.floor(R()*4))*CLOUD_K),near=Math.max(1,Math.round(4*CLOUD_K)),rx=5+5*i,ry=3+3*i;
     for(let c=0;c<n+near;c++){const size=CLOUD_SIZES[(R()*CLOUD_SIZES.length)|0],loc=c>=n,
       cx=loc?G.px+(R()*2-1)*rx:R()*W,cy=loc?G.py+(R()*2-1)*ry:R()*H,m=Math.max(2,Math.round(size/3)),own=[];
       style.push([1+((R()*2)|0),3+((R()*4)|0)]);   // tuile de cœur, style de bord
@@ -52,7 +83,7 @@ function playIntro(){
   INTRO={t0:performance.now(),last:performance.now(),ev:{},flash:0,
     stars:Array.from({length:150},(_,i)=>({x:R(),y:R(),l:i<80?0:i<128?1:2})),
     layers:CLOUD_ALT.map((a,i)=>Object.assign({a},cloudLayer(i))),
-    bolts:[.62,.68,.73].map(dd=>({t:TZ0+dd*(TZ1-TZ0),x:.15+R()*.7,pts:null})),
+    bolts:BOLTS.map(dd=>({t:TZ0+dd*(TZ1-TZ0),x:.15+R()*.7,pts:null})),
     dust:null,shadow:shipShadow(),mapImg:introMapImg()};
   introCv.hidden=false;introCv.style.opacity=1;$('introSkip').hidden=false;
   requestAnimationFrame(introFrame);}
@@ -79,9 +110,9 @@ function introFrame(now){const I=INTRO;if(!I)return;ensureChasmOv();
   const ev=k=>{if(I.ev[k])return false;I.ev[k]=true;return true;};
   const DUR=TZ1-TZ0,d=clamp01((t-TZ0)/DUR);
   // intensité de l'entrée dans l'atmosphère : monte en accélérant jusqu'au pic critique (d = 0,7, quand on traverse les nuages), puis retombe
-  const heat=d<.7?Math.pow(smooth3((d-.12)/.58),2):1-smooth3((d-.7)/.16);
+  const heat=d<HP?Math.pow(smooth3((d-HS)/(HP-HS)),2):1-smooth3((d-HP)/HF);
   if(t<.05&&ev('hyper'))SFX.hyper();if(t>TE0&&ev('hum'))SFX.hum();if(t>TZ0&&ev('appr'))SFX.approach();
-  if(d>.12&&ev('reen'))SFX.reentry(DUR*.76,DUR*.58);if(t>TL0&&ev('thr'))SFX.thrust();
+  if(d>HS&&ev('reen'))SFX.reentry(DUR*(.88-HS),DUR*(HP-HS));if(t>TL0&&ev('thr'))SFX.thrust();
   // grille des tuiles calée sur la vue du jeu, et cadrage final identique à celui du jeu (foreuse au centre, caméra bornée)
   const mr=$('mapwrap').getBoundingClientRect(),vw2=Math.floor(mr.width),vh2=Math.floor(mr.height),vc=vw2/S,vr=vh2/S;
   const camX2=Math.max(0,Math.min(W-Math.floor(vc),G.px-Math.floor(vc/2))),camY2=Math.max(0,Math.min(H-Math.floor(vr),G.py-Math.floor(vr/2)));
@@ -165,10 +196,8 @@ function introFrame(now){const I=INTRO;if(!I)return;ensureChasmOv();
     I.parts.length=n;}
   /* --- éclairs, au plus fort de la traversée --- */
   for(const b of I.bolts){if(t<b.t||t>b.t+.22)continue;
-    if(!b.pts){b.pts=[];let bx=b.x*w,by=-10;while(by<h*.62){b.pts.push([bx,by]);bx+=(Math.random()*2-1)*42;by+=18+Math.random()*30;}b.pts.push([bx,by]);I.flash=1;SFX.thunder();}
-    const fa=1-(t-b.t)/.22;x.lineJoin='miter';
-    x.globalAlpha=fa*.45;x.strokeStyle=PAL['2'];x.lineWidth=8;x.beginPath();b.pts.forEach(([a,c],k)=>k?x.lineTo(a,c):x.moveTo(a,c));x.stroke();
-    x.globalAlpha=fa;x.strokeStyle='#ffffff';x.lineWidth=3;x.stroke();x.globalAlpha=1;}
+    if(!b.img){b.img=boltImage(b.x*w,h+8,w,h);I.flash=1;SFX.thunder();}
+    const e=t-b.t;if(e<.07||(e>.1&&e<.17))x.drawImage(b.img,0,0,w,h);}   // éclair stroboscopique : allumé, éteint, rallumé, sans fondu
   /* --- vaisseau (foreuse dans la soute) : il tangue en avançant, puis rejoint sa place d'atterrissage ; plus gros en altitude --- */
   const cx=shipCX,cy=shipCY,sw=SGW*S*scl,sh=SGH*S*scl,ox=Math.round(cx-sw/2+shx),oy=Math.round(cy-sh/2+shy),k=2*scl;
   const fl=clamp01(1-e5*1.15);
@@ -218,7 +247,7 @@ if(!reduced)setInterval(()=>{liqFrame^=1;if(G&&$('overlay').hidden)render();},65
 function start(data){
   buildTiles();buildGen();buildLife();
   const fromHot=!!(data&&data.G&&data.G.t&&data.G.t.length===W*H);
-  if(data&&data.G&&data.G.t&&data.G.st&&data.G.t.length===W*H){G=data.G;G.dmg=G.dmg||{};if(!G.ore)hideOre();if(!G.st||G.st.pre==null||G.st.energieMax!==100||G.st.cout!==10||G.st.power!==3){G.st={vie:100,vieMax:100,energie:100,energieMax:100,repar:0,power:3,vitesse:5,degats:10,capteur:5,cout:10,pre:80,esq:10};}
+  if(data&&data.G&&data.G.t&&data.G.st&&data.G.t.length===W*H){G=data.G;G.dmg=G.dmg||{};if(G.st&&(G.st.capteur<10||G.st.capteur===12||G.st.capteur===15))G.st.capteur=10;if(!G.ore)hideOre();if(!G.st||G.st.pre==null||G.st.energieMax!==100||G.st.cout!==10||G.st.power!==3){G.st={vie:100,vieMax:100,energie:100,energieMax:100,repar:0,power:3,vitesse:5,degats:10,capteur:10,cout:10,pre:80,esq:10};}
   if(!G.gems)hideGems();
   if(!G.beasts||!G.beasts.some(b=>b.sp===1)&&LIFE.cafar>0)spawnBeasts();
   if(G.fv!==2){G.fv=2;G.blood={};G.beasts=[];spawnAnimals();spawnBeasts();}started=!!data.started;computeFOV();}else newGame();
