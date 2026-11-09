@@ -73,7 +73,7 @@ Roguelike au tour par tour dans une esthétique inspirée de Cogmind et de Brogu
 | Vie | 100 | **pas de réparation automatique** |
 | Énergie | 100 | se recharge de POW par tour (3 par tour au départ) |
 | VIT | 5 | affichée, **sans effet** pour l'instant |
-| EYE | 5 | rayon de vision |
+| EYE | 15 | rayon de vision (5 avant le 10 novembre 2026) |
 | DEG | 10 | dégâts par coup de foreuse |
 | PRE | 80 | précision |
 | ESQ | 10 | esquive (modifiée par le terrain) |
