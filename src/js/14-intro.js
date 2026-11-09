@@ -25,6 +25,28 @@ function shipShadow(){const c=document.createElement('canvas');c.width=TL.ship.w
 let INTRO_CLOUD_AT=null;
 // toute la carte pré-composée une fois, à la résolution des motifs (16 px par case) : pendant l'intro, chaque tuile affichée
 // n'est plus qu'une copie, au lieu de 2 à 4 dessins avec changements d'opacité (l'intro ramait)
+/* Éclair en pixel art : tronc par déplacement des points milieux (zigzags à toutes les échelles), quelques branches qui
+   se ramifient une fois, tracés sur une grille de 2 px (un pixel de tuile) : tronc à cœur blanc et halo bio d'un pixel,
+   branches et rameaux d'un pixel en bio.
+   Opaque, sans lissage ; dessiné une fois dans une image de la taille de l'écran. */
+function boltImage(x0,y1,w,h){const P=2,trunk=new Set(),branch=new Set();
+  const zig=(ax,ay,bx,by,rough,depth,out)=>{if(depth===0){out.push([bx,by]);return;}const mx=(ax+bx)/2,my=(ay+by)/2,dx=bx-ax,dy=by-ay,l=Math.hypot(dx,dy)||1,d=(Math.random()*2-1)*rough*l;
+    const px=mx-dy/l*d,py=my+dx/l*d;zig(ax,ay,px,py,rough,depth-1,out);zig(px,py,bx,by,rough,depth-1,out);};
+  const line=(a,c,b,d,set,wide)=>{let x=Math.round(a/P),y=Math.round(c/P);const X=Math.round(b/P),Y=Math.round(d/P),sx=x<X?1:-1,sy=y<Y?1:-1,ddx=Math.abs(X-x),ddy=-Math.abs(Y-y);let err=ddx+ddy;
+    for(;;){set.add(x+','+y);if(wide)set.add((x+1)+','+y);if(x===X&&y===Y)break;const e2=2*err;if(e2>=ddy){err+=ddy;x+=sx;}if(e2<=ddx){err+=ddx;y+=sy;}}};
+  // level 0 : tronc (2 pixels, cœur blanc) ; level 1 : branches ; level 2 : rameaux (1 pixel, couleur bio)
+  const path=(ax,ay,bx,by,depth,level)=>{const pts=[[ax,ay]];zig(ax,ay,bx,by,level?.28:.2,depth,pts);
+    for(let k=1;k<pts.length;k++)line(pts[k-1][0],pts[k-1][1],pts[k][0],pts[k][1],level?branch:trunk,level===0);
+    if(level<2)for(let k=3;k<pts.length-3;k++){if(Math.random()>(level===0?.07:.06))continue;const [qx,qy]=pts[k];
+      const down=Math.atan2(by-ay,bx-ax),ang=down+(Math.random()<.5?-1:1)*(.3+Math.random()*.55),len=Math.hypot(bx-ax,by-ay)*(level===0?.15+Math.random()*.2:.08+Math.random()*.08);
+      path(qx,qy,qx+Math.cos(ang)*len,qy+Math.sin(ang)*len,level===0?5:4,level+1);}};
+  path(x0,-8,x0+(Math.random()*2-1)*w*.1,y1,7,0);
+  const c=document.createElement('canvas');c.width=w;c.height=h;const g=c.getContext('2d'),halo=new Set();
+  g.fillStyle=PAL['2'];
+  for(const k of trunk){const [x,y]=k.split(',').map(Number);for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){const n=(x+dx)+','+(y+dy);if(!trunk.has(n)&&!halo.has(n)){halo.add(n);g.fillRect((x+dx)*P,(y+dy)*P,P,P);}}}
+  for(const k of branch){if(trunk.has(k))continue;const [x,y]=k.split(',').map(Number);g.fillRect(x*P,y*P,P,P);}
+  g.fillStyle='#ffffff';for(const k of trunk){const [x,y]=k.split(',').map(Number);g.fillRect(x*P,y*P,P,P);}
+  return c;}
 function introMapImg(){ensureChasmOv();const c=document.createElement('canvas');c.width=W*16;c.height=H*16;const x=c.getContext('2d');
   x.imageSmoothingEnabled=false;x.setTransform(16/S,0,0,16/S,0,0);
   for(let i=0;i<W*H;i++)introCell(x,i,(i%W)*S,((i/W)|0)*S);
@@ -165,10 +187,8 @@ function introFrame(now){const I=INTRO;if(!I)return;ensureChasmOv();
     I.parts.length=n;}
   /* --- éclairs, au plus fort de la traversée --- */
   for(const b of I.bolts){if(t<b.t||t>b.t+.22)continue;
-    if(!b.pts){b.pts=[];let bx=b.x*w,by=-10;while(by<h*.62){b.pts.push([bx,by]);bx+=(Math.random()*2-1)*42;by+=18+Math.random()*30;}b.pts.push([bx,by]);I.flash=1;SFX.thunder();}
-    const fa=1-(t-b.t)/.22;x.lineJoin='miter';
-    x.globalAlpha=fa*.45;x.strokeStyle=PAL['2'];x.lineWidth=8;x.beginPath();b.pts.forEach(([a,c],k)=>k?x.lineTo(a,c):x.moveTo(a,c));x.stroke();
-    x.globalAlpha=fa;x.strokeStyle='#ffffff';x.lineWidth=3;x.stroke();x.globalAlpha=1;}
+    if(!b.img){b.img=boltImage(b.x*w,h*(.5+Math.random()*.2),w,h);I.flash=1;SFX.thunder();}
+    const e=t-b.t;if(e<.07||(e>.1&&e<.17))x.drawImage(b.img,0,0,w,h);}   // éclair stroboscopique : allumé, éteint, rallumé, sans fondu
   /* --- vaisseau (foreuse dans la soute) : il tangue en avançant, puis rejoint sa place d'atterrissage ; plus gros en altitude --- */
   const cx=shipCX,cy=shipCY,sw=SGW*S*scl,sh=SGH*S*scl,ox=Math.round(cx-sw/2+shx),oy=Math.round(cy-sh/2+shy),k=2*scl;
   const fl=clamp01(1-e5*1.15);
