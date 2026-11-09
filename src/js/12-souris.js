@@ -5,20 +5,23 @@ const busy=()=>!G||!!G.over||drilling||!$('overlay').hidden;
 function occupant(x,y){const seenHere=!fog||vis[idx(x,y)];if(!seenHere)return null;return beastAt(x,y)||animalAt(x,y)||null;}
 // Plus court chemin (Dijkstra, 8 directions) sur les cases connues ; l'eau profonde est évitée autant que possible.
 // La destination peut être une créature ou une roche : la dernière étape devient alors un coup de foreuse.
-function findPath(tx,ty){
-  if(tx<0||ty<0||tx>=W||ty>=H||(tx===G.px&&ty===G.py))return null;const ti=idx(tx,ty),v=G.t[ti];
-  if((fog&&!G.seen[ti])||v===CHASM)return null;
-  if((v===ROCK||v===MOUNT)&&(tx===0||ty===0||tx===W-1||ty===H-1))return null;
+// explore : les cases jamais vues sont supposées franchissables (coût uniforme, sans regarder ce qu'elles cachent) ;
+// la foreuse avance vers une destination dans le brouillard et recalcule sa route à chaque pas
+function findPath(tx,ty,explore){
+  if(tx<0||ty<0||tx>=W||ty>=H||(tx===G.px&&ty===G.py))return null;const ti=idx(tx,ty),v=G.t[ti],tUnk=fog&&!G.seen[ti];
+  if(tUnk&&!explore)return null;if(!tUnk&&v===CHASM)return null;
+  if(!tUnk&&(v===ROCK||v===MOUNT)&&(tx===0||ty===0||tx===W-1||ty===H-1))return null;
   const N=W*H,dist=new Float64Array(N).fill(Infinity),prev=new Int32Array(N).fill(-1),hp=heap(),s0=idx(G.px,G.py);dist[s0]=0;hp.push(s0,0);
   while(hp.size){const [d,c]=hp.pop();if(d>dist[c])continue;if(c===ti)break;const x=c%W,y=(c/W)|0;
     for(const [dx,dy] of DIRS){const a=x+dx,b=y+dy;if(a<0||b<0||a>=W||b>=H)continue;const j=idx(a,b);
-      if(j!==ti&&(blocks(G.t[j])||(fog&&!G.seen[j])||occupant(a,b)))continue;
-      const w=G.t[j],nd=d+(dx&&dy?1.001:1)+(w===DEEP?6:w===LIQ?.4:0);
+      const unk=fog&&!G.seen[j];
+      if(j!==ti&&(unk?!explore:(blocks(G.t[j])||occupant(a,b))))continue;
+      const w=G.t[j],nd=d+(dx&&dy?1.001:1)+(unk?.3:w===DEEP?6:w===LIQ?.4:0);
       if(nd<dist[j]){dist[j]=nd;prev[j]=c;hp.push(j,nd);}}}
   if(dist[ti]===Infinity)return null;
   const p=[];for(let c=ti;c!==s0;c=prev[c])p.push([c%W,(c/W)|0]);return p.reverse();}
 function getPath(){if(!HOV||!G)return null;const k=[HOV.x,HOV.y,G.turn,G.px,G.py,fog,G.t[idx(HOV.x,HOV.y)]].join();
-  if(PC.k!==k){PC.k=k;PC.p=findPath(HOV.x,HOV.y);}return PC.p;}
+  if(PC.k!==k){PC.k=k;PC.p=findPath(HOV.x,HOV.y)||findPath(HOV.x,HOV.y,true);}return PC.p;}
 // Trajet : un petit rond blanc en pixel art (4 × 4 pixels de tuile) au centre de chaque case intermédiaire,
 // rien sur la case du viseur (trajet en cours, sinon trajet vers la case survolée)
 const PATH_DOT=curCanvas(Array.from({length:16},(_,y)=>y===6||y===9?'.......ww.......':y===7||y===8?'......wwww......':'................'));
@@ -29,10 +32,10 @@ function drawPath(){const p=TRAV?TRAV.path.slice(TRAV.i):(HOV&&!busy()?getPath()
 function goTo(x,y){if(busy())return;const d=Math.max(Math.abs(x-G.px),Math.abs(y-G.py));
   if(d===0){if(siteAt(x,y))askDrill();return;}
   if(d===1){tryMove(x-G.px,y-G.py);return;}
-  const p=findPath(x,y);if(!p){say(fog&&!G.seen[idx(x,y)]?'Zone inexplorée : destination inconnue.':'Destination inaccessible.');SFX.blocked();render();return;}
+  const p=findPath(x,y)||findPath(x,y,true);if(!p){say('Destination inaccessible.');SFX.blocked();render();return;}
   const gk=new Set();if(G.gems)for(const k in G.gems)if(vis[+k])gk.add(k);
   const seen=new Set();for(const e of [...(G.beasts||[]),...(G.animals||[])])if(vis[idx(e.x,e.y)])seen.add(e);
-  TRAV={path:p,i:0,seen,gk,vie:G.st.vie,sites:G.sites.filter(s=>s.seen).length,tm:0};travelStep();}
+  TRAV={path:p,i:0,tx:x,ty:y,explore:p.some(([a,b])=>fog&&!G.seen[idx(a,b)]),seen,gk,vie:G.st.vie,sites:G.sites.filter(s=>s.seen).length,tm:0};travelStep();}
 function stopTravel(m){if(!TRAV)return;clearTimeout(TRAV.tm);TRAV=null;if(m)sayMore(m,'warn');render();}
 // Un pas par tour ; le trajet s'arrête au moindre imprévu
 function travelEvent(T){
@@ -44,6 +47,11 @@ function travelEvent(T){
   if(G.gems)for(const k in G.gems)if(vis[+k]&&!T.gk.has(k))return 'Trajet interrompu : joyau repéré.';
   return null;}
 function travelStep(){const T=TRAV;if(!T)return;if(busy()){stopTravel();return;}
+  if(T.explore){   // trajet lancé à travers l'inexploré : la route est recalculée à chaque pas avec ce que la foreuse voit, sans jamais forer
+    const np=findPath(T.tx,T.ty)||findPath(T.tx,T.ty,true);
+    if(!np){stopTravel('La foreuse s’arrête : plus de passage vers la destination.');return;}
+    T.path=np;T.i=0;
+    const [fx,fy]=np[0];if(blocks(G.t[idx(fx,fy)])){stopTravel(np.length===1?'La foreuse s’arrête : la destination est infranchissable.':'La foreuse s’arrête : passage bloqué.');return;}}
   const [nx,ny]=T.path[T.i],dx=nx-G.px,dy=ny-G.py,last=T.i===T.path.length-1;
   if(Math.max(Math.abs(dx),Math.abs(dy))!==1){stopTravel('Trajet interrompu : la foreuse a dévié de sa route.');return;}
   if(!last&&occupant(nx,ny)){stopTravel('Trajet interrompu : passage bloqué.');return;}
