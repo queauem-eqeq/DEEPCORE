@@ -1,12 +1,32 @@
 /* ---------- Rendu ---------- */
-const cv=$('view'),ctx=cv.getContext('2d');let cols=20,rows=15,camX=0,camY=0,vw=0,vh=0;
+const cv=$('view'),ctx=cv.getContext('2d'),fcv=$('fxv'),fctx=fcv.getContext('2d');let cols=20,rows=15,camX=0,camY=0,vw=0,vh=0;
 function resize(){const r=$('mapwrap').getBoundingClientRect();vw=Math.max(1,Math.floor(r.width));vh=Math.max(1,Math.floor(r.height));
-  const dpr=devicePixelRatio||1;cv.width=vw*dpr;cv.height=vh*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);
+  const dpr=devicePixelRatio||1;cv.width=vw*dpr;cv.height=vh*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);fcv.width=vw*dpr;fcv.height=vh*dpr;fctx.setTransform(dpr,0,0,dpr,0,0);
   cols=Math.ceil(vw/S);rows=Math.ceil(vh/S);render();}
 const hash=(x,y)=>((x*73856093)^(y*19349663))>>>0;
 let ox=0,oy=0;
 /* ---------- Effets de percussion ---------- */
 let FX=[],fxRaf=0;
+/* ---------- Foreuse endommagée : fumée sous 50 PV, fumée + flammèches sous 20 PV ----------
+   Dessiné sur un calque transparent posé sur la vue (#fxv), animé en continu sans redessiner la carte.
+   Particules en pixels de carte (case × S) : la fumée qui s'élève reste sur place quand la foreuse avance (traînée). */
+const SMOKE={p:[],raf:0,last:0,acc:0,accF:0};
+function smokeOn(){return G&&!G.over&&G.st&&G.st.vie<50&&$('introCv').hidden;}
+function smokeKick(){if(!SMOKE.raf&&(smokeOn()||SMOKE.p.length)){SMOKE.last=performance.now();SMOKE.raf=requestAnimationFrame(smokeStep);}}
+function smokeStep(now){const dt=Math.min(.05,(now-SMOKE.last)/1000);SMOKE.last=now;const on=smokeOn(),fire=on&&G.st.vie<20;
+  if(on){const cx=(G.px+.5)*S,cy=(G.py+.5)*S;
+    SMOKE.acc+=dt*(fire?24:12);while(SMOKE.acc>=1){SMOKE.acc--;const g=85+((Math.random()*60)|0);
+      SMOKE.p.push({x:cx+(Math.random()-.5)*S*.5,y:cy-S*.1+(Math.random()-.5)*S*.3,vx:(Math.random()-.5)*6,vy:-(18+Math.random()*18),
+        a:0,l:1+Math.random()*1.1,sz:2+((Math.random()*3)|0),c:`rgb(${g+8},${g+14},${g+12})`,smoke:true});}
+    if(fire){SMOKE.accF+=dt*14;while(SMOKE.accF>=1){SMOKE.accF--;
+      SMOKE.p.push({x:cx+(Math.random()-.5)*S*.55,y:cy+(Math.random()-.3)*S*.4,vx:(Math.random()-.5)*8,vy:-(18+Math.random()*22),
+        a:0,l:.2+Math.random()*.35,sz:2+(Math.random()<.4?1:0),c:['#ffe066','#ff9a1f','#ff9a1f','#e8432a'][(Math.random()*4)|0],smoke:false});}}}
+  fctx.clearRect(0,0,vw,vh);let n=0;
+  for(const q of SMOKE.p){q.a+=dt;if(q.a>=q.l)continue;q.x+=(q.vx+Math.sin(now/600+q.l*9)*4)*dt;q.y+=q.vy*dt;if(q.smoke)q.vy*=Math.exp(-.6*dt);
+    SMOKE.p[n++]=q;const k=q.a/q.l,s=q.smoke?q.sz+Math.floor(k*3):q.sz;
+    fctx.globalAlpha=q.smoke?.75*(1-k):1;fctx.fillStyle=q.c;fctx.fillRect(Math.round(q.x-camX*S-s/2),Math.round(q.y-camY*S-s/2),s,s);}
+  SMOKE.p.length=n;fctx.globalAlpha=1;
+  SMOKE.raf=(on||n)?requestAnimationFrame(smokeStep):0;if(!SMOKE.raf)fctx.clearRect(0,0,vw,vh);}
 /* ---------- Explosion de la foreuse (mort) ----------
    Comme la poussière d'atterrissage : des centaines d'éclats (couleurs de la foreuse) projetés en l'air, qui retombent,
    rebondissent au sol, ricochent sur les obstacles, tombent dans les gouffres et disparaissent d'un coup, chacun à son
@@ -114,6 +134,7 @@ function render(){
   ctx.globalAlpha=1;
   if(BOOM)drawBoom();
   ctx.restore();
+  smokeKick();
   if(HOV&&CURT&&!busy()){const ok=(x,y)=>{const i=idx(x,y);return (!fog||G.seen[i])&&(getPath()||Math.max(Math.abs(x-G.px),Math.abs(y-G.py))<=1);};
     ctx.globalAlpha=1;ctx.drawImage(ok(HOV.x,HOV.y)?CURT:CURT_DIM,(HOV.x-camX)*S,(HOV.y-camY)*S,S,S);}
   ctx.globalAlpha=1;side();mini();
