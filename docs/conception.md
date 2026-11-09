@@ -86,9 +86,9 @@ Roguelike au tour par tour dans une esthétique inspirée de Cogmind et de Brogu
 ## 6. Combat
 
 - Chance de toucher = précision de l'attaquant − esquive de la cible, bornée entre 5 et 95 %.
-- Foncer sur un animal = coup de foreuse (dégâts DEG). Coup raté : « raté » affiché, énergie consommée.
+- Foncer sur un animal = coup de foreuse (dégâts DEG). Coup raté : « 0 » affiché (gris), énergie consommée.
 - Les animaux attaquent **une fois par tour au contact** ; la vitesse ne règle que les déplacements (vitesse 5 = 1 case par tour).
-- Animation : bond de l'attaquant, flash, chiffres de dégâts flottants (« -10 », « raté »), tremblement d'écran quand le robot est touché ou qu'un ennemi meurt.
+- Animation : bond de l'attaquant, flash, chiffres de dégâts flottants (« -10 », « 0 » pour un coup raté, de part et d'autre), « +10 / +15 / +20 » en couleur bio au ramassage d'éclats de métal, tremblement d'écran quand le robot est touché ou qu'un ennemi meurt.
 - Un animal tué laisse une trace de sang.
 
 ## 7. Bestiaire

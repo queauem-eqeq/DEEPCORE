@@ -32,7 +32,7 @@ function tryMove(dx,dy){
   G.face=dx>0?'r':dx<0?'l':dy>0?'d':'u';
   const bz=beastAt(nx,ny);
   if(bz){if(!spend())return;const sp=BEASTS[bz.sp];G.turn++;G.msg=null;
-    {const ch=hitChance(G.st.pre,sp.esq+terrMod(nx,ny));if(!roll(ch)){bz.hunt=8;addFx({kind:'lunge',robot:true,dx,dy,dur:180});addFx({kind:'num',x:nx,y:ny,txt:'raté',col:'#8aa9a2',dur:750});
+    {const ch=hitChance(G.st.pre,sp.esq+terrMod(nx,ny));if(!roll(ch)){bz.hunt=8;addFx({kind:'lunge',robot:true,dx,dy,dur:180});addFx({kind:'num',x:nx,y:ny,txt:'0',col:'#8aa9a2',dur:750});
       say(`La foreuse rate le ${sp.n.toLowerCase()} (${ch} %).`);SFX.whoosh();drift();animalsAct();beastsAct();regen();computeFOV();render();if(G.over&&G.over.dead)dead();return;}}
     const dm=G.st.degats;bz.hp-=dm;bz.hunt=8;addFx({kind:'num',x:nx,y:ny,txt:'-'+dm,col:PAL['3'],dur:750});
     addFx({kind:'lunge',robot:true,dx,dy,dur:180});addFx({kind:'flash',beast:bz,dur:180});if(bz.hp<=0)addFx({kind:'shake',amp:4,dur:200});
@@ -41,7 +41,7 @@ function tryMove(dx,dy){
     drift();animalsAct();beastsAct();regen();computeFOV();render();if(G.over&&G.over.dead)dead();return;}
   const an=animalAt(nx,ny);
   if(an){if(!spend())return;const sp=SPECIES[an.sp];G.turn++;G.msg=null;
-    {const ch=hitChance(G.st.pre,sp.esq+terrMod(nx,ny));if(!roll(ch)){an.aware=10;addFx({kind:'lunge',robot:true,dx,dy,dur:180});addFx({kind:'num',x:nx,y:ny,txt:'raté',col:'#8aa9a2',dur:750});
+    {const ch=hitChance(G.st.pre,sp.esq+terrMod(nx,ny));if(!roll(ch)){an.aware=10;addFx({kind:'lunge',robot:true,dx,dy,dur:180});addFx({kind:'num',x:nx,y:ny,txt:'0',col:'#8aa9a2',dur:750});
       say(`La foreuse rate l’${sp.n.toLowerCase()} (${ch} %).`);SFX.whoosh();drift();animalsAct();beastsAct();regen();computeFOV();render();if(G.over&&G.over.dead)dead();return;}}
     an.hp=(an.hp??sp.pv)-G.st.degats;addFx({kind:'num',x:nx,y:ny,txt:'-'+G.st.degats,col:PAL['3'],dur:750});addFx({kind:'lunge',robot:true,dx,dy,dur:180});
     if(an.hp<=0){G.animals.splice(G.animals.indexOf(an),1);bleed(an.x,an.y);say(`La foreuse écrase l’${sp.n.toLowerCase()}.`,'warn');SFX.squish();}
@@ -68,6 +68,7 @@ function tryMove(dx,dy){
   if(doorway){SFX.door();say(v===DECK?'La porte du vaisseau s’ouvre : la foreuse rentre dans la soute.':'La porte du vaisseau s’ouvre : la foreuse sort.','info');}
   drift();animalsAct();beastsAct();regen();
   {const oi=idx(G.px,G.py);if(G.ore&&G.ore[oi]&&oreSol(G.ore[oi])){const l=oreLv(G.ore[oi]);delete G.ore[oi];const av=G.st.vie;G.st.vie=Math.min(G.st.vieMax,G.st.vie+ORE_PV[l]);
+    addFx({kind:'num',x:G.px,y:G.py,txt:'+'+(G.st.vie-av),col:PAL['2'],dur:750});   // affiché comme les dégâts, couleur des éclats
     sayMore(`Éclats de métal récupérés : +${G.st.vie-av} PV.`,'good');SFX.spot();}}
   {const gi=idx(G.px,G.py);if(G.gems&&G.gems[gi]==='visible'){delete G.gems[gi];computeFOV();render();SFX.analyse();chooseUpgrade();return;}}
   const s=siteAt(G.px,G.py);
