@@ -164,12 +164,12 @@ function genPlanet(){
     if(sites.length<NSITES&&!last)continue;
     const depths=[1,2,3,4,5].sort(()=>Math.random()-.5);
     G={t,seen:new Array(N).fill(0),px:sx,py:sy,turn:0,dist:0,over:null,msg:null,ship,face:'d',
-      st:{vie:100,vieMax:100,energie:100,energieMax:100,repar:0,power:6,vitesse:5,degats:10,capteur:5,cout:10,pre:80,esq:10},
+      st:{vie:100,vieMax:100,energie:100,energieMax:100,repar:0,power:3,vitesse:5,degats:10,capteur:5,cout:10,pre:80,esq:10},
       sites:sites.map((s,i)=>({x:s.x,y:s.y,depth:depths[i],id:LETTERS[i],seen:false,known:false}))};
     return;
   }
 }
-function newGame(){drilling=false;genPlanet();hideGems();G.log=[];G.tracks={};G.lastDir=null;G.beasts=[];G.blood={};G.fv=2;spawnAnimals();spawnBeasts();computeFOV();say(`Atterrissage confirmé. ${G.sites.length} sites de forage signalés par l’orbiteur. La foreuse est dans la soute ; la porte est à l’arrière.`,'info');}
+function newGame(){drilling=false;genPlanet();hideGems();hideOre();G.log=[];G.tracks={};G.lastDir=null;G.beasts=[];G.blood={};G.fv=2;spawnAnimals();spawnBeasts();computeFOV();say(`Atterrissage confirmé. ${G.sites.length} sites de forage signalés par l’orbiteur. La foreuse est dans la soute ; la porte est à l’arrière.`,'info');}
 
 /* ---------- Indice de proximité des sites ---------- */
 let densG=null,dens=null;
@@ -207,6 +207,11 @@ const UPGRADES=[
   ['esq','ESQ (esquive)','+5',st=>{st.esq+=5;}],
   ['power','POW (énergie/tour)','+1',st=>{st.power+=1;}]
 ];
+// Éclats de métal : ORE_PCT % des cases de rocher (hors bords et joyaux) en contiennent ; brisée, la roche les laisse
+// tomber au sol ; la foreuse qui passe dessus les ramasse et regagne ORE_PV points de vie
+const ORE_PCT=10,ORE_PV=20;
+function hideOre(){G.ore={};for(let i=0;i<W*H;i++){const x=i%W,y=(i/W)|0;
+  if(G.t[i]===ROCK&&x>0&&y>0&&x<W-1&&y<H-1&&!(G.gems&&G.gems[i])&&Math.random()*100<ORE_PCT)G.ore[i]='roche';}}
 function hideGems(){G.gems={};
   // Toujours GEM_COUNT joyaux : d'abord au cœur des massifs (8 voisines en roche), sinon au plus profond disponible
   const deep=i=>DIRS.filter(([dx,dy])=>G.t[idx(i%W+dx,((i/W)|0)+dy)]===MOUNT).length;

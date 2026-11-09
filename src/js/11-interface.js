@@ -55,7 +55,9 @@ function seenHTML(){
     +(ans.length>max?`<div class="none">+ ${ans.length-max} autre${ans.length-max>1?'s':''}</div>`:'')+'</div>');
   }
   {let ng=0,nr=0;if(G.gems)for(const k in G.gems){if(!vis[+k])continue;if(G.gems[k]==='visible')ng++;else nr++;}
-   const L=[];if(ng)L.push(`<div class="site k">Joyau${ng>1?' ×'+ng:''} · à ramasser</div>`);if(nr)L.push(`<div class="site">Roche à joyau${nr>1?' ×'+nr:''} · à briser</div>`);if(L.length)out.push(`<div class="grp">${L.join('')}</div>`);}
+   const L=[];if(ng)L.push(`<div class="site k">Joyau${ng>1?' ×'+ng:''} · à ramasser</div>`);if(nr)L.push(`<div class="site">Roche à joyau${nr>1?' ×'+nr:''} · à briser</div>`);
+   let os=0,orr=0;if(G.ore)for(const k in G.ore){if(!vis[+k])continue;if(G.ore[k]==='sol')os++;else orr++;}
+   if(os)L.push(`<div class="site k">Éclats de métal${os>1?' ×'+os:''} · +${ORE_PV} PV</div>`);if(orr)L.push(`<div class="site">Roche à éclats${orr>1?' ×'+orr:''} · à briser</div>`);if(L.length)out.push(`<div class="grp">${L.join('')}</div>`);}
   const sites=G.sites.filter(s=>vis[idx(s.x,s.y)]);
   if(sites.length)out.push('<div class="grp">'+sites.map(s=>`<div class="site${s.known?' k':''}">Site ${s.id} · ${s.known?'profondeur '+s.depth:'non analysé'}</div>`).join('')+'</div>');
   const ins=HOV&&!busy()?inspectHTML():'';
