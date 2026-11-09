@@ -133,7 +133,9 @@ body{margin:0;background:var(--black);color:var(--fg);font:13px/1.45 var(--mono)
 .bcard .fields{display:grid;grid-template-columns:1fr 1fr;gap:6px 12px}
 .bcard label{display:flex;justify-content:space-between;align-items:center;gap:8px;color:var(--dim);font-size:12px}
 .bcard input{width:58px;font:inherit;color:var(--fg);background:var(--void);border:1px solid var(--line);padding:2px 4px;text-align:right}
-.mfoot{display:flex;justify-content:flex-end}
+.mfoot{display:flex;justify-content:flex-end;align-items:center;gap:8px;flex-wrap:wrap}
+.mfoot .go{border-color:var(--c3)}
+.mfoot .saved{flex-basis:100%;text-align:right}
 .foldwrap{display:grid;gap:10px}
 .fold summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:8px}
 .fold summary::-webkit-details-marker{display:none}

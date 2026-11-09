@@ -126,8 +126,9 @@ function applySaved(d){
     render();}}
   catch(e){}}).catch(()=>{});
 // Bouton « Enregistrer » du Tile editor : envoie tuiles et réglages dans la base de l'artefact (Claude peut ensuite les lire et les adopter)
-async function saveSettings(){
-  if(!DB||!$('saveBtn'))return;const b=$('saveBtn'),m=$('saveMsg');b.disabled=true;b.textContent='Enregistrement…';m.className='saved';m.textContent='';
+// b, m : bouton et zone de message (Tile editor par défaut, ou Bestiaire)
+async function saveSettings(b,m){b=b instanceof HTMLElement?b:$('saveBtn');m=m||$('saveMsg');
+  if(!DB||!b)return;b.disabled=true;b.textContent='Enregistrement…';m.className='saved';m.textContent='';
   const best={};BEST_LIST().forEach(e=>{best[e.key]={nom:e.o.n};BFIELDS.forEach(([f])=>best[e.key][f]=e.o[f]);});
   const data={enregistreLe:new Date().toISOString(),bestiaire:best,life:Object.assign({},LIFE),generation:Object.assign({},GEN),
     planete:{largeur:W,hauteur:H,joyaux:GEM_COUNT},robot:G&&G.st?Object.assign({},G.st):null,
@@ -136,7 +137,8 @@ async function saveSettings(){
   try{await DB.doc('reglages/courant').set(data);commitTileBase();try{localStorage.setItem('np-maj',String(Date.parse(data.enregistreLe)));}catch(e){}if(!$('viseurs').hidden)drawCurEd();const t=new Date();m.className='saved ok';m.textContent=`Réglages enregistrés à ${String(t.getHours()).padStart(2,'0')}:${String(t.getMinutes()).padStart(2,'0')}.`;}
   catch(e){m.className='saved err';m.textContent=e&&e.code==='invalid_argument'?'Vous n’avez pas le droit d’enregistrer sur cette page.':'Échec de l’enregistrement. Réessayez dans un instant.';}
   b.disabled=false;b.textContent='Enregistrer';}
-$('saveBtn').onclick=saveSettings;
+$('saveBtn').onclick=()=>saveSettings();
+$('bestSave').onclick=()=>saveSettings($('bestSave'),$('bestMsg'));
 $('bestClose').onclick=closeBest;
 $('bestiary').addEventListener('click',e=>{if(e.target===$('bestiary'))closeBest();});
 $('bestList').addEventListener('change',e=>{const t=e.target;if(!t.dataset||!t.dataset.f)return;const ent=BEST_LIST().find(x=>x.key===t.dataset.k),fd=BFIELDS.find(x=>x[0]===t.dataset.f);
