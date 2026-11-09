@@ -56,7 +56,7 @@ function tryMove(dx,dy){
     {const brk=hits>=hp;addFx({kind:'lunge',robot:true,dx,dy,dur:180});}
     if(hits>=hp){delete G.dmg[i];G.t[i]=RUBBLE;SFX.break();say(v===ROCK?'Rocher brisé : il ne reste que des gravats.':'La paroi cède : passage ouvert.','good');
       if(G.gems&&G.gems[i]==='cache'){G.gems[i]='visible';sayMore('Un joyau brille dans les gravats !','info');SFX.spot();}
-      if(G.ore&&G.ore[i]==='roche'){G.ore[i]='sol';sayMore('Des éclats de métal tombent au sol.','info');}}
+      if(G.ore&&G.ore[i]&&!oreSol(G.ore[i])){const l=oreLv(G.ore[i]);G.ore[i]='sol'+l;sayMore(['','De petits éclats de métal tombent au sol.','Des éclats de métal tombent au sol.','De gros éclats de métal tombent au sol.'][l],'info');}}
     else{G.dmg[i]=hits;SFX.crack();say(v===ROCK?'La foreuse frappe le rocher : il se fissure.':`La foreuse attaque la montagne : fissure ${hits}/${hp-1}.`,'warn');}
     drift();animalsAct();beastsAct();regen();computeFOV();render();if(G.over&&G.over.dead)dead();return;}
   {const oi=idx(G.px,G.py),ov=G.t[oi],dk=DIRS.findIndex(d=>d[0]===dx&&d[1]===dy);
@@ -67,7 +67,7 @@ function tryMove(dx,dy){
   if(v===LIQ)SFX.water();else if(v===DEEP)SFX.deep();else SFX.step();
   if(doorway){SFX.door();say(v===DECK?'La porte du vaisseau s’ouvre : la foreuse rentre dans la soute.':'La porte du vaisseau s’ouvre : la foreuse sort.','info');}
   drift();animalsAct();beastsAct();regen();
-  {const oi=idx(G.px,G.py);if(G.ore&&G.ore[oi]==='sol'){delete G.ore[oi];const av=G.st.vie;G.st.vie=Math.min(G.st.vieMax,G.st.vie+ORE_PV);
+  {const oi=idx(G.px,G.py);if(G.ore&&G.ore[oi]&&oreSol(G.ore[oi])){const l=oreLv(G.ore[oi]);delete G.ore[oi];const av=G.st.vie;G.st.vie=Math.min(G.st.vieMax,G.st.vie+ORE_PV[l]);
     sayMore(`Éclats de métal récupérés : +${G.st.vie-av} PV.`,'good');SFX.spot();}}
   {const gi=idx(G.px,G.py);if(G.gems&&G.gems[gi]==='visible'){delete G.gems[gi];computeFOV();render();SFX.analyse();chooseUpgrade();return;}}
   const s=siteAt(G.px,G.py);

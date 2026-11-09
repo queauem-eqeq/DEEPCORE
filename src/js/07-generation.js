@@ -208,10 +208,12 @@ const UPGRADES=[
   ['power','POW (énergie/tour)','+1',st=>{st.power+=1;}]
 ];
 // Éclats de métal : ORE_PCT % des cases de montagne (hors rangée extérieure indestructible et joyau) en contiennent ; brisée, la roche les laisse
-// tomber au sol ; la foreuse qui passe dessus les ramasse et regagne ORE_PV points de vie
-const ORE_PCT=10,ORE_PV=20;
+// tomber au sol ; la foreuse qui passe dessus les ramasse et regagne des points de vie selon la densité.
+// G.ore[i] = 'roche1|2|3' (dans la paroi) ou 'sol1|2|3' (tombés) ; 1 petits, 2 moyens, 3 gros (ORE_MIX : part de chaque densité)
+const ORE_PCT=10,ORE_PV=[0,10,15,20],ORE_MIX=[0,.5,.3,.2],ORE_NOM=['','petits','moyens','gros'];
+const oreLv=v=>+String(v).slice(-1)||3,oreSol=v=>String(v).startsWith('sol'),oreTile=(v,sol)=>{const l=oreLv(v);return TL[(sol?'oreSol':'ore')+(l===3?'':l)];};
 function hideOre(){G.ore={};for(let i=0;i<W*H;i++){const x=i%W,y=(i/W)|0;
-  if(G.t[i]===MOUNT&&x>0&&y>0&&x<W-1&&y<H-1&&!(G.gems&&G.gems[i])&&Math.random()*100<ORE_PCT)G.ore[i]='roche';}}
+  if(G.t[i]===MOUNT&&x>0&&y>0&&x<W-1&&y<H-1&&!(G.gems&&G.gems[i])&&Math.random()*100<ORE_PCT){const r=Math.random();G.ore[i]='roche'+(r<ORE_MIX[1]?1:r<ORE_MIX[1]+ORE_MIX[2]?2:3);}}}
 function hideGems(){G.gems={};
   // Toujours GEM_COUNT joyaux : d'abord au cœur des massifs (8 voisines en roche), sinon au plus profond disponible
   const deep=i=>DIRS.filter(([dx,dy])=>G.t[idx(i%W+dx,((i/W)|0)+dy)]===MOUNT).length;
