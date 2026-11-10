@@ -67,7 +67,7 @@ function segs(el,v,max,n){n=n||max;const on=Math.ceil(v/max*n-1e-9);el.innerHTML
 function side(){
   const st=G.st;
 
-  for(const [t,v,mx] of [['lifeT',st.vie,st.vieMax],['enT',st.energie,st.energieMax]]){$(t).innerHTML=asciiBar(v,mx,ABAR_N);$(t).setAttribute('aria-valuenow',Math.floor(v));$(t).setAttribute('aria-valuemax',mx);}
+  for(const [t,v,mx,nm] of [['lifeT',st.vie,st.vieMax,'lifeN'],['enT',st.energie,st.energieMax,'enN']]){$(t).innerHTML=asciiBar(v,mx,ABAR_N);$(nm).textContent=Math.floor(v)+'/'+mx;$(t).setAttribute('aria-valuenow',Math.floor(v));$(t).setAttribute('aria-valuemax',mx);}
   const tm=terrMod(G.px,G.py),ev=st.esq+tm;
   const sv={vitesse:st.vitesse,degats:st.degats,capteur:st.capteur,pre:st.pre,
     esq:tm?`<span style="color:${tm>0?'var(--c1)':'var(--life)'}">${ev}</span>`:ev,

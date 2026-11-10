@@ -35,7 +35,8 @@ body{margin:0;background:var(--black);color:var(--fg);font:13px/1.45 var(--mono)
 .r{display:flex;justify-content:space-between;gap:8px;font-variant-numeric:tabular-nums}
 .r span:first-child{color:var(--dim)}
 .meter{display:grid;gap:3px}
-.bar2{display:grid;grid-template-columns:4.6em minmax(0,1fr);align-items:center;gap:10px}
+.bar2{display:grid;grid-template-columns:4.6em minmax(0,1fr) auto;align-items:center;gap:10px}
+.bnum{font-size:12px;font-variant-numeric:tabular-nums;color:var(--fg);text-align:right;min-width:6ch}
 .bar2>span:first-child{color:var(--dim)}
 .abar{white-space:nowrap;overflow:hidden;line-height:1;letter-spacing:0;font-size:12px}
 .abar .ae,.seen .an .hp .ae{opacity:1}

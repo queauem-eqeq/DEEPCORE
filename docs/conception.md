@@ -129,6 +129,7 @@ Roguelike au tour par tour dans une esthétique inspirée de Cogmind et de Brogu
 - **Pas d'écran d'accueil** : la partie commence directement, foreuse dans la soute (plus de texte d'explication ni de bouton « Déployer le robot »). Le son s'active à la première touche ou au premier clic (règle des navigateurs).
 - Plein écran ; colonne noire à droite, défilable à la molette ou au doigt mais sans barre de défilement (pour ne pas la déformer) ; journal de bord sous la carte (5 dernières lignes, numéro de tour, ×N pour les répétitions).
 - **Statut** : barres ASCII `█`/`░` (20 caractères) — Vie en couleur technologie, Énergie en couleur structure ; pas de chiffres.
+- **Statut** : barres Vie et Énergie suivies de leur valeur chiffrée (« 63/100 »), remises le 10 novembre 2026.
 - **Statistiques** (sous-menu repliable, sous Statut) sur deux colonnes : VIT, EYE, DEG, PRE, ESQ, POW (ESQ affiche la valeur modifiée, colorée, sans le modificateur).
 - **En vue** (sans titre, sous la mini-carte) : fiche d'inspection de la case survolée en tête (voir ci-dessous), puis animaux visibles (icône, barre de vie ASCII 10 caractères, colonnes TOUCHER / SUBIR colorées), joyaux, sites.
 - **Mini-carte** pleine largeur ; ennemis en points rouges ; un clic recentre la vue (mode carte) ; bouton maintenu + glisser = défilement en temps réel. Saisi à l'intérieur, le cadre suit le pointeur sans sauter ; saisi à l'extérieur, il se centre d'abord sous le pointeur. Fonctionne aussi au doigt.
