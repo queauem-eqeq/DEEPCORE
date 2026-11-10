@@ -19,8 +19,8 @@ function computeFOV(){vis=new Uint8Array(W*H);const r=G.st.capteur,px=G.px,py=G.
 
 /* ---------- Déplacement ---------- */
 const siteAt=(x,y)=>G.sites.find(s=>s.x===x&&s.y===y);
-// Ancienne dérive à chaque tour dans l'eau profonde : remplacée le 10 novembre 2026 par la déviation au moment du pas (DEEP_MISS)
-function drift(){return;
+// Dérive dans l'eau profonde : seulement quand la foreuse attend (un pas, lui, est dévié au moment même : DEEP_MISS)
+function drift(wait){if(!wait)return;
   if(G.t[idx(G.px,G.py)]!==DEEP)return;
   const k=rnd(0,7),[dx,dy]=DIRS[k],nx=G.px+dx,ny=G.py+dy,v=G.t[idx(nx,ny)];
   if(v===ROCK||v===MOUNT||v===CHASM||!diagOk(G.px,G.py,dx,dy)||beastAt(nx,ny)||animalAt(nx,ny)){SFX.thud();sayMore(`Le courant plaque le robot contre un obstacle (${DIRN[k]}).`,'warn');return;}
@@ -92,7 +92,7 @@ function tryMove(dx,dy){
 /* ---------- Forage ---------- */
 function waitTurn(){
   if(G.over||drilling||!$('overlay').hidden)return;G.turn++;G.msg=null;say('Le robot attend.');
-  drift();animalsAct();beastsAct();regen();computeFOV();render();if(G.over&&G.over.dead)dead();
+  drift(true);animalsAct();beastsAct();regen();computeFOV();render();if(G.over&&G.over.dead)dead();
 }
 function askDrill(){
   if(G.over||drilling||!$('overlay').hidden)return;const s=siteAt(G.px,G.py);if(!s)return;

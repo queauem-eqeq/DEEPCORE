@@ -3,7 +3,10 @@ let AC=null,MASTER=null,SND={on:true,vol:60},unlocked=false;
 try{const v=JSON.parse(localStorage.getItem('np-son')||'null');if(v&&typeof v.vol==='number')SND=v;}catch(e){}
 function audio(){
   if(!unlocked||!SND.on)return null;
-  if(!AC){try{AC=new (window.AudioContext||window.webkitAudioContext)();MASTER=AC.createGain();MASTER.connect(AC.destination);}catch(e){return null;}}
+  if(!AC){try{AC=new (window.AudioContext||window.webkitAudioContext)();MASTER=AC.createGain();
+    // limiteur en sortie : quand plusieurs sons forts se superposent (tonnerres, rentrée), le total ne sature plus
+    const lim=AC.createDynamicsCompressor();lim.threshold.value=-10;lim.knee.value=6;lim.ratio.value=12;lim.attack.value=.003;lim.release.value=.25;
+    MASTER.connect(lim);lim.connect(AC.destination);}catch(e){return null;}}
   if(AC.state==='suspended')AC.resume();MASTER.gain.value=SND.vol/100*.8;return AC;}
 function tone(f,dur,type,g,f2,delay){const a=audio();if(!a)return;const t=a.currentTime+(delay||0),o=a.createOscillator(),v=a.createGain();
   o.type=type||'square';o.frequency.setValueAtTime(f,t);if(f2)o.frequency.exponentialRampToValueAtTime(f2,t+dur);
@@ -49,7 +52,8 @@ const SFX={
     const o=a.createOscillator(),g=a.createGain();o.type='sawtooth';o.frequency.setValueAtTime(36,t);o.frequency.linearRampToValueAtTime(64,t+pk);o.frequency.linearRampToValueAtTime(40,t+dur);
     g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.07,t+pk);g.gain.exponentialRampToValueAtTime(.0001,t+dur);o.connect(g);g.connect(MASTER);o.start(t);o.stop(t+dur+.05);},
   // tonnerre : claquement sec, craquements, puis long grondement qui roule (bouffées irrégulières de bruit grave)
-  thunder(){const a=audio();if(!a)return;noiz(.09,.45,4200,'highpass');noiz(.25,.35,1400,'bandpass',.02,500);
+  // un tonnerre qui suit de près le précédent ne rejoue que son claquement (sinon les grondements s'empilent et saturent)
+  thunder(){const a=audio();if(!a)return;const now=a.currentTime;if(SFX.lastThunder&&now-SFX.lastThunder<1.6){noiz(.09,.3,4200,'highpass');noiz(.2,.2,1400,'bandpass',.02,500);return;}SFX.lastThunder=now;noiz(.09,.45,4200,'highpass');noiz(.25,.35,1400,'bandpass',.02,500);
     for(let k=0;k<5;k++)noiz(.06,.18,2500+Math.random()*2000,'highpass',.05+Math.random()*.35);   // craquements
     const t=a.currentTime+.05,dur=3.4+Math.random()*.8,src=a.createBufferSource(),fl=a.createBiquadFilter(),v=a.createGain();
     src.buffer=NB;src.loop=true;fl.type='lowpass';fl.Q.value=.7;fl.frequency.setValueAtTime(420,t);fl.frequency.exponentialRampToValueAtTime(70,t+dur);
