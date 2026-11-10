@@ -26,6 +26,7 @@ function drift(){
   G.px=nx;G.py=ny;G.lastDir=null;if(v===GRASS)G.t[idx(nx,ny)]=FLAT;
   SFX.drift();sayMore(`Eau profonde : le courant entraîne le robot vers ${['l’est','l’ouest','le sud','le nord','le sud-est','le nord-est','le sud-ouest','le nord-ouest'][k]}.`,'warn');
 }
+const MOVE_COST=2;   // énergie dépensée à chaque pas
 function tryMove(dx,dy){
   if(G.over||drilling)return;const nx=G.px+dx,ny=G.py+dy;if(nx<0||ny<0||nx>=W||ny>=H)return;
   const v=G.t[idx(nx,ny)];
@@ -60,6 +61,9 @@ function tryMove(dx,dy){
       if(G.ore&&G.ore[i]&&!oreSol(G.ore[i])){const l=oreLv(G.ore[i]);G.ore[i]='sol'+l;sayMore(['','De petits éclats de métal tombent au sol.','Des éclats de métal tombent au sol.','De gros éclats de métal tombent au sol.'][l],'info');}}
     else{G.dmg[i]=hits;SFX.crack();say(v===ROCK?'La foreuse frappe le rocher : il se fissure.':`La foreuse attaque la montagne : fissure ${hits}/${hp-1}.`,'warn');}
     drift();animalsAct();beastsAct();regen();computeFOV();render();if(G.over&&G.over.dead)dead();return;}
+  // chaque pas coûte MOVE_COST d'énergie ; sans assez d'énergie, la foreuse ne bouge pas (attendre recharge l'énergie)
+  if(G.st.energie<MOVE_COST){say(`Énergie insuffisante pour avancer (${Math.floor(G.st.energie)}/${MOVE_COST}). Attendez qu’elle se recharge.`,'warn');SFX.blocked();render();return;}
+  G.st.energie-=MOVE_COST;
   {const oi=idx(G.px,G.py),ov=G.t[oi],dk=DIRS.findIndex(d=>d[0]===dx&&d[1]===dy);
     if(ov!==LIQ&&ov!==DEEP&&ov!==BRIDGE&&ov!==DECK){G.tracks=G.tracks||{};G.tracks[oi]={t:G.turn+1,i:G.lastDir??dk,o:dk};}G.lastDir=dk;}
   const doorway=(G.t[idx(G.px,G.py)]===DECK)!==(v===DECK);   // passage de la porte du vaisseau

@@ -71,13 +71,13 @@ Roguelike au tour par tour dans une esthétique inspirée de Cogmind et de Brogu
 | Stat | Valeur | Rôle |
 |---|---|---|
 | Vie | 100 | **pas de réparation automatique** |
-| Énergie | 100 | se recharge de POW par tour (3 par tour au départ) |
+| Énergie | 100 | se recharge de POW par tour (5 par tour au départ) ; **chaque pas coûte 2** (10 novembre 2026), un coup de foreuse 10 |
 | VIT | 5 | affichée, **sans effet** pour l'instant |
 | EYE | 10 | rayon de vision (5 avant le 10 novembre 2026) |
 | DEG | 10 | dégâts par coup de foreuse |
 | PRE | 80 | précision |
 | ESQ | 10 | esquive (modifiée par le terrain) |
-| POW | 3 / tour | recharge d'énergie (6 avant le 9 novembre 2026) |
+| POW | 5 / tour | recharge d'énergie (6 avant le 9 novembre 2026, 3 le 9 novembre) |
 
 - Chaque coup de foreuse (roche ou animal) coûte **10 d'énergie** ; refusé sous 10.
 - **Aperçu derrière les obstacles** (foreuse seulement, depuis le 6 novembre 2026) : dans le rayon EYE, la case juste derrière un obstacle à la vue (montagne, herbes hautes) est aperçue en **mode souvenir** — terrain affiché assombri comme une case explorée hors de vue, sans les créatures. Une seule case : un obstacle de 2 cases d'épaisseur cache toujours la suite. Les ennemis ne voient pas à travers les obstacles.
