@@ -7,24 +7,10 @@ const hash=(x,y)=>((x*73856093)^(y*19349663))>>>0;
 let ox=0,oy=0;
 /* ---------- Effets de percussion ---------- */
 let FX=[],fxRaf=0,SHOWVIS=false;
-// Trames pixel du champ de vision (essais) : motifs 16 × 16 en pixels de tuile, blancs opaques ; « contour » = pointillé sur le bord de la zone
-let VIS_STYLE='points';
-const VIS_PATS={
-  points:(x,y)=>x%4===1&&y%4===1,                         // A : points espacés
-  quinconce:(x,y)=>y%4===1&&(x+(y%8<4?0:2))%4===1,        // B : points en quinconce
-  diagonales:(x,y)=>(x+y)%6===0,                          // C : hachures diagonales
-  lignes:(x,y)=>y%4===0&&x%2===0,                         // D : lignes pointillées horizontales
-  croix:(x,y)=>(x===8&&y>=7&&y<=9)||(y===8&&x>=7&&x<=9),  // E : petite croix au centre de chaque case
-  damier:(x,y)=>(x+y)%2===0&&x%4<2&&y%4<2};               // F : petits damiers
-let VIS_TL=null,VIS_KEY='';
-function drawVisCells(cells){
-  if(VIS_STYLE==='contour'){ctx.fillStyle='#ffffff';
-    for(const i of cells){const x=i%W,y=(i/W)|0,px=(x-camX)*S,py=(y-camY)*S;
-      const edge=(dx,dy)=>!cells.has(idx(x+dx,y+dy));
-      for(let k=0;k<16;k+=2){if(edge(0,-1))ctx.fillRect(px+k*2,py,2,2);if(edge(0,1))ctx.fillRect(px+k*2,py+S-2,2,2);if(edge(-1,0))ctx.fillRect(px,py+k*2,2,2);if(edge(1,0))ctx.fillRect(px+S-2,py+k*2,2,2);}}
-    return;}
-  if(VIS_KEY!==VIS_STYLE){VIS_KEY=VIS_STYLE;const f=VIS_PATS[VIS_STYLE]||VIS_PATS.points;VIS_TL=tileCanvas((x,y)=>f(x,y)?'w':'.');}
-  ctx.globalAlpha=1;for(const i of cells)ctx.drawImage(VIS_TL,(i%W-camX)*S,(((i/W)|0)-camY)*S,S,S);}   // SHOWVIS : touche V, champs de vision des ennemis
+// Champ de vision (touche V) : contour pointillé blanc, en pixels de tuile opaques, sur le bord de la zone ; l'intérieur reste intact
+function drawVisCells(cells){ctx.globalAlpha=1;ctx.fillStyle='#ffffff';
+  for(const i of cells){const x=i%W,y=(i/W)|0,px=(x-camX)*S,py=(y-camY)*S,edge=(dx,dy)=>!cells.has(idx(x+dx,y+dy));
+    for(let k=0;k<16;k+=2){if(edge(0,-1))ctx.fillRect(px+k*2,py,2,2);if(edge(0,1))ctx.fillRect(px+k*2,py+S-2,2,2);if(edge(-1,0))ctx.fillRect(px,py+k*2,2,2);if(edge(1,0))ctx.fillRect(px+S-2,py+k*2,2,2);}}}
 /* ---------- Foreuse endommagée : fumée sous 50 PV, fumée + flammèches sous 20 PV ----------
    Dessiné sur un calque transparent posé sur la vue (#fxv), animé en continu sans redessiner la carte.
    Particules en pixels de carte (case × S) : la fumée qui s'élève reste sur place quand la foreuse avance (traînée).
@@ -153,7 +139,7 @@ function render(){
   ctx.globalAlpha=1;
   if(G.blood)for(const k in G.blood){const i=+k,bx=i%W,by=(i/W)|0;if(fog&&!G.seen[i])continue;put(TL['blood'+G.blood[k]],bx,by,fog&&!vis[i]?.3:.9);}
   for(const s of G.sites){if(fog&&!G.seen[idx(s.x,s.y)])continue;put(s.known?TL['site'+s.depth]:TL.siteUnknown,s.x,s.y,!fog||vis[idx(s.x,s.y)]?1:.35);}
-  // touche V : champ de vision de chaque ennemi visible (cases qu'il peut voir : portée de détection et ligne de vue), blanc à 5 %
+  // touche V : champ de vision de chaque ennemi visible (cases qu'il peut voir : portée de détection et ligne de vue), entouré d'un pointillé
   if(SHOWVIS){const cells=new Set();
     for(const [o,r] of [...(G.beasts||[]).map(b=>[b,BEASTS[b.sp].d]),...(G.animals||[]).map(a=>[a,SPECIES[a.sp].d+(a.aware?5:0)])]){
       if(fog&&!vis[idx(o.x,o.y)])continue;
