@@ -71,7 +71,7 @@ function side(){
   const tm=terrMod(G.px,G.py),ev=st.esq+tm;
   const sv={vitesse:st.vitesse,degats:st.degats,capteur:st.capteur,pre:st.pre,
     esq:tm?`<span style="color:${tm>0?'var(--c1)':'var(--life)'}">${ev}</span>`:ev,
-    power:`${st.power}/t`};
+    crit:`${st.crit??5} %`,power:`${st.power}/t`,nul1:0,nul2:0};
   $('stats').innerHTML=STATS.map(([k,l,t])=>`<div class="r" title="${t}"><span>${l}</span><span>${sv[k]}</span></div>`).join('');
   $('msg').innerHTML=seenHTML();
   const lg=(G.log||[]).slice(-5);

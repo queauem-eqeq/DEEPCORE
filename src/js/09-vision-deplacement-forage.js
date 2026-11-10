@@ -35,21 +35,22 @@ function tryMove(dx,dy){
   G.face=dx>0?'r':dx<0?'l':dy>0?'d':'u';
   if(!diagOk(G.px,G.py,dx,dy)){say('Coin de paroi : pas de passage en diagonale.');SFX.blocked();render();return;}
   const bz=beastAt(nx,ny);
-  if(bz){if(!spend())return;const sp=BEASTS[bz.sp];G.turn++;G.msg=null;
-    {const ch=hitChance(G.st.pre,sp.esq+terrMod(nx,ny));if(!roll(ch)){bz.hunt=1;spot(bz);addFx({kind:'lunge',robot:true,dx,dy,dur:180});addFx({kind:'num',x:nx,y:ny,txt:'0',col:'#8aa9a2',dur:750});
+  if(bz){if(!spend())return;const sp=BEASTS[bz.sp];G.turn++;G.msg=null;const sur=!(bz.hunt>0),cr=sur||roll(G.st.crit??5);   // surprise : ne vous a pas repéré
+    {const ch=hitChance(G.st.pre,sp.esq+terrMod(nx,ny));if(!sur&&!roll(ch)){bz.hunt=1;spot(bz);addFx({kind:'lunge',robot:true,dx,dy,dur:180});addFx({kind:'num',x:nx,y:ny,txt:'0',col:'#8aa9a2',dur:750});
       say(`La foreuse rate le ${sp.n.toLowerCase()} (${ch} %).`);SFX.whoosh();drift();animalsAct();beastsAct();regen();computeFOV();render();if(G.over&&G.over.dead)dead();return;}}
-    const dm=G.st.degats;bz.hp-=dm;bz.hunt=1;spot(bz);addFx({kind:'num',x:nx,y:ny,txt:'-'+dm,col:PAL['3'],dur:750});
+    const dm=G.st.degats*(cr?CRIT_X:1);bz.hp-=dm;bz.hunt=1;spot(bz);addFx({kind:'num',x:nx,y:ny,txt:'-'+dm+(cr?'!':''),col:cr?PAL['1']:PAL['3'],dur:cr?1000:750});if(cr){addFx({kind:'shake',amp:6,dur:220});SFX.crit();}
     addFx({kind:'lunge',robot:true,dx,dy,dur:180});addFx({kind:'flash',beast:bz,dur:180});if(bz.hp<=0)addFx({kind:'shake',amp:4,dur:200});
-    if(bz.hp<=0){G.beasts.splice(G.beasts.indexOf(bz),1);bleed(bz.x,bz.y);say(`La foreuse abat le ${sp.n.toLowerCase()}.`,'good');SFX.break();}
-    else{say(`La foreuse percute le ${sp.n.toLowerCase()} : −${dm} PV (${bz.hp}/${sp.pv}).`,'warn');SFX.crack();}
+    const tag=sur?'Coup par surprise ! ':cr?'Coup critique ! ':'';
+    if(bz.hp<=0){G.beasts.splice(G.beasts.indexOf(bz),1);bleed(bz.x,bz.y);say(`${tag}La foreuse abat le ${sp.n.toLowerCase()}.`,'good');SFX.break();}
+    else{say(`${tag}La foreuse percute le ${sp.n.toLowerCase()} : −${dm} PV (${bz.hp}/${sp.pv}).`,'warn');SFX.crack();}
     drift();animalsAct();beastsAct();regen();computeFOV();render();if(G.over&&G.over.dead)dead();return;}
   const an=animalAt(nx,ny);
-  if(an){if(!spend())return;const sp=SPECIES[an.sp];G.turn++;G.msg=null;
-    {const ch=hitChance(G.st.pre,sp.esq+terrMod(nx,ny));if(!roll(ch)){an.aware=1;spot(an);addFx({kind:'lunge',robot:true,dx,dy,dur:180});addFx({kind:'num',x:nx,y:ny,txt:'0',col:'#8aa9a2',dur:750});
+  if(an){if(!spend())return;const sp=SPECIES[an.sp];G.turn++;G.msg=null;const sur=!an.aware,cr=sur||roll(G.st.crit??5);
+    {const ch=hitChance(G.st.pre,sp.esq+terrMod(nx,ny));if(!sur&&!roll(ch)){an.aware=1;spot(an);addFx({kind:'lunge',robot:true,dx,dy,dur:180});addFx({kind:'num',x:nx,y:ny,txt:'0',col:'#8aa9a2',dur:750});
       say(`La foreuse rate l’${sp.n.toLowerCase()} (${ch} %).`);SFX.whoosh();drift();animalsAct();beastsAct();regen();computeFOV();render();if(G.over&&G.over.dead)dead();return;}}
-    an.hp=(an.hp??sp.pv)-G.st.degats;addFx({kind:'num',x:nx,y:ny,txt:'-'+G.st.degats,col:PAL['3'],dur:750});addFx({kind:'lunge',robot:true,dx,dy,dur:180});
-    if(an.hp<=0){G.animals.splice(G.animals.indexOf(an),1);bleed(an.x,an.y);say(`La foreuse écrase l’${sp.n.toLowerCase()}.`,'warn');SFX.squish();}
-    else{an.aware=1;spot(an);say(`La foreuse heurte l’${sp.n.toLowerCase()}.`);SFX.crack();}
+    const dm=G.st.degats*(cr?CRIT_X:1),tag=sur?'Coup par surprise ! ':cr?'Coup critique ! ':'';an.hp=(an.hp??sp.pv)-dm;addFx({kind:'num',x:nx,y:ny,txt:'-'+dm+(cr?'!':''),col:cr?PAL['1']:PAL['3'],dur:cr?1000:750});if(cr){addFx({kind:'shake',amp:6,dur:220});SFX.crit();}addFx({kind:'lunge',robot:true,dx,dy,dur:180});
+    if(an.hp<=0){G.animals.splice(G.animals.indexOf(an),1);bleed(an.x,an.y);say(`${tag}La foreuse écrase l’${sp.n.toLowerCase()}.`,'warn');SFX.squish();}
+    else{an.aware=1;spot(an);say(`${tag}La foreuse heurte l’${sp.n.toLowerCase()}.`);SFX.crack();}
    drift();animalsAct();beastsAct();regen();computeFOV();render();if(G.over&&G.over.dead)dead();return;}
   if(v===CHASM){say('Gouffre : passage impossible.');SFX.blocked();render();return;}
   if(v===SHIP){say('Coque du vaisseau : indestructible.');SFX.blocked();render();return;}

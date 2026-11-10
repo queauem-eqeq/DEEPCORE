@@ -36,7 +36,16 @@ function chaseStep(o,dist,fits,tx=G.px,ty=G.py){const h=dist[idx(o.x,o.y)],cur=h
    membres, et transmise par le cri d'alerte). Arrivé, il fouille SEARCH_T tours autour, puis oublie et reprend son errance.
    Plus aucune connaissance de la position réelle de la foreuse sans la voir. */
 const SEARCH_T=4;
-function spot(o){o.mem=[G.px,G.py];o.search=0;o.stuck=0;}                       // o vient de voir (ou de sentir) la foreuse
+function spot(o){o.mem=[G.px,G.py];o.search=0;o.stuck=0;faceTo(o,G.px,G.py);}
+/* Cône de vision (10 novembre 2026) : un ennemi ne voit que devant lui, sur VIEW_ANGLE degrés ; son dos est aveugle.
+   Il regarde dans le sens de sa marche, vers la foreuse quand il la voit, et jette parfois un coup d'œil ailleurs à l'arrêt. */
+const VIEW_ANGLE=120,VIEW_COS=Math.cos(VIEW_ANGLE/2*Math.PI/180);
+function faceOf(o){if(o.fx==null){const [dx,dy]=DIRS[rnd(0,7)];o.fx=dx;o.fy=dy;}return [o.fx,o.fy];}
+function faceTo(o,x,y){const dx=Math.sign(x-o.x),dy=Math.sign(y-o.y);if(dx||dy){o.fx=dx;o.fy=dy;if(dx)o.dir=dx;}}
+function inCone(o,x,y){const dx=x-o.x,dy=y-o.y;if(!dx&&!dy)return true;const [fx,fy]=faceOf(o);return (dx*fx+dy*fy)/(Math.hypot(dx,dy)*Math.hypot(fx,fy))>=VIEW_COS-1e-9;}
+// après le tour : regarde dans le sens du déplacement, ou tourne la tête de 45° de temps en temps s'il est immobile et calme
+function turnHead(o,ox,oy,calm){if(o.x!==ox||o.y!==oy){faceTo(o,o.x+(o.x-ox),o.y+(o.y-oy));return;}
+  if(calm&&Math.random()<.15){const [fx,fy]=faceOf(o),k=DIRS.findIndex(d=>d[0]===fx&&d[1]===fy),ring=[0,4,2,6,1,7,3,5],r=ring.indexOf(k),n=ring[(r+(Math.random()<.5?1:7))%8];o.fx=DIRS[n][0];o.fy=DIRS[n][1];if(o.fx)o.dir=o.fx;}}                       // o vient de voir (ou de sentir) la foreuse
 function forget(o){o.mem=null;o.search=0;o.stuck=0;}
 // un pas vers la dernière position connue ; renvoie false quand il faut passer à la fouille
 function seekStep(o,swim,fits,DC){const [mx,my]=o.mem,k=mx+','+my+','+(swim?1:0),d=DC[k]||(DC[k]=distFrom(mx,my,swim)),h=d[idx(o.x,o.y)];
@@ -49,9 +58,10 @@ function stepAway(a){const cur=(a.x-G.px)**2+(a.y-G.py)**2;let best=null,bd=cur;
 function animalsAct(){
   if(!G.animals||G.over)return;let fled=null,swarm=null;const dist=robotDist(false),DC={};
   const backup=(G.beasts||[]).some(b=>b.hunt>0&&cheb(b,G.px,G.py)<=BACKUP_R);
+  const prevA=new Map(G.animals.map(o=>[o,[o.x,o.y]]));
   for(const a of G.animals){if(G.over)break;const sp=SPECIES[a.sp];a.mp=Math.min(2,a.mp+sp.v/5);
     // déjà alerté, il garde la foreuse en vue de plus loin (+5 cases)
-    const d=Math.hypot(a.x-G.px,a.y-G.py),sees=(d<=sp.d||(a.aware&&d<=sp.d+5))&&los(a.x,a.y,G.px,G.py);
+    const d=Math.hypot(a.x-G.px,a.y-G.py),sees=(d<=sp.d||(a.aware&&d<=sp.d+5))&&inCone(a,G.px,G.py)&&los(a.x,a.y,G.px,G.py);
     if(sees){a.aware=1;spot(a);}
     else if(a.aware&&a.search>0&&--a.search===0){a.aware=0;a.enraged=false;forget(a);}   // fouille terminée : il oublie
     else if(a.aware&&!a.mem)a.aware=0;
@@ -72,6 +82,7 @@ function animalsAct(){
         if(animalOk(nx,ny)&&diagOk(a.x,a.y,dx,dy)&&(a.mode!=='hold'||cheb({x:nx,y:ny},G.px,G.py)>KEEP_MIN)){a.x=nx;a.y=ny;if(dx)a.dir=dx;}}
       else a.mp=Math.min(a.mp,.99);}
   }
+  for(const [o,[ox,oy]] of prevA)if(G.animals.includes(o))turnHead(o,ox,oy,!o.aware);
   if(swarm){sayMore(`Renforts de crabos : les ${swarm.n.toLowerCase()}s passent à l’attaque !`,'warn');SFX.chirp();}
   else if(fled){sayMore(`Un ${fled.n.toLowerCase()} recule.`);SFX.chirp();}
 }
@@ -109,12 +120,14 @@ function hurtRobot(b,sp){sp=sp||BEASTS[b.sp];const le=sp.n.match(/^[aeiouyéèê
   if(!roll(ch)){addFx({kind:'lunge',beast:b,dx:Math.sign(G.px-b.x),dy:Math.sign(G.py-b.y),dur:200});addFx({kind:'num',x:G.px,y:G.py,txt:'0',col:'#8aa9a2',dur:750});
     SFX.whoosh();sayMore(`${le}${sp.n.toLowerCase()} attaque et rate (${ch} %).`);return;}
   addFx({kind:'lunge',beast:b,dx:Math.sign(G.px-b.x),dy:Math.sign(G.py-b.y),dur:200});
-  addFx({kind:'shake',amp:5,dur:220});G.st.vie=Math.max(0,G.st.vie-sp.dmg);addFx({kind:'num',x:G.px,y:G.py,txt:'-'+sp.dmg,col:'#ff3b3b',dur:750});SFX.bite();sayMore(`${le}${sp.n.toLowerCase()} attaque : −${sp.dmg} vie.`,'warn');
+  const cr=roll(sp.crit||0),dm=sp.dmg*(cr?CRIT_X:1);   // coup critique de l'ennemi : selon sa stat CRIT
+  addFx({kind:'shake',amp:cr?9:5,dur:cr?320:220});G.st.vie=Math.max(0,G.st.vie-dm);addFx({kind:'num',x:G.px,y:G.py,txt:'-'+dm+(cr?'!':''),col:'#ff3b3b',dur:cr?1000:750});SFX.bite();sayMore(`${le}${sp.n.toLowerCase()} attaque${cr?' : coup critique':''} : −${dm} vie.`,'warn');
   if(G.st.vie<=0){G.over={dead:true};}}
 function beastsAct(){
   if(!G.beasts||!G.beasts.length||G.over)return;const distDry=robotDist(false),distWet=robotDist(true),DC={};let charged=null;const alarms=[];packTick();
+  const prevB=new Map(G.beasts.map(o=>[o,[o.x,o.y]]));
   for(const b of G.beasts){if(G.over)break;const sp=BEASTS[b.sp];b.mp=Math.min(2,b.mp+sp.v/5);
-    const d=Math.hypot(b.x-G.px,b.y-G.py),sees=d<=sp.d&&los(b.x,b.y,G.px,G.py);
+    const d=Math.hypot(b.x-G.px,b.y-G.py),sees=d<=sp.d&&inCone(b,G.px,G.py)&&los(b.x,b.y,G.px,G.py);
     if(sees){if(!b.hunt&&sp.alarm)alarms.push(b);if(!b.hunt&&beastVisible(b))charged=charged||sp;b.hunt=1;spot(b);if(G.px!==b.x)b.dir=Math.sign(G.px-b.x);
       if(sp.pack)for(const o of mates(b)){o.hunt=1;spot(o);}}                        // la bande partage ce qu'un membre voit
     else if(b.hunt&&b.search>0&&--b.search===0){b.hunt=0;forget(b);}                // fouille terminée : il oublie
@@ -132,6 +145,7 @@ function beastsAct(){
       else if(Math.random()<.25){const[dx,dy]=DIRS[rnd(0,7)];if(beastFits(b,b.x+dx,b.y+dy)&&diagOk(b.x,b.y,dx,dy)&&(!sp.pack||packOk(b,b.x+dx,b.y+dy))){b.x+=dx;b.y+=dy;if(dx)b.dir=dx;}}
       else b.mp=Math.min(b.mp,.99);}
   }
+  for(const [o,[ox,oy]] of prevB)if(G.beasts.includes(o))turnHead(o,ox,oy,!(o.hunt>0));
   if(charged){sayMore(`Le ${charged.n.toLowerCase()} vous a repéré et charge !`,'warn');SFX.roar();}
 }
 // Plus de réparation automatique : seule l'énergie se recharge à chaque tour
