@@ -34,8 +34,9 @@ Le jeu est une page web en plusieurs fichiers (`src/`), **sans étape d'assembla
 5. **Publier** sur l'artefact existant, toujours le même (https://claude.ai/artifact/NL3Dn842a32JiGimprg8cm), avec
    `publish_files` depuis le disque : `src/index.html` → `index.html`, `src/style.css` → `style.css`,
    `src/js/*.js` → `js/…`, mode `replace`, slug et `base_version` de l'artefact. Ne pas passer le contenu par la conversation.
-6. **Marquer la version publiée** : pousser une branche `claude/version-AAAA-MM-JJ-n` (ex. `claude/version-2026-11-06-1`)
-   qui pointe sur le commit publié (`git push origin HEAD:refs/heads/claude/version-AAAA-MM-JJ-n`). Ne pas utiliser de tags.
+6. **Marquer une version publiée seulement quand l'utilisateur le demande** (pas à chaque changement, consigne du 10 novembre 2026) :
+   pousser alors une branche `claude/version-AAAA-MM-JJ-n` qui pointe sur le commit publié
+   (`git push origin HEAD:refs/heads/claude/version-AAAA-MM-JJ-n`). Ne pas utiliser de tags. Les commits vont sur la branche de travail en cours, sans en créer de nouvelle à chaque changement.
    Ne plus synchroniser de HTML dans le projet claude.ai « GAME » ; mettre à jour seulement
    `claude/noyau-profond-conception.md` (copie de `docs/conception.md`) quand ce document change.
 
