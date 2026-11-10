@@ -67,7 +67,7 @@ function segs(el,v,max,n){n=n||max;const on=Math.ceil(v/max*n-1e-9);el.innerHTML
 function side(){
   const st=G.st;
 
-  for(const [t,v,mx] of [['lifeT',st.vie,st.vieMax],['enT',st.energie,st.energieMax]]){$(t).innerHTML=asciiBar(v,mx,ABAR_N);$(t).setAttribute('aria-valuenow',Math.floor(v));$(t).setAttribute('aria-valuemax',mx);}
+  for(const [t,v,mx,nm] of [['lifeT',st.vie,st.vieMax,'lifeN'],['enT',st.energie,st.energieMax,'enN']]){$(t).innerHTML=asciiBar(v,mx,ABAR_N);$(nm).textContent=Math.floor(v)+'/'+mx;$(t).setAttribute('aria-valuenow',Math.floor(v));$(t).setAttribute('aria-valuemax',mx);}
   const tm=terrMod(G.px,G.py),ev=st.esq+tm;
   const sv={vitesse:st.vitesse,degats:st.degats,capteur:st.capteur,pre:st.pre,
     esq:tm?`<span style="color:${tm>0?'var(--c1)':'var(--life)'}">${ev}</span>`:ev,
@@ -88,6 +88,7 @@ addEventListener('keydown',ev=>{
   if(!$('viseurs').hidden){if(ev.key==='Escape'){ev.preventDefault();closeCur();}return;}
   if(!$('overlay').hidden||ev.ctrlKey||ev.metaKey||ev.altKey||ev.target.tagName==='INPUT')return;const k=ev.key.toLowerCase();
   if(TRAV){if(!['shift','control','alt','meta'].includes(k)){ev.preventDefault();stopTravel('Trajet interrompu.');}return;}
+  if(k==='v'){ev.preventDefault();toggleVision();return;}
   if(INSPECT){ev.preventDefault();
     if(KEYS[k]){const st=ev.shiftKey?5:1;moveInspect(KEYS[k][0]*st,KEYS[k][1]*st);}
     else if(k==='enter'||k===' '){const t=HOV;setInspect(false);HOV=t;goTo(t.x,t.y);}
@@ -148,6 +149,7 @@ $('bestList').addEventListener('change',e=>{const t=e.target;if(!t.dataset||!t.d
 $('bestReset').onclick=()=>{BEST_LIST().forEach(e=>Object.assign(e.o,BEST_DEF[e.key]));saveBest();buildBest();};
 const saveSnd=()=>{try{localStorage.setItem('np-son',JSON.stringify(SND));}catch(e){}};
 function toggleSound(){SND.on=!SND.on;saveSnd();say(SND.on?'Son activé.':'Son coupé.','info');if(SND.on){unlock();SFX.spot();}render();}
+function toggleVision(){SHOWVIS=!SHOWVIS;say(SHOWVIS?'Champs de vision des ennemis affichés.':'Champs de vision des ennemis masqués.','info');render();}
 function toggleFog(){fog=!fog;try{localStorage.setItem('np-fog',fog?'on':'off');}catch(e){}say(fog?'Brouillard de guerre activé.':'Brouillard de guerre désactivé.','info');render();}
 ['fd-stats','fd-gen','fd-life','fd-pal','fd-lab'].forEach(id=>{const d=$(id);try{d.open=localStorage.getItem('np-'+id)==='open';}catch(e){}
   d.addEventListener('toggle',()=>{try{localStorage.setItem('np-'+id,d.open?'open':'closed');}catch(e){}});});

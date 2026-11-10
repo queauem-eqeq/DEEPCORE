@@ -19,16 +19,19 @@ function computeFOV(){vis=new Uint8Array(W*H);const r=G.st.capteur,px=G.px,py=G.
 
 /* ---------- Déplacement ---------- */
 const siteAt=(x,y)=>G.sites.find(s=>s.x===x&&s.y===y);
-function drift(){
+// Dérive dans l'eau profonde : seulement quand la foreuse attend (un pas, lui, est dévié au moment même : DEEP_MISS)
+function drift(wait){if(!wait)return;
   if(G.t[idx(G.px,G.py)]!==DEEP)return;
   const k=rnd(0,7),[dx,dy]=DIRS[k],nx=G.px+dx,ny=G.py+dy,v=G.t[idx(nx,ny)];
   if(v===ROCK||v===MOUNT||v===CHASM||!diagOk(G.px,G.py,dx,dy)||beastAt(nx,ny)||animalAt(nx,ny)){SFX.thud();sayMore(`Le courant plaque le robot contre un obstacle (${DIRN[k]}).`,'warn');return;}
   G.px=nx;G.py=ny;G.lastDir=null;if(v===GRASS)G.t[idx(nx,ny)]=FLAT;
   SFX.drift();sayMore(`Eau profonde : le courant entraîne le robot vers ${['l’est','l’ouest','le sud','le nord','le sud-est','le nord-est','le sud-ouest','le nord-ouest'][k]}.`,'warn');
 }
+const MOVE_COST=2;   // énergie dépensée à chaque pas
+const DEEP_MISS=.5;   // eau profonde : chance qu'un pas parte dans une autre direction, tirée au hasard
 function tryMove(dx,dy){
-  if(G.over||drilling)return;const nx=G.px+dx,ny=G.py+dy;if(nx<0||ny<0||nx>=W||ny>=H)return;
-  const v=G.t[idx(nx,ny)];
+  if(G.over||drilling)return;let nx=G.px+dx,ny=G.py+dy;if(nx<0||ny<0||nx>=W||ny>=H)return;
+  let v=G.t[idx(nx,ny)];
   G.face=dx>0?'r':dx<0?'l':dy>0?'d':'u';
   if(!diagOk(G.px,G.py,dx,dy)){say('Coin de paroi : pas de passage en diagonale.');SFX.blocked();render();return;}
   const bz=beastAt(nx,ny);
@@ -60,10 +63,19 @@ function tryMove(dx,dy){
       if(G.ore&&G.ore[i]&&!oreSol(G.ore[i])){const l=oreLv(G.ore[i]);G.ore[i]='sol'+l;sayMore(['','De petits éclats de métal tombent au sol.','Des éclats de métal tombent au sol.','De gros éclats de métal tombent au sol.'][l],'info');}}
     else{G.dmg[i]=hits;SFX.crack();say(v===ROCK?'La foreuse frappe le rocher : il se fissure.':`La foreuse attaque la montagne : fissure ${hits}/${hp-1}.`,'warn');}
     drift();animalsAct();beastsAct();regen();computeFOV();render();if(G.over&&G.over.dead)dead();return;}
+  // chaque pas coûte MOVE_COST d'énergie ; sans assez d'énergie, la foreuse ne bouge pas (attendre recharge l'énergie)
+  if(G.st.energie<MOVE_COST){say(`Énergie insuffisante pour avancer (${Math.floor(G.st.energie)}/${MOVE_COST}). Attendez qu’elle se recharge.`,'warn');SFX.blocked();render();return;}
+  G.st.energie-=MOVE_COST;
+  // eau profonde : une fois sur deux, le courant emporte le pas dans une autre direction au hasard
+  if(G.t[idx(G.px,G.py)]===DEEP&&Math.random()<DEEP_MISS){const o=DIRS.map((d,k)=>k).filter(k=>DIRS[k][0]!==dx||DIRS[k][1]!==dy),k=o[rnd(0,o.length-1)],[ex,ey]=DIRS[k],ax=G.px+ex,ay=G.py+ey,av=G.t[idx(ax,ay)];
+    const dirs=['l’est','l’ouest','le sud','le nord','le sud-est','le nord-est','le sud-ouest','le nord-ouest'];
+    if(ax<1||ay<1||ax>=W-1||ay>=H-1||blocks(av)||!diagOk(G.px,G.py,ex,ey)||beastAt(ax,ay)||animalAt(ax,ay)){G.turn++;G.msg=null;SFX.thud();
+      say(`Eau profonde : le courant plaque la foreuse contre un obstacle (${dirs[k]}).`,'warn');animalsAct();beastsAct();regen();computeFOV();render();if(G.over&&G.over.dead)dead();return;}
+    dx=ex;dy=ey;nx=ax;ny=ay;v=av;G.face=dx>0?'r':dx<0?'l':dy>0?'d':'u';SFX.drift();G.devMsg=`Eau profonde : le courant dévie la foreuse vers ${dirs[k]}.`;}
   {const oi=idx(G.px,G.py),ov=G.t[oi],dk=DIRS.findIndex(d=>d[0]===dx&&d[1]===dy);
     if(ov!==LIQ&&ov!==DEEP&&ov!==BRIDGE&&ov!==DECK){G.tracks=G.tracks||{};G.tracks[oi]={t:G.turn+1,i:G.lastDir??dk,o:dk};}G.lastDir=dk;}
   const doorway=(G.t[idx(G.px,G.py)]===DECK)!==(v===DECK);   // passage de la porte du vaisseau
-  G.px=nx;G.py=ny;G.turn++;G.dist++;G.msg=null;
+  G.px=nx;G.py=ny;G.turn++;G.dist++;G.msg=null;if(G.devMsg){say(G.devMsg,'warn');G.devMsg=null;}
   if(v===GRASS){G.t[idx(nx,ny)]=FLAT;SFX.grass();}else if(v===LOW)SFX.grass();
   if(v===LIQ)SFX.water();else if(v===DEEP)SFX.deep();else SFX.step();
   if(doorway){SFX.door();say(v===DECK?'La porte du vaisseau s’ouvre : la foreuse rentre dans la soute.':'La porte du vaisseau s’ouvre : la foreuse sort.','info');}
@@ -80,7 +92,7 @@ function tryMove(dx,dy){
 /* ---------- Forage ---------- */
 function waitTurn(){
   if(G.over||drilling||!$('overlay').hidden)return;G.turn++;G.msg=null;say('Le robot attend.');
-  drift();animalsAct();beastsAct();regen();computeFOV();render();if(G.over&&G.over.dead)dead();
+  drift(true);animalsAct();beastsAct();regen();computeFOV();render();if(G.over&&G.over.dead)dead();
 }
 function askDrill(){
   if(G.over||drilling||!$('overlay').hidden)return;const s=siteAt(G.px,G.py);if(!s)return;
