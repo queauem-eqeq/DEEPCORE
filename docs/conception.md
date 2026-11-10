@@ -71,7 +71,7 @@ Roguelike au tour par tour dans une esthétique inspirée de Cogmind et de Brogu
 | Stat | Valeur | Rôle |
 |---|---|---|
 | Vie | 100 | **pas de réparation automatique** |
-| Énergie | 100 | se recharge de POW par tour (5 par tour au départ) ; **chaque pas coûte 2** (10 novembre 2026), un coup de foreuse 8 |
+| Énergie | 100 | se recharge de POW par tour (5 par tour au départ) ; **chaque pas coûte 2** (10 novembre 2026), un coup de foreuse 10 |
 | VIT | 5 | affichée, **sans effet** pour l'instant |
 | EYE | 10 | rayon de vision (5 avant le 10 novembre 2026) |
 | DEG | 10 | dégâts par coup de foreuse |
