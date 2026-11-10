@@ -30,7 +30,7 @@ function drift(wait){if(!wait)return;
 const MOVE_COST=2;   // énergie dépensée à chaque pas
 const DEEP_MISS=.5;   // eau profonde : chance qu'un pas parte dans une autre direction, tirée au hasard
 function tryMove(dx,dy){
-  if(G.over||drilling)return;let nx=G.px+dx,ny=G.py+dy;if(nx<0||ny<0||nx>=W||ny>=H)return;
+  if(G.over||drilling)return;let nx=G.px+dx,ny=G.py+dy;if(nx<0||ny<0||nx>=W||ny>=H)return;G.still=false;
   let v=G.t[idx(nx,ny)];
   G.face=dx>0?'r':dx<0?'l':dy>0?'d':'u';
   if(!diagOk(G.px,G.py,dx,dy)){say('Coin de paroi : pas de passage en diagonale.');SFX.blocked();render();return;}
@@ -92,7 +92,7 @@ function tryMove(dx,dy){
 
 /* ---------- Forage ---------- */
 function waitTurn(){
-  if(G.over||drilling||!$('overlay').hidden)return;G.turn++;G.msg=null;say('Le robot attend.');
+  if(G.over||drilling||!$('overlay').hidden)return;G.turn++;G.msg=null;say('Le robot attend.');G.still=true;   // immobile : bonus de discrétion
   drift(true);animalsAct();beastsAct();regen();computeFOV();render();if(G.over&&G.over.dead)dead();
 }
 function askDrill(){

@@ -145,7 +145,7 @@ function render(){
     for(const [o,r,al] of [...(G.beasts||[]).map(b=>[b,BEASTS[b.sp].d,b.hunt>0]),...(G.animals||[]).map(a=>[a,SPECIES[a.sp].d+(a.aware?5:0),!!a.aware])]){
       if(fog&&!vis[idx(o.x,o.y)])continue;const cells=al?seen:calm;
       for(let y=Math.max(0,o.y-r);y<=Math.min(H-1,o.y+r);y++)for(let x=Math.max(0,o.x-r);x<=Math.min(W-1,o.x+r);x++){
-        const i=idx(x,y);if(cells.has(i)||Math.hypot(x-o.x,y-o.y)>r||(fog&&!G.seen[i]))continue;if(inCone(o,x,y)&&los(o.x,o.y,x,y))cells.add(i);}}
+        const i=idx(x,y);if(cells.has(i)||Math.hypot(x-o.x,y-o.y)>r||(fog&&!G.seen[i]))continue;if(los(o.x,o.y,x,y))cells.add(i);}}
     for(const i of seen)calm.delete(i);
     drawVisCells(calm,'#ffffff');drawVisCells(seen,'#b8242a');}
   drawPath();

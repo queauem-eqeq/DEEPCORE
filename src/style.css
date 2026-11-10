@@ -28,6 +28,7 @@ body{margin:0;background:var(--black);color:var(--fg);font:13px/1.45 var(--mono)
 .col::-webkit-scrollbar{display:none}   /* défilement à la molette ou au doigt, sans barre qui déforme la colonne */
 .col h2{font-family:var(--display);font-size:11px;font-weight:500;letter-spacing:.22em;text-transform:uppercase;color:var(--dim);margin:0 0 8px}
 .rows{display:grid;gap:5px}
+.eye{display:flex;align-items:center;gap:8px}.eyeic{color:var(--c3);flex:none}
 .stats2{display:grid;grid-template-columns:repeat(3,1fr);gap:6px 12px}
 .stats2 .r{display:flex;gap:8px;justify-content:flex-start;align-items:baseline}
 .stats2 .r span:first-child{font-size:11px;letter-spacing:.12em;min-width:3.2em}
