@@ -140,14 +140,14 @@ function render(){
   if(G.blood)for(const k in G.blood){const i=+k,bx=i%W,by=(i/W)|0;if(fog&&!G.seen[i])continue;put(TL['blood'+G.blood[k]],bx,by,fog&&!vis[i]?.3:.9);}
   for(const s of G.sites){if(fog&&!G.seen[idx(s.x,s.y)])continue;put(s.known?TL['site'+s.depth]:TL.siteUnknown,s.x,s.y,!fog||vis[idx(s.x,s.y)]?1:.35);}
   // touche V : champ de vision de chaque ennemi visible (cases qu'il peut voir : portée de détection et ligne de vue), entouré d'un pointillé
-  if(SHOWVIS){   // deux zones sans superposition : grise = ennemis qui vous ont repéré (prioritaire), blanche = les autres
+  if(SHOWVIS){   // deux zones sans superposition : rouge = ennemis qui vous ont repéré (prioritaire), blanche = les autres
     const seen=new Set(),calm=new Set();
     for(const [o,r,al] of [...(G.beasts||[]).map(b=>[b,BEASTS[b.sp].d,b.hunt>0]),...(G.animals||[]).map(a=>[a,SPECIES[a.sp].d+(a.aware?5:0),!!a.aware])]){
       if(fog&&!vis[idx(o.x,o.y)])continue;const cells=al?seen:calm;
       for(let y=Math.max(0,o.y-r);y<=Math.min(H-1,o.y+r);y++)for(let x=Math.max(0,o.x-r);x<=Math.min(W-1,o.x+r);x++){
         const i=idx(x,y);if(cells.has(i)||Math.hypot(x-o.x,y-o.y)>r||(fog&&!G.seen[i]))continue;if(los(o.x,o.y,x,y))cells.add(i);}}
     for(const i of seen)calm.delete(i);
-    drawVisCells(calm,'#ffffff');drawVisCells(seen,'#8a8f8c');}
+    drawVisCells(calm,'#ffffff');drawVisCells(seen,'#b8242a');}
   drawPath();
   if(G.animals)for(const a of G.animals)if(!fog||vis[idx(a.x,a.y)]){const [lx,ly]=lungeOff(f=>f.kind==='lunge'&&f.beast===a);ctx.globalAlpha=1;ctx.drawImage(TL['an'+a.sp+(a.dir<0?'l':'r')],(a.x-camX)*S+lx,(a.y-camY)*S+ly,S,S);}
   if(G.beasts)for(const b of G.beasts){if(!beastVisible(b))continue;const [lx,ly]=lungeOff(f=>f.kind==='lunge'&&f.beast===b);
