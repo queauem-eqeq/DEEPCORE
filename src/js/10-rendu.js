@@ -6,7 +6,25 @@ function resize(){const r=$('mapwrap').getBoundingClientRect();vw=Math.max(1,Mat
 const hash=(x,y)=>((x*73856093)^(y*19349663))>>>0;
 let ox=0,oy=0;
 /* ---------- Effets de percussion ---------- */
-let FX=[],fxRaf=0,SHOWVIS=false;   // SHOWVIS : touche V, champs de vision des ennemis
+let FX=[],fxRaf=0,SHOWVIS=false;
+// Trames pixel du champ de vision (essais) : motifs 16 × 16 en pixels de tuile, blancs opaques ; « contour » = pointillé sur le bord de la zone
+let VIS_STYLE='points';
+const VIS_PATS={
+  points:(x,y)=>x%4===1&&y%4===1,                         // A : points espacés
+  quinconce:(x,y)=>y%4===1&&(x+(y%8<4?0:2))%4===1,        // B : points en quinconce
+  diagonales:(x,y)=>(x+y)%6===0,                          // C : hachures diagonales
+  lignes:(x,y)=>y%4===0&&x%2===0,                         // D : lignes pointillées horizontales
+  croix:(x,y)=>(x===8&&y>=7&&y<=9)||(y===8&&x>=7&&x<=9),  // E : petite croix au centre de chaque case
+  damier:(x,y)=>(x+y)%2===0&&x%4<2&&y%4<2};               // F : petits damiers
+let VIS_TL=null,VIS_KEY='';
+function drawVisCells(cells){
+  if(VIS_STYLE==='contour'){ctx.fillStyle='#ffffff';
+    for(const i of cells){const x=i%W,y=(i/W)|0,px=(x-camX)*S,py=(y-camY)*S;
+      const edge=(dx,dy)=>!cells.has(idx(x+dx,y+dy));
+      for(let k=0;k<16;k+=2){if(edge(0,-1))ctx.fillRect(px+k*2,py,2,2);if(edge(0,1))ctx.fillRect(px+k*2,py+S-2,2,2);if(edge(-1,0))ctx.fillRect(px,py+k*2,2,2);if(edge(1,0))ctx.fillRect(px+S-2,py+k*2,2,2);}}
+    return;}
+  if(VIS_KEY!==VIS_STYLE){VIS_KEY=VIS_STYLE;const f=VIS_PATS[VIS_STYLE]||VIS_PATS.points;VIS_TL=tileCanvas((x,y)=>f(x,y)?'w':'.');}
+  ctx.globalAlpha=1;for(const i of cells)ctx.drawImage(VIS_TL,(i%W-camX)*S,(((i/W)|0)-camY)*S,S,S);}   // SHOWVIS : touche V, champs de vision des ennemis
 /* ---------- Foreuse endommagée : fumée sous 50 PV, fumée + flammèches sous 20 PV ----------
    Dessiné sur un calque transparent posé sur la vue (#fxv), animé en continu sans redessiner la carte.
    Particules en pixels de carte (case × S) : la fumée qui s'élève reste sur place quand la foreuse avance (traînée).
@@ -141,7 +159,7 @@ function render(){
       if(fog&&!vis[idx(o.x,o.y)])continue;
       for(let y=Math.max(0,o.y-r);y<=Math.min(H-1,o.y+r);y++)for(let x=Math.max(0,o.x-r);x<=Math.min(W-1,o.x+r);x++){
         const i=idx(x,y);if(cells.has(i)||Math.hypot(x-o.x,y-o.y)>r||(fog&&!G.seen[i]))continue;if(los(o.x,o.y,x,y))cells.add(i);}}
-    ctx.globalAlpha=.05;ctx.fillStyle='#ffffff';for(const i of cells)ctx.fillRect((i%W-camX)*S,(((i/W)|0)-camY)*S,S,S);ctx.globalAlpha=1;}
+    drawVisCells(cells);}
   drawPath();
   if(G.animals)for(const a of G.animals)if(!fog||vis[idx(a.x,a.y)]){const [lx,ly]=lungeOff(f=>f.kind==='lunge'&&f.beast===a);ctx.globalAlpha=1;ctx.drawImage(TL['an'+a.sp+(a.dir<0?'l':'r')],(a.x-camX)*S+lx,(a.y-camY)*S+ly,S,S);}
   if(G.beasts)for(const b of G.beasts){if(!beastVisible(b))continue;const [lx,ly]=lungeOff(f=>f.kind==='lunge'&&f.beast===b);
