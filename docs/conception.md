@@ -51,7 +51,7 @@ Roguelike au tour par tour dans une esthétique inspirée de Cogmind et de Brogu
 | Rocher | brisé en 2 coups | libre | laisse des gravats |
 | Montagne | brisée en 2 coups (sauf bord de carte) | bloquée | peut contenir le joyau ; 10 % contiennent des éclats de métal |
 | Eau peu profonde | oui | libre | −20 d'esquive ; évitée par les insectoïdes et les cafars, praticable pour les crabos |
-| Eau profonde | oui | libre | −20 d'esquive ; le courant déplace la foreuse d'une case au hasard à chaque tour ; seuls les crabos y entrent (sans dérive) |
+| Eau profonde | oui | libre | −20 d'esquive ; **chaque pas a 50 % de chance de partir dans une autre direction tirée au hasard** (si cette case est bloquée, la foreuse est plaquée contre l'obstacle et ne bouge pas ; le tour passe) — remplace le 10 novembre 2026 l'ancienne dérive d'une case à chaque tour ; seuls les crabos y entrent (sans dérive) |
 | Herbes hautes | oui | bloquée | se couchent au passage ; +10 d'esquive pour qui s'y trouve |
 | Herbe basse / couchée | oui | libre | — |
 | Gouffre | non | libre | — |
@@ -71,7 +71,7 @@ Roguelike au tour par tour dans une esthétique inspirée de Cogmind et de Brogu
 | Stat | Valeur | Rôle |
 |---|---|---|
 | Vie | 100 | **pas de réparation automatique** |
-| Énergie | 100 | se recharge de POW par tour (5 par tour au départ) ; **chaque pas coûte 2** (10 novembre 2026), un coup de foreuse 10 |
+| Énergie | 100 | se recharge de POW par tour (5 par tour au départ) ; **chaque pas coûte 2** (10 novembre 2026), un coup de foreuse 8 |
 | VIT | 5 | affichée, **sans effet** pour l'instant |
 | EYE | 10 | rayon de vision (5 avant le 10 novembre 2026) |
 | DEG | 10 | dégâts par coup de foreuse |
