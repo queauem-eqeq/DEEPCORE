@@ -47,11 +47,13 @@ function stepAway(a){const cur=(a.x-G.px)**2+(a.y-G.py)**2;let best=null,bd=cur;
   for(const[dx,dy]of [...DIRS].sort(()=>Math.random()-.5)){const nx=a.x+dx,ny=a.y+dy;if(!animalOk(nx,ny)||!diagOk(a.x,a.y,dx,dy))continue;const nd=(nx-G.px)**2+(ny-G.py)**2;if(nd>bd){bd=nd;best=[nx,ny,dx];}}
   if(best){a.x=best[0];a.y=best[1];if(best[2])a.dir=best[2]>0?1:-1;}}
 function animalsAct(){
+  turnStealth();
   if(!G.animals||G.over)return;let fled=null,swarm=null;const dist=robotDist(false),DC={};
   const backup=(G.beasts||[]).some(b=>b.hunt>0&&cheb(b,G.px,G.py)<=BACKUP_R);
   for(const a of G.animals){if(G.over)break;const sp=SPECIES[a.sp];a.mp=Math.min(2,a.mp+sp.v/5);
-    // déjà alerté, il garde la foreuse en vue de plus loin (+5 cases)
-    const d=Math.hypot(a.x-G.px,a.y-G.py),sees=(d<=sp.d||(a.aware&&d<=sp.d+5))&&los(a.x,a.y,G.px,G.py);
+    // portée de discrétion : 25 % par tour pour le remarquer ; déjà en chasse, il vous suit jusqu'à 3 fois ce rayon
+    const d=Math.hypot(a.x-G.px,a.y-G.py),inLos=los(a.x,a.y,G.px,G.py),
+      sees=inLos&&(a.aware?d<=G.stealth*HUNT_MULT:d<=G.stealth&&Math.random()<NOTICE);
     if(sees){a.aware=1;spot(a);}
     else if(a.aware&&a.search>0&&--a.search===0){a.aware=0;a.enraged=false;forget(a);}   // fouille terminée : il oublie
     else if(a.aware&&!a.mem)a.aware=0;
@@ -112,9 +114,12 @@ function hurtRobot(b,sp){sp=sp||BEASTS[b.sp];const le=sp.n.match(/^[aeiouyéèê
   addFx({kind:'shake',amp:5,dur:220});G.st.vie=Math.max(0,G.st.vie-sp.dmg);addFx({kind:'num',x:G.px,y:G.py,txt:'-'+sp.dmg,col:'#ff3b3b',dur:750});SFX.bite();sayMore(`${le}${sp.n.toLowerCase()} attaque : −${sp.dmg} vie.`,'warn');
   if(G.st.vie<=0){G.over={dead:true};}}
 function beastsAct(){
+  turnStealth();
   if(!G.beasts||!G.beasts.length||G.over)return;const distDry=robotDist(false),distWet=robotDist(true),DC={};let charged=null;const alarms=[];packTick();
   for(const b of G.beasts){if(G.over)break;const sp=BEASTS[b.sp];b.mp=Math.min(2,b.mp+sp.v/5);
-    const d=Math.hypot(b.x-G.px,b.y-G.py),sees=d<=sp.d&&los(b.x,b.y,G.px,G.py);
+    // portée de discrétion : 25 % par tour pour le remarquer ; déjà en chasse, il vous suit jusqu'à 3 fois ce rayon
+    const d=Math.hypot(b.x-G.px,b.y-G.py),inLos=los(b.x,b.y,G.px,G.py),
+      sees=inLos&&(b.hunt?d<=G.stealth*HUNT_MULT:d<=G.stealth&&Math.random()<NOTICE);
     if(sees){if(!b.hunt&&sp.alarm)alarms.push(b);if(!b.hunt&&beastVisible(b))charged=charged||sp;b.hunt=1;spot(b);if(G.px!==b.x)b.dir=Math.sign(G.px-b.x);
       if(sp.pack)for(const o of mates(b)){o.hunt=1;spot(o);}}                        // la bande partage ce qu'un membre voit
     else if(b.hunt&&b.search>0&&--b.search===0){b.hunt=0;forget(b);}                // fouille terminée : il oublie

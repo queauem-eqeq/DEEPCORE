@@ -94,7 +94,7 @@ introCv.addEventListener('pointerdown',()=>{unlock();});
 function introCell(x,i,px,py){const t=G.t[i],h=hash(i%W,(i/W)|0),put2=(tl,a)=>{if(!tl)return;x.globalAlpha=a;x.drawImage(tl,px,py,S,S);};
   x.globalAlpha=1;x.fillStyle='#020605';x.fillRect(px,py,S,S);
   if(t!==CHASM){x.globalAlpha=.08;x.fillStyle=PAL['3'];x.fillRect(px,py,S,S);}
-  const lv=densLevel(i);if(t!==BRIDGE)put2(lv?TL[`gd${lv}_${h%3}`]:TL.ground0,lv?.55+lv*.08:.6);
+  if(t!==BRIDGE)put2(TL.ground0,.6);
   if(t===ROCK)put2(h%3?TL.rock:TL.rock2,.95);
   else if(t===MOUNT){const up=i>=W&&G.t[i-W]===MOUNT;put2(up?TL.mtBody:TL.mtTop,.9);}
   else if(t===LIQ){x.globalAlpha=.24;x.fillStyle=PAL['2'];x.fillRect(px,py,S,S);put2(h%2?TL.liq1:TL.liq0,.9);}

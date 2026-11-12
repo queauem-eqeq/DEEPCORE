@@ -104,7 +104,7 @@ function inspectHTML(){const {x,y}=HOV;if(x<0||y<0||x>=W||y>=H)return '';
     const state=isB?(occ.hunt>0?(occ.sees?'en chasse':occ.search>0?'fouille les environs':'se dirige vers votre dernière position connue'):P?(P.pause>0?'au repos':'en route'):'erre'):({attack:'attaque',flee:'recule',follow:'suit',hold:'observe',seek:'se dirige vers votre dernière position connue',search:'fouille les environs'}[occ.mode]||'ne vous a pas repéré');
     const me=hitChance(G.st.pre,sp.esq+terrMod(x,y)),them=isB||occ.mode==='attack'?hitChance(sp.pre,robotEsq()):null;
     out.push(head(ICON[isB?'bz'+occ.sp+'r':'an'+occ.sp+'r'],sp.n,`${state} · ${dt}`),
-      `<div class="kv"><span>PV <b>${hp}/${sp.pv}</b></span><span>DÉG <b>${sp.dmg}</b></span><span>PRE <b>${sp.pre}</b></span><span>ESQ <b>${sp.esq+terrMod(x,y)}</b></span><span>VIT <b>${sp.v}</b></span><span>DÉT <b>${sp.d}</b></span></div>`,
+      `<div class="kv"><span>PV <b>${hp}/${sp.pv}</b></span><span>DÉG <b>${sp.dmg}</b></span><span>PRE <b>${sp.pre}</b></span><span>ESQ <b>${sp.esq+terrMod(x,y)}</b></span><span>VIT <b>${sp.v}</b></span></div>`,
       `<p>Toucher <b style="color:${chanceCol(me)}">${me} %</b> · Subir <b style="color:${them==null?'var(--dim)':chanceCol(100-them)}">${them==null?'—':them+' %'}</b></p>`,
       `<p>${BEHAV[key]}</p>`);}
   else out.push(head('',tn,dt));

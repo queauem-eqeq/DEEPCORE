@@ -11,11 +11,30 @@ function computeFOV(){vis=new Uint8Array(W*H);const r=G.st.capteur,px=G.px,py=G.
   for(let y=py-r;y<=py+r;y++)for(let x=px-r;x<=px+r;x++){if(x<0||y<0||x>=W||y>=H)continue;if((x-px)**2+(y-py)**2>r*r+r)continue;
     if(los(px,py,x,y)){vis[idx(x,y)]=1;G.seen[idx(x,y)]=1;}else if(peekBehind(px,py,x,y))G.seen[idx(x,y)]=1;}
   if(G.animals)for(const a of G.animals)if(vis[idx(a.x,a.y)]&&!G.fauna.includes(a.sp)){G.fauna.push(a.sp);const sp=SPECIES[a.sp];
-    sayMore(`Nouvelle espèce observée : ${sp.n} (vitesse ${sp.v}, détection ${sp.d}).`,'info');SFX.chirp();}
+    sayMore(`Nouvelle espèce observée : ${sp.n} (vitesse ${sp.v}).`,'info');SFX.chirp();}
   if(G.beasts){if(typeof G.beastSeen!=='object'||!G.beastSeen)G.beastSeen={};for(const b of G.beasts){if(G.beastSeen[b.sp]||!vis[idx(b.x,b.y)])continue;G.beastSeen[b.sp]=true;const sp=BEASTS[b.sp];
-    sayMore(`Ennemi repéré : ${sp.n} (vitesse ${sp.v}, détection ${sp.d}, ${sp.pv} PV).`,'warn');SFX.roar();}}
+    sayMore(`Ennemi repéré : ${sp.n} (vitesse ${sp.v}, ${sp.pv} PV).`,'warn');SFX.roar();}}
   for(const s of G.sites)if(vis[idx(s.x,s.y)]&&!s.seen){s.seen=true;SFX.spot();say(`Site ${s.id} repéré.`,'info');}
 }
+
+/* ---------- Portée de discrétion (13 novembre 2026) ----------
+   Un seul rayon, celui de la foreuse, le même pour tous les ennemis : dans ce rayon et en ligne de vue, un ennemi
+   qui ne vous a pas repéré a NOTICE de chance par tour de vous remarquer. Un ennemi déjà en chasse vous garde en vue
+   jusqu'à HUNT_MULT fois ce rayon ; au-delà il se rabat sur votre dernière position connue, fouille, puis oublie.
+   Calcul, dans cet ordre : base, ×1,5 en brisant une paroi, ÷2 en attendant sur place, ÷2 sur des herbes couchées
+   (arrondi au supérieur à chaque division), −1 par paroi adjacente (rocher ou montagne), plancher STEALTH_MIN. */
+let STEALTH_BASE=10;const NOTICE=.25,HUNT_MULT=3,STEALTH_MIN=2,DIG_MULT=1.5;
+try{const s=+localStorage.getItem('np-stealth');if(s>=2&&s<=30)STEALTH_BASE=s;}catch(e){}
+function setStealthBase(v){STEALTH_BASE=Math.max(2,Math.min(30,v|0));try{localStorage.setItem('np-stealth',STEALTH_BASE);}catch(e){}touchLocal();}
+let lastAct='move';                                   // ce que la foreuse vient de faire : 'move', 'wait' ou 'dig'
+function stealthRange(act){
+  let r=STEALTH_BASE;
+  if(act==='dig')r=Math.ceil(r*DIG_MULT);
+  if(act==='wait')r=Math.ceil(r/2);
+  if(G.t[idx(G.px,G.py)]===FLAT)r=Math.ceil(r/2);     // herbes couchées : couvert
+  let walls=0;for(const [dx,dy] of DIRS){const x=G.px+dx,y=G.py+dy;if(x<0||y<0||x>=W||y>=H)continue;const v=G.t[idx(x,y)];if(v===ROCK||v===MOUNT)walls++;}
+  return Math.max(STEALTH_MIN,r-walls);}
+function turnStealth(){G.stealth=stealthRange(lastAct);}
 
 /* ---------- Déplacement ---------- */
 const siteAt=(x,y)=>G.sites.find(s=>s.x===x&&s.y===y);
@@ -30,7 +49,7 @@ function drift(wait){if(!wait)return;
 const MOVE_COST=2;   // énergie dépensée à chaque pas
 const DEEP_MISS=.5;   // eau profonde : chance qu'un pas parte dans une autre direction, tirée au hasard
 function tryMove(dx,dy){
-  if(G.over||drilling)return;let nx=G.px+dx,ny=G.py+dy;if(nx<0||ny<0||nx>=W||ny>=H)return;
+  if(G.over||drilling)return;lastAct='move';let nx=G.px+dx,ny=G.py+dy;if(nx<0||ny<0||nx>=W||ny>=H)return;
   let v=G.t[idx(nx,ny)];
   G.face=dx>0?'r':dx<0?'l':dy>0?'d':'u';
   if(!diagOk(G.px,G.py,dx,dy)){say('Coin de paroi : pas de passage en diagonale.');SFX.blocked();render();return;}
@@ -56,6 +75,7 @@ function tryMove(dx,dy){
   if(v===ROCK||v===MOUNT){
     if(nx===0||ny===0||nx===W-1||ny===H-1){say('Bord de la carte : roche impossible à briser.');SFX.blocked();render();return;}
     if(!spend())return;
+    lastAct='dig';                                   // briser une paroi fait du bruit : portée de discrétion ×1,5
     const i=idx(nx,ny),hp=2;G.dmg=G.dmg||{};const hits=(G.dmg[i]||0)+1;G.turn++;G.msg=null;
     {const brk=hits>=hp;addFx({kind:'lunge',robot:true,dx,dy,dur:180});}
     if(hits>=hp){delete G.dmg[i];G.t[i]=RUBBLE;SFX.break();say(v===ROCK?'Rocher brisé : il ne reste que des gravats.':'La paroi cède : passage ouvert.','good');
@@ -91,7 +111,7 @@ function tryMove(dx,dy){
 
 /* ---------- Forage ---------- */
 function waitTurn(){
-  if(G.over||drilling||!$('overlay').hidden)return;G.turn++;G.msg=null;say('Le robot attend.');
+  if(G.over||drilling||!$('overlay').hidden)return;lastAct='wait';G.turn++;G.msg=null;say('Le robot attend.');
   drift(true);animalsAct();beastsAct();regen();computeFOV();render();if(G.over&&G.over.dead)dead();
 }
 function askDrill(){

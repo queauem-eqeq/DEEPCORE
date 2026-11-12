@@ -69,9 +69,11 @@ function side(){
 
   for(const [t,v,mx,nm] of [['lifeT',st.vie,st.vieMax,'lifeN'],['enT',st.energie,st.energieMax,'enN']]){$(t).innerHTML=asciiBar(v,mx,ABAR_N);$(nm).textContent=Math.floor(v)+'/'+mx;$(t).setAttribute('aria-valuenow',Math.floor(v));$(t).setAttribute('aria-valuemax',mx);}
   const tm=terrMod(G.px,G.py),ev=st.esq+tm;
+  const sr=G.stealth||STEALTH_BASE;
   const sv={vitesse:st.vitesse,degats:st.degats,capteur:st.capteur,pre:st.pre,
     esq:tm?`<span style="color:${tm>0?'var(--c1)':'var(--life)'}">${ev}</span>`:ev,
-    power:`${st.power}/t`};
+    power:`${st.power}/t`,
+    stealth:sr!==STEALTH_BASE?`<span style="color:${sr<STEALTH_BASE?'var(--c1)':'var(--life)'}">${sr}</span>`:sr};
   $('stats').innerHTML=STATS.map(([k,l,t])=>`<div class="r" title="${t}"><span>${l}</span><span>${sv[k]}</span></div>`).join('');
   $('msg').innerHTML=seenHTML();
   const lg=(G.log||[]).slice(-5);
@@ -112,6 +114,7 @@ let DB=null;
 function applySaved(d){
   const num=v=>typeof v==='number'&&isFinite(v);
   if(d.bestiaire)BEST_LIST().forEach(e=>{const b=d.bestiaire[e.key];if(b)BFIELDS.forEach(([f])=>{if(num(b[f]))e.o[f]=b[f];});});saveBest();
+  if(num(d.discretion))setStealthBase(d.discretion);
   if(d.life)LIFE_LBL.forEach(([k])=>{if(num(d.life[k]))setLife(k,d.life[k]);});
   if(d.generation){const g=d.generation;GEN_LBL.forEach(([k])=>{if(num(g[k]))GEN[k]=0;});GEN_LBL.forEach(([k])=>{if(num(g[k]))setGen(k,g[k]);});
     if(METHODS.some(m=>m[0]===g.methode)){GEN.methode=g.methode;$('gm').value=g.methode;}
@@ -131,7 +134,7 @@ function applySaved(d){
 async function saveSettings(b,m){b=b instanceof HTMLElement?b:$('saveBtn');m=m||$('saveMsg');
   if(!DB||!b)return;b.disabled=true;b.textContent='Enregistrement…';m.className='saved';m.textContent='';
   const best={};BEST_LIST().forEach(e=>{best[e.key]={nom:e.o.n};BFIELDS.forEach(([f])=>best[e.key][f]=e.o[f]);});
-  const data={enregistreLe:new Date().toISOString(),bestiaire:best,life:Object.assign({},LIFE),generation:Object.assign({},GEN),
+  const data={enregistreLe:new Date().toISOString(),bestiaire:best,discretion:STEALTH_BASE,life:Object.assign({},LIFE),generation:Object.assign({},GEN),
     planete:{largeur:W,hauteur:H,joyaux:GEM_COUNT},robot:G&&G.st?Object.assign({},G.st):null,
     palette:{active:PRESETS[PRESET_ACTIVE].n,palettes:PRESETS.map(p=>({nom:p.n,couleurs:p.c.slice()}))},
     tuiles:Object.assign({},TILE_OV)};
@@ -142,14 +145,16 @@ $('saveBtn').onclick=()=>saveSettings();
 $('bestSave').onclick=()=>saveSettings($('bestSave'),$('bestMsg'));
 $('bestClose').onclick=closeBest;
 $('bestiary').addEventListener('click',e=>{if(e.target===$('bestiary'))closeBest();});
-$('bestList').addEventListener('change',e=>{const t=e.target;if(!t.dataset||!t.dataset.f)return;const ent=BEST_LIST().find(x=>x.key===t.dataset.k),fd=BFIELDS.find(x=>x[0]===t.dataset.f);
+$('bestList').addEventListener('change',e=>{const t=e.target;
+  if(t.id==='bf-stealth'){setStealthBase(+t.value||0);t.value=STEALTH_BASE;turnStealth();side();render();return;}
+  if(!t.dataset||!t.dataset.f)return;const ent=BEST_LIST().find(x=>x.key===t.dataset.k),fd=BFIELDS.find(x=>x[0]===t.dataset.f);
   const v=Math.max(fd[2],Math.min(fd[3],Math.round(+t.value||0)));t.value=v;ent.o[t.dataset.f]=v;
   if(t.dataset.f==='pv'){for(const a of [...(G.animals||[]),...(G.beasts||[])])if(a.hp>v)a.hp=v;}
   saveBest();});
 $('bestReset').onclick=()=>{BEST_LIST().forEach(e=>Object.assign(e.o,BEST_DEF[e.key]));saveBest();buildBest();};
 const saveSnd=()=>{try{localStorage.setItem('np-son',JSON.stringify(SND));}catch(e){}};
 function toggleSound(){SND.on=!SND.on;saveSnd();say(SND.on?'Son activé.':'Son coupé.','info');if(SND.on){unlock();SFX.spot();}render();}
-function toggleVision(){SHOWVIS=!SHOWVIS;say(SHOWVIS?'Champs de vision des ennemis affichés.':'Champs de vision des ennemis masqués.','info');render();}
+function toggleVision(){SHOWVIS=!SHOWVIS;say(SHOWVIS?'Portée de discrétion affichée.':'Portée de discrétion masquée.','info');render();}
 function toggleFog(){fog=!fog;try{localStorage.setItem('np-fog',fog?'on':'off');}catch(e){}say(fog?'Brouillard de guerre activé.':'Brouillard de guerre désactivé.','info');render();}
 ['fd-stats','fd-gen','fd-life','fd-pal','fd-lab'].forEach(id=>{const d=$(id);try{d.open=localStorage.getItem('np-'+id)==='open';}catch(e){}
   d.addEventListener('toggle',()=>{try{localStorage.setItem('np-'+id,d.open?'open':'closed');}catch(e){}});});
