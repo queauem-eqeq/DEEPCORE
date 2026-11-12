@@ -36,11 +36,24 @@ function chaseStep(o,dist,fits,tx=G.px,ty=G.py){const h=dist[idx(o.x,o.y)],cur=h
    membres, et transmise par le cri d'alerte). Arrivé, il fouille SEARCH_T tours autour, puis oublie et reprend son errance.
    Plus aucune connaissance de la position réelle de la foreuse sans la voir. */
 const SEARCH_T=4;
-function spot(o){o.mem=[G.px,G.py];o.search=0;o.stuck=0;const dx=Math.sign(G.px-o.x);if(dx)o.dir=dx;}
+/* Perte de trace (13 novembre 2026, les 3 % de Brogue) : une bête qui vous chasse hors du rayon de discrétion,
+   mais encore dans la bande de chasse (HUNT_MULT ×), a LOSE_TRACK par tour de vous perdre. Elle garde alors sa
+   dernière position connue et s'y rend, mais ne vous suit plus de loin : il lui faut vous remarquer de nouveau
+   (NOTICE) à l'intérieur du rayon. Dans le rayon, elle ne vous perd jamais. */
+function voitForeuse(o,chasse){
+  const d=Math.hypot(o.x-G.px,o.y-G.py);
+  if(!los(o.x,o.y,G.px,G.py))return false;
+  if(chasse&&!o.lost){
+    if(d>G.stealth*HUNT_MULT)return false;
+    if(d>G.stealth&&Math.random()<LOSE_TRACK){o.lost=1;return false;}   // perd la trace
+    return true;}
+  if(d<=G.stealth&&Math.random()<NOTICE){o.lost=0;return true;}         // vous remarque (de nouveau)
+  return false;}
+function spot(o){o.mem=[G.px,G.py];o.search=0;o.stuck=0;o.lost=0;const dx=Math.sign(G.px-o.x);if(dx)o.dir=dx;}
 /* Chance qu'un ennemi calme vous remarque ce tour-ci (affichée au survol) : plate dans la portée de
    discrétion et en ligne de vue, nulle au-delà. Voir la portée de discrétion dans 09. */
 function detectChance(o){return (Math.hypot(o.x-G.px,o.y-G.py)<=(G.stealth||STEALTH_BASE)&&los(o.x,o.y,G.px,G.py))?Math.round(NOTICE*100):0;}
-function forget(o){o.mem=null;o.search=0;o.stuck=0;}
+function forget(o){o.mem=null;o.search=0;o.stuck=0;o.lost=0;}
 // un pas vers la dernière position connue ; renvoie false quand il faut passer à la fouille
 function seekStep(o,swim,fits,DC){const [mx,my]=o.mem,k=mx+','+my+','+(swim?1:0),d=DC[k]||(DC[k]=distFrom(mx,my,swim)),h=d[idx(o.x,o.y)];
   if(h<0){forget(o);return false;}if(h<=1){o.search=SEARCH_T;return false;}
@@ -54,9 +67,7 @@ function animalsAct(){
   if(!G.animals||G.over)return;let fled=null,swarm=null;const dist=robotDist(false),DC={};
   const backup=(G.beasts||[]).some(b=>b.hunt>0&&cheb(b,G.px,G.py)<=BACKUP_R);
   for(const a of G.animals){if(G.over)break;const sp=SPECIES[a.sp];a.mp=Math.min(2,a.mp+sp.v/5);
-    // portée de discrétion : 25 % par tour pour le remarquer ; déjà en chasse, il vous suit jusqu'à 2 fois ce rayon
-    const d=Math.hypot(a.x-G.px,a.y-G.py),inLos=los(a.x,a.y,G.px,G.py),
-      sees=inLos&&(a.aware?d<=G.stealth*HUNT_MULT:d<=G.stealth&&Math.random()<NOTICE);
+    const d=Math.hypot(a.x-G.px,a.y-G.py),sees=voitForeuse(a,!!a.aware);
     if(sees){a.aware=1;spot(a);}
     else if(a.aware&&a.search>0&&--a.search===0){a.aware=0;a.enraged=false;forget(a);}   // fouille terminée : il oublie
     else if(a.aware&&!a.mem)a.aware=0;
@@ -121,9 +132,7 @@ function beastsAct(){
   turnStealth();
   if(!G.beasts||!G.beasts.length||G.over)return;const distDry=robotDist(false),distWet=robotDist(true),DC={};let charged=null;const alarms=[];packTick();
   for(const b of G.beasts){if(G.over)break;const sp=BEASTS[b.sp];b.mp=Math.min(2,b.mp+sp.v/5);
-    // portée de discrétion : 25 % par tour pour le remarquer ; déjà en chasse, il vous suit jusqu'à 2 fois ce rayon
-    const d=Math.hypot(b.x-G.px,b.y-G.py),inLos=los(b.x,b.y,G.px,G.py),
-      sees=inLos&&(b.hunt?d<=G.stealth*HUNT_MULT:d<=G.stealth&&Math.random()<NOTICE);
+    const d=Math.hypot(b.x-G.px,b.y-G.py),sees=voitForeuse(b,b.hunt>0);
     if(sees){if(!b.hunt&&sp.alarm)alarms.push(b);if(!b.hunt&&beastVisible(b))charged=charged||sp;b.hunt=1;spot(b);if(G.px!==b.x)b.dir=Math.sign(G.px-b.x);
       if(sp.pack)for(const o of mates(b)){o.hunt=1;spot(o);}}                        // la bande partage ce qu'un membre voit
     else if(b.hunt&&b.search>0&&--b.search===0){b.hunt=0;forget(b);}                // fouille terminée : il oublie

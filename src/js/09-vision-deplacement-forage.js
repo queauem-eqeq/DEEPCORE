@@ -21,9 +21,12 @@ function computeFOV(){vis=new Uint8Array(W*H);const r=G.st.capteur,px=G.px,py=G.
    Un seul rayon, celui de la foreuse, le même pour tous les ennemis : dans ce rayon et en ligne de vue, un ennemi
    qui ne vous a pas repéré a NOTICE de chance par tour de vous remarquer. Un ennemi déjà en chasse vous garde en vue
    jusqu'à HUNT_MULT fois ce rayon (2 ×) ; au-delà il se rabat sur votre dernière position connue, fouille, puis oublie.
+   Hors du rayon mais encore dans la bande de chasse, il a LOSE_TRACK par tour de perdre votre trace (les 3 % de Brogue) :
+   il garde la dernière position connue et s'y rend, mais ne vous suit plus de loin — il doit vous remarquer de nouveau
+   (NOTICE) à l'intérieur du rayon. Marqué par o.lost, remis à zéro dès qu'il vous revoit ou qu'il oublie.
    Calcul, dans cet ordre : base, ×1,5 en brisant une paroi, ÷2 en attendant sur place, ÷2 sur des herbes couchées
    (arrondi au supérieur à chaque division), −1 par paroi adjacente (rocher ou montagne), plancher STEALTH_MIN. */
-let STEALTH_BASE=10;const NOTICE=.25,HUNT_MULT=2,STEALTH_MIN=2,DIG_MULT=1.5;
+let STEALTH_BASE=10;const NOTICE=.25,HUNT_MULT=2,STEALTH_MIN=2,DIG_MULT=1.5,LOSE_TRACK=.03;
 try{const s=+localStorage.getItem('np-stealth');if(s>=2&&s<=30)STEALTH_BASE=s;}catch(e){}
 function setStealthBase(v){STEALTH_BASE=Math.max(2,Math.min(30,v|0));try{localStorage.setItem('np-stealth',STEALTH_BASE);}catch(e){}touchLocal();}
 let lastAct='move';                                   // ce que la foreuse vient de faire : 'move', 'wait' ou 'dig'
