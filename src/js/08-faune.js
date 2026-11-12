@@ -36,7 +36,10 @@ function chaseStep(o,dist,fits,tx=G.px,ty=G.py){const h=dist[idx(o.x,o.y)],cur=h
    membres, et transmise par le cri d'alerte). Arrivé, il fouille SEARCH_T tours autour, puis oublie et reprend son errance.
    Plus aucune connaissance de la position réelle de la foreuse sans la voir. */
 const SEARCH_T=4;
-function spot(o){o.mem=[G.px,G.py];o.search=0;o.stuck=0;}                       // o vient de voir (ou de sentir) la foreuse
+function spot(o){o.mem=[G.px,G.py];o.search=0;o.stuck=0;const dx=Math.sign(G.px-o.x);if(dx)o.dir=dx;}
+/* Chance qu'un ennemi calme vous remarque ce tour-ci (affichée au survol) : plate dans la portée de
+   discrétion et en ligne de vue, nulle au-delà. Voir la portée de discrétion dans 09. */
+function detectChance(o){return (Math.hypot(o.x-G.px,o.y-G.py)<=(G.stealth||STEALTH_BASE)&&los(o.x,o.y,G.px,G.py))?Math.round(NOTICE*100):0;}
 function forget(o){o.mem=null;o.search=0;o.stuck=0;}
 // un pas vers la dernière position connue ; renvoie false quand il faut passer à la fouille
 function seekStep(o,swim,fits,DC){const [mx,my]=o.mem,k=mx+','+my+','+(swim?1:0),d=DC[k]||(DC[k]=distFrom(mx,my,swim)),h=d[idx(o.x,o.y)];
@@ -111,7 +114,8 @@ function hurtRobot(b,sp){sp=sp||BEASTS[b.sp];const le=sp.n.match(/^[aeiouyéèê
   if(!roll(ch)){addFx({kind:'lunge',beast:b,dx:Math.sign(G.px-b.x),dy:Math.sign(G.py-b.y),dur:200});addFx({kind:'num',x:G.px,y:G.py,txt:'0',col:'#8aa9a2',dur:750});
     SFX.whoosh();sayMore(`${le}${sp.n.toLowerCase()} attaque et rate (${ch} %).`);return;}
   addFx({kind:'lunge',beast:b,dx:Math.sign(G.px-b.x),dy:Math.sign(G.py-b.y),dur:200});
-  addFx({kind:'shake',amp:5,dur:220});G.st.vie=Math.max(0,G.st.vie-sp.dmg);addFx({kind:'num',x:G.px,y:G.py,txt:'-'+sp.dmg,col:'#ff3b3b',dur:750});SFX.bite();sayMore(`${le}${sp.n.toLowerCase()} attaque : −${sp.dmg} vie.`,'warn');
+  const cr=roll(sp.crit||0),dm=sp.dmg*(cr?CRIT_X:1);   // coup critique de l'ennemi : selon sa stat CRIT
+  addFx({kind:'shake',amp:cr?9:5,dur:cr?320:220});G.st.vie=Math.max(0,G.st.vie-dm);addFx({kind:'num',x:G.px,y:G.py,txt:'-'+dm+(cr?'!':''),col:'#ff3b3b',dur:cr?1000:750});SFX.bite();sayMore(`${le}${sp.n.toLowerCase()} attaque${cr?' : coup critique':''} : −${dm} vie.`,'warn');
   if(G.st.vie<=0){G.over={dead:true};}}
 function beastsAct(){
   turnStealth();

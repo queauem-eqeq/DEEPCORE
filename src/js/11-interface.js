@@ -72,7 +72,7 @@ function side(){
   const sr=G.stealth||STEALTH_BASE;
   const sv={vitesse:st.vitesse,degats:st.degats,capteur:st.capteur,pre:st.pre,
     esq:tm?`<span style="color:${tm>0?'var(--c1)':'var(--life)'}">${ev}</span>`:ev,
-    power:`${st.power}/t`,
+    crit:`${st.crit??5} %`,power:`${st.power}/t`,nul2:0,
     stealth:sr!==STEALTH_BASE?`<span style="color:${sr<STEALTH_BASE?'var(--c1)':'var(--life)'}">${sr}</span>`:sr};
   $('stats').innerHTML=STATS.map(([k,l,t])=>`<div class="r" title="${t}"><span>${l}</span><span>${sv[k]}</span></div>`).join('');
   $('msg').innerHTML=seenHTML();

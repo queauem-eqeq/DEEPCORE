@@ -77,6 +77,7 @@ Roguelike au tour par tour dans une esthétique inspirée de Cogmind et de Brogu
 | DEG | 10 | dégâts par coup de foreuse |
 | PRE | 80 | précision |
 | ESQ | 10 | esquive (modifiée par le terrain) |
+| CRIT | 5 % | chance de coup critique (×3 dégâts) ; coup par surprise toujours critique |
 | POW | 5 / tour | recharge d'énergie (6 avant le 9 novembre 2026, 3 le 9 novembre) |
 
 - Chaque coup de foreuse (roche ou animal) coûte **10 d'énergie** ; refusé sous 10.
@@ -93,11 +94,11 @@ Roguelike au tour par tour dans une esthétique inspirée de Cogmind et de Brogu
 
 ## 7. Bestiaire
 
-| Espèce | VIT | PV | DÉG | PRE | ESQ | Nombre (Life) |
-|---|---|---|---|---|---|---|
-| Insectoïde | 6 | 10 | 3 | 60 | 30 | 21 |
-| Crabos | 5 | 25 | 5 | 70 | 15 | 15 |
-| Cafar | 5 | 10 | 5 | 60 | 0 | 12 (bandes de 2 à 5 : tirage parmi 2, 3, 4, 4, 5) |
+| Espèce | VIT | PV | DÉG | PRE | ESQ | CRIT | Nombre (Life) |
+|---|---|---|---|---|---|---|---|
+| Insectoïde | 6 | 10 | 3 | 60 | 30 | 5 % | 21 |
+| Crabos | 5 | 25 | 5 | 70 | 15 | 5 % | 15 |
+| Cafar | 5 | 10 | 5 | 60 | 0 | 5 % | 12 (bandes de 2 à 5 : tirage parmi 2, 3, 4, 4, 5) |
 
 La statistique **DÉT (détection)** par espèce a été supprimée le 13 novembre 2026 : toutes les espèces partagent désormais la portée de discrétion de la foreuse (ci-dessous).
 
@@ -107,6 +108,8 @@ La statistique **DÉT (détection)** par espèce a été supprimée le 13 novemb
 - **Eau** : les crabos entrent dans l'eau peu profonde et profonde (et y subissent −20 d'esquive) ; les insectoïdes et les cafars n'entrent dans aucune eau et la contournent (bandes de cafars comprises). Si la foreuse est dans l'eau, ils l'attaquent depuis la rive.
 - **Poursuite (tous les ennemis)** : chaque ennemi qui chasse ou attaque suit le plus court chemin vers la foreuse. Si un autre ennemi bloque le passage, il contourne l'obstacle (détour de 10 cases au plus) vers une case libre autour de la foreuse, au lieu d'attendre : plusieurs ennemis peuvent ainsi l'encercler et attaquer en même temps (jusqu'à 8).
 - **Diagonales comme dans Brogue** (10 novembre 2026) : un pas ou un coup en diagonale est **impossible si l'une des deux cases voisines orthogonales est une paroi** (rocher, montagne, coque du vaisseau) — on ne coupe pas les coins. Vaut pour la foreuse (message « Coin de paroi »), tous les ennemis (déplacements et attaques), le courant de l'eau profonde, les trajets automatiques et la génération (connexion des zones et accès aux sites calculés avec la même règle). L'eau et les gouffres ne bloquent pas les diagonales. Dans le brouillard, le trajet ne tient compte que des coins déjà vus.
+- **Coup par surprise** : frapper un ennemi qui **ne vous a pas repéré** (ni en chasse, ni alerté, ni en train de vous chercher) **touche toujours** et est **toujours critique**. Message « Coup par surprise ! ».
+- **Coups critiques** : un critique fait **×3 dégâts**. Foreuse : stat **CRIT 5 %** au départ (+5 % par amélioration de joyau). Ennemis : chacun a sa stat CRIT (5 % par défaut, réglable dans le Bestiaire, colonne « Critique % »). Chiffre flottant suivi de « ! » (couleur accent pour la foreuse), secousse et son sec.
 - **Mémoire, dernière position connue (tous les ennemis, 10 novembre 2026)** : un ennemi ne connaît la position de la foreuse que s'il la voit. Il retient l'endroit où il l'a vue ; quand il ne la voit plus, il s'y rend par le plus court chemin. Pour une **bande de cafars**, cette position est **partagée** : ce qu'un membre voit, toute la bande le sait ; le **cri d'alerte** transmet aussi la position aux ennemis alertés. Crabos et insectoïdes ont chacun leur propre mémoire. Arrivé (ou bloqué 3 tours), il **fouille 4 tours** autour, puis **oublie** et reprend son comportement de départ (errance, voyage de la bande). Un coup de foreuse le met aussi au courant. État affiché : « en chasse », « cherche » (vers la dernière position), « fouille ». Remplace l'ancienne poursuite « à l'aveugle » de 8 tours (qui connaissait la position réelle).
 - **Portée de discrétion (13 novembre 2026, inspirée de Brogue)** : la détection appartient à la foreuse, pas aux ennemis. **Un seul rayon, le même pour toutes les espèces** : un ennemi qui ne vous a pas repéré, situé dans ce rayon **et en ligne de vue**, a **25 % de chance par tour** de vous remarquer (chance plate, sans effet de la distance : c'est le choix de Brogue depuis sa version 1.7.3, pour la lisibilité). Calcul, dans cet ordre : **base 10**, **×1,5 en brisant un rocher ou une montagne**, **÷2 en attendant sur place**, **÷2 sur des herbes couchées** (arrondi au supérieur à chaque division), **−1 par paroi adjacente** (rocher ou montagne, les 8 voisines), **plancher 2**. Exemples : 10 en terrain dégagé, 7 le long d'une falaise (3 parois) ou sur des herbes couchées, 5 en attendant, 3 en attendant sur des herbes couchées, 2 en attendant dans un recoin, 15 en brisant une paroi. Un ennemi **déjà en chasse** vous garde en vue jusqu'à **3 fois** ce rayon ; au-delà il se rabat sur votre dernière position connue, fouille, puis oublie. Valeur de base réglable dans le Bestiaire (« Portée de discrétion »), affichée dans la colonne de droite sous **DIS** (ambre quand elle est sous la base, rouge au-dessus). Le forage d'un site ne compte pas : il termine le niveau, les ennemis ne jouent plus.
 - **Touche V** (10 novembre 2026, refaite le 13 novembre) : affiche ou masque la **portée de discrétion** — les cases d'où un ennemi pourrait vous remarquer (rayon et ligne de vue depuis la foreuse), **entourées d'un contour pointillé blanc** (pixels de tuile opaques, un sur deux, sur le bord de la zone ; l'intérieur reste intact). Remplace l'ancien affichage du champ de vision de chaque ennemi.
@@ -133,7 +136,7 @@ La statistique **DÉT (détection)** par espèce a été supprimée le 13 novemb
 - Plein écran ; colonne noire à droite, défilable à la molette ou au doigt mais sans barre de défilement (pour ne pas la déformer) ; journal de bord sous la carte (5 dernières lignes, numéro de tour, ×N pour les répétitions).
 - **Statut** : barres ASCII `█`/`░` (20 caractères) — Vie en couleur technologie, Énergie en couleur structure ; pas de chiffres.
 - **Statut** : barres Vie et Énergie suivies de leur valeur chiffrée (« 63/100 »), remises le 10 novembre 2026.
-- **Statistiques** (sous-menu repliable, sous Statut) sur deux colonnes : VIT, EYE, DEG, PRE, ESQ, POW (ESQ affiche la valeur modifiée, colorée, sans le modificateur).
+- **Statistiques** (sous-menu repliable, sous Statut) en **grille 3 × 3** : VIT, EYE, DEG / PRE, ESQ, CRIT / POW, NUL 0, NUL 0 (deux emplacements libres) (ESQ affiche la valeur modifiée, colorée, sans le modificateur).
 - **En vue** (sans titre, sous la mini-carte) : fiche d'inspection de la case survolée en tête (voir ci-dessous), puis animaux visibles (icône, barre de vie ASCII 10 caractères, colonnes TOUCHER / SUBIR colorées), joyaux, sites.
 - **Mini-carte** pleine largeur ; ennemis en points rouges ; un clic recentre la vue (mode carte) ; bouton maintenu + glisser = défilement en temps réel. Saisi à l'intérieur, le cadre suit le pointeur sans sauter ; saisi à l'extérieur, il se centre d'abord sous le pointeur. Fonctionne aussi au doigt.
 - Sous-menus repliables : **Statistiques**, **Génération** (+ bouton REGEN), **Life** (nombre d'animaux par espèce), **Palette**, **Lab** (Bestiaire, Tile editor, Intro ; plus de bouton Enregistrer pour l'instant les réglages, aide des touches).
