@@ -54,7 +54,7 @@ function animalsAct(){
   if(!G.animals||G.over)return;let fled=null,swarm=null;const dist=robotDist(false),DC={};
   const backup=(G.beasts||[]).some(b=>b.hunt>0&&cheb(b,G.px,G.py)<=BACKUP_R);
   for(const a of G.animals){if(G.over)break;const sp=SPECIES[a.sp];a.mp=Math.min(2,a.mp+sp.v/5);
-    // portée de discrétion : 25 % par tour pour le remarquer ; déjà en chasse, il vous suit jusqu'à 3 fois ce rayon
+    // portée de discrétion : 25 % par tour pour le remarquer ; déjà en chasse, il vous suit jusqu'à 2 fois ce rayon
     const d=Math.hypot(a.x-G.px,a.y-G.py),inLos=los(a.x,a.y,G.px,G.py),
       sees=inLos&&(a.aware?d<=G.stealth*HUNT_MULT:d<=G.stealth&&Math.random()<NOTICE);
     if(sees){a.aware=1;spot(a);}
@@ -121,7 +121,7 @@ function beastsAct(){
   turnStealth();
   if(!G.beasts||!G.beasts.length||G.over)return;const distDry=robotDist(false),distWet=robotDist(true),DC={};let charged=null;const alarms=[];packTick();
   for(const b of G.beasts){if(G.over)break;const sp=BEASTS[b.sp];b.mp=Math.min(2,b.mp+sp.v/5);
-    // portée de discrétion : 25 % par tour pour le remarquer ; déjà en chasse, il vous suit jusqu'à 3 fois ce rayon
+    // portée de discrétion : 25 % par tour pour le remarquer ; déjà en chasse, il vous suit jusqu'à 2 fois ce rayon
     const d=Math.hypot(b.x-G.px,b.y-G.py),inLos=los(b.x,b.y,G.px,G.py),
       sees=inLos&&(b.hunt?d<=G.stealth*HUNT_MULT:d<=G.stealth&&Math.random()<NOTICE);
     if(sees){if(!b.hunt&&sp.alarm)alarms.push(b);if(!b.hunt&&beastVisible(b))charged=charged||sp;b.hunt=1;spot(b);if(G.px!==b.x)b.dir=Math.sign(G.px-b.x);

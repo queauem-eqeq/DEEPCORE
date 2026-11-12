@@ -20,10 +20,10 @@ function computeFOV(){vis=new Uint8Array(W*H);const r=G.st.capteur,px=G.px,py=G.
 /* ---------- Portée de discrétion (13 novembre 2026) ----------
    Un seul rayon, celui de la foreuse, le même pour tous les ennemis : dans ce rayon et en ligne de vue, un ennemi
    qui ne vous a pas repéré a NOTICE de chance par tour de vous remarquer. Un ennemi déjà en chasse vous garde en vue
-   jusqu'à HUNT_MULT fois ce rayon ; au-delà il se rabat sur votre dernière position connue, fouille, puis oublie.
+   jusqu'à HUNT_MULT fois ce rayon (2 ×) ; au-delà il se rabat sur votre dernière position connue, fouille, puis oublie.
    Calcul, dans cet ordre : base, ×1,5 en brisant une paroi, ÷2 en attendant sur place, ÷2 sur des herbes couchées
    (arrondi au supérieur à chaque division), −1 par paroi adjacente (rocher ou montagne), plancher STEALTH_MIN. */
-let STEALTH_BASE=10;const NOTICE=.25,HUNT_MULT=3,STEALTH_MIN=2,DIG_MULT=1.5;
+let STEALTH_BASE=10;const NOTICE=.25,HUNT_MULT=2,STEALTH_MIN=2,DIG_MULT=1.5;
 try{const s=+localStorage.getItem('np-stealth');if(s>=2&&s<=30)STEALTH_BASE=s;}catch(e){}
 function setStealthBase(v){STEALTH_BASE=Math.max(2,Math.min(30,v|0));try{localStorage.setItem('np-stealth',STEALTH_BASE);}catch(e){}touchLocal();}
 let lastAct='move';                                   // ce que la foreuse vient de faire : 'move', 'wait' ou 'dig'
