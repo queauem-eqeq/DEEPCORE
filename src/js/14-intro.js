@@ -94,7 +94,7 @@ introCv.addEventListener('pointerdown',()=>{unlock();});
 function introCell(x,i,px,py){const t=G.t[i],h=hash(i%W,(i/W)|0),put2=(tl,a)=>{if(!tl)return;x.globalAlpha=a;x.drawImage(tl,px,py,S,S);};
   x.globalAlpha=1;x.fillStyle='#020605';x.fillRect(px,py,S,S);
   if(t!==CHASM){x.globalAlpha=.08;x.fillStyle=PAL['3'];x.fillRect(px,py,S,S);}
-  const lv=densLevel(i);if(t!==BRIDGE)put2(lv?TL[`gd${lv}_${h%3}`]:TL.ground0,lv?.55+lv*.08:.6);
+  if(t!==BRIDGE)put2(TL.ground0,.6);
   if(t===ROCK)put2(h%3?TL.rock:TL.rock2,.95);
   else if(t===MOUNT){const up=i>=W&&G.t[i-W]===MOUNT;put2(up?TL.mtBody:TL.mtTop,.9);}
   else if(t===LIQ){x.globalAlpha=.24;x.fillStyle=PAL['2'];x.fillRect(px,py,S,S);put2(h%2?TL.liq1:TL.liq0,.9);}
@@ -247,7 +247,7 @@ if(!reduced)setInterval(()=>{liqFrame^=1;if(G&&$('overlay').hidden)render();},65
 function start(data){
   buildTiles();buildGen();buildLife();
   const fromHot=!!(data&&data.G&&data.G.t&&data.G.t.length===W*H);
-  if(data&&data.G&&data.G.t&&data.G.st&&data.G.t.length===W*H){G=data.G;G.dmg=G.dmg||{};if(G.st)G.st.cout=10;if(G.st&&G.st.power<5)G.st.power=5;if(G.st&&(G.st.capteur<10||G.st.capteur===12||G.st.capteur===15))G.st.capteur=10;if(!G.ore)hideOre();if(!G.st||G.st.pre==null||G.st.energieMax!==100){G.st={vie:100,vieMax:100,energie:100,energieMax:100,repar:0,power:5,vitesse:5,degats:10,capteur:10,cout:10,pre:80,esq:10};}
+  if(data&&data.G&&data.G.t&&data.G.st&&data.G.t.length===W*H){G=data.G;G.dmg=G.dmg||{};if(G.st&&G.st.crit==null)G.st.crit=5;if(G.st)G.st.cout=10;if(G.st&&G.st.power<5)G.st.power=5;if(G.st&&(G.st.capteur<10||G.st.capteur===12||G.st.capteur===15))G.st.capteur=10;if(!G.ore)hideOre();if(!G.st||G.st.pre==null||G.st.energieMax!==100){G.st={vie:100,vieMax:100,energie:100,energieMax:100,repar:0,power:5,vitesse:5,degats:10,capteur:10,cout:10,pre:80,esq:10,crit:5};}
   if(!G.gems)hideGems();
   if(!G.beasts||!G.beasts.some(b=>b.sp===1)&&LIFE.cafar>0)spawnBeasts();
   if(G.fv!==2){G.fv=2;G.blood={};G.beasts=[];spawnAnimals();spawnBeasts();}started=!!data.started;computeFOV();}else newGame();

@@ -115,7 +115,7 @@ function render(){
   for(let y=camY;y<Math.min(H,camY+rows+1);y++)for(let x=camX;x<Math.min(W,camX+cols+1);x++){
     const i=idx(x,y),v=fog?vis[i]:1;if(!v&&!G.seen[i])continue;const t=G.t[i],h=hash(x,y),k=v?1:.28;
     if(t!==CHASM){ctx.globalAlpha=.08*k;ctx.fillStyle=PAL['3'];ctx.fillRect((x-camX)*S,(y-camY)*S,S,S);}
-    const lv=densLevel(i);if(t===BRIDGE){}else if(lv)put(TL[`gd${lv}_${h%3}`],x,y,(.55+lv*.08)*k);else put(TL.ground0,x,y,.6*k);
+    if(t!==BRIDGE)put(TL.ground0,x,y,.6*k);   // sol uniforme : plus de variations près des sites (13 novembre 2026)
     if(t===ROCK)put(h%3?TL.rock:TL.rock2,x,y,.95*k);
     else if(t===MOUNT)put(y>0&&G.t[idx(x,y-1)]===MOUNT?TL.mtBody:TL.mtTop,x,y,.9*k);
     else if((t===SHIP||t===DECK)&&G.ship){const sk=TL['ship_'+(x-G.ship.x)+'_'+(y-G.ship.y)];if(sk)put(sk,x,y,k);}
@@ -139,15 +139,12 @@ function render(){
   ctx.globalAlpha=1;
   if(G.blood)for(const k in G.blood){const i=+k,bx=i%W,by=(i/W)|0;if(fog&&!G.seen[i])continue;put(TL['blood'+G.blood[k]],bx,by,fog&&!vis[i]?.3:.9);}
   for(const s of G.sites){if(fog&&!G.seen[idx(s.x,s.y)])continue;put(s.known?TL['site'+s.depth]:TL.siteUnknown,s.x,s.y,!fog||vis[idx(s.x,s.y)]?1:.35);}
-  // touche V : champ de vision de chaque ennemi visible (cases qu'il peut voir : portée de détection et ligne de vue), entouré d'un pointillé
-  if(SHOWVIS){   // deux zones sans superposition : rouge = ennemis qui vous ont repéré (prioritaire), blanche = les autres
-    const seen=new Set(),calm=new Set();
-    for(const [o,r,al] of [...(G.beasts||[]).map(b=>[b,BEASTS[b.sp].d,b.hunt>0]),...(G.animals||[]).map(a=>[a,SPECIES[a.sp].d+(a.aware?5:0),!!a.aware])]){
-      if(fog&&!vis[idx(o.x,o.y)])continue;const cells=al?seen:calm;
-      for(let y=Math.max(0,o.y-r);y<=Math.min(H-1,o.y+r);y++)for(let x=Math.max(0,o.x-r);x<=Math.min(W-1,o.x+r);x++){
-        const i=idx(x,y);if(cells.has(i)||Math.hypot(x-o.x,y-o.y)>r||(fog&&!G.seen[i]))continue;if(los(o.x,o.y,x,y))cells.add(i);}}
-    for(const i of seen)calm.delete(i);
-    drawVisCells(calm,'#ffffff');drawVisCells(seen,'#b8242a');}
+  // touche V : portée de discrétion de la foreuse — les cases d'où un ennemi peut vous remarquer, entourées d'un pointillé
+  if(SHOWVIS&&!G.over){
+    const r=G.stealth||STEALTH_BASE,cells=new Set();
+    for(let y=Math.max(0,G.py-r);y<=Math.min(H-1,G.py+r);y++)for(let x=Math.max(0,G.px-r);x<=Math.min(W-1,G.px+r);x++){
+      const i=idx(x,y);if(Math.hypot(x-G.px,y-G.py)>r)continue;if(los(G.px,G.py,x,y))cells.add(i);}
+    drawVisCells(cells,'#ffffff');}
   drawPath();
   if(G.animals)for(const a of G.animals)if(!fog||vis[idx(a.x,a.y)]){const [lx,ly]=lungeOff(f=>f.kind==='lunge'&&f.beast===a);ctx.globalAlpha=1;ctx.drawImage(TL['an'+a.sp+(a.dir<0?'l':'r')],(a.x-camX)*S+lx,(a.y-camY)*S+ly,S,S);}
   if(G.beasts)for(const b of G.beasts){if(!beastVisible(b))continue;const [lx,ly]=lungeOff(f=>f.kind==='lunge'&&f.beast===b);

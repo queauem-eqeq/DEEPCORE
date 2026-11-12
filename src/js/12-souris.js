@@ -1,3 +1,5 @@
+// icône d'œil (pixel art) de la fiche de survol : risque d'être repéré par un ennemi calme
+const EYE_SVG='<svg class="eyeic" viewBox="0 0 11 7" width="22" height="14" shape-rendering="crispEdges" aria-hidden="true"><path fill="currentColor" d="M3 0h5v1H3zM1 1h2v1H1zM8 1h2v1H8zM0 2h1v3H0zM10 2h1v3h-1zM1 5h2v1H1zM8 5h2v1H8zM3 6h5v1H3zM4 2h3v3H4z"/></svg>';
 /* ---------- Souris, inspection et déplacement automatique (inspirés de Brogue) ---------- */
 let HOV=null,INSPECT=false,TRAV=null,lastPT='mouse',PC={k:'',p:null};
 const busy=()=>!G||!!G.over||drilling||!$('overlay').hidden;
@@ -104,7 +106,8 @@ function inspectHTML(){const {x,y}=HOV;if(x<0||y<0||x>=W||y>=H)return '';
     const state=isB?(occ.hunt>0?(occ.sees?'en chasse':occ.search>0?'fouille les environs':'se dirige vers votre dernière position connue'):P?(P.pause>0?'au repos':'en route'):'erre'):({attack:'attaque',flee:'recule',follow:'suit',hold:'observe',seek:'se dirige vers votre dernière position connue',search:'fouille les environs'}[occ.mode]||'ne vous a pas repéré');
     const me=hitChance(G.st.pre,sp.esq+terrMod(x,y)),them=isB||occ.mode==='attack'?hitChance(sp.pre,robotEsq()):null;
     out.push(head(ICON[isB?'bz'+occ.sp+'r':'an'+occ.sp+'r'],sp.n,`${state} · ${dt}`),
-      `<div class="kv"><span>PV <b>${hp}/${sp.pv}</b></span><span>DÉG <b>${sp.dmg}</b></span><span>PRE <b>${sp.pre}</b></span><span>ESQ <b>${sp.esq+terrMod(x,y)}</b></span><span>VIT <b>${sp.v}</b></span><span>DÉT <b>${sp.d}</b></span></div>`,
+      `<div class="kv"><span>PV <b>${hp}/${sp.pv}</b></span><span>DÉG <b>${sp.dmg}</b></span><span>PRE <b>${sp.pre}</b></span><span>ESQ <b>${sp.esq+terrMod(x,y)}</b></span><span>VIT <b>${sp.v}</b></span></div>`,
+      ((isB?!(occ.hunt>0):!occ.mode)?`<p class="eye" title="Chance qu’il vous repère à chaque tour">${EYE_SVG} <b>${detectChance(occ)} %</b></p>`:''),
       `<p>Toucher <b style="color:${chanceCol(me)}">${me} %</b> · Subir <b style="color:${them==null?'var(--dim)':chanceCol(100-them)}">${them==null?'—':them+' %'}</b></p>`,
       `<p>${BEHAV[key]}</p>`);}
   else out.push(head('',tn,dt));

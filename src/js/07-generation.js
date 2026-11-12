@@ -168,31 +168,25 @@ function genPlanet(){
     if(sites.length<NSITES&&!last)continue;
     const depths=[1,2,3,4,5].sort(()=>Math.random()-.5);
     G={t,seen:new Array(N).fill(0),px:sx,py:sy,turn:0,dist:0,over:null,msg:null,ship,face:'d',
-      st:{vie:100,vieMax:100,energie:100,energieMax:100,repar:0,power:5,vitesse:5,degats:10,capteur:10,cout:10,pre:80,esq:10},
+      st:{vie:100,vieMax:100,energie:100,energieMax:100,repar:0,power:5,vitesse:5,degats:10,capteur:10,cout:10,pre:80,esq:10,crit:5},
       sites:sites.map((s,i)=>({x:s.x,y:s.y,depth:depths[i],id:LETTERS[i],seen:false,known:false}))};
     return;
   }
 }
-function newGame(){drilling=false;genPlanet();hideGems();hideOre();G.log=[];G.tracks={};G.lastDir=null;G.beasts=[];G.blood={};G.fv=2;spawnAnimals();spawnBeasts();computeFOV();say(`Atterrissage confirmé. ${G.sites.length} sites de forage signalés par l’orbiteur. La foreuse est dans la soute ; la porte est à l’arrière.`,'info');}
-
-/* ---------- Indice de proximité des sites ---------- */
-let densG=null,dens=null;
-function densLevel(i){
-  if(densG!==G){densG=G;dens=new Uint8Array(W*H);
-    for(let j=0;j<W*H;j++){const x=j%W,y=(j/W)|0;let m=1e9;for(const s of G.sites){const d=Math.hypot(s.x-x,s.y-y);if(d<m)m=d;}
-      dens[j]=m<=3?3:m<=6?2:m<=9?1:0;}}
-  return dens[i];}
+function newGame(){drilling=false;genPlanet();hideGems();hideOre();G.log=[];G.tracks={};G.lastDir=null;G.beasts=[];G.blood={};G.fv=2;spawnAnimals();spawnBeasts();lastAct='move';turnStealth();computeFOV();say(`Atterrissage confirmé. ${G.sites.length} sites de forage signalés par l’orbiteur. La foreuse est dans la soute ; la porte est à l’arrière.`,'info');}
 
 /* ---------- Bestiaire : édition des statistiques ---------- */
-const BFIELDS=[['v','Vitesse',1,10],['d','Détection',1,15],['pv','PV',1,200],['dmg','Dégâts',0,100],['pre','Précision',0,100],['esq','Esquive',0,100]];
+const BFIELDS=[['v','Vitesse',1,10],['pv','PV',1,200],['dmg','Dégâts',0,100],['pre','Précision',0,100],['esq','Esquive',0,100],['crit','Critique %',0,100]];
 const BEST_LIST=()=>[{key:'insectoide',o:SPECIES[0],ic:'an0r',role:'Suit à distance, attaque avec les crabos'},{key:'crabos',o:BEASTS[0],ic:'bz0r',role:'Chasse le robot'},{key:'cafar',o:BEASTS[1],ic:'bz1r',role:'En bande de 2 à 5, donne l’alerte'}];
 const BEST_DEF={};BEST_LIST().forEach(e=>{BEST_DEF[e.key]={};BFIELDS.forEach(([f])=>BEST_DEF[e.key][f]=e.o[f]);});
 try{const b=JSON.parse(localStorage.getItem('np-best')||'null');if(b)BEST_LIST().forEach(e=>{if(b[e.key])BFIELDS.forEach(([f])=>{if(typeof b[e.key][f]==='number')e.o[f]=b[e.key][f];});});}catch(e){}
 function saveBest(){const o={};BEST_LIST().forEach(e=>{o[e.key]={};BFIELDS.forEach(([f])=>o[e.key][f]=e.o[f]);});try{localStorage.setItem('np-best',JSON.stringify(o));}catch(e){}touchLocal();}
-try{if(localStorage.getItem('np-mig')!=='eq1'){SPECIES[0].d=5;SPECIES[0].v=6;BEASTS[0].d=5;BEASTS[0].pv=25;saveBest();
+try{if(localStorage.getItem('np-mig')!=='eq1'){SPECIES[0].v=6;BEASTS[0].pv=25;saveBest();
   LIFE.crabos=15;localStorage.setItem('np-life',JSON.stringify(LIFE));localStorage.setItem('np-mig','eq1');}}catch(e){}
 function buildBest(){
-  $('bestList').innerHTML=BEST_LIST().map(e=>`<div class="bcard"><div class="bh"><img src="${ICON[e.ic]||''}" alt=""><div><b>${e.o.n}</b><br><span>${e.role}</span></div></div>
+  $('bestList').innerHTML=`<div class="bcard"><div class="bh"><div><b>Portée de discrétion</b><br><span>Rayon commun à tous les ennemis : dans ce rayon et en vue, 25 % par tour de vous remarquer</span></div></div>
+    <div class="fields"><label for="bf-stealth">Base<input type="number" id="bf-stealth" min="2" max="30" step="1" value="${STEALTH_BASE}"></label></div></div>`
+  +BEST_LIST().map(e=>`<div class="bcard"><div class="bh"><img src="${ICON[e.ic]||''}" alt=""><div><b>${e.o.n}</b><br><span>${e.role}</span></div></div>
     <div class="fields">${BFIELDS.map(([f,l,mn,mx])=>`<label for="bf-${e.key}-${f}">${l}<input type="number" id="bf-${e.key}-${f}" data-k="${e.key}" data-f="${f}" min="${mn}" max="${mx}" step="1" value="${e.o[f]}"></label>`).join('')}</div></div>`).join('');
 }
 function openBest(){buildBest();$('bestiary').hidden=false;$('bestClose').focus();}
@@ -209,6 +203,7 @@ const UPGRADES=[
   ['degats','DEG (dégâts)','+5',st=>{st.degats+=5;}],
   ['pre','PRE (précision)','+5',st=>{st.pre+=5;}],
   ['esq','ESQ (esquive)','+5',st=>{st.esq+=5;}],
+  ['crit','CRIT (coup critique)','+5 %',st=>{st.crit=(st.crit??5)+5;}],
   ['power','POW (énergie/tour)','+1',st=>{st.power+=1;}]
 ];
 // Éclats de métal : ORE_PCT % des cases de montagne (hors rangée extérieure indestructible et joyau) en contiennent ; brisée, la roche les laisse

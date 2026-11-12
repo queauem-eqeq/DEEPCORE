@@ -77,6 +77,7 @@ Roguelike au tour par tour dans une esthétique inspirée de Cogmind et de Brogu
 | DEG | 10 | dégâts par coup de foreuse |
 | PRE | 80 | précision |
 | ESQ | 10 | esquive (modifiée par le terrain) |
+| CRIT | 5 % | chance de coup critique (×3 dégâts) ; coup par surprise toujours critique |
 | POW | 5 / tour | recharge d'énergie (6 avant le 9 novembre 2026, 3 le 9 novembre) |
 
 - Chaque coup de foreuse (roche ou animal) coûte **10 d'énergie** ; refusé sous 10.
@@ -93,11 +94,13 @@ Roguelike au tour par tour dans une esthétique inspirée de Cogmind et de Brogu
 
 ## 7. Bestiaire
 
-| Espèce | VIT | DÉT | PV | DÉG | PRE | ESQ | Nombre (Life) |
+| Espèce | VIT | PV | DÉG | PRE | ESQ | CRIT | Nombre (Life) |
 |---|---|---|---|---|---|---|---|
-| Insectoïde | 6 | 5 | 10 | 3 | 60 | 30 | 21 |
-| Crabos | 5 | 5 | 25 | 5 | 70 | 15 | 15 |
-| Cafar | 5 | 4 | 10 | 5 | 60 | 0 | 12 (bandes de 2 à 5 : tirage parmi 2, 3, 4, 4, 5) |
+| Insectoïde | 6 | 10 | 3 | 60 | 30 | 5 % | 21 |
+| Crabos | 5 | 25 | 5 | 70 | 15 | 5 % | 15 |
+| Cafar | 5 | 10 | 5 | 60 | 0 | 5 % | 12 (bandes de 2 à 5 : tirage parmi 2, 3, 4, 4, 5) |
+
+La statistique **DÉT (détection)** par espèce a été supprimée le 13 novembre 2026 : toutes les espèces partagent désormais la portée de discrétion de la foreuse (ci-dessous).
 
 (Valeurs par défaut du code. Les valeurs réellement utilisées sont celles enregistrées par le joueur — voir § 10.)
 
@@ -105,10 +108,13 @@ Roguelike au tour par tour dans une esthétique inspirée de Cogmind et de Brogu
 - **Eau** : les crabos entrent dans l'eau peu profonde et profonde (et y subissent −20 d'esquive) ; les insectoïdes et les cafars n'entrent dans aucune eau et la contournent (bandes de cafars comprises). Si la foreuse est dans l'eau, ils l'attaquent depuis la rive.
 - **Poursuite (tous les ennemis)** : chaque ennemi qui chasse ou attaque suit le plus court chemin vers la foreuse. Si un autre ennemi bloque le passage, il contourne l'obstacle (détour de 10 cases au plus) vers une case libre autour de la foreuse, au lieu d'attendre : plusieurs ennemis peuvent ainsi l'encercler et attaquer en même temps (jusqu'à 8).
 - **Diagonales comme dans Brogue** (10 novembre 2026) : un pas ou un coup en diagonale est **impossible si l'une des deux cases voisines orthogonales est une paroi** (rocher, montagne, coque du vaisseau) — on ne coupe pas les coins. Vaut pour la foreuse (message « Coin de paroi »), tous les ennemis (déplacements et attaques), le courant de l'eau profonde, les trajets automatiques et la génération (connexion des zones et accès aux sites calculés avec la même règle). L'eau et les gouffres ne bloquent pas les diagonales. Dans le brouillard, le trajet ne tient compte que des coins déjà vus.
+- **Coup par surprise** : frapper un ennemi qui **ne vous a pas repéré** (ni en chasse, ni alerté, ni en train de vous chercher) **touche toujours** et est **toujours critique**. Message « Coup par surprise ! ».
+- **Coups critiques** : un critique fait **×3 dégâts**. Foreuse : stat **CRIT 5 %** au départ (+5 % par amélioration de joyau). Ennemis : chacun a sa stat CRIT (5 % par défaut, réglable dans le Bestiaire, colonne « Critique % »). Chiffre flottant suivi de « ! » (couleur accent pour la foreuse), secousse et son sec.
 - **Mémoire, dernière position connue (tous les ennemis, 10 novembre 2026)** : un ennemi ne connaît la position de la foreuse que s'il la voit. Il retient l'endroit où il l'a vue ; quand il ne la voit plus, il s'y rend par le plus court chemin. Pour une **bande de cafars**, cette position est **partagée** : ce qu'un membre voit, toute la bande le sait ; le **cri d'alerte** transmet aussi la position aux ennemis alertés. Crabos et insectoïdes ont chacun leur propre mémoire. Arrivé (ou bloqué 3 tours), il **fouille 4 tours** autour, puis **oublie** et reprend son comportement de départ (errance, voyage de la bande). Un coup de foreuse le met aussi au courant. État affiché : « en chasse », « cherche » (vers la dernière position), « fouille ». Remplace l'ancienne poursuite « à l'aveugle » de 8 tours (qui connaissait la position réelle).
-- **Touche V** (10 novembre 2026) : affiche ou masque le **champ de vision de chaque ennemi visible** — les cases qu'il peut voir (portée de détection, +5 pour un insectoïde alerté, et ligne de vue), **entourées d'un contour pointillé** : deux zones sans superposition — **rouge** (rouge du sang) pour les ennemis qui vous ont repéré (en chasse, alertés ; prioritaire là où les zones se touchent), **blanche** pour les autres (pixels de tuile opaques, un sur deux, sur le bord de la zone ; l'intérieur reste intact). Seulement sur les cases déjà découvertes ; les ennemis hors de vue ne sont pas montrés.
+- **Portée de discrétion (13 novembre 2026, inspirée de Brogue)** : la détection appartient à la foreuse, pas aux ennemis. **Un seul rayon, le même pour toutes les espèces** : un ennemi qui ne vous a pas repéré, situé dans ce rayon **et en ligne de vue**, a **25 % de chance par tour** de vous remarquer (chance plate, sans effet de la distance : c'est le choix de Brogue depuis sa version 1.7.3, pour la lisibilité). Calcul, dans cet ordre : **base 10**, **×1,5 en brisant un rocher ou une montagne**, **÷2 en attendant sur place**, **÷2 sur des herbes couchées** (arrondi au supérieur à chaque division), **−1 par paroi adjacente** (rocher ou montagne, les 8 voisines), **plancher 2**. Exemples : 10 en terrain dégagé, 7 le long d'une falaise (3 parois) ou sur des herbes couchées, 5 en attendant, 3 en attendant sur des herbes couchées, 2 en attendant dans un recoin, 15 en brisant une paroi. Un ennemi **déjà en chasse** vous garde en vue jusqu'à **2 fois** ce rayon (13 novembre 2026) ; **dès qu'il perd le contact visuel** — ligne de vue coupée, ou au-delà de ce double rayon — il rejoint votre **dernière position connue**, y fouille, puis oublie. Valeur de base réglable dans le Bestiaire (« Portée de discrétion »), affichée dans la colonne de droite sous **DIS** (ambre quand elle est sous la base, rouge au-dessus). Le forage d'un site ne compte pas : il termine le niveau, les ennemis ne jouent plus.
+- **Touche V** (10 novembre 2026, refaite le 13 novembre) : affiche ou masque la **portée de discrétion** — les cases d'où un ennemi pourrait vous remarquer (rayon et ligne de vue depuis la foreuse), **entourées d'un contour pointillé blanc** (pixels de tuile opaques, un sur deux, sur le bord de la zone ; l'intérieur reste intact). Remplace l'ancien affichage du champ de vision de chaque ennemi.
 - **Crabos** : erre ; dès qu'il voit le robot, le chasse et l'attaque au contact ; le perd de vue → dernière position connue (ci-dessus).
-- **Insectoïde** : une fois le robot repéré (et tant qu'il le voit, portée de vue +5 cases une fois alerté), le suit à 2–3 cases (recule au contact, se rapproche au-delà de 3). Si un ennemi chasse le robot à 4 cases ou moins, il passe à l'attaque et **ne recule plus jamais** ensuite.
+- **Insectoïde** : une fois le robot repéré, le suit à 2–3 cases (recule au contact, se rapproche au-delà de 3). Si un ennemi chasse le robot à 4 cases ou moins, il passe à l'attaque et **ne recule plus jamais** ensuite.
 - **Cafar** : vit en bande ; chaque individu reste à 4 cases au plus du centre de sa bande. Hors chasse, la bande voyage vers un point accessible tiré au hasard (≥ 10 cases), y fait une **pause de 50 tours**, puis repart. À la détection, **cri d'alerte** : tous les ennemis à 5 cases ou moins se mettent en chasse (pas de réaction en chaîne).
 
 ## 8. Objectifs et progression
@@ -130,14 +136,14 @@ Roguelike au tour par tour dans une esthétique inspirée de Cogmind et de Brogu
 - Plein écran ; colonne noire à droite, défilable à la molette ou au doigt mais sans barre de défilement (pour ne pas la déformer) ; journal de bord sous la carte (5 dernières lignes, numéro de tour, ×N pour les répétitions).
 - **Statut** : barres ASCII `█`/`░` (20 caractères) — Vie en couleur technologie, Énergie en couleur structure ; pas de chiffres.
 - **Statut** : barres Vie et Énergie suivies de leur valeur chiffrée (« 63/100 »), remises le 10 novembre 2026.
-- **Statistiques** (sous-menu repliable, sous Statut) sur deux colonnes : VIT, EYE, DEG, PRE, ESQ, POW (ESQ affiche la valeur modifiée, colorée, sans le modificateur).
+- **Statistiques** (sous-menu repliable, sous Statut) en **grille 3 × 3** : VIT, EYE, DEG / PRE, ESQ, CRIT / POW, NUL 0, NUL 0 (deux emplacements libres) (ESQ affiche la valeur modifiée, colorée, sans le modificateur).
 - **En vue** (sans titre, sous la mini-carte) : fiche d'inspection de la case survolée en tête (voir ci-dessous), puis animaux visibles (icône, barre de vie ASCII 10 caractères, colonnes TOUCHER / SUBIR colorées), joyaux, sites.
 - **Mini-carte** pleine largeur ; ennemis en points rouges ; un clic recentre la vue (mode carte) ; bouton maintenu + glisser = défilement en temps réel. Saisi à l'intérieur, le cadre suit le pointeur sans sauter ; saisi à l'extérieur, il se centre d'abord sous le pointeur. Fonctionne aussi au doigt.
 - Sous-menus repliables : **Statistiques**, **Génération** (+ bouton REGEN), **Life** (nombre d'animaux par espèce), **Palette**, **Lab** (Bestiaire, Tile editor, Intro ; plus de bouton Enregistrer pour l'instant les réglages, aide des touches).
 
 ### Souris et inspection (inspirées de Brogue)
 - Le curseur système est masqué sur la carte ; le **viseur** est dessiné sur la case survolée. Dès qu'on appuie sur une touche (hors mode inspection), le viseur, la fiche et le trajet disparaissent jusqu'au prochain mouvement de souris.
-- **Survol** : fiche complète dans « En vue » — terrain et ses effets, distance, créature (état, PV, DÉG, PRE, ESQ modifiée, VIT, DÉT, chances Toucher / Subir, comportement), site (profondeur ou « non analysé »), joyau (libre ou pris dans la roche), roche fissurée, bord indestructible, traces de sang, « souvenir » si la case est hors de vue, et l'action du clic (« y aller · N tours », « frapper », « forer »).
+- **Survol** : fiche complète dans « En vue » — terrain et ses effets, distance, créature (état, PV, DÉG, PRE, ESQ modifiée, VIT, chances Toucher / Subir, comportement), site (profondeur ou « non analysé »), joyau (libre ou pris dans la roche), roche fissurée, bord indestructible, traces de sang, « souvenir » si la case est hors de vue, et l'action du clic (« y aller · N tours », « frapper », « forer »).
 - **Trajet** : le plus court chemin (Dijkstra, 8 directions, cases connues seulement, eau profonde évitée, créatures visibles contournées) s'affiche par un petit rond blanc en pixel art (4 × 4 pixels de tuile, opacité 70 %) au centre de chaque case intermédiaire, rien sur la case du viseur.
 - **Clic** : case voisine = action immédiate (pas, coup de foreuse, attaque) ; case lointaine = déplacement automatique, un pas toutes les 90 ms. Si la destination est une roche ou une créature, la dernière étape est un coup de foreuse. Clic sur la foreuse posée sur un site = forer.
 - **Clic dans le brouillard** (9 novembre 2026) : une case inexplorée (ou une case vue mais atteignable seulement en passant par l'inexploré) est une destination valide. Le trajet suppose franchissables les cases jamais vues, sans regarder ce qu'elles cachent (l'aperçu ne révèle donc rien), et **se recalcule à chaque pas** avec ce que la foreuse découvre. Elle ne fore jamais pendant un tel trajet : elle **s'arrête** quand plus aucun passage ne mène à la destination, ou quand la destination se révèle infranchissable (montagne, rocher, gouffre). Les autres arrêts (ennemi, site, joyau…) s'appliquent aussi.
@@ -148,7 +154,7 @@ Roguelike au tour par tour dans une esthétique inspirée de Cogmind et de Brogu
 ### Tile editor (Lab → Tile editor)
 - Liste des tuiles éditables, par groupe : **Viseur** ; **Foreuse et faune** (Foreuse, Insectoïde, Crabos, Cafar) ; **Terrain** (Sol, Rocher, Rocher 2, Crête, Montagne, Eau A, Eau B, Eau profonde, Herbes hautes, Herbes couchées, Gravats, Fissures, Remous, Remous profond) ; **Objets** (Site, Joyau, Éclats petits / moyens / gros (montagne et sol), Sang A, Sang B) ; **Vaisseau** (Cargo, édité d'un bloc : 80 × 96 pixels, pixels affichés en 4 × 4, limites des cases repérées ; sur la carte il est découpé case par case).
 - Les variantes suivent la tuile de base : 4 orientations de la foreuse, animaux tournés à gauche, 2e image de l'eau profonde, herbe basse (moitié inférieure des herbes hautes), joyau dans la roche et son liseré.
-- Non éditables pour l'instant : sol près des sites (points générés), sites analysés (chiffres), traces de chenilles, ancien sprite robot.
+- Non éditables pour l'instant : sites analysés (chiffres), traces de chenilles, ancien sprite robot.
 - Éditeur 16 × 16 : encres en pastilles de couleur, sans nom (nom au survol) : **Monde, Bio, Accent** (suivent la palette active), **Blanc**, **Noir**, **Rouge** (#b8242a, celui du sang), Gomme (pastille hachurée) ; clic droit = effacer ; Miroir ↔ et Miroir ↕ (désactivés par défaut, les deux ensemble = symétrie ×4) ; boutons Contour auto, Vider, **Rétablir l'enregistré** : revient à la version enregistrée avec « Enregistrer les réglages » (ou au dessin d'origine si la tuile n'a jamais été enregistrée). Le titre de l'éditeur indique « enregistrée » ou « non enregistrée ».
 - Aperçu : la tuile en grand, puis en pavage (terrain) ou posée sur le sol (foreuse, faune, objets, viseur).
 - Retouches mémorisées dans le navigateur (`np-tiles`). « Enregistrer les réglages » les écrit dans la base (champ `tuiles`) et en fait la nouvelle référence (`np-tiles-base`) ; au chargement, les tuiles de la base deviennent aussi la référence.
@@ -156,7 +162,7 @@ Roguelike au tour par tour dans une esthétique inspirée de Cogmind et de Brogu
 - Export / import texte : essayé puis retiré le 6 novembre 2026 (« on verra plus tard »).
 
 ### Touches
-ZQSD / flèches / pavé numérique : déplacer · A E W C : diagonales · Souris : survol = inspection, clic = y aller · X : inspection au clavier · F : forer · Espace / 5 : attendre · B : brouillard de guerre · ! : son · M : mode carte (déplacements = défilement, Maj = plus vite, Échap ou M pour revenir).
+ZQSD / flèches / pavé numérique : déplacer · A E W C : diagonales · Souris : survol = inspection, clic = y aller · X : inspection au clavier · F : forer · Espace / 5 : attendre · V : portée de discrétion · B : brouillard de guerre · ! : son · M : mode carte (déplacements = défilement, Maj = plus vite, Échap ou M pour revenir).
 
 ## 10. Sauvegarde des réglages
 
