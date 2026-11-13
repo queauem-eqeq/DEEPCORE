@@ -8,7 +8,7 @@
 
 ## 1. Concept
 
-Roguelike au tour par tour dans une esthétique inspirée de Cogmind et de Brogue (aucun élément repris de ces jeux). Un robot foreur explore la surface d'une planète inconnue (niveau 1), cherche un site de forage, puis fore pour descendre au niveau 2 (pas encore conçu : l'écran de fin de niveau propose une nouvelle planète).
+Roguelike au tour par tour dans une esthétique inspirée de Cogmind et de Brogue (aucun élément repris de ces jeux). Un robot foreur explore la surface d'une planète inconnue (niveau 1), cherche le site de forage, puis fore pour descendre : cinq niveaux, un biome par niveau, jusqu'au noyau (§ 3 bis).
 
 ## 2. Direction visuelle
 
@@ -42,6 +42,79 @@ Roguelike au tour par tour dans une esthétique inspirée de Cogmind et de Brogu
 - **Gouffres** : jamais de trou de moins de 4 cases reliées par les côtés, et jamais deux gouffres reliés seulement par un coin. Nettoyage avant et après la connexion automatique, et après la pose du vaisseau ; il ne fait que combler (gouffre → sol), donc la connexion reste garantie. Un pont qui ne franchit plus rien redevient du sol.
 - Curseurs de génération (en %) : Eau ≤ 60, Montagne ≤ 70, Gouffre ≤ 30, Herbe ≤ 80, total ≤ 80. Herbe répartie moitié haute, moitié basse.
 - Bouton **REGEN** dans le titre « Génération » : nouvelle planète immédiate.
+
+### Taille de la carte (13 novembre 2026)
+
+Réglage « Taille de la carte » en tête du sous-menu Génération, de **1 à 5**, appliqué au prochain lancement (REGEN) :
+
+| Taille | Cases | Usage |
+|---|---|---|
+| 1 | 32 × 22 | arène : tient presque dans l'écran, pour essayer des monstres |
+| 2 | 48 × 32 | |
+| 3 | 72 × 48 | |
+| 4 | 96 × 64 | **taille d'origine**, valeur par défaut |
+| 5 | 144 × 96 | |
+
+Le relief, les lacs et les distances de sécurité suivent l'échelle, et la faune aussi depuis le passage de Life aux intensités (ci-dessous).
+
+### Life : intensité par espèce (13 novembre 2026)
+
+Le sous-menu Life ne demande plus un nombre d'individus mais une **intensité** par espèce, sur cinq niveaux, plus une ligne « Toutes » qui règle les dix espèces d'un coup (elle affiche « Mixte » quand elles diffèrent).
+
+| Niveau | Coefficient | Minimum |
+|---|---|---|
+| Aucun | 0 | 0 |
+| Rare | × 0,5 | 1 |
+| Normal | × 1 | 1 |
+| Nombreux | × 2 | 2 |
+| Infesté | × 4 | 4 |
+
+Nombre de créatures = effectif de référence de l'espèce (colonne « Référence » du § 7) × coefficient × surface de la carte rapportée à la taille 4, avec le minimum du niveau (2 pour les cafars, qui vont en bande). En taille 4 et au niveau Normal on retrouve les effectifs d'avant ; en taille 1, un ou deux individus par espèce, et « Infesté » en donne au moins quatre. Les anciens réglages en nombres sont convertis au niveau le plus proche. Mémorisé sous `np-intens` (l'ancienne clé `np-life` n'est plus écrite).
+
+## 3 bis. Descente : niveaux, biomes, difficulté (13 novembre 2026)
+
+La partie est une **descente en 5 niveaux** (5 pour commencer ; on allongera). Forer le site d'un niveau fait arriver sur une nouvelle carte, d'un autre biome ; on ne remonte pas. Forer le site du niveau 5 atteint le noyau : écran « NOYAU ATTEINT ».
+
+- **Niveau 1** : toujours le biome Plateau, **taille 2** (48 × 32), avec le vaisseau.
+- **Niveaux 2 à 5** : taille **tirée au hasard entre 2 et 5** (la taille 1, trop petite, reste réservée aux essais) ; pas de vaisseau, la foreuse débouche du puits sur un carré de sol dégagé.
+- **Biomes** : quatre des cinq autres biomes sont tirés au début de la descente et rangés du moins au plus dangereux (rang).
+- **Ce que la foreuse emporte** : vie, énergie, équipement, bonus de joyaux, Matière, journal. Les effets durables (poison, glu) et les objets laissés au sol sont perdus.
+- **Carte d'arrivée** : une fiche annonce le niveau, le biome, sa faune et ses gisements, puis « Continuer ».
+- **En jeu** : « Niveau 2/5 · Marécage » sous le titre Statut.
+- **Mort** : nouvelle descente au niveau 1.
+
+### Biomes : un relief, une faune
+
+| Biome | Rang | Relief (eau / montagne / gouffre / herbe, en %) | Faune (intensité, § 3) | Idée |
+|---|---|---|---|---|
+| Plateau | 1 | 8 / 10 / 3 / 14 | Insectoïde normal, Crabos rare, Cafar rare | l'arrivée : ouvert, peu de danger |
+| Marécage | 2 | 30 / 6 / 1 / 28 | Crabos nombreux, Tapi normal, Gluar normal, Vipérin rare, Insectoïde rare | les crabos nagent, la glu et l'eau ralentissent la fuite |
+| Hautes herbes | 2 | 6 / 6 / 2 / 55 | Tapi nombreux, Insectoïde normal, Siphon normal, Crachin rare | on se cache bien, les embusqués aussi |
+| Galeries | 3 | 2 / 46 / 3 / 4 (bruit) | Cafar nombreux, Taupar normal, Vipérin normal, Gluar rare | couloirs étroits, bandes, parois percées |
+| Pierrier | 3 | 1 / 14 / 6 / 2 (bruit) | Crachin nombreux, Siphon normal, Crabos rare, Mastok rare | à découvert sous les tirs |
+| Failles | 4 | 4 / 22 / 18 / 6 | Mastok nombreux, Vipérin nombreux, Cafar normal, Taupar rare | gouffres partout, les plus gros ennemis |
+
+**Palette** : la même partout (choix de l'utilisateur), avec une petite variation par biome appliquée à la palette du joueur : rotation de teinte de 4 à 18°, clarté et saturation de la couleur monde légèrement modifiées. Le sous-menu Palette règle toujours la palette de base.
+
+### Courbe de difficulté
+
+| Niveau | Monstres (× l'effectif du biome) | Métal de réparation (gisements pour 1000 cases) | Matière (pour 1000 cases) |
+|---|---|---|---|
+| 1 | × 0,7 | 26 | 3 |
+| 2 | × 0,85 | 18 | 6 |
+| 3 | × 1 | 12 | 10 |
+| 4 | × 1,25 | 8 | 14 |
+| 5 | × 1,5 | 4 | 18 |
+
+Plus on descend : plus de monstres, moins de quoi se réparer, plus de Matière. Les gisements se comptent par surface de carte et non plus en part de la montagne, sinon un biome très rocheux (Galeries) aurait été le mieux fourni en réparation. **Courbe posée à la main, pas encore mesurée** : à régler en jouant, puis par simulation.
+
+### Matière
+
+Second métal, **couleur accent** (les éclats de réparation sont couleur bio), mêmes dessins et mêmes trois tailles. Pris dans la montagne, il tombe quand on brise la paroi (ou qu'un taupar la perce) ; passer dessus ajoute **10, 15 ou 20** à la réserve **Matière**, affichée sous les jauges. La Matière servira à construire de l'équipement (plus tard) ; elle ne sert encore à rien.
+
+### Cartes d'essai
+
+Le bouton **REGEN** ne lance plus une partie mais une **carte d'essai** : taille, relief (Génération) et faune (Life) choisis par le joueur, palette de base, 10 % de montagne en métal et 2 % en Matière. « Carte d'essai » s'affiche sous Statut ; y forer relance une carte d'essai. Le bouton **Nouvelle descente** du Lab repart au niveau 1. (Hypothèse retenue faute de réponse de l'utilisateur à la question : à confirmer.)
 
 ## 4. Terrains
 
@@ -86,7 +159,7 @@ Roguelike au tour par tour dans une esthétique inspirée de Cogmind et de Brogu
 - **Aperçu derrière les obstacles** (foreuse seulement, depuis le 6 novembre 2026) : dans le rayon EYE, la case juste derrière un obstacle à la vue (montagne, herbes hautes) est aperçue en **mode souvenir** — terrain affiché assombri comme une case explorée hors de vue, sans les créatures. Une seule case : un obstacle de 2 cases d'épaisseur cache toujours la suite. Les ennemis ne voient pas à travers les obstacles.
 - Attendre un tour : Espace ou 5. **La recharge d'énergie y est doublée** (13 novembre 2026) : 2/t à POW 1, 2 × POW en général. C'est la façon de refaire le plein après avoir couru ou foré.
 - **Repos** (touche P, ou bouton « REPOS » du pavé, 13 novembre 2026) : enchaîne des attentes **jusqu'à l'énergie pleine**. Chaque battement est une attente ordinaire (recharge doublée, portée de discrétion ÷ 2), le journal n'en garde que le début et la fin. Le repos s'arrête net si une créature **entre dans le champ de vision**, si un ennemi déjà visible **repère** la foreuse, si elle est **touchée**, ou à la moindre touche ou clic du joueur. Il est refusé d'emblée si l'énergie est déjà pleine ou si un ennemi visible vous chasse déjà. Garde-fou : 400 battements au plus.
-- **Course** (touche R, ou bouton « Allure » sous l'énergie) : mode qu'on allume et qu'on éteint. Chaque pas dure moitié moins et coûte **5 d'énergie** ; sans assez d'énergie, la foreuse reprend la marche d'elle-même. **Le moteur s'entend : + 2 cases de portée de discrétion** (13 novembre 2026), appliquées après tous les autres modificateurs. Bruitage de moteur électrique au démarrage, à l'arrêt et à chaque pas couru.
+- **Course** (touche R, ou bouton « MARCHE / COURSE » sous l'énergie ; le mot « Allure » et l'indication « vitesse × » ont été retirés le 13 novembre 2026) : mode qu'on allume et qu'on éteint. Chaque pas dure moitié moins et coûte **5 d'énergie** ; sans assez d'énergie, la foreuse reprend la marche d'elle-même. **Le moteur s'entend : + 2 cases de portée de discrétion** (13 novembre 2026), appliquées après tous les autres modificateurs. Bruitage de moteur électrique au démarrage, à l'arrêt et à chaque pas couru.
 
 ## 5 bis. Horloge : le temps continu (13 novembre 2026)
 
@@ -108,13 +181,86 @@ Le jeu ne compte plus en tours mais en **unités de temps**, comme Brogue et Cog
 - Animation : bond de l'attaquant, flash, chiffres de dégâts flottants (« -10 », « 0 » pour un coup raté, de part et d'autre), « +10 / +15 / +20 » en couleur bio au ramassage d'éclats de métal, tremblement d'écran quand le robot est touché ou qu'un ennemi meurt.
 - Un animal tué laisse une trace de sang.
 
+## 6 bis. Inventaire et équipement (13 novembre 2026)
+
+Version d'essai : tous les objets sont donnés au départ, non équipés sauf la foreuse, pour pouvoir tout essayer (choix confirmé le 13 novembre 2026 pour la phase d'équilibrage).
+
+- **Emplacements** : 1 arme, 1 armure, 3 accessoires. Le sac n'a pas de limite pour l'instant.
+- **Ouverture** : bouton « INVENTAIRE » à côté de « MARCHE / COURSE », ou touche **I**. L'inventaire est une **fenêtre plein écran, comme le Tile editor** (le panneau dans la colonne, essayé d'abord, a été abandonné le jour même). Le jeu ne reçoit plus les touches tant qu'elle est ouverte ; le temps ne passe pas.
+- **Liste à gauche** : une ligne par objet, précédée d'un signe (`/` arme, `[` armure, `=` accessoire, `!` consommable), suivie de son type. Un objet **équipé reste dans la liste**, en couleur monde, avec la mention « équipé ». Les consommables identiques s'empilent (« ×2 »).
+- **Fiche à droite** de l'objet choisi : dessin **ASCII coloré** aux couleurs de la palette, description, effets (en accent s'ils sont favorables, en rouge sinon), boutons **Équiper / Retirer / Utiliser** et **Jeter**. Le dernier message est répété sous la liste, le journal étant caché.
+- **Choisir** : à la souris (clic ; double-clic = Entrée) ou au clavier : ↑ ↓ (ou Z S, 8 2) pour parcourir, **Entrée** pour équiper, retirer ou utiliser, **J** (ou Suppr) pour jeter, **G** pour ramasser ce qui est sous la foreuse, **I** ou **Échap** pour fermer.
+- **Équiper** est gratuit et instantané. Une arme ou une armure remplace celle qui est portée ; un 4ᵉ accessoire est refusé tant qu'un emplacement n'est pas libéré.
+- **Effets** : l'objet ajoute ses modificateurs aux stats tant qu'il est porté ; les stats modifiées s'affichent en couleur dans « Statistiques ». Les bonus des joyaux s'additionnent.
+- **Consommables** : usage unique, gratuit et instantané pour l'instant. Refusé si la jauge est déjà pleine (l'objet n'est pas perdu) ; le surplus au-delà du maximum est perdu.
+- **Jeter** pose l'objet (un seul exemplaire pour une pile) au sol sous la foreuse (tuile « Objet au sol », retouchable au Tile editor). Repasser sur la case le ramasse ; sans bouger, touche G ou bouton « Ramasser ». La fiche de survol nomme les objets posés.
+- **Durée du coup** : une arme peut allonger ou raccourcir le coup de foreuse (§ 5 bis) ; plancher à 25.
+- « Pas de blindage » (§ 11) tient toujours : aucune armure ne réduit les dégâts, elles jouent sur la vie max, l'esquive ou la discrétion.
+
+| Objet | Type | Effets |
+|---|---|---|
+| Foreuse | arme | arme de départ, sans modificateur : DEG 10, coup 100 |
+| Foret diamant | arme | DEG −2, PRE +15, coup rapide (60) |
+| Marteau-pilon | arme | DEG +15, PRE −10, coup lent (150) |
+| Scie circulaire | arme | DEG +3, CRIT +15 % |
+| Lance thermique | arme | DEG +7, ESQ −10 |
+| Châssis renforcé | armure | Vie max +30, VIT −1 |
+| Coque furtive | armure | ESQ +5, DIS −2 (portée de discrétion) |
+| Châssis allégé | armure | VIT +1, ESQ +10, Vie max −15 |
+| Coque isolante | armure | poison et glu durent deux fois moins, Vie max +10 |
+| Servomoteur | accessoire | VIT +2 |
+| Téléobjectif | accessoire | EYE +3 |
+| Viseur laser | accessoire | CRIT +10 % |
+| Condensateur | accessoire | POW +1 |
+| Gyroscope | accessoire | ESQ +10 |
+| Stabilisateur | accessoire | PRE +10 |
+| Accumulateur | accessoire | Énergie max +40 |
+| Réparobots (×2) | consommable | Vie +50 |
+| Batterie (×2) | consommable | Énergie +50 |
+| Purge (×2) | consommable | supprime poison et glu |
+| Fumigène (×2) | consommable | les ennemis perdent la trace et ne voient plus la foreuse pendant 5 battements |
+| Charge sismique (×2) | consommable | 20 dégâts à tous les ennemis à 2 cases ou moins ; bruyante (comme un forage) |
+
+Vingt et un objets depuis le 13 novembre 2026. Règles ajoutées ce jour-là :
+
+- **La foreuse est une arme** : c'est l'arme de départ, déjà équipée. Il y a **toujours une arme en main** : on ne peut ni la retirer ni la jeter, seulement la remplacer. **Toute arme fore la roche pareil** (choix de l'utilisateur) : l'arme ne change que le combat et le visuel.
+- **Le visuel de la foreuse suit l'équipement** : l'arme dessine la moitié avant (la pointe), l'armure la moitié arrière (le corps), dans les quatre orientations. Sans armure et avec la foreuse d'origine, c'est la tuile « Foreuse » du Tile editor, retouches comprises ; les autres combinaisons ne sont pas encore retouchables.
+- **Maximum de vie ou d'énergie modifié par un objet** : la jauge garde sa proportion (100/100 devient 130/130, 50/100 devient 65/130). S'équiper ne soigne pas, ne blesse pas, et retirer puis remettre ne rapporte rien.
+- **Statistiques dans la fenêtre** : sous la fiche, les onze valeurs actuelles ; pour l'objet choisi, la valeur qu'aurait chaque stat après Entrée s'affiche à côté (« DEG 10 → 25 »), en accent si elle y gagne, en rouge si elle y perd.
+- Dessins ASCII agrandis (30 px).
+
+Premier équilibrage mesuré le 13 novembre 2026 (duels simulés, `outils/simul.py combat`, résultats dans `mesures.md`) : les quatre armes spéciales valent à peu près autant, chacune nettement mieux que la foreuse nue ; les armures et accessoires de combat apportent un gain modéré. Rien n'étant équipé au départ, les mesures de détection et de fuite restent valables.
+
+Reste à faire : faire **trouver** les objets (au sol, lâchés par les ennemis, fabrication plus tard) et retirer le sac de départ ; attaques spéciales (plus tard) ; décider si équiper ou utiliser prend du temps ; limite du sac.
+
 ## 7. Bestiaire
 
-| Espèce | VIT | PV | DÉG | PRE | ESQ | CRIT | Nombre (Life) |
+| Espèce | VIT | PV | DÉG | PRE | ESQ | CRIT | Référence (niveau Normal, taille 4) |
 |---|---|---|---|---|---|---|---|
 | Insectoïde | 6 | 10 | 3 | 60 | 30 | 5 % | 21 |
 | Crabos | 5 | 25 | 5 | 70 | 15 | 5 % | 15 |
 | Cafar | 5 | 10 | 5 | 60 | 0 | 5 % | 12 (bandes de 2 à 4 : tirage parmi 2, 3, 4, 4 — 2 à 5 avant le 13 novembre 2026) |
+| Crachin | 4 | 12 | 4 | 65 | 10 | 0 | 4 |
+| Vipérin | 6 | 12 | 3 | 70 | 25 | 5 % | 4 |
+| Gluar | 3 | 30 | 6 | 65 | 0 | 0 | 3 |
+| Siphon | 7 | 8 | 2 | 70 | 35 | 0 | 3 |
+| Tapi | 4 | 18 | 6 | 85 | 5 | 5 % | 4 |
+| Taupar | 3 | 35 | 7 | 70 | 5 | 5 % | 2 |
+| Mastok | 3 | 60 | 14 | 60 | 0 | 10 % | 1 |
+
+**Dix espèces depuis le 13 novembre 2026.** Les sept nouvelles ont chacune un rôle :
+
+| Espèce | Rôle | Particularité |
+|---|---|---|
+| Crachin | tireur | crache de l'acide jusqu'à **5 cases** tant qu'il voit la foreuse ; serré à 2 cases ou moins, il recule une fois sur deux au lieu de tirer |
+| Vipérin | empoisonneur | sa morsure pose un **poison** : 2 points de vie par battement pendant 5 battements (se renouvelle, ne se cumule pas) |
+| Gluar | entrave | sa **glu** double la durée des pas pendant 4 battements : gênant pour fuir, pas pour se battre |
+| Siphon | harceleur | chaque piqûre **vole 15 d'énergie** ; rapide, difficile à toucher, très fragile |
+| Tapi | embusqué | caché dans les **herbes hautes**, invisible et absent de toutes les listes ; frappe **par surprise** (touche toujours, critique) dès que la foreuse est à son contact, puis se bat normalement. Si la foreuse bute dessus avant, c'est elle qui a la surprise |
+| Taupar | creuseur | en chasse, il vient **en ligne droite en perçant la roche** (une paroi = un battement) ; les éclats et joyaux de la paroi tombent comme pour la foreuse |
+| Mastok | colosse | lent, 60 PV, 14 de dégâts : à éviter ou à fuir sans équipement |
+
+Effets durables sur la foreuse : affichés sous les jauges (« Poison 4 · Englué 2 »), décomptés à chaque battement. La Coque isolante divise leur durée par deux, la Purge les supprime.
 
 La statistique **DÉT (détection)** par espèce a été supprimée le 13 novembre 2026 : toutes les espèces partagent désormais la portée de discrétion de la foreuse (ci-dessous).
 
@@ -136,7 +282,7 @@ La statistique **DÉT (détection)** par espèce a été supprimée le 13 novemb
 
 ## 8. Objectifs et progression
 
-- 5 sites de forage, profondeur 1 à 5 (une de chaque), révélée en passant dessus. La profondeur n'a pas encore d'effet de jeu.
+- **Un seul site de forage par carte** depuis le 13 novembre 2026 (5 auparavant), toujours de **profondeur 10** : simple valeur affichée, sans effet de jeu (choix de l'utilisateur). Il est placé dans le tiers de la carte le plus éloigné de l'arrivée : il faut la traverser. Forer fait descendre au niveau suivant (§ 3 bis).
 - Forage : touche F sur un site → confirmation → descente → écran « Entrée niveau 2 ».
 - **1 joyau** par planète, au cœur d'un massif (8 voisines en roche, jamais en bordure), visible dès que la case est vue. Briser la roche, le ramasser → choix de **3 améliorations tirées au hasard** parmi : Vie max +10, Énergie max +10, EYE +1, DEG +5, PRE +5, ESQ +5, POW +1, VIT +1 (13 novembre 2026).
 - **Éclats de métal** (9 novembre 2026) : **10 % des cases de montagne** (hors rangée extérieure indestructible et joyau ; réglage `ORE_PCT` dans la génération) montrent des éclats de métal couleur bio — ceux pris au cœur d'un massif ne se voient qu'en creusant jusqu'à eux. Briser la paroi les fait **tomber au sol** ; la foreuse qui passe dessus les ramasse et regagne des PV selon la **densité** : **petits +10 PV** (50 % des éclats), **moyens +15 PV** (30 %), **gros +20 PV** (20 %), sans dépasser la vie max (réglages `ORE_PV`, `ORE_MIX`). Chaque densité a sa tuile, dans la paroi et au sol. Signalés dans la fiche de survol (plus de liste dans « En vue » depuis le 13 novembre 2026). Tuiles éditables : Éclats petits / moyens / gros, en montagne et au sol (dessins retouchés au Tile editor et adoptés comme norme le 9 novembre 2026).
@@ -156,7 +302,7 @@ La statistique **DÉT (détection)** par espèce a été supprimée le 13 novemb
 - **Statistiques** (sous-menu repliable, sous Statut) en **grille 3 × 3** : VIT, EYE, DEG / PRE, ESQ, CRIT / POW, NUL 0, NUL 0 (deux emplacements libres) (ESQ affiche la valeur modifiée, colorée, sans le modificateur).
 - **En vue** (sans titre, sous la mini-carte) : fiche d'inspection de la case survolée en tête (voir ci-dessous), puis animaux visibles (icône, barre de vie ASCII 10 caractères, colonnes TOUCHER / SUBIR colorées). Joyaux, roches à joyau, éclats de métal et sites ne sont plus listés ici (retirés le 13 novembre 2026) : on les lit à la fiche de survol.
 - **Mini-carte** pleine largeur ; ennemis en points rouges ; un clic recentre la vue (mode carte) ; bouton maintenu + glisser = défilement en temps réel. Saisi à l'intérieur, le cadre suit le pointeur sans sauter ; saisi à l'extérieur, il se centre d'abord sous le pointeur. Fonctionne aussi au doigt.
-- Sous-menus repliables : **Statistiques**, **Génération** (+ bouton REGEN), **Life** (nombre d'animaux par espèce), **Palette**, **Lab** (Bestiaire, Discrétion, Tile editor, Intro ; plus de bouton Enregistrer pour l'instant les réglages, aide des touches).
+- Sous-menus repliables : **Statistiques**, **Génération** (+ bouton REGEN), **Life** (intensité par espèce, § 3), **Palette**, **Lab** (Bestiaire, Discrétion, Tile editor, Intro ; plus de bouton Enregistrer pour l'instant les réglages, aide des touches).
 
 ### Souris et inspection (inspirées de Brogue)
 - Le curseur système est masqué sur la carte ; le **viseur** est dessiné sur la case survolée. Dès qu'on appuie sur une touche (hors mode inspection), le viseur, la fiche et le trajet disparaissent jusqu'au prochain mouvement de souris.
@@ -179,7 +325,7 @@ La statistique **DÉT (détection)** par espèce a été supprimée le 13 novemb
 - Export / import texte : essayé puis retiré le 6 novembre 2026 (« on verra plus tard »).
 
 ### Touches
-ZQSD / flèches / pavé numérique : déplacer · A E W C : diagonales · Souris : survol = inspection, clic = y aller · X : inspection au clavier · R : courir / marcher · F : forer · Espace / 5 : attendre · P : repos jusqu’à l’énergie pleine · V : portée de discrétion · B : brouillard de guerre · ! : son · M : mode carte (déplacements = défilement, Maj = plus vite, Échap ou M pour revenir).
+ZQSD / flèches / pavé numérique : déplacer · A E W C : diagonales · Souris : survol = inspection, clic = y aller · X : inspection au clavier · R : courir / marcher · I : inventaire · F : forer · Espace / 5 : attendre · P : repos jusqu’à l’énergie pleine · V : portée de discrétion · B : brouillard de guerre · ! : son · M : mode carte (déplacements = défilement, Maj = plus vite, Échap ou M pour revenir).
 
 ## 10. Sauvegarde des réglages
 
@@ -231,7 +377,7 @@ Chiffres à l'appui dans `mesures.md`, points de comparaison avec Brogue dans `b
 - Niveau 2 (sous-sol) : à concevoir (salles par accrétion ou caverne par automate cellulaire).
 - Donner un effet à la profondeur des sites (risque / récompense).
 - Récompenser les combats (fragments, énergie).
-- **Inventaire et équipement** (demandé le 13 novembre 2026) : sous-menu avec 1 emplacement arme, 1 armure, 3 accessoires ; l'équipement modifie les stats, donne des attaques spéciales et change la durée de certaines actions. L'horloge (§ 5 bis) est prête pour ça.
+- **Inventaire et équipement** : première version faite le 13 novembre 2026 (§ 6 bis). Suite : provenance des objets (sol, ennemis, fabrication), attaques spéciales, équilibrage.
 - Autres terrains lents possibles (gravats, herbes hautes) ; rendre la course bruyante ; donner des durées différentes aux actions (table `DUR`).
 - Source de soin limitée (kits, forage qui répare).
 - Exploration automatique façon Brogue (vers la zone inexplorée la plus proche), sur le même moteur de trajet.

@@ -124,7 +124,14 @@ const TDESC={[GROUND]:['Sol rocheux','Praticable. Les points au sol se densifien
   [DECK]:['Soute du vaisseau','Praticable. La foreuse peut toujours y revenir ; la porte est à l’arrière.']};
 const BEHAV={insectoide:'Suit la foreuse à 2 ou 3 cases ; passe à l’attaque si un ennemi la chasse à proximité, et ne recule plus ensuite.',
   crabos:'Chasse la foreuse dès qu’il la voit et l’attaque au contact. Abandonne environ 8 tours après l’avoir perdue de vue.',
-  cafar:'Vit en bande : ce qu’un membre voit, toute la bande le sait.'};
+  cafar:'Vit en bande : ce qu’un membre voit, toute la bande le sait.',
+  crachin:'Crache de l’acide jusqu’à 5 cases tant qu’il vous voit ; recule une fois sur deux quand on le serre. Fragile au contact.',
+  viperin:'Morsure empoisonnée : 2 points de vie perdus par battement pendant 5 battements.',
+  gluar:'Lent et résistant. Sa glu double la durée de vos pas pendant 4 battements.',
+  siphon:'Rapide, difficile à toucher. Chaque piqûre vole 15 d’énergie.',
+  tapi:'Embusqué dans les herbes hautes, invisible : frappe par surprise (coup critique) quand on passe à son contact.',
+  taupar:'Creuseur : une fois en chasse, il vient en ligne droite en perçant la roche.',
+  mastok:'Colosse lent : beaucoup de points de vie, des coups très lourds. Mieux vaut l’éviter ou le fuir.'};
 function inspectHTML(){const {x,y}=HOV;if(x<0||y<0||x>=W||y>=H)return '';
   const i=idx(x,y),seen=!fog||G.seen[i],see=!fog||vis[i],d=Math.max(Math.abs(x-G.px),Math.abs(y-G.py)),dt=d?`${d} case${d>1?'s':''}`:'ici';
   const head=(ic,n,ex)=>`<div class="ih">${ic?`<img src="${ic}" alt="">`:''}<b>${n}</b><span>${ex||''}</span></div>`;
@@ -133,7 +140,7 @@ function inspectHTML(){const {x,y}=HOV;if(x<0||y<0||x>=W||y>=H)return '';
   const occ=see?occupant(x,y):null;
   if(d===0){const st=G.st;out.push(head(ICON.robot_r,'Foreuse U-7',dt),
     `<div class="kv"><span>Vie <b>${Math.ceil(st.vie)}/${st.vieMax}</b></span><span>Énergie <b>${Math.floor(st.energie)}/${st.energieMax}</b></span><span>ESQ <b>${robotEsq()}</b></span></div>`);}
-  else if(occ){const isB=(G.beasts||[]).includes(occ),sp=isB?BEASTS[occ.sp]:SPECIES[occ.sp],key=isB?(occ.sp===0?'crabos':'cafar'):'insectoide',hp=Math.max(0,occ.hp??sp.pv);
+  else if(occ){const isB=(G.beasts||[]).includes(occ),sp=isB?BEASTS[occ.sp]:SPECIES[occ.sp],key=isB?sp.key:'insectoide',hp=Math.max(0,occ.hp??sp.pv);
     const P=isB&&sp.pack&&G.packs?G.packs[occ.pack]:null;
     const state=isB?(occ.hunt>0?(occ.sees?'en chasse':occ.search>0?'fouille les environs':'se dirige vers votre dernière position connue'):P?(P.pause>0?'au repos':'en route'):'erre'):({attack:'attaque',flee:'recule',follow:'suit',hold:'observe',seek:'se dirige vers votre dernière position connue',search:'fouille les environs'}[occ.mode]||'ne vous a pas repéré');
     const me=hitChance(G.st.pre,sp.esq+terrMod(x,y)),them=isB||occ.mode==='attack'?hitChance(sp.pre,robotEsq()):null;
@@ -144,13 +151,16 @@ function inspectHTML(){const {x,y}=HOV;if(x<0||y<0||x>=W||y>=H)return '';
       `<p>${BEHAV[key]}</p>`);}
   else out.push(head('',tn,dt));
   const s=siteAt(x,y);
-  if(s)out.push(`<p><b>Site de forage ${s.id}</b> · ${s.known?`profondeur ${s.depth} niveau${s.depth>1?'x':''}.`:'non analysé : placez la foreuse dessus pour mesurer sa profondeur.'}</p>`);
+  if(s)out.push(`<p><b>Site de forage</b> · ${s.known?`profondeur ${s.depth}. [F] pour forer et descendre.`:'non analysé : placez la foreuse dessus.'}</p>`);
   const gm=G.gems&&G.gems[i];
   if(gm==='visible')out.push('<p><b>Joyau</b> · placez la foreuse dessus pour le ramasser et choisir une amélioration.</p>');
   else if(gm==='cache')out.push('<p><b>Joyau pris dans la roche</b> · brisez la roche pour le libérer.</p>');
   const om=G.ore&&G.ore[i];
-  if(om&&oreSol(om))out.push(`<p><b>Éclats de métal ${ORE_NOM[oreLv(om)]}</b> · placez la foreuse dessus pour les ramasser : +${ORE_PV[oreLv(om)]} PV.</p>`);
+  if(om&&oreMat(om))out.push(oreSol(om)?`<p><b>Matière</b> · placez la foreuse dessus pour la ramasser : +${ORE_PV[oreLv(om)]} en réserve.</p>`:`<p><b>Matière prise dans la montagne</b> · brisez la paroi pour la faire tomber (+${ORE_PV[oreLv(om)]}).</p>`);
+  else if(om&&oreSol(om))out.push(`<p><b>Éclats de métal ${ORE_NOM[oreLv(om)]}</b> · placez la foreuse dessus pour les ramasser : +${ORE_PV[oreLv(om)]} PV.</p>`);
   else if(om)out.push('<p><b>Éclats de métal '+ORE_NOM[oreLv(om)]+' pris dans la montagne</b> · brisez la paroi pour les faire tomber (+'+ORE_PV[oreLv(om)]+' PV).</p>');
+  const sol=G.items&&G.items[i];
+  if(sol&&sol.length)out.push(`<p><b>${sol.length>1?'Objets au sol':'Objet au sol'}</b> · ${sol.map(k=>ITEMS[k].n).join(', ')} · placez la foreuse dessus pour ramasser.</p>`);
   if(G.blood&&G.blood[i]!=null)out.push('<p>Traces de sang.</p>');
   if(d!==0&&occ||d===0)out.push(`<p><b>${tn}</b> · ${td}</p>`);else out.push(`<p>${td}</p>`);
   const dm=G.dmg&&G.dmg[i];if(dm&&(t===ROCK||t===MOUNT))out.push('<p>Fissurée : encore 1 coup pour la briser.</p>');

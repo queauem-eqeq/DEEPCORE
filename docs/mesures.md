@@ -83,6 +83,71 @@ précision de ces chiffres : **40 essais par cas**, donc ± 15 points ; deux mes
   portée, la course suffit presque toujours. Contre un insectoïde (vitesse 6), l'avance gagnée est
   un peu plus faible.
 
+## Combats (13 novembre 2026)
+
+Duels simulés dans le vrai moteur (`python3 outils/simul.py combat`) : la foreuse, 100 PV, marche sur l'ennemi et frappe jusqu'à
+la mort de l'un des deux, sur terrain dégagé, ennemis déjà en chasse à 6 cases. **300 essais par cas**, soit ± 3 points sur les
+victoires et ± 2 sur la vie. « Vie restante » : moyenne sur les combats gagnés, poison restant déduit.
+
+### Un ennemi, puis des groupes, foreuse sans équipement
+
+| Adversaires | Victoires | Vie restante | Durée (battements) |
+|---|---|---|---|
+| 1 Crabos | 100 % | 85 | 7 |
+| 1 Cafar | 100 % | 97 | 4 |
+| 1 Crachin | 100 % | 85 | 11 |
+| 1 Vipérin | 100 % | 80 | 7 |
+| 1 Gluar | 100 % | 88 | 8 |
+| 1 Siphon | 100 % | 97 | 5 |
+| 1 Tapi (embusqué) | 100 % | 74 | 4 |
+| 1 Taupar | 100 % | 77 | 9 |
+| 1 Mastok | 92 % | 48 | 11 |
+| 2 Crabos | 100 % | 59 | 12 |
+| 3 Cafars | 100 % | 85 | 7 |
+| 4 Cafars | 100 % | 76 | 8 |
+| 2 Crachins | 100 % | 56 | 20 |
+| 2 Vipérins | 100 % | 62 | 10 |
+| Mastok + 2 Crabos | 28 % | 25 | 15 |
+
+Lecture : un ennemi seul coûte de 3 à 26 points de vie, le Mastok une cinquantaine (et une défaite sur douze). Sans réparation
+automatique, c'est l'accumulation qui tue : deux crabos coûtent déjà 40 points. Le Siphon et le Gluar font peu de dégâts, leur
+danger est ailleurs (énergie volée, fuite ralentie) et ne se lit pas dans un duel. « Mastok + 2 Crabos » est voulu comme un
+combat à fuir.
+
+### Ce que vaut chaque objet
+
+Même combat de référence pour tous : **2 Crabos + 1 Vipérin**, un seul objet équipé.
+
+| Équipement | Victoires | Vie restante | Durée |
+|---|---|---|---|
+| foreuse nue | 81 % | 28 | 14 |
+| Foret diamant | 100 % | 52 | 10 |
+| Marteau-pilon | 97 % | 55 | 12 |
+| Châssis renforcé | 94 % | 47 | 16 |
+| Coque furtive | 86 % | 28 | 15 |
+| Servomoteur | 87 % | 32 | 14 |
+| Téléobjectif | 80 % | 28 | 15 |
+| Viseur laser | 82 % | 33 | 14 |
+| Condensateur | 84 % | 27 | 15 |
+| Gyroscope | 92 % | 32 | 15 |
+| Scie circulaire | 98 % | 53 | 11 |
+| Lance thermique | 98 % | 46 | 11 |
+| Châssis allégé | 88 % | 28 | 14 |
+| Coque isolante | 87 % | 38 | 15 |
+| Stabilisateur | 93 % | 34 | 13 |
+| Accumulateur | 82 % | 27 | 15 |
+
+Contre un Mastok seul : Marteau-pilon 97 % / 57 PV · Foret diamant 99 % / 60 PV · Scie circulaire 97 % / 62 PV · Lance thermique 99 % / 54 PV (foreuse nue : 92 % / 48 PV).
+
+Lecture : les quatre armes spéciales se tiennent (97 à 100 % de victoires, 46 à 55 PV restants) et valent toutes nettement mieux que
+la foreuse nue (81 %, 28 PV). Le Châssis renforcé est la seule armure qui pèse dans un duel ; Coque furtive, Châssis allégé,
+Servomoteur, Téléobjectif, Condensateur et Accumulateur servent hors du corps à corps (discrétion, fuite, vision, énergie), ce que
+ce test ne mesure pas.
+
+Réglages faits à la suite de la première mesure : Foret diamant affaibli (il gagnait 100 % des combats avec 70 PV), Marteau-pilon
+renforcé (il faisait moins bien que la foreuse nue), Stabilisateur ramené de +15 à +10, Gluar porté de 4 à 6 de dégâts, et la vie
+qui suit le maximum quand on équipe un châssis (sans quoi les +30 PV ne servaient à rien dans un combat).
+
 ## Piège de méthode
 
 Une mesure à longue distance exige de **dégager toute la carte**. Un relief laissé au hasard coupe la

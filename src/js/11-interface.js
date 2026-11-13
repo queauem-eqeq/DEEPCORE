@@ -62,15 +62,19 @@ function side(){
   const st=G.st;
 
   for(const [t,v,mx,nm] of [['lifeT',st.vie,st.vieMax,'lifeN'],['enT',st.energie,st.energieMax,'enN']]){$(t).innerHTML=asciiBar(v,mx,ABAR_N);$(nm).textContent=Math.floor(v)+'/'+mx;$(t).setAttribute('aria-valuenow',Math.floor(v));$(t).setAttribute('aria-valuemax',mx);}
-  {const b=$('sprintBtn'),sl=slowOf(G.t[idx(G.px,G.py)]);b.textContent=G.sprint?'COURSE':'MARCHE';b.classList.toggle('on',!!G.sprint);b.setAttribute('aria-pressed',!!G.sprint);
-    $('paceN').textContent=(sl>1?'terrain lent · ':'')+'vitesse ×'+(+(TICK/stepDur(G.t[idx(G.px,G.py)],G.sprint&&st.energie>=SPRINT_COST)).toFixed(2)+'').replace('.',',');}
+  {const b=$('sprintBtn');b.textContent=G.sprint?'COURSE':'MARCHE';b.classList.toggle('on',!!G.sprint);b.setAttribute('aria-pressed',!!G.sprint);}
   const tm=terrMod(G.px,G.py),ev=st.esq+tm;
   const sr=G.stealth||STEALTH_BASE;
-  const sv={vitesse:st.vitesse,degats:st.degats,capteur:st.capteur,pre:st.pre,
-    esq:tm?`<span style="color:${tm>0?'var(--c1)':'var(--life)'}">${ev}</span>`:ev,
-    crit:`${st.crit??5} %`,power:`${st.power}/t`,nul2:0,
+  // une stat modifiée par l'équipement s'affiche en couleur : accent si elle y gagne, rouge si elle y perd
+  const eqv=(k,v)=>{const b=invBonus(k);return b?`<span style="color:${b>0?'var(--c1)':'var(--life)'}">${v}</span>`:v;};
+  const sv={vitesse:eqv('vitesse',st.vitesse),degats:eqv('degats',st.degats),capteur:eqv('capteur',st.capteur),pre:eqv('pre',st.pre),
+    esq:tm?`<span style="color:${tm>0?'var(--c1)':'var(--life)'}">${ev}</span>`:eqv('esq',ev),
+    crit:eqv('crit',`${st.crit??5} %`),power:eqv('power',`${st.power}/t`),nul2:0,
     stealth:sr!==STEALTH_BASE?`<span style="color:${sr<STEALTH_BASE?'var(--c1)':'var(--life)'}">${sr}</span>`:sr};
   $('stats').innerHTML=STATS.map(([k,l,t])=>`<div class="r" title="${t}"><span>${l}</span><span>${sv[k]}</span></div>`).join('');
+  {const E=G.eff||{},l=[];if(E.poison>0)l.push(`<span style="color:var(--life)">Poison ${E.poison}</span>`);if(E.glu>0)l.push(`Englué ${E.glu}`);if(E.fum>0)l.push(`<span style="color:var(--c1)">Fumée ${E.fum}</span>`);$('effs').innerHTML=l.join(' · ');}
+  $('lvl').textContent=G.mode==='test'?'Carte d’essai':`Niveau ${G.niv}/${NIV_MAX} · ${BIOMES[G.biome].n}`;$('matN').textContent=G.st.matiere||0;
+  if(!$('inventaire').hidden)invDraw();
   $('msg').innerHTML=seenHTML();
   const lg=(G.log||[]).slice(-5);
   $('log').innerHTML=lg.map(e=>`<li class="${e.c||''}${e.t===G.turn&&!e.c?' new':''}"><span class="t">T${String(e.t).padStart(3,'0')}</span>${e.m}${e.n>1?`<span class="x">×${e.n}</span>`:''}</li>`).join('');
@@ -82,6 +86,7 @@ const KEYS={arrowup:[0,-1],arrowdown:[0,1],arrowleft:[-1,0],arrowright:[1,0],z:[
   a:[-1,-1],e:[1,-1],w:[-1,1],c:[1,1],'8':[0,-1],'2':[0,1],'4':[-1,0],'6':[1,0],'7':[-1,-1],'9':[1,-1],'1':[-1,1],'3':[1,1]};
 addEventListener('keydown',ev=>{
   if(INTRO){ev.preventDefault();if(ev.key==='Escape'||ev.key===' '||ev.key==='Enter')skipIntro();return;}
+  if(!$('inventaire').hidden){invKey(ev);return;}
   if(!$('discretion').hidden){if(ev.key==='Escape'){ev.preventDefault();closeDisc();}return;}
   if(!$('bestiary').hidden){if(ev.key==='Escape'){ev.preventDefault();closeBest();}return;}
   if(!$('viseurs').hidden){if(ev.key==='Escape'){ev.preventDefault();closeCur();}return;}
@@ -100,7 +105,7 @@ addEventListener('keydown',ev=>{
   if(k==='m'){ev.preventDefault();setFreeCam(!freeCam);return;}
   if(ev.key==='!'){ev.preventDefault();toggleSound();return;}
   if(freeCam){if(KEYS[k]){ev.preventDefault();const st=ev.shiftKey?5:2;panCam(KEYS[k][0]*st,KEYS[k][1]*st);}else if(k==='escape'){ev.preventDefault();setFreeCam(false);}else if(k==='b'){ev.preventDefault();toggleFog();}return;}
-  if(KEYS[k]){ev.preventDefault();tryMove(...KEYS[k]);}else if(k==='f'){ev.preventDefault();askDrill();}else if(k==='b'){ev.preventDefault();toggleFog();}else if(k==='r'){ev.preventDefault();toggleSprint();}else if(k==='p'){ev.preventDefault();startRest();}else if(k===' '||k==='5'||k==='.'||ev.code==='Numpad5'){ev.preventDefault();waitTurn();}
+  if(KEYS[k]){ev.preventDefault();tryMove(...KEYS[k]);}else if(k==='f'){ev.preventDefault();askDrill();}else if(k==='b'){ev.preventDefault();toggleFog();}else if(k==='r'){ev.preventDefault();toggleSprint();}else if(k==='p'){ev.preventDefault();startRest();}else if(k==='i'){ev.preventDefault();invToggle();}else if(k===' '||k==='5'||k==='.'||ev.code==='Numpad5'){ev.preventDefault();waitTurn();}
 });
 $('pad').addEventListener('click',ev=>{const b=ev.target.closest('button[data-d]');if(!b||!$('overlay').hidden)return;const [dx,dy]=b.dataset.d.split(',').map(Number);if(freeCam)panCam(dx*2,dy*2);else tryMove(dx,dy);});
 $('waitPad').onclick=waitTurn;
@@ -115,7 +120,8 @@ function applySaved(d){
   const num=v=>typeof v==='number'&&isFinite(v);
   if(d.bestiaire)BEST_LIST().forEach(e=>{const b=d.bestiaire[e.key];if(b)BFIELDS.forEach(([f])=>{if(num(b[f]))e.o[f]=b[f];});});saveBest();
   if(num(d.discretion))setStealthBase(d.discretion);
-  if(d.life)LIFE_LBL.forEach(([k])=>{if(num(d.life[k]))setLife(k,d.life[k]);});
+  if(d.intensite)LIFE_LBL.forEach(([k])=>{if(num(d.intensite[k]))setIntens(k,d.intensite[k]);});
+  else if(d.life)LIFE_LBL.forEach(([k])=>{if(num(d.life[k]))setIntens(k,nivDe(k,d.life[k]));});   // ancien enregistrement, en nombres
   if(d.generation){const g=d.generation;GEN_LBL.forEach(([k])=>{if(num(g[k]))GEN[k]=0;});GEN_LBL.forEach(([k])=>{if(num(g[k]))setGen(k,g[k]);});
     if(METHODS.some(m=>m[0]===g.methode)){GEN.methode=g.methode;$('gm').value=g.methode;}
     if(num(g.remplissage))setCA('remplissage',g.remplissage,35,70);if(num(g.iterations))setCA('iterations',g.iterations,1,10);caState();saveGen();}
@@ -134,7 +140,7 @@ function applySaved(d){
 async function saveSettings(b,m){b=b instanceof HTMLElement?b:$('saveBtn');m=m||$('saveMsg');
   if(!DB||!b)return;b.disabled=true;b.textContent='Enregistrement…';m.className='saved';m.textContent='';
   const best={};BEST_LIST().forEach(e=>{best[e.key]={nom:e.o.n};BFIELDS.forEach(([f])=>best[e.key][f]=e.o[f]);});
-  const data={enregistreLe:new Date().toISOString(),bestiaire:best,discretion:STEALTH_BASE,life:Object.assign({},LIFE),generation:Object.assign({},GEN),
+  const data={enregistreLe:new Date().toISOString(),bestiaire:best,discretion:STEALTH_BASE,intensite:Object.assign({},INTENS),generation:Object.assign({},GEN),
     planete:{largeur:W,hauteur:H,joyaux:GEM_COUNT},robot:G&&G.st?Object.assign({},G.st):null,
     palette:{active:PRESETS[PRESET_ACTIVE].n,palettes:PRESETS.map(p=>({nom:p.n,couleurs:p.c.slice()}))},
     tuiles:Object.assign({},TILE_OV)};
@@ -162,4 +168,4 @@ function toggleVision(){SHOWVIS=!SHOWVIS;say(SHOWVIS?'Portée de discrétion aff
 function toggleFog(){fog=!fog;try{localStorage.setItem('np-fog',fog?'on':'off');}catch(e){}say(fog?'Brouillard de guerre activé.':'Brouillard de guerre désactivé.','info');render();}
 ['fd-stats','fd-gen','fd-life','fd-pal','fd-lab'].forEach(id=>{const d=$(id);try{d.open=localStorage.getItem('np-'+id)==='open';}catch(e){}
   d.addEventListener('toggle',()=>{try{localStorage.setItem('np-'+id,d.open?'open':'closed');}catch(e){}});});
-$('restart').onclick=e=>{e.preventDefault();e.stopPropagation();unlock();SFX.start();newGame();started=true;$('overlay').hidden=true;render();};
+$('restart').onclick=e=>{e.preventDefault();e.stopPropagation();unlock();SFX.start();testGame();started=true;$('overlay').hidden=true;render();};

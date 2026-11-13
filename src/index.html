@@ -41,6 +41,13 @@
     </div>
   </div>
 </div>
+<div class="modal" id="inventaire" role="dialog" aria-modal="true" aria-labelledby="invTitle" hidden>
+  <div class="mcard wide" tabindex="-1">
+    <div class="mhead"><h2 id="invTitle">Inventaire</h2><button id="invClose" aria-label="Fermer l’inventaire">Fermer</button></div>
+    <div class="inv" id="inv"></div>
+    <p class="mnote"><kbd>↑</kbd> <kbd>↓</kbd> choisir · <kbd>Entrée</kbd> équiper, retirer ou utiliser · <kbd>J</kbd> jeter · <kbd>G</kbd> ramasser ce qui est au sol · <kbd>I</kbd> ou <kbd>Échap</kbd> fermer · double-clic = Entrée</p>
+  </div>
+</div>
 <div class="off" id="off" hidden><p>SIGNAL COUPÉ</p><button id="offOn">Rallumer</button></div>
 <canvas class="intro" id="introCv" hidden aria-label="Cinématique d’arrivée sur la planète"></canvas>
 <div class="introskip" id="introSkip" hidden>Échap : passer · clic : activer le son</div>
@@ -58,10 +65,13 @@
   <aside class="col">
     <div>
       <h2>Statut</h2>
+      <div class="lvl" id="lvl"></div>
       <div class="rows">
         <div class="bar2"><span>Vie</span><span class="abar life" role="meter" aria-label="Vie" id="lifeT"></span><span class="bnum" id="lifeN"></span></div>
         <div class="bar2"><span>Énergie</span><span class="abar energy" role="meter" aria-label="Énergie" id="enT"></span><span class="bnum" id="enN"></span></div>
-        <div class="bar2"><span>Allure</span><span><button id="sprintBtn" class="pace" aria-pressed="false" title="Courir ou marcher (R) : la course double la vitesse et coûte 5 d’énergie par pas">MARCHE</button></span><span class="bnum" id="paceN"></span></div>
+        <div class="bar2"><span>Matière</span><span></span><span class="bnum mat" id="matN" title="Réserve de Matière : servira à construire de l’équipement">0</span></div>
+        <div class="btnrow"><button id="sprintBtn" class="pace" aria-pressed="false" title="Courir ou marcher (R) : la course double la vitesse et coûte 5 d’énergie par pas">MARCHE</button><button id="invBtn" class="pace" aria-haspopup="dialog" title="Ouvrir l’inventaire (I)">INVENTAIRE</button></div>
+        <div class="effs" id="effs" role="status" aria-label="Effets en cours"></div>
       </div>
     </div>
     <details class="fold" id="fd-stats">
@@ -106,9 +116,10 @@
           <button id="bestBtn">Bestiaire</button>
           <button id="discBtn">Discrétion</button>
           <button id="curBtn">Tile editor</button>
+          <button id="campBtn" title="Recommencer une descente au niveau 1">Nouvelle descente</button>
           <button id="introBtn" title="Générer une nouvelle planète et rejouer la cinématique d’arrivée">Intro</button>
         </div>
-        <p class="keys"><kbd>ZQSD</kbd> <kbd>↑↓←→</kbd> pavé num. · <kbd>A</kbd><kbd>E</kbd><kbd>W</kbd><kbd>C</kbd> diagonales · Souris : survol = inspection, clic = y aller · <kbd>X</kbd> inspection au clavier (<kbd>Entrée</kbd> pour y aller) · <kbd>R</kbd> courir / marcher · <kbd>F</kbd> forer · <kbd>Espace</kbd> <kbd>5</kbd> attendre un tour · <kbd>P</kbd> repos jusqu’à l’énergie pleine · <kbd>B</kbd> brouillard de guerre · <kbd>V</kbd> champs de vision des ennemis · <kbd>!</kbd> son · <kbd>M</kbd> mode carte (déplacements = défilement, <kbd>Maj</kbd> pour aller plus vite, mini-carte : clic pour recentrer, glisser le cadre pour défiler)</p>
+        <p class="keys"><kbd>ZQSD</kbd> <kbd>↑↓←→</kbd> pavé num. · <kbd>A</kbd><kbd>E</kbd><kbd>W</kbd><kbd>C</kbd> diagonales · Souris : survol = inspection, clic = y aller · <kbd>X</kbd> inspection au clavier (<kbd>Entrée</kbd> pour y aller) · <kbd>R</kbd> courir / marcher · <kbd>I</kbd> inventaire · <kbd>F</kbd> forer · <kbd>Espace</kbd> <kbd>5</kbd> attendre un tour · <kbd>P</kbd> repos jusqu’à l’énergie pleine · <kbd>B</kbd> brouillard de guerre · <kbd>V</kbd> champs de vision des ennemis · <kbd>!</kbd> son · <kbd>M</kbd> mode carte (déplacements = défilement, <kbd>Maj</kbd> pour aller plus vite, mini-carte : clic pour recentrer, glisser le cadre pour défiler)</p>
       </div>
     </details>
   </aside>
@@ -128,4 +139,5 @@
 <script src="js/11-interface.js"></script>
 <script src="js/12-souris.js"></script>
 <script src="js/13-editeur-tuiles.js"></script>
-<script src="js/14-intro.js"></script>
+<script src="js/14-inventaire.js"></script>
+<script src="js/15-intro.js"></script>

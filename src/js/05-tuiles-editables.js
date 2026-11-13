@@ -6,13 +6,14 @@ function curOutline(r){return r.map((l,y)=>[...l].map((c,x)=>c!=='.'?c:[[1,0],[-
 const CURSOR_DEF=curOutline(curGen((x,y)=>((y===0||y===15)&&(x<5||x>10))||((x===0||x===15)&&(y<5||y>10))));   // viseur « Crochets »
 const TILE_LIST=[
   ['Viseur',[['cursor','Viseur']]],
-  ['Foreuse et faune',[['robot_u','Foreuse'],['an0r','Insectoïde'],['bz0r','Crabos'],['bz1r','Cafar']]],
+  ['Foreuse et faune',[['robot_u','Foreuse'],['an0r','Insectoïde'],['bz0r','Crabos'],['bz1r','Cafar'],...BEASTS.slice(2).map((b,i)=>['bz'+(i+2)+'r',b.n])]],
   ['Terrain',[['ground0','Sol'],['rock','Rocher'],['rock2','Rocher 2'],['mtTop','Crête'],['mtBody','Montagne'],['liq0','Eau A'],['liq1','Eau B'],['deep0','Eau profonde'],['grass0','Herbes hautes'],['flat0','Herbes basses'],['rubble','Gravats'],['crackH','Fissures'],['wade','Remous'],['wadeDeep','Remous profond']]],
-  ['Objets',[['siteUnknown','Site'],['gem','Joyau'],['ore1','Éclats petits (montagne)'],['ore2','Éclats moyens (montagne)'],['ore','Éclats gros (montagne)'],['oreSol1','Éclats petits (sol)'],['oreSol2','Éclats moyens (sol)'],['oreSol','Éclats gros (sol)'],['blood0','Sang A'],['blood1','Sang B']]],
+  ['Objets',[['siteUnknown','Site'],['gem','Joyau'],['objet','Objet au sol'],['ore1','Éclats petits (montagne)'],['ore2','Éclats moyens (montagne)'],['ore','Éclats gros (montagne)'],['oreSol1','Éclats petits (sol)'],['oreSol2','Éclats moyens (sol)'],['oreSol','Éclats gros (sol)'],['blood0','Sang A'],['blood1','Sang B']]],
   ['Vaisseau',[['ship','Cargo']]],
   ['Intro',[['nuage0','Nuage plein'],['nuage1','Nuage texturé'],['nuage2','Bord diagonal'],['nuage3','Bord croisé'],['nuage4','Bord rayé'],['nuage5','Bord tramé']]]];
 const TILE_DEPS={robot_u:['robot_u','robot_r','robot_d','robot_l'],an0r:['an0r','an0l'],bz0r:['bz0r','bz0l'],bz1r:['bz1r','bz1l'],deep0:['deep0','deep1'],grass0:['grass0'],gem:['gem','gemDim','gemHole'],ship:['ship',...SHIP_KEYS]};
 // dimensions en pixels : 16 x 16, sauf le vaisseau édité d'un bloc (5 x 6 tuiles)
+BEASTS.forEach((_,i)=>{TILE_DEPS['bz'+i+'r']=['bz'+i+'r','bz'+i+'l'];});
 const tileDim=k=>k==='ship'?[SGW*16,SGH*16]:[16,16];
 const validTile=(r,k)=>{const [w,h]=tileDim(k);return Array.isArray(r)&&r.length===h&&r.every(l=>typeof l==='string'&&l.length===w&&/^[.0w123r]+$/.test(l));};
 const PAT_ORIG={};
@@ -29,7 +30,7 @@ for(const k in PAT_ORIG)if(k!=='cursor'&&k!=='ship')PAT[k]=(x,y)=>TF(k)(x,y);
 // tuiles du vaisseau posées case par case sur la carte, découpées dans l'image d'ensemble
 for(const k of SHIP_KEYS){const [,cx,cy]=k.split('_').map(Number);PAT[k]=(x,y)=>TF('ship')(cx*16+x,cy*16+y);}
 PAT.robot_r=(x,y)=>TF('robot_u')(y,15-x);PAT.robot_d=(x,y)=>TF('robot_u')(15-x,15-y);PAT.robot_l=(x,y)=>TF('robot_u')(15-y,x);
-for(const k of ['an0','bz0','bz1'])PAT[k+'l']=(x,y)=>TF(k+'r')(15-x,y);
+for(const k of ['an0',...BEASTS.map((_,i)=>'bz'+i)])PAT[k+'l']=(x,y)=>TF(k+'r')(15-x,y);
 PAT.deep1=(x,y)=>TF('deep0')((x+14)%16,y);
 PAT.gemDim=(x,y)=>TF('gem')(x,y);
 PAT.gemHole=(x,y)=>[[0,0],[1,0],[-1,0],[0,1],[0,-1]].some(([dx,dy])=>{const a=x+dx,b=y+dy;if(a<0||b<0||a>15||b>15)return false;const c=TF('gem')(a,b);return c&&c!=='.';})?'0':'.';
@@ -39,13 +40,16 @@ const inkCol=ch=>ch==='0'?'#020605':ch==='r'?'#b8242a':ch==='w'?'#ffffff':PAL[ch
 function tileCanvas(src,w=16,h=16){const c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d');
   for(let j=0;j<h;j++)for(let i=0;i<w;i++){const ch=typeof src==='function'?src(i,j):src[j][i];const col=inkCol(ch);if(col){x.fillStyle=col;x.fillRect(i,j,1,1);}}return c;}
 // reconstruit une tuile retouchée et ses variantes
-function rebuildTile(k){for(const d of TILE_DEPS[k]||[k]){if(d==='ship')TL.ship=tileCanvas(TF('ship'),SGW*16,SGH*16);else if(PAT[d])TL[d]=tileCanvas(PAT[d]);if(/^(an|bz)\d+r$|^robot_r$/.test(d)){try{ICON[d]=TL[d].toDataURL();}catch(e){}}}buildCursor();}
+function rebuildTile(k){for(const d of TILE_DEPS[k]||[k]){if(d==='ship')TL.ship=tileCanvas(TF('ship'),SGW*16,SGH*16);else if(PAT[d])TL[d]=tileCanvas(PAT[d]);if(/^(an|bz)\d+r$|^robot_r$/.test(d)){try{ICON[d]=TL[d].toDataURL();}catch(e){}}}buildCursor();if(k==='robot_u')robotTiles();}
 function buildTiles(){
-  TL={};for(const k in PAT)TL[k]=tileCanvas(PAT[k]);TL.ship=tileCanvas(TF('ship'),SGW*16,SGH*16);buildCursor();
+  TL={};for(const k in PAT)TL[k]=tileCanvas(PAT[k]);
+  // la Matière reprend les dessins des éclats de métal (retouches comprises), en couleur accent au lieu de bio
+  for(const k of ['ore','ore1','ore2','oreSol','oreSol1','oreSol2']){const f=TF(k);TL[k.replace('ore','mat')]=tileCanvas((x,y)=>{const c=f(x,y);return c==='2'?'1':c;});}TL.ship=tileCanvas(TF('ship'),SGW*16,SGH*16);buildCursor();
   ICON={};for(const k in TL)if(/^(an|bz)\d+r$|^robot_r$/.test(k)){try{ICON[k]=TL[k].toDataURL();}catch(e){}}
+  robotTiles();
   ANIMG=SPECIES.map((_,i)=>{try{return TL['an'+i+'r'].toDataURL();}catch(e){return '';}});
   const r=document.documentElement.style;r.setProperty('--c1',PAL['1']);r.setProperty('--c2',PAL['2']);r.setProperty('--c3',PAL['3']);
-  ['1','2','3'].forEach(k=>{$('pc'+k).style.background=PAL[k];$('pc'+k).title=PAL[k];});
+  ['1','2','3'].forEach(k=>{$('pc'+k).style.background=PAL_U[k];$('pc'+k).title=PAL_U[k];});
 }
-function setPal(p){PAL=p;try{localStorage.setItem('np-palette',JSON.stringify(PAL));}catch(e){}touchLocal();buildTiles();render();}
+function setPal(p){PAL_U=p;try{localStorage.setItem('np-palette',JSON.stringify(PAL_U));}catch(e){}touchLocal();palBiome(TEINTE);buildTiles();render();}
 

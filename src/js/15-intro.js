@@ -220,6 +220,7 @@ function introFrame(now){const I=INTRO;if(!I)return;ensureChasmOv();
   introCv.style.opacity=t>T5?String(1-clamp01((t-T5)/(TEND-T5))):'1';
   if(t>=TEND){endIntro();return;}
   requestAnimationFrame(introFrame);}
+$('campBtn').onclick=()=>{unlock();if(TRAV)stopTravel();SFX.start();newGame();started=true;$('overlay').hidden=true;render();};
 $('introBtn').onclick=()=>{unlock();if(TRAV)stopTravel();newGame();started=true;$('overlay').hidden=true;render();playIntro();};
 function savePresets(){try{localStorage.setItem('np-presets',JSON.stringify(PRESETS.map(p=>p.c)));localStorage.setItem('np-preset-active',PRESET_ACTIVE);}catch(e){}touchLocal();}
 function drawPresets(){$('presets').innerHTML=PRESETS.map((p,i)=>`<button data-p="${i}" title="${p.n}" aria-label="Palette ${p.n}" aria-pressed="${i===PRESET_ACTIVE}">${[2,1,0].map(j=>`<i style="background:${p.c[j]}"></i>`).join('')}</button>`).join('');
@@ -232,10 +233,10 @@ let pickKey=null;
 function openPick(k){const grid=$('cgrid');if(pickKey===k){closePick();return;}pickKey=k;
   ['1','2','3'].forEach(x=>$('pc'+x).setAttribute('aria-expanded',x===k));
   $('pc'+k).closest('label').after(grid);
-  grid.innerHTML=COLORS64.map(c=>`<button role="option" data-c="${c}" style="background:${c}" title="${c}" aria-label="${c}" aria-selected="${c.toLowerCase()===String(PAL[k]).toLowerCase()}"></button>`).join('');
+  grid.innerHTML=COLORS64.map(c=>`<button role="option" data-c="${c}" style="background:${c}" title="${c}" aria-label="${c}" aria-selected="${c.toLowerCase()===String(PAL_U[k]).toLowerCase()}"></button>`).join('');
   grid.hidden=false;}
 function closePick(){pickKey=null;$('cgrid').hidden=true;['1','2','3'].forEach(x=>$('pc'+x).setAttribute('aria-expanded','false'));}
-function applyColor(k,c){const j=+k-1;PRESETS[PRESET_ACTIVE].c[j]=c;savePresets();drawPresets();setPal(Object.assign({},PAL,{[k]:c}));}
+function applyColor(k,c){const j=+k-1;PRESETS[PRESET_ACTIVE].c[j]=c;savePresets();drawPresets();setPal(Object.assign({},PAL_U,{[k]:c}));}
 ['1','2','3'].forEach(k=>$('pc'+k).addEventListener('click',e=>{e.preventDefault();openPick(k);}));
 $('cgrid').addEventListener('click',e=>{const b=e.target.closest('button[data-c]');if(!b||!pickKey)return;const k=pickKey;applyColor(k,b.dataset.c);closePick();$('pc'+k).focus();});
 addEventListener('keydown',e=>{if(e.key==='Escape'&&pickKey)closePick();});
@@ -246,9 +247,14 @@ if(!reduced)setInterval(()=>{liqFrame^=1;if(G&&$('overlay').hidden)render();},65
 
 function start(data){
   buildTiles();buildGen();buildLife();
+  // partie reprise à chaud : la carte garde la taille qu'elle avait
+  if(data&&data.G&&data.G.t){const g=data.G,w=g.w||96,h=g.h||64;if(g.t.length===w*h){W=w;H=h;F=W/96;vis=new Uint8Array(W*H);}}
   const fromHot=!!(data&&data.G&&data.G.t&&data.G.t.length===W*H);
   if(data&&data.G&&data.G.t&&data.G.st&&data.G.t.length===W*H){G=data.G;G.dmg=G.dmg||{};for(let i=0;i<G.t.length;i++)if(G.t[i]===LOW)G.t[i]=FLAT;   // herbes basses et couchées fusionnées
-    if(G.st&&G.st.crit==null)G.st.crit=5;if(G.st)G.st.cout=10;if(G.st&&G.st.power<1)G.st.power=1;if(G.st&&(G.st.capteur<10||G.st.capteur===12||G.st.capteur===15))G.st.capteur=10;if(!G.ore)hideOre();if(!G.st||G.st.pre==null||G.st.energieMax!==100){G.st={vie:100,vieMax:100,energie:100,energieMax:100,repar:0,power:5,vitesse:5,degats:10,capteur:10,cout:10,pre:80,esq:10,crit:5};}
+    if(G.st&&G.st.crit==null)G.st.crit=5;if(G.st)G.st.cout=10;if(G.st&&G.st.power<1)G.st.power=1;if(G.st&&(G.st.capteur<10||G.st.capteur===12||G.st.capteur===15))G.st.capteur=10;if(!G.ore)hideOre();if(!G.st||G.st.pre==null||G.st.energieMax==null){G.st={vie:100,vieMax:100,energie:100,energieMax:100,repar:0,power:5,vitesse:5,degats:10,capteur:10,cout:10,pre:80,esq:10,crit:5};if(G.inv)G.inv.forEach(o=>o.eq=0);}
+  if(!G.inv)G.inv=invTest();if(!G.items)G.items={};if(!G.eff)G.eff={};if(!G.amb)G.amb=[];G.w=W;G.h=H;invMigre();
+  if(!G.mode){G.mode='descente';G.niv=1;G.biome='plateau';G.suite=tirageBiomes();}if(G.st.matiere==null)G.st.matiere=0;   // partie commencée avant la descente
+  palBiome(G.biome?BIOMES[G.biome].teinte:null);buildTiles();   // partie commencée avant l'inventaire
   if(!G.gems)hideGems();
   if(!G.beasts||!G.beasts.some(b=>b.sp===1)&&LIFE.cafar>0)spawnBeasts();
   if(G.fv!==2){G.fv=2;G.blood={};G.beasts=[];spawnAnimals();spawnBeasts();}started=!!data.started;computeFOV();}else newGame();
