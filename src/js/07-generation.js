@@ -195,7 +195,7 @@ function buildDisc(){
     ['Briser une paroi (bruit)',`× ${String(DIG_MULT).replace('.',',')}, arrondi au supérieur ; le bruit s’entend aussi hors de vue`,c('dig',0,0)],
     ['Attendre sur place (Espace ou 5)','÷ 2, arrondi au supérieur',c('wait',0,0)],
     ['Sur des herbes couchées (couvert)','÷ 2, arrondi au supérieur',c('move',1,0)],
-    ['Parois adjacentes (rocher ou montagne)',`− 1 par paroi, au plus − ${WALL_MAX}`,`${c('move',0,1)} (1 paroi) · ${c('move',0,3)} (3 parois) · ${c('move',0,5)} (5 parois ou plus)`]];
+    ['Parois adjacentes (rocher ou montagne)',`− 1 par 2 parois (arrondi au supérieur), au plus − ${WALL_MAX}`,`${c('move',0,1)} (1-2 parois) · ${c('move',0,3)} (3-4 parois) · ${c('move',0,8)} (7-8 parois)`]];
   $('discList').innerHTML=`<div class="bcard"><div class="bh"><div><b>Portée de discrétion</b><br><span>Rayon commun à tous les ennemis : dans ce rayon et en vue, ${Math.round(NOTICE*100)} % par tour de vous remarquer. Touche V : l’afficher sur la carte.</span></div></div>
     <div class="fields"><label for="bf-stealth">Base<input type="number" id="bf-stealth" min="2" max="30" step="1" value="${b}"></label></div>
     <p class="mnote">En ce moment : <b>${now}</b> case${now>1?'s':''}</p></div>
