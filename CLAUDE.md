@@ -3,6 +3,34 @@
 Roguelike au tour par tour, style Cogmind / Brogue : une foreuse explore et fore une planète inconnue.
 Le jeu est une page web en plusieurs fichiers (`src/`), **sans étape d'assemblage**, publiée comme artefact claude.ai ; ce dépôt (GitHub) garde tous les fichiers et l'historique des versions.
 
+## Démarrer une session
+1. **Ouvrir le dépôt** : l'attacher à la session (outil `add_repo`, propriétaire `queauem-eqeq`, dépôt
+   `DEEPCORE`, accès `push`), puis le cloner là où il est indiqué, puis `register_repo_root`. Ce fichier
+   arrive alors tout seul : ne pas le lire à la main.
+2. **Regarder ce qui existe déjà**, avant de toucher à quoi que ce soit :
+   `git ls-remote --heads origin | sed 's#.*refs/heads/##' | sort` (la **liste entière**, sans `head` ni
+   `tail`) et `gh api "repos/queauem-eqeq/DEEPCORE/pulls?state=open"`.
+   **`main` n'est pas forcément à jour** : du travail fini peut dormir dans une branche non fusionnée.
+   Le 12 novembre 2026, une liste tronquée a fait manquer `claude/surprise-crit` ; en publiant depuis
+   `main`, les coups par surprise et les critiques ont disparu de l'artefact. Travailler depuis une
+   branche qui contient tout, ou fusionner d'abord.
+3. **Plusieurs conversations peuvent travailler en parallèle** sur le même dépôt et le même artefact.
+   Avant de publier, vérifier que l'artefact n'a pas bougé (`get_artifact` donne la version en cours).
+
+## Documents
+- `docs/conception.md` : **source de vérité** des règles et des décisions. Le lire avant de modifier une
+  mécanique, en cherchant la section utile, jamais en entier.
+- `docs/mesures.md` : les chiffres mesurés (détection, fuite) et la date de leur mesure. À comparer après
+  un changement d'équilibrage.
+- `docs/brogue.md` : ce que fait Brogue, pour s'y référer quand on règle le jeu.
+
+## Outils de vérification
+- `python3 outils/captures.py DOSSIER t1 t2 …` : images de l'intro à ces instants, contrôle des erreurs.
+- `python3 outils/jeu.py DOSSIER [script.js]` : image de la partie, intro passée ; le script prépare la
+  scène dans la page et renvoie ce qu'on veut lire.
+- `python3 outils/simul.py [detection|fuite|tout]` : rejoue des situations dans le moteur et mesure.
+- `python3 outils/perf.py` : fluidité.
+
 ## L'utilisateur
 - Ne code pas : il décrit ce qu'il veut, en français. Répondre en **français**, de façon concise.
 - Tâche claire → agir directement. Tâche ambiguë ou coûteuse à refaire → poser d'abord les questions nécessaires.
@@ -19,14 +47,13 @@ Le jeu est une page web en plusieurs fichiers (`src/`), **sans étape d'assembla
   07 génération de carte · 08 faune et prédateurs · 09 vision, déplacement, forage · 10 rendu et gouffres ·
   11 interface (mode carte, « En vue », commandes, enregistrement) · 12 souris et inspection · 13 éditeur de tuiles ·
   14 cinématique d'intro.
-- `docs/conception.md` : **document de conception, source de vérité** des règles et décisions. Le lire avant
-  de modifier une mécanique.
-- `planches/` : planches de travail (vaisseau, gouffres). `outils/` : scripts de vérification.
+- `docs/` : conception, mesures, notes sur Brogue (voir plus haut). `planches/` : planches de travail
+  (vaisseau, gouffres). `outils/` : scripts de vérification (voir plus haut).
 
 ## Après chaque modification
 1. Syntaxe : `for f in src/js/*.js; do node --check "$f"; done`.
-2. Vérifier le rendu quand c'est visuel : `python3 outils/captures.py DOSSIER t1 t2 …` (le jeu est lu directement dans
-   `src/` ; captures de l'intro à ces instants, contrôle de fin d'intro et des erreurs). Fluidité : `python3 outils/perf.py`.
+2. Vérifier le rendu quand c'est visuel, avec les outils ci-dessus (le jeu est lu directement dans `src/`).
+   Après un changement d'équilibrage, relancer `outils/simul.py` et mettre `docs/mesures.md` à jour.
 3. **Mettre à jour `docs/conception.md`** (section concernée) pour décrire le nouveau comportement.
 4. **Commit** en français (message court décrivant le changement pour un joueur), puis **push sur la branche
    `claude/NOM-COURT`** (la session ne peut pousser que sur des branches `claude/…`, jamais sur `main` ni sur des tags :

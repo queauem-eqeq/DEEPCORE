@@ -100,7 +100,7 @@ BEASTS.forEach((bp,i)=>{const f=bp.fn||((x,y)=>bp.rows[y][x]);PAT['bz'+i+'r']=f;
 PAT.blood0=["................","................","..........r.....","......rr........",".....rrrr..r....","....rrrrrr......","...r.rrrrrr.....","....rrrrrrr.r...",".....rrrrr......","..r...rrr.......","......r....r....","...........r....","................","................","................","................"];
 PAT.blood1=["................","................","...r............","............r...",".......rr.......","..r..rrrrr......","....rrrrrrr..r..","....rrr.rrrr....","...rrrrrrrr.....","....rrrrrr......","......rr...r....","..r.............","...........r....","................","................","................"];
 SPECIES.forEach((sp,i)=>{const f=sp.rows?((x,y)=>sp.rows[y][x]):critter(sp);PAT['an'+i+'r']=f;PAT['an'+i+'l']=(x,y)=>f(15-x,y);});
-// Herbes : 6 styles, un seul tiré au hasard par planète (haute / couchée)
+// Herbes : 6 styles, un seul tiré au hasard par planète (haute / basse)
 {const rows=a=>(x,y)=>(a[y]||'')[x]||'.';
 const norm=a=>a.map(l=>(l+'................').slice(0,16));
 const grassA=rows(["................","..1.....1....1..","..1..1..1.1..1..",".1...1.1..1.1...",".1..1..1..1.1..1",".1..1.1...1.1..1","1.1.1.1..1..1.1.","1.1.1.1..1.1..1.","1.1.11...1.1..1.",".1.1.1..1..1.1..",".1.1.1..1..1.1..","..11.1.1...11...","..11..11...11...","...1..11....1...","...1...1....1...","................"]);
@@ -116,7 +116,7 @@ const flatC=(x,y)=>{const L=[[0,2],[5,7],[2,12]];for(const[ox,oy]of L){for(let k
 const FERNS=[[3,7],[11,4],[7,14]];
 const grassD=(x,y)=>{for(const[cx,by]of FERNS){const top=by-6;if(x===cx&&y>=top&&y<=by)return '1';for(let k=0;k<3;k++){const ly=top+1+k*2,w=k+1;if(y===ly&&(x===cx-w||x===cx+w))return '1';if(y===ly+1&&(x===cx-w-1||x===cx+w+1)&&k<2)return '1';}}return '.';};
 const flatD=(x,y)=>grassD(15-y,x)==='1'&&(x+y)%2===0?'1':'.';
-// E : herbe couchée par le vent (diagonales)
+// E : herbe basse couchée par le vent (diagonales)
 const WIND=[[1,6],[6,7],[11,5],[3,12],[8,13],[13,11],[0,15],[10,15]];
 const grassE=(x,y)=>{for(const[bx,by]of WIND)for(let k=0;k<3;k++){const px=(bx+k)%16;if(px===x&&(y===by-2*k||y===by-2*k-1))return '1';}return '.';};
 const flatE=(x,y)=>(y%4===1&&(x+y*3)%8<4)||(y%4===3&&(x+y*5)%9===0)?'1':'.';
@@ -126,7 +126,7 @@ const grassF=(x,y)=>{for(const[fx,fy]of FLW){if(x===fx&&y===fy)return '3';if((Ma
 const flatF=(x,y)=>{if((x===12&&y===8)||(x===3&&y===12))return '3';if((x===11&&y===8)||(x===13&&y===8)||(x===2&&y===12)||(x===4&&y===12))return '2';return flatA(x,y);};
 const GT=[[grassA,flatA],[grassB,flatB],[grassC,flatC],[grassD,flatD],[grassE,flatE],[grassF,flatF]];
 GT.forEach(([g,f],i)=>{PAT['grass'+i]=g;PAT['flat'+i]=f;});
-PAT.low=(x,y)=>y>=9?grassA(x,y):'.';}
+}
 const NGRASS=6;
 for(let d=1;d<=5;d++)PAT['site'+d]=(x,y)=>{const g=DIGITS[d];if(x>=6&&x<=8&&y>=4&&y<=8)return g[y-4][x-6]==='3'?'3':'.';return RING[y][x];};
 // Nuages de l'intro : 4 variantes de tuiles opaques (blanc, ombre bio)

@@ -24,18 +24,18 @@ function computeFOV(){vis=new Uint8Array(W*H);const r=G.st.capteur,px=G.px,py=G.
    Hors du rayon mais encore dans la bande de chasse, il a LOSE_TRACK par tour de perdre votre trace (les 3 % de Brogue) :
    il garde la dernière position connue et s'y rend, mais ne vous suit plus de loin — il doit vous remarquer de nouveau
    (NOTICE) à l'intérieur du rayon. Marqué par o.lost, remis à zéro dès qu'il vous revoit ou qu'il oublie.
-   Calcul, dans cet ordre : base, ×1,5 en brisant une paroi, ÷2 en attendant sur place, ÷2 sur des herbes couchées
+   Calcul, dans cet ordre : base, ×1,5 en brisant une paroi, ÷2 en attendant sur place, ÷2 sur des herbes basses
    (arrondi au supérieur à chaque division), −1 par 2 parois adjacentes, arrondi au supérieur (rocher ou montagne), au plus −4, plancher STEALTH_MIN. */
 let STEALTH_BASE=10;const NOTICE=.25,HUNT_MULT=2,STEALTH_MIN=2,DIG_MULT=1.5,LOSE_TRACK=.03;
 try{const s=+localStorage.getItem('np-stealth');if(s>=2&&s<=30)STEALTH_BASE=s;}catch(e){}
 function setStealthBase(v){STEALTH_BASE=Math.max(2,Math.min(30,v|0));try{localStorage.setItem('np-stealth',STEALTH_BASE);}catch(e){}touchLocal();}
 let lastAct='move';                                   // ce que la foreuse vient de faire : 'move', 'wait' ou 'dig'
 const WALL_MAX=4;                                      // retrait maximal dû aux parois adjacentes (−4)
-function stealthCalc(base,act,flat,walls){           // flat : sur des herbes couchées ; walls : parois adjacentes (0 à 8) : retrait = parois ÷ 2 arrondi au supérieur, au plus WALL_MAX
+function stealthCalc(base,act,flat,walls){           // flat : sur des herbes basses ; walls : parois adjacentes (0 à 8) : retrait = parois ÷ 2 arrondi au supérieur, au plus WALL_MAX
   let r=base;
   if(act==='dig')r=Math.ceil(r*DIG_MULT);
   if(act==='wait')r=Math.ceil(r/2);
-  if(flat)r=Math.ceil(r/2);                           // herbes couchées : couvert
+  if(flat)r=Math.ceil(r/2);                           // herbes basses : couvert
   return Math.max(STEALTH_MIN,r-Math.min(Math.ceil(walls/2),WALL_MAX));}
 function stealthRange(act){
   let walls=0;for(const [dx,dy] of DIRS){const x=G.px+dx,y=G.py+dy;if(x<0||y<0||x>=W||y>=H)continue;const v=G.t[idx(x,y)];if(v===ROCK||v===MOUNT)walls++;}
@@ -103,7 +103,7 @@ function tryMove(dx,dy){
     if(ov!==LIQ&&ov!==DEEP&&ov!==BRIDGE&&ov!==DECK){G.tracks=G.tracks||{};G.tracks[oi]={t:G.turn+1,i:G.lastDir??dk,o:dk};}G.lastDir=dk;}
   const doorway=(G.t[idx(G.px,G.py)]===DECK)!==(v===DECK);   // passage de la porte du vaisseau
   G.px=nx;G.py=ny;G.turn++;G.dist++;G.msg=null;if(G.devMsg){say(G.devMsg,'warn');G.devMsg=null;}
-  if(v===GRASS){G.t[idx(nx,ny)]=FLAT;SFX.grass();}else if(v===LOW)SFX.grass();
+  if(v===GRASS){G.t[idx(nx,ny)]=FLAT;SFX.grass();}else if(v===FLAT)SFX.grass();
   if(v===LIQ)SFX.water();else if(v===DEEP)SFX.deep();else SFX.step();
   if(doorway){SFX.door();say(v===DECK?'La porte du vaisseau s’ouvre : la foreuse rentre dans la soute.':'La porte du vaisseau s’ouvre : la foreuse sort.','info');}
   drift();animalsAct();beastsAct();regen();

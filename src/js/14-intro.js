@@ -100,7 +100,7 @@ function introCell(x,i,px,py){const t=G.t[i],h=hash(i%W,(i/W)|0),put2=(tl,a)=>{i
   else if(t===LIQ){x.globalAlpha=.24;x.fillStyle=PAL['2'];x.fillRect(px,py,S,S);put2(h%2?TL.liq1:TL.liq0,.9);}
   else if(t===DEEP){x.globalAlpha=1;x.fillStyle='#01060c';x.fillRect(px,py,S,S);x.globalAlpha=.08;x.fillStyle=PAL['2'];x.fillRect(px,py,S,S);put2(h%2?TL.deep1:TL.deep0,.4);}
   else if(t===CHASM){x.globalAlpha=1;x.fillStyle='#000';x.fillRect(px,py,S,S);if(CHASM_OV)x.drawImage(CHASM_OV,(i%W)*16,((i/W)|0)*16,16,16,px,py,S,S);}
-  else if(t===RUBBLE)put2(TL.rubble,.65);else if(t===GRASS)put2(TL.grass0,.9);else if(t===LOW)put2(TL.low,.75);else if(t===FLAT)put2(TL.flat0,.5);
+  else if(t===RUBBLE)put2(TL.rubble,.65);else if(t===GRASS)put2(TL.grass0,.9);else if(t===FLAT)put2(TL.flat0,.75);
   x.globalAlpha=1;}
 const wrapIdx=(mx,my)=>(((my%H)+H)%H)*W+(((mx%W)+W)%W);
 function introFrame(now){const I=INTRO;if(!I)return;ensureChasmOv();
@@ -247,7 +247,8 @@ if(!reduced)setInterval(()=>{liqFrame^=1;if(G&&$('overlay').hidden)render();},65
 function start(data){
   buildTiles();buildGen();buildLife();
   const fromHot=!!(data&&data.G&&data.G.t&&data.G.t.length===W*H);
-  if(data&&data.G&&data.G.t&&data.G.st&&data.G.t.length===W*H){G=data.G;G.dmg=G.dmg||{};if(G.st&&G.st.crit==null)G.st.crit=5;if(G.st)G.st.cout=10;if(G.st&&G.st.power<1)G.st.power=1;if(G.st&&(G.st.capteur<10||G.st.capteur===12||G.st.capteur===15))G.st.capteur=10;if(!G.ore)hideOre();if(!G.st||G.st.pre==null||G.st.energieMax!==100){G.st={vie:100,vieMax:100,energie:100,energieMax:100,repar:0,power:5,vitesse:5,degats:10,capteur:10,cout:10,pre:80,esq:10,crit:5};}
+  if(data&&data.G&&data.G.t&&data.G.st&&data.G.t.length===W*H){G=data.G;G.dmg=G.dmg||{};for(let i=0;i<G.t.length;i++)if(G.t[i]===LOW)G.t[i]=FLAT;   // herbes basses et couchées fusionnées
+    if(G.st&&G.st.crit==null)G.st.crit=5;if(G.st)G.st.cout=10;if(G.st&&G.st.power<1)G.st.power=1;if(G.st&&(G.st.capteur<10||G.st.capteur===12||G.st.capteur===15))G.st.capteur=10;if(!G.ore)hideOre();if(!G.st||G.st.pre==null||G.st.energieMax!==100){G.st={vie:100,vieMax:100,energie:100,energieMax:100,repar:0,power:5,vitesse:5,degats:10,capteur:10,cout:10,pre:80,esq:10,crit:5};}
   if(!G.gems)hideGems();
   if(!G.beasts||!G.beasts.some(b=>b.sp===1)&&LIFE.cafar>0)spawnBeasts();
   if(G.fv!==2){G.fv=2;G.blood={};G.beasts=[];spawnAnimals();spawnBeasts();}started=!!data.started;computeFOV();}else newGame();

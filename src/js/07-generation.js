@@ -119,7 +119,7 @@ function tidyChasms(t){
       if(![0,1,2,3].some(d=>{const a=x+DIRS[d][0],b=y+DIRS[d][1];return a>=0&&b>=0&&a<W&&b<H&&t[idx(a,b)]===CHASM;})){t[i]=GROUND;ch=true;}}
     if(!ch)break;}}
 // Pose le vaisseau sur une zone dégagée (marge d'une case autour) ; à défaut, sur la zone la moins encombrée, puis relie tout
-function placeShip(t){const ok=v=>v===GROUND||v===GRASS||v===FLAT||v===LOW||v===RUBBLE||v===ROCK;let bx=3,by=3,bb=1e9;
+function placeShip(t){const ok=v=>v===GROUND||v===GRASS||v===FLAT||v===RUBBLE||v===ROCK;let bx=3,by=3,bb=1e9;
   for(let k=0;k<800&&bb>0;k++){const x0=rnd(3,W-SGW-4),y0=rnd(3,H-SGH-4);let bad=0;
     for(let y=y0-1;y<=y0+SGH;y++)for(let x=x0-1;x<=x0+SGW;x++)if(!ok(t[idx(x,y)]))bad++;
     if(bad<bb){bb=bad;bx=x0;by=y0;}}
@@ -154,7 +154,7 @@ function genPlanet(){
       const c=rankFill(t,crev,Math.round(ct/2),CHASM),b=placeBlobs(t,ct-c,CHASM,cSize,fill,it,false);if(c+b<ct)rankFill(t,crev,ct-c-b,CHASM);}
     placeLakes(t,P('eau'));
     const gC=placeBlobs(t,P('herbe'),GRASS,()=>[rnd(SZ(10,4),SZ(22,6)),rnd(SZ(6,3),SZ(13,4))],.5,4,false);if(gC<P('herbe'))rankFill(t,sc(fbm()),P('herbe')-gC,GRASS);
-    {const gn=sc(fbm()),gc=[];for(let i=0;i<N;i++)if(t[i]===GRASS)gc.push(i);gc.sort((a,b)=>gn[a]-gn[b]);for(const i of gc.slice(0,gc.length>>1))t[i]=LOW;}
+    {const gn=sc(fbm()),gc=[];for(let i=0;i<N;i++)if(t[i]===GRASS)gc.push(i);gc.sort((a,b)=>gn[a]-gn[b]);for(const i of gc.slice(0,gc.length>>1))t[i]=FLAT;}
     for(let i=0;i<N;i++)if(t[i]===GROUND&&Math.random()<.035)t[i]=ROCK;
     tidyChasms(t);connect(t);tidyChasms(t);separateWater(t);
     const ship=placeShip(t),sx=ship.x+2,sy=ship.y+2,st=idx(sx,sy);   // la foreuse démarre au fond du couloir (case du haut), mèche vers la porte
@@ -177,7 +177,7 @@ function newGame(){drilling=false;genPlanet();hideGems();hideOre();G.log=[];G.tr
 
 /* ---------- Bestiaire : édition des statistiques ---------- */
 const BFIELDS=[['v','Vitesse',1,10],['pv','PV',1,200],['dmg','Dégâts',0,100],['pre','Précision',0,100],['esq','Esquive',0,100],['crit','Critique %',0,100]];
-const BEST_LIST=()=>[{key:'insectoide',o:SPECIES[0],ic:'an0r',role:'Suit à distance, attaque avec les crabos'},{key:'crabos',o:BEASTS[0],ic:'bz0r',role:'Chasse le robot'},{key:'cafar',o:BEASTS[1],ic:'bz1r',role:'En bande de 2 à 5, donne l’alerte'}];
+const BEST_LIST=()=>[{key:'insectoide',o:SPECIES[0],ic:'an0r',role:'Suit à distance, attaque avec les crabos'},{key:'crabos',o:BEASTS[0],ic:'bz0r',role:'Chasse le robot'},{key:'cafar',o:BEASTS[1],ic:'bz1r',role:'En bande de 2 à 4, donne l’alerte'}];
 const BEST_DEF={};BEST_LIST().forEach(e=>{BEST_DEF[e.key]={};BFIELDS.forEach(([f])=>BEST_DEF[e.key][f]=e.o[f]);});
 try{const b=JSON.parse(localStorage.getItem('np-best')||'null');if(b)BEST_LIST().forEach(e=>{if(b[e.key])BFIELDS.forEach(([f])=>{if(typeof b[e.key][f]==='number')e.o[f]=b[e.key][f];});});}catch(e){}
 function saveBest(){const o={};BEST_LIST().forEach(e=>{o[e.key]={};BFIELDS.forEach(([f])=>o[e.key][f]=e.o[f]);});try{localStorage.setItem('np-best',JSON.stringify(o));}catch(e){}touchLocal();}
@@ -194,12 +194,12 @@ function buildDisc(){
     ['Marcher','aucun',c('move',0,0)],
     ['Briser une paroi (bruit)',`× ${String(DIG_MULT).replace('.',',')}, arrondi au supérieur ; le bruit s’entend aussi hors de vue`,c('dig',0,0)],
     ['Attendre sur place (Espace ou 5)','÷ 2, arrondi au supérieur',c('wait',0,0)],
-    ['Sur des herbes couchées (couvert)','÷ 2, arrondi au supérieur',c('move',1,0)],
+    ['Sur des herbes basses (couvert)','÷ 2, arrondi au supérieur',c('move',1,0)],
     ['Parois adjacentes (rocher ou montagne)',`− 1 par 2 parois (arrondi au supérieur), au plus − ${WALL_MAX}`,`${c('move',0,1)} (1-2 parois) · ${c('move',0,3)} (3-4 parois) · ${c('move',0,8)} (7-8 parois)`]];
   $('discList').innerHTML=`<div class="bcard"><div class="bh"><div><b>Portée de discrétion</b><br><span>Rayon commun à tous les ennemis : dans ce rayon et en vue, ${Math.round(NOTICE*100)} % par tour de vous remarquer. Touche V : l’afficher sur la carte.</span></div></div>
     <div class="fields"><label for="bf-stealth">Base<input type="number" id="bf-stealth" min="2" max="30" step="1" value="${b}"></label></div>
     <p class="mnote">En ce moment : <b>${now}</b> case${now>1?'s':''}</p></div>
-  <div class="bcard"><div class="bh"><div><b>Modificateurs</b><br><span>Appliqués dans cet ordre : base, briser, attendre, herbes couchées, parois. Plancher : ${STEALTH_MIN}.</span></div></div>
+  <div class="bcard"><div class="bh"><div><b>Modificateurs</b><br><span>Appliqués dans cet ordre : base, briser, attendre, herbes basses, parois. Plancher : ${STEALTH_MIN}.</span></div></div>
     <table class="dtab"><thead><tr><th>Situation</th><th>Modificateur</th><th>Portée (base ${b})</th></tr></thead><tbody>`
     +rows.map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td></tr>`).join('')+`</tbody></table></div>
   <div class="bcard"><div class="bh"><div><b>Règles liées</b></div></div>
