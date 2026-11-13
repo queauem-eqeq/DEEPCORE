@@ -54,12 +54,6 @@ function seenHTML(){
       return `<div class="an${e.agg&&e.st?' hunt':''}" title="${e.sp.n}${e.st?' · '+e.st:''} · ${d} case${d>1?'s':''} · ${Math.max(0,e.hp)}/${pv} PV"><img src="${ICON[e.ic]||''}" alt="${e.sp.n}"><span class="hp">${asciiBar(Math.max(0,e.hp),pv,EBAR_N)}</span><span class="n" style="color:${chanceCol(c.me)}">${c.me} %</span><span class="n" style="color:${c.them==null?'var(--dim)':chanceCol(100-c.them)}">${c.them==null?'—':c.them+' %'}</span></div>`;}).join('')
     +(ans.length>max?`<div class="none">+ ${ans.length-max} autre${ans.length-max>1?'s':''}</div>`:'')+'</div>');
   }
-  {let ng=0,nr=0;if(G.gems)for(const k in G.gems){if(!vis[+k])continue;if(G.gems[k]==='visible')ng++;else nr++;}
-   const L=[];if(ng)L.push(`<div class="site k">Joyau${ng>1?' ×'+ng:''} · à ramasser</div>`);if(nr)L.push(`<div class="site">Roche à joyau${nr>1?' ×'+nr:''} · à briser</div>`);
-   let os=0,opv=0,orr=0;if(G.ore)for(const k in G.ore){if(!vis[+k])continue;if(oreSol(G.ore[k])){os++;opv+=ORE_PV[oreLv(G.ore[k])];}else orr++;}
-   if(os)L.push(`<div class="site k">Éclats de métal${os>1?' ×'+os:''} · +${opv} PV</div>`);if(orr)L.push(`<div class="site">Montagne à éclats${orr>1?' ×'+orr:''} · à briser</div>`);if(L.length)out.push(`<div class="grp">${L.join('')}</div>`);}
-  const sites=G.sites.filter(s=>vis[idx(s.x,s.y)]);
-  if(sites.length)out.push('<div class="grp">'+sites.map(s=>`<div class="site${s.known?' k':''}">Site ${s.id} · ${s.known?'profondeur '+s.depth:'non analysé'}</div>`).join('')+'</div>');
   const ins=HOV&&!busy()?inspectHTML():'';
   return ins+(out.join('')||'<div class="none">Rien en vue.</div>');
 }
@@ -86,6 +80,7 @@ const KEYS={arrowup:[0,-1],arrowdown:[0,1],arrowleft:[-1,0],arrowright:[1,0],z:[
   a:[-1,-1],e:[1,-1],w:[-1,1],c:[1,1],'8':[0,-1],'2':[0,1],'4':[-1,0],'6':[1,0],'7':[-1,-1],'9':[1,-1],'1':[-1,1],'3':[1,1]};
 addEventListener('keydown',ev=>{
   if(INTRO){ev.preventDefault();if(ev.key==='Escape'||ev.key===' '||ev.key==='Enter')skipIntro();return;}
+  if(!$('discretion').hidden){if(ev.key==='Escape'){ev.preventDefault();closeDisc();}return;}
   if(!$('bestiary').hidden){if(ev.key==='Escape'){ev.preventDefault();closeBest();}return;}
   if(!$('viseurs').hidden){if(ev.key==='Escape'){ev.preventDefault();closeCur();}return;}
   if(!$('overlay').hidden||ev.ctrlKey||ev.metaKey||ev.altKey||ev.target.tagName==='INPUT')return;const k=ev.key.toLowerCase();
@@ -108,6 +103,7 @@ addEventListener('keydown',ev=>{
 $('pad').addEventListener('click',ev=>{const b=ev.target.closest('button[data-d]');if(!b||!$('overlay').hidden)return;const [dx,dy]=b.dataset.d.split(',').map(Number);if(freeCam)panCam(dx*2,dy*2);else tryMove(dx,dy);});
 $('waitPad').onclick=waitTurn;
 $('bestBtn').onclick=openBest;
+$('discBtn').onclick=openDisc;
 /* ---------- Enregistrement des réglages (base de l'artefact, lisible par Claude) ---------- */
 let DB=null;
 // À l'ouverture, les réglages enregistrés en base sont rechargés (même d'un autre appareil)
@@ -144,9 +140,13 @@ async function saveSettings(b,m){b=b instanceof HTMLElement?b:$('saveBtn');m=m||
 $('saveBtn').onclick=()=>saveSettings();
 $('bestSave').onclick=()=>saveSettings($('bestSave'),$('bestMsg'));
 $('bestClose').onclick=closeBest;
+$('discClose').onclick=closeDisc;
+$('discretion').addEventListener('click',e=>{if(e.target===$('discretion'))closeDisc();});
+$('discList').addEventListener('change',e=>{const t=e.target;
+  if(t.id==='bf-stealth'){setStealthBase(+t.value||0);turnStealth();side();render();buildDisc();$('bf-stealth').focus();}});
+$('discReset').onclick=()=>{setStealthBase(10);turnStealth();side();render();buildDisc();};
 $('bestiary').addEventListener('click',e=>{if(e.target===$('bestiary'))closeBest();});
 $('bestList').addEventListener('change',e=>{const t=e.target;
-  if(t.id==='bf-stealth'){setStealthBase(+t.value||0);t.value=STEALTH_BASE;turnStealth();side();render();return;}
   if(!t.dataset||!t.dataset.f)return;const ent=BEST_LIST().find(x=>x.key===t.dataset.k),fd=BFIELDS.find(x=>x[0]===t.dataset.f);
   const v=Math.max(fd[2],Math.min(fd[3],Math.round(+t.value||0)));t.value=v;ent.o[t.dataset.f]=v;
   if(t.dataset.f==='pv'){for(const a of [...(G.animals||[]),...(G.beasts||[])])if(a.hp>v)a.hp=v;}

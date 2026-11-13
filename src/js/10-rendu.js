@@ -142,7 +142,7 @@ function render(){
   if(SHOWVIS&&!G.over){
     const r=G.stealth||STEALTH_BASE,cells=new Set();
     for(let y=Math.max(0,G.py-r);y<=Math.min(H-1,G.py+r);y++)for(let x=Math.max(0,G.px-r);x<=Math.min(W-1,G.px+r);x++){
-      const i=idx(x,y);if(Math.hypot(x-G.px,y-G.py)>r)continue;if(los(G.px,G.py,x,y))cells.add(i);}
+      const i=idx(x,y);if(Math.hypot(x-G.px,y-G.py)>r)continue;if(lastAct==='dig'||los(G.px,G.py,x,y))cells.add(i);}
     drawVisCells(cells,'#ffffff');}
   drawPath();
   if(G.animals)for(const a of G.animals)if(!fog||vis[idx(a.x,a.y)]){const [lx,ly]=lungeOff(f=>f.kind==='lunge'&&f.beast===a);ctx.globalAlpha=1;ctx.drawImage(TL['an'+a.sp+(a.dir<0?'l':'r')],(a.x-camX)*S+lx,(a.y-camY)*S+ly,S,S);}

@@ -168,7 +168,7 @@ function genPlanet(){
     if(sites.length<NSITES&&!last)continue;
     const depths=[1,2,3,4,5].sort(()=>Math.random()-.5);
     G={t,seen:new Array(N).fill(0),px:sx,py:sy,turn:0,dist:0,over:null,msg:null,ship,face:'d',
-      st:{vie:100,vieMax:100,energie:100,energieMax:100,repar:0,power:5,vitesse:5,degats:10,capteur:10,cout:10,pre:80,esq:10,crit:5},
+      st:{vie:100,vieMax:100,energie:100,energieMax:100,repar:0,power:1,vitesse:5,degats:10,capteur:10,cout:10,pre:80,esq:10,crit:5},
       sites:sites.map((s,i)=>({x:s.x,y:s.y,depth:depths[i],id:LETTERS[i],seen:false,known:false}))};
     return;
   }
@@ -184,11 +184,32 @@ function saveBest(){const o={};BEST_LIST().forEach(e=>{o[e.key]={};BFIELDS.forEa
 try{if(localStorage.getItem('np-mig')!=='eq1'){SPECIES[0].v=6;BEASTS[0].pv=25;saveBest();
   LIFE.crabos=15;localStorage.setItem('np-life',JSON.stringify(LIFE));localStorage.setItem('np-mig','eq1');}}catch(e){}
 function buildBest(){
-  $('bestList').innerHTML=`<div class="bcard"><div class="bh"><div><b>Portée de discrétion</b><br><span>Rayon commun à tous les ennemis : dans ce rayon et en vue, 25 % par tour de vous remarquer</span></div></div>
-    <div class="fields"><label for="bf-stealth">Base<input type="number" id="bf-stealth" min="2" max="30" step="1" value="${STEALTH_BASE}"></label></div></div>`
-  +BEST_LIST().map(e=>`<div class="bcard"><div class="bh"><img src="${ICON[e.ic]||''}" alt=""><div><b>${e.o.n}</b><br><span>${e.role}</span></div></div>
+  $('bestList').innerHTML=BEST_LIST().map(e=>`<div class="bcard"><div class="bh"><img src="${ICON[e.ic]||''}" alt=""><div><b>${e.o.n}</b><br><span>${e.role}</span></div></div>
     <div class="fields">${BFIELDS.map(([f,l,mn,mx])=>`<label for="bf-${e.key}-${f}">${l}<input type="number" id="bf-${e.key}-${f}" data-k="${e.key}" data-f="${f}" min="${mn}" max="${mx}" step="1" value="${e.o[f]}"></label>`).join('')}</div></div>`).join('');
 }
+/* ---------- Discrétion : base modifiable et liste des modificateurs (13 novembre 2026) ---------- */
+function buildDisc(){
+  const b=STEALTH_BASE,c=(a,f,w)=>stealthCalc(b,a,f,w),now=G.stealth||STEALTH_BASE;
+  const rows=[
+    ['Marcher','aucun',c('move',0,0)],
+    ['Briser une paroi (bruit)',`× ${String(DIG_MULT).replace('.',',')}, arrondi au supérieur ; le bruit s’entend aussi hors de vue`,c('dig',0,0)],
+    ['Attendre sur place (Espace ou 5)','÷ 2, arrondi au supérieur',c('wait',0,0)],
+    ['Sur des herbes basses (couvert)','÷ 2, arrondi au supérieur',c('move',1,0)],
+    ['Parois adjacentes (rocher ou montagne)',`− 1 par 2 parois (arrondi au supérieur), au plus − ${WALL_MAX}`,`${c('move',0,1)} (1-2 parois) · ${c('move',0,3)} (3-4 parois) · ${c('move',0,8)} (7-8 parois)`]];
+  $('discList').innerHTML=`<div class="bcard"><div class="bh"><div><b>Portée de discrétion</b><br><span>Rayon commun à tous les ennemis : dans ce rayon et en vue, ${Math.round(NOTICE*100)} % par tour de vous remarquer. Touche V : l’afficher sur la carte.</span></div></div>
+    <div class="fields"><label for="bf-stealth">Base<input type="number" id="bf-stealth" min="2" max="30" step="1" value="${b}"></label></div>
+    <p class="mnote">En ce moment : <b>${now}</b> case${now>1?'s':''}</p></div>
+  <div class="bcard"><div class="bh"><div><b>Modificateurs</b><br><span>Appliqués dans cet ordre : base, briser, attendre, herbes basses, parois. Plancher : ${STEALTH_MIN}.</span></div></div>
+    <table class="dtab"><thead><tr><th>Situation</th><th>Modificateur</th><th>Portée (base ${b})</th></tr></thead><tbody>`
+    +rows.map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td></tr>`).join('')+`</tbody></table></div>
+  <div class="bcard"><div class="bh"><div><b>Règles liées</b></div></div>
+    <table class="dtab"><tbody>
+    <tr><td>Un ennemi qui vous chasse vous garde en vue jusqu’à</td><td>× ${HUNT_MULT} la portée</td></tr>
+    <tr><td>Hors de la portée, il peut perdre votre trace (par tour)</td><td>${Math.round(LOSE_TRACK*100)} %</td></tr>
+    </tbody></table></div>`;
+}
+function openDisc(){buildDisc();$('discretion').hidden=false;$('discClose').focus();}
+function closeDisc(){$('discretion').hidden=true;$('discBtn').focus();render();}
 function openBest(){buildBest();$('bestiary').hidden=false;$('bestClose').focus();}
 function closeBest(){$('bestiary').hidden=true;$('bestBtn').focus();render();}
 

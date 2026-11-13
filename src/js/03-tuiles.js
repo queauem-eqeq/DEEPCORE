@@ -91,7 +91,7 @@ function critter(p){const cx=7,cy=9,hx=cx+p.rx+1,hy=cy-p.ry+1,top=hy-Math.ceil(p
 // Animal agressif (1 case) : v = vitesse, d = détection, pv = points de vie
 const BEASTS=[
   {n:'Crabos',v:5,pv:25,dmg:5,pre:70,esq:15,crit:5,swim:true,rows:["................","................","................","................","......0..0......",".11...2..2...11.","1.11..2..2..11.1","1..1.222222.1..1",".11122222222111.","...2222222222...","..2.22222222.2..",".2..2.2..2.2..2.",".2.2..2..2..2.2.","................","................","................"]},
-  {n:'Cafar',v:5,pv:10,dmg:5,pre:60,esq:0,crit:5,pack:true,alarm:true,
+  {n:'Cafar',v:5,pv:10,dmg:5,pre:60,esq:0,crit:5,pack:true,alarm:false,
    // dessin retouché au Tile editor et adopté comme norme le 6 novembre 2026
    rows:["................", "................", "................", "......2..2......", "..22..2..2......", "....2..2..2.....", ".....21221...2..", "....221221222...", "....000000223...", "....221221222...", ".....21221...2..", "....2..2..2.....", "..22..2..2......", "......2..2......", "................", "................"]}
 ];
@@ -100,7 +100,7 @@ BEASTS.forEach((bp,i)=>{const f=bp.fn||((x,y)=>bp.rows[y][x]);PAT['bz'+i+'r']=f;
 PAT.blood0=["................","................","..........r.....","......rr........",".....rrrr..r....","....rrrrrr......","...r.rrrrrr.....","....rrrrrrr.r...",".....rrrrr......","..r...rrr.......","......r....r....","...........r....","................","................","................","................"];
 PAT.blood1=["................","................","...r............","............r...",".......rr.......","..r..rrrrr......","....rrrrrrr..r..","....rrr.rrrr....","...rrrrrrrr.....","....rrrrrr......","......rr...r....","..r.............","...........r....","................","................","................"];
 SPECIES.forEach((sp,i)=>{const f=sp.rows?((x,y)=>sp.rows[y][x]):critter(sp);PAT['an'+i+'r']=f;PAT['an'+i+'l']=(x,y)=>f(15-x,y);});
-// Herbes : 6 styles, un seul tiré au hasard par planète (haute / couchée)
+// Herbes : 6 styles, un seul tiré au hasard par planète (haute / basse)
 {const rows=a=>(x,y)=>(a[y]||'')[x]||'.';
 const norm=a=>a.map(l=>(l+'................').slice(0,16));
 const grassA=rows(["................","..1.....1....1..","..1..1..1.1..1..",".1...1.1..1.1...",".1..1..1..1.1..1",".1..1.1...1.1..1","1.1.1.1..1..1.1.","1.1.1.1..1.1..1.","1.1.11...1.1..1.",".1.1.1..1..1.1..",".1.1.1..1..1.1..","..11.1.1...11...","..11..11...11...","...1..11....1...","...1...1....1...","................"]);
@@ -116,7 +116,7 @@ const flatC=(x,y)=>{const L=[[0,2],[5,7],[2,12]];for(const[ox,oy]of L){for(let k
 const FERNS=[[3,7],[11,4],[7,14]];
 const grassD=(x,y)=>{for(const[cx,by]of FERNS){const top=by-6;if(x===cx&&y>=top&&y<=by)return '1';for(let k=0;k<3;k++){const ly=top+1+k*2,w=k+1;if(y===ly&&(x===cx-w||x===cx+w))return '1';if(y===ly+1&&(x===cx-w-1||x===cx+w+1)&&k<2)return '1';}}return '.';};
 const flatD=(x,y)=>grassD(15-y,x)==='1'&&(x+y)%2===0?'1':'.';
-// E : herbe couchée par le vent (diagonales)
+// E : herbe basse couchée par le vent (diagonales)
 const WIND=[[1,6],[6,7],[11,5],[3,12],[8,13],[13,11],[0,15],[10,15]];
 const grassE=(x,y)=>{for(const[bx,by]of WIND)for(let k=0;k<3;k++){const px=(bx+k)%16;if(px===x&&(y===by-2*k||y===by-2*k-1))return '1';}return '.';};
 const flatE=(x,y)=>(y%4===1&&(x+y*3)%8<4)||(y%4===3&&(x+y*5)%9===0)?'1':'.';

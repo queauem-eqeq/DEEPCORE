@@ -24,19 +24,22 @@ function computeFOV(){vis=new Uint8Array(W*H);const r=G.st.capteur,px=G.px,py=G.
    Hors du rayon mais encore dans la bande de chasse, il a LOSE_TRACK par tour de perdre votre trace (les 3 % de Brogue) :
    il garde la dernière position connue et s'y rend, mais ne vous suit plus de loin — il doit vous remarquer de nouveau
    (NOTICE) à l'intérieur du rayon. Marqué par o.lost, remis à zéro dès qu'il vous revoit ou qu'il oublie.
-   Calcul, dans cet ordre : base, ×1,5 en brisant une paroi, ÷2 en attendant sur place, ÷2 sur des herbes couchées
-   (arrondi au supérieur à chaque division), −1 par paroi adjacente (rocher ou montagne), plancher STEALTH_MIN. */
+   Calcul, dans cet ordre : base, ×1,5 en brisant une paroi, ÷2 en attendant sur place, ÷2 sur des herbes basses
+   (arrondi au supérieur à chaque division), −1 par 2 parois adjacentes, arrondi au supérieur (rocher ou montagne), au plus −4, plancher STEALTH_MIN. */
 let STEALTH_BASE=10;const NOTICE=.25,HUNT_MULT=2,STEALTH_MIN=2,DIG_MULT=1.5,LOSE_TRACK=.03;
 try{const s=+localStorage.getItem('np-stealth');if(s>=2&&s<=30)STEALTH_BASE=s;}catch(e){}
 function setStealthBase(v){STEALTH_BASE=Math.max(2,Math.min(30,v|0));try{localStorage.setItem('np-stealth',STEALTH_BASE);}catch(e){}touchLocal();}
 let lastAct='move';                                   // ce que la foreuse vient de faire : 'move', 'wait' ou 'dig'
-function stealthRange(act){
-  let r=STEALTH_BASE;
+const WALL_MAX=4;                                      // retrait maximal dû aux parois adjacentes (−4)
+function stealthCalc(base,act,flat,walls){           // flat : sur des herbes basses ; walls : parois adjacentes (0 à 8) : retrait = parois ÷ 2 arrondi au supérieur, au plus WALL_MAX
+  let r=base;
   if(act==='dig')r=Math.ceil(r*DIG_MULT);
   if(act==='wait')r=Math.ceil(r/2);
-  if(G.t[idx(G.px,G.py)]===FLAT)r=Math.ceil(r/2);     // herbes couchées : couvert
+  if(flat)r=Math.ceil(r/2);                           // herbes basses : couvert
+  return Math.max(STEALTH_MIN,r-Math.min(Math.ceil(walls/2),WALL_MAX));}
+function stealthRange(act){
   let walls=0;for(const [dx,dy] of DIRS){const x=G.px+dx,y=G.py+dy;if(x<0||y<0||x>=W||y>=H)continue;const v=G.t[idx(x,y)];if(v===ROCK||v===MOUNT)walls++;}
-  return Math.max(STEALTH_MIN,r-walls);}
+  return stealthCalc(STEALTH_BASE,act,G.t[idx(G.px,G.py)]===FLAT,walls);}
 function turnStealth(){G.stealth=stealthRange(lastAct);}
 
 /* ---------- Déplacement ---------- */
@@ -49,7 +52,7 @@ function drift(wait){if(!wait)return;
   G.px=nx;G.py=ny;G.lastDir=null;if(v===GRASS)G.t[idx(nx,ny)]=FLAT;
   SFX.drift();sayMore(`Eau profonde : le courant entraîne le robot vers ${['l’est','l’ouest','le sud','le nord','le sud-est','le nord-est','le sud-ouest','le nord-ouest'][k]}.`,'warn');
 }
-const MOVE_COST=2;   // énergie dépensée à chaque pas
+const MOVE_COST=0;   // énergie dépensée à chaque pas (0 depuis le 13 novembre 2026 : se déplacer est gratuit)
 const DEEP_MISS=.5;   // eau profonde : chance qu'un pas parte dans une autre direction, tirée au hasard
 function tryMove(dx,dy){
   if(G.over||drilling)return;lastAct='move';let nx=G.px+dx,ny=G.py+dy;if(nx<0||ny<0||nx>=W||ny>=H)return;
@@ -57,7 +60,7 @@ function tryMove(dx,dy){
   G.face=dx>0?'r':dx<0?'l':dy>0?'d':'u';
   if(!diagOk(G.px,G.py,dx,dy)){say('Coin de paroi : pas de passage en diagonale.');SFX.blocked();render();return;}
   const bz=beastAt(nx,ny);
-  if(bz){if(!spend())return;const sp=BEASTS[bz.sp];G.turn++;G.msg=null;const sur=!(bz.hunt>0),cr=sur||roll(G.st.crit??5);   // surprise : ne vous a pas repéré
+  if(bz){const sp=BEASTS[bz.sp];G.turn++;G.msg=null;const sur=!(bz.hunt>0),cr=sur||roll(G.st.crit??5);   // surprise : ne vous a pas repéré
     {const ch=hitChance(G.st.pre,sp.esq+terrMod(nx,ny));if(!sur&&!roll(ch)){bz.hunt=1;spot(bz);addFx({kind:'lunge',robot:true,dx,dy,dur:180});addFx({kind:'num',x:nx,y:ny,txt:'0',col:'#8aa9a2',dur:750});
       say(`La foreuse rate le ${sp.n.toLowerCase()} (${ch} %).`);SFX.whoosh();drift();animalsAct();beastsAct();regen();computeFOV();render();if(G.over&&G.over.dead)dead();return;}}
     const dm=G.st.degats*(cr?CRIT_X:1);bz.hp-=dm;bz.hunt=1;spot(bz);addFx({kind:'num',x:nx,y:ny,txt:'-'+dm+(cr?'!':''),col:cr?PAL['1']:PAL['3'],dur:cr?1000:750});if(cr){addFx({kind:'shake',amp:6,dur:220});SFX.crit();}
@@ -67,7 +70,7 @@ function tryMove(dx,dy){
     else{say(`${tag}La foreuse percute le ${sp.n.toLowerCase()} : −${dm} PV (${bz.hp}/${sp.pv}).`,'warn');SFX.crack();}
     drift();animalsAct();beastsAct();regen();computeFOV();render();if(G.over&&G.over.dead)dead();return;}
   const an=animalAt(nx,ny);
-  if(an){if(!spend())return;const sp=SPECIES[an.sp];G.turn++;G.msg=null;const sur=!an.aware,cr=sur||roll(G.st.crit??5);
+  if(an){const sp=SPECIES[an.sp];G.turn++;G.msg=null;const sur=!an.aware,cr=sur||roll(G.st.crit??5);
     {const ch=hitChance(G.st.pre,sp.esq+terrMod(nx,ny));if(!sur&&!roll(ch)){an.aware=1;spot(an);addFx({kind:'lunge',robot:true,dx,dy,dur:180});addFx({kind:'num',x:nx,y:ny,txt:'0',col:'#8aa9a2',dur:750});
       say(`La foreuse rate l’${sp.n.toLowerCase()} (${ch} %).`);SFX.whoosh();drift();animalsAct();beastsAct();regen();computeFOV();render();if(G.over&&G.over.dead)dead();return;}}
     const dm=G.st.degats*(cr?CRIT_X:1),tag=sur?'Coup par surprise ! ':cr?'Coup critique ! ':'';an.hp=(an.hp??sp.pv)-dm;addFx({kind:'num',x:nx,y:ny,txt:'-'+dm+(cr?'!':''),col:cr?PAL['1']:PAL['3'],dur:cr?1000:750});if(cr){addFx({kind:'shake',amp:6,dur:220});SFX.crit();}addFx({kind:'lunge',robot:true,dx,dy,dur:180});
