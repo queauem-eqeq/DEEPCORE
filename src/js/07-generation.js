@@ -176,8 +176,8 @@ function genPlanet(){
 function newGame(){drilling=false;genPlanet();hideGems();hideOre();G.log=[];G.tracks={};G.lastDir=null;G.beasts=[];G.blood={};G.fv=2;spawnAnimals();spawnBeasts();lastAct='move';turnStealth();computeFOV();say(`Atterrissage confirmé. ${G.sites.length} sites de forage signalés par l’orbiteur. La foreuse est dans la soute ; la porte est à l’arrière.`,'info');}
 
 /* ---------- Bestiaire : édition des statistiques ---------- */
-const BFIELDS=[['v','Vitesse',1,10],['pv','PV',1,200],['dmg','Dégâts',0,100],['pre','Précision',0,100],['esq','Esquive',0,100],['crit','Critique %',0,100]];
-const BEST_LIST=()=>[{key:'insectoide',o:SPECIES[0],ic:'an0r',role:'Suit à distance, attaque avec les crabos'},{key:'crabos',o:BEASTS[0],ic:'bz0r',role:'Chasse le robot'},{key:'cafar',o:BEASTS[1],ic:'bz1r',role:'En bande de 2 à 4, donne l’alerte'}];
+const BFIELDS=[['v','Vitesse',1,10],['pv','PV',1,200],['dmg','Dégâts',0,100],['pre','Précision',0,100],['esq','Esquive',0,100],['crit','Crit %',0,100]];
+const BEST_LIST=()=>[{key:'insectoide',o:SPECIES[0],ic:'an0r',role:'Suit à distance, attaque avec les crabos'},{key:'crabos',o:BEASTS[0],ic:'bz0r',role:'Chasse le robot'},{key:'cafar',o:BEASTS[1],ic:'bz1r',role:'En bande de 2 à 4 ; ce qu’un membre voit, la bande le sait'}];
 const BEST_DEF={};BEST_LIST().forEach(e=>{BEST_DEF[e.key]={};BFIELDS.forEach(([f])=>BEST_DEF[e.key][f]=e.o[f]);});
 try{const b=JSON.parse(localStorage.getItem('np-best')||'null');if(b)BEST_LIST().forEach(e=>{if(b[e.key])BFIELDS.forEach(([f])=>{if(typeof b[e.key][f]==='number')e.o[f]=b[e.key][f];});});}catch(e){}
 function saveBest(){const o={};BEST_LIST().forEach(e=>{o[e.key]={};BFIELDS.forEach(([f])=>o[e.key][f]=e.o[f]);});try{localStorage.setItem('np-best',JSON.stringify(o));}catch(e){}touchLocal();}
@@ -189,18 +189,19 @@ function buildBest(){
 }
 /* ---------- Discrétion : base modifiable et liste des modificateurs (13 novembre 2026) ---------- */
 function buildDisc(){
-  const b=STEALTH_BASE,c=(a,f,w)=>stealthCalc(b,a,f,w),now=G.stealth||STEALTH_BASE;
+  const b=STEALTH_BASE,c=(a,f,w,r)=>stealthCalc(b,a,f,w,r),now=G.stealth||STEALTH_BASE;
   const rows=[
     ['Marcher','aucun',c('move',0,0)],
     ['Briser une paroi (bruit)',`× ${String(DIG_MULT).replace('.',',')}, arrondi au supérieur ; le bruit s’entend aussi hors de vue`,c('dig',0,0)],
     ['Attendre sur place (Espace ou 5)','÷ 2, arrondi au supérieur',c('wait',0,0)],
     ['Sur des herbes basses (couvert)','÷ 2, arrondi au supérieur',c('move',1,0)],
-    ['Parois adjacentes (rocher ou montagne)',`− 1 par 2 parois (arrondi au supérieur), au plus − ${WALL_MAX}`,`${c('move',0,1)} (1-2 parois) · ${c('move',0,3)} (3-4 parois) · ${c('move',0,8)} (7-8 parois)`]];
+    ['Parois adjacentes (rocher ou montagne)',`− 1 par 2 parois (arrondi au supérieur), au plus − ${WALL_MAX}`,`${c('move',0,1)} (1-2 parois) · ${c('move',0,3)} (3-4 parois) · ${c('move',0,8)} (7-8 parois)`],
+    ['Courir (touche R)',`+ ${SPRINT_NOISE}, après tout le reste`,c('move',0,0,1)]];
   $('discList').innerHTML=`<div class="bcard"><div class="bh"><div><b>Portée de discrétion</b><br><span>Rayon commun à tous les ennemis : dans ce rayon et en vue, ${Math.round(NOTICE*100)} % par tour de vous remarquer. Touche V : l’afficher sur la carte.</span></div></div>
     <div class="fields"><label for="bf-stealth">Base<input type="number" id="bf-stealth" min="2" max="30" step="1" value="${b}"></label></div>
     <p class="mnote">En ce moment : <b>${now}</b> case${now>1?'s':''}</p></div>
-  <div class="bcard"><div class="bh"><div><b>Modificateurs</b><br><span>Appliqués dans cet ordre : base, briser, attendre, herbes basses, parois. Plancher : ${STEALTH_MIN}.</span></div></div>
-    <table class="dtab"><thead><tr><th>Situation</th><th>Modificateur</th><th>Portée (base ${b})</th></tr></thead><tbody>`
+  <div class="bcard"><div class="bh"><div><b>Modificateurs</b><br><span>Appliqués dans cet ordre : base, briser, attendre, herbes basses, parois, course. Plancher : ${STEALTH_MIN}.</span></div></div>
+    <table class="dtab eq3"><thead><tr><th>Situation</th><th>Modificateur</th><th>Portée (base ${b})</th></tr></thead><tbody>`
     +rows.map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td></tr>`).join('')+`</tbody></table></div>
   <div class="bcard"><div class="bh"><div><b>Règles liées</b></div></div>
     <table class="dtab"><tbody>
@@ -225,7 +226,8 @@ const UPGRADES=[
   ['pre','PRE (précision)','+5',st=>{st.pre+=5;}],
   ['esq','ESQ (esquive)','+5',st=>{st.esq+=5;}],
   ['crit','CRIT (coup critique)','+5 %',st=>{st.crit=(st.crit??5)+5;}],
-  ['power','POW (énergie/tour)','+1',st=>{st.power+=1;}]
+  ['power','POW (énergie/tour)','+1',st=>{st.power+=1;}],
+  ['vitesse','VIT (vitesse)','+1',st=>{st.vitesse+=1;}]
 ];
 // Éclats de métal : ORE_PCT % des cases de montagne (hors rangée extérieure indestructible et joyau) en contiennent ; brisée, la roche les laisse
 // tomber au sol ; la foreuse qui passe dessus les ramasse et regagne des points de vie selon la densité.

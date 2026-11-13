@@ -33,7 +33,7 @@ function chaseStep(o,dist,fits,tx=G.px,ty=G.py){const h=dist[idx(o.x,o.y)],cur=h
   if(best){o.x=best[0];o.y=best[1];if(best[2])o.dir=best[2]>0?1:-1;return true;}return false;}
 /* Mémoire des ennemis (10 novembre 2026) : un ennemi qui voit la foreuse retient sa position (o.mem) ; quand il ne la voit
    plus, il se dirige vers cette dernière position connue — celle de son groupe pour une bande de cafars (partagée entre
-   membres, et transmise par le cri d'alerte). Arrivé, il fouille SEARCH_T tours autour, puis oublie et reprend son errance.
+   membres). Arrivé, il fouille SEARCH_T tours autour, puis oublie et reprend son errance.
    Plus aucune connaissance de la position réelle de la foreuse sans la voir. */
 const SEARCH_T=4;
 /* Perte de trace (13 novembre 2026, les 3 % de Brogue) : une bête qui vous chasse hors du rayon de discrétion,
@@ -68,7 +68,7 @@ function animalsAct(){
   turnStealth();
   if(!G.animals||G.over)return;let fled=null,swarm=null;const dist=robotDist(false),DC={};
   const backup=(G.beasts||[]).some(b=>b.hunt>0&&cheb(b,G.px,G.py)<=BACKUP_R);
-  for(const a of G.animals){if(G.over)break;const sp=SPECIES[a.sp];a.mp=Math.min(2,a.mp+sp.v/5);
+  for(const a of G.animals){if(G.over)break;const sp=SPECIES[a.sp];a.mp=Math.min(2,a.mp+sp.v/5/slowOf(G.t[idx(a.x,a.y)],sp.swim));
     const d=Math.hypot(a.x-G.px,a.y-G.py),sees=voitForeuse(a,!!a.aware);
     if(sees){a.aware=1;spot(a);}
     else if(a.aware&&a.search>0&&--a.search===0){a.aware=0;a.enraged=false;forget(a);}   // fouille terminée : il oublie
@@ -133,7 +133,7 @@ function hurtRobot(b,sp){sp=sp||BEASTS[b.sp];const le=sp.n.match(/^[aeiouyéèê
 function beastsAct(){
   turnStealth();
   if(!G.beasts||!G.beasts.length||G.over)return;const distDry=robotDist(false),distWet=robotDist(true),DC={};let charged=null;const alarms=[];packTick();
-  for(const b of G.beasts){if(G.over)break;const sp=BEASTS[b.sp];b.mp=Math.min(2,b.mp+sp.v/5);
+  for(const b of G.beasts){if(G.over)break;const sp=BEASTS[b.sp];b.mp=Math.min(2,b.mp+sp.v/5/slowOf(G.t[idx(b.x,b.y)],sp.swim));
     const d=Math.hypot(b.x-G.px,b.y-G.py),sees=voitForeuse(b,b.hunt>0);
     if(sees){if(!b.hunt&&sp.alarm)alarms.push(b);if(!b.hunt&&beastVisible(b))charged=charged||sp;b.hunt=1;spot(b);if(G.px!==b.x)b.dir=Math.sign(G.px-b.x);
       if(sp.pack)for(const o of mates(b)){o.hunt=1;spot(o);}}                        // la bande partage ce qu'un membre voit
@@ -154,8 +154,9 @@ function beastsAct(){
   }
   if(charged){sayMore(`Le ${charged.n.toLowerCase()} vous a repéré et charge !`,'warn');SFX.roar();}
 }
-// Plus de réparation automatique : seule l'énergie se recharge à chaque tour
-function regen(){if(G.over)return;G.st.energie=Math.min(G.st.energieMax,G.st.energie+G.st.power);}
+// Plus de réparation automatique : seule l'énergie se recharge à chaque battement.
+// Attendre sur place la recharge WAIT_REGEN fois plus vite (13 novembre 2026) : 2/t au lieu de 1/t à POW 1.
+function regen(wait){if(G.over)return;G.st.energie=Math.min(G.st.energieMax,G.st.energie+G.st.power*(wait?WAIT_REGEN:1));}
 // Coup de foreuse : consomme de l'énergie ; refusé si la réserve est insuffisante
 function spend(){if(G.st.energie<G.st.cout){say(`Énergie insuffisante pour frapper (${Math.floor(G.st.energie)}/${G.st.cout}). Attendez qu’elle se recharge.`,'warn');SFX.blocked();render();return false;}G.st.energie-=G.st.cout;return true;}
 const TRACK_LIFE=5;
