@@ -102,6 +102,14 @@ const mur = () => { for (let y = 4; y < H - 4; y++) G.t[idx(X0 + 6, y)] = MOUNT;
 const franchir = () => { if (G.px <= X0 + 6) pas(1, 0); else if (!pas(0, -1)) pas(1, 0); };
 mesure('ouverture dans un mur puis obliquer', mur, franchir, 4);
 mesure('la même avec 12 cases d’avance', mur, franchir, 12);
+// course : deux pas par battement tant qu'il reste de l'énergie (5 par pas, +1 par battement), puis marche
+let jus = 100;
+const course = (un) => () => { if (jus >= 10) { jus -= 10; un(); un(); } else un(); jus = Math.min(100, jus + 1); };
+const plein = (f) => () => { jus = 100; f(); };
+mesure('EN COURANT, terrain dégagé, 4 cases d’avance', plein(rien), course(droit), 4);
+mesure('EN COURANT, terrain dégagé, 12 cases d’avance', plein(rien), course(droit), 12);
+mesure('EN COURANT, herbes hautes, ligne droite', plein(herbes), course(droit), 4);
+mesure('EN COURANT, ouverture dans un mur puis obliquer', plein(mur), course(franchir), 4);
 const rochers = () => { for (let y = 4; y < H - 4; y++) for (let x = X0 + 3; x < W - 2; x++) if ((x * 7 + y * 13) % 11 < 4) G.t[idx(x, y)] = MOUNT; };
 mesure('zone de rochers épars', rochers, (n) => { const d = (Math.floor((n - 1) / 3) % 2 === 0) ? -1 : 1; if (!pas(1, d)) if (!pas(1, 0)) pas(0, d); }, 4);
 return JSON.stringify(out, null, 1);

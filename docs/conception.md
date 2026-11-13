@@ -52,8 +52,8 @@ Roguelike au tour par tour dans une esthétique inspirée de Cogmind et de Brogu
 | Sol rocheux | oui | libre | des points de plus en plus denses à 9, 6 et 3 cases d'un site |
 | Rocher | brisé en 2 coups | libre | laisse des gravats |
 | Montagne | brisée en 2 coups (sauf bord de carte) | bloquée | peut contenir le joyau ; 10 % contiennent des éclats de métal |
-| Eau peu profonde | oui | libre | −20 d'esquive ; évitée par les insectoïdes et les cafars, praticable pour les crabos |
-| Eau profonde | oui | libre | −20 d'esquive ; **chaque pas a 50 % de chance de partir dans une autre direction tirée au hasard** (si cette case est bloquée, la foreuse est plaquée contre l'obstacle et ne bouge pas ; le tour passe) ; **attendre** dans l'eau profonde déplace la foreuse d'une case au hasard (le courant) ; seuls les crabos y entrent (sans dérive) |
+| Eau peu profonde | oui | libre | −20 d'esquive ; évitée par les insectoïdes et les cafars, praticable pour les crabos ; **terrain lent : pas ×1,5** (sauf crabos) |
+| Eau profonde | oui | libre | −20 d'esquive ; **chaque pas a 50 % de chance de partir dans une autre direction tirée au hasard** (si cette case est bloquée, la foreuse est plaquée contre l'obstacle et ne bouge pas ; le tour passe) ; **attendre** dans l'eau profonde déplace la foreuse d'une case au hasard (le courant) ; seuls les crabos y entrent (sans dérive) ; **terrain lent : pas ×2** (sauf crabos) |
 | Herbes hautes | oui | bloquée | **deviennent des herbes basses** au passage ; +10 d'esquive pour qui s'y trouve |
 | Herbes basses | oui | libre | **portée de discrétion ÷ 2** : c'est le couvert du jeu |
 | Gouffre | non | libre | — |
@@ -74,7 +74,7 @@ Roguelike au tour par tour dans une esthétique inspirée de Cogmind et de Brogu
 |---|---|---|
 | Vie | 100 | **pas de réparation automatique** |
 | Énergie | 100 | se recharge de POW par tour (**1 par tour** au départ depuis le 13 novembre 2026) ; **se déplacer ne coûte plus d'énergie** (13 novembre 2026 ; 2 par pas avant, constante `MOVE_COST`), un coup de foreuse sur la roche 10 (frapper un animal : gratuit) |
-| VIT | 5 | affichée, **sans effet** pour l'instant |
+| VIT | 5 | **vitesse de déplacement** (13 novembre 2026) : un pas dure 100 × 5 ÷ VIT. À 5, un pas = un battement ; à 10, deux pas par battement. Ne joue ni sur les coups ni sur le forage. Améliorable par joyau (+1). |
 | EYE | 10 | rayon de vision (5 avant le 10 novembre 2026) |
 | DEG | 10 | dégâts par coup de foreuse |
 | PRE | 80 | précision |
@@ -85,12 +85,25 @@ Roguelike au tour par tour dans une esthétique inspirée de Cogmind et de Brogu
 - Un coup de foreuse sur une **roche** coûte **10 d'énergie** (refusé sous 10) ; **attaquer un animal ne coûte plus d'énergie** (13 novembre 2026).
 - **Aperçu derrière les obstacles** (foreuse seulement, depuis le 6 novembre 2026) : dans le rayon EYE, la case juste derrière un obstacle à la vue (montagne, herbes hautes) est aperçue en **mode souvenir** — terrain affiché assombri comme une case explorée hors de vue, sans les créatures. Une seule case : un obstacle de 2 cases d'épaisseur cache toujours la suite. Les ennemis ne voient pas à travers les obstacles.
 - Attendre un tour : Espace ou 5.
+- **Course** (touche R, ou bouton « Allure » sous l'énergie) : mode qu'on allume et qu'on éteint. Chaque pas dure moitié moins et coûte **5 d'énergie** ; sans assez d'énergie, la foreuse reprend la marche d'elle-même. La course ne change pas la portée de discrétion.
+
+## 5 bis. Horloge : le temps continu (13 novembre 2026)
+
+Le jeu ne compte plus en tours mais en **unités de temps**, comme Brogue et Cogmind.
+
+- Chaque action de la foreuse a une **durée** (table `DUR` dans `09`) : pas 100, coup de foreuse 100, coup sur la roche 100, attendre 100. Ces durées sont faites pour être réglées et, plus tard, modifiées par l'équipement.
+- Durée d'un pas = 100 × 5 ÷ VIT × terrain (eau peu profonde 1,5 ; eau profonde 2) × 0,5 en course.
+- Le monde **bat toutes les 100 unités** : à chaque battement les ennemis agissent, la détection et la perte de trace sont tirées, l'énergie remonte de POW. Une action de 50 laisse passer un battement une fois sur deux ; une action de 200 en laisse passer deux.
+- Conséquence voulue : **la détection se tire au temps, pas à l'action**. Courir fait traverser une zone avec deux fois moins de tirages ; une action longue en fait subir davantage.
+- À VIT 5, en marchant sur sol sec, un pas vaut exactement un battement : rien ne change par rapport à avant, et les mesures de `mesures.md` restent valables. « Par tour » dans ce document se lit désormais « par battement ».
+- Les ennemis gardent leurs points de mouvement (VIT ÷ 5 par battement), divisés par le ralentissement du terrain où ils se trouvent.
+- Limite connue : les ennemis agissent par battements entiers, seule la foreuse a des durées fines.
 
 ## 6. Combat
 
 - Chance de toucher = précision de l'attaquant − esquive de la cible, bornée entre 5 et 95 %.
 - Foncer sur un animal = coup de foreuse (dégâts DEG). Coup raté : « 0 » affiché (gris). Frapper un animal ne consomme pas d'énergie.
-- Les animaux attaquent **une fois par tour au contact** ; la vitesse ne règle que les déplacements (vitesse 5 = 1 case par tour).
+- Les animaux attaquent **une fois par battement au contact** ; leur vitesse ne règle que les déplacements (vitesse 5 = 1 case par battement), et l'eau les ralentit comme la foreuse, sauf les nageurs.
 - Animation : bond de l'attaquant, flash, chiffres de dégâts flottants (« -10 », « 0 » pour un coup raté, de part et d'autre), « +10 / +15 / +20 » en couleur bio au ramassage d'éclats de métal, tremblement d'écran quand le robot est touché ou qu'un ennemi meurt.
 - Un animal tué laisse une trace de sang.
 
@@ -165,7 +178,7 @@ La statistique **DÉT (détection)** par espèce a été supprimée le 13 novemb
 - Export / import texte : essayé puis retiré le 6 novembre 2026 (« on verra plus tard »).
 
 ### Touches
-ZQSD / flèches / pavé numérique : déplacer · A E W C : diagonales · Souris : survol = inspection, clic = y aller · X : inspection au clavier · F : forer · Espace / 5 : attendre · V : portée de discrétion · B : brouillard de guerre · ! : son · M : mode carte (déplacements = défilement, Maj = plus vite, Échap ou M pour revenir).
+ZQSD / flèches / pavé numérique : déplacer · A E W C : diagonales · Souris : survol = inspection, clic = y aller · X : inspection au clavier · R : courir / marcher · F : forer · Espace / 5 : attendre · V : portée de discrétion · B : brouillard de guerre · ! : son · M : mode carte (déplacements = défilement, Maj = plus vite, Échap ou M pour revenir).
 
 ## 10. Sauvegarde des réglages
 
@@ -217,10 +230,8 @@ Chiffres à l'appui dans `mesures.md`, points de comparaison avec Brogue dans `b
 - Niveau 2 (sous-sol) : à concevoir (salles par accrétion ou caverne par automate cellulaire).
 - Donner un effet à la profondeur des sites (risque / récompense).
 - Récompenser les combats (fragments, énergie).
-- **Brancher la vitesse du robot** (sprint coûtant de l'énergie). C'est la piste la plus mûre : la stat
-  VIT est affichée mais n'a aucun effet, et tant qu'on ne peut pas prendre de distance, fuir à découvert
-  de près est impossible (voir `mesures.md`). C'est aussi ce qui donnerait tout son sens à la perte de
-  trace à 3 %, qui ne joue qu'au-delà du rayon de discrétion.
+- **Inventaire et équipement** (demandé le 13 novembre 2026) : sous-menu avec 1 emplacement arme, 1 armure, 3 accessoires ; l'équipement modifie les stats, donne des attaques spéciales et change la durée de certaines actions. L'horloge (§ 5 bis) est prête pour ça.
+- Autres terrains lents possibles (gravats, herbes hautes) ; rendre la course bruyante ; donner des durées différentes aux actions (table `DUR`).
 - Source de soin limitée (kits, forage qui répare).
 - Exploration automatique façon Brogue (vers la zone inexplorée la plus proche), sur le même moteur de trajet.
 - Fait le 6 novembre 2026 : projet sous git, fichiers séparés par thème. Reste possible : passer à de vrais modules ES (imports) si la portée globale partagée devient gênante (niveau 2).

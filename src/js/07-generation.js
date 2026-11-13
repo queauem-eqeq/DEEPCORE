@@ -225,7 +225,8 @@ const UPGRADES=[
   ['pre','PRE (précision)','+5',st=>{st.pre+=5;}],
   ['esq','ESQ (esquive)','+5',st=>{st.esq+=5;}],
   ['crit','CRIT (coup critique)','+5 %',st=>{st.crit=(st.crit??5)+5;}],
-  ['power','POW (énergie/tour)','+1',st=>{st.power+=1;}]
+  ['power','POW (énergie/tour)','+1',st=>{st.power+=1;}],
+  ['vitesse','VIT (vitesse)','+1',st=>{st.vitesse+=1;}]
 ];
 // Éclats de métal : ORE_PCT % des cases de montagne (hors rangée extérieure indestructible et joyau) en contiennent ; brisée, la roche les laisse
 // tomber au sol ; la foreuse qui passe dessus les ramasse et regagne des points de vie selon la densité.

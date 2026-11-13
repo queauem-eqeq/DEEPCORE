@@ -53,6 +53,16 @@ Le contrôle vérifie que la méthode est saine : une bête enfermée derrière 
 | La même, avec 12 cases d'avance | à tous les coups, en 22 tours |
 | Zone de rochers épars | **jamais semée** |
 
+La même chose **en courant** (13 novembre 2026 : deux pas par battement tant qu'il reste de l'énergie,
+soit une vingtaine de cases avec le plein, puis marche) :
+
+| Situation | En marchant | En courant |
+|---|---|---|
+| Terrain dégagé, 4 cases d'avance | jamais semée | **43 % des cas, en 36 tours** |
+| Terrain dégagé, 12 cases d'avance | 70 à 78 % | **à tous les coups, en 28 tours** |
+| Herbes hautes, en ligne droite | 90 à 95 % | à tous les coups, en 8 tours |
+| Ouverture dans un mur, puis obliquer | 70 à 85 % | à tous les coups, en 14 tours |
+
 ### Ce que ces chiffres disent
 
 - **De près, à découvert, on ne sème personne.** Le crabos va aussi vite que la foreuse (vitesse 5
@@ -63,8 +73,10 @@ Le contrôle vérifie que la méthode est saine : une bête enfermée derrière 
 - **Les herbes hautes sont le meilleur abri du jeu**, parce que celles qu'on ne couche pas bloquent la
   vue. Zigzaguer évite de laisser derrière soi un couloir d'herbes couchées bien dégagé.
 - **Les rochers épars ne cachent pas** : ils gênent la foreuse plus qu'ils ne coupent la ligne de vue.
-- Tant que la stat **VIT** n'a aucun effet, prendre de la distance reste impossible : c'est le levier
-  qui rendrait la fuite jouable (voir les pistes ouvertes de `conception.md`).
+- **La course change la donne** : de près et à découvert, on sème maintenant un crabos un peu moins
+  d'une fois sur deux, au prix de toute l'énergie (donc sans pouvoir frapper ensuite). Avec un abri à
+  portée, la course suffit presque toujours. Contre un insectoïde (vitesse 6), l'avance gagnée est
+  un peu plus faible.
 
 ## Piège de méthode
 
