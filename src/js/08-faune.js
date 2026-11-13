@@ -3,7 +3,7 @@ const animalAt=(x,y)=>G.animals&&G.animals.find(a=>a.x===x&&a.y===y);
 // Eau : seuls les crabos (swim) y entrent ; insectoïdes et cafars évitent l'eau peu profonde comme l'eau profonde
 const isWater=v=>v===LIQ||v===DEEP,canWalk=(v,swim)=>!blocks(v)&&(swim||!isWater(v));
 const canHit=o=>Math.max(Math.abs(o.x-G.px),Math.abs(o.y-G.py))<=1&&diagOk(o.x,o.y,Math.sign(G.px-o.x),Math.sign(G.py-o.y));   // pas d'attaque à travers un coin
-const animalOk=(x,y)=>{if(x<1||y<1||x>=W-1||y>=H-1)return false;const v=G.t[idx(x,y)];return canWalk(v,false)&&!(x===G.px&&y===G.py)&&!animalAt(x,y)&&!beastAt(x,y);};
+const animalOk=(x,y)=>{if(x<1||y<1||x>=W-1||y>=H-1)return false;const v=G.t[idx(x,y)];return canWalk(v,false)&&!(x===G.px&&y===G.py)&&!animalAt(x,y)&&!beastAt(x,y)&&!ambAt(x,y);};
 function spawnAnimals(){
   const pool=[...SPECIES.keys()].sort(()=>Math.random()-.5).slice(0,1);G.animals=[];G.fauna=[];G.pool=pool;
   for(let k=0,tries=0;k<LIFE.insectoide&&tries<LIFE.insectoide*300+500;tries++){const x=rnd(2,W-3),y=rnd(2,H-3),v=G.t[idx(x,y)];
@@ -41,6 +41,7 @@ const SEARCH_T=4;
    dernière position connue et s'y rend, mais ne vous suit plus de loin : il lui faut vous remarquer de nouveau
    (NOTICE) à l'intérieur du rayon. Dans le rayon, elle ne vous perd jamais. */
 function voitForeuse(o,chasse){
+  if(G.eff&&G.eff.fum>0)return false;                                    // fumigène : personne ne voit la foreuse
   const d=Math.hypot(o.x-G.px,o.y-G.py);
   const bruit=lastAct==='dig';                                          // briser une paroi s'entend à travers les parois
   if(!bruit&&!los(o.x,o.y,G.px,G.py))return false;
@@ -98,7 +99,7 @@ function animalsAct(){
 const FOOT=[[0,0]];
 const beastAt=(x,y)=>G.beasts&&G.beasts.find(b=>b.x===x&&b.y===y);
 function beastFits(b,x,y){for(const[dx,dy]of FOOT){const cx=x+dx,cy=y+dy;if(cx<1||cy<1||cx>=W-1||cy>=H-1)return false;const v=G.t[idx(cx,cy)];
-  if(!canWalk(v,!!BEASTS[b.sp].swim)||(cx===G.px&&cy===G.py)||animalAt(cx,cy))return false;const o=beastAt(cx,cy);if(o&&o!==b)return false;}return true;}
+  if(!canWalk(v,!!BEASTS[b.sp].swim)||(cx===G.px&&cy===G.py)||animalAt(cx,cy)||ambAt(cx,cy))return false;const o=beastAt(cx,cy);if(o&&o!==b)return false;}return true;}
 const beastVisible=b=>!fog||FOOT.some(([dx,dy])=>vis[idx(b.x+dx,b.y+dy)]);
 function spawnBeasts(){G.beasts=[];G.beastSeen={};G.packs={};let packId=0;
   const tryPut=(sp,x,y,pack)=>{const b={sp,x,y,hp:BEASTS[sp].pv,mp:Math.random(),hunt:0,dir:-1,pack};if(!beastFits(b,x,y))return false;G.beasts.push(b);return true;};
@@ -109,7 +110,13 @@ function spawnBeasts(){G.beasts=[];G.beastSeen={};G.packs={};let packId=0;
     let n=Math.min(left,PACK_SIZES[rnd(0,PACK_SIZES.length-1)]);if(left-n===1)n=left<=5?left:n-1;let put=0;   // jamais de cafar seul restant
     for(let u=0;u<60&&put<n;u++){if(tryPut(1,cx+rnd(-2,2),cy+rnd(-2,2),packId))put++;}
     if(put===1){G.beasts.pop();put=0;}   // pas de place pour la bande : on essaie ailleurs
-    if(put){left-=put;packId++;}}}
+    if(put){left-=put;packId++;}}
+  // autres espèces : dispersées ; les embusqués (ambush) attendent cachés dans les herbes hautes, hors de G.beasts tant qu'ils n'ont pas frappé
+  G.amb=[];
+  BEASTS.forEach((sp,i)=>{if(i<2)return;const n=LIFE[sp.key]||0;
+    for(let k=0,t=0;k<n&&t<n*400+500;t++){const x=rnd(2,W-3),y=rnd(2,H-3);if(Math.hypot(x-G.px,y-G.py)<SZ(sp.ambush?8:20,sp.ambush?3:6))continue;
+      if(sp.ambush){const v=G.t[idx(x,y)];if(!(v===GRASS||(t>n*200&&canWalk(v,false)))||ambAt(x,y)||beastAt(x,y)||animalAt(x,y)||(x===G.px&&y===G.py))continue;G.amb.push({sp:i,x,y,hp:sp.pv});k++;}
+      else if(tryPut(i,x,y,-1))k++;}});}
 function robotDist(swim){return distFrom(G.px,G.py,swim);}
 function distFrom(tx,ty,swim){const d=new Int16Array(W*H).fill(-1),q=[idx(tx,ty)];d[q[0]]=0;
   for(let k=0;k<q.length;k++){const c=q[k],x=c%W,y=(c/W)|0;for(const[dx,dy]of DIRS){const a=x+dx,b=y+dy;if(a<1||b<1||a>=W-1||b>=H-1)continue;const j=idx(a,b),v=G.t[j];if(d[j]>=0||!diagOk(x,y,dx,dy)||!canWalk(v,swim))continue;d[j]=d[c]+1;q.push(j);}}return d;}
@@ -122,18 +129,62 @@ const robotEsq=()=>G.st.esq+terrMod(G.px,G.py);
 const hitChance=(pre,esq)=>Math.max(5,Math.min(95,pre-esq));
 const roll=ch=>Math.random()*100<ch;
 const chanceCol=ch=>ch>=70?'var(--c1)':ch>=40?'var(--c3)':'var(--life)';
-function hurtRobot(b,sp){sp=sp||BEASTS[b.sp];const le=sp.n.match(/^[aeiouyéèêîïôâ]/i)?'L’':'Le ';
+/* Attaque d'un ennemi sur la foreuse. o.tir : attaque à distance (projectile) ; o.sur : par surprise (touche toujours, critique).
+   Effets durables posés par le coup (G.eff, décomptés à chaque battement par effTick) :
+   poison = vie perdue par battement · glu = pas deux fois plus longs · drain = énergie volée sur le coup.
+   Une armure isolante (G.st.isol) divise les durées par deux. */
+function hurtRobot(b,sp,o){sp=sp||BEASTS[b.sp];o=o||{};const le=sp.n.match(/^[aeiouyéèêîïôâ]/i)?'L’':'Le ',nom=sp.n.toLowerCase(),verbe=o.tir?'crache':'attaque';
   const ch=hitChance(sp.pre,robotEsq());
-  if(!roll(ch)){addFx({kind:'lunge',beast:b,dx:Math.sign(G.px-b.x),dy:Math.sign(G.py-b.y),dur:200});addFx({kind:'num',x:G.px,y:G.py,txt:'0',col:'#8aa9a2',dur:750});
-    SFX.whoosh();sayMore(`${le}${sp.n.toLowerCase()} attaque et rate (${ch} %).`);return;}
-  addFx({kind:'lunge',beast:b,dx:Math.sign(G.px-b.x),dy:Math.sign(G.py-b.y),dur:200});
-  const cr=roll(sp.crit||0),dm=sp.dmg*(cr?CRIT_X:1);   // coup critique de l'ennemi : selon sa stat CRIT
-  addFx({kind:'shake',amp:cr?9:5,dur:cr?320:220});G.st.vie=Math.max(0,G.st.vie-dm);addFx({kind:'num',x:G.px,y:G.py,txt:'-'+dm+(cr?'!':''),col:'#ff3b3b',dur:cr?1000:750});SFX.bite();sayMore(`${le}${sp.n.toLowerCase()} attaque${cr?' : coup critique':''} : −${dm} vie.`,'warn');
-  if(G.st.vie<=0){G.over={dead:true};}}
+  const geste=()=>o.tir?addFx({kind:'tir',x0:b.x,y0:b.y,x1:G.px,y1:G.py,dur:260}):addFx({kind:'lunge',beast:b,dx:Math.sign(G.px-b.x),dy:Math.sign(G.py-b.y),dur:200});
+  if(!o.sur&&!roll(ch)){geste();addFx({kind:'num',x:G.px,y:G.py,txt:'0',col:'#8aa9a2',dur:750});
+    SFX.whoosh();sayMore(`${le}${nom} ${verbe} et rate (${ch} %).`);return;}
+  geste();
+  const cr=o.sur||roll(sp.crit||0),dm=sp.dmg*(cr?CRIT_X:1);   // coup critique de l'ennemi : selon sa stat CRIT
+  addFx({kind:'shake',amp:cr?9:5,dur:cr?320:220});G.st.vie=Math.max(0,G.st.vie-dm);addFx({kind:'num',x:G.px,y:G.py,txt:'-'+dm+(cr?'!':''),col:'#ff3b3b',dur:cr?1000:750});SFX.bite();sayMore(`${le}${nom} ${verbe}${o.sur?' par surprise':cr?' : coup critique':''} : −${dm} vie.`,'warn');
+  if(G.st.vie<=0){G.over={dead:true};return;}
+  const E=G.eff=G.eff||{},du=n=>G.st.isol>0?Math.ceil(n/2):n;
+  if(sp.poison){E.poison=Math.max(E.poison||0,du(sp.poison[1]));E.pdmg=sp.poison[0];sayMore('Empoisonné !','warn');}
+  if(sp.slow){E.glu=Math.max(E.glu||0,du(sp.slow));sayMore('Englué : la foreuse est ralentie.','warn');}
+  if(sp.drain){const e=Math.min(G.st.energie,sp.drain);G.st.energie-=e;if(e>0)sayMore(`Énergie siphonnée : −${Math.round(e)}.`,'warn');}}
+// Une fois par battement : effets durables sur la foreuse
+function effTick(){const E=G.eff;if(!E||G.over)return;
+  if(E.poison>0){E.poison--;const dm=Math.min(G.st.vie,E.pdmg||2);G.st.vie-=dm;addFx({kind:'num',x:G.px,y:G.py,txt:'-'+dm,col:'#ff3b3b',dur:750});
+    if(G.st.vie<=0){G.over={dead:true};sayMore('Le poison achève la foreuse.','warn');return;}
+    if(!E.poison)sayMore('Le poison est éliminé.','good');}
+  if(E.glu>0&&--E.glu===0)sayMore('La glu se détache : la foreuse retrouve sa vitesse.','good');
+  if(E.fum>0&&--E.fum===0)sayMore('La fumée se dissipe.');}
+// Embusqués : cachés (G.amb), ils ne bougent pas et ne figurent nulle part tant que la foreuse n'est pas à leur contact
+const ambAt=(x,y)=>G.amb&&G.amb.find(a=>a.x===x&&a.y===y);
+function ambWake(a,hunt){G.amb.splice(G.amb.indexOf(a),1);const b={sp:a.sp,x:a.x,y:a.y,hp:a.hp,mp:0,hunt:hunt?1:0,dir:Math.sign(G.px-a.x)||1,pack:-1};G.beasts=G.beasts||[];G.beasts.push(b);return b;}
+function ambTick(){if(!G.amb||!G.amb.length||G.over)return;
+  for(const a of [...G.amb]){if(G.over)break;if(!canHit(a))continue;const sp=BEASTS[a.sp],b=ambWake(a,true);spot(b);b.skip=1;
+    sayMore(`Un ${sp.n.toLowerCase()} surgit de sa cachette !`,'warn');SFX.roar();hurtRobot(b,sp,{sur:true});}}
+// Tireur : un pas pour s'éloigner de la foreuse (renvoie false s'il est acculé)
+function beastAway(b){let best=null,bd=(b.x-G.px)**2+(b.y-G.py)**2;
+  for(const[dx,dy]of [...DIRS].sort(()=>Math.random()-.5)){const nx=b.x+dx,ny=b.y+dy;if(!diagOk(b.x,b.y,dx,dy)||!beastFits(b,nx,ny))continue;const nd=(nx-G.px)**2+(ny-G.py)**2;if(nd>bd){bd=nd;best=[nx,ny,dx];}}
+  if(best){b.x=best[0];b.y=best[1];if(best[2])b.dir=best[2]>0?1:-1;return true;}return false;}
+// Creuseur : chemin le plus court en comptant la roche comme franchissable (4 directions) ; une paroi sur le chemin est percée, ce qui prend le battement
+function rockFalls(i){if(G.dmg)delete G.dmg[i];G.t[i]=RUBBLE;if(G.gems&&G.gems[i]==='cache')G.gems[i]='visible';if(G.ore&&G.ore[i]&&!oreSol(G.ore[i]))G.ore[i]='sol'+oreLv(G.ore[i]);}
+function digDist(tx,ty){const d=new Int16Array(W*H).fill(-1),q=[idx(tx,ty)];d[q[0]]=0;
+  for(let k=0;k<q.length;k++){const c=q[k],x=c%W,y=(c/W)|0;for(let n=0;n<4;n++){const a=x+DIRS[n][0],b=y+DIRS[n][1];if(a<1||b<1||a>=W-1||b>=H-1)continue;
+    const j=idx(a,b),v=G.t[j];if(d[j]>=0||!(canWalk(v,false)||v===ROCK||v===MOUNT))continue;d[j]=d[c]+1;q.push(j);}}return d;}
+function digStep(b,sees){const t=sees?[G.px,G.py]:b.mem;if(!t){b.hunt=0;return false;}
+  const d=digDist(t[0],t[1]),h=d[idx(b.x,b.y)];if(h<0){forget(b);b.hunt=0;return false;}
+  if(h<=1){if(!sees)b.search=SEARCH_T;return false;}
+  let best=null,bv=h;
+  for(let n=0;n<4;n++){const dx=DIRS[n][0],dy=DIRS[n][1],nx=b.x+dx,ny=b.y+dy;if(nx<1||ny<1||nx>=W-1||ny>=H-1)continue;const j=idx(nx,ny),v=d[j];if(v<0||v>=bv)continue;
+    const tv=G.t[j],rock=tv===ROCK||tv===MOUNT;if(!rock&&!beastFits(b,nx,ny))continue;bv=v;best=[nx,ny,dx,rock];}
+  if(!best)return false;
+  if(best[2])b.dir=best[2];
+  if(best[3]){rockFalls(idx(best[0],best[1]));b.mp=0;
+    if(cheb(b,G.px,G.py)<=10){SFX.crack();sayMore(vis[idx(b.x,b.y)]?`Le ${BEASTS[b.sp].n.toLowerCase()} perce la roche !`:'Un bruit de roche brisée, tout près.','warn');}
+    return false;}
+  b.x=best[0];b.y=best[1];return true;}
 function beastsAct(){
   turnStealth();
+  ambTick();
   if(!G.beasts||!G.beasts.length||G.over)return;const distDry=robotDist(false),distWet=robotDist(true),DC={};let charged=null;const alarms=[];packTick();
-  for(const b of G.beasts){if(G.over)break;const sp=BEASTS[b.sp];b.mp=Math.min(2,b.mp+sp.v/5/slowOf(G.t[idx(b.x,b.y)],sp.swim));
+  for(const b of G.beasts){if(G.over)break;if(b.skip){b.skip=0;continue;}const sp=BEASTS[b.sp];b.mp=Math.min(2,b.mp+sp.v/5/slowOf(G.t[idx(b.x,b.y)],sp.swim));
     const d=Math.hypot(b.x-G.px,b.y-G.py),sees=voitForeuse(b,b.hunt>0);
     if(sees){if(!b.hunt&&sp.alarm)alarms.push(b);if(!b.hunt&&beastVisible(b))charged=charged||sp;b.hunt=1;spot(b);if(G.px!==b.x)b.dir=Math.sign(G.px-b.x);
       if(sp.pack)for(const o of mates(b)){o.hunt=1;spot(o);}}                        // la bande partage ce qu'un membre voit
@@ -141,8 +192,11 @@ function beastsAct(){
     else if(b.hunt&&!b.mem)b.hunt=0;
     b.sees=sees;
     if(alarms.length&&alarms[alarms.length-1]===b)raiseAlarm(b);
+    if(b.hunt>0&&sees&&sp.range){const c=cheb(b,G.px,G.py);                          // tireur : tire dès qu'il est à portée, recule une fois sur deux si on le serre
+      if(c<=sp.range){if(c<=2&&Math.random()<.5&&beastAway(b))continue;hurtRobot(b,sp,{tir:true});continue;}}
     if(b.hunt>0&&nearRobot(b)){hurtRobot(b);continue;}
     while(b.mp>=1&&!G.over){b.mp-=1;
+      if(sp.dig&&b.hunt>0&&!(b.search>0)){if(!digStep(b,sees))break;continue;}          // creuseur : tout droit, à travers la roche
       if(b.hunt>0&&sees){
         if(nearRobot(b)){b.mp=Math.min(b.mp,.99);break;}
         chaseStep(b,sp.swim?distWet:distDry,(x,y)=>beastFits(b,x,y));}

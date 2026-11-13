@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Mesure la détection et la fuite en rejouant des situations dans le vrai moteur du jeu.
 
-    python3 outils/simul.py [detection|fuite|tout]
+    python3 outils/simul.py [detection|fuite|combat|tout]
 
 Les simulations tournent dans la page, sur une carte entièrement dégagée (ou avec l'obstacle voulu),
 en appelant directement animalsAct() et beastsAct(). Elles ne touchent ni aux fichiers ni à l'artefact.
@@ -116,6 +116,41 @@ return JSON.stringify(out, null, 1);
 })()
 """
 
+# Duels : la foreuse marche sur l'ennemi et frappe jusqu'à la mort de l'un des deux, dans le vrai moteur (tryMove, pass).
+# Pour chaque cas : part de victoires, vie restante moyenne en cas de victoire, durée moyenne en battements.
+COMBAT = COMMUN + """
+(() => {
+const N = 300, out = {};
+addFx = () => {}; render = () => {}; dead = () => {}; SND.on = false; fog = false;
+const neuf = () => { G.st = { vie: 100, vieMax: 100, energie: 100, energieMax: 100, repar: 0, power: 1, vitesse: 5, degats: 10, capteur: 10, cout: 10, pre: 80, esq: 10, crit: 5 };
+  G.inv = invTest(); G.eff = {}; G.over = null; G.sprint = false; G.debt = 0; G.time = 0; G.items = {}; G.ore = {}; G.gems = {}; G.blood = {}; G.log = []; };
+const equipe = (ks) => { for (const k of ks) invEquip(G.inv.findIndex(o => o.k === k)); };
+const bete = (sp, x, y) => ({ sp, x, y, hp: BEASTS[sp].pv, mp: 0, hunt: 1, dir: -1, pack: -1, mem: [G.px, G.py], search: 0, lost: 0 });
+const proche = () => { let b = null, bd = 1e9; for (const o of G.beasts) { const d = Math.max(Math.abs(o.x - G.px), Math.abs(o.y - G.py)); if (d < bd) { bd = d; b = o; } } return b; };
+const duel = (nom, pose, kit) => { let vic = 0, vie = 0, bat = 0;
+  for (let e = 0; e < N; e++) { degager(); G.px = 30; G.py = 32; G.animals = []; G.amb = []; G.beasts = []; neuf(); equipe(kit || []); pose();
+    for (let n = 0; n < 400 && !G.over && (G.beasts.length || G.amb.length); n++) { const b = proche();
+      if (!b) { waitTurn(); continue; }
+      const dx = Math.sign(b.x - G.px), dy = Math.sign(b.y - G.py), t0 = G.time;
+      tryMove(dx, dy); if (G.time === t0) { tryMove(dx, 0); if (G.time === t0) { tryMove(0, dy); if (G.time === t0) waitTurn(); } } }
+    if (!G.over && !G.beasts.length && !G.amb.length) { vic++; vie += G.st.vie - (G.eff.poison > 0 ? G.eff.poison * (G.eff.pdmg || 0) : 0); }
+    bat += G.time / 100; }
+  out[nom] = `${Math.round(100 * vic / N)} % de victoires · vie restante ${vic ? Math.round(vie / vic) : '—'} · ${Math.round(bat / N)} battements`; };
+const seul = (sp, d) => () => { G.beasts.push(bete(sp, 30 + (d || 6), 32)); };
+const groupe = (sp, n) => () => { for (let k = 0; k < n; k++) G.beasts.push(bete(sp, 36 + (k >> 1), 31 + (k % 2) * 2)); };
+BEASTS.forEach((sp, i) => { if (sp.ambush) duel('1 ' + sp.n + ' (embusqué)', () => { G.amb.push({ sp: i, x: 31, y: 32, hp: sp.pv }); }); else duel('1 ' + sp.n, seul(i)); });
+const I = k => BEASTS.findIndex(b => b.key === k);
+duel('2 Crabos', groupe(I('crabos'), 2)); duel('3 Cafars', groupe(I('cafar'), 3)); duel('4 Cafars', groupe(I('cafar'), 4));
+duel('2 Crachins', groupe(I('crachin'), 2)); duel('2 Vipérins', groupe(I('viperin'), 2)); duel('Mastok + 2 Crabos', () => { groupe(I('crabos'), 2)(); G.beasts.push(bete(I('mastok'), 38, 32)); });
+const ref = () => { groupe(I('crabos'), 2)(); G.beasts.push(bete(I('viperin'), 38, 32)); };
+duel('RÉF. (2 Crabos + 1 Vipérin) · foreuse nue', ref);
+for (const k of Object.keys(ITEMS)) { const d = ITEMS[k]; if (d.conso || d.base) continue; duel('RÉF. avec ' + d.n, ref, [k]); }
+duel('Mastok avec Marteau-pilon', seul(I('mastok')), ['pilon']); duel('Mastok avec Foret diamant', seul(I('mastok')), ['foret']);
+duel('Mastok avec Scie circulaire', seul(I('mastok')), ['scie']); duel('Mastok avec Lance thermique', seul(I('mastok')), ['lance']);
+return JSON.stringify(out, null, 1);
+})()
+"""
+
 
 async def principal(quoi: str) -> int:
     async with async_playwright() as p:
@@ -129,7 +164,7 @@ async def principal(quoi: str) -> int:
             if not await page.locator('#introCv').is_visible():
                 break
 
-        for nom, code in (('DÉTECTION', DETECTION), ('FUITE', FUITE)):
+        for nom, code in (('DÉTECTION', DETECTION), ('FUITE', FUITE), ('COMBAT', COMBAT)):
             if quoi in ('tout', nom.lower().replace('é', 'e')):
                 print('\n===', nom, '===')
                 print(await page.evaluate(code))
@@ -140,7 +175,7 @@ async def principal(quoi: str) -> int:
 
 if __name__ == '__main__':
     choix = sys.argv[1] if len(sys.argv) > 1 else 'tout'
-    if choix not in ('detection', 'fuite', 'tout'):
+    if choix not in ('detection', 'fuite', 'combat', 'tout'):
         print(__doc__)
         sys.exit(2)
     sys.exit(asyncio.run(principal(choix)))

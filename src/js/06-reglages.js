@@ -11,8 +11,11 @@ function buildCursor(){const r=rowsOf('cursor');CURT=curCanvas(r);CURT_DIM=curCa
 // des couloirs partout ; gouffre : la carte devient un réseau de ponts). L'herbe ne gêne que la vue.
 const GEN_LBL=[['eau','Eau',60],['montagne','Montagne',70],['gouffre','Gouffre',30],['herbe','Herbe',80]],GEN_SUM=80;
 const METHODS=[['automate','Automate cellulaire'],['bruit','Bruit (chaînes)'],['mixte','Mixte']];
-let GEN={eau:10,montagne:12,gouffre:4,herbe:15,methode:'automate',remplissage:55,iterations:5};
+let GEN={taille:4,eau:10,montagne:12,gouffre:4,herbe:15,methode:'automate',remplissage:55,iterations:5};
 try{const g=JSON.parse(localStorage.getItem('np-gen')||'null');if(g&&typeof g.eau==='number')GEN=Object.assign(GEN,g);}catch(e){}
+if(!(GEN.taille>=1&&GEN.taille<=5))GEN.taille=4;
+function setTaille(v){v=Math.max(1,Math.min(5,Math.round(+v||4)));GEN.taille=v;$('gr-taille').value=v;$('gn-taille').value=v;
+  $('genTaille').textContent=`${SIZES[v][0]} × ${SIZES[v][1]} cases${v===4?' (taille d’origine)':''}. Appliqué au prochain lancement.`;saveGen();}
 const saveGen=()=>{try{localStorage.setItem('np-gen',JSON.stringify(GEN));}catch(e){}touchLocal();};
 function setGen(k,v){const others=GEN_LBL.reduce((a,[kk])=>a+(kk===k?0:GEN[kk]),0),mx=GEN_LBL.find(l=>l[0]===k)[2];
   v=Math.max(0,Math.min(mx,GEN_SUM-others,Math.round(+v||0)));GEN[k]=v;$('gr-'+k).value=v;$('gn-'+k).value=v;
@@ -20,9 +23,9 @@ function setGen(k,v){const others=GEN_LBL.reduce((a,[kk])=>a+(kk===k?0:GEN[kk]),
 function setCA(k,v,mn,mx){v=Math.max(mn,Math.min(mx,Math.round(+v||mn)));GEN[k]=v;$('gn-'+k).value=v;saveGen();}
 function caState(){const off=GEN.methode==='bruit';$('gn-remplissage').disabled=off;$('gn-iterations').disabled=off;}
 /* ---------- Réglages de faune : nombre d'individus par planète ---------- */
-let LIFE={insectoide:21,crabos:15,cafar:12};
+let LIFE={insectoide:21};BEASTS.forEach(b=>{LIFE[b.key]=b.nb;});
 try{const l=JSON.parse(localStorage.getItem('np-life')||'null');if(l&&typeof l.crabos==='number')LIFE=Object.assign(LIFE,l);}catch(e){}
-const LIFE_LBL=[['insectoide','Insectoïde',100],['crabos','Crabos',100],['cafar','Cafar',100]];
+const LIFE_LBL=[['insectoide','Insectoïde',100],...BEASTS.map(b=>[b.key,b.n,100])];
 function setLife(k,v){const mx=LIFE_LBL.find(l=>l[0]===k)[2];v=Math.max(0,Math.min(mx,Math.round(+v||0)));LIFE[k]=v;$('lr-'+k).value=v;$('ln-'+k).value=v;
   try{localStorage.setItem('np-life',JSON.stringify(LIFE));}catch(e){}touchLocal();}
 function buildLife(){
@@ -31,12 +34,14 @@ function buildLife(){
   LIFE_LBL.forEach(([k])=>{$('lr-'+k).addEventListener('input',e=>setLife(k,e.target.value));$('ln-'+k).addEventListener('change',e=>setLife(k,e.target.value));});
 }
 function buildGen(){
-  $('gen').innerHTML=GEN_LBL.map(([k,l,mx])=>`<div class="g"><label for="gn-${k}">${l} (%)</label><input type="range" id="gr-${k}" min="0" max="${mx}" step="1" value="${GEN[k]}" aria-label="${l} en pourcentage"><input type="number" id="gn-${k}" min="0" max="${mx}" step="1" value="${GEN[k]}"></div>`).join('')
+  $('gen').innerHTML=`<div class="g"><label for="gn-taille">Taille de la carte</label><input type="range" id="gr-taille" min="1" max="5" step="1" value="${GEN.taille}" aria-label="Taille de la carte, de 1 à 5"><input type="number" id="gn-taille" min="1" max="5" step="1" value="${GEN.taille}"></div><div class="sum" id="genTaille"></div>`
+   +GEN_LBL.map(([k,l,mx])=>`<div class="g"><label for="gn-${k}">${l} (%)</label><input type="range" id="gr-${k}" min="0" max="${mx}" step="1" value="${GEN[k]}" aria-label="${l} en pourcentage"><input type="number" id="gn-${k}" min="0" max="${mx}" step="1" value="${GEN[k]}"></div>`).join('')
    +'<div class="sum" id="genSum"></div><div class="sub">Relief (montagnes et gouffres)</div>'
    +`<div class="g2"><label for="gm">Méthode</label><select id="gm">${METHODS.map(([v,l])=>`<option value="${v}"${GEN.methode===v?' selected':''}>${l}</option>`).join('')}</select></div>`
    +`<div class="g2"><label for="gn-remplissage">Remplissage initial (%)</label><input type="number" id="gn-remplissage" min="35" max="70" value="${GEN.remplissage}"></div>`
    +`<div class="g2"><label for="gn-iterations">Itérations</label><input type="number" id="gn-iterations" min="1" max="10" value="${GEN.iterations}"></div>`;
   GEN_LBL.forEach(([k])=>{$('gr-'+k).addEventListener('input',e=>setGen(k,e.target.value));$('gn-'+k).addEventListener('change',e=>setGen(k,e.target.value));});
+  $('gr-taille').addEventListener('input',e=>setTaille(e.target.value));$('gn-taille').addEventListener('change',e=>setTaille(e.target.value));setTaille(GEN.taille);
   $('gm').addEventListener('change',e=>{GEN.methode=e.target.value;saveGen();caState();});
   $('gn-remplissage').addEventListener('change',e=>setCA('remplissage',e.target.value,35,70));
   $('gn-iterations').addEventListener('change',e=>setCA('iterations',e.target.value,1,10));

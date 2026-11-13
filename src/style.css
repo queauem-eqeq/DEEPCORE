@@ -228,8 +228,8 @@ kbd{font-family:var(--mono);color:var(--fg);border:1px solid var(--line);padding
 .ileft{display:grid;gap:10px;min-width:0}
 .islots{display:flex;gap:18px;font-size:12px;color:var(--dim)}
 .islots b{font-weight:400;color:var(--fg);font-variant-numeric:tabular-nums}
-.ilist{display:grid;max-height:min(58vh,520px);overflow-y:auto}
-.ilist .it{display:grid;grid-template-columns:1.2em minmax(0,1fr) 7.5em 4.5em;gap:8px;align-items:baseline;text-align:left;padding:4px 8px;border:0;border-left:2px solid transparent;
+.ilist{display:grid;max-height:min(66vh,640px);overflow-y:auto;scrollbar-width:thin}
+.ilist .it{display:grid;grid-template-columns:1.2em minmax(0,1fr) 7.5em 4.5em;gap:8px;align-items:baseline;text-align:left;padding:2px 8px;border:0;border-left:2px solid transparent;
   font-size:13px;letter-spacing:0;text-transform:none;color:var(--fg)}
 .ilist .it i{font-style:normal;color:var(--dim)}
 .ilist .it span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -237,7 +237,14 @@ kbd{font-family:var(--mono);color:var(--fg);border:1px solid var(--line);padding
 .ilist .it em.st{font-size:10px;letter-spacing:.14em;text-transform:uppercase;text-align:right}
 .ilist .it.eq,.ilist .it.eq i,.ilist .it.eq em{color:var(--c3)}        /* équipé : reste dans la liste, en couleur monde */
 .ilist .it.sel{border-left-color:currentColor;background:rgba(255,255,255,.08)}
-.idet{display:grid;gap:8px;border:1px solid var(--line);padding:14px;font-size:12px;align-content:start;min-height:420px}
+.iright{display:grid;gap:10px;min-width:0}
+.idet{display:grid;gap:8px;border:1px solid var(--line);padding:14px;font-size:12px;align-content:start;min-height:400px}
+.isth{font-family:var(--display);font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--dim)}
+.isth span{letter-spacing:.04em;text-transform:none;font-family:var(--mono);color:var(--fg)}
+.istats{display:grid;grid-template-columns:repeat(3,1fr);gap:4px 10px;font-size:12px;font-variant-numeric:tabular-nums}
+.istats span{white-space:nowrap}
+.istats i{font-style:normal;font-size:11px;letter-spacing:.1em;color:var(--dim);margin-right:2px}
+.istats b{font-weight:400}
 .iart{margin:6px auto 10px;font:30px/1.15 var(--mono);color:var(--fg);white-space:pre;min-height:calc(6 * 1.15em)}
 .inm{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
 .inm b{font-weight:700;color:var(--fg);font-size:14px}
@@ -250,3 +257,5 @@ kbd{font-family:var(--mono);color:var(--fg);border:1px solid var(--line);padding
 .inv .imsg.warn{color:var(--c3)}.inv .imsg.good{color:var(--c1)}
 #inventaire .mcard.wide{width:min(900px,100%)}
 @media (max-width:720px){.iwrap{grid-template-columns:1fr}.idet{min-height:0}.iart{font-size:20px}}
+.effs{font-size:11px;color:var(--c3);letter-spacing:.06em}
+.effs:empty{display:none}

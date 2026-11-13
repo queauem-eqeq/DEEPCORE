@@ -43,6 +43,20 @@ Roguelike au tour par tour dans une esthétique inspirée de Cogmind et de Brogu
 - Curseurs de génération (en %) : Eau ≤ 60, Montagne ≤ 70, Gouffre ≤ 30, Herbe ≤ 80, total ≤ 80. Herbe répartie moitié haute, moitié basse.
 - Bouton **REGEN** dans le titre « Génération » : nouvelle planète immédiate.
 
+### Taille de la carte (13 novembre 2026)
+
+Réglage « Taille de la carte » en tête du sous-menu Génération, de **1 à 5**, appliqué au prochain lancement (REGEN) :
+
+| Taille | Cases | Usage |
+|---|---|---|
+| 1 | 32 × 22 | arène : tient presque dans l'écran, pour essayer des monstres |
+| 2 | 48 × 32 | |
+| 3 | 72 × 48 | |
+| 4 | 96 × 64 | **taille d'origine**, valeur par défaut |
+| 5 | 144 × 96 | |
+
+Le relief, les lacs et les distances de sécurité suivent l'échelle. **Les nombres du sous-menu Life ne suivent pas** : ce sont des nombres d'individus par planète, à régler à la main pour une petite carte (les valeurs par défaut y sont beaucoup trop denses).
+
 ## 4. Terrains
 
 **13 novembre 2026** : les herbes basses et les herbes basses, qui faisaient deux terrains distincts, n'en font plus qu'un, **les herbes basses**. La génération pose donc des herbes hautes et des herbes basses ; marcher dans les hautes les couche en basses. La tuile éditable « Herbes basses » a été renommée « Herbes basses » (sa clé `flat0` n'a pas changé : les retouches sont conservées).
@@ -110,7 +124,7 @@ Le jeu ne compte plus en tours mais en **unités de temps**, comme Brogue et Cog
 
 ## 6 bis. Inventaire et équipement (13 novembre 2026)
 
-Première version, **en phase d'essai** : tous les objets sont donnés au départ, non équipés, pour pouvoir tout essayer.
+Version d'essai : tous les objets sont donnés au départ, non équipés sauf la foreuse, pour pouvoir tout essayer (choix confirmé le 13 novembre 2026 pour la phase d'équilibrage).
 
 - **Emplacements** : 1 arme, 1 armure, 3 accessoires. Le sac n'a pas de limite pour l'instant.
 - **Ouverture** : bouton « INVENTAIRE » à côté de « MARCHE / COURSE », ou touche **I**. L'inventaire est une **fenêtre plein écran, comme le Tile editor** (le panneau dans la colonne, essayé d'abord, a été abandonné le jour même). Le jeu ne reçoit plus les touches tant qu'elle est ouverte ; le temps ne passe pas.
@@ -126,19 +140,37 @@ Première version, **en phase d'essai** : tous les objets sont donnés au dépar
 
 | Objet | Type | Effets |
 |---|---|---|
-| Foret diamant | arme | DEG +4, PRE +10, coup rapide (75) |
-| Marteau-pilon | arme | DEG +10, PRE −10, coup lent (150) |
+| Foreuse | arme | arme de départ, sans modificateur : DEG 10, coup 100 |
+| Foret diamant | arme | DEG −2, PRE +15, coup rapide (60) |
+| Marteau-pilon | arme | DEG +15, PRE −10, coup lent (150) |
+| Scie circulaire | arme | DEG +3, CRIT +15 % |
+| Lance thermique | arme | DEG +7, ESQ −10 |
 | Châssis renforcé | armure | Vie max +30, VIT −1 |
 | Coque furtive | armure | ESQ +5, DIS −2 (portée de discrétion) |
+| Châssis allégé | armure | VIT +1, ESQ +10, Vie max −15 |
+| Coque isolante | armure | poison et glu durent deux fois moins, Vie max +10 |
 | Servomoteur | accessoire | VIT +2 |
 | Téléobjectif | accessoire | EYE +3 |
 | Viseur laser | accessoire | CRIT +10 % |
 | Condensateur | accessoire | POW +1 |
 | Gyroscope | accessoire | ESQ +10 |
-| Réparobots (×2 au départ) | consommable | Vie +50 |
-| Batterie (×2 au départ) | consommable | Énergie +50 |
+| Stabilisateur | accessoire | PRE +10 |
+| Accumulateur | accessoire | Énergie max +40 |
+| Réparobots (×2) | consommable | Vie +50 |
+| Batterie (×2) | consommable | Énergie +50 |
+| Purge (×2) | consommable | supprime poison et glu |
+| Fumigène (×2) | consommable | les ennemis perdent la trace et ne voient plus la foreuse pendant 5 battements |
+| Charge sismique (×2) | consommable | 20 dégâts à tous les ennemis à 2 cases ou moins ; bruyante (comme un forage) |
 
-Ces valeurs sont des valeurs d'essai, **pas encore équilibrées** : rien n'étant équipé au départ, les mesures de `mesures.md` restent valables. À refaire quand les objets se gagneront en jeu.
+Vingt et un objets depuis le 13 novembre 2026. Règles ajoutées ce jour-là :
+
+- **La foreuse est une arme** : c'est l'arme de départ, déjà équipée. Il y a **toujours une arme en main** : on ne peut ni la retirer ni la jeter, seulement la remplacer. **Toute arme fore la roche pareil** (choix de l'utilisateur) : l'arme ne change que le combat et le visuel.
+- **Le visuel de la foreuse suit l'équipement** : l'arme dessine la moitié avant (la pointe), l'armure la moitié arrière (le corps), dans les quatre orientations. Sans armure et avec la foreuse d'origine, c'est la tuile « Foreuse » du Tile editor, retouches comprises ; les autres combinaisons ne sont pas encore retouchables.
+- **Maximum de vie ou d'énergie modifié par un objet** : la jauge garde sa proportion (100/100 devient 130/130, 50/100 devient 65/130). S'équiper ne soigne pas, ne blesse pas, et retirer puis remettre ne rapporte rien.
+- **Statistiques dans la fenêtre** : sous la fiche, les onze valeurs actuelles ; pour l'objet choisi, la valeur qu'aurait chaque stat après Entrée s'affiche à côté (« DEG 10 → 25 »), en accent si elle y gagne, en rouge si elle y perd.
+- Dessins ASCII agrandis (30 px).
+
+Premier équilibrage mesuré le 13 novembre 2026 (duels simulés, `outils/simul.py combat`, résultats dans `mesures.md`) : les quatre armes spéciales valent à peu près autant, chacune nettement mieux que la foreuse nue ; les armures et accessoires de combat apportent un gain modéré. Rien n'étant équipé au départ, les mesures de détection et de fuite restent valables.
 
 Reste à faire : faire **trouver** les objets (au sol, lâchés par les ennemis, fabrication plus tard) et retirer le sac de départ ; attaques spéciales (plus tard) ; décider si équiper ou utiliser prend du temps ; limite du sac.
 
@@ -149,6 +181,27 @@ Reste à faire : faire **trouver** les objets (au sol, lâchés par les ennemis,
 | Insectoïde | 6 | 10 | 3 | 60 | 30 | 5 % | 21 |
 | Crabos | 5 | 25 | 5 | 70 | 15 | 5 % | 15 |
 | Cafar | 5 | 10 | 5 | 60 | 0 | 5 % | 12 (bandes de 2 à 4 : tirage parmi 2, 3, 4, 4 — 2 à 5 avant le 13 novembre 2026) |
+| Crachin | 4 | 12 | 4 | 65 | 10 | 0 | 4 |
+| Vipérin | 6 | 12 | 3 | 70 | 25 | 5 % | 4 |
+| Gluar | 3 | 30 | 6 | 65 | 0 | 0 | 3 |
+| Siphon | 7 | 8 | 2 | 70 | 35 | 0 | 3 |
+| Tapi | 4 | 18 | 6 | 85 | 5 | 5 % | 4 |
+| Taupar | 3 | 35 | 7 | 70 | 5 | 5 % | 2 |
+| Mastok | 3 | 60 | 14 | 60 | 0 | 10 % | 1 |
+
+**Dix espèces depuis le 13 novembre 2026.** Les sept nouvelles ont chacune un rôle :
+
+| Espèce | Rôle | Particularité |
+|---|---|---|
+| Crachin | tireur | crache de l'acide jusqu'à **5 cases** tant qu'il voit la foreuse ; serré à 2 cases ou moins, il recule une fois sur deux au lieu de tirer |
+| Vipérin | empoisonneur | sa morsure pose un **poison** : 2 points de vie par battement pendant 5 battements (se renouvelle, ne se cumule pas) |
+| Gluar | entrave | sa **glu** double la durée des pas pendant 4 battements : gênant pour fuir, pas pour se battre |
+| Siphon | harceleur | chaque piqûre **vole 15 d'énergie** ; rapide, difficile à toucher, très fragile |
+| Tapi | embusqué | caché dans les **herbes hautes**, invisible et absent de toutes les listes ; frappe **par surprise** (touche toujours, critique) dès que la foreuse est à son contact, puis se bat normalement. Si la foreuse bute dessus avant, c'est elle qui a la surprise |
+| Taupar | creuseur | en chasse, il vient **en ligne droite en perçant la roche** (une paroi = un battement) ; les éclats et joyaux de la paroi tombent comme pour la foreuse |
+| Mastok | colosse | lent, 60 PV, 14 de dégâts : à éviter ou à fuir sans équipement |
+
+Effets durables sur la foreuse : affichés sous les jauges (« Poison 4 · Englué 2 »), décomptés à chaque battement. La Coque isolante divise leur durée par deux, la Purge les supprime.
 
 La statistique **DÉT (détection)** par espèce a été supprimée le 13 novembre 2026 : toutes les espèces partagent désormais la portée de discrétion de la foreuse (ci-dessous).
 

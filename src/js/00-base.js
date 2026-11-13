@@ -1,6 +1,9 @@
-const W=96,H=64,NSITES=5,S=32;
+let W=96,H=64;const NSITES=5,S=32;
+// Taille de la carte : réglage « Taille » de Génération, de 1 à 5 ; 4 = la taille d'origine (96 × 64)
+const SIZES=[null,[32,22],[48,32],[72,48],[96,64],[144,96]];
+function setSize(n){const s=SIZES[n]||SIZES[4];W=s[0];H=s[1];F=W/96;}
 // Échelle de génération : 1 pour une planète de 96 × 64 (taille actuelle) ; les tailles de relief, lacs et distances suivent
-const F=W/96,SZ=(v,mn)=>Math.max(mn||2,Math.round(v*F));
+let F=W/96;const SZ=(v,mn)=>Math.max(mn||2,Math.round(v*F));
 const GROUND=0,ROCK=1,MOUNT=2,LIQ=3,GRASS=4,FLAT=5,DEEP=6,CHASM=7,BRIDGE=8,RUBBLE=9,LOW=10,SHIP=11,DECK=12;
 // FLAT = herbes basses (13 novembre 2026 : les herbes couchées et les herbes basses n'en font plus qu'une).
 // LOW n'est plus produit ; il ne sert qu'à convertir une partie commencée avant ce changement.
