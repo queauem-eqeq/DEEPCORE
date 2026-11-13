@@ -103,7 +103,18 @@ function ensureChasmOv(){if(!G)return;const key=(G.seed||'')+'|'+PAL['3']+'|'+G.
     if(dd<NT){const f=(NT-dd)/(NT+1);set(i,base.map(v=>Math.round(v*f)));}}}
   x.putImageData(img,0,0);c._g=G;CHASM_OV=c;CHASM_KEY=key;}
 function hexRgb3(h){const n=parseInt(h.slice(1),16);return [(n>>16)&255,(n>>8)&255,n&255];}
+/* Sonar d'arrivée (13 novembre 2026) : en arrivant sur un niveau, la foreuse émet une onde circulaire qui balaie toute la carte et
+   détecte les gisements (éclats de métal et Matière). G.sonar : 1 = à émettre, 2 = émis. Les gisements détectés s'affichent sur la carte
+   et la mini-carte même là où la foreuse n'a rien vu, au fur et à mesure que l'onde les atteint. */
+const SONAR_V=38;                                       // cases par seconde
+function sonarStart(){G.sonar=2;G.sonX=G.px;G.sonY=G.py;const r=Math.hypot(Math.max(G.px,W-G.px),Math.max(G.py,H-G.py))+2;
+  addFx({kind:'sonar',x:G.px,y:G.py,r,dur:reduced?1:r/SONAR_V*1000});SFX.analyse();
+  const l=Object.values(G.ore||{}),m=l.filter(oreMat).length,n=l.length-m;
+  sayMore(`Sonar : ${n} gisement${n>1?'s':''} de métal et ${m} de Matière détecté${l.length>1?'s':''}.`,'info');}
+function sonarR(){if(!G||G.sonar===1)return -1;const f=FX.find(f=>f.kind==='sonar');return f?fxP(f)*f.r:Infinity;}
+const sonarVu=(i,sr)=>Math.hypot(i%W-(G.sonX??G.px),((i/W)|0)-(G.sonY??G.py))<=sr;
 function render(){
+  if(G&&G.sonar===1&&started&&!INTRO&&!BOOM&&$('overlay').hidden&&$('introCv').hidden)sonarStart();
   if(!G||!TL.robot)return;ensureChasmOv();
   const vc=vw/S,vr=vh/S;
   const fx0=freeCam?camCX:G.px,fy0=freeCam?camCY:G.py;
@@ -133,6 +144,7 @@ function render(){
     const i=+k;if(tr.i==null||(fog&&!vis[i]))continue;put(TL[`tk${tr.i}${tr.o}${Math.max(0,age)}`],i%W,(i/W)|0,.6);}
   if(G.gems)for(const k in G.gems){if(G.gems[k]!=='visible')continue;const i=+k;if(fog&&!G.seen[i])continue;put(TL.gemDim,i%W,(i/W)|0,fog&&!vis[i]?.35:1);}
   if(G.ore)for(const k in G.ore){if(!oreSol(G.ore[k]))continue;const i=+k;if(fog&&!G.seen[i])continue;put(oreTile(G.ore[k],true),i%W,(i/W)|0,fog&&!vis[i]?.35:1);}
+  {const sr=sonarR();if(sr>0&&G.ore&&fog)for(const k in G.ore){const i=+k;if(G.seen[i]||!sonarVu(i,sr))continue;put(oreTile(G.ore[k],oreSol(G.ore[k])),i%W,(i/W)|0,1);}}   // gisements détectés par le sonar, même hors de vue
   if(G.items)for(const k in G.items){const i=+k;if(fog&&!G.seen[i])continue;put(TL.objet,i%W,(i/W)|0,fog&&!vis[i]?.35:1);}   // objets posés au sol
   if(G.splat)for(const [px,py,c,sz] of G.splat){const i=idx(Math.floor(px/S),Math.floor(py/S));if(fog&&!G.seen[i])continue;   // gouttes de sang au sol
     ctx.globalAlpha=fog&&!vis[i]?.3:1;ctx.fillStyle=c;ctx.fillRect(px-camX*S,py-camY*S,sz,sz);}
@@ -154,12 +166,18 @@ function render(){
     const pv=pvDe(BEASTS[b.sp]);if(b.hp<pv){const w=S-6;ctx.fillStyle='#000';ctx.fillRect(px+3,py-4,w,3);ctx.fillStyle='#ff3b3b';ctx.fillRect(px+3,py-4,Math.round(w*b.hp/pv),3);}}
   const wreck=BOOM||(G.over&&G.over.dead);   // foreuse détruite : plus dessinée
   if(!wreck){const [lx,ly]=lungeOff(f=>f.kind==='lunge'&&f.robot);ctx.globalAlpha=1;ctx.drawImage(TL['robot_'+(G.face||'u')],(G.px-camX)*S+lx,(G.py-camY)*S+ly,S,S);}
-  for(const f of FX)if(f.kind==='tir'){const p=fxP(f),x=f.x0+(f.x1-f.x0)*p,y=f.y0+(f.y1-f.y0)*p;ctx.globalAlpha=1;ctx.fillStyle=PAL['1'];ctx.fillRect(Math.round((x+.5-camX)*S)-3,Math.round((y+.5-camY)*S)-3,6,6);}   // projectile d'un tireur
   const ht=G.t[idx(G.px,G.py)];if(wreck){}else if(ht===LIQ)put(TL.wade,G.px,G.py,.95);else if(ht===DEEP)put(TL.wadeDeep,G.px,G.py,.95);
   for(const f of FX){if(f.kind!=='num')continue;const p=fxP(f),rise=reduced?0:p*14;
     ctx.globalAlpha=p<.6?1:1-(p-.6)/.4;ctx.font='bold 14px "JetBrains Mono", ui-monospace, monospace';ctx.textAlign='center';ctx.textBaseline='bottom';
     const tx=(f.x-camX)*S+S/2,ty=(f.y-camY)*S-2-rise-(f.stack||0)*14;ctx.fillStyle='#000';ctx.fillText(f.txt,tx+1,ty+1);ctx.fillStyle=f.col;ctx.fillText(f.txt,tx,ty);}
   ctx.globalAlpha=1;
+  // Dessins au pixel de tuile (u = 1/16 de case), calés sur la grille, opaques : le projectile d'un tireur et l'onde du sonar
+  {const u=S/16;ctx.fillStyle=PAL['1'];
+   for(const f of FX)if(f.kind==='tir'){const p=fxP(f),px=Math.round((f.x0+(f.x1-f.x0)*p+.5-camX)*16),py=Math.round((f.y0+(f.y1-f.y0)*p+.5-camY)*16);
+     ctx.fillRect((px-1)*u,(py-2)*u,2*u,4*u);ctx.fillRect((px-2)*u,(py-1)*u,4*u,2*u);}                    // petite boule de 4 pixels de large
+   for(const f of FX)if(f.kind==='sonar'){const R=fxP(f)*f.r*16,cx=Math.round((f.x+.5-camX)*16),cy=Math.round((f.y+.5-camY)*16),w=Math.ceil(vw/u),h=Math.ceil(vh/u),q=R*Math.SQRT1_2;
+     const dot=(px,py)=>{if(px>=0&&py>=0&&px<w&&py<h)ctx.fillRect(px*u,py*u,u,u);};
+     for(let d=-Math.ceil(q);d<=Math.ceil(q);d++){const e=Math.round(Math.sqrt(Math.max(0,R*R-d*d)));dot(cx+d,cy-e);dot(cx+d,cy+e);dot(cx-e,cy+d);dot(cx+e,cy+d);}}}
   if(BOOM)drawBoom();
   ctx.restore();
   smokeKick();

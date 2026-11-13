@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Mesure la détection et la fuite en rejouant des situations dans le vrai moteur du jeu.
 
-    python3 outils/simul.py [detection|fuite|combat|niveaux|tout]
+    python3 outils/simul.py [detection|fuite|combat|tout]
 
 Les simulations tournent dans la page, sur une carte entièrement dégagée (ou avec l'obstacle voulu),
 en appelant directement animalsAct() et beastsAct(). Elles ne touchent ni aux fichiers ni à l'artefact.
@@ -154,17 +154,6 @@ for (const k of Object.keys(ITEMS)) { const d = ITEMS[k]; if (d.conso || d.base)
 duel('Mastok avec Marteau-pilon', seul(I('mastok')), ['pilon']); duel('Mastok avec Foret diamant', seul(I('mastok')), ['foret']);
 duel('Mastok avec Scie circulaire', seul(I('mastok')), ['scie']); duel('Mastok avec Lance thermique', seul(I('mastok')), ['lance']);
 """
-# Mêmes duels, mais en descente : à chaque niveau les ennemis gagnent des points de vie et des dégâts (profK).
-CAS_NIVEAUX = """
-const I = k => BEASTS.findIndex(b => b.key === k);
-const kit = ['scie', 'chassis', 'gyro', 'viseur', 'stabil'];
-for (let n = 1; n <= NIV_MAX; n++) { const en = f => () => { G.mode = 'descente'; G.niv = n; f(); };
-  duel('N' + n + ' · 1 Crabos · nue', en(seul(I('crabos'))));
-  duel('N' + n + ' · 2 Crabos + 1 Vipérin · nue', en(() => { groupe(I('crabos'), 2)(); G.beasts.push(bete(I('viperin'), 38, 32)); }));
-  duel('N' + n + ' · 2 Crabos + 1 Vipérin · équipée', en(() => { groupe(I('crabos'), 2)(); G.beasts.push(bete(I('viperin'), 38, 32)); }), kit);
-  duel('N' + n + ' · 1 Mastok · équipée', en(seul(I('mastok'))), kit); }
-"""
-NIVEAUX = COMBAT.replace('/*CAS*/', CAS_NIVEAUX)
 COMBAT = COMBAT.replace('/*CAS*/', CAS_COMBAT)
 
 async def principal(quoi: str) -> int:
@@ -181,7 +170,7 @@ async def principal(quoi: str) -> int:
         # les scénarios supposent la carte d'origine (96 × 64) : la partie démarre maintenant sur une carte de taille 2
         await page.evaluate("setTaille(4);testGame();started=true")
 
-        for nom, code in (('DÉTECTION', DETECTION), ('FUITE', FUITE), ('COMBAT', COMBAT), ('NIVEAUX', NIVEAUX)):
+        for nom, code in (('DÉTECTION', DETECTION), ('FUITE', FUITE), ('COMBAT', COMBAT)):
             if quoi in ('tout', nom.lower().replace('é', 'e')):
                 print('\n===', nom, '===')
                 print(await page.evaluate(code))
@@ -192,7 +181,7 @@ async def principal(quoi: str) -> int:
 
 if __name__ == '__main__':
     choix = sys.argv[1] if len(sys.argv) > 1 else 'tout'
-    if choix not in ('detection', 'fuite', 'combat', 'niveaux', 'tout'):
+    if choix not in ('detection', 'fuite', 'combat', 'tout'):
         print(__doc__)
         sys.exit(2)
     sys.exit(asyncio.run(principal(choix)))

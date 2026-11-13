@@ -186,6 +186,7 @@ const BEHAV={insectoide:'Suit la foreuse à 2 ou 3 cases ; passe à l’attaque 
 function inspectHTML(){const {x,y}=HOV;if(x<0||y<0||x>=W||y>=H)return '';
   const i=idx(x,y),seen=!fog||G.seen[i],see=!fog||vis[i],d=Math.max(Math.abs(x-G.px),Math.abs(y-G.py)),dt=d?`${d} case${d>1?'s':''}`:'ici';
   const head=(ic,n,ex)=>`<div class="ih">${ic?`<img src="${ic}" alt="">`:''}<b>${n}</b><span>${ex||''}</span></div>`;
+  if(!seen&&G.ore&&G.ore[i]&&sonarVu(i,sonarR())){const o=G.ore[i];return `<div class="insp">${head('','Gisement détecté',dt)}<p><b>${oreMat(o)?'Matière':'Éclats de métal'}</b> · repéré par le sonar : ${oreMat(o)?`+${ORE_PV[oreLv(o)]} en réserve`:`+${ORE_PV[oreLv(o)]} PV`}. ${oreSol(o)?'Au sol.':'Pris dans la roche : il faudra forer.'}</p></div>`;}
   if(!seen)return `<div class="insp">${head('','Zone inexplorée',dt)}<p>Aucune donnée : la foreuse n’est jamais passée à portée de ce secteur.</p></div>`;
   const out=[],t=G.t[i],[tn,td]=TDESC[t]||['Terrain',''],border=x===0||y===0||x===W-1||y===H-1;
   const occ=see?occupant(x,y):null;

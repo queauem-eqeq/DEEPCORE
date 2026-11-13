@@ -28,6 +28,7 @@ function mini(){
   mctx.globalAlpha=1;
   if(G.gems){mctx.fillStyle=PAL['2'];for(const k in G.gems){const i=+k;if(fog&&!G.seen[i])continue;cell(i%W,(i/W)|0);}}
   for(const s of G.sites){if(fog&&!s.seen)continue;mctx.fillStyle=s.known?PAL['3']:PAL['2'];cell(s.x-1,s.y-1,3,3);}
+  {const sr=sonarR();if(sr>0&&G.ore){const d=Math.max(3,Math.round(k*1.4));for(const o in G.ore){const i=+o;if(!sonarVu(i,sr))continue;mctx.fillStyle=oreMat(G.ore[o])?PAL['1']:PAL['2'];mctx.fillRect(Math.round((i%W+.5)*k-d/2),Math.round((((i/W)|0)+.5)*k-d/2),d,d);}}}   // gisements détectés par le sonar
   // ennemis : points rouges (dans le champ de vision, ou partout sans brouillard)
   {const d=Math.max(2,Math.round(k*1.2));mctx.fillStyle='#ff3b3b';
    for(const e of [...(G.beasts||[]),...(G.animals||[])]){if(fog&&!vis[idx(e.x,e.y)])continue;mctx.fillRect(Math.round((e.x+.5)*k-d/2),Math.round((e.y+.5)*k-d/2),d,d);}}

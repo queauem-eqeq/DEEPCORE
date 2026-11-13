@@ -98,21 +98,28 @@ La partie est une **descente en 5 niveaux** (5 pour commencer ; on allongera). F
 
 ### Courbe de difficulté
 
-| Niveau | Monstres (× l'effectif du biome) | PV et dégâts des ennemis | Métal de réparation (gisements pour 1000 cases) | Matière (pour 1000 cases) |
-|---|---|---|---|---|
-| 1 | × 1 | × 1 | 16 | 3 |
-| 2 | × 1,3 | × 1,25 | 11 | 6 |
-| 3 | × 1,6 | × 1,5 | 7 | 10 |
-| 4 | × 2 | × 1,75 | 4 | 14 |
-| 5 | × 2,5 | × 2 | 2 | 18 |
+| Niveau | Monstres (× l'effectif du biome) | Gisements de métal de réparation (carte de taille 2) | Gisements de Matière (taille 2) |
+|---|---|---|---|
+| 1 | × 1,5 | 3 | 1 |
+| 2 | × 2,2 | 3 | 1 |
+| 3 | × 3 | 2 | 2 |
+| 4 | × 4 | 1 | 3 |
+| 5 | × 5 | 1 | 3 |
 
-Plus on descend : plus de monstres, plus coriaces, moins de quoi se réparer, plus de Matière. Les gisements se comptent par surface de carte et non plus en part de la montagne, sinon un biome très rocheux (Galeries) aurait été le mieux fourni en réparation.
+Plus on descend : plus de monstres, moins de quoi se réparer, plus de Matière.
 
-**Durcie le 13 novembre 2026** à la demande de l'utilisateur (« il faut que ce soit plus dur ») : la première courbe allait de × 0,7 à × 1,5 monstres, sans renforcement des ennemis, avec 26 à 4 gisements de métal. Le renforcement (+25 % de PV et de dégâts par niveau) s'applique en descente seulement ; les cartes d'essai et le Bestiaire gardent les valeurs de base. Mesures par niveau dans `mesures.md` : c'est l'équipement, tout donné au départ pour l'instant, qui rend le haut de la descente facile.
+- **Les PV et les dégâts des ennemis ne changent pas avec la profondeur** (décision de l'utilisateur, 13 novembre 2026) : la difficulté vient de leur **nombre**. Un renforcement de 25 % par niveau, essayé le même jour, a été retiré. Les fonctions `pvDe` / `dmgDe` restent le point d'entrée unique si l'on y revient.
+- Densités constatées : environ 8 créatures pour 1000 cases au niveau 1, 17 aux niveaux 2 et 3, 18 à 26 au niveau 5 (jusqu'à 350 créatures sur une carte de taille 5 ; le battement reste à 25 ms). La carte d'origine en comptait 11.
+- **Gisements rares mais gros** : quatre en tout sur une carte de taille 2, répartis entre métal et Matière selon le niveau ; les autres tailles en reçoivent en proportion de leur surface (16 en taille 4, 36 en taille 5). Chaque gisement vaut **30, 40 ou 50** (10, 15, 20 auparavant, pour des gisements beaucoup plus nombreux). Les cartes d'essai en ont 2 + 2 à la taille 2.
+- Historique de la courbe ce jour-là : × 0,7 à 1,5, puis × 1 à 2,5 avec ennemis renforcés, puis les valeurs ci-dessus. **Toujours posée à la main** : à régler en jouant.
 
 ### Matière
 
-Second métal, **couleur accent** (les éclats de réparation sont couleur bio), mêmes dessins et mêmes trois tailles. Pris dans la montagne, il tombe quand on brise la paroi (ou qu'un taupar la perce) ; passer dessus ajoute **10, 15 ou 20** à la réserve **Matière**, affichée sous les jauges. La Matière servira à construire de l'équipement (plus tard) ; elle ne sert encore à rien.
+Second métal, **couleur accent** (les éclats de réparation sont couleur bio), mêmes dessins et mêmes trois tailles. Pris dans la montagne, il tombe quand on brise la paroi (ou qu'un taupar la perce) ; passer dessus ajoute **30, 40 ou 50** à la réserve **Matière**, affichée sous les jauges. La Matière servira à construire de l'équipement (plus tard) ; elle ne sert encore à rien.
+
+### Sonar d'arrivée
+
+En arrivant sur un niveau (atterrissage compris, une fois l'intro passée), la foreuse émet une **onde circulaire** qui part d'elle et balaie toute la carte à 38 cases par seconde : un cercle d'un pixel de tuile, calé sur la grille, opaque, couleur accent. Elle **détecte tous les gisements** (métal et Matière) : chacun apparaît quand l'onde l'atteint, sur la carte comme sur la mini-carte (bio pour le métal, accent pour la Matière), même en zone jamais vue et même au cœur d'un massif. Le journal donne le compte ; survoler un gisement détecté dit ce qu'il contient et s'il faudra forer.
 
 ### Cartes d'essai
 
@@ -241,6 +248,7 @@ Vingt et un objets depuis le 13 novembre 2026. Règles ajoutées ce jour-là :
 - **Maximum de vie ou d'énergie modifié par un objet** : la jauge garde sa proportion (100/100 devient 130/130, 50/100 devient 65/130). S'équiper ne soigne pas, ne blesse pas, et retirer puis remettre ne rapporte rien.
 - **Statistiques dans la fenêtre** : sous la fiche, les onze valeurs actuelles ; pour l'objet choisi, la valeur qu'aurait chaque stat après Entrée s'affiche à côté (« DEG 10 → 25 »), en accent si elle y gagne, en rouge si elle y perd.
 - Dessins ASCII agrandis (30 px).
+- **Tir d'un ennemi** : le projectile est une petite boule de 4 pixels de tuile, calée sur la grille et opaque (13 novembre 2026).
 
 Premier équilibrage mesuré le 13 novembre 2026 (duels simulés, `outils/simul.py combat`, résultats dans `mesures.md`) : les quatre armes spéciales valent à peu près autant, chacune nettement mieux que la foreuse nue ; les armures et accessoires de combat apportent un gain modéré. Rien n'étant équipé au départ, les mesures de détection et de fuite restent valables.
 

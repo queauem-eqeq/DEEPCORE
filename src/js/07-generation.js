@@ -193,18 +193,19 @@ const BIOMES={
   galeries:{n:'Galeries',rang:3,d:'De la roche presque partout, des couloirs étroits : les bandes de cafars y circulent et les taupars percent les parois.',
     gen:{eau:2,montagne:46,gouffre:3,herbe:4,methode:'bruit'},vie:{cafar:3,taupar:2,viperin:2,gluar:1},teinte:[0,0,-10,-8,-10]},
   pierrier:{n:'Pierrier',rang:3,d:'Un désert de pierres, sec et à découvert : rien pour s’abriter des crachins.',
-    gen:{eau:1,montagne:14,gouffre:6,herbe:2,methode:'bruit'},vie:{crachin:3,siphon:2,crabos:1,mastok:1},teinte:[0,0,-4,4,-25]},
+    gen:{eau:1,montagne:14,gouffre:6,herbe:2,methode:'bruit'},vie:{crachin:3,siphon:3,crabos:2,mastok:1},teinte:[0,0,-4,4,-25]},
   failles:{n:'Failles',rang:4,d:'Un terrain éventré de gouffres, tout près du noyau : le territoire des mastoks et des vipérins.',
-    gen:{eau:4,montagne:22,gouffre:18,herbe:6,methode:'automate'},vie:{mastok:3,viperin:3,cafar:2,taupar:1},teinte:[6,12,-16,-6,0]}
+    gen:{eau:4,montagne:22,gouffre:18,herbe:6,methode:'automate'},vie:{mastok:2,viperin:3,cafar:2,taupar:1},teinte:[6,12,-16,-6,0]}
 };
-// Courbe de difficulté, par niveau : m = multiplicateur du nombre de monstres ; metal, mat = gisements d'éclats de métal (réparation) et de
-// Matière (construction) POUR 1000 CASES de carte, quelle que soit la part de montagne du biome.
-// Plus on descend : plus de monstres, moins de réparation, plus de Matière.
-// Durcie le 13 novembre 2026 (« il faut que ce soit plus dur ») : avant, m = 0,7 à 1,5 et métal = 26 à 4.
-const COURBE=[null,{m:1,metal:16,mat:3},{m:1.3,metal:11,mat:6},{m:1.6,metal:7,mat:10},{m:2,metal:4,mat:14},{m:2.5,metal:2,mat:18}];
-// Les ennemis eux-mêmes se renforcent avec la profondeur : +25 % de points de vie et de dégâts par niveau sous le premier (× 2 au niveau 5).
-// Tout le jeu lit les PV et les dégâts d'une espèce par pvDe / dmgDe ; hors descente (carte d'essai, mesures), le facteur vaut 1.
-const PROF_PAS=.25,profK=()=>G&&G.mode==='descente'?1+(G.niv-1)*PROF_PAS:1,pvDe=sp=>Math.round(sp.pv*profK()),dmgDe=sp=>Math.round(sp.dmg*profK());
+// Courbe de difficulté, par niveau : m = multiplicateur du nombre de monstres ; metal, mat = nombre de gisements d'éclats de métal (réparation)
+// et de Matière (construction) pour une carte de TAILLE 2 ; les autres tailles en reçoivent en proportion de leur surface.
+// Plus on descend : plus de monstres, moins de réparation, plus de Matière. Quatre gisements en tout par carte de taille 2, mais gros (ORE_PV).
+// Historique du 13 novembre 2026 : m valait 0,7 à 1,5, puis 1 à 2,5 avec des ennemis renforcés (+25 % de PV et de dégâts par niveau).
+// Décision de l'utilisateur le même jour : les PV et les dégâts des ennemis ne bougent pas avec la profondeur, c'est leur NOMBRE qui monte.
+const COURBE=[null,{m:1.5,metal:3,mat:1},{m:2.2,metal:3,mat:1},{m:3,metal:2,mat:2},{m:4,metal:1,mat:3},{m:5,metal:1,mat:3}];
+// pvDe / dmgDe : points de vie et dégâts d'une espèce tels que le jeu les lit. Aujourd'hui ce sont les valeurs du Bestiaire, sans modification ;
+// ces deux fonctions restent le seul endroit à changer si l'on veut un jour les faire varier.
+const pvDe=sp=>sp.pv,dmgDe=sp=>sp.dmg;
 const TAILLES_NIV=[2,3,4,5];           // tailles tirées au hasard à partir du niveau 2 (le niveau 1 est toujours de taille 2)
 // biomes des niveaux 2 à 5 : quatre des cinq autres, du moins au plus dangereux
 function tirageBiomes(){return Object.keys(BIOMES).filter(k=>k!=='plateau').sort(()=>Math.random()-.5).slice(0,NIV_MAX-1).sort((a,b)=>BIOMES[a].rang-BIOMES[b].rang||Math.random()-.5);}
@@ -217,7 +218,8 @@ function niveau(o){drilling=false;const g0=GEN,bio=o.test?null:BIOMES[o.biome],g
   G.w=W;G.h=H;G.mode=o.test?'test':'descente';G.niv=o.test?0:o.niv;G.biome=o.test?null:o.biome;G.suite=o.suite||null;
   const c=o.test?null:COURBE[o.niv];
   if(o.test)lifeCalc();else lifeCalc(bio.vie,c.m);
-  G.eff={};hideGems();if(o.test)hideOre();else hideOre(Math.round(c.metal*W*H/1000),Math.round(c.mat*W*H/1000));G.items={};G.tracks={};G.lastDir=null;G.beasts=[];G.blood={};G.fv=2;
+  {const a=W*H/(48*32),q=o.test?{metal:2,mat:2}:c;G.eff={};hideGems();hideOre(Math.max(1,Math.round(q.metal*a)),Math.max(1,Math.round(q.mat*a)));}
+  G.sonar=1;   // sonar d'arrivée à émettre dès que la carte est à l'écran (voir sonarStart, 10-rendu)G.items={};G.tracks={};G.lastDir=null;G.beasts=[];G.blood={};G.fv=2;
   if(garde)Object.assign(G,garde);else{G.inv=invTest();G.log=[];}
   G.st.matiere=G.st.matiere||0;
   spawnAnimals();spawnBeasts();lastAct='move';palBiome(bio?bio.teinte:null);buildTiles();turnStealth();computeFOV();}
@@ -287,15 +289,14 @@ const UPGRADES=[
 // Éclats de métal : ORE_PCT % des cases de montagne (hors rangée extérieure indestructible et joyau) en contiennent ; brisée, la roche les laisse
 // tomber au sol ; la foreuse qui passe dessus les ramasse et regagne des points de vie selon la densité.
 // G.ore[i] = 'roche1|2|3' (dans la paroi) ou 'sol1|2|3' (tombés) ; 1 petits, 2 moyens, 3 gros (ORE_MIX : part de chaque densité)
-const ORE_PCT=10,ORE_PV=[0,10,15,20],ORE_MIX=[0,.5,.3,.2],ORE_NOM=['','petits','moyens','gros'];
+const ORE_PCT=10,ORE_PV=[0,30,40,50],   // gisements rares mais gros depuis le 13 novembre 2026 (avant : 10, 15, 20)
+      ORE_MIX=[0,.5,.3,.2],ORE_NOM=['','petits','moyens','gros'];
 // Matière (13 novembre 2026) : second métal, couleur accent, même code précédé de « m » ('mroche2', 'msol2'). Ramassée, elle remplit la réserve G.st.matiere.
 const oreLv=v=>+String(v).slice(-1)||3,oreSol=v=>/^m?sol/.test(String(v)),oreMat=v=>String(v)[0]==='m',oreTile=(v,sol)=>{const l=oreLv(v);return TL[(oreMat(v)?'mat':'ore')+(sol?'Sol':'')+(l===3?'':l)];};
-// Sans argument (carte d'essai) : ORE_PCT % des cases de montagne en métal, 2 % en Matière.
-// Avec nMetal, nMat (descente) : ce nombre de gisements, tirés parmi les cases de montagne, dans la limite des places.
-function hideOre(nMetal,nMat){G.ore={};const lib=[];
+// nMetal gisements d'éclats de métal et nMat de Matière, tirés parmi les cases de montagne (dans la limite des places)
+function hideOre(nMetal=3,nMat=1){G.ore={};const lib=[];
   for(let i=0;i<W*H;i++){const x=i%W,y=(i/W)|0;if(G.t[i]===MOUNT&&x>0&&y>0&&x<W-1&&y<H-1&&!(G.gems&&G.gems[i]))lib.push(i);}
   for(let i=lib.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[lib[i],lib[j]]=[lib[j],lib[i]];}
-  if(nMetal==null){nMetal=Math.round(lib.length*ORE_PCT/100);nMat=Math.round(lib.length*.02);}
   lib.slice(0,nMetal+nMat).forEach((i,k)=>{const r=Math.random();G.ore[i]=(k<nMetal?'':'m')+'roche'+(r<ORE_MIX[1]?1:r<ORE_MIX[1]+ORE_MIX[2]?2:3);});}
 function hideGems(){G.gems={};
   // Toujours GEM_COUNT joyaux : d'abord au cœur des massifs (8 voisines en roche), sinon au plus profond disponible
