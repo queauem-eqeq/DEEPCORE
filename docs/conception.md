@@ -98,7 +98,7 @@ Roguelike au tour par tour dans une esthétique inspirée de Cogmind et de Brogu
 |---|---|---|---|---|---|---|---|
 | Insectoïde | 6 | 10 | 3 | 60 | 30 | 5 % | 21 |
 | Crabos | 5 | 25 | 5 | 70 | 15 | 5 % | 15 |
-| Cafar | 5 | 10 | 5 | 60 | 0 | 5 % | 12 (bandes de 2 à 5 : tirage parmi 2, 3, 4, 4, 5) |
+| Cafar | 5 | 10 | 5 | 60 | 0 | 5 % | 12 (bandes de 2 à 4 : tirage parmi 2, 3, 4, 4 — 2 à 5 avant le 13 novembre 2026) |
 
 La statistique **DÉT (détection)** par espèce a été supprimée le 13 novembre 2026 : toutes les espèces partagent désormais la portée de discrétion de la foreuse (ci-dessous).
 
