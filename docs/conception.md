@@ -71,14 +71,14 @@ Roguelike au tour par tour dans une esthétique inspirée de Cogmind et de Brogu
 | Stat | Valeur | Rôle |
 |---|---|---|
 | Vie | 100 | **pas de réparation automatique** |
-| Énergie | 100 | se recharge de POW par tour (5 par tour au départ) ; **chaque pas coûte 2** (10 novembre 2026), un coup de foreuse sur la roche 10 (frapper un animal : gratuit) |
+| Énergie | 100 | se recharge de POW par tour (**1 par tour** au départ depuis le 13 novembre 2026) ; **se déplacer ne coûte plus d'énergie** (13 novembre 2026 ; 2 par pas avant, constante `MOVE_COST`), un coup de foreuse sur la roche 10 (frapper un animal : gratuit) |
 | VIT | 5 | affichée, **sans effet** pour l'instant |
 | EYE | 10 | rayon de vision (5 avant le 10 novembre 2026) |
 | DEG | 10 | dégâts par coup de foreuse |
 | PRE | 80 | précision |
 | ESQ | 10 | esquive (modifiée par le terrain) |
 | CRIT | 5 % | chance de coup critique (×3 dégâts) ; coup par surprise toujours critique |
-| POW | 5 / tour | recharge d'énergie (6 avant le 9 novembre 2026, 3 le 9 novembre) |
+| POW | 1 / tour | recharge d'énergie (5 avant le 13 novembre 2026 ; 6 puis 3 le 9 novembre) |
 
 - Un coup de foreuse sur une **roche** coûte **10 d'énergie** (refusé sous 10) ; **attaquer un animal ne coûte plus d'énergie** (13 novembre 2026).
 - **Aperçu derrière les obstacles** (foreuse seulement, depuis le 6 novembre 2026) : dans le rayon EYE, la case juste derrière un obstacle à la vue (montagne, herbes hautes) est aperçue en **mode souvenir** — terrain affiché assombri comme une case explorée hors de vue, sans les créatures. Une seule case : un obstacle de 2 cases d'épaisseur cache toujours la suite. Les ennemis ne voient pas à travers les obstacles.

@@ -52,7 +52,7 @@ function drift(wait){if(!wait)return;
   G.px=nx;G.py=ny;G.lastDir=null;if(v===GRASS)G.t[idx(nx,ny)]=FLAT;
   SFX.drift();sayMore(`Eau profonde : le courant entraîne le robot vers ${['l’est','l’ouest','le sud','le nord','le sud-est','le nord-est','le sud-ouest','le nord-ouest'][k]}.`,'warn');
 }
-const MOVE_COST=2;   // énergie dépensée à chaque pas
+const MOVE_COST=0;   // énergie dépensée à chaque pas (0 depuis le 13 novembre 2026 : se déplacer est gratuit)
 const DEEP_MISS=.5;   // eau profonde : chance qu'un pas parte dans une autre direction, tirée au hasard
 function tryMove(dx,dy){
   if(G.over||drilling)return;lastAct='move';let nx=G.px+dx,ny=G.py+dy;if(nx<0||ny<0||nx>=W||ny>=H)return;
