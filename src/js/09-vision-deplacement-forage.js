@@ -41,7 +41,7 @@ function stealthCalc(base,act,flat,walls,run){           // flat : sur des herbe
   return r+(run?SPRINT_NOISE:0);}                      // la course s'entend : + 2, après tout le reste
 function stealthRange(act){
   let walls=0;for(const [dx,dy] of DIRS){const x=G.px+dx,y=G.py+dy;if(x<0||y<0||x>=W||y>=H)continue;const v=G.t[idx(x,y)];if(v===ROCK||v===MOUNT)walls++;}
-  return stealthCalc(STEALTH_BASE,act,G.t[idx(G.px,G.py)]===FLAT,walls,lastRun);}
+  return stealthCalc(Math.max(STEALTH_MIN,STEALTH_BASE+(G.st.dis||0)),act,G.t[idx(G.px,G.py)]===FLAT,walls,lastRun);}
 function turnStealth(){G.stealth=stealthRange(lastAct);}
 
 /* ---------- Horloge (13 novembre 2026) ----------
@@ -56,6 +56,7 @@ const SLOW={[LIQ]:1.5,[DEEP]:2};                        // terrains lents : eau 
 const SPRINT_COST=5,SPRINT_MULT=.5;                     // course : énergie par pas, et durée du pas multipliée
 const WAIT_REGEN=2;                                     // attendre sur place : recharge d'énergie multipliée
 const slowOf=(v,swim)=>swim?1:(SLOW[v]||1);             // les nageurs (crabos) ne sont pas ralentis par l'eau
+const coupDur=()=>Math.max(25,DUR.coup+(G.st.coup||0));   // une arme peut allonger ou raccourcir le coup (14-inventaire)
 const robotVit=()=>Math.max(1,G.st.vitesse||5);
 function stepDur(v,run){return DUR.pas*5/robotVit()*slowOf(v)*(run?SPRINT_MULT:1);}
 function pass(d,wait){G.time=(G.time||0)+d;G.debt=(G.debt||0)+d;
@@ -84,21 +85,21 @@ function tryMove(dx,dy){
   const bz=beastAt(nx,ny);
   if(bz){const sp=BEASTS[bz.sp];G.turn++;G.msg=null;const sur=!(bz.hunt>0),cr=sur||roll(G.st.crit??5);   // surprise : ne vous a pas repéré
     {const ch=hitChance(G.st.pre,sp.esq+terrMod(nx,ny));if(!sur&&!roll(ch)){bz.hunt=1;spot(bz);addFx({kind:'lunge',robot:true,dx,dy,dur:180});addFx({kind:'num',x:nx,y:ny,txt:'0',col:'#8aa9a2',dur:750});
-      say(`La foreuse rate le ${sp.n.toLowerCase()} (${ch} %).`);SFX.whoosh();pass(DUR.coup);computeFOV();render();if(G.over&&G.over.dead)dead();return;}}
+      say(`La foreuse rate le ${sp.n.toLowerCase()} (${ch} %).`);SFX.whoosh();pass(coupDur());computeFOV();render();if(G.over&&G.over.dead)dead();return;}}
     const dm=G.st.degats*(cr?CRIT_X:1);bz.hp-=dm;bz.hunt=1;spot(bz);addFx({kind:'num',x:nx,y:ny,txt:'-'+dm+(cr?'!':''),col:cr?PAL['1']:PAL['3'],dur:cr?1000:750});if(cr){addFx({kind:'shake',amp:6,dur:220});SFX.crit();}
     addFx({kind:'lunge',robot:true,dx,dy,dur:180});addFx({kind:'flash',beast:bz,dur:180});if(bz.hp<=0)addFx({kind:'shake',amp:4,dur:200});
     const tag=sur?'Coup par surprise ! ':cr?'Coup critique ! ':'';
     if(bz.hp<=0){G.beasts.splice(G.beasts.indexOf(bz),1);bleed(bz.x,bz.y);say(`${tag}La foreuse abat le ${sp.n.toLowerCase()}.`,'good');SFX.break();}
     else{say(`${tag}La foreuse percute le ${sp.n.toLowerCase()} : −${dm} PV (${bz.hp}/${sp.pv}).`,'warn');SFX.crack();}
-    pass(DUR.coup);computeFOV();render();if(G.over&&G.over.dead)dead();return;}
+    pass(coupDur());computeFOV();render();if(G.over&&G.over.dead)dead();return;}
   const an=animalAt(nx,ny);
   if(an){const sp=SPECIES[an.sp];G.turn++;G.msg=null;const sur=!an.aware,cr=sur||roll(G.st.crit??5);
     {const ch=hitChance(G.st.pre,sp.esq+terrMod(nx,ny));if(!sur&&!roll(ch)){an.aware=1;spot(an);addFx({kind:'lunge',robot:true,dx,dy,dur:180});addFx({kind:'num',x:nx,y:ny,txt:'0',col:'#8aa9a2',dur:750});
-      say(`La foreuse rate l’${sp.n.toLowerCase()} (${ch} %).`);SFX.whoosh();pass(DUR.coup);computeFOV();render();if(G.over&&G.over.dead)dead();return;}}
+      say(`La foreuse rate l’${sp.n.toLowerCase()} (${ch} %).`);SFX.whoosh();pass(coupDur());computeFOV();render();if(G.over&&G.over.dead)dead();return;}}
     const dm=G.st.degats*(cr?CRIT_X:1),tag=sur?'Coup par surprise ! ':cr?'Coup critique ! ':'';an.hp=(an.hp??sp.pv)-dm;addFx({kind:'num',x:nx,y:ny,txt:'-'+dm+(cr?'!':''),col:cr?PAL['1']:PAL['3'],dur:cr?1000:750});if(cr){addFx({kind:'shake',amp:6,dur:220});SFX.crit();}addFx({kind:'lunge',robot:true,dx,dy,dur:180});
     if(an.hp<=0){G.animals.splice(G.animals.indexOf(an),1);bleed(an.x,an.y);say(`${tag}La foreuse écrase l’${sp.n.toLowerCase()}.`,'warn');SFX.squish();}
     else{an.aware=1;spot(an);say(`${tag}La foreuse heurte l’${sp.n.toLowerCase()}.`);SFX.crack();}
-   pass(DUR.coup);computeFOV();render();if(G.over&&G.over.dead)dead();return;}
+   pass(coupDur());computeFOV();render();if(G.over&&G.over.dead)dead();return;}
   if(v===CHASM){say('Gouffre : passage impossible.');SFX.blocked();render();return;}
   if(v===SHIP){say('Coque du vaisseau : indestructible.');SFX.blocked();render();return;}
   if(v===ROCK||v===MOUNT){
@@ -133,6 +134,7 @@ function tryMove(dx,dy){
   {const oi=idx(G.px,G.py);if(G.ore&&G.ore[oi]&&oreSol(G.ore[oi])){const l=oreLv(G.ore[oi]);delete G.ore[oi];const av=G.st.vie;G.st.vie=Math.min(G.st.vieMax,G.st.vie+ORE_PV[l]);
     addFx({kind:'num',x:G.px,y:G.py,txt:'+'+(G.st.vie-av),col:PAL['2'],dur:750});   // affiché comme les dégâts, couleur des éclats
     sayMore(`Éclats de métal récupérés : +${G.st.vie-av} PV.`,'good');SFX.spot();}}
+  invPickup(true);
   {const gi=idx(G.px,G.py);if(G.gems&&G.gems[gi]==='visible'){delete G.gems[gi];computeFOV();render();SFX.analyse();chooseUpgrade();return;}}
   const s=siteAt(G.px,G.py);
   if(s){if(!s.known)SFX.analyse();s.known=true;say(`Site ${s.id} : profondeur ${s.depth} niveau${s.depth>1?'x':''}. [F] pour forer.`,'good');}

@@ -86,7 +86,7 @@ Roguelike au tour par tour dans une esthétique inspirée de Cogmind et de Brogu
 - **Aperçu derrière les obstacles** (foreuse seulement, depuis le 6 novembre 2026) : dans le rayon EYE, la case juste derrière un obstacle à la vue (montagne, herbes hautes) est aperçue en **mode souvenir** — terrain affiché assombri comme une case explorée hors de vue, sans les créatures. Une seule case : un obstacle de 2 cases d'épaisseur cache toujours la suite. Les ennemis ne voient pas à travers les obstacles.
 - Attendre un tour : Espace ou 5. **La recharge d'énergie y est doublée** (13 novembre 2026) : 2/t à POW 1, 2 × POW en général. C'est la façon de refaire le plein après avoir couru ou foré.
 - **Repos** (touche P, ou bouton « REPOS » du pavé, 13 novembre 2026) : enchaîne des attentes **jusqu'à l'énergie pleine**. Chaque battement est une attente ordinaire (recharge doublée, portée de discrétion ÷ 2), le journal n'en garde que le début et la fin. Le repos s'arrête net si une créature **entre dans le champ de vision**, si un ennemi déjà visible **repère** la foreuse, si elle est **touchée**, ou à la moindre touche ou clic du joueur. Il est refusé d'emblée si l'énergie est déjà pleine ou si un ennemi visible vous chasse déjà. Garde-fou : 400 battements au plus.
-- **Course** (touche R, ou bouton « Allure » sous l'énergie) : mode qu'on allume et qu'on éteint. Chaque pas dure moitié moins et coûte **5 d'énergie** ; sans assez d'énergie, la foreuse reprend la marche d'elle-même. **Le moteur s'entend : + 2 cases de portée de discrétion** (13 novembre 2026), appliquées après tous les autres modificateurs. Bruitage de moteur électrique au démarrage, à l'arrêt et à chaque pas couru.
+- **Course** (touche R, ou bouton « MARCHE / COURSE » sous l'énergie ; le mot « Allure » et l'indication « vitesse × » ont été retirés le 13 novembre 2026) : mode qu'on allume et qu'on éteint. Chaque pas dure moitié moins et coûte **5 d'énergie** ; sans assez d'énergie, la foreuse reprend la marche d'elle-même. **Le moteur s'entend : + 2 cases de portée de discrétion** (13 novembre 2026), appliquées après tous les autres modificateurs. Bruitage de moteur électrique au démarrage, à l'arrêt et à chaque pas couru.
 
 ## 5 bis. Horloge : le temps continu (13 novembre 2026)
 
@@ -107,6 +107,36 @@ Le jeu ne compte plus en tours mais en **unités de temps**, comme Brogue et Cog
 - Les animaux attaquent **une fois par battement au contact** ; leur vitesse ne règle que les déplacements (vitesse 5 = 1 case par battement), et l'eau les ralentit comme la foreuse, sauf les nageurs.
 - Animation : bond de l'attaquant, flash, chiffres de dégâts flottants (« -10 », « 0 » pour un coup raté, de part et d'autre), « +10 / +15 / +20 » en couleur bio au ramassage d'éclats de métal, tremblement d'écran quand le robot est touché ou qu'un ennemi meurt.
 - Un animal tué laisse une trace de sang.
+
+## 6 bis. Inventaire et équipement (13 novembre 2026)
+
+Première version, **en phase d'essai** : les neuf objets sont donnés au départ, non équipés, pour pouvoir tout essayer.
+
+- **Emplacements** : 1 arme, 1 armure, 3 accessoires. Le sac n'a pas de limite pour l'instant.
+- **Ouverture** : bouton « INVENTAIRE » à côté de « MARCHE / COURSE », ou touche **I**. Le panneau s'ouvre dans la colonne, sous le statut, et reste ouvert d'une partie à l'autre (`np-inv`).
+- **Liste** : une ligne par objet, précédée d'un signe (`/` arme, `[` armure, `=` accessoire). Un objet **équipé reste dans la liste**, en couleur monde, avec la mention « équipé ».
+- **Fiche** de l'objet choisi (un clic) : dessin **ASCII coloré** aux couleurs de la palette, description, effets (en accent s'ils sont favorables, en rouge sinon), boutons **Équiper / Retirer** (ou **Utiliser** pour un futur consommable) et **Jeter**. Double-clic sur une ligne = équiper ou retirer.
+- **Équiper** est gratuit et instantané. Une arme ou une armure remplace celle qui est portée ; un 4ᵉ accessoire est refusé tant qu'un emplacement n'est pas libéré.
+- **Effets** : l'objet ajoute ses modificateurs aux stats tant qu'il est porté ; les stats modifiées s'affichent en couleur dans « Statistiques ». Les bonus des joyaux s'additionnent.
+- **Jeter** pose l'objet au sol sous la foreuse (tuile « Objet au sol », retouchable au Tile editor). Repasser sur la case le ramasse ; sans bouger, bouton « Ramasser » dans le panneau. La fiche de survol nomme les objets posés.
+- **Durée du coup** : une arme peut allonger ou raccourcir le coup de foreuse (§ 5 bis) ; plancher à 25.
+- « Pas de blindage » (§ 11) tient toujours : aucune armure ne réduit les dégâts, elles jouent sur la vie max, l'esquive ou la discrétion.
+
+| Objet | Emplacement | Effets |
+|---|---|---|
+| Foret diamant | arme | DEG +4, PRE +10, coup rapide (75) |
+| Marteau-pilon | arme | DEG +10, PRE −10, coup lent (150) |
+| Châssis renforcé | armure | Vie max +30, VIT −1 |
+| Coque furtive | armure | ESQ +5, DIS −2 (portée de discrétion) |
+| Servomoteur | accessoire | VIT +2 |
+| Téléobjectif | accessoire | EYE +3 |
+| Viseur laser | accessoire | CRIT +10 % |
+| Condensateur | accessoire | POW +1 |
+| Gyroscope | accessoire | ESQ +10 |
+
+Ces valeurs sont des valeurs d'essai, **pas encore équilibrées** : rien n'étant équipé au départ, les mesures de `mesures.md` restent valables. À refaire quand les objets se gagneront en jeu.
+
+Reste à faire : faire **trouver** les objets (au sol, lâchés par les ennemis, fabrication plus tard) et retirer le sac de départ ; attaques spéciales (plus tard) ; décider si équiper prend du temps ; limite du sac ; pilotage de l'inventaire au clavier.
 
 ## 7. Bestiaire
 
@@ -179,7 +209,7 @@ La statistique **DÉT (détection)** par espèce a été supprimée le 13 novemb
 - Export / import texte : essayé puis retiré le 6 novembre 2026 (« on verra plus tard »).
 
 ### Touches
-ZQSD / flèches / pavé numérique : déplacer · A E W C : diagonales · Souris : survol = inspection, clic = y aller · X : inspection au clavier · R : courir / marcher · F : forer · Espace / 5 : attendre · P : repos jusqu’à l’énergie pleine · V : portée de discrétion · B : brouillard de guerre · ! : son · M : mode carte (déplacements = défilement, Maj = plus vite, Échap ou M pour revenir).
+ZQSD / flèches / pavé numérique : déplacer · A E W C : diagonales · Souris : survol = inspection, clic = y aller · X : inspection au clavier · R : courir / marcher · I : inventaire · F : forer · Espace / 5 : attendre · P : repos jusqu’à l’énergie pleine · V : portée de discrétion · B : brouillard de guerre · ! : son · M : mode carte (déplacements = défilement, Maj = plus vite, Échap ou M pour revenir).
 
 ## 10. Sauvegarde des réglages
 
@@ -231,7 +261,7 @@ Chiffres à l'appui dans `mesures.md`, points de comparaison avec Brogue dans `b
 - Niveau 2 (sous-sol) : à concevoir (salles par accrétion ou caverne par automate cellulaire).
 - Donner un effet à la profondeur des sites (risque / récompense).
 - Récompenser les combats (fragments, énergie).
-- **Inventaire et équipement** (demandé le 13 novembre 2026) : sous-menu avec 1 emplacement arme, 1 armure, 3 accessoires ; l'équipement modifie les stats, donne des attaques spéciales et change la durée de certaines actions. L'horloge (§ 5 bis) est prête pour ça.
+- **Inventaire et équipement** : première version faite le 13 novembre 2026 (§ 6 bis). Suite : provenance des objets (sol, ennemis, fabrication), attaques spéciales, équilibrage.
 - Autres terrains lents possibles (gravats, herbes hautes) ; rendre la course bruyante ; donner des durées différentes aux actions (table `DUR`).
 - Source de soin limitée (kits, forage qui répare).
 - Exploration automatique façon Brogue (vers la zone inexplorée la plus proche), sur le même moteur de trajet.

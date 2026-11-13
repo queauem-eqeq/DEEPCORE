@@ -31,8 +31,8 @@ body{margin:0;background:var(--black);color:var(--fg);font:13px/1.45 var(--mono)
 .eye{display:flex;align-items:center;gap:8px}.eyeic{color:var(--c3);flex:none}
 .stats2{display:grid;grid-template-columns:repeat(3,1fr);gap:6px 12px}
 .stats2 .r{display:flex;gap:8px;justify-content:flex-start;align-items:baseline}
-.stats2 .r span:first-child{font-size:11px;letter-spacing:.12em;min-width:3.2em}
-.stats2 .r span:last-child{font-variant-numeric:tabular-nums}
+.stats2 .r>span:first-child{font-size:11px;letter-spacing:.12em;min-width:3.2em}
+.stats2 .r>span:last-child{font-variant-numeric:tabular-nums;white-space:nowrap}
 .r{display:flex;justify-content:space-between;gap:8px;font-variant-numeric:tabular-nums}
 .r span:first-child{color:var(--dim)}
 .meter{display:grid;gap:3px}
@@ -217,3 +217,28 @@ kbd{font-family:var(--mono);color:var(--fg);border:1px solid var(--line);padding
 /* Allure : bouton marche / course */
 .pace{font:inherit;font-size:12px;letter-spacing:.08em;padding:2px 10px;background:transparent;color:var(--dim);border:1px solid currentColor;cursor:pointer}
 .pace.on{color:var(--c3);background:color-mix(in srgb,var(--c3) 14%,transparent)}
+
+/* Inventaire (14-inventaire.js) : liste des objets portés, fiche de l'objet choisi avec son dessin ASCII coloré */
+.btnrow{display:flex;gap:8px}
+.btnrow .pace{flex:1 1 0;min-width:0}
+.inv{display:grid;gap:10px;font-size:12px}
+.inv p{margin:0;color:var(--dim);line-height:1.5}
+.islots{display:flex;justify-content:space-between;gap:6px;font-size:11px;color:var(--dim)}
+.islots b{font-weight:400;color:var(--fg);font-variant-numeric:tabular-nums}
+.ilist{display:grid}
+.ilist .it{display:grid;grid-template-columns:1.1em minmax(0,1fr) auto;gap:6px;align-items:baseline;text-align:left;padding:2px 6px;border:0;border-left:2px solid transparent;
+  font-size:12px;letter-spacing:0;text-transform:none;color:var(--fg)}
+.ilist .it i{font-style:normal;color:var(--dim)}
+.ilist .it span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ilist .it em{font-style:normal;font-size:10px;letter-spacing:.14em;text-transform:uppercase}
+.ilist .it.eq,.ilist .it.eq i{color:var(--c3)}                     /* équipé : reste dans la liste, en couleur monde */
+.ilist .it.sel{border-left-color:currentColor;background:rgba(255,255,255,.07)}
+.idet{display:grid;gap:6px;border:1px solid var(--line);padding:8px}
+.iart{margin:0 auto 2px;font:13px/1.15 var(--mono);color:var(--fg);white-space:pre}
+.inm{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.inm b{font-weight:700;color:var(--fg)}
+.inm span{color:var(--dim);font-size:11px;white-space:nowrap}
+.ibtns{display:flex;gap:8px;margin-top:2px}
+.ibtns .pace{flex:1 1 0;text-transform:uppercase}
+.isol{display:flex;align-items:center;justify-content:space-between;gap:8px;color:var(--dim)}
+.isol .pace{text-transform:uppercase;white-space:nowrap}

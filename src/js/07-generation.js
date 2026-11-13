@@ -173,7 +173,7 @@ function genPlanet(){
     return;
   }
 }
-function newGame(){drilling=false;genPlanet();hideGems();hideOre();G.log=[];G.tracks={};G.lastDir=null;G.beasts=[];G.blood={};G.fv=2;spawnAnimals();spawnBeasts();lastAct='move';turnStealth();computeFOV();say(`Atterrissage confirmé. ${G.sites.length} sites de forage signalés par l’orbiteur. La foreuse est dans la soute ; la porte est à l’arrière.`,'info');}
+function newGame(){drilling=false;genPlanet();hideGems();hideOre();G.inv=invTest();G.items={};G.log=[];G.tracks={};G.lastDir=null;G.beasts=[];G.blood={};G.fv=2;spawnAnimals();spawnBeasts();lastAct='move';turnStealth();computeFOV();say(`Atterrissage confirmé. ${G.sites.length} sites de forage signalés par l’orbiteur. La foreuse est dans la soute ; la porte est à l’arrière.`,'info');}
 
 /* ---------- Bestiaire : édition des statistiques ---------- */
 const BFIELDS=[['v','Vitesse',1,10],['pv','PV',1,200],['dmg','Dégâts',0,100],['pre','Précision',0,100],['esq','Esquive',0,100],['crit','Crit %',0,100]];
