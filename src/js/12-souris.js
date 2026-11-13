@@ -63,6 +63,38 @@ function travelStep(){const T=TRAV;if(!T)return;if(busy()){stopTravel();return;}
   const why=travelEvent(T);
   if(why||T.i>=T.path.length||busy()){stopTravel(why);return;}
   T.tm=setTimeout(travelStep,reduced?30:90);}
+/* ---------- Repos (touche P) : attendre jusqu'à l'énergie pleine ----------
+   Chaque battement est une attente normale (recharge doublée, portée de discrétion ÷ 2). Le repos
+   s'arrête dès que l'énergie est pleine, qu'une créature entre dans le champ de vision, qu'un ennemi
+   visible vous repère, que la foreuse est touchée, ou au moindre geste du joueur. */
+let REST=null;
+const REST_MAX=400;                                   // garde-fou : jamais plus de 400 battements d'affilée
+const visibles=()=>{const s=new Set();for(const e of [...(G.beasts||[]),...(G.animals||[])])if(vis[idx(e.x,e.y)])s.add(e);return s;};
+function restEvent(T){
+  if(G.st.vie<T.vie)return 'la foreuse est attaquée';
+  for(const b of G.beasts||[])if(vis[idx(b.x,b.y)]&&!T.seen.has(b))return `${BEASTS[b.sp].n.toLowerCase()} en vue`;
+  for(const a of G.animals||[])if(vis[idx(a.x,a.y)]&&!T.seen.has(a))return `${SPECIES[a.sp].n.toLowerCase()} en vue`;
+  for(const b of G.beasts||[])if(b.hunt>0&&vis[idx(b.x,b.y)])return `${BEASTS[b.sp].n.toLowerCase()} vous a repéré`;
+  for(const a of G.animals||[])if(a.aware&&vis[idx(a.x,a.y)])return `${SPECIES[a.sp].n.toLowerCase()} vous a repéré`;
+  return null;}
+function startRest(){
+  if(busy()||TRAV)return;
+  if(G.st.energie>=G.st.energieMax){say('Énergie déjà au maximum : repos inutile.');SFX.blocked();render();return;}
+  const T={seen:visibles(),vie:G.st.vie,n:0,tm:0},why=restEvent(T);
+  if(why){say(`Repos impossible : ${why}.`,'warn');SFX.blocked();render();return;}
+  REST=T;say('La foreuse se met au repos.');restStep();}
+function stopRest(m,c){if(!REST)return;clearTimeout(REST.tm);REST=null;if(m)sayMore(m,c||'warn');render();}
+function restStep(){const T=REST;if(!T)return;if(busy()){stopRest();return;}
+  const turn=G.turn;waitTurn();
+  if(REST!==T)return;
+  if(G.turn===turn){stopRest();return;}
+  T.n++;
+  const why=restEvent(T);
+  if(why){stopRest(`Repos interrompu (${T.n} tour${T.n>1?'s':''}) : ${why}.`);return;}
+  if(G.st.energie>=G.st.energieMax){stopRest(`Repos terminé : énergie au maximum, en ${T.n} tour${T.n>1?'s':''}.`,'good');SFX.spot();return;}
+  if(T.n>=REST_MAX){stopRest('Repos interrompu : trop long.');return;}
+  T.tm=setTimeout(restStep,reduced?0:45);}
+
 // Mode inspection au clavier (touche X)
 function setInspect(on){INSPECT=on;$('inspTag').hidden=!on;if(on){if(freeCam)setFreeCam(false);HOV={x:G.px,y:G.py};}else HOV=null;render();}
 function moveInspect(dx,dy){const vc=Math.floor(vw/S),vr=Math.floor(vh/S);
@@ -72,7 +104,7 @@ cv.addEventListener('pointerdown',ev=>{lastPT=ev.pointerType||'mouse';});
 cv.addEventListener('pointermove',ev=>{if(ev.pointerType==='touch'||!G)return;const c=cellAt(ev);if(c.x<0||c.y<0||c.x>=W||c.y>=H)return;
   if(!HOV||HOV.x!==c.x||HOV.y!==c.y){HOV=c;render();}});
 cv.addEventListener('pointerleave',()=>{if(INSPECT||lastPT==='touch')return;if(HOV){HOV=null;render();}});
-cv.addEventListener('click',ev=>{if(busy())return;if(TRAV){stopTravel('Trajet interrompu.');return;}
+cv.addEventListener('click',ev=>{if(busy())return;if(REST){stopRest('Repos interrompu.');return;}if(TRAV){stopTravel('Trajet interrompu.');return;}
   const c=cellAt(ev);if(c.x<0||c.y<0||c.x>=W||c.y>=H)return;
   // écran tactile : un premier appui inspecte et montre le trajet, un second sur la même case lance le déplacement
   if(lastPT==='touch'&&(!HOV||HOV.x!==c.x||HOV.y!==c.y)){HOV=c;render();return;}

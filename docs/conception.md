@@ -85,6 +85,7 @@ Roguelike au tour par tour dans une esthétique inspirée de Cogmind et de Brogu
 - Un coup de foreuse sur une **roche** coûte **10 d'énergie** (refusé sous 10) ; **attaquer un animal ne coûte plus d'énergie** (13 novembre 2026).
 - **Aperçu derrière les obstacles** (foreuse seulement, depuis le 6 novembre 2026) : dans le rayon EYE, la case juste derrière un obstacle à la vue (montagne, herbes hautes) est aperçue en **mode souvenir** — terrain affiché assombri comme une case explorée hors de vue, sans les créatures. Une seule case : un obstacle de 2 cases d'épaisseur cache toujours la suite. Les ennemis ne voient pas à travers les obstacles.
 - Attendre un tour : Espace ou 5. **La recharge d'énergie y est doublée** (13 novembre 2026) : 2/t à POW 1, 2 × POW en général. C'est la façon de refaire le plein après avoir couru ou foré.
+- **Repos** (touche P, ou bouton « REPOS » du pavé, 13 novembre 2026) : enchaîne des attentes **jusqu'à l'énergie pleine**. Chaque battement est une attente ordinaire (recharge doublée, portée de discrétion ÷ 2), le journal n'en garde que le début et la fin. Le repos s'arrête net si une créature **entre dans le champ de vision**, si un ennemi déjà visible **repère** la foreuse, si elle est **touchée**, ou à la moindre touche ou clic du joueur. Il est refusé d'emblée si l'énergie est déjà pleine ou si un ennemi visible vous chasse déjà. Garde-fou : 400 battements au plus.
 - **Course** (touche R, ou bouton « Allure » sous l'énergie) : mode qu'on allume et qu'on éteint. Chaque pas dure moitié moins et coûte **5 d'énergie** ; sans assez d'énergie, la foreuse reprend la marche d'elle-même. **Le moteur s'entend : + 2 cases de portée de discrétion** (13 novembre 2026), appliquées après tous les autres modificateurs. Bruitage de moteur électrique au démarrage, à l'arrêt et à chaque pas couru.
 
 ## 5 bis. Horloge : le temps continu (13 novembre 2026)
@@ -178,7 +179,7 @@ La statistique **DÉT (détection)** par espèce a été supprimée le 13 novemb
 - Export / import texte : essayé puis retiré le 6 novembre 2026 (« on verra plus tard »).
 
 ### Touches
-ZQSD / flèches / pavé numérique : déplacer · A E W C : diagonales · Souris : survol = inspection, clic = y aller · X : inspection au clavier · R : courir / marcher · F : forer · Espace / 5 : attendre · V : portée de discrétion · B : brouillard de guerre · ! : son · M : mode carte (déplacements = défilement, Maj = plus vite, Échap ou M pour revenir).
+ZQSD / flèches / pavé numérique : déplacer · A E W C : diagonales · Souris : survol = inspection, clic = y aller · X : inspection au clavier · R : courir / marcher · F : forer · Espace / 5 : attendre · P : repos jusqu’à l’énergie pleine · V : portée de discrétion · B : brouillard de guerre · ! : son · M : mode carte (déplacements = défilement, Maj = plus vite, Échap ou M pour revenir).
 
 ## 10. Sauvegarde des réglages
 
