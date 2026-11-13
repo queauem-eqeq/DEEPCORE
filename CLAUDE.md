@@ -41,8 +41,18 @@ Le jeu est une page web en plusieurs fichiers (`src/`), **sans étape d'assembla
    `claude/noyau-profond-conception.md` (copie de `docs/conception.md`) quand ce document change.
 
 ## Publication sur GitHub Pages
-Le workflow `.github/workflows/pages.yml` publie `src/` sur https://queauem-eqeq.github.io/DEEPCORE/ à chaque fusion dans `main`.
-Pas de réglages d'artefact (base `db`) là-bas : les réglages du joueur restent dans le navigateur (`localStorage`).
+Le jeu est en ligne sur https://queauem-eqeq.github.io/DEEPCORE/ à chaque fusion dans `main`.
+
+Publication **automatique par la branche** (Settings → Pages → Source : `main`, racine) : GitHub met tout le dépôt en
+ligne, sans workflow. Le jeu vivant dans `src/`, il est servi à `/DEEPCORE/src/index.html` ; l'`index.html` à la racine
+du dépôt y redirige, pour que l'adresse courte marche. `.nojekyll` évite que GitHub fasse passer les fichiers par Jekyll.
+
+Le workflow `.github/workflows/pages.yml`, qui publiait `src/` à la racine du site, a été **supprimé le 13 novembre 2026** :
+il faisait doublon avec la publication automatique, les deux écrivaient sur le même site et la dernière arrivée écrasait
+l'autre (c'est ainsi que le README s'affichait à la place du jeu). Choix de l'utilisateur : garder l'automatique, le plus
+simple. Ne pas le réintroduire sans basculer en même temps la source sur GitHub Actions.
+
+Pas de réglages d'artefact (base `db`) sur Pages : les réglages du joueur restent dans le navigateur (`localStorage`).
 
 ## Revenir à une version précédente
 `git branch -r | grep version` liste les versions publiées. Pour revenir : `git checkout origin/claude/version-… -- src/`,

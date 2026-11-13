@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<!-- Redirection vers le jeu.
+     GitHub Pages peut publier ce dépôt de deux façons : par le workflow .github/workflows/pages.yml,
+     qui met le dossier src/ à la racine du site, ou par la construction automatique à partir de la
+     branche main, qui publie le dépôt entier et affiche alors le README. Cette page couvre le second
+     cas : elle renvoie vers src/index.html. Elle ne sert à rien dans le premier, et ne gêne pas. -->
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Noyau Profond</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="refresh" content="0; url=src/index.html">
+<link rel="canonical" href="src/index.html">
+<style>
+  body{background:#07080a;color:#ffa53a;font-family:ui-monospace,Menlo,Consolas,monospace;
+       display:flex;align-items:center;justify-content:center;height:100vh;margin:0;text-align:center}
+  a{color:#8fe6cf}
+</style>
+</head>
+<body>
+<p>Noyau Profond se charge…<br><a href="src/index.html">Entrer dans la soute</a></p>
+<script>location.replace('src/index.html');</script>
+</body>
+</html>
