@@ -119,7 +119,8 @@ function applySaved(d){
   const num=v=>typeof v==='number'&&isFinite(v);
   if(d.bestiaire)BEST_LIST().forEach(e=>{const b=d.bestiaire[e.key];if(b)BFIELDS.forEach(([f])=>{if(num(b[f]))e.o[f]=b[f];});});saveBest();
   if(num(d.discretion))setStealthBase(d.discretion);
-  if(d.life)LIFE_LBL.forEach(([k])=>{if(num(d.life[k]))setLife(k,d.life[k]);});
+  if(d.intensite)LIFE_LBL.forEach(([k])=>{if(num(d.intensite[k]))setIntens(k,d.intensite[k]);});
+  else if(d.life)LIFE_LBL.forEach(([k])=>{if(num(d.life[k]))setIntens(k,nivDe(k,d.life[k]));});   // ancien enregistrement, en nombres
   if(d.generation){const g=d.generation;GEN_LBL.forEach(([k])=>{if(num(g[k]))GEN[k]=0;});GEN_LBL.forEach(([k])=>{if(num(g[k]))setGen(k,g[k]);});
     if(METHODS.some(m=>m[0]===g.methode)){GEN.methode=g.methode;$('gm').value=g.methode;}
     if(num(g.remplissage))setCA('remplissage',g.remplissage,35,70);if(num(g.iterations))setCA('iterations',g.iterations,1,10);caState();saveGen();}
@@ -138,7 +139,7 @@ function applySaved(d){
 async function saveSettings(b,m){b=b instanceof HTMLElement?b:$('saveBtn');m=m||$('saveMsg');
   if(!DB||!b)return;b.disabled=true;b.textContent='Enregistrement…';m.className='saved';m.textContent='';
   const best={};BEST_LIST().forEach(e=>{best[e.key]={nom:e.o.n};BFIELDS.forEach(([f])=>best[e.key][f]=e.o[f]);});
-  const data={enregistreLe:new Date().toISOString(),bestiaire:best,discretion:STEALTH_BASE,life:Object.assign({},LIFE),generation:Object.assign({},GEN),
+  const data={enregistreLe:new Date().toISOString(),bestiaire:best,discretion:STEALTH_BASE,intensite:Object.assign({},INTENS),generation:Object.assign({},GEN),
     planete:{largeur:W,hauteur:H,joyaux:GEM_COUNT},robot:G&&G.st?Object.assign({},G.st):null,
     palette:{active:PRESETS[PRESET_ACTIVE].n,palettes:PRESETS.map(p=>({nom:p.n,couleurs:p.c.slice()}))},
     tuiles:Object.assign({},TILE_OV)};

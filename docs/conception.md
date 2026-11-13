@@ -55,7 +55,21 @@ Réglage « Taille de la carte » en tête du sous-menu Génération, de **1 à 
 | 4 | 96 × 64 | **taille d'origine**, valeur par défaut |
 | 5 | 144 × 96 | |
 
-Le relief, les lacs et les distances de sécurité suivent l'échelle. **Les nombres du sous-menu Life ne suivent pas** : ce sont des nombres d'individus par planète, à régler à la main pour une petite carte (les valeurs par défaut y sont beaucoup trop denses).
+Le relief, les lacs et les distances de sécurité suivent l'échelle, et la faune aussi depuis le passage de Life aux intensités (ci-dessous).
+
+### Life : intensité par espèce (13 novembre 2026)
+
+Le sous-menu Life ne demande plus un nombre d'individus mais une **intensité** par espèce, sur cinq niveaux, plus une ligne « Toutes » qui règle les dix espèces d'un coup (elle affiche « Mixte » quand elles diffèrent).
+
+| Niveau | Coefficient | Minimum |
+|---|---|---|
+| Aucun | 0 | 0 |
+| Rare | × 0,5 | 1 |
+| Normal | × 1 | 1 |
+| Nombreux | × 2 | 2 |
+| Infesté | × 4 | 4 |
+
+Nombre de créatures = effectif de référence de l'espèce (colonne « Référence » du § 7) × coefficient × surface de la carte rapportée à la taille 4, avec le minimum du niveau (2 pour les cafars, qui vont en bande). En taille 4 et au niveau Normal on retrouve les effectifs d'avant ; en taille 1, un ou deux individus par espèce, et « Infesté » en donne au moins quatre. Les anciens réglages en nombres sont convertis au niveau le plus proche. Mémorisé sous `np-intens` (l'ancienne clé `np-life` n'est plus écrite).
 
 ## 4. Terrains
 
@@ -176,7 +190,7 @@ Reste à faire : faire **trouver** les objets (au sol, lâchés par les ennemis,
 
 ## 7. Bestiaire
 
-| Espèce | VIT | PV | DÉG | PRE | ESQ | CRIT | Nombre (Life) |
+| Espèce | VIT | PV | DÉG | PRE | ESQ | CRIT | Référence (niveau Normal, taille 4) |
 |---|---|---|---|---|---|---|---|
 | Insectoïde | 6 | 10 | 3 | 60 | 30 | 5 % | 21 |
 | Crabos | 5 | 25 | 5 | 70 | 15 | 5 % | 15 |
@@ -243,7 +257,7 @@ La statistique **DÉT (détection)** par espèce a été supprimée le 13 novemb
 - **Statistiques** (sous-menu repliable, sous Statut) en **grille 3 × 3** : VIT, EYE, DEG / PRE, ESQ, CRIT / POW, NUL 0, NUL 0 (deux emplacements libres) (ESQ affiche la valeur modifiée, colorée, sans le modificateur).
 - **En vue** (sans titre, sous la mini-carte) : fiche d'inspection de la case survolée en tête (voir ci-dessous), puis animaux visibles (icône, barre de vie ASCII 10 caractères, colonnes TOUCHER / SUBIR colorées). Joyaux, roches à joyau, éclats de métal et sites ne sont plus listés ici (retirés le 13 novembre 2026) : on les lit à la fiche de survol.
 - **Mini-carte** pleine largeur ; ennemis en points rouges ; un clic recentre la vue (mode carte) ; bouton maintenu + glisser = défilement en temps réel. Saisi à l'intérieur, le cadre suit le pointeur sans sauter ; saisi à l'extérieur, il se centre d'abord sous le pointeur. Fonctionne aussi au doigt.
-- Sous-menus repliables : **Statistiques**, **Génération** (+ bouton REGEN), **Life** (nombre d'animaux par espèce), **Palette**, **Lab** (Bestiaire, Discrétion, Tile editor, Intro ; plus de bouton Enregistrer pour l'instant les réglages, aide des touches).
+- Sous-menus repliables : **Statistiques**, **Génération** (+ bouton REGEN), **Life** (intensité par espèce, § 3), **Palette**, **Lab** (Bestiaire, Discrétion, Tile editor, Intro ; plus de bouton Enregistrer pour l'instant les réglages, aide des touches).
 
 ### Souris et inspection (inspirées de Brogue)
 - Le curseur système est masqué sur la carte ; le **viseur** est dessiné sur la case survolée. Dès qu'on appuie sur une touche (hors mode inspection), le viseur, la fiche et le trajet disparaissent jusqu'au prochain mouvement de souris.

@@ -259,3 +259,7 @@ kbd{font-family:var(--mono);color:var(--fg);border:1px solid var(--line);padding
 @media (max-width:720px){.iwrap{grid-template-columns:1fr}.idet{min-height:0}.iart{font-size:20px}}
 .effs{font-size:11px;color:var(--c3);letter-spacing:.06em}
 .effs:empty{display:none}
+.gen .g.niv{grid-template-columns:minmax(0,1fr) 64px 62px}
+.gen .g.niv span{font-size:11px;color:var(--fg);text-align:right;white-space:nowrap}
+.gen .g.niv.tout{padding-bottom:6px;border-bottom:1px solid var(--line)}
+.gen .g.niv.tout label{color:var(--fg)}

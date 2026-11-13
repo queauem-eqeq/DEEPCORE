@@ -174,7 +174,7 @@ function genPlanet(){
     return;
   }
 }
-function newGame(){drilling=false;genPlanet();G.w=W;G.h=H;G.eff={};hideGems();hideOre();G.inv=invTest();G.items={};G.log=[];G.tracks={};G.lastDir=null;G.beasts=[];G.blood={};G.fv=2;spawnAnimals();spawnBeasts();lastAct='move';robotTiles();turnStealth();computeFOV();say(`Atterrissage confirmé. ${G.sites.length} sites de forage signalés par l’orbiteur. La foreuse est dans la soute ; la porte est à l’arrière.`,'info');}
+function newGame(){drilling=false;genPlanet();lifeCalc();G.w=W;G.h=H;G.eff={};hideGems();hideOre();G.inv=invTest();G.items={};G.log=[];G.tracks={};G.lastDir=null;G.beasts=[];G.blood={};G.fv=2;spawnAnimals();spawnBeasts();lastAct='move';robotTiles();turnStealth();computeFOV();say(`Atterrissage confirmé. ${G.sites.length} sites de forage signalés par l’orbiteur. La foreuse est dans la soute ; la porte est à l’arrière.`,'info');}
 
 /* ---------- Bestiaire : édition des statistiques ---------- */
 const BFIELDS=[['v','Vitesse',1,10],['pv','PV',1,200],['dmg','Dégâts',0,100],['pre','Précision',0,100],['esq','Esquive',0,100],['crit','Crit %',0,100]];
@@ -183,7 +183,7 @@ const BEST_DEF={};BEST_LIST().forEach(e=>{BEST_DEF[e.key]={};BFIELDS.forEach(([f
 try{const b=JSON.parse(localStorage.getItem('np-best')||'null');if(b)BEST_LIST().forEach(e=>{if(b[e.key])BFIELDS.forEach(([f])=>{if(typeof b[e.key][f]==='number')e.o[f]=b[e.key][f];});});}catch(e){}
 function saveBest(){const o={};BEST_LIST().forEach(e=>{o[e.key]={};BFIELDS.forEach(([f])=>o[e.key][f]=e.o[f]);});try{localStorage.setItem('np-best',JSON.stringify(o));}catch(e){}touchLocal();}
 try{if(localStorage.getItem('np-mig')!=='eq1'){SPECIES[0].v=6;BEASTS[0].pv=25;saveBest();
-  LIFE.crabos=15;localStorage.setItem('np-life',JSON.stringify(LIFE));localStorage.setItem('np-mig','eq1');}}catch(e){}
+  localStorage.setItem('np-mig','eq1');}}catch(e){}
 function buildBest(){
   $('bestList').innerHTML=BEST_LIST().map(e=>`<div class="bcard"><div class="bh"><img src="${ICON[e.ic]||''}" alt=""><div><b>${e.o.n}</b><br><span>${e.role}</span></div></div>
     <div class="fields">${BFIELDS.map(([f,l,mn,mx])=>`<label for="bf-${e.key}-${f}">${l}<input type="number" id="bf-${e.key}-${f}" data-k="${e.key}" data-f="${f}" min="${mn}" max="${mx}" step="1" value="${e.o[f]}"></label>`).join('')}</div></div>`).join('');
