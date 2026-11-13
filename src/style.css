@@ -224,7 +224,7 @@ kbd{font-family:var(--mono);color:var(--fg);border:1px solid var(--line);padding
 #inventaire .mcard:focus{outline:none}
 .inv{display:grid;gap:10px}
 .inv p{margin:0;color:var(--dim);line-height:1.5}
-.iwrap{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:16px;align-items:start}
+.iwrap{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:16px;align-items:start}
 .ileft{display:grid;gap:10px;min-width:0}
 .islots{display:flex;gap:18px;font-size:12px;color:var(--dim)}
 .islots b{font-weight:400;color:var(--fg);font-variant-numeric:tabular-nums}
@@ -237,8 +237,8 @@ kbd{font-family:var(--mono);color:var(--fg);border:1px solid var(--line);padding
 .ilist .it em.st{font-size:10px;letter-spacing:.14em;text-transform:uppercase;text-align:right}
 .ilist .it.eq,.ilist .it.eq i,.ilist .it.eq em{color:var(--c3)}        /* équipé : reste dans la liste, en couleur monde */
 .ilist .it.sel{border-left-color:currentColor;background:rgba(255,255,255,.08)}
-.idet{display:grid;gap:8px;border:1px solid var(--line);padding:14px;font-size:12px;align-content:start;min-height:290px}
-.iart{margin:0 auto 4px;font:16px/1.15 var(--mono);color:var(--fg);white-space:pre;min-height:calc(6 * 1.15em)}
+.idet{display:grid;gap:8px;border:1px solid var(--line);padding:14px;font-size:12px;align-content:start;min-height:420px}
+.iart{margin:6px auto 10px;font:30px/1.15 var(--mono);color:var(--fg);white-space:pre;min-height:calc(6 * 1.15em)}
 .inm{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
 .inm b{font-weight:700;color:var(--fg);font-size:14px}
 .inm span{color:var(--dim);font-size:11px;white-space:nowrap}
@@ -248,4 +248,5 @@ kbd{font-family:var(--mono);color:var(--fg);border:1px solid var(--line);padding
 .isol .pace{text-transform:uppercase;white-space:nowrap}
 .imsg{font-size:12px;min-height:1.5em}
 .inv .imsg.warn{color:var(--c3)}.inv .imsg.good{color:var(--c1)}
-@media (max-width:720px){.iwrap{grid-template-columns:1fr}.idet{min-height:0}}
+#inventaire .mcard.wide{width:min(900px,100%)}
+@media (max-width:720px){.iwrap{grid-template-columns:1fr}.idet{min-height:0}.iart{font-size:20px}}
