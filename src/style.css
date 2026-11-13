@@ -207,3 +207,6 @@ kbd{font-family:var(--mono);color:var(--fg);border:1px solid var(--line);padding
   .pad{display:flex}
 }
 @media (pointer:coarse){.pad{display:flex}}
+
+.dtab{width:100%;border-collapse:collapse;font-size:12px}.dtab th{color:var(--dim);font-weight:400;text-align:left}.dtab td,.dtab th{border-top:1px solid var(--line);padding:5px 6px;vertical-align:top}.dtab td:last-child,.dtab th:last-child{text-align:right;white-space:nowrap}
+.dlist{display:grid;gap:12px;min-width:0}.dtab td:first-child{width:46%}

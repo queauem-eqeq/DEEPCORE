@@ -30,13 +30,15 @@ let STEALTH_BASE=10;const NOTICE=.25,HUNT_MULT=2,STEALTH_MIN=2,DIG_MULT=1.5,LOSE
 try{const s=+localStorage.getItem('np-stealth');if(s>=2&&s<=30)STEALTH_BASE=s;}catch(e){}
 function setStealthBase(v){STEALTH_BASE=Math.max(2,Math.min(30,v|0));try{localStorage.setItem('np-stealth',STEALTH_BASE);}catch(e){}touchLocal();}
 let lastAct='move';                                   // ce que la foreuse vient de faire : 'move', 'wait' ou 'dig'
-function stealthRange(act){
-  let r=STEALTH_BASE;
+function stealthCalc(base,act,flat,walls){           // flat : sur des herbes couchées ; walls : parois adjacentes (0 à 8)
+  let r=base;
   if(act==='dig')r=Math.ceil(r*DIG_MULT);
   if(act==='wait')r=Math.ceil(r/2);
-  if(G.t[idx(G.px,G.py)]===FLAT)r=Math.ceil(r/2);     // herbes couchées : couvert
-  let walls=0;for(const [dx,dy] of DIRS){const x=G.px+dx,y=G.py+dy;if(x<0||y<0||x>=W||y>=H)continue;const v=G.t[idx(x,y)];if(v===ROCK||v===MOUNT)walls++;}
+  if(flat)r=Math.ceil(r/2);                           // herbes couchées : couvert
   return Math.max(STEALTH_MIN,r-walls);}
+function stealthRange(act){
+  let walls=0;for(const [dx,dy] of DIRS){const x=G.px+dx,y=G.py+dy;if(x<0||y<0||x>=W||y>=H)continue;const v=G.t[idx(x,y)];if(v===ROCK||v===MOUNT)walls++;}
+  return stealthCalc(STEALTH_BASE,act,G.t[idx(G.px,G.py)]===FLAT,walls);}
 function turnStealth(){G.stealth=stealthRange(lastAct);}
 
 /* ---------- Déplacement ---------- */
