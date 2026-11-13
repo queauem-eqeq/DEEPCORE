@@ -73,18 +73,18 @@ Roguelike au tour par tour dans une esthétique inspirée de Cogmind et de Brogu
 | Stat | Valeur | Rôle |
 |---|---|---|
 | Vie | 100 | **pas de réparation automatique** |
-| Énergie | 100 | se recharge de POW par tour (**1 par tour** au départ depuis le 13 novembre 2026) ; **se déplacer ne coûte plus d'énergie** (13 novembre 2026 ; 2 par pas avant, constante `MOVE_COST`), un coup de foreuse sur la roche 10 (frapper un animal : gratuit) |
+| Énergie | 100 | se recharge de POW par battement (**1/t** au départ depuis le 13 novembre 2026, **× 2 en attendant sur place**) ; **se déplacer ne coûte plus d'énergie** (13 novembre 2026 ; 2 par pas avant, constante `MOVE_COST`), un coup de foreuse sur la roche 10 (frapper un animal : gratuit) |
 | VIT | 5 | **vitesse de déplacement** (13 novembre 2026) : un pas dure 100 × 5 ÷ VIT. À 5, un pas = un battement ; à 10, deux pas par battement. Ne joue ni sur les coups ni sur le forage. Améliorable par joyau (+1). |
 | EYE | 10 | rayon de vision (5 avant le 10 novembre 2026) |
 | DEG | 10 | dégâts par coup de foreuse |
 | PRE | 80 | précision |
 | ESQ | 10 | esquive (modifiée par le terrain) |
 | CRIT | 5 % | chance de coup critique (×3 dégâts) ; coup par surprise toujours critique |
-| POW | 1 / tour | recharge d'énergie (5 avant le 13 novembre 2026 ; 6 puis 3 le 9 novembre) |
+| POW | 1 / battement | recharge d'énergie (doublée en attendant sur place) (5 avant le 13 novembre 2026 ; 6 puis 3 le 9 novembre) |
 
 - Un coup de foreuse sur une **roche** coûte **10 d'énergie** (refusé sous 10) ; **attaquer un animal ne coûte plus d'énergie** (13 novembre 2026).
 - **Aperçu derrière les obstacles** (foreuse seulement, depuis le 6 novembre 2026) : dans le rayon EYE, la case juste derrière un obstacle à la vue (montagne, herbes hautes) est aperçue en **mode souvenir** — terrain affiché assombri comme une case explorée hors de vue, sans les créatures. Une seule case : un obstacle de 2 cases d'épaisseur cache toujours la suite. Les ennemis ne voient pas à travers les obstacles.
-- Attendre un tour : Espace ou 5.
+- Attendre un tour : Espace ou 5. **La recharge d'énergie y est doublée** (13 novembre 2026) : 2/t à POW 1, 2 × POW en général. C'est la façon de refaire le plein après avoir couru ou foré.
 - **Course** (touche R, ou bouton « Allure » sous l'énergie) : mode qu'on allume et qu'on éteint. Chaque pas dure moitié moins et coûte **5 d'énergie** ; sans assez d'énergie, la foreuse reprend la marche d'elle-même. **Le moteur s'entend : + 2 cases de portée de discrétion** (13 novembre 2026), appliquées après tous les autres modificateurs. Bruitage de moteur électrique au démarrage, à l'arrêt et à chaque pas couru.
 
 ## 5 bis. Horloge : le temps continu (13 novembre 2026)

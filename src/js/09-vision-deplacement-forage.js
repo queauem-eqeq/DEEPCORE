@@ -54,11 +54,12 @@ const TICK=100;
 const DUR={pas:100,coup:100,forage:100,attente:100};   // durée de chaque action ; un équipement pourra les modifier
 const SLOW={[LIQ]:1.5,[DEEP]:2};                        // terrains lents : eau peu profonde ×1,5, eau profonde ×2
 const SPRINT_COST=5,SPRINT_MULT=.5;                     // course : énergie par pas, et durée du pas multipliée
+const WAIT_REGEN=2;                                     // attendre sur place : recharge d'énergie multipliée
 const slowOf=(v,swim)=>swim?1:(SLOW[v]||1);             // les nageurs (crabos) ne sont pas ralentis par l'eau
 const robotVit=()=>Math.max(1,G.st.vitesse||5);
 function stepDur(v,run){return DUR.pas*5/robotVit()*slowOf(v)*(run?SPRINT_MULT:1);}
 function pass(d,wait){G.time=(G.time||0)+d;G.debt=(G.debt||0)+d;
-  while(G.debt>=TICK-1e-6&&!G.over){G.debt-=TICK;if(wait)drift(true);animalsAct();beastsAct();regen();}
+  while(G.debt>=TICK-1e-6&&!G.over){G.debt-=TICK;if(wait)drift(true);animalsAct();beastsAct();regen(wait);}
   if(!G.over)turnStealth();}                            // une action rapide peut ne faire battre personne : la portée affichée reste juste
 function toggleSprint(){if(!G||G.over)return;
   if(!G.sprint&&G.st.energie<SPRINT_COST){say(`Énergie insuffisante pour courir (${Math.floor(G.st.energie)}/${SPRINT_COST}).`,'warn');SFX.blocked();render();return;}
@@ -140,7 +141,7 @@ function tryMove(dx,dy){
 
 /* ---------- Forage ---------- */
 function waitTurn(){
-  if(G.over||drilling||!$('overlay').hidden)return;lastAct='wait';lastRun=false;G.turn++;G.msg=null;say('Le robot attend.');
+  if(G.over||drilling||!$('overlay').hidden)return;lastAct='wait';lastRun=false;G.turn++;G.msg=null;say(`Le robot attend : recharge ${WAIT_REGEN} fois plus vite (${G.st.power*WAIT_REGEN}/t).`);
   pass(DUR.attente,true);computeFOV();render();if(G.over&&G.over.dead)dead();
 }
 function askDrill(){

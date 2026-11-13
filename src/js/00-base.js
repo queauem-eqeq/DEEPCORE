@@ -6,7 +6,7 @@ const GROUND=0,ROCK=1,MOUNT=2,LIQ=3,GRASS=4,FLAT=5,DEEP=6,CHASM=7,BRIDGE=8,RUBBL
 // LOW n'est plus produit ; il ne sert qu'à convertir une partie commencée avant ce changement.
 const TNAME=['sol rocheux','rocher','montagne','liquide','herbes hautes','herbes basses','eau profonde','gouffre','pont','gravats','(inutilisé)','coque du vaisseau','soute du vaisseau'];
 const DIRN=['est','ouest','sud','nord','sud-est','nord-est','sud-ouest','nord-ouest'];
-const STATS=[['vitesse','VIT','Vitesse'],['capteur','EYE','Portée capteur'],['degats','DEG','Dégâts'],['pre','PRE','Précision'],['esq','ESQ','Esquive (modifiée par le terrain)'],['crit','CRIT','Chance de coup critique (×3 dégâts) ; un coup par surprise est toujours critique'],['power','POW','Power : énergie rechargée par tour'],['stealth','DIS','Portée de discrétion : rayon où un ennemi en vue a 25 % par tour de vous remarquer (touche V)'],['nul2','NUL','Emplacement libre']];
+const STATS=[['vitesse','VIT','Vitesse'],['capteur','EYE','Portée capteur'],['degats','DEG','Dégâts'],['pre','PRE','Précision'],['esq','ESQ','Esquive (modifiée par le terrain)'],['crit','CRIT','Chance de coup critique (×3 dégâts) ; un coup par surprise est toujours critique'],['power','POW','Power : énergie rechargée par battement (× 2 en attendant sur place)'],['stealth','DIS','Portée de discrétion : rayon où un ennemi en vue a 25 % par tour de vous remarquer (touche V)'],['nul2','NUL','Emplacement libre']];
 const CRIT_X=3;   // dégâts d'un coup critique
 const $=id=>document.getElementById(id);
 // Horodatage de la dernière retouche faite dans ce navigateur (palettes, tuiles, génération, faune, bestiaire) :

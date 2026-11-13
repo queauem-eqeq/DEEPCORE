@@ -154,8 +154,9 @@ function beastsAct(){
   }
   if(charged){sayMore(`Le ${charged.n.toLowerCase()} vous a repéré et charge !`,'warn');SFX.roar();}
 }
-// Plus de réparation automatique : seule l'énergie se recharge à chaque tour
-function regen(){if(G.over)return;G.st.energie=Math.min(G.st.energieMax,G.st.energie+G.st.power);}
+// Plus de réparation automatique : seule l'énergie se recharge à chaque battement.
+// Attendre sur place la recharge WAIT_REGEN fois plus vite (13 novembre 2026) : 2/t au lieu de 1/t à POW 1.
+function regen(wait){if(G.over)return;G.st.energie=Math.min(G.st.energieMax,G.st.energie+G.st.power*(wait?WAIT_REGEN:1));}
 // Coup de foreuse : consomme de l'énergie ; refusé si la réserve est insuffisante
 function spend(){if(G.st.energie<G.st.cout){say(`Énergie insuffisante pour frapper (${Math.floor(G.st.energie)}/${G.st.cout}). Attendez qu’elle se recharge.`,'warn');SFX.blocked();render();return false;}G.st.energie-=G.st.cout;return true;}
 const TRACK_LIFE=5;
