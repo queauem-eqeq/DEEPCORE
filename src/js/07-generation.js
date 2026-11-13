@@ -200,7 +200,7 @@ function buildDisc(){
     <div class="fields"><label for="bf-stealth">Base<input type="number" id="bf-stealth" min="2" max="30" step="1" value="${b}"></label></div>
     <p class="mnote">En ce moment : <b>${now}</b> case${now>1?'s':''}</p></div>
   <div class="bcard"><div class="bh"><div><b>Modificateurs</b><br><span>Appliqués dans cet ordre : base, briser, attendre, herbes basses, parois. Plancher : ${STEALTH_MIN}.</span></div></div>
-    <table class="dtab"><thead><tr><th>Situation</th><th>Modificateur</th><th>Portée (base ${b})</th></tr></thead><tbody>`
+    <table class="dtab eq3"><thead><tr><th>Situation</th><th>Modificateur</th><th>Portée (base ${b})</th></tr></thead><tbody>`
     +rows.map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td></tr>`).join('')+`</tbody></table></div>
   <div class="bcard"><div class="bh"><div><b>Règles liées</b></div></div>
     <table class="dtab"><tbody>
