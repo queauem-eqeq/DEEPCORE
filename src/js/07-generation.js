@@ -119,7 +119,7 @@ function tidyChasms(t){
       if(![0,1,2,3].some(d=>{const a=x+DIRS[d][0],b=y+DIRS[d][1];return a>=0&&b>=0&&a<W&&b<H&&t[idx(a,b)]===CHASM;})){t[i]=GROUND;ch=true;}}
     if(!ch)break;}}
 // Pose le vaisseau sur une zone dégagée (marge d'une case autour) ; à défaut, sur la zone la moins encombrée, puis relie tout
-function placeShip(t){const ok=v=>v===GROUND||v===GRASS||v===FLAT||v===LOW||v===RUBBLE||v===ROCK;let bx=3,by=3,bb=1e9;
+function placeShip(t){const ok=v=>v===GROUND||v===GRASS||v===FLAT||v===RUBBLE||v===ROCK;let bx=3,by=3,bb=1e9;
   for(let k=0;k<800&&bb>0;k++){const x0=rnd(3,W-SGW-4),y0=rnd(3,H-SGH-4);let bad=0;
     for(let y=y0-1;y<=y0+SGH;y++)for(let x=x0-1;x<=x0+SGW;x++)if(!ok(t[idx(x,y)]))bad++;
     if(bad<bb){bb=bad;bx=x0;by=y0;}}
@@ -154,7 +154,7 @@ function genPlanet(){
       const c=rankFill(t,crev,Math.round(ct/2),CHASM),b=placeBlobs(t,ct-c,CHASM,cSize,fill,it,false);if(c+b<ct)rankFill(t,crev,ct-c-b,CHASM);}
     placeLakes(t,P('eau'));
     const gC=placeBlobs(t,P('herbe'),GRASS,()=>[rnd(SZ(10,4),SZ(22,6)),rnd(SZ(6,3),SZ(13,4))],.5,4,false);if(gC<P('herbe'))rankFill(t,sc(fbm()),P('herbe')-gC,GRASS);
-    {const gn=sc(fbm()),gc=[];for(let i=0;i<N;i++)if(t[i]===GRASS)gc.push(i);gc.sort((a,b)=>gn[a]-gn[b]);for(const i of gc.slice(0,gc.length>>1))t[i]=LOW;}
+    {const gn=sc(fbm()),gc=[];for(let i=0;i<N;i++)if(t[i]===GRASS)gc.push(i);gc.sort((a,b)=>gn[a]-gn[b]);for(const i of gc.slice(0,gc.length>>1))t[i]=FLAT;}
     for(let i=0;i<N;i++)if(t[i]===GROUND&&Math.random()<.035)t[i]=ROCK;
     tidyChasms(t);connect(t);tidyChasms(t);separateWater(t);
     const ship=placeShip(t),sx=ship.x+2,sy=ship.y+2,st=idx(sx,sy);   // la foreuse démarre au fond du couloir (case du haut), mèche vers la porte

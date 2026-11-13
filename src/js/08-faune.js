@@ -7,7 +7,7 @@ const animalOk=(x,y)=>{if(x<1||y<1||x>=W-1||y>=H-1)return false;const v=G.t[idx(
 function spawnAnimals(){
   const pool=[...SPECIES.keys()].sort(()=>Math.random()-.5).slice(0,1);G.animals=[];G.fauna=[];G.pool=pool;
   for(let k=0,tries=0;k<LIFE.insectoide&&tries<LIFE.insectoide*300+500;tries++){const x=rnd(2,W-3),y=rnd(2,H-3),v=G.t[idx(x,y)];
-    if(!(v===GROUND||v===GRASS||v===FLAT||v===LOW)||Math.hypot(x-G.px,y-G.py)<SZ(10,4)||animalAt(x,y))continue;
+    if(!(v===GROUND||v===GRASS||v===FLAT)||Math.hypot(x-G.px,y-G.py)<SZ(10,4)||animalAt(x,y))continue;
     G.animals.push({sp:pool[k%pool.length],x,y,hp:SPECIES[pool[k%pool.length]].pv,mp:Math.random(),flee:0,dir:Math.random()<.5?1:-1});k++;}
 }
 // Insectoïde : une fois le robot repéré, il le suit à 2 ou 3 cases (recule au contact,

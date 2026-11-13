@@ -126,7 +126,7 @@ const grassF=(x,y)=>{for(const[fx,fy]of FLW){if(x===fx&&y===fy)return '3';if((Ma
 const flatF=(x,y)=>{if((x===12&&y===8)||(x===3&&y===12))return '3';if((x===11&&y===8)||(x===13&&y===8)||(x===2&&y===12)||(x===4&&y===12))return '2';return flatA(x,y);};
 const GT=[[grassA,flatA],[grassB,flatB],[grassC,flatC],[grassD,flatD],[grassE,flatE],[grassF,flatF]];
 GT.forEach(([g,f],i)=>{PAT['grass'+i]=g;PAT['flat'+i]=f;});
-PAT.low=(x,y)=>y>=9?grassA(x,y):'.';}
+}
 const NGRASS=6;
 for(let d=1;d<=5;d++)PAT['site'+d]=(x,y)=>{const g=DIGITS[d];if(x>=6&&x<=8&&y>=4&&y<=8)return g[y-4][x-6]==='3'?'3':'.';return RING[y][x];};
 // Nuages de l'intro : 4 variantes de tuiles opaques (blanc, ombre bio)

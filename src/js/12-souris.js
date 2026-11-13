@@ -85,7 +85,7 @@ const TDESC={[GROUND]:['Sol rocheux','Praticable. Les points au sol se densifien
   [LIQ]:['Eau peu profonde','Praticable. Esquive −20 pour qui s’y trouve. Insectoïdes et cafars l’évitent ; les crabos y entrent.'],
   [DEEP]:['Eau profonde','Praticable. Esquive −20, et le courant déplace la foreuse d’une case au hasard à chaque tour. Seuls les crabos s’y aventurent.'],
   [GRASS]:['Herbes hautes','Praticables mais opaques. Esquive +10 pour qui s’y cache. Elles se couchent au passage.'],
-  [FLAT]:['Herbes couchées','Praticables, ne bloquent plus la vue.'],[LOW]:['Herbe basse','Praticable.'],
+  [FLAT]:['Herbes basses','Ne bloquent pas la vue. Vous y êtes deux fois plus discret.'],
   [CHASM]:['Gouffre','Infranchissable. Ne bloque pas la vue.'],[BRIDGE]:['Pont','Praticable. Permet de franchir un gouffre.'],
   [RUBBLE]:['Gravats','Praticables. Restes d’une roche brisée.'],
   [SHIP]:['Coque du vaisseau','Infranchissable et indestructible, ne bloque pas la vue. Le cargo qui a déposé la foreuse.'],

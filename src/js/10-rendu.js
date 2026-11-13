@@ -126,8 +126,7 @@ function render(){
     else if(t===CHASM){ctx.globalAlpha=1;ctx.fillStyle='#000';ctx.fillRect((x-camX)*S,(y-camY)*S,S,S);if(CHASM_OV){ctx.globalAlpha=k;ctx.drawImage(CHASM_OV,x*16,y*16,16,16,(x-camX)*S,(y-camY)*S,S,S);}}
     else if(t===RUBBLE)put(TL.rubble,x,y,.65*k);
     else if(t===GRASS)put(TL.grass0,x,y,.9*k);
-    else if(t===LOW)put(TL.low,x,y,.75*k);
-    else if(t===FLAT)put(TL.flat0,x,y,.5*k);
+    else if(t===FLAT)put(TL.flat0,x,y,.75*k);
     const dm=G.dmg&&G.dmg[i];if(dm&&(t===ROCK||t===MOUNT))put(TL.crackH,x,y,.95*k);
   }
   if(G.tracks)for(const k in G.tracks){const tr=G.tracks[k],age=G.turn-tr.t;if(age>=TRACK_LIFE){delete G.tracks[k];continue;}
