@@ -44,6 +44,13 @@ Le jeu est une page web en plusieurs fichiers (`src/`), **sans étape d'assembla
 Le workflow `.github/workflows/pages.yml` publie `src/` sur https://queauem-eqeq.github.io/DEEPCORE/ à chaque fusion dans `main`.
 Pas de réglages d'artefact (base `db`) là-bas : les réglages du joueur restent dans le navigateur (`localStorage`).
 
+**Attention (13 novembre 2026)** : deux publications se font concurrence à chaque fusion. Le workflow ci-dessus, et la
+construction automatique de GitHub à partir de la branche (« pages build and deployment »), qui publie le dépôt entier et
+affiche le README à la racine. C'est elle qui l'emportait. Tant que la source n'est pas réglée sur **GitHub Actions**
+(Settings → Pages → Source), le jeu est servi à `/DEEPCORE/src/index.html` ; l'`index.html` à la racine du dépôt redirige
+vers lui pour que l'adresse courte marche dans les deux cas. Ce fichier est inutile si la source passe sur GitHub Actions,
+mais il ne gêne pas.
+
 ## Revenir à une version précédente
 `git branch -r | grep version` liste les versions publiées. Pour revenir : `git checkout origin/claude/version-… -- src/`,
 republier (étape 5), puis commit « Retour à la version … ». Ne jamais réécrire l'historique de `main`. Avant une grosse
