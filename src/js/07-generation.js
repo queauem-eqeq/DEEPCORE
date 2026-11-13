@@ -189,17 +189,18 @@ function buildBest(){
 }
 /* ---------- Discrétion : base modifiable et liste des modificateurs (13 novembre 2026) ---------- */
 function buildDisc(){
-  const b=STEALTH_BASE,c=(a,f,w)=>stealthCalc(b,a,f,w),now=G.stealth||STEALTH_BASE;
+  const b=STEALTH_BASE,c=(a,f,w,r)=>stealthCalc(b,a,f,w,r),now=G.stealth||STEALTH_BASE;
   const rows=[
     ['Marcher','aucun',c('move',0,0)],
     ['Briser une paroi (bruit)',`× ${String(DIG_MULT).replace('.',',')}, arrondi au supérieur ; le bruit s’entend aussi hors de vue`,c('dig',0,0)],
     ['Attendre sur place (Espace ou 5)','÷ 2, arrondi au supérieur',c('wait',0,0)],
     ['Sur des herbes basses (couvert)','÷ 2, arrondi au supérieur',c('move',1,0)],
-    ['Parois adjacentes (rocher ou montagne)',`− 1 par 2 parois (arrondi au supérieur), au plus − ${WALL_MAX}`,`${c('move',0,1)} (1-2 parois) · ${c('move',0,3)} (3-4 parois) · ${c('move',0,8)} (7-8 parois)`]];
+    ['Parois adjacentes (rocher ou montagne)',`− 1 par 2 parois (arrondi au supérieur), au plus − ${WALL_MAX}`,`${c('move',0,1)} (1-2 parois) · ${c('move',0,3)} (3-4 parois) · ${c('move',0,8)} (7-8 parois)`],
+    ['Courir (touche R)',`+ ${SPRINT_NOISE}, après tout le reste`,c('move',0,0,1)]];
   $('discList').innerHTML=`<div class="bcard"><div class="bh"><div><b>Portée de discrétion</b><br><span>Rayon commun à tous les ennemis : dans ce rayon et en vue, ${Math.round(NOTICE*100)} % par tour de vous remarquer. Touche V : l’afficher sur la carte.</span></div></div>
     <div class="fields"><label for="bf-stealth">Base<input type="number" id="bf-stealth" min="2" max="30" step="1" value="${b}"></label></div>
     <p class="mnote">En ce moment : <b>${now}</b> case${now>1?'s':''}</p></div>
-  <div class="bcard"><div class="bh"><div><b>Modificateurs</b><br><span>Appliqués dans cet ordre : base, briser, attendre, herbes basses, parois. Plancher : ${STEALTH_MIN}.</span></div></div>
+  <div class="bcard"><div class="bh"><div><b>Modificateurs</b><br><span>Appliqués dans cet ordre : base, briser, attendre, herbes basses, parois, course. Plancher : ${STEALTH_MIN}.</span></div></div>
     <table class="dtab eq3"><thead><tr><th>Situation</th><th>Modificateur</th><th>Portée (base ${b})</th></tr></thead><tbody>`
     +rows.map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td></tr>`).join('')+`</tbody></table></div>
   <div class="bcard"><div class="bh"><div><b>Règles liées</b></div></div>

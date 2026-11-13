@@ -38,7 +38,7 @@ const remarquer = (d) => {
   for (let i = 0; i < N; i++) {
     G.beasts = [crabos(G.px + d, G.py, false)];
     let n = 0;
-    while (!G.beasts[0].hunt && n < 200) { G.beasts[0].x = G.px + d; G.beasts[0].mp = 0; lastAct = 'move'; beastsAct(); n++; }
+    while (!G.beasts[0].hunt && n < 200) { G.beasts[0].x = G.px + d; G.beasts[0].mp = 0; lastAct = 'move'; lastRun = false; beastsAct(); n++; }
     r.push(G.beasts[0].hunt ? n : 0);
   }
   const ok = r.filter(v => v > 0);
@@ -52,7 +52,7 @@ const perdre = (d) => {
   for (let i = 0; i < N; i++) {
     G.beasts = [crabos(G.px + d, G.py, true)];
     let n = 0;
-    while (!G.beasts[0].lost && G.beasts[0].hunt && n < 400) { G.beasts[0].x = G.px + d; G.beasts[0].mp = 0; lastAct = 'move'; beastsAct(); n++; }
+    while (!G.beasts[0].lost && G.beasts[0].hunt && n < 400) { G.beasts[0].x = G.px + d; G.beasts[0].mp = 0; lastAct = 'move'; lastRun = false; beastsAct(); n++; }
     r.push(G.beasts[0].lost ? n : 0);
   }
   const ok = r.filter(v => v > 0);
@@ -75,7 +75,7 @@ const pas = (dx, dy) => { const nx = G.px + dx, ny = G.py + dy;
     G.px = nx; G.py = ny; if (G.t[idx(nx, ny)] === GRASS) G.t[idx(nx, ny)] = FLAT; return true; }
   return false; };
 function essai(prepare, avancer, dist) {
-  degager(); G.px = X0; G.py = Y0; G.animals = []; prepare(); lastAct = 'move'; turnStealth();
+  degager(); G.px = X0; G.py = Y0; G.animals = []; prepare(); lastAct = 'move'; lastRun = false; turnStealth();
   G.beasts = [crabos(X0 - dist, Y0, true)];
   for (let n = 1; n <= MAXT; n++) { avancer(n); lastAct = 'move'; G.turn++; animalsAct(); beastsAct();
     if (!G.beasts[0].hunt) return n; }
@@ -104,7 +104,7 @@ mesure('ouverture dans un mur puis obliquer', mur, franchir, 4);
 mesure('la même avec 12 cases d’avance', mur, franchir, 12);
 // course : deux pas par battement tant qu'il reste de l'énergie (5 par pas, +1 par battement), puis marche
 let jus = 100;
-const course = (un) => () => { if (jus >= 10) { jus -= 10; un(); un(); } else un(); jus = Math.min(100, jus + 1); };
+const course = (un) => () => { if (jus >= 10) { jus -= 10; un(); un(); lastRun = true; } else { un(); lastRun = false; } jus = Math.min(100, jus + 1); };
 const plein = (f) => () => { jus = 100; f(); };
 mesure('EN COURANT, terrain dégagé, 4 cases d’avance', plein(rien), course(droit), 4);
 mesure('EN COURANT, terrain dégagé, 12 cases d’avance', plein(rien), course(droit), 12);

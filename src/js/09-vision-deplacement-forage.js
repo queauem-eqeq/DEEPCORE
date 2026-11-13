@@ -26,20 +26,22 @@ function computeFOV(){vis=new Uint8Array(W*H);const r=G.st.capteur,px=G.px,py=G.
    (NOTICE) à l'intérieur du rayon. Marqué par o.lost, remis à zéro dès qu'il vous revoit ou qu'il oublie.
    Calcul, dans cet ordre : base, ×1,5 en brisant une paroi, ÷2 en attendant sur place, ÷2 sur des herbes basses
    (arrondi au supérieur à chaque division), −1 par 2 parois adjacentes, arrondi au supérieur (rocher ou montagne), au plus −4, plancher STEALTH_MIN. */
-let STEALTH_BASE=10;const NOTICE=.25,HUNT_MULT=2,STEALTH_MIN=2,DIG_MULT=1.5,LOSE_TRACK=.03;
+let STEALTH_BASE=10;const NOTICE=.25,HUNT_MULT=2,STEALTH_MIN=2,DIG_MULT=1.5,LOSE_TRACK=.03,SPRINT_NOISE=2;   // courir s'entend : + 2 cases de portée
 try{const s=+localStorage.getItem('np-stealth');if(s>=2&&s<=30)STEALTH_BASE=s;}catch(e){}
 function setStealthBase(v){STEALTH_BASE=Math.max(2,Math.min(30,v|0));try{localStorage.setItem('np-stealth',STEALTH_BASE);}catch(e){}touchLocal();}
 let lastAct='move';                                   // ce que la foreuse vient de faire : 'move', 'wait' ou 'dig'
+let lastRun=false;                                     // ce pas a-t-il été couru ? (portée de discrétion + SPRINT_NOISE)
 const WALL_MAX=4;                                      // retrait maximal dû aux parois adjacentes (−4)
-function stealthCalc(base,act,flat,walls){           // flat : sur des herbes basses ; walls : parois adjacentes (0 à 8) : retrait = parois ÷ 2 arrondi au supérieur, au plus WALL_MAX
+function stealthCalc(base,act,flat,walls,run){           // flat : sur des herbes basses ; walls : parois adjacentes (0 à 8) : retrait = parois ÷ 2 arrondi au supérieur, au plus WALL_MAX
   let r=base;
   if(act==='dig')r=Math.ceil(r*DIG_MULT);
   if(act==='wait')r=Math.ceil(r/2);
   if(flat)r=Math.ceil(r/2);                           // herbes basses : couvert
-  return Math.max(STEALTH_MIN,r-Math.min(Math.ceil(walls/2),WALL_MAX));}
+  r=Math.max(STEALTH_MIN,r-Math.min(Math.ceil(walls/2),WALL_MAX));
+  return r+(run?SPRINT_NOISE:0);}                      // la course s'entend : + 2, après tout le reste
 function stealthRange(act){
   let walls=0;for(const [dx,dy] of DIRS){const x=G.px+dx,y=G.py+dy;if(x<0||y<0||x>=W||y>=H)continue;const v=G.t[idx(x,y)];if(v===ROCK||v===MOUNT)walls++;}
-  return stealthCalc(STEALTH_BASE,act,G.t[idx(G.px,G.py)]===FLAT,walls);}
+  return stealthCalc(STEALTH_BASE,act,G.t[idx(G.px,G.py)]===FLAT,walls,lastRun);}
 function turnStealth(){G.stealth=stealthRange(lastAct);}
 
 /* ---------- Horloge (13 novembre 2026) ----------
@@ -56,10 +58,11 @@ const slowOf=(v,swim)=>swim?1:(SLOW[v]||1);             // les nageurs (crabos) 
 const robotVit=()=>Math.max(1,G.st.vitesse||5);
 function stepDur(v,run){return DUR.pas*5/robotVit()*slowOf(v)*(run?SPRINT_MULT:1);}
 function pass(d,wait){G.time=(G.time||0)+d;G.debt=(G.debt||0)+d;
-  while(G.debt>=TICK-1e-6&&!G.over){G.debt-=TICK;if(wait)drift(true);animalsAct();beastsAct();regen();}}
+  while(G.debt>=TICK-1e-6&&!G.over){G.debt-=TICK;if(wait)drift(true);animalsAct();beastsAct();regen();}
+  if(!G.over)turnStealth();}                            // une action rapide peut ne faire battre personne : la portée affichée reste juste
 function toggleSprint(){if(!G||G.over)return;
   if(!G.sprint&&G.st.energie<SPRINT_COST){say(`Énergie insuffisante pour courir (${Math.floor(G.st.energie)}/${SPRINT_COST}).`,'warn');SFX.blocked();render();return;}
-  G.sprint=!G.sprint;say(G.sprint?`Course : deux fois plus vite, ${SPRINT_COST} d’énergie par pas.`:'La foreuse reprend la marche.','info');render();}
+  G.sprint=!G.sprint;G.sprint?SFX.motorOn():SFX.motorOff();say(G.sprint?`Course : deux fois plus vite, ${SPRINT_COST} d’énergie par pas, et ${SPRINT_NOISE} cases de discrétion en plus.`:'La foreuse reprend la marche.','info');render();}
 
 /* ---------- Déplacement ---------- */
 const siteAt=(x,y)=>G.sites.find(s=>s.x===x&&s.y===y);
@@ -73,7 +76,7 @@ function drift(wait){if(!wait)return;
 }
 const DEEP_MISS=.5;   // eau profonde : chance qu'un pas parte dans une autre direction, tirée au hasard
 function tryMove(dx,dy){
-  if(G.over||drilling)return;lastAct='move';let nx=G.px+dx,ny=G.py+dy;if(nx<0||ny<0||nx>=W||ny>=H)return;
+  if(G.over||drilling)return;lastAct='move';lastRun=false;let nx=G.px+dx,ny=G.py+dy;if(nx<0||ny<0||nx>=W||ny>=H)return;
   let v=G.t[idx(nx,ny)];
   G.face=dx>0?'r':dx<0?'l':dy>0?'d':'u';
   if(!diagOk(G.px,G.py,dx,dy)){say('Coin de paroi : pas de passage en diagonale.');SFX.blocked();render();return;}
@@ -117,11 +120,13 @@ function tryMove(dx,dy){
   {const oi=idx(G.px,G.py),ov=G.t[oi],dk=DIRS.findIndex(d=>d[0]===dx&&d[1]===dy);
     if(ov!==LIQ&&ov!==DEEP&&ov!==BRIDGE&&ov!==DECK){G.tracks=G.tracks||{};G.tracks[oi]={t:G.turn+1,i:G.lastDir??dk,o:dk};}G.lastDir=dk;}
   // course : chaque pas coûte SPRINT_COST d'énergie et dure moitié moins ; à sec, la foreuse reprend la marche
-  let run=false;if(G.sprint){if(G.st.energie>=SPRINT_COST){G.st.energie-=SPRINT_COST;run=true;}else{G.sprint=false;G.devMsg=(G.devMsg?G.devMsg+' ':'')+'Énergie insuffisante : la foreuse reprend la marche.';}}
+  let run=false;if(G.sprint){if(G.st.energie>=SPRINT_COST){G.st.energie-=SPRINT_COST;run=true;}else{G.sprint=false;SFX.motorOff();G.devMsg=(G.devMsg?G.devMsg+' ':'')+'Énergie insuffisante : la foreuse reprend la marche.';}}
+  lastRun=run;
   const doorway=(G.t[idx(G.px,G.py)]===DECK)!==(v===DECK);   // passage de la porte du vaisseau
   G.px=nx;G.py=ny;G.turn++;G.dist++;G.msg=null;if(G.devMsg){say(G.devMsg,'warn');G.devMsg=null;}
   if(v===GRASS){G.t[idx(nx,ny)]=FLAT;SFX.grass();}else if(v===FLAT)SFX.grass();
   if(v===LIQ)SFX.water();else if(v===DEEP)SFX.deep();else SFX.step();
+  if(run)SFX.motor();
   if(doorway){SFX.door();say(v===DECK?'La porte du vaisseau s’ouvre : la foreuse rentre dans la soute.':'La porte du vaisseau s’ouvre : la foreuse sort.','info');}
   pass(stepDur(v,run));
   {const oi=idx(G.px,G.py);if(G.ore&&G.ore[oi]&&oreSol(G.ore[oi])){const l=oreLv(G.ore[oi]);delete G.ore[oi];const av=G.st.vie;G.st.vie=Math.min(G.st.vieMax,G.st.vie+ORE_PV[l]);
@@ -135,7 +140,7 @@ function tryMove(dx,dy){
 
 /* ---------- Forage ---------- */
 function waitTurn(){
-  if(G.over||drilling||!$('overlay').hidden)return;lastAct='wait';G.turn++;G.msg=null;say('Le robot attend.');
+  if(G.over||drilling||!$('overlay').hidden)return;lastAct='wait';lastRun=false;G.turn++;G.msg=null;say('Le robot attend.');
   pass(DUR.attente,true);computeFOV();render();if(G.over&&G.over.dead)dead();
 }
 function askDrill(){

@@ -21,7 +21,15 @@ function noiz(dur,g,freq,ftype,delay,f2){const a=audio();if(!a)return;const t=a.
   src.connect(fl);fl.connect(v);v.connect(MASTER);src.start(t,Math.random()*.5);src.stop(t+dur+.02);}
 const SFX={
   step(){noiz(.06,.12,700);tone(62,.05,'square',.035);},
-  grass(){noiz(.1,.09,5000,'highpass');},
+  // Herbe : froufrou — trois coups de brosse décalés, filtrés en bande montante, légèrement tirés au hasard
+  grass(){const r=()=>.82+Math.random()*.36;
+    noiz(.14*r(),.05,2600*r(),'bandpass',0,6500);
+    noiz(.1*r(),.042,5000*r(),'highpass',.03);
+    noiz(.08*r(),.028,7200*r(),'highpass',.075);},
+  // Moteur électrique de la course : bourdon court et sifflement d'engrenage, un par pas couru
+  motor(){const r=.94+Math.random()*.12;tone(188*r,.1,'sawtooth',.04,214*r);tone(1240*r,.07,'square',.016,1460*r);noiz(.05,.02,2800,'bandpass',.01,1800);},
+  motorOn(){tone(120,.26,'sawtooth',.05,330);tone(900,.22,'square',.02,1500,.03);},
+  motorOff(){tone(320,.3,'sawtooth',.045,110);tone(1450,.2,'square',.018,820,.02);},
   water(){noiz(.22,.16,1800,'bandpass',0,600);},
   deep(){noiz(.3,.14,900,'bandpass',0,300);tone(180,.3,'sine',.06,110);},
   drift(){noiz(.45,.12,500,'lowpass',0,1400);tone(260,.4,'sine',.05,130);},

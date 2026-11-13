@@ -58,10 +58,15 @@ soit une vingtaine de cases avec le plein, puis marche) :
 
 | Situation | En marchant | En courant |
 |---|---|---|
-| Terrain dégagé, 4 cases d'avance | jamais semée | **43 % des cas, en 36 tours** |
-| Terrain dégagé, 12 cases d'avance | 70 à 78 % | **à tous les coups, en 28 tours** |
-| Herbes hautes, en ligne droite | 90 à 95 % | à tous les coups, en 8 tours |
+| Terrain dégagé, 4 cases d'avance | jamais semée | **une fois sur deux environ** (43 à 65 % selon le tirage, en 40 tours) |
+| Terrain dégagé, 12 cases d'avance | 70 à 83 % | **à tous les coups, en 29 à 36 tours** |
+| Herbes hautes, en ligne droite | 90 à 95 % | à tous les coups, en 9 à 11 tours |
 | Ouverture dans un mur, puis obliquer | 70 à 85 % | à tous les coups, en 14 tours |
+
+Mesuré après l'ajout des **+ 2 cases de portée en courant** (13 novembre 2026) : le bruit du moteur ne
+referme pas la fuite, parce qu'une fois lancée la foreuse sort de toute façon du rayon. Attention à la
+précision de ces chiffres : **40 essais par cas**, donc ± 15 points ; deux mesures d'affilée du cas à
+4 cases ont donné 43 % puis 65 %. Seuls les écarts francs (jamais / toujours) sont solides.
 
 ### Ce que ces chiffres disent
 
