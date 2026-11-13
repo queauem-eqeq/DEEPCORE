@@ -220,7 +220,6 @@ function introFrame(now){const I=INTRO;if(!I)return;ensureChasmOv();
   introCv.style.opacity=t>T5?String(1-clamp01((t-T5)/(TEND-T5))):'1';
   if(t>=TEND){endIntro();return;}
   requestAnimationFrame(introFrame);}
-$('campBtn').onclick=()=>{unlock();if(TRAV)stopTravel();SFX.start();newGame();started=true;$('overlay').hidden=true;render();};
 $('introBtn').onclick=()=>{unlock();if(TRAV)stopTravel();newGame();started=true;$('overlay').hidden=true;render();playIntro();};
 function savePresets(){try{localStorage.setItem('np-presets',JSON.stringify(PRESETS.map(p=>p.c)));localStorage.setItem('np-preset-active',PRESET_ACTIVE);}catch(e){}touchLocal();}
 function drawPresets(){$('presets').innerHTML=PRESETS.map((p,i)=>`<button data-p="${i}" title="${p.n}" aria-label="Palette ${p.n}" aria-pressed="${i===PRESET_ACTIVE}">${[2,1,0].map(j=>`<i style="background:${p.c[j]}"></i>`).join('')}</button>`).join('');

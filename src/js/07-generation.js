@@ -226,7 +226,7 @@ function niveau(o){drilling=false;const g0=GEN,bio=o.test?null:BIOMES[o.biome],g
 const fauneTxt=()=>LIFE_LBL.filter(([k])=>LIFE[k]>0).map(([,l])=>l).join(', ')||'aucune';
 function newGame(){niveau({niv:1,biome:'plateau',taille:2,suite:tirageBiomes()});
   say(`Atterrissage confirmé. Niveau 1 sur ${NIV_MAX} : ${BIOMES.plateau.n}. Un site de forage signalé par l’orbiteur. La foreuse est dans la soute ; la porte est à l’arrière.`,'info');}
-function testGame(){niveau({test:true});say('Carte d’essai : réglages Génération et Life. Le forage relance une carte d’essai.','info');}
+function testGame(){niveau({test:true});say('Carte d’essai, hors descente : réglages Génération et Life. REGEN pour reprendre la descente au niveau 1.','info');}
 function descendre(){const n=G.niv+1,b=G.suite[n-2];
   niveau({niv:n,biome:b,taille:TAILLES_NIV[Math.floor(Math.random()*TAILLES_NIV.length)],suite:G.suite,
     garde:{st:G.st,inv:G.inv,turn:G.turn,dist:G.dist,time:G.time,debt:0,beastSeen:G.beastSeen,log:G.log}});

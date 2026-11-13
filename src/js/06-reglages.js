@@ -46,7 +46,7 @@ function setIntens(k,v){v=Math.max(0,Math.min(4,Math.round(+v||0)));if(k==='tout
 function buildLife(){
   const row=(k,l,cls)=>`<div class="g niv${cls||''}"><label for="lr-${k}">${l}</label><input type="range" id="lr-${k}" min="0" max="4" step="1" value="2" aria-label="Intensité : ${l}" aria-describedby="ll-${k}"><span id="ll-${k}"></span></div>`;
   $('life').innerHTML=row('tout','Toutes',' tout')+LIFE_LBL.map(([k,l])=>row(k,l)).join('')
-    +'<div class="sum">Intensité par espèce : Aucun, Rare, Normal, Nombreux, Infesté. Le nombre de créatures suit la taille de la carte. S’applique aux cartes d’essai (REGEN) ; en descente, chaque biome a sa faune.</div>';
+    +'<div class="sum">Intensité par espèce : Aucun, Rare, Normal, Nombreux, Infesté. Le nombre de créatures suit la taille de la carte. S’applique aux cartes d’essai (bouton CARTE D’ESSAI, dans Génération) ; en descente, chaque biome a sa faune.</div>';
   ['tout',...LIFE_LBL.map(l=>l[0])].forEach(k=>$('lr-'+k).addEventListener('input',e=>setIntens(k,e.target.value)));
   intensAff();
 }
@@ -56,7 +56,9 @@ function buildGen(){
    +'<div class="sum" id="genSum"></div><div class="sub">Relief (montagnes et gouffres)</div>'
    +`<div class="g2"><label for="gm">Méthode</label><select id="gm">${METHODS.map(([v,l])=>`<option value="${v}"${GEN.methode===v?' selected':''}>${l}</option>`).join('')}</select></div>`
    +`<div class="g2"><label for="gn-remplissage">Remplissage initial (%)</label><input type="number" id="gn-remplissage" min="35" max="70" value="${GEN.remplissage}"></div>`
-   +`<div class="g2"><label for="gn-iterations">Itérations</label><input type="number" id="gn-iterations" min="1" max="10" value="${GEN.iterations}"></div>`;
+   +`<div class="g2"><label for="gn-iterations">Itérations</label><input type="number" id="gn-iterations" min="1" max="10" value="${GEN.iterations}"></div>`
+   +'<button class="go" id="essaiBtn" title="Créer une carte d’essai avec ces réglages et ceux de Life, hors de la descente">CARTE D’ESSAI</button><div class="sum">Ces réglages et ceux de Life ne servent qu’aux cartes d’essai. REGEN relance la descente au niveau 1, où chaque biome a son relief et sa faune.</div>';
+  $('essaiBtn').onclick=()=>{$('essaiBtn').blur();unlock();SFX.start();testGame();started=true;$('overlay').hidden=true;render();};
   GEN_LBL.forEach(([k])=>{$('gr-'+k).addEventListener('input',e=>setGen(k,e.target.value));$('gn-'+k).addEventListener('change',e=>setGen(k,e.target.value));});
   $('gr-taille').addEventListener('input',e=>setTaille(e.target.value));$('gn-taille').addEventListener('change',e=>setTaille(e.target.value));setTaille(GEN.taille);
   $('gm').addEventListener('change',e=>{GEN.methode=e.target.value;saveGen();caState();});

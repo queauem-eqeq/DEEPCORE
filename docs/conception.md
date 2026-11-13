@@ -123,7 +123,9 @@ En arrivant sur un niveau (atterrissage compris, une fois l'intro passée), la f
 
 ### Cartes d'essai
 
-Le bouton **REGEN** ne lance plus une partie mais une **carte d'essai** : taille, relief (Génération) et faune (Life) choisis par le joueur, palette de base, 10 % de montagne en métal et 2 % en Matière. « Carte d'essai » s'affiche sous Statut ; y forer relance une carte d'essai. Le bouton **Nouvelle descente** du Lab repart au niveau 1. (Hypothèse retenue faute de réponse de l'utilisateur à la question : à confirmer.)
+- **REGEN** relance la **descente au niveau 1** (c'est la partie normale).
+- Le bouton **CARTE D'ESSAI**, au bas du sous-menu Génération, crée une carte hors descente : taille, relief (Génération) et faune (Life) choisis par le joueur, palette de base, 2 gisements de métal et 2 de Matière à la taille 2. « Carte d'essai » s'affiche sous Statut à la place de « Niveau 1/5 · Plateau » ; y forer relance une carte d'essai.
+- Du 13 novembre 2026 après-midi jusqu'au soir, REGEN créait la carte d'essai et la descente se relançait depuis le Lab : l'utilisateur ne retrouvait plus les niveaux, inversé le jour même.
 
 ## 3 ter. Exploration automatique (13 novembre 2026)
 
