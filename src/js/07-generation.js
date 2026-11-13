@@ -192,7 +192,7 @@ function buildDisc(){
   const b=STEALTH_BASE,c=(a,f,w)=>stealthCalc(b,a,f,w),now=G.stealth||STEALTH_BASE;
   const rows=[
     ['Marcher','aucun',c('move',0,0)],
-    ['Briser une paroi (bruit)',`× ${String(DIG_MULT).replace('.',',')}, arrondi au supérieur`,c('dig',0,0)],
+    ['Briser une paroi (bruit)',`× ${String(DIG_MULT).replace('.',',')}, arrondi au supérieur ; le bruit s’entend aussi hors de vue`,c('dig',0,0)],
     ['Attendre sur place (Espace ou 5)','÷ 2, arrondi au supérieur',c('wait',0,0)],
     ['Sur des herbes couchées (couvert)','÷ 2, arrondi au supérieur',c('move',1,0)],
     ['Parois adjacentes (rocher ou montagne)',`− 1 par paroi, au plus − ${WALL_MAX}`,`${c('move',0,1)} (1 paroi) · ${c('move',0,3)} (3 parois) · ${c('move',0,5)} (5 parois ou plus)`]];
