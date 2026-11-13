@@ -42,8 +42,10 @@ const SEARCH_T=4;
    (NOTICE) à l'intérieur du rayon. Dans le rayon, elle ne vous perd jamais. */
 function voitForeuse(o,chasse){
   const d=Math.hypot(o.x-G.px,o.y-G.py);
-  if(!los(o.x,o.y,G.px,G.py))return false;
+  const bruit=lastAct==='dig';                                          // briser une paroi s'entend à travers les parois
+  if(!bruit&&!los(o.x,o.y,G.px,G.py))return false;
   if(chasse&&!o.lost){
+    if(!los(o.x,o.y,G.px,G.py))return false;
     if(d>G.stealth*HUNT_MULT)return false;
     if(d>G.stealth&&Math.random()<LOSE_TRACK){o.lost=1;return false;}   // perd la trace
     return true;}
@@ -52,7 +54,7 @@ function voitForeuse(o,chasse){
 function spot(o){o.mem=[G.px,G.py];o.search=0;o.stuck=0;o.lost=0;const dx=Math.sign(G.px-o.x);if(dx)o.dir=dx;}
 /* Chance qu'un ennemi calme vous remarque ce tour-ci (affichée au survol) : plate dans la portée de
    discrétion et en ligne de vue, nulle au-delà. Voir la portée de discrétion dans 09. */
-function detectChance(o){return (Math.hypot(o.x-G.px,o.y-G.py)<=(G.stealth||STEALTH_BASE)&&los(o.x,o.y,G.px,G.py))?Math.round(NOTICE*100):0;}
+function detectChance(o){return (Math.hypot(o.x-G.px,o.y-G.py)<=(G.stealth||STEALTH_BASE)&&(lastAct==='dig'||los(o.x,o.y,G.px,G.py)))?Math.round(NOTICE*100):0;}
 function forget(o){o.mem=null;o.search=0;o.stuck=0;o.lost=0;}
 // un pas vers la dernière position connue ; renvoie false quand il faut passer à la fouille
 function seekStep(o,swim,fits,DC){const [mx,my]=o.mem,k=mx+','+my+','+(swim?1:0),d=DC[k]||(DC[k]=distFrom(mx,my,swim)),h=d[idx(o.x,o.y)];
@@ -187,7 +189,7 @@ function packStep(b){const m=mates(b);if(!m.length)return false;const [cx,cy]=pa
   let best=null,bd=Math.hypot(b.x-cx,b.y-cy);
   for(const[dx,dy]of DIRS){const nx=b.x+dx,ny=b.y+dy;if(!diagOk(b.x,b.y,dx,dy)||!beastFits(b,nx,ny))continue;const d=Math.hypot(nx-cx,ny-cy);if(d<bd){bd=d;best=[nx,ny,dx];}}
   if(best){b.x=best[0];b.y=best[1];if(best[2])b.dir=best[2];return true;}return false;}
-// Cri d'alerte : tous les ennemis à 5 cases ou moins du cafar se mettent en chasse
+// Cri d'alerte (désactivé le 13 novembre 2026 : sp.alarm=false pour tous) : tous les ennemis à 5 cases ou moins du cafar se mettent en chasse
 const ALARM_R=5;
 function raiseAlarm(b){const sp=BEASTS[b.sp];let n=0;
   for(const o of G.beasts)if(o!==b&&Math.max(Math.abs(o.x-b.x),Math.abs(o.y-b.y))<=ALARM_R){if(!o.hunt)n++;o.hunt=1;spot(o);}   // le cri transmet la position de la foreuse

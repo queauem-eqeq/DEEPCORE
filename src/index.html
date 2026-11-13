@@ -12,6 +12,14 @@
     <div class="mfoot"><button id="bestReset">Valeurs par défaut</button><button class="go" id="bestSave" title="Enregistrer ces valeurs dans la base du jeu, lisible par Claude, pour qu’elles deviennent les valeurs de référence">Enregistrer</button><span class="saved" id="bestMsg" role="status"></span></div>
   </div>
 </div>
+<div class="modal" id="discretion" role="dialog" aria-modal="true" aria-labelledby="discTitle" hidden>
+  <div class="mcard">
+    <div class="mhead"><h2 id="discTitle">Discrétion</h2><button id="discClose" aria-label="Fermer la discrétion">Fermer</button></div>
+    <p class="mnote">La base s’applique immédiatement à la partie en cours et reste mémorisée dans ce navigateur.</p>
+    <div class="dlist" id="discList"></div>
+    <div class="mfoot"><button id="discReset">Valeur par défaut</button></div>
+  </div>
+</div>
 <div class="modal" id="viseurs" role="dialog" aria-modal="true" aria-labelledby="curTitle" hidden>
   <div class="mcard wide">
     <div class="mhead"><h2 id="curTitle">Tile editor</h2><button id="curClose" aria-label="Fermer le Tile editor">Fermer</button></div>
@@ -94,6 +102,7 @@
       <div class="foldwrap">
         <div class="labbtns">
           <button id="bestBtn">Bestiaire</button>
+          <button id="discBtn">Discrétion</button>
           <button id="curBtn">Tile editor</button>
           <button id="introBtn" title="Générer une nouvelle planète et rejouer la cinématique d’arrivée">Intro</button>
         </div>

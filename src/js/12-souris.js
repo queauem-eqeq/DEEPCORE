@@ -92,7 +92,7 @@ const TDESC={[GROUND]:['Sol rocheux','Praticable. Les points au sol se densifien
   [DECK]:['Soute du vaisseau','Praticable. La foreuse peut toujours y revenir ; la porte est à l’arrière.']};
 const BEHAV={insectoide:'Suit la foreuse à 2 ou 3 cases ; passe à l’attaque si un ennemi la chasse à proximité, et ne recule plus ensuite.',
   crabos:'Chasse la foreuse dès qu’il la voit et l’attaque au contact. Abandonne environ 8 tours après l’avoir perdue de vue.',
-  cafar:'Vit en bande. À la détection, pousse un cri d’alerte qui met en chasse tous les ennemis à 5 cases ou moins.'};
+  cafar:'Vit en bande : ce qu’un membre voit, toute la bande le sait.'};
 function inspectHTML(){const {x,y}=HOV;if(x<0||y<0||x>=W||y>=H)return '';
   const i=idx(x,y),seen=!fog||G.seen[i],see=!fog||vis[i],d=Math.max(Math.abs(x-G.px),Math.abs(y-G.py)),dt=d?`${d} case${d>1?'s':''}`:'ici';
   const head=(ic,n,ex)=>`<div class="ih">${ic?`<img src="${ic}" alt="">`:''}<b>${n}</b><span>${ex||''}</span></div>`;
@@ -126,7 +126,7 @@ function inspectHTML(){const {x,y}=HOV;if(x<0||y<0||x>=W||y>=H)return '';
   if(!see)out.push('<p>Hors de vue : souvenir du dernier passage.</p>');
   let act='';
   if(d===0)act=s?'<kbd>F</kbd> ou clic : forer ce site.':'';
-  else if(d===1&&occ)act='Clic : frapper avec la foreuse (10 énergie).';
+  else if(d===1&&occ)act='Clic : frapper avec la foreuse.';
   else if(d===1&&(t===ROCK||t===MOUNT))act=border?'':'Clic : coup de foreuse (10 énergie).';
   else if(d===1&&t===CHASM)act='';
   else if(d===1)act='Clic : avancer d’une case.';
