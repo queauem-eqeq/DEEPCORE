@@ -189,7 +189,7 @@ function packStep(b){const m=mates(b);if(!m.length)return false;const [cx,cy]=pa
   let best=null,bd=Math.hypot(b.x-cx,b.y-cy);
   for(const[dx,dy]of DIRS){const nx=b.x+dx,ny=b.y+dy;if(!diagOk(b.x,b.y,dx,dy)||!beastFits(b,nx,ny))continue;const d=Math.hypot(nx-cx,ny-cy);if(d<bd){bd=d;best=[nx,ny,dx];}}
   if(best){b.x=best[0];b.y=best[1];if(best[2])b.dir=best[2];return true;}return false;}
-// Cri d'alerte : tous les ennemis à 5 cases ou moins du cafar se mettent en chasse
+// Cri d'alerte (désactivé le 13 novembre 2026 : sp.alarm=false pour tous) : tous les ennemis à 5 cases ou moins du cafar se mettent en chasse
 const ALARM_R=5;
 function raiseAlarm(b){const sp=BEASTS[b.sp];let n=0;
   for(const o of G.beasts)if(o!==b&&Math.max(Math.abs(o.x-b.x),Math.abs(o.y-b.y))<=ALARM_R){if(!o.hunt)n++;o.hunt=1;spot(o);}   // le cri transmet la position de la foreuse
