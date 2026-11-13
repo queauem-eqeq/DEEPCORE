@@ -200,7 +200,11 @@ const BIOMES={
 // Courbe de difficulté, par niveau : m = multiplicateur du nombre de monstres ; metal, mat = gisements d'éclats de métal (réparation) et de
 // Matière (construction) POUR 1000 CASES de carte, quelle que soit la part de montagne du biome.
 // Plus on descend : plus de monstres, moins de réparation, plus de Matière.
-const COURBE=[null,{m:.7,metal:26,mat:3},{m:.85,metal:18,mat:6},{m:1,metal:12,mat:10},{m:1.25,metal:8,mat:14},{m:1.5,metal:4,mat:18}];
+// Durcie le 13 novembre 2026 (« il faut que ce soit plus dur ») : avant, m = 0,7 à 1,5 et métal = 26 à 4.
+const COURBE=[null,{m:1,metal:16,mat:3},{m:1.3,metal:11,mat:6},{m:1.6,metal:7,mat:10},{m:2,metal:4,mat:14},{m:2.5,metal:2,mat:18}];
+// Les ennemis eux-mêmes se renforcent avec la profondeur : +25 % de points de vie et de dégâts par niveau sous le premier (× 2 au niveau 5).
+// Tout le jeu lit les PV et les dégâts d'une espèce par pvDe / dmgDe ; hors descente (carte d'essai, mesures), le facteur vaut 1.
+const PROF_PAS=.25,profK=()=>G&&G.mode==='descente'?1+(G.niv-1)*PROF_PAS:1,pvDe=sp=>Math.round(sp.pv*profK()),dmgDe=sp=>Math.round(sp.dmg*profK());
 const TAILLES_NIV=[2,3,4,5];           // tailles tirées au hasard à partir du niveau 2 (le niveau 1 est toujours de taille 2)
 // biomes des niveaux 2 à 5 : quatre des cinq autres, du moins au plus dangereux
 function tirageBiomes(){return Object.keys(BIOMES).filter(k=>k!=='plateau').sort(()=>Math.random()-.5).slice(0,NIV_MAX-1).sort((a,b)=>BIOMES[a].rang-BIOMES[b].rang||Math.random()-.5);}

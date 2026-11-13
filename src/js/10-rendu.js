@@ -151,7 +151,7 @@ function render(){
     const px=(b.x-camX)*S+lx,py=(b.y-camY)*S+ly,img=TL['bz'+b.sp+(b.dir<0?'l':'r')];
     ctx.globalAlpha=1;ctx.drawImage(img,px,py,S,S);
     const fl=FX.find(f=>f.kind==='flash'&&f.beast===b);if(fl){ctx.globalCompositeOperation='lighter';ctx.globalAlpha=1-fxP(fl);ctx.drawImage(img,px,py,S,S);ctx.drawImage(img,px,py,S,S);ctx.globalCompositeOperation='source-over';ctx.globalAlpha=1;}
-    const pv=BEASTS[b.sp].pv;if(b.hp<pv){const w=S-6;ctx.fillStyle='#000';ctx.fillRect(px+3,py-4,w,3);ctx.fillStyle='#ff3b3b';ctx.fillRect(px+3,py-4,Math.round(w*b.hp/pv),3);}}
+    const pv=pvDe(BEASTS[b.sp]);if(b.hp<pv){const w=S-6;ctx.fillStyle='#000';ctx.fillRect(px+3,py-4,w,3);ctx.fillStyle='#ff3b3b';ctx.fillRect(px+3,py-4,Math.round(w*b.hp/pv),3);}}
   const wreck=BOOM||(G.over&&G.over.dead);   // foreuse détruite : plus dessinée
   if(!wreck){const [lx,ly]=lungeOff(f=>f.kind==='lunge'&&f.robot);ctx.globalAlpha=1;ctx.drawImage(TL['robot_'+(G.face||'u')],(G.px-camX)*S+lx,(G.py-camY)*S+ly,S,S);}
   for(const f of FX)if(f.kind==='tir'){const p=fxP(f),x=f.x0+(f.x1-f.x0)*p,y=f.y0+(f.y1-f.y0)*p;ctx.globalAlpha=1;ctx.fillStyle=PAL['1'];ctx.fillRect(Math.round((x+.5-camX)*S)-3,Math.round((y+.5-camY)*S)-3,6,6);}   // projectile d'un tireur

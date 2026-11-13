@@ -241,7 +241,7 @@ const ARME_FIXE='Il faut toujours une arme en main : équipez-en une autre pour 
 // consommables offensifs : ennemis à r cases ou moins, et onde de choc
 const invCibles=r=>[...(G.beasts||[]),...(G.animals||[])].filter(o=>Math.max(Math.abs(o.x-G.px),Math.abs(o.y-G.py))<=r);
 function invBoum(r,dm){let n=0,k=0;lastAct='dig';
-  for(const o of invCibles(r)){n++;const isB=G.beasts.includes(o),sp=isB?BEASTS[o.sp]:SPECIES[o.sp];o.hp=(o.hp??sp.pv)-dm;
+  for(const o of invCibles(r)){n++;const isB=G.beasts.includes(o),sp=isB?BEASTS[o.sp]:SPECIES[o.sp];o.hp=(o.hp??pvDe(sp))-dm;
     addFx({kind:'num',x:o.x,y:o.y,txt:'-'+dm,col:PAL['3'],dur:900});
     if(o.hp<=0){k++;(isB?G.beasts:G.animals).splice((isB?G.beasts:G.animals).indexOf(o),1);bleed(o.x,o.y);}
     else if(isB){o.hunt=1;spot(o);}else{o.aware=1;spot(o);}}

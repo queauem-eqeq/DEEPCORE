@@ -8,7 +8,7 @@ let miniDrag=null;
 const miniCell=ev=>{const r=mv.getBoundingClientRect();return [(ev.clientX-r.left)/r.width*W,(ev.clientY-r.top)/r.height*H];};
 function miniMove(ev){const [x,y]=miniCell(ev);camCX=Math.max(0,Math.min(W-1,Math.round(x-miniDrag.ox)));camCY=Math.max(0,Math.min(H-1,Math.round(y-miniDrag.oy)));render();}
 mv.addEventListener('pointerdown',ev=>{if(!G||!$('overlay').hidden||ev.button>0)return;ev.preventDefault();
-  if(TRAV)stopTravel('Trajet interrompu.');if(REST)stopRest('Repos interrompu.');if(INSPECT){INSPECT=false;$('inspTag').hidden=true;}
+  if(TRAV)stopTravel('Trajet interrompu.');if(REST)stopRest('Repos interrompu.');if(EXPL)stopExplore('Exploration interrompue.');if(INSPECT){INSPECT=false;$('inspTag').hidden=true;}
   if(!freeCam)setFreeCam(true);
   const vc=vw/S,vr=vh/S,[x,y]=miniCell(ev);camCX=camX+Math.floor(vc/2);camCY=camY+Math.floor(vr/2);
   const inside=x>=camX&&x<camX+vc&&y>=camY&&y<camY+vr;
@@ -45,12 +45,12 @@ function seenHTML(){
   for(let i=0;i<W*H;i++)if(vis[i]){const v=G.t[i];ter.set(v,(ter.get(v)||0)+1);}
   const near=(a,b)=>Math.hypot(a.x-G.px,a.y-G.py)-Math.hypot(b.x-G.px,b.y-G.py);
   const ans=[...(G.beasts||[]).filter(b=>vis[idx(b.x,b.y)]).map(b=>({o:b,sp:BEASTS[b.sp],ic:'bz'+b.sp+'r',hp:b.hp,st:b.hunt>0?(b.sees?'en chasse':b.search>0?'fouille':'cherche'):'',agg:true})),
-             ...(G.animals||[]).filter(a=>vis[idx(a.x,a.y)]).map(a=>({o:a,sp:SPECIES[a.sp],ic:'an'+a.sp+'r',hp:a.hp??SPECIES[a.sp].pv,st:{attack:'attaque',flee:'recule',follow:'suit',hold:'observe',seek:'cherche',search:'fouille'}[a.mode]||'',agg:a.mode==='attack'}))]
+             ...(G.animals||[]).filter(a=>vis[idx(a.x,a.y)]).map(a=>({o:a,sp:SPECIES[a.sp],ic:'an'+a.sp+'r',hp:a.hp??pvDe(SPECIES[a.sp]),st:{attack:'attaque',flee:'recule',follow:'suit',hold:'observe',seek:'cherche',search:'fouille'}[a.mode]||'',agg:a.mode==='attack'}))]
     .sort((p,q)=>near(p.o,q.o));
   if(ans.length){const max=6;
     const calc=e=>{const tmA=terrMod(e.o.x,e.o.y),tmR=terrMod(G.px,G.py),me=hitChance(G.st.pre,e.sp.esq+tmA),them=e.agg?hitChance(e.sp.pre,robotEsq()):null;return {tmA,tmR,me,them};};
     const head='<div class="hd"><span></span><span>Vie</span><span title="Votre chance de le toucher">Toucher</span><span title="Sa chance de vous toucher">Subir</span></div>';
-    out.push('<div class="grp">'+head+ans.slice(0,max).map(e=>{const pv=e.sp.pv,d=Math.max(Math.abs(e.o.x-G.px),Math.abs(e.o.y-G.py)),c=calc(e);
+    out.push('<div class="grp">'+head+ans.slice(0,max).map(e=>{const pv=pvDe(e.sp),d=Math.max(Math.abs(e.o.x-G.px),Math.abs(e.o.y-G.py)),c=calc(e);
       return `<div class="an${e.agg&&e.st?' hunt':''}" title="${e.sp.n}${e.st?' · '+e.st:''} · ${d} case${d>1?'s':''} · ${Math.max(0,e.hp)}/${pv} PV"><img src="${ICON[e.ic]||''}" alt="${e.sp.n}"><span class="hp">${asciiBar(Math.max(0,e.hp),pv,EBAR_N)}</span><span class="n" style="color:${chanceCol(c.me)}">${c.me} %</span><span class="n" style="color:${c.them==null?'var(--dim)':chanceCol(100-c.them)}">${c.them==null?'—':c.them+' %'}</span></div>`;}).join('')
     +(ans.length>max?`<div class="none">+ ${ans.length-max} autre${ans.length-max>1?'s':''}</div>`:'')+'</div>');
   }
@@ -91,7 +91,7 @@ addEventListener('keydown',ev=>{
   if(!$('bestiary').hidden){if(ev.key==='Escape'){ev.preventDefault();closeBest();}return;}
   if(!$('viseurs').hidden){if(ev.key==='Escape'){ev.preventDefault();closeCur();}return;}
   if(!$('overlay').hidden||ev.ctrlKey||ev.metaKey||ev.altKey||ev.target.tagName==='INPUT')return;const k=ev.key.toLowerCase();
-  if(TRAV||REST){if(!['shift','control','alt','meta'].includes(k)){ev.preventDefault();stopTravel('Trajet interrompu.');stopRest('Repos interrompu.');}return;}
+  if(TRAV||REST||EXPL){if(!['shift','control','alt','meta'].includes(k)){ev.preventDefault();stopTravel('Trajet interrompu.');stopRest('Repos interrompu.');stopExplore('Exploration interrompue.');}return;}
   if(k==='v'){ev.preventDefault();toggleVision();return;}
   if(INSPECT){ev.preventDefault();
     if(KEYS[k]){const st=ev.shiftKey?5:1;moveInspect(KEYS[k][0]*st,KEYS[k][1]*st);}
@@ -105,11 +105,13 @@ addEventListener('keydown',ev=>{
   if(k==='m'){ev.preventDefault();setFreeCam(!freeCam);return;}
   if(ev.key==='!'){ev.preventDefault();toggleSound();return;}
   if(freeCam){if(KEYS[k]){ev.preventDefault();const st=ev.shiftKey?5:2;panCam(KEYS[k][0]*st,KEYS[k][1]*st);}else if(k==='escape'){ev.preventDefault();setFreeCam(false);}else if(k==='b'){ev.preventDefault();toggleFog();}return;}
-  if(KEYS[k]){ev.preventDefault();tryMove(...KEYS[k]);}else if(k==='f'){ev.preventDefault();askDrill();}else if(k==='b'){ev.preventDefault();toggleFog();}else if(k==='r'){ev.preventDefault();toggleSprint();}else if(k==='p'){ev.preventDefault();startRest();}else if(k==='i'){ev.preventDefault();invToggle();}else if(k===' '||k==='5'||k==='.'||ev.code==='Numpad5'){ev.preventDefault();waitTurn();}
+  if(KEYS[k]){ev.preventDefault();tryMove(...KEYS[k]);}else if(k==='f'){ev.preventDefault();askDrill();}else if(k==='b'){ev.preventDefault();toggleFog();}else if(k==='r'){ev.preventDefault();toggleSprint();}else if(k==='p'){ev.preventDefault();startRest();}else if(k==='i'){ev.preventDefault();invToggle();}else if(k==='o'){ev.preventDefault();startExplore();}else if(k===' '||k==='5'||k==='.'||ev.code==='Numpad5'){ev.preventDefault();waitTurn();}
 });
 $('pad').addEventListener('click',ev=>{const b=ev.target.closest('button[data-d]');if(!b||!$('overlay').hidden)return;const [dx,dy]=b.dataset.d.split(',').map(Number);if(freeCam)panCam(dx*2,dy*2);else tryMove(dx,dy);});
 $('waitPad').onclick=waitTurn;
 $('restPad').onclick=()=>{if($('overlay').hidden)startRest();};
+$('restBtn').onclick=()=>{$('restBtn').blur();if($('overlay').hidden)startRest();};
+$('explBtn').onclick=()=>{$('explBtn').blur();if($('overlay').hidden)startExplore();};
 $('sprintBtn').onclick=()=>{if($('overlay').hidden)toggleSprint();};
 $('bestBtn').onclick=openBest;
 $('discBtn').onclick=openDisc;

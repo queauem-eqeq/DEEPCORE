@@ -98,15 +98,17 @@ La partie est une **descente en 5 niveaux** (5 pour commencer ; on allongera). F
 
 ### Courbe de difficulté
 
-| Niveau | Monstres (× l'effectif du biome) | Métal de réparation (gisements pour 1000 cases) | Matière (pour 1000 cases) |
-|---|---|---|---|
-| 1 | × 0,7 | 26 | 3 |
-| 2 | × 0,85 | 18 | 6 |
-| 3 | × 1 | 12 | 10 |
-| 4 | × 1,25 | 8 | 14 |
-| 5 | × 1,5 | 4 | 18 |
+| Niveau | Monstres (× l'effectif du biome) | PV et dégâts des ennemis | Métal de réparation (gisements pour 1000 cases) | Matière (pour 1000 cases) |
+|---|---|---|---|---|
+| 1 | × 1 | × 1 | 16 | 3 |
+| 2 | × 1,3 | × 1,25 | 11 | 6 |
+| 3 | × 1,6 | × 1,5 | 7 | 10 |
+| 4 | × 2 | × 1,75 | 4 | 14 |
+| 5 | × 2,5 | × 2 | 2 | 18 |
 
-Plus on descend : plus de monstres, moins de quoi se réparer, plus de Matière. Les gisements se comptent par surface de carte et non plus en part de la montagne, sinon un biome très rocheux (Galeries) aurait été le mieux fourni en réparation. **Courbe posée à la main, pas encore mesurée** : à régler en jouant, puis par simulation.
+Plus on descend : plus de monstres, plus coriaces, moins de quoi se réparer, plus de Matière. Les gisements se comptent par surface de carte et non plus en part de la montagne, sinon un biome très rocheux (Galeries) aurait été le mieux fourni en réparation.
+
+**Durcie le 13 novembre 2026** à la demande de l'utilisateur (« il faut que ce soit plus dur ») : la première courbe allait de × 0,7 à × 1,5 monstres, sans renforcement des ennemis, avec 26 à 4 gisements de métal. Le renforcement (+25 % de PV et de dégâts par niveau) s'applique en descente seulement ; les cartes d'essai et le Bestiaire gardent les valeurs de base. Mesures par niveau dans `mesures.md` : c'est l'équipement, tout donné au départ pour l'instant, qui rend le haut de la descente facile.
 
 ### Matière
 
@@ -115,6 +117,17 @@ Second métal, **couleur accent** (les éclats de réparation sont couleur bio),
 ### Cartes d'essai
 
 Le bouton **REGEN** ne lance plus une partie mais une **carte d'essai** : taille, relief (Génération) et faune (Life) choisis par le joueur, palette de base, 10 % de montagne en métal et 2 % en Matière. « Carte d'essai » s'affiche sous Statut ; y forer relance une carte d'essai. Le bouton **Nouvelle descente** du Lab repart au niveau 1. (Hypothèse retenue faute de réponse de l'utilisateur à la question : à confirmer.)
+
+## 3 ter. Exploration automatique (13 novembre 2026)
+
+Touche **O** ou bouton **EXPLORER** (sous MARCHE / INVENTAIRE, à côté d'un bouton REPOS) : la foreuse explore seule.
+
+- **Où elle va** : vers la case connue la plus proche d'où l'on découvre du terrain. Au passage elle ramasse ce qui est en vue : objets, Matière, joyau, et les éclats de réparation **seulement si la vie n'est pas pleine** (sinon elle les contourne pour ne pas les gâcher).
+- **Ce qu'elle ne fait jamais** : forer la roche, attaquer. Elle n'entre dans l'eau profonde que s'il ne reste rien d'autre à voir.
+- **Elle s'arrête** dès qu'un événement survient : une créature jamais signalée entre en vue (chaque créature n'interrompt qu'une fois, sinon un insectoïde qui suit la foreuse l'arrêterait sans cesse), un ennemi visible la chasse, elle est touchée, empoisonnée ou engluée, le site de forage ou un joyau est repéré, un message d'alerte tombe (embuscade, roche percée par un taupar…), ou à la moindre touche et au moindre clic. Le journal dit pourquoi. Appuyer de nouveau sur O reprend.
+- **Refusée** tant qu'un ennemi visible chasse la foreuse.
+- **Quand tout est exploré** : elle rejoint le site de forage s'il est connu (« [F] pour forer »), sinon « Plus rien à explorer sans forer la roche ».
+- Chaque pas est un déplacement normal : le temps passe, la course et la discrétion s'appliquent.
 
 ## 4. Terrains
 
@@ -325,7 +338,7 @@ La statistique **DÉT (détection)** par espèce a été supprimée le 13 novemb
 - Export / import texte : essayé puis retiré le 6 novembre 2026 (« on verra plus tard »).
 
 ### Touches
-ZQSD / flèches / pavé numérique : déplacer · A E W C : diagonales · Souris : survol = inspection, clic = y aller · X : inspection au clavier · R : courir / marcher · I : inventaire · F : forer · Espace / 5 : attendre · P : repos jusqu’à l’énergie pleine · V : portée de discrétion · B : brouillard de guerre · ! : son · M : mode carte (déplacements = défilement, Maj = plus vite, Échap ou M pour revenir).
+ZQSD / flèches / pavé numérique : déplacer · A E W C : diagonales · Souris : survol = inspection, clic = y aller · X : inspection au clavier · R : courir / marcher · I : inventaire · O : exploration automatique · F : forer · Espace / 5 : attendre · P : repos jusqu’à l’énergie pleine · V : portée de discrétion · B : brouillard de guerre · ! : son · M : mode carte (déplacements = défilement, Maj = plus vite, Échap ou M pour revenir).
 
 ## 10. Sauvegarde des réglages
 

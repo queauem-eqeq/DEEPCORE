@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Mesure la détection et la fuite en rejouant des situations dans le vrai moteur du jeu.
 
-    python3 outils/simul.py [detection|fuite|combat|tout]
+    python3 outils/simul.py [detection|fuite|combat|niveaux|tout]
 
 Les simulations tournent dans la page, sur une carte entièrement dégagée (ou avec l'obstacle voulu),
 en appelant directement animalsAct() et beastsAct(). Elles ne touchent ni aux fichiers ni à l'artefact.
@@ -123,9 +123,9 @@ COMBAT = COMMUN + """
 const N = 300, out = {};
 addFx = () => {}; render = () => {}; dead = () => {}; SND.on = false; fog = false;
 const neuf = () => { G.st = { vie: 100, vieMax: 100, energie: 100, energieMax: 100, repar: 0, power: 1, vitesse: 5, degats: 10, capteur: 10, cout: 10, pre: 80, esq: 10, crit: 5 };
-  G.inv = invTest(); G.eff = {}; G.over = null; G.sprint = false; G.debt = 0; G.time = 0; G.items = {}; G.ore = {}; G.gems = {}; G.blood = {}; G.log = []; };
+  G.inv = invTest(); G.eff = {}; G.mode = 'test'; G.niv = 0; G.over = null; G.sprint = false; G.debt = 0; G.time = 0; G.items = {}; G.ore = {}; G.gems = {}; G.blood = {}; G.log = []; };
 const equipe = (ks) => { for (const k of ks) invEquip(G.inv.findIndex(o => o.k === k)); };
-const bete = (sp, x, y) => ({ sp, x, y, hp: BEASTS[sp].pv, mp: 0, hunt: 1, dir: -1, pack: -1, mem: [G.px, G.py], search: 0, lost: 0 });
+const bete = (sp, x, y) => ({ sp, x, y, hp: pvDe(BEASTS[sp]), mp: 0, hunt: 1, dir: -1, pack: -1, mem: [G.px, G.py], search: 0, lost: 0 });
 const proche = () => { let b = null, bd = 1e9; for (const o of G.beasts) { const d = Math.max(Math.abs(o.x - G.px), Math.abs(o.y - G.py)); if (d < bd) { bd = d; b = o; } } return b; };
 const duel = (nom, pose, kit) => { let vic = 0, vie = 0, bat = 0;
   for (let e = 0; e < N; e++) { degager(); G.px = 30; G.py = 32; G.animals = []; G.amb = []; G.beasts = []; neuf(); equipe(kit || []); pose();
@@ -138,7 +138,13 @@ const duel = (nom, pose, kit) => { let vic = 0, vie = 0, bat = 0;
   out[nom] = `${Math.round(100 * vic / N)} % de victoires · vie restante ${vic ? Math.round(vie / vic) : '—'} · ${Math.round(bat / N)} battements`; };
 const seul = (sp, d) => () => { G.beasts.push(bete(sp, 30 + (d || 6), 32)); };
 const groupe = (sp, n) => () => { for (let k = 0; k < n; k++) G.beasts.push(bete(sp, 36 + (k >> 1), 31 + (k % 2) * 2)); };
-BEASTS.forEach((sp, i) => { if (sp.ambush) duel('1 ' + sp.n + ' (embusqué)', () => { G.amb.push({ sp: i, x: 31, y: 32, hp: sp.pv }); }); else duel('1 ' + sp.n, seul(i)); });
+/*CAS*/
+return JSON.stringify(out, null, 1);
+})()
+"""
+
+
+CAS_COMBAT = """BEASTS.forEach((sp, i) => { if (sp.ambush) duel('1 ' + sp.n + ' (embusqué)', () => { G.amb.push({ sp: i, x: 31, y: 32, hp: sp.pv }); }); else duel('1 ' + sp.n, seul(i)); });
 const I = k => BEASTS.findIndex(b => b.key === k);
 duel('2 Crabos', groupe(I('crabos'), 2)); duel('3 Cafars', groupe(I('cafar'), 3)); duel('4 Cafars', groupe(I('cafar'), 4));
 duel('2 Crachins', groupe(I('crachin'), 2)); duel('2 Vipérins', groupe(I('viperin'), 2)); duel('Mastok + 2 Crabos', () => { groupe(I('crabos'), 2)(); G.beasts.push(bete(I('mastok'), 38, 32)); });
@@ -147,10 +153,19 @@ duel('RÉF. (2 Crabos + 1 Vipérin) · foreuse nue', ref);
 for (const k of Object.keys(ITEMS)) { const d = ITEMS[k]; if (d.conso || d.base) continue; duel('RÉF. avec ' + d.n, ref, [k]); }
 duel('Mastok avec Marteau-pilon', seul(I('mastok')), ['pilon']); duel('Mastok avec Foret diamant', seul(I('mastok')), ['foret']);
 duel('Mastok avec Scie circulaire', seul(I('mastok')), ['scie']); duel('Mastok avec Lance thermique', seul(I('mastok')), ['lance']);
-return JSON.stringify(out, null, 1);
-})()
 """
-
+# Mêmes duels, mais en descente : à chaque niveau les ennemis gagnent des points de vie et des dégâts (profK).
+CAS_NIVEAUX = """
+const I = k => BEASTS.findIndex(b => b.key === k);
+const kit = ['scie', 'chassis', 'gyro', 'viseur', 'stabil'];
+for (let n = 1; n <= NIV_MAX; n++) { const en = f => () => { G.mode = 'descente'; G.niv = n; f(); };
+  duel('N' + n + ' · 1 Crabos · nue', en(seul(I('crabos'))));
+  duel('N' + n + ' · 2 Crabos + 1 Vipérin · nue', en(() => { groupe(I('crabos'), 2)(); G.beasts.push(bete(I('viperin'), 38, 32)); }));
+  duel('N' + n + ' · 2 Crabos + 1 Vipérin · équipée', en(() => { groupe(I('crabos'), 2)(); G.beasts.push(bete(I('viperin'), 38, 32)); }), kit);
+  duel('N' + n + ' · 1 Mastok · équipée', en(seul(I('mastok'))), kit); }
+"""
+NIVEAUX = COMBAT.replace('/*CAS*/', CAS_NIVEAUX)
+COMBAT = COMBAT.replace('/*CAS*/', CAS_COMBAT)
 
 async def principal(quoi: str) -> int:
     async with async_playwright() as p:
@@ -166,7 +181,7 @@ async def principal(quoi: str) -> int:
         # les scénarios supposent la carte d'origine (96 × 64) : la partie démarre maintenant sur une carte de taille 2
         await page.evaluate("setTaille(4);testGame();started=true")
 
-        for nom, code in (('DÉTECTION', DETECTION), ('FUITE', FUITE), ('COMBAT', COMBAT)):
+        for nom, code in (('DÉTECTION', DETECTION), ('FUITE', FUITE), ('COMBAT', COMBAT), ('NIVEAUX', NIVEAUX)):
             if quoi in ('tout', nom.lower().replace('é', 'e')):
                 print('\n===', nom, '===')
                 print(await page.evaluate(code))
@@ -177,7 +192,7 @@ async def principal(quoi: str) -> int:
 
 if __name__ == '__main__':
     choix = sys.argv[1] if len(sys.argv) > 1 else 'tout'
-    if choix not in ('detection', 'fuite', 'combat', 'tout'):
+    if choix not in ('detection', 'fuite', 'combat', 'niveaux', 'tout'):
         print(__doc__)
         sys.exit(2)
     sys.exit(asyncio.run(principal(choix)))

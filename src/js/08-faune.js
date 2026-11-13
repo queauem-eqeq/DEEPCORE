@@ -8,7 +8,7 @@ function spawnAnimals(){
   const pool=[...SPECIES.keys()].sort(()=>Math.random()-.5).slice(0,1);G.animals=[];G.fauna=[];G.pool=pool;
   for(let k=0,tries=0;k<LIFE.insectoide&&tries<LIFE.insectoide*300+500;tries++){const x=rnd(2,W-3),y=rnd(2,H-3),v=G.t[idx(x,y)];
     if(!(v===GROUND||v===GRASS||v===FLAT)||Math.hypot(x-G.px,y-G.py)<SZ(10,4)||animalAt(x,y))continue;
-    G.animals.push({sp:pool[k%pool.length],x,y,hp:SPECIES[pool[k%pool.length]].pv,mp:Math.random(),flee:0,dir:Math.random()<.5?1:-1});k++;}
+    G.animals.push({sp:pool[k%pool.length],x,y,hp:pvDe(SPECIES[pool[k%pool.length]]),mp:Math.random(),flee:0,dir:Math.random()<.5?1:-1});k++;}
 }
 // Insectoïde : une fois le robot repéré, il le suit à 2 ou 3 cases (recule au contact,
 // se rapproche au-delà de 3). Quand un crabos chasse le robot à proximité, il passe à l'attaque.
@@ -102,7 +102,7 @@ function beastFits(b,x,y){for(const[dx,dy]of FOOT){const cx=x+dx,cy=y+dy;if(cx<1
   if(!canWalk(v,!!BEASTS[b.sp].swim)||(cx===G.px&&cy===G.py)||animalAt(cx,cy)||ambAt(cx,cy))return false;const o=beastAt(cx,cy);if(o&&o!==b)return false;}return true;}
 const beastVisible=b=>!fog||FOOT.some(([dx,dy])=>vis[idx(b.x+dx,b.y+dy)]);
 function spawnBeasts(){G.beasts=[];G.beastSeen={};G.packs={};let packId=0;
-  const tryPut=(sp,x,y,pack)=>{const b={sp,x,y,hp:BEASTS[sp].pv,mp:Math.random(),hunt:0,dir:-1,pack};if(!beastFits(b,x,y))return false;G.beasts.push(b);return true;};
+  const tryPut=(sp,x,y,pack)=>{const b={sp,x,y,hp:pvDe(BEASTS[sp]),mp:Math.random(),hunt:0,dir:-1,pack};if(!beastFits(b,x,y))return false;G.beasts.push(b);return true;};
   for(let k=0,t=0;k<LIFE.crabos&&t<LIFE.crabos*400+500;t++){const x=rnd(2,W-4),y=rnd(2,H-4);if(Math.hypot(x-G.px,y-G.py)<SZ(20,6))continue;if(tryPut(0,x,y,-1))k++;}
   // cafars : bandes de 2 à 4 individus regroupés autour d'un point (tirage dans PACK_SIZES : 4 deux fois plus fréquent)
   const PACK_SIZES=[2,3,4,4];let left=LIFE.cafar||0;
@@ -115,7 +115,7 @@ function spawnBeasts(){G.beasts=[];G.beastSeen={};G.packs={};let packId=0;
   G.amb=[];
   BEASTS.forEach((sp,i)=>{if(i<2)return;const n=LIFE[sp.key]||0;
     for(let k=0,t=0;k<n&&t<n*400+500;t++){const x=rnd(2,W-3),y=rnd(2,H-3);if(Math.hypot(x-G.px,y-G.py)<SZ(sp.ambush?8:20,sp.ambush?3:6))continue;
-      if(sp.ambush){const v=G.t[idx(x,y)];if(!(v===GRASS||(t>n*200&&canWalk(v,false)))||ambAt(x,y)||beastAt(x,y)||animalAt(x,y)||(x===G.px&&y===G.py))continue;G.amb.push({sp:i,x,y,hp:sp.pv});k++;}
+      if(sp.ambush){const v=G.t[idx(x,y)];if(!(v===GRASS||(t>n*200&&canWalk(v,false)))||ambAt(x,y)||beastAt(x,y)||animalAt(x,y)||(x===G.px&&y===G.py))continue;G.amb.push({sp:i,x,y,hp:pvDe(sp)});k++;}
       else if(tryPut(i,x,y,-1))k++;}});}
 function robotDist(swim){return distFrom(G.px,G.py,swim);}
 function distFrom(tx,ty,swim){const d=new Int16Array(W*H).fill(-1),q=[idx(tx,ty)];d[q[0]]=0;
@@ -139,7 +139,7 @@ function hurtRobot(b,sp,o){sp=sp||BEASTS[b.sp];o=o||{};const le=sp.n.match(/^[ae
   if(!o.sur&&!roll(ch)){geste();addFx({kind:'num',x:G.px,y:G.py,txt:'0',col:'#8aa9a2',dur:750});
     SFX.whoosh();sayMore(`${le}${nom} ${verbe} et rate (${ch} %).`);return;}
   geste();
-  const cr=o.sur||roll(sp.crit||0),dm=sp.dmg*(cr?CRIT_X:1);   // coup critique de l'ennemi : selon sa stat CRIT
+  const cr=o.sur||roll(sp.crit||0),dm=dmgDe(sp)*(cr?CRIT_X:1);   // coup critique de l'ennemi : selon sa stat CRIT
   addFx({kind:'shake',amp:cr?9:5,dur:cr?320:220});G.st.vie=Math.max(0,G.st.vie-dm);addFx({kind:'num',x:G.px,y:G.py,txt:'-'+dm+(cr?'!':''),col:'#ff3b3b',dur:cr?1000:750});SFX.bite();sayMore(`${le}${nom} ${verbe}${o.sur?' par surprise':cr?' : coup critique':''} : −${dm} vie.`,'warn');
   if(G.st.vie<=0){G.over={dead:true};return;}
   const E=G.eff=G.eff||{},du=n=>G.st.isol>0?Math.ceil(n/2):n;

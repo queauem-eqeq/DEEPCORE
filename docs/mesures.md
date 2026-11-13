@@ -148,6 +148,26 @@ Réglages faits à la suite de la première mesure : Foret diamant affaibli (il 
 renforcé (il faisait moins bien que la foreuse nue), Stabilisateur ramené de +15 à +10, Gluar porté de 4 à 6 de dégâts, et la vie
 qui suit le maximum quand on équipe un châssis (sans quoi les +30 PV ne servaient à rien dans un combat).
 
+### Par niveau (durcissement du 13 novembre 2026)
+
+`python3 outils/simul.py niveaux` : mêmes duels, en descente. Les ennemis gagnent **25 % de points de vie et de dégâts par niveau**
+sous le premier (× 2 au niveau 5). « Équipée » = Scie circulaire, Châssis renforcé, Gyroscope, Viseur laser, Stabilisateur (130 PV).
+Chaque case : victoires / vie restante. 300 essais par cas.
+
+| Niveau | PV, dégâts | 1 Crabos, nue | 2 Crabos + 1 Vipérin, nue | 2 Crabos + 1 Vipérin, équipée | 1 Mastok, équipée |
+|---|---|---|---|---|---|
+| 1 | × 1 | 100 % / 86 | 80 % / 26 | 100 % / 98 | 100 % / 98 |
+| 2 | × 1,25 | 100 % / 78 | 29 % / 16 | 100 % / 76 | 98 % / 84 |
+| 3 | × 1,5 | 100 % / 68 | 15 % / 14 | 98 % / 69 | 95 % / 73 |
+| 4 | × 1,75 | 100 % / 57 | 1 % / 4 | 86 % / 51 | 82 % / 55 |
+| 5 | × 2 | 96 % / 55 | 0 % / — | 79 % / 48 | 59 % / 56 |
+
+Lecture : **l'équipement décide de tout**. Foreuse nue, le combat de référence est perdu d'avance dès le niveau 2 ; équipée, il reste
+confortable jusqu'au niveau 3 et ne devient risqué qu'aux niveaux 4 et 5 (un combat sur cinq perdu au niveau 5, le Mastok deux sur cinq).
+Tant que tout l'équipement est donné au départ, la partie reste donc facile en haut et dure seulement en bas ; la vraie courbe viendra
+quand les objets se gagneront en jeu. Un premier essai à +15 % par niveau laissait la foreuse équipée gagner 93 % des combats au
+niveau 5 : jugé trop doux, porté à +25 %.
+
 ## Piège de méthode
 
 Une mesure à longue distance exige de **dégager toute la carte**. Un relief laissé au hasard coupe la

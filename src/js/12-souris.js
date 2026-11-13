@@ -63,6 +63,57 @@ function travelStep(){const T=TRAV;if(!T)return;if(busy()){stopTravel();return;}
   const why=travelEvent(T);
   if(why||T.i>=T.path.length||busy()){stopTravel(why);return;}
   T.tm=setTimeout(travelStep,reduced?30:90);}
+/* ---------- Exploration automatique (touche O, bouton EXPLORER) ----------
+   La foreuse va d'elle-même à la case connue la plus proche d'où l'on découvre du terrain, en ramassant au passage ce qui est en vue
+   (objets, Matière, joyau, et les éclats de réparation seulement si la vie n'est pas pleine : sinon elle les contourne pour ne pas les gâcher).
+   Elle ne fore jamais et n'entre dans l'eau profonde que s'il ne reste rien d'autre. Elle s'arrête au moindre événement (exploreEvent),
+   à la moindre touche ou au moindre clic. Quand tout est exploré, elle rejoint le site de forage s'il est connu. */
+let EXPL=null;
+const EXPL_VUS=new WeakSet();   // créatures déjà signalées : chacune n'interrompt l'exploration qu'une fois (sinon un insectoïde qui suit la foreuse l'arrêterait sans cesse)
+function exploreScan(E,deep){const N=W*H,prev=new Int32Array(N).fill(-2),q=[idx(G.px,G.py)];prev[q[0]]=-1;const plein=G.st.vie>=G.st.vieMax;
+  const butin=j=>{if(G.items&&G.items[j]&&G.items[j].length)return 'un objet';const o=G.ore&&G.ore[j];if(o&&oreSol(o)&&(oreMat(o)||!plein))return oreMat(o)?'de la Matière':'des éclats de métal';
+    return G.gems&&G.gems[j]==='visible'?'un joyau':null;};
+  for(let k=0;k<q.length;k++){const c=q[k],x=c%W,y=(c/W)|0;
+    if(k>0){if(butin(c))return {c,prev};
+      if(!E.vu.has(c))for(const[dx,dy]of DIRS){const a=x+dx,b=y+dy;if(a>=0&&b>=0&&a<W&&b<H&&!G.seen[idx(a,b)])return {c,prev};}}
+    for(const[dx,dy]of DIRS){const a=x+dx,b=y+dy;if(a<1||b<1||a>=W-1||b>=H-1)continue;const j=idx(a,b);if(prev[j]!==-2||!G.seen[j])continue;const v=G.t[j];
+      if(blocks(v)||(v===DEEP&&!deep)||!diagOk(x,y,dx,dy)||occupant(a,b))continue;
+      const o=G.ore&&G.ore[j];if(plein&&o&&oreSol(o)&&!oreMat(o))continue;
+      prev[j]=c;q.push(j);}}
+  return null;}
+function exploreEvent(E){
+  if(G.st.vie<E.vie)return 'la foreuse est attaquée';
+  let nv=null;for(const e of [...(G.beasts||[]),...(G.animals||[])])if(vis[idx(e.x,e.y)]&&!EXPL_VUS.has(e)){EXPL_VUS.add(e);nv=nv||e;}
+  if(nv)return `${(G.beasts.includes(nv)?BEASTS:SPECIES)[nv.sp].n.toLowerCase()} en vue`;
+  if((G.beasts||[]).some(b=>b.hunt>0&&vis[idx(b.x,b.y)]))return 'un ennemi vous chasse';
+  if(G.sites.filter(s=>s.seen).length>E.sites)return 'site de forage repéré';
+  if(G.gems)for(const k in G.gems)if(vis[+k]&&!E.gk.has(k))return 'joyau repéré';
+  const ef=G.eff||{};if(ef.poison>0||ef.glu>0)return 'la foreuse subit un effet';
+  if(G.msg&&G.msg.c==='warn')return 'alerte';
+  return null;}
+function stopExplore(m,c){if(!EXPL)return;clearTimeout(EXPL.tm);EXPL=null;$('explBtn').classList.remove('on');if(m)sayMore(m,c||'warn');render();}
+function startExplore(){
+  if(EXPL){stopExplore('Exploration interrompue.');return;}
+  if(busy()||TRAV||REST)return;
+  if((G.beasts||[]).some(b=>b.hunt>0&&vis[idx(b.x,b.y)])){say('Un ennemi vous chasse : pas d’exploration automatique.','warn');SFX.blocked();render();return;}
+  const gk=new Set();if(G.gems)for(const k in G.gems)if(vis[+k])gk.add(k);
+  for(const e of [...(G.beasts||[]),...(G.animals||[])])if(vis[idx(e.x,e.y)])EXPL_VUS.add(e);
+  EXPL={gk,vie:G.st.vie,sites:G.sites.filter(s=>s.seen).length,vu:new Set(),n:0,tm:0};$('explBtn').classList.add('on');
+  say('Exploration automatique. Une touche ou un clic pour l’arrêter.','info');exploreStep();}
+function exploreStep(){const E=EXPL;if(!E)return;if(busy()){stopExplore();return;}
+  E.vu.add(idx(G.px,G.py));
+  const r=exploreScan(E,false)||exploreScan(E,true);
+  if(!r){const s=G.sites.find(s=>s.seen);
+    if(s&&!(s.x===G.px&&s.y===G.py)){stopExplore('Tout est exploré : la foreuse rejoint le site de forage.','info');goTo(s.x,s.y);}
+    else stopExplore(s?'Tout est exploré. [F] pour forer.':'Plus rien à explorer sans forer la roche.','info');
+    return;}
+  let c=r.c;const s0=idx(G.px,G.py);while(r.prev[c]!==s0)c=r.prev[c];
+  const turn=G.turn;tryMove(c%W-G.px,((c/W)|0)-G.py);E.n++;
+  if(EXPL!==E)return;
+  if(G.turn===turn){stopExplore('Exploration interrompue : passage bloqué.');return;}
+  if(busy()){stopExplore();return;}
+  const why=exploreEvent(E);if(why){stopExplore(why==='alerte'?'Exploration interrompue.':`Exploration interrompue : ${why}.`);return;}
+  E.tm=setTimeout(exploreStep,reduced?20:70);}
 /* ---------- Repos (touche P) : attendre jusqu'à l'énergie pleine ----------
    Chaque battement est une attente normale (recharge doublée, portée de discrétion ÷ 2). Le repos
    s'arrête dès que l'énergie est pleine, qu'une créature entre dans le champ de vision, qu'un ennemi
@@ -78,7 +129,7 @@ function restEvent(T){
   for(const a of G.animals||[])if(a.aware&&vis[idx(a.x,a.y)])return `${SPECIES[a.sp].n.toLowerCase()} vous a repéré`;
   return null;}
 function startRest(){
-  if(busy()||TRAV)return;
+  if(busy()||TRAV||EXPL)return;
   if(G.st.energie>=G.st.energieMax){say('Énergie déjà au maximum : repos inutile.');SFX.blocked();render();return;}
   const T={seen:visibles(),vie:G.st.vie,n:0,tm:0},why=restEvent(T);
   if(why){say(`Repos impossible : ${why}.`,'warn');SFX.blocked();render();return;}
@@ -104,7 +155,7 @@ cv.addEventListener('pointerdown',ev=>{lastPT=ev.pointerType||'mouse';});
 cv.addEventListener('pointermove',ev=>{if(ev.pointerType==='touch'||!G)return;const c=cellAt(ev);if(c.x<0||c.y<0||c.x>=W||c.y>=H)return;
   if(!HOV||HOV.x!==c.x||HOV.y!==c.y){HOV=c;render();}});
 cv.addEventListener('pointerleave',()=>{if(INSPECT||lastPT==='touch')return;if(HOV){HOV=null;render();}});
-cv.addEventListener('click',ev=>{if(busy())return;if(REST){stopRest('Repos interrompu.');return;}if(TRAV){stopTravel('Trajet interrompu.');return;}
+cv.addEventListener('click',ev=>{if(busy())return;if(EXPL){stopExplore('Exploration interrompue.');return;}if(REST){stopRest('Repos interrompu.');return;}if(TRAV){stopTravel('Trajet interrompu.');return;}
   const c=cellAt(ev);if(c.x<0||c.y<0||c.x>=W||c.y>=H)return;
   // écran tactile : un premier appui inspecte et montre le trajet, un second sur la même case lance le déplacement
   if(lastPT==='touch'&&(!HOV||HOV.x!==c.x||HOV.y!==c.y)){HOV=c;render();return;}
@@ -140,12 +191,12 @@ function inspectHTML(){const {x,y}=HOV;if(x<0||y<0||x>=W||y>=H)return '';
   const occ=see?occupant(x,y):null;
   if(d===0){const st=G.st;out.push(head(ICON.robot_r,'Foreuse U-7',dt),
     `<div class="kv"><span>Vie <b>${Math.ceil(st.vie)}/${st.vieMax}</b></span><span>Énergie <b>${Math.floor(st.energie)}/${st.energieMax}</b></span><span>ESQ <b>${robotEsq()}</b></span></div>`);}
-  else if(occ){const isB=(G.beasts||[]).includes(occ),sp=isB?BEASTS[occ.sp]:SPECIES[occ.sp],key=isB?sp.key:'insectoide',hp=Math.max(0,occ.hp??sp.pv);
+  else if(occ){const isB=(G.beasts||[]).includes(occ),sp=isB?BEASTS[occ.sp]:SPECIES[occ.sp],key=isB?sp.key:'insectoide',hp=Math.max(0,occ.hp??pvDe(sp));
     const P=isB&&sp.pack&&G.packs?G.packs[occ.pack]:null;
     const state=isB?(occ.hunt>0?(occ.sees?'en chasse':occ.search>0?'fouille les environs':'se dirige vers votre dernière position connue'):P?(P.pause>0?'au repos':'en route'):'erre'):({attack:'attaque',flee:'recule',follow:'suit',hold:'observe',seek:'se dirige vers votre dernière position connue',search:'fouille les environs'}[occ.mode]||'ne vous a pas repéré');
     const me=hitChance(G.st.pre,sp.esq+terrMod(x,y)),them=isB||occ.mode==='attack'?hitChance(sp.pre,robotEsq()):null;
     out.push(head(ICON[isB?'bz'+occ.sp+'r':'an'+occ.sp+'r'],sp.n,`${state} · ${dt}`),
-      `<div class="kv"><span>PV <b>${hp}/${sp.pv}</b></span><span>DÉG <b>${sp.dmg}</b></span><span>PRE <b>${sp.pre}</b></span><span>ESQ <b>${sp.esq+terrMod(x,y)}</b></span><span>VIT <b>${sp.v}</b></span></div>`,
+      `<div class="kv"><span>PV <b>${hp}/${pvDe(sp)}</b></span><span>DÉG <b>${dmgDe(sp)}</b></span><span>PRE <b>${sp.pre}</b></span><span>ESQ <b>${sp.esq+terrMod(x,y)}</b></span><span>VIT <b>${sp.v}</b></span></div>`,
       ((isB?!(occ.hunt>0):!occ.mode)?`<p class="eye" title="Chance qu’il vous repère à chaque tour">${EYE_SVG} <b>${detectChance(occ)} %</b></p>`:''),
       `<p>Toucher <b style="color:${chanceCol(me)}">${me} %</b> · Subir <b style="color:${them==null?'var(--dim)':chanceCol(100-them)}">${them==null?'—':them+' %'}</b></p>`,
       `<p>${BEHAV[key]}</p>`);}
