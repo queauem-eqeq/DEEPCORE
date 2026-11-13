@@ -164,7 +164,7 @@ function beastAway(b){let best=null,bd=(b.x-G.px)**2+(b.y-G.py)**2;
   for(const[dx,dy]of [...DIRS].sort(()=>Math.random()-.5)){const nx=b.x+dx,ny=b.y+dy;if(!diagOk(b.x,b.y,dx,dy)||!beastFits(b,nx,ny))continue;const nd=(nx-G.px)**2+(ny-G.py)**2;if(nd>bd){bd=nd;best=[nx,ny,dx];}}
   if(best){b.x=best[0];b.y=best[1];if(best[2])b.dir=best[2]>0?1:-1;return true;}return false;}
 // Creuseur : chemin le plus court en comptant la roche comme franchissable (4 directions) ; une paroi sur le chemin est percée, ce qui prend le battement
-function rockFalls(i){if(G.dmg)delete G.dmg[i];G.t[i]=RUBBLE;if(G.gems&&G.gems[i]==='cache')G.gems[i]='visible';if(G.ore&&G.ore[i]&&!oreSol(G.ore[i]))G.ore[i]='sol'+oreLv(G.ore[i]);}
+function rockFalls(i){if(G.dmg)delete G.dmg[i];G.t[i]=RUBBLE;if(G.gems&&G.gems[i]==='cache')G.gems[i]='visible';if(G.ore&&G.ore[i]&&!oreSol(G.ore[i]))G.ore[i]=(oreMat(G.ore[i])?'m':'')+'sol'+oreLv(G.ore[i]);}
 function digDist(tx,ty){const d=new Int16Array(W*H).fill(-1),q=[idx(tx,ty)];d[q[0]]=0;
   for(let k=0;k<q.length;k++){const c=q[k],x=c%W,y=(c/W)|0;for(let n=0;n<4;n++){const a=x+DIRS[n][0],b=y+DIRS[n][1];if(a<1||b<1||a>=W-1||b>=H-1)continue;
     const j=idx(a,b),v=G.t[j];if(d[j]>=0||!(canWalk(v,false)||v===ROCK||v===MOUNT))continue;d[j]=d[c]+1;q.push(j);}}return d;}

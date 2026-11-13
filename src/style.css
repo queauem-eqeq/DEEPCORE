@@ -263,3 +263,5 @@ kbd{font-family:var(--mono);color:var(--fg);border:1px solid var(--line);padding
 .gen .g.niv span{font-size:11px;color:var(--fg);text-align:right;white-space:nowrap}
 .gen .g.niv.tout{padding-bottom:6px;border-bottom:1px solid var(--line)}
 .gen .g.niv.tout label{color:var(--fg)}
+.lvl{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--c3);margin:-4px 0 8px}
+.bnum.mat{color:var(--c1)}

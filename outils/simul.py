@@ -163,6 +163,8 @@ async def principal(quoi: str) -> int:
             await page.wait_for_timeout(500)
             if not await page.locator('#introCv').is_visible():
                 break
+        # les scénarios supposent la carte d'origine (96 × 64) : la partie démarre maintenant sur une carte de taille 2
+        await page.evaluate("setTaille(4);testGame();started=true")
 
         for nom, code in (('DÉTECTION', DETECTION), ('FUITE', FUITE), ('COMBAT', COMBAT)):
             if quoi in ('tout', nom.lower().replace('é', 'e')):

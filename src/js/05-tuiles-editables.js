@@ -42,12 +42,14 @@ function tileCanvas(src,w=16,h=16){const c=document.createElement('canvas');c.wi
 // reconstruit une tuile retouchée et ses variantes
 function rebuildTile(k){for(const d of TILE_DEPS[k]||[k]){if(d==='ship')TL.ship=tileCanvas(TF('ship'),SGW*16,SGH*16);else if(PAT[d])TL[d]=tileCanvas(PAT[d]);if(/^(an|bz)\d+r$|^robot_r$/.test(d)){try{ICON[d]=TL[d].toDataURL();}catch(e){}}}buildCursor();if(k==='robot_u')robotTiles();}
 function buildTiles(){
-  TL={};for(const k in PAT)TL[k]=tileCanvas(PAT[k]);TL.ship=tileCanvas(TF('ship'),SGW*16,SGH*16);buildCursor();
+  TL={};for(const k in PAT)TL[k]=tileCanvas(PAT[k]);
+  // la Matière reprend les dessins des éclats de métal (retouches comprises), en couleur accent au lieu de bio
+  for(const k of ['ore','ore1','ore2','oreSol','oreSol1','oreSol2']){const f=TF(k);TL[k.replace('ore','mat')]=tileCanvas((x,y)=>{const c=f(x,y);return c==='2'?'1':c;});}TL.ship=tileCanvas(TF('ship'),SGW*16,SGH*16);buildCursor();
   ICON={};for(const k in TL)if(/^(an|bz)\d+r$|^robot_r$/.test(k)){try{ICON[k]=TL[k].toDataURL();}catch(e){}}
   robotTiles();
   ANIMG=SPECIES.map((_,i)=>{try{return TL['an'+i+'r'].toDataURL();}catch(e){return '';}});
   const r=document.documentElement.style;r.setProperty('--c1',PAL['1']);r.setProperty('--c2',PAL['2']);r.setProperty('--c3',PAL['3']);
-  ['1','2','3'].forEach(k=>{$('pc'+k).style.background=PAL[k];$('pc'+k).title=PAL[k];});
+  ['1','2','3'].forEach(k=>{$('pc'+k).style.background=PAL_U[k];$('pc'+k).title=PAL_U[k];});
 }
-function setPal(p){PAL=p;try{localStorage.setItem('np-palette',JSON.stringify(PAL));}catch(e){}touchLocal();buildTiles();render();}
+function setPal(p){PAL_U=p;try{localStorage.setItem('np-palette',JSON.stringify(PAL_U));}catch(e){}touchLocal();palBiome(TEINTE);buildTiles();render();}
 

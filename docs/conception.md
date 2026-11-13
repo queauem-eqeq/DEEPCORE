@@ -8,7 +8,7 @@
 
 ## 1. Concept
 
-Roguelike au tour par tour dans une esthétique inspirée de Cogmind et de Brogue (aucun élément repris de ces jeux). Un robot foreur explore la surface d'une planète inconnue (niveau 1), cherche un site de forage, puis fore pour descendre au niveau 2 (pas encore conçu : l'écran de fin de niveau propose une nouvelle planète).
+Roguelike au tour par tour dans une esthétique inspirée de Cogmind et de Brogue (aucun élément repris de ces jeux). Un robot foreur explore la surface d'une planète inconnue (niveau 1), cherche le site de forage, puis fore pour descendre : cinq niveaux, un biome par niveau, jusqu'au noyau (§ 3 bis).
 
 ## 2. Direction visuelle
 
@@ -70,6 +70,51 @@ Le sous-menu Life ne demande plus un nombre d'individus mais une **intensité** 
 | Infesté | × 4 | 4 |
 
 Nombre de créatures = effectif de référence de l'espèce (colonne « Référence » du § 7) × coefficient × surface de la carte rapportée à la taille 4, avec le minimum du niveau (2 pour les cafars, qui vont en bande). En taille 4 et au niveau Normal on retrouve les effectifs d'avant ; en taille 1, un ou deux individus par espèce, et « Infesté » en donne au moins quatre. Les anciens réglages en nombres sont convertis au niveau le plus proche. Mémorisé sous `np-intens` (l'ancienne clé `np-life` n'est plus écrite).
+
+## 3 bis. Descente : niveaux, biomes, difficulté (13 novembre 2026)
+
+La partie est une **descente en 5 niveaux** (5 pour commencer ; on allongera). Forer le site d'un niveau fait arriver sur une nouvelle carte, d'un autre biome ; on ne remonte pas. Forer le site du niveau 5 atteint le noyau : écran « NOYAU ATTEINT ».
+
+- **Niveau 1** : toujours le biome Plateau, **taille 2** (48 × 32), avec le vaisseau.
+- **Niveaux 2 à 5** : taille **tirée au hasard entre 2 et 5** (la taille 1, trop petite, reste réservée aux essais) ; pas de vaisseau, la foreuse débouche du puits sur un carré de sol dégagé.
+- **Biomes** : quatre des cinq autres biomes sont tirés au début de la descente et rangés du moins au plus dangereux (rang).
+- **Ce que la foreuse emporte** : vie, énergie, équipement, bonus de joyaux, Matière, journal. Les effets durables (poison, glu) et les objets laissés au sol sont perdus.
+- **Carte d'arrivée** : une fiche annonce le niveau, le biome, sa faune et ses gisements, puis « Continuer ».
+- **En jeu** : « Niveau 2/5 · Marécage » sous le titre Statut.
+- **Mort** : nouvelle descente au niveau 1.
+
+### Biomes : un relief, une faune
+
+| Biome | Rang | Relief (eau / montagne / gouffre / herbe, en %) | Faune (intensité, § 3) | Idée |
+|---|---|---|---|---|
+| Plateau | 1 | 8 / 10 / 3 / 14 | Insectoïde normal, Crabos rare, Cafar rare | l'arrivée : ouvert, peu de danger |
+| Marécage | 2 | 30 / 6 / 1 / 28 | Crabos nombreux, Tapi normal, Gluar normal, Vipérin rare, Insectoïde rare | les crabos nagent, la glu et l'eau ralentissent la fuite |
+| Hautes herbes | 2 | 6 / 6 / 2 / 55 | Tapi nombreux, Insectoïde normal, Siphon normal, Crachin rare | on se cache bien, les embusqués aussi |
+| Galeries | 3 | 2 / 46 / 3 / 4 (bruit) | Cafar nombreux, Taupar normal, Vipérin normal, Gluar rare | couloirs étroits, bandes, parois percées |
+| Pierrier | 3 | 1 / 14 / 6 / 2 (bruit) | Crachin nombreux, Siphon normal, Crabos rare, Mastok rare | à découvert sous les tirs |
+| Failles | 4 | 4 / 22 / 18 / 6 | Mastok nombreux, Vipérin nombreux, Cafar normal, Taupar rare | gouffres partout, les plus gros ennemis |
+
+**Palette** : la même partout (choix de l'utilisateur), avec une petite variation par biome appliquée à la palette du joueur : rotation de teinte de 4 à 18°, clarté et saturation de la couleur monde légèrement modifiées. Le sous-menu Palette règle toujours la palette de base.
+
+### Courbe de difficulté
+
+| Niveau | Monstres (× l'effectif du biome) | Métal de réparation (gisements pour 1000 cases) | Matière (pour 1000 cases) |
+|---|---|---|---|
+| 1 | × 0,7 | 26 | 3 |
+| 2 | × 0,85 | 18 | 6 |
+| 3 | × 1 | 12 | 10 |
+| 4 | × 1,25 | 8 | 14 |
+| 5 | × 1,5 | 4 | 18 |
+
+Plus on descend : plus de monstres, moins de quoi se réparer, plus de Matière. Les gisements se comptent par surface de carte et non plus en part de la montagne, sinon un biome très rocheux (Galeries) aurait été le mieux fourni en réparation. **Courbe posée à la main, pas encore mesurée** : à régler en jouant, puis par simulation.
+
+### Matière
+
+Second métal, **couleur accent** (les éclats de réparation sont couleur bio), mêmes dessins et mêmes trois tailles. Pris dans la montagne, il tombe quand on brise la paroi (ou qu'un taupar la perce) ; passer dessus ajoute **10, 15 ou 20** à la réserve **Matière**, affichée sous les jauges. La Matière servira à construire de l'équipement (plus tard) ; elle ne sert encore à rien.
+
+### Cartes d'essai
+
+Le bouton **REGEN** ne lance plus une partie mais une **carte d'essai** : taille, relief (Génération) et faune (Life) choisis par le joueur, palette de base, 10 % de montagne en métal et 2 % en Matière. « Carte d'essai » s'affiche sous Statut ; y forer relance une carte d'essai. Le bouton **Nouvelle descente** du Lab repart au niveau 1. (Hypothèse retenue faute de réponse de l'utilisateur à la question : à confirmer.)
 
 ## 4. Terrains
 
@@ -237,7 +282,7 @@ La statistique **DÉT (détection)** par espèce a été supprimée le 13 novemb
 
 ## 8. Objectifs et progression
 
-- 5 sites de forage, profondeur 1 à 5 (une de chaque), révélée en passant dessus. La profondeur n'a pas encore d'effet de jeu.
+- **Un seul site de forage par carte** depuis le 13 novembre 2026 (5 auparavant), toujours de **profondeur 10** : simple valeur affichée, sans effet de jeu (choix de l'utilisateur). Il est placé dans le tiers de la carte le plus éloigné de l'arrivée : il faut la traverser. Forer fait descendre au niveau suivant (§ 3 bis).
 - Forage : touche F sur un site → confirmation → descente → écran « Entrée niveau 2 ».
 - **1 joyau** par planète, au cœur d'un massif (8 voisines en roche, jamais en bordure), visible dès que la case est vue. Briser la roche, le ramasser → choix de **3 améliorations tirées au hasard** parmi : Vie max +10, Énergie max +10, EYE +1, DEG +5, PRE +5, ESQ +5, POW +1, VIT +1 (13 novembre 2026).
 - **Éclats de métal** (9 novembre 2026) : **10 % des cases de montagne** (hors rangée extérieure indestructible et joyau ; réglage `ORE_PCT` dans la génération) montrent des éclats de métal couleur bio — ceux pris au cœur d'un massif ne se voient qu'en creusant jusqu'à eux. Briser la paroi les fait **tomber au sol** ; la foreuse qui passe dessus les ramasse et regagne des PV selon la **densité** : **petits +10 PV** (50 % des éclats), **moyens +15 PV** (30 %), **gros +20 PV** (20 %), sans dépasser la vie max (réglages `ORE_PV`, `ORE_MIX`). Chaque densité a sa tuile, dans la paroi et au sol. Signalés dans la fiche de survol (plus de liste dans « En vue » depuis le 13 novembre 2026). Tuiles éditables : Éclats petits / moyens / gros, en montagne et au sol (dessins retouchés au Tile editor et adoptés comme norme le 9 novembre 2026).

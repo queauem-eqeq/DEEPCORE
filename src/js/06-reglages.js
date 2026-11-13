@@ -36,7 +36,8 @@ try{const i=JSON.parse(localStorage.getItem('np-intens')||'null');
   if(i&&typeof i==='object'){for(const k in INTENS)if(i[k]>=0&&i[k]<=4)INTENS[k]=Math.round(i[k]);}
   else{const l=JSON.parse(localStorage.getItem('np-life')||'null');if(l&&typeof l.crabos==='number')for(const k in INTENS)if(typeof l[k]==='number')INTENS[k]=nivDe(k,l[k]);}}catch(e){}
 let LIFE={};
-function lifeCalc(){const surf=W*H/(96*64);for(const k in INTENS){const [,c,mn]=NIVEAUX[INTENS[k]];LIFE[k]=c?Math.max(mn,k==='cafar'?2:1,Math.round(LIFE_REF[k]*c*surf)):0;}}   // les cafars vont au moins par deux
+function lifeCalc(niv,mult){const src=niv||INTENS,m=mult||1,surf=W*H/(96*64);   // niv, mult : niveaux d'un biome et multiplicateur de profondeur (descente) ; sans eux, les réglages du joueur (carte d'essai)
+  for(const k in INTENS){const [,c,mn]=NIVEAUX[src[k]||0];LIFE[k]=c?Math.max(mn,k==='cafar'?2:1,Math.round(LIFE_REF[k]*c*surf*m)):0;}}   // les cafars vont au moins par deux
 lifeCalc();
 function intensAff(){LIFE_LBL.forEach(([k])=>{$('lr-'+k).value=INTENS[k];$('ll-'+k).textContent=NIVEAUX[INTENS[k]][0];});
   const v=Object.values(INTENS),m=v.every(x=>x===v[0]);$('lr-tout').value=m?v[0]:2;$('ll-tout').textContent=m?NIVEAUX[v[0]][0]:'Mixte';}
@@ -45,7 +46,7 @@ function setIntens(k,v){v=Math.max(0,Math.min(4,Math.round(+v||0)));if(k==='tout
 function buildLife(){
   const row=(k,l,cls)=>`<div class="g niv${cls||''}"><label for="lr-${k}">${l}</label><input type="range" id="lr-${k}" min="0" max="4" step="1" value="2" aria-label="Intensité : ${l}" aria-describedby="ll-${k}"><span id="ll-${k}"></span></div>`;
   $('life').innerHTML=row('tout','Toutes',' tout')+LIFE_LBL.map(([k,l])=>row(k,l)).join('')
-    +'<div class="sum">Intensité par espèce : Aucun, Rare, Normal, Nombreux, Infesté. Le nombre de créatures suit la taille de la carte. Appliqué au prochain lancement.</div>';
+    +'<div class="sum">Intensité par espèce : Aucun, Rare, Normal, Nombreux, Infesté. Le nombre de créatures suit la taille de la carte. S’applique aux cartes d’essai (REGEN) ; en descente, chaque biome a sa faune.</div>';
   ['tout',...LIFE_LBL.map(l=>l[0])].forEach(k=>$('lr-'+k).addEventListener('input',e=>setIntens(k,e.target.value)));
   intensAff();
 }

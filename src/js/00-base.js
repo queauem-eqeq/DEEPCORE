@@ -1,4 +1,4 @@
-let W=96,H=64;const NSITES=5,S=32;
+let W=96,H=64;const NSITES=1,S=32;   // un seul site de forage par carte (13 novembre 2026)
 // Taille de la carte : réglage « Taille » de Génération, de 1 à 5 ; 4 = la taille d'origine (96 × 64)
 const SIZES=[null,[32,22],[48,32],[72,48],[96,64],[144,96]];
 function setSize(n){const s=SIZES[n]||SIZES[4];W=s[0];H=s[1];F=W/96;}

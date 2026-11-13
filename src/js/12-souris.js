@@ -151,12 +151,13 @@ function inspectHTML(){const {x,y}=HOV;if(x<0||y<0||x>=W||y>=H)return '';
       `<p>${BEHAV[key]}</p>`);}
   else out.push(head('',tn,dt));
   const s=siteAt(x,y);
-  if(s)out.push(`<p><b>Site de forage ${s.id}</b> · ${s.known?`profondeur ${s.depth} niveau${s.depth>1?'x':''}.`:'non analysé : placez la foreuse dessus pour mesurer sa profondeur.'}</p>`);
+  if(s)out.push(`<p><b>Site de forage</b> · ${s.known?`profondeur ${s.depth}. [F] pour forer et descendre.`:'non analysé : placez la foreuse dessus.'}</p>`);
   const gm=G.gems&&G.gems[i];
   if(gm==='visible')out.push('<p><b>Joyau</b> · placez la foreuse dessus pour le ramasser et choisir une amélioration.</p>');
   else if(gm==='cache')out.push('<p><b>Joyau pris dans la roche</b> · brisez la roche pour le libérer.</p>');
   const om=G.ore&&G.ore[i];
-  if(om&&oreSol(om))out.push(`<p><b>Éclats de métal ${ORE_NOM[oreLv(om)]}</b> · placez la foreuse dessus pour les ramasser : +${ORE_PV[oreLv(om)]} PV.</p>`);
+  if(om&&oreMat(om))out.push(oreSol(om)?`<p><b>Matière</b> · placez la foreuse dessus pour la ramasser : +${ORE_PV[oreLv(om)]} en réserve.</p>`:`<p><b>Matière prise dans la montagne</b> · brisez la paroi pour la faire tomber (+${ORE_PV[oreLv(om)]}).</p>`);
+  else if(om&&oreSol(om))out.push(`<p><b>Éclats de métal ${ORE_NOM[oreLv(om)]}</b> · placez la foreuse dessus pour les ramasser : +${ORE_PV[oreLv(om)]} PV.</p>`);
   else if(om)out.push('<p><b>Éclats de métal '+ORE_NOM[oreLv(om)]+' pris dans la montagne</b> · brisez la paroi pour les faire tomber (+'+ORE_PV[oreLv(om)]+' PV).</p>');
   const sol=G.items&&G.items[i];
   if(sol&&sol.length)out.push(`<p><b>${sol.length>1?'Objets au sol':'Objet au sol'}</b> · ${sol.map(k=>ITEMS[k].n).join(', ')} · placez la foreuse dessus pour ramasser.</p>`);
