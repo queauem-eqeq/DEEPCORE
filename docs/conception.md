@@ -211,10 +211,15 @@ Décisions validées le 6 novembre 2026 :
 
 ## 12. Pistes ouvertes
 
+Chiffres à l'appui dans `mesures.md`, points de comparaison avec Brogue dans `brogue.md`.
+
 - Niveau 2 (sous-sol) : à concevoir (salles par accrétion ou caverne par automate cellulaire).
 - Donner un effet à la profondeur des sites (risque / récompense).
 - Récompenser les combats (fragments, énergie).
-- Brancher la vitesse du robot (sprint coûtant de l'énergie).
+- **Brancher la vitesse du robot** (sprint coûtant de l'énergie). C'est la piste la plus mûre : la stat
+  VIT est affichée mais n'a aucun effet, et tant qu'on ne peut pas prendre de distance, fuir à découvert
+  de près est impossible (voir `mesures.md`). C'est aussi ce qui donnerait tout son sens à la perte de
+  trace à 3 %, qui ne joue qu'au-delà du rayon de discrétion.
 - Source de soin limitée (kits, forage qui répare).
 - Exploration automatique façon Brogue (vers la zone inexplorée la plus proche), sur le même moteur de trajet.
 - Fait le 6 novembre 2026 : projet sous git, fichiers séparés par thème. Reste possible : passer à de vrais modules ES (imports) si la portée globale partagée devient gênante (niveau 2).
