@@ -110,19 +110,21 @@ Le jeu ne compte plus en tours mais en **unités de temps**, comme Brogue et Cog
 
 ## 6 bis. Inventaire et équipement (13 novembre 2026)
 
-Première version, **en phase d'essai** : les neuf objets sont donnés au départ, non équipés, pour pouvoir tout essayer.
+Première version, **en phase d'essai** : tous les objets sont donnés au départ, non équipés, pour pouvoir tout essayer.
 
 - **Emplacements** : 1 arme, 1 armure, 3 accessoires. Le sac n'a pas de limite pour l'instant.
-- **Ouverture** : bouton « INVENTAIRE » à côté de « MARCHE / COURSE », ou touche **I**. Le panneau s'ouvre dans la colonne, sous le statut, et reste ouvert d'une partie à l'autre (`np-inv`).
-- **Liste** : une ligne par objet, précédée d'un signe (`/` arme, `[` armure, `=` accessoire). Un objet **équipé reste dans la liste**, en couleur monde, avec la mention « équipé ».
-- **Fiche** de l'objet choisi (un clic) : dessin **ASCII coloré** aux couleurs de la palette, description, effets (en accent s'ils sont favorables, en rouge sinon), boutons **Équiper / Retirer** (ou **Utiliser** pour un futur consommable) et **Jeter**. Double-clic sur une ligne = équiper ou retirer.
+- **Ouverture** : bouton « INVENTAIRE » à côté de « MARCHE / COURSE », ou touche **I**. L'inventaire est une **fenêtre plein écran, comme le Tile editor** (le panneau dans la colonne, essayé d'abord, a été abandonné le jour même). Le jeu ne reçoit plus les touches tant qu'elle est ouverte ; le temps ne passe pas.
+- **Liste à gauche** : une ligne par objet, précédée d'un signe (`/` arme, `[` armure, `=` accessoire, `!` consommable), suivie de son type. Un objet **équipé reste dans la liste**, en couleur monde, avec la mention « équipé ». Les consommables identiques s'empilent (« ×2 »).
+- **Fiche à droite** de l'objet choisi : dessin **ASCII coloré** aux couleurs de la palette, description, effets (en accent s'ils sont favorables, en rouge sinon), boutons **Équiper / Retirer / Utiliser** et **Jeter**. Le dernier message est répété sous la liste, le journal étant caché.
+- **Choisir** : à la souris (clic ; double-clic = Entrée) ou au clavier : ↑ ↓ (ou Z S, 8 2) pour parcourir, **Entrée** pour équiper, retirer ou utiliser, **J** (ou Suppr) pour jeter, **G** pour ramasser ce qui est sous la foreuse, **I** ou **Échap** pour fermer.
 - **Équiper** est gratuit et instantané. Une arme ou une armure remplace celle qui est portée ; un 4ᵉ accessoire est refusé tant qu'un emplacement n'est pas libéré.
 - **Effets** : l'objet ajoute ses modificateurs aux stats tant qu'il est porté ; les stats modifiées s'affichent en couleur dans « Statistiques ». Les bonus des joyaux s'additionnent.
-- **Jeter** pose l'objet au sol sous la foreuse (tuile « Objet au sol », retouchable au Tile editor). Repasser sur la case le ramasse ; sans bouger, bouton « Ramasser » dans le panneau. La fiche de survol nomme les objets posés.
+- **Consommables** : usage unique, gratuit et instantané pour l'instant. Refusé si la jauge est déjà pleine (l'objet n'est pas perdu) ; le surplus au-delà du maximum est perdu.
+- **Jeter** pose l'objet (un seul exemplaire pour une pile) au sol sous la foreuse (tuile « Objet au sol », retouchable au Tile editor). Repasser sur la case le ramasse ; sans bouger, touche G ou bouton « Ramasser ». La fiche de survol nomme les objets posés.
 - **Durée du coup** : une arme peut allonger ou raccourcir le coup de foreuse (§ 5 bis) ; plancher à 25.
 - « Pas de blindage » (§ 11) tient toujours : aucune armure ne réduit les dégâts, elles jouent sur la vie max, l'esquive ou la discrétion.
 
-| Objet | Emplacement | Effets |
+| Objet | Type | Effets |
 |---|---|---|
 | Foret diamant | arme | DEG +4, PRE +10, coup rapide (75) |
 | Marteau-pilon | arme | DEG +10, PRE −10, coup lent (150) |
@@ -133,10 +135,12 @@ Première version, **en phase d'essai** : les neuf objets sont donnés au dépar
 | Viseur laser | accessoire | CRIT +10 % |
 | Condensateur | accessoire | POW +1 |
 | Gyroscope | accessoire | ESQ +10 |
+| Réparobots (×2 au départ) | consommable | Vie +50 |
+| Batterie (×2 au départ) | consommable | Énergie +50 |
 
 Ces valeurs sont des valeurs d'essai, **pas encore équilibrées** : rien n'étant équipé au départ, les mesures de `mesures.md` restent valables. À refaire quand les objets se gagneront en jeu.
 
-Reste à faire : faire **trouver** les objets (au sol, lâchés par les ennemis, fabrication plus tard) et retirer le sac de départ ; attaques spéciales (plus tard) ; décider si équiper prend du temps ; limite du sac ; pilotage de l'inventaire au clavier.
+Reste à faire : faire **trouver** les objets (au sol, lâchés par les ennemis, fabrication plus tard) et retirer le sac de départ ; attaques spéciales (plus tard) ; décider si équiper ou utiliser prend du temps ; limite du sac.
 
 ## 7. Bestiaire
 

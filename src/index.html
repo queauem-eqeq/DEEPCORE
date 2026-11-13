@@ -41,6 +41,13 @@
     </div>
   </div>
 </div>
+<div class="modal" id="inventaire" role="dialog" aria-modal="true" aria-labelledby="invTitle" hidden>
+  <div class="mcard wide" tabindex="-1">
+    <div class="mhead"><h2 id="invTitle">Inventaire</h2><button id="invClose" aria-label="Fermer l’inventaire">Fermer</button></div>
+    <div class="inv" id="inv"></div>
+    <p class="mnote"><kbd>↑</kbd> <kbd>↓</kbd> choisir · <kbd>Entrée</kbd> équiper, retirer ou utiliser · <kbd>J</kbd> jeter · <kbd>G</kbd> ramasser ce qui est au sol · <kbd>I</kbd> ou <kbd>Échap</kbd> fermer · double-clic = Entrée</p>
+  </div>
+</div>
 <div class="off" id="off" hidden><p>SIGNAL COUPÉ</p><button id="offOn">Rallumer</button></div>
 <canvas class="intro" id="introCv" hidden aria-label="Cinématique d’arrivée sur la planète"></canvas>
 <div class="introskip" id="introSkip" hidden>Échap : passer · clic : activer le son</div>
@@ -61,12 +68,8 @@
       <div class="rows">
         <div class="bar2"><span>Vie</span><span class="abar life" role="meter" aria-label="Vie" id="lifeT"></span><span class="bnum" id="lifeN"></span></div>
         <div class="bar2"><span>Énergie</span><span class="abar energy" role="meter" aria-label="Énergie" id="enT"></span><span class="bnum" id="enN"></span></div>
-        <div class="btnrow"><button id="sprintBtn" class="pace" aria-pressed="false" title="Courir ou marcher (R) : la course double la vitesse et coûte 5 d’énergie par pas">MARCHE</button><button id="invBtn" class="pace" aria-pressed="false" aria-controls="invPanel" title="Ouvrir ou fermer l’inventaire (I)">INVENTAIRE</button></div>
+        <div class="btnrow"><button id="sprintBtn" class="pace" aria-pressed="false" title="Courir ou marcher (R) : la course double la vitesse et coûte 5 d’énergie par pas">MARCHE</button><button id="invBtn" class="pace" aria-haspopup="dialog" title="Ouvrir l’inventaire (I)">INVENTAIRE</button></div>
       </div>
-    </div>
-    <div id="invPanel" hidden>
-      <h2>Inventaire</h2>
-      <div class="inv" id="inv"></div>
     </div>
     <details class="fold" id="fd-stats">
       <summary><h2>Statistiques</h2></summary>

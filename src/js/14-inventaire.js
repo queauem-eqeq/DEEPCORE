@@ -5,6 +5,7 @@
    sans rien savoir de l'équipement, et les joyaux (qui modifient aussi G.st) s'additionnent sans conflit.
    Champs de mod : degats, pre, crit, esq, vitesse, capteur, power, vieMax,
                    dis (portée de discrétion, en cases), coup (durée d'un coup de foreuse, en unités de temps).
+   Consommables (conso) : usage unique, empilés (n exemplaires sur une ligne).
    Dessins : art = lignes de caractères ; col = même grille, une couleur par caractère
              (w blanc · 1 accent · 2 bio · 3 monde · e énergie · r rouge · d gris · . couleur du texte). */
 const SLOTS={arme:{n:1,nom:'Arme',g:'/'},armure:{n:1,nom:'Armure',g:'['},acc:{n:3,nom:'Accessoire',g:'='}};
@@ -121,11 +122,43 @@ const ITEMS={
          '....333w333....',
          '..dd3dd1dd3dd..',
          '....333w333....',
-         '.......w.......']}
+         '.......w.......']},
+  // Consommables : conso = usage unique ; plein(st) = inutile dans cet état ; use(st) applique l'effet et renvoie ce qu'il a rendu
+  repar:{n:'Réparobots',pl:1,conso:1,eff:'Vie +50',
+    d:'Essaim de micro-robots réparateurs : rend 50 points de vie.',
+    plein:st=>st.vie>=st.vieMax,non:'Vie déjà au maximum : réparobots inutiles.',
+    use:st=>{const a=st.vie;st.vie=Math.min(st.vieMax,st.vie+50);return `+${Math.round(st.vie-a)} PV`;},
+    art:['    ┌─────┐    ',
+         '  ┌─┴─────┴─┐  ',
+         '  │   ▐█▌   │  ',
+         '  │ ▐█████▌ │  ',
+         '  │   ▐█▌   │  ',
+         '  └─────────┘  '],
+    col:['....ddddddd....',
+         '..ddddddddddd..',
+         '..w...222...w..',
+         '..w.2222222.w..',
+         '..w...222...w..',
+         '..wwwwwwwwwww..']},
+  batterie:{n:'Batterie',f:1,conso:1,eff:'Énergie +50',
+    d:'Cellule de secours : rend 50 points d’énergie.',
+    plein:st=>st.energie>=st.energieMax,non:'Énergie déjà au maximum : batterie inutile.',
+    use:st=>{const a=st.energie;st.energie=Math.min(st.energieMax,st.energie+50);return `+${Math.round(st.energie-a)} énergie`;},
+    art:['  ┌─────────┐  ',
+         '  │███▓▓▒▒░░├┐ ',
+         '  │███▓▓▒▒░░││ ',
+         '  │███▓▓▒▒░░├┘ ',
+         '  └─────────┘  '],
+    col:['..ddddddddddd..',
+         '..deeeeeeeeeww.',
+         '..deeeeeeeeeww.',
+         '..deeeeeeeeeww.',
+         '..ddddddddddd..']}
 };
-// Objets donnés au départ, non équipés (phase d'essai : plus tard ils se trouveront au sol ou sur les ennemis)
-const INV_TEST=['foret','pilon','chassis','furtif','servo','optique','viseur','conden','gyro'];
-const invTest=()=>INV_TEST.map(k=>({k,eq:0}));
+// Objets donnés au départ, non équipés (phase d'essai : plus tard ils se trouveront au sol ou sur les ennemis).
+// Le second terme est le nombre d'exemplaires d'un consommable : ils s'empilent sur une seule ligne (« ×2 »).
+const INV_TEST=[['foret'],['pilon'],['chassis'],['furtif'],['servo'],['optique'],['viseur'],['conden'],['gyro'],['repar',2],['batterie',2]];
+const invTest=()=>INV_TEST.map(([k,n])=>n?{k,eq:0,n}:{k,eq:0});
 const ACOL={w:'#fff','1':'var(--c1)','2':'var(--c2)','3':'var(--c3)',e:'var(--energy)',r:'var(--life)',d:'var(--dim)'};
 const escH=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 // dessin ASCII coloré : regroupe les caractères voisins de même couleur
@@ -136,61 +169,83 @@ function artHTML(d){return d.art.map((l,y)=>{let h='',x=0;const m=d.col[y]||'';
 const signe=v=>(v>0?'+':'−')+Math.abs(v);
 // « DEG +4 » ; la durée du coup se lit mieux en clair : « coup rapide (75) », 100 étant le coup ordinaire
 const modLib=(k,v)=>k==='coup'?`coup ${v<0?'rapide':'lent'} (${DUR.coup+v})`:`${MODS[k][0]} ${signe(v)}${MODS[k][2]}`;
-function modHTML(d){return Object.entries(d.mod||{}).map(([k,v])=>
-  `<span style="color:${v*MODS[k][1]>0?'var(--c1)':'var(--life)'}">${modLib(k,v)}</span>`).join(' · ');}
+function modHTML(d){if(d.conso)return `<span style="color:var(--c1)">${d.eff}</span> · usage unique`;
+  return Object.entries(d.mod||{}).map(([k,v])=>`<span style="color:${v*MODS[k][1]>0?'var(--c1)':'var(--life)'}">${modLib(k,v)}</span>`).join(' · ');}
 const modTxt=d=>Object.entries(d.mod||{}).map(([k,v])=>modLib(k,v)).join(', ');
+const typeNom=d=>d.conso?'Consommable':SLOTS[d.slot].nom;
+const accord=d=>(d.f?'e':'')+(d.pl?'s':'');   // « équipée », « utilisés »
 // total apporté par l'équipement porté sur une stat (sert à colorer le panneau Statistiques)
 function invBonus(k){let s=0;for(const o of (G&&G.inv)||[])if(o.eq)s+=(ITEMS[o.k].mod||{})[k]||0;return s;}
 function invApply(o,sg){const m=ITEMS[o.k].mod||{},st=G.st;for(const k in m)st[k]=(st[k]||0)+sg*m[k];st.vie=Math.min(st.vieMax,st.vie);}
 const invCount=s=>G.inv.filter(o=>o.eq&&ITEMS[o.k].slot===s).length;
 
-let INV_SEL=-1,INV_H=null;
+let INV_SEL=0,INV_H=null,INV_MSG=null;   // INV_MSG : dernier message, répété dans la fenêtre (le journal est caché derrière)
+function invSay(m,c){say(m,c);INV_MSG={m,c:c||''};}
 function invChanged(){computeFOV();turnStealth();render();}
-function invEquip(i){const o=G.inv[i];if(!o||G.over)return;const d=ITEMS[o.k],e=d.f?'e':'';
-  if(d.use){d.use(G.st);G.inv.splice(i,1);INV_SEL=Math.min(INV_SEL,G.inv.length-1);say(`${d.n} utilisé${e}.`,'good');SFX.done();invChanged();return;}
-  if(o.eq){invApply(o,-1);o.eq=0;say(`${d.n} retiré${e}.`);SFX.door();invChanged();return;}
+// retire un exemplaire de la ligne i (toute la ligne s'il n'en reste plus)
+function invTake(i){const o=G.inv[i];if((o.n||1)>1)o.n--;else{G.inv.splice(i,1);INV_SEL=Math.max(0,Math.min(INV_SEL,G.inv.length-1));}}
+// Entrée ou bouton principal : utiliser un consommable, équiper ou retirer un équipement
+function invEquip(i){const o=G.inv[i];if(!o||G.over)return;const d=ITEMS[o.k],e=accord(d);
+  if(d.conso){
+    if(d.plein(G.st)){invSay(d.non,'warn');SFX.blocked();render();return;}
+    const r=d.use(G.st);invTake(i);invSay(`${d.n} utilisé${e} : ${r}.`,'good');SFX.spot();invChanged();return;}
+  if(o.eq){invApply(o,-1);o.eq=0;invSay(`${d.n} retiré${e}.`);SFX.door();invChanged();return;}
   const sl=SLOTS[d.slot];let rem='';
   if(invCount(d.slot)>=sl.n){
-    if(sl.n>1){say(`Les ${sl.n} emplacements d’accessoire sont pris : retirez-en un d’abord.`,'warn');SFX.blocked();render();return;}
+    if(sl.n>1){invSay(`Les ${sl.n} emplacements d’accessoire sont pris : retirez-en un d’abord.`,'warn');SFX.blocked();render();return;}
     const old=G.inv.find(p=>p.eq&&ITEMS[p.k].slot===d.slot);invApply(old,-1);old.eq=0;rem=` à la place de : ${ITEMS[old.k].n}`;}
-  o.eq=1;invApply(o,1);say(`${d.n} équipé${e}${rem} (${modTxt(d)}).`,'good');SFX.done();invChanged();}
+  o.eq=1;invApply(o,1);invSay(`${d.n} équipé${e}${rem} (${modTxt(d)}).`,'good');SFX.done();invChanged();}
 function invDrop(i){const o=G.inv[i];if(!o||G.over)return;const d=ITEMS[o.k];
   if(o.eq){invApply(o,-1);o.eq=0;}
-  G.inv.splice(i,1);INV_SEL=Math.min(INV_SEL,G.inv.length-1);
+  invTake(i);
   const c=idx(G.px,G.py);G.items=G.items||{};(G.items[c]=G.items[c]||[]).push(o.k);
-  say(`${d.n} jeté${d.f?'e':''} au sol.`);SFX.thud();invChanged();}
+  invSay(`${d.n} jeté${accord(d)} au sol.`);SFX.thud();invChanged();}
 // ramasse tout ce qui est posé sous la foreuse ; more : à la suite d'un déplacement (complète le message du pas)
 function invPickup(more){const c=idx(G.px,G.py),l=G.items&&G.items[c];if(!l||!l.length)return false;
-  for(const k of l)G.inv.push({k,eq:0});delete G.items[c];
-  (more?sayMore:say)(`${l.length>1?'Objets ramassés':'Objet ramassé'} : ${l.map(k=>ITEMS[k].n).join(', ')}.`,'good');SFX.spot();return true;}
+  for(const k of l){const pile=ITEMS[k].conso&&G.inv.find(o=>o.k===k);if(pile)pile.n=(pile.n||1)+1;else G.inv.push(ITEMS[k].conso?{k,eq:0,n:1}:{k,eq:0});}
+  delete G.items[c];
+  (more?sayMore:invSay)(`${l.length>1?'Objets ramassés':'Objet ramassé'} : ${l.map(k=>ITEMS[k].n).join(', ')}.`,'good');SFX.spot();return true;}
 
-function invHTML(){const inv=G.inv||[];if(INV_SEL>=inv.length)INV_SEL=inv.length-1;
+/* Fenêtre plein écran (comme le Tile editor) : la liste à gauche, la fiche de l'objet choisi à droite. */
+function invHTML(){const inv=G.inv||[];INV_SEL=Math.max(0,Math.min(INV_SEL,inv.length-1));
   const cnt=s=>`${SLOTS[s].nom} <b>${invCount(s)}/${SLOTS[s].n}</b>`;
-  let h=`<div class="islots"><span>${cnt('arme')}</span><span>${cnt('armure')}</span><span>${cnt('acc')}</span></div>`;
+  let h=`<div class="iwrap"><div class="ileft"><div class="islots"><span>${cnt('arme')}</span><span>${cnt('armure')}</span><span>${cnt('acc')}</span></div>`;
   h+=inv.length?`<div class="ilist" role="listbox" aria-label="Objets portés">${inv.map((o,i)=>{const d=ITEMS[o.k];
-    return `<button class="it${o.eq?' eq':''}${i===INV_SEL?' sel':''}" data-i="${i}" role="option" aria-selected="${i===INV_SEL}"><i>${SLOTS[d.slot]?SLOTS[d.slot].g:'!'}</i><span>${d.n}</span><em>${o.eq?'équipé':''}</em></button>`;}).join('')}</div>`
-    :'<p class="inone">Aucun objet.</p>';
+    return `<button class="it${o.eq?' eq':''}${i===INV_SEL?' sel':''}" data-i="${i}" role="option" aria-selected="${i===INV_SEL}"><i>${d.conso?'!':SLOTS[d.slot].g}</i><span>${d.n}${(o.n||1)>1?' ×'+o.n:''}</span><em>${typeNom(d)}</em><em class="st">${o.eq?'équipé':''}</em></button>`;}).join('')}</div>`
+    :'<p class="inone">Le sac est vide.</p>';
+  const sol=G.items&&G.items[idx(G.px,G.py)];
+  if(sol&&sol.length)h+=`<div class="isol"><span>Au sol ici : ${sol.map(k=>ITEMS[k].n).join(', ')}</span><button class="pace" data-a="pick">Ramasser</button></div>`;
+  h+='</div>';
   const o=inv[INV_SEL];
   if(o){const d=ITEMS[o.k];
     h+=`<div class="idet"><pre class="iart" aria-hidden="true">${artHTML(d)}</pre>
-      <div class="inm"><b>${d.n}</b><span>${d.slot?SLOTS[d.slot].nom:'Consommable'}${o.eq?' · équipé':''}</span></div>
+      <div class="inm"><b>${d.n}${(o.n||1)>1?' ×'+o.n:''}</b><span>${typeNom(d)}${o.eq?' · équipé':''}</span></div>
       <p>${d.d}</p><p class="imods">${modHTML(d)}</p>
-      <div class="ibtns"><button class="pace on" data-a="eq">${d.use?'Utiliser':o.eq?'Retirer':'Équiper'}</button><button class="pace" data-a="drop">Jeter</button></div></div>`;}
-  else if(inv.length)h+='<p class="inone">Choisissez un objet pour le voir, l’équiper ou le jeter.</p>';
-  const sol=G.items&&G.items[idx(G.px,G.py)];
-  if(sol&&sol.length)h+=`<div class="isol"><span>Au sol ici : ${sol.map(k=>ITEMS[k].n).join(', ')}</span><button class="pace" data-a="pick">Ramasser</button></div>`;
+      <div class="ibtns"><button class="pace on" data-a="eq">${d.conso?'Utiliser':o.eq?'Retirer':'Équiper'}</button><button class="pace" data-a="drop">Jeter</button></div></div>`;}
+  else h+='<div class="idet"><p>Aucun objet à afficher.</p></div>';
+  h+=`</div><p class="imsg ${INV_MSG?INV_MSG.c:''}" role="status">${INV_MSG?INV_MSG.m:'&nbsp;'}</p>`;
   return h;}
 // redessine seulement si quelque chose a changé : le rendu tourne en continu, et reconstruire les boutons ferait rater des clics
-function invDraw(){const el=$('inv');if(!el||!G||!G.inv)return;const h=invHTML();if(h!==INV_H){el.innerHTML=h;INV_H=h;}}
-function invOpen(on){const p=$('invPanel'),b=$('invBtn');p.hidden=!on;b.classList.toggle('on',on);b.setAttribute('aria-pressed',on);
-  try{localStorage.setItem('np-inv',on?'open':'closed');}catch(e){}
-  if(on){invDraw();p.scrollIntoView({block:'nearest'});}}
-const invToggle=()=>invOpen($('invPanel').hidden);
-$('invBtn').onclick=()=>{invToggle();$('invBtn').blur();};
+function invDraw(){const el=$('inv');if(!el||!G||!G.inv)return;const h=invHTML();if(h===INV_H)return;el.innerHTML=h;INV_H=h;
+  const s=el.querySelector('.it.sel');if(s)s.scrollIntoView({block:'nearest'});}
+function invOpen(on){const m=$('inventaire');
+  if(on){if(TRAV||REST){stopTravel('Trajet interrompu.');stopRest('Repos interrompu.');}
+    INV_MSG=null;invDraw();m.hidden=false;m.querySelector('.mcard').focus();}
+  else{m.hidden=true;render();}}
+const invToggle=()=>invOpen($('inventaire').hidden);
+// touches de la fenêtre : appelée par le gestionnaire de clavier (11-interface) tant qu'elle est ouverte
+function invKey(ev){if(ev.ctrlKey||ev.metaKey||ev.altKey)return;const k=ev.key.toLowerCase(),n=G.inv.length,d=KEYS[k];
+  if(k==='escape'||k==='i'){ev.preventDefault();invOpen(false);return;}
+  if(d&&d[0]===0&&n){ev.preventDefault();INV_SEL=(INV_SEL+d[1]+n)%n;INV_MSG=null;invDraw();return;}
+  if((k==='enter'||k===' ')&&ev.target.tagName==='BUTTON')return;        // un bouton a le focus : le laisser faire son clic
+  if(k==='enter'||k===' '){ev.preventDefault();invEquip(INV_SEL);}
+  else if(k==='j'||k==='delete'||k==='backspace'){ev.preventDefault();invDrop(INV_SEL);}
+  else if(k==='g'){ev.preventDefault();if(invPickup())render();}}
+$('invBtn').onclick=()=>{$('invBtn').blur();invOpen(true);};
+$('invClose').onclick=()=>invOpen(false);
+$('inventaire').addEventListener('pointerdown',ev=>{if(ev.target===$('inventaire'))invOpen(false);});   // clic hors de la fenêtre
 $('inv').addEventListener('click',ev=>{
   const a=ev.target.closest('[data-a]');
-  if(a){if(TRAV||REST){stopTravel('Trajet interrompu.');stopRest('Repos interrompu.');}
-    if(a.dataset.a==='eq')invEquip(INV_SEL);else if(a.dataset.a==='drop')invDrop(INV_SEL);else if(invPickup())render();return;}
-  const r=ev.target.closest('[data-i]');if(r){const i=+r.dataset.i;INV_SEL=i===INV_SEL?-1:i;invDraw();}});
+  if(a){if(a.dataset.a==='eq')invEquip(INV_SEL);else if(a.dataset.a==='drop')invDrop(INV_SEL);else if(invPickup())render();return;}
+  const r=ev.target.closest('[data-i]');if(r){INV_SEL=+r.dataset.i;INV_MSG=null;invDraw();}});
 $('inv').addEventListener('dblclick',ev=>{const r=ev.target.closest('[data-i]');if(r){INV_SEL=+r.dataset.i;invEquip(INV_SEL);}});
-try{invOpen(localStorage.getItem('np-inv')==='open');}catch(e){}
