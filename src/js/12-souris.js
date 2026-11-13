@@ -126,7 +126,7 @@ function inspectHTML(){const {x,y}=HOV;if(x<0||y<0||x>=W||y>=H)return '';
   if(!see)out.push('<p>Hors de vue : souvenir du dernier passage.</p>');
   let act='';
   if(d===0)act=s?'<kbd>F</kbd> ou clic : forer ce site.':'';
-  else if(d===1&&occ)act='Clic : frapper avec la foreuse (10 énergie).';
+  else if(d===1&&occ)act='Clic : frapper avec la foreuse.';
   else if(d===1&&(t===ROCK||t===MOUNT))act=border?'':'Clic : coup de foreuse (10 énergie).';
   else if(d===1&&t===CHASM)act='';
   else if(d===1)act='Clic : avancer d’une case.';

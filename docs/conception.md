@@ -71,7 +71,7 @@ Roguelike au tour par tour dans une esthétique inspirée de Cogmind et de Brogu
 | Stat | Valeur | Rôle |
 |---|---|---|
 | Vie | 100 | **pas de réparation automatique** |
-| Énergie | 100 | se recharge de POW par tour (5 par tour au départ) ; **chaque pas coûte 2** (10 novembre 2026), un coup de foreuse 10 |
+| Énergie | 100 | se recharge de POW par tour (5 par tour au départ) ; **chaque pas coûte 2** (10 novembre 2026), un coup de foreuse sur la roche 10 (frapper un animal : gratuit) |
 | VIT | 5 | affichée, **sans effet** pour l'instant |
 | EYE | 10 | rayon de vision (5 avant le 10 novembre 2026) |
 | DEG | 10 | dégâts par coup de foreuse |
@@ -80,14 +80,14 @@ Roguelike au tour par tour dans une esthétique inspirée de Cogmind et de Brogu
 | CRIT | 5 % | chance de coup critique (×3 dégâts) ; coup par surprise toujours critique |
 | POW | 5 / tour | recharge d'énergie (6 avant le 9 novembre 2026, 3 le 9 novembre) |
 
-- Chaque coup de foreuse (roche ou animal) coûte **10 d'énergie** ; refusé sous 10.
+- Un coup de foreuse sur une **roche** coûte **10 d'énergie** (refusé sous 10) ; **attaquer un animal ne coûte plus d'énergie** (13 novembre 2026).
 - **Aperçu derrière les obstacles** (foreuse seulement, depuis le 6 novembre 2026) : dans le rayon EYE, la case juste derrière un obstacle à la vue (montagne, herbes hautes) est aperçue en **mode souvenir** — terrain affiché assombri comme une case explorée hors de vue, sans les créatures. Une seule case : un obstacle de 2 cases d'épaisseur cache toujours la suite. Les ennemis ne voient pas à travers les obstacles.
 - Attendre un tour : Espace ou 5.
 
 ## 6. Combat
 
 - Chance de toucher = précision de l'attaquant − esquive de la cible, bornée entre 5 et 95 %.
-- Foncer sur un animal = coup de foreuse (dégâts DEG). Coup raté : « 0 » affiché (gris), énergie consommée.
+- Foncer sur un animal = coup de foreuse (dégâts DEG). Coup raté : « 0 » affiché (gris). Frapper un animal ne consomme pas d'énergie.
 - Les animaux attaquent **une fois par tour au contact** ; la vitesse ne règle que les déplacements (vitesse 5 = 1 case par tour).
 - Animation : bond de l'attaquant, flash, chiffres de dégâts flottants (« -10 », « 0 » pour un coup raté, de part et d'autre), « +10 / +15 / +20 » en couleur bio au ramassage d'éclats de métal, tremblement d'écran quand le robot est touché ou qu'un ennemi meurt.
 - Un animal tué laisse une trace de sang.
