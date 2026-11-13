@@ -33,7 +33,7 @@ function chaseStep(o,dist,fits,tx=G.px,ty=G.py){const h=dist[idx(o.x,o.y)],cur=h
   if(best){o.x=best[0];o.y=best[1];if(best[2])o.dir=best[2]>0?1:-1;return true;}return false;}
 /* Mémoire des ennemis (10 novembre 2026) : un ennemi qui voit la foreuse retient sa position (o.mem) ; quand il ne la voit
    plus, il se dirige vers cette dernière position connue — celle de son groupe pour une bande de cafars (partagée entre
-   membres, et transmise par le cri d'alerte). Arrivé, il fouille SEARCH_T tours autour, puis oublie et reprend son errance.
+   membres). Arrivé, il fouille SEARCH_T tours autour, puis oublie et reprend son errance.
    Plus aucune connaissance de la position réelle de la foreuse sans la voir. */
 const SEARCH_T=4;
 /* Perte de trace (13 novembre 2026, les 3 % de Brogue) : une bête qui vous chasse hors du rayon de discrétion,
