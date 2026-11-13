@@ -54,12 +54,6 @@ function seenHTML(){
       return `<div class="an${e.agg&&e.st?' hunt':''}" title="${e.sp.n}${e.st?' · '+e.st:''} · ${d} case${d>1?'s':''} · ${Math.max(0,e.hp)}/${pv} PV"><img src="${ICON[e.ic]||''}" alt="${e.sp.n}"><span class="hp">${asciiBar(Math.max(0,e.hp),pv,EBAR_N)}</span><span class="n" style="color:${chanceCol(c.me)}">${c.me} %</span><span class="n" style="color:${c.them==null?'var(--dim)':chanceCol(100-c.them)}">${c.them==null?'—':c.them+' %'}</span></div>`;}).join('')
     +(ans.length>max?`<div class="none">+ ${ans.length-max} autre${ans.length-max>1?'s':''}</div>`:'')+'</div>');
   }
-  {let ng=0,nr=0;if(G.gems)for(const k in G.gems){if(!vis[+k])continue;if(G.gems[k]==='visible')ng++;else nr++;}
-   const L=[];if(ng)L.push(`<div class="site k">Joyau${ng>1?' ×'+ng:''} · à ramasser</div>`);if(nr)L.push(`<div class="site">Roche à joyau${nr>1?' ×'+nr:''} · à briser</div>`);
-   let os=0,opv=0,orr=0;if(G.ore)for(const k in G.ore){if(!vis[+k])continue;if(oreSol(G.ore[k])){os++;opv+=ORE_PV[oreLv(G.ore[k])];}else orr++;}
-   if(os)L.push(`<div class="site k">Éclats de métal${os>1?' ×'+os:''} · +${opv} PV</div>`);if(orr)L.push(`<div class="site">Montagne à éclats${orr>1?' ×'+orr:''} · à briser</div>`);if(L.length)out.push(`<div class="grp">${L.join('')}</div>`);}
-  const sites=G.sites.filter(s=>vis[idx(s.x,s.y)]);
-  if(sites.length)out.push('<div class="grp">'+sites.map(s=>`<div class="site${s.known?' k':''}">Site ${s.id} · ${s.known?'profondeur '+s.depth:'non analysé'}</div>`).join('')+'</div>');
   const ins=HOV&&!busy()?inspectHTML():'';
   return ins+(out.join('')||'<div class="none">Rien en vue.</div>');
 }
