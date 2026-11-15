@@ -171,7 +171,7 @@ Jugée trop haute et trop étroite (640 × 835), elle est passée à 940 × 390 
 
 | Terrain | Passage | Vue | Effet |
 |---|---|---|---|
-| Sol rocheux | oui | libre | des points de plus en plus denses à 9, 6 et 3 cases d'un site |
+| Sol rocheux | oui | libre | **uni** : la tuile est vide depuis le 15 novembre 2026 (quatre petits points de couleur monde avant ; les points de plus en plus denses près d'un site avaient déjà disparu le 13). Seul reste le voile de couleur monde à 8 % posé sur chaque case. Retouchable au Tile editor : une tuile « Sol » déjà retouchée garde son dessin |
 | Rocher | brisé en 2 coups | libre | laisse des gravats |
 | Montagne | brisée en 2 coups (sauf bord de carte) | bloquée | peut contenir le joyau ; 10 % contiennent des éclats de métal |
 | Eau peu profonde | oui | libre | −20 d'esquive ; **toutes les créatures y entrent** (15 novembre 2026) ; **terrain lent : pas ×1,5**, sauf pour les crabos qui nagent |
