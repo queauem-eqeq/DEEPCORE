@@ -31,6 +31,14 @@ Le jeu est une page web en plusieurs fichiers (`src/`), **sans étape d'assembla
 - `python3 outils/simul.py [detection|fuite|tout]` : rejoue des situations dans le moteur et mesure.
 - `python3 outils/perf.py` : fluidité.
 
+## Banc de combat
+Artefact à part (https://claude.ai/artifact/9BKRaoB4hzgdWhzYFx5A6q) qui rejoue des combats dans le vrai moteur, sur carte de taille 1.
+- `banc/banc.js`, `banc/banc.css` : le panneau ; `banc/resultats.js` : les archives affichées ; `banc/archives/` : les données brutes.
+- `python3 outils/banc.py` assemble `banc/site/` (non versionné) à partir de `src/` : c'est ce dossier qu'on publie sur l'artefact du banc
+  (`publish_files`, mêmes chemins). **À republier quand le moteur change**, sinon le banc mesure l'ancien jeu.
+- `python3 outils/banc_series.py CONFIGS.json SORTIE.json [essais] [processus]` lance des séries en lot.
+- Les coûts de menace du jeu (`MENACE_ESP`, `terrain` des biomes) en sortent : après un changement de stats, relancer et mettre à jour.
+
 ## L'utilisateur
 - Ne code pas : il décrit ce qu'il veut, en français. Répondre en **français**, de façon concise.
 - Tâche claire → agir directement. Tâche ambiguë ou coûteuse à refaire → poser d'abord les questions nécessaires.

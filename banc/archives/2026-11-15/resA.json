@@ -1,0 +1,3122 @@
+[
+ {
+  "cfg": {
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 2000,
+   "carte": "arene",
+   "ennemis": {
+    "insectoide": 1
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 1997,
+   "v0": 2000,
+   "perte": 3.4,
+   "ennemis": 1,
+   "tues": 1,
+   "parMonstre": 3.4,
+   "bat": 10
+  }
+ },
+ {
+  "cfg": {
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 2000,
+   "carte": "arene",
+   "ennemis": {
+    "insectoide": 2
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 1994,
+   "v0": 2000,
+   "perte": 6.1,
+   "ennemis": 2,
+   "tues": 2,
+   "parMonstre": 3.1,
+   "bat": 18
+  }
+ },
+ {
+  "cfg": {
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 2000,
+   "carte": "arene",
+   "ennemis": {
+    "insectoide": 3
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 1990,
+   "v0": 2000,
+   "perte": 10,
+   "ennemis": 3,
+   "tues": 3,
+   "parMonstre": 3.3,
+   "bat": 24
+  }
+ },
+ {
+  "cfg": {
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 2000,
+   "carte": "arene",
+   "ennemis": {
+    "insectoide": 4
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 1986,
+   "v0": 2000,
+   "perte": 13.8,
+   "ennemis": 4,
+   "tues": 4,
+   "parMonstre": 3.5,
+   "bat": 31
+  }
+ },
+ {
+  "cfg": {
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 2000,
+   "carte": "arene",
+   "ennemis": {
+    "insectoide": 6
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 1980,
+   "v0": 2000,
+   "perte": 20.4,
+   "ennemis": 6,
+   "tues": 6,
+   "parMonstre": 3.4,
+   "bat": 39
+  }
+ },
+ {
+  "cfg": {
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 2000,
+   "carte": "arene",
+   "ennemis": {
+    "insectoide": 9
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 1969,
+   "v0": 2000,
+   "perte": 30.9,
+   "ennemis": 9,
+   "tues": 9,
+   "parMonstre": 3.4,
+   "bat": 50
+  }
+ },
+ {
+  "cfg": {
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 2000,
+   "carte": "arene",
+   "ennemis": {
+    "crabos": 1
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 1989,
+   "v0": 2000,
+   "perte": 11.1,
+   "ennemis": 1,
+   "tues": 1,
+   "parMonstre": 11.1,
+   "bat": 13
+  }
+ },
+ {
+  "cfg": {
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 2000,
+   "carte": "arene",
+   "ennemis": {
+    "crabos": 2
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 1975,
+   "v0": 2000,
+   "perte": 24.6,
+   "ennemis": 2,
+   "tues": 2,
+   "parMonstre": 12.3,
+   "bat": 21
+  }
+ },
+ {
+  "cfg": {
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 2000,
+   "carte": "arene",
+   "ennemis": {
+    "crabos": 3
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 1961,
+   "v0": 2000,
+   "perte": 39.1,
+   "ennemis": 3,
+   "tues": 3,
+   "parMonstre": 13,
+   "bat": 29
+  }
+ },
+ {
+  "cfg": {
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 2000,
+   "carte": "arene",
+   "ennemis": {
+    "crabos": 4
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 1944,
+   "v0": 2000,
+   "perte": 55.6,
+   "ennemis": 4,
+   "tues": 4,
+   "parMonstre": 13.9,
+   "bat": 35
+  }
+ },
+ {
+  "cfg": {
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 2000,
+   "carte": "arene",
+   "ennemis": {
+    "crabos": 6
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 1905,
+   "v0": 2000,
+   "perte": 94.5,
+   "ennemis": 6,
+   "tues": 6,
+   "parMonstre": 15.8,
+   "bat": 48
+  }
+ },
+ {
+  "cfg": {
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 2000,
+   "carte": "arene",
+   "ennemis": {
+    "crabos": 9
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 1824,
+   "v0": 2000,
+   "perte": 175.5,
+   "ennemis": 9,
+   "tues": 9,
+   "parMonstre": 19.5,
+   "bat": 62
+  }
+ },
+ {
+  "cfg": {
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 2000,
+   "carte": "arene",
+   "ennemis": {
+    "cafar": 1
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 2000,
+   "v0": 2000,
+   "perte": 0,
+   "ennemis": 0,
+   "tues": 0,
+   "parMonstre": null,
+   "bat": 0
+  }
+ },
+ {
+  "cfg": {
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 2000,
+   "carte": "arene",
+   "ennemis": {
+    "cafar": 2
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 1996,
+   "v0": 2000,
+   "perte": 4.4,
+   "ennemis": 2,
+   "tues": 2,
+   "parMonstre": 2.2,
+   "bat": 10
+  }
+ },
+ {
+  "cfg": {
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 2000,
+   "carte": "arene",
+   "ennemis": {
+    "cafar": 3
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 1993,
+   "v0": 2000,
+   "perte": 7,
+   "ennemis": 3,
+   "tues": 3,
+   "parMonstre": 2.3,
+   "bat": 11
+  }
+ },
+ {
+  "cfg": {
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 2000,
+   "carte": "arene",
+   "ennemis": {
+    "cafar": 4
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 1989,
+   "v0": 2000,
+   "perte": 11.4,
+   "ennemis": 4,
+   "tues": 4,
+   "parMonstre": 2.9,
+   "bat": 13
+  }
+ },
+ {
+  "cfg": {
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 2000,
+   "carte": "arene",
+   "ennemis": {
+    "cafar": 6
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 1983,
+   "v0": 2000,
+   "perte": 17.4,
+   "ennemis": 6,
+   "tues": 6,
+   "parMonstre": 2.9,
+   "bat": 18
+  }
+ },
+ {
+  "cfg": {
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 2000,
+   "carte": "arene",
+   "ennemis": {
+    "cafar": 9
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 1968,
+   "v0": 2000,
+   "perte": 31.9,
+   "ennemis": 9,
+   "tues": 9,
+   "parMonstre": 3.5,
+   "bat": 22
+  }
+ },
+ {
+  "cfg": {
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 2000,
+   "carte": "arene",
+   "ennemis": {
+    "crachin": 1
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 1988,
+   "v0": 2000,
+   "perte": 12.2,
+   "ennemis": 1,
+   "tues": 1,
+   "parMonstre": 12.2,
+   "bat": 17
+  }
+ },
+ {
+  "cfg": {
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 2000,
+   "carte": "arene",
+   "ennemis": {
+    "crachin": 2
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 1973,
+   "v0": 2000,
+   "perte": 26.8,
+   "ennemis": 2,
+   "tues": 2,
+   "parMonstre": 13.4,
+   "bat": 30
+  }
+ },
+ {
+  "cfg": {
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 2000,
+   "carte": "arene",
+   "ennemis": {
+    "crachin": 3
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 1953,
+   "v0": 2000,
+   "perte": 46.6,
+   "ennemis": 3,
+   "tues": 3,
+   "parMonstre": 15.5,
+   "bat": 41
+  }
+ },
+ {
+  "cfg": {
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 2000,
+   "carte": "arene",
+   "ennemis": {
+    "crachin": 4
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 1929,
+   "v0": 2000,
+   "perte": 71.4,
+   "ennemis": 4,
+   "tues": 4,
+   "parMonstre": 17.9,
+   "bat": 49
+  }
+ },
+ {
+  "cfg": {
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 2000,
+   "carte": "arene",
+   "ennemis": {
+    "crachin": 6
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 1867,
+   "v0": 2000,
+   "perte": 133.1,
+   "ennemis": 6,
+   "tues": 6,
+   "parMonstre": 22.2,
+   "bat": 67
+  }
+ },
+ {
+  "cfg": {
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 2000,
+   "carte": "arene",
+   "ennemis": {
+    "crachin": 9
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 1706,
+   "v0": 2000,
+   "perte": 294.2,
+   "ennemis": 9,
+   "tues": 9,
+   "parMonstre": 32.7,
+   "bat": 90
+  }
+ },
+ {
+  "cfg": {
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 2000,
+   "carte": "arene",
+   "ennemis": {
+    "viperin": 1
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 1984,
+   "v0": 2000,
+   "perte": 15.5,
+   "ennemis": 1,
+   "tues": 1,
+   "parMonstre": 15.5,
+   "bat": 12
+  }
+ },
+ {
+  "cfg": {
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 2000,
+   "carte": "arene",
+   "ennemis": {
+    "viperin": 2
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 1970,
+   "v0": 2000,
+   "perte": 29.8,
+   "ennemis": 2,
+   "tues": 2,
+   "parMonstre": 14.9,
+   "bat": 20
+  }
+ },
+ {
+  "cfg": {
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 2000,
+   "carte": "arene",
+   "ennemis": {
+    "viperin": 3
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 1953,
+   "v0": 2000,
+   "perte": 47.4,
+   "ennemis": 3,
+   "tues": 3,
+   "parMonstre": 15.8,
+   "bat": 27
+  }
+ },
+ {
+  "cfg": {
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 2000,
+   "carte": "arene",
+   "ennemis": {
+    "viperin": 4
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 1937,
+   "v0": 2000,
+   "perte": 63.4,
+   "ennemis": 4,
+   "tues": 4,
+   "parMonstre": 15.9,
+   "bat": 34
+  }
+ },
+ {
+  "cfg": {
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 2000,
+   "carte": "arene",
+   "ennemis": {
+    "viperin": 6
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 1903,
+   "v0": 2000,
+   "perte": 97.5,
+   "ennemis": 6,
+   "tues": 6,
+   "parMonstre": 16.2,
+   "bat": 44
+  }
+ },
+ {
+  "cfg": {
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 2000,
+   "carte": "arene",
+   "ennemis": {
+    "viperin": 9
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 1845,
+   "v0": 2000,
+   "perte": 154.5,
+   "ennemis": 9,
+   "tues": 9,
+   "parMonstre": 17.2,
+   "bat": 57
+  }
+ },
+ {
+  "cfg": {
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 2000,
+   "carte": "arene",
+   "ennemis": {
+    "gluar": 1
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 1991,
+   "v0": 2000,
+   "perte": 8.7,
+   "ennemis": 1,
+   "tues": 1,
+   "parMonstre": 8.7,
+   "bat": 12
+  }
+ },
+ {
+  "cfg": {
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 2000,
+   "carte": "arene",
+   "ennemis": {
+    "gluar": 2
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 1981,
+   "v0": 2000,
+   "perte": 19.2,
+   "ennemis": 2,
+   "tues": 2,
+   "parMonstre": 9.6,
+   "bat": 22
+  }
+ },
+ {
+  "cfg": {
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 2000,
+   "carte": "arene",
+   "ennemis": {
+    "gluar": 3
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 1971,
+   "v0": 2000,
+   "perte": 29.2,
+   "ennemis": 3,
+   "tues": 3,
+   "parMonstre": 9.7,
+   "bat": 30
+  }
+ },
+ {
+  "cfg": {
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 2000,
+   "carte": "arene",
+   "ennemis": {
+    "gluar": 4
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 1959,
+   "v0": 2000,
+   "perte": 41.4,
+   "ennemis": 4,
+   "tues": 4,
+   "parMonstre": 10.3,
+   "bat": 38
+  }
+ },
+ {
+  "cfg": {
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 2000,
+   "carte": "arene",
+   "ennemis": {
+    "gluar": 6
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 1933,
+   "v0": 2000,
+   "perte": 67.3,
+   "ennemis": 6,
+   "tues": 6,
+   "parMonstre": 11.2,
+   "bat": 49
+  }
+ },
+ {
+  "cfg": {
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 2000,
+   "carte": "arene",
+   "ennemis": {
+    "gluar": 9
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 1883,
+   "v0": 2000,
+   "perte": 117.5,
+   "ennemis": 9,
+   "tues": 9,
+   "parMonstre": 13.1,
+   "bat": 64
+  }
+ },
+ {
+  "cfg": {
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 2000,
+   "carte": "arene",
+   "ennemis": {
+    "siphon": 1
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 1998,
+   "v0": 2000,
+   "perte": 1.7,
+   "ennemis": 1,
+   "tues": 1,
+   "parMonstre": 1.7,
+   "bat": 10
+  }
+ },
+ {
+  "cfg": {
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 2000,
+   "carte": "arene",
+   "ennemis": {
+    "siphon": 2
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 1997,
+   "v0": 2000,
+   "perte": 3.5,
+   "ennemis": 2,
+   "tues": 2,
+   "parMonstre": 1.8,
+   "bat": 18
+  }
+ },
+ {
+  "cfg": {
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 2000,
+   "carte": "arene",
+   "ennemis": {
+    "siphon": 3
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 1994,
+   "v0": 2000,
+   "perte": 5.7,
+   "ennemis": 3,
+   "tues": 3,
+   "parMonstre": 1.9,
+   "bat": 24
+  }
+ },
+ {
+  "cfg": {
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 2000,
+   "carte": "arene",
+   "ennemis": {
+    "siphon": 4
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 1992,
+   "v0": 2000,
+   "perte": 8.1,
+   "ennemis": 4,
+   "tues": 4,
+   "parMonstre": 2,
+   "bat": 30
+  }
+ },
+ {
+  "cfg": {
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 2000,
+   "carte": "arene",
+   "ennemis": {
+    "siphon": 6
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 1986,
+   "v0": 2000,
+   "perte": 14.1,
+   "ennemis": 6,
+   "tues": 6,
+   "parMonstre": 2.3,
+   "bat": 36
+  }
+ },
+ {
+  "cfg": {
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 2000,
+   "carte": "arene",
+   "ennemis": {
+    "siphon": 9
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 1978,
+   "v0": 2000,
+   "perte": 21.9,
+   "ennemis": 9,
+   "tues": 9,
+   "parMonstre": 2.4,
+   "bat": 46
+  }
+ },
+ {
+  "cfg": {
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 2000,
+   "carte": "arene",
+   "ennemis": {
+    "tapi": 1
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 1974,
+   "v0": 2000,
+   "perte": 25.8,
+   "ennemis": 1,
+   "tues": 1,
+   "parMonstre": 25.8,
+   "bat": 11
+  }
+ },
+ {
+  "cfg": {
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 2000,
+   "carte": "arene",
+   "ennemis": {
+    "tapi": 2
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 1948,
+   "v0": 2000,
+   "perte": 52.4,
+   "ennemis": 2,
+   "tues": 2,
+   "parMonstre": 26.2,
+   "bat": 21
+  }
+ },
+ {
+  "cfg": {
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 2000,
+   "carte": "arene",
+   "ennemis": {
+    "tapi": 3
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 1922,
+   "v0": 2000,
+   "perte": 77.5,
+   "ennemis": 3,
+   "tues": 3,
+   "parMonstre": 25.9,
+   "bat": 30
+  }
+ },
+ {
+  "cfg": {
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 2000,
+   "carte": "arene",
+   "ennemis": {
+    "tapi": 4
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 1895,
+   "v0": 2000,
+   "perte": 105.3,
+   "ennemis": 4,
+   "tues": 4,
+   "parMonstre": 26.3,
+   "bat": 38
+  }
+ },
+ {
+  "cfg": {
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 2000,
+   "carte": "arene",
+   "ennemis": {
+    "tapi": 6
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 1844,
+   "v0": 2000,
+   "perte": 156.3,
+   "ennemis": 6,
+   "tues": 6,
+   "parMonstre": 26.1,
+   "bat": 52
+  }
+ },
+ {
+  "cfg": {
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 2000,
+   "carte": "arene",
+   "ennemis": {
+    "tapi": 9
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 1763,
+   "v0": 2000,
+   "perte": 236.9,
+   "ennemis": 9,
+   "tues": 9,
+   "parMonstre": 26.3,
+   "bat": 71
+  }
+ },
+ {
+  "cfg": {
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 2000,
+   "carte": "arene",
+   "ennemis": {
+    "taupar": 1
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 1977,
+   "v0": 2000,
+   "perte": 22.7,
+   "ennemis": 1,
+   "tues": 1,
+   "parMonstre": 22.7,
+   "bat": 15
+  }
+ },
+ {
+  "cfg": {
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 2000,
+   "carte": "arene",
+   "ennemis": {
+    "taupar": 2
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 1959,
+   "v0": 2000,
+   "perte": 41.3,
+   "ennemis": 2,
+   "tues": 2,
+   "parMonstre": 20.6,
+   "bat": 26
+  }
+ },
+ {
+  "cfg": {
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 2000,
+   "carte": "arene",
+   "ennemis": {
+    "taupar": 3
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 1935,
+   "v0": 2000,
+   "perte": 64.9,
+   "ennemis": 3,
+   "tues": 3,
+   "parMonstre": 21.6,
+   "bat": 36
+  }
+ },
+ {
+  "cfg": {
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 2000,
+   "carte": "arene",
+   "ennemis": {
+    "taupar": 4
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 1915,
+   "v0": 2000,
+   "perte": 85.3,
+   "ennemis": 4,
+   "tues": 4,
+   "parMonstre": 21.3,
+   "bat": 46
+  }
+ },
+ {
+  "cfg": {
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 2000,
+   "carte": "arene",
+   "ennemis": {
+    "taupar": 6
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 1863,
+   "v0": 2000,
+   "perte": 137.3,
+   "ennemis": 6,
+   "tues": 6,
+   "parMonstre": 22.9,
+   "bat": 61
+  }
+ },
+ {
+  "cfg": {
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 2000,
+   "carte": "arene",
+   "ennemis": {
+    "taupar": 9
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 1787,
+   "v0": 2000,
+   "perte": 212.6,
+   "ennemis": 9,
+   "tues": 9,
+   "parMonstre": 23.6,
+   "bat": 81
+  }
+ },
+ {
+  "cfg": {
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 2000,
+   "carte": "arene",
+   "ennemis": {
+    "mastok": 1
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 1948,
+   "v0": 2000,
+   "perte": 51.9,
+   "ennemis": 1,
+   "tues": 1,
+   "parMonstre": 51.9,
+   "bat": 16
+  }
+ },
+ {
+  "cfg": {
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 2000,
+   "carte": "arene",
+   "ennemis": {
+    "mastok": 2
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 1899,
+   "v0": 2000,
+   "perte": 100.7,
+   "ennemis": 2,
+   "tues": 2,
+   "parMonstre": 50.4,
+   "bat": 28
+  }
+ },
+ {
+  "cfg": {
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 2000,
+   "carte": "arene",
+   "ennemis": {
+    "mastok": 3
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 1833,
+   "v0": 2000,
+   "perte": 167,
+   "ennemis": 3,
+   "tues": 3,
+   "parMonstre": 55.7,
+   "bat": 38
+  }
+ },
+ {
+  "cfg": {
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 2000,
+   "carte": "arene",
+   "ennemis": {
+    "mastok": 4
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 1754,
+   "v0": 2000,
+   "perte": 246.3,
+   "ennemis": 4,
+   "tues": 4,
+   "parMonstre": 61.6,
+   "bat": 47
+  }
+ },
+ {
+  "cfg": {
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 2000,
+   "carte": "arene",
+   "ennemis": {
+    "mastok": 6
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 1592,
+   "v0": 2000,
+   "perte": 408.1,
+   "ennemis": 6,
+   "tues": 6,
+   "parMonstre": 68,
+   "bat": 65
+  }
+ },
+ {
+  "cfg": {
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 2000,
+   "carte": "arene",
+   "ennemis": {
+    "mastok": 9
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 1,
+   "inc": 0,
+   "vie": 1262,
+   "v0": 2000,
+   "perte": 744.2,
+   "ennemis": 9,
+   "tues": 9,
+   "parMonstre": 82.8,
+   "bat": 89
+  }
+ },
+ {
+  "cfg": {
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 2000,
+   "carte": "plateau",
+   "ennemis": {
+    "insectoide": 1
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 1997,
+   "v0": 2000,
+   "perte": 3.3,
+   "ennemis": 1,
+   "tues": 1,
+   "parMonstre": 3.3,
+   "bat": 12
+  }
+ },
+ {
+  "cfg": {
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 2000,
+   "carte": "plateau",
+   "ennemis": {
+    "insectoide": 2
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 1994,
+   "v0": 2000,
+   "perte": 6.3,
+   "ennemis": 2,
+   "tues": 2,
+   "parMonstre": 3.1,
+   "bat": 20
+  }
+ },
+ {
+  "cfg": {
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 2000,
+   "carte": "plateau",
+   "ennemis": {
+    "insectoide": 3
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 1990,
+   "v0": 2000,
+   "perte": 9.7,
+   "ennemis": 3,
+   "tues": 3,
+   "parMonstre": 3.2,
+   "bat": 29
+  }
+ },
+ {
+  "cfg": {
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 2000,
+   "carte": "plateau",
+   "ennemis": {
+    "insectoide": 4
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 1986,
+   "v0": 2000,
+   "perte": 13.9,
+   "ennemis": 4,
+   "tues": 4,
+   "parMonstre": 3.5,
+   "bat": 34
+  }
+ },
+ {
+  "cfg": {
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 2000,
+   "carte": "plateau",
+   "ennemis": {
+    "insectoide": 6
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 1979,
+   "v0": 2000,
+   "perte": 20.9,
+   "ennemis": 6,
+   "tues": 6,
+   "parMonstre": 3.5,
+   "bat": 46
+  }
+ },
+ {
+  "cfg": {
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 2000,
+   "carte": "plateau",
+   "ennemis": {
+    "insectoide": 9
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 1970,
+   "v0": 2000,
+   "perte": 30.5,
+   "ennemis": 9,
+   "tues": 9,
+   "parMonstre": 3.4,
+   "bat": 58
+  }
+ },
+ {
+  "cfg": {
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 2000,
+   "carte": "plateau",
+   "ennemis": {
+    "crabos": 1
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 1990,
+   "v0": 2000,
+   "perte": 9.6,
+   "ennemis": 1,
+   "tues": 1,
+   "parMonstre": 9.6,
+   "bat": 14
+  }
+ },
+ {
+  "cfg": {
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 2000,
+   "carte": "plateau",
+   "ennemis": {
+    "crabos": 2
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 1981,
+   "v0": 2000,
+   "perte": 19.1,
+   "ennemis": 2,
+   "tues": 2,
+   "parMonstre": 9.6,
+   "bat": 24
+  }
+ },
+ {
+  "cfg": {
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 2000,
+   "carte": "plateau",
+   "ennemis": {
+    "crabos": 3
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 1971,
+   "v0": 2000,
+   "perte": 28.8,
+   "ennemis": 3,
+   "tues": 3,
+   "parMonstre": 9.6,
+   "bat": 32
+  }
+ },
+ {
+  "cfg": {
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 2000,
+   "carte": "plateau",
+   "ennemis": {
+    "crabos": 4
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 1960,
+   "v0": 2000,
+   "perte": 39.6,
+   "ennemis": 4,
+   "tues": 4,
+   "parMonstre": 9.9,
+   "bat": 38
+  }
+ },
+ {
+  "cfg": {
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 2000,
+   "carte": "plateau",
+   "ennemis": {
+    "crabos": 6
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 1930,
+   "v0": 2000,
+   "perte": 69.8,
+   "ennemis": 6,
+   "tues": 6,
+   "parMonstre": 11.6,
+   "bat": 53
+  }
+ },
+ {
+  "cfg": {
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 2000,
+   "carte": "plateau",
+   "ennemis": {
+    "crabos": 9
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 1878,
+   "v0": 2000,
+   "perte": 122,
+   "ennemis": 9,
+   "tues": 9,
+   "parMonstre": 13.6,
+   "bat": 69
+  }
+ },
+ {
+  "cfg": {
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 2000,
+   "carte": "plateau",
+   "ennemis": {
+    "cafar": 1
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 2000,
+   "v0": 2000,
+   "perte": 0,
+   "ennemis": 0,
+   "tues": 0,
+   "parMonstre": null,
+   "bat": 0
+  }
+ },
+ {
+  "cfg": {
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 2000,
+   "carte": "plateau",
+   "ennemis": {
+    "cafar": 2
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 1996,
+   "v0": 2000,
+   "perte": 4.4,
+   "ennemis": 2,
+   "tues": 2,
+   "parMonstre": 2.2,
+   "bat": 13
+  }
+ },
+ {
+  "cfg": {
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 2000,
+   "carte": "plateau",
+   "ennemis": {
+    "cafar": 3
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 1992,
+   "v0": 2000,
+   "perte": 7.6,
+   "ennemis": 3,
+   "tues": 3,
+   "parMonstre": 2.6,
+   "bat": 13
+  }
+ },
+ {
+  "cfg": {
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 2000,
+   "carte": "plateau",
+   "ennemis": {
+    "cafar": 4
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 1989,
+   "v0": 2000,
+   "perte": 11,
+   "ennemis": 4,
+   "tues": 4,
+   "parMonstre": 2.7,
+   "bat": 17
+  }
+ },
+ {
+  "cfg": {
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 2000,
+   "carte": "plateau",
+   "ennemis": {
+    "cafar": 6
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 1986,
+   "v0": 2000,
+   "perte": 14.2,
+   "ennemis": 6,
+   "tues": 6,
+   "parMonstre": 2.4,
+   "bat": 22
+  }
+ },
+ {
+  "cfg": {
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 2000,
+   "carte": "plateau",
+   "ennemis": {
+    "cafar": 9
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 1974,
+   "v0": 2000,
+   "perte": 25.7,
+   "ennemis": 9,
+   "tues": 9,
+   "parMonstre": 2.9,
+   "bat": 29
+  }
+ },
+ {
+  "cfg": {
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 2000,
+   "carte": "plateau",
+   "ennemis": {
+    "crachin": 1
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 1993,
+   "v0": 2000,
+   "perte": 7.3,
+   "ennemis": 1,
+   "tues": 1,
+   "parMonstre": 7.3,
+   "bat": 15
+  }
+ },
+ {
+  "cfg": {
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 2000,
+   "carte": "plateau",
+   "ennemis": {
+    "crachin": 2
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 1984,
+   "v0": 2000,
+   "perte": 16.1,
+   "ennemis": 2,
+   "tues": 2,
+   "parMonstre": 8.1,
+   "bat": 27
+  }
+ },
+ {
+  "cfg": {
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 2000,
+   "carte": "plateau",
+   "ennemis": {
+    "crachin": 3
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 1975,
+   "v0": 2000,
+   "perte": 24.7,
+   "ennemis": 3,
+   "tues": 3,
+   "parMonstre": 8.2,
+   "bat": 36
+  }
+ },
+ {
+  "cfg": {
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 2000,
+   "carte": "plateau",
+   "ennemis": {
+    "crachin": 4
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 1960,
+   "v0": 2000,
+   "perte": 40.2,
+   "ennemis": 4,
+   "tues": 4,
+   "parMonstre": 10.1,
+   "bat": 44
+  }
+ },
+ {
+  "cfg": {
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 2000,
+   "carte": "plateau",
+   "ennemis": {
+    "crachin": 6
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 1925,
+   "v0": 2000,
+   "perte": 74.7,
+   "ennemis": 6,
+   "tues": 6,
+   "parMonstre": 12.5,
+   "bat": 60
+  }
+ },
+ {
+  "cfg": {
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 2000,
+   "carte": "plateau",
+   "ennemis": {
+    "crachin": 9
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 1862,
+   "v0": 2000,
+   "perte": 137.6,
+   "ennemis": 9,
+   "tues": 9,
+   "parMonstre": 15.3,
+   "bat": 78
+  }
+ },
+ {
+  "cfg": {
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 2000,
+   "carte": "plateau",
+   "ennemis": {
+    "viperin": 1
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 1987,
+   "v0": 2000,
+   "perte": 12.8,
+   "ennemis": 1,
+   "tues": 1,
+   "parMonstre": 12.8,
+   "bat": 13
+  }
+ },
+ {
+  "cfg": {
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 2000,
+   "carte": "plateau",
+   "ennemis": {
+    "viperin": 2
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 1978,
+   "v0": 2000,
+   "perte": 21.9,
+   "ennemis": 2,
+   "tues": 2,
+   "parMonstre": 11,
+   "bat": 22
+  }
+ },
+ {
+  "cfg": {
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 2000,
+   "carte": "plateau",
+   "ennemis": {
+    "viperin": 3
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 1964,
+   "v0": 2000,
+   "perte": 36.4,
+   "ennemis": 3,
+   "tues": 3,
+   "parMonstre": 12.1,
+   "bat": 31
+  }
+ },
+ {
+  "cfg": {
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 2000,
+   "carte": "plateau",
+   "ennemis": {
+    "viperin": 4
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 1950,
+   "v0": 2000,
+   "perte": 50,
+   "ennemis": 4,
+   "tues": 4,
+   "parMonstre": 12.5,
+   "bat": 38
+  }
+ },
+ {
+  "cfg": {
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 2000,
+   "carte": "plateau",
+   "ennemis": {
+    "viperin": 6
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 1925,
+   "v0": 2000,
+   "perte": 74.7,
+   "ennemis": 6,
+   "tues": 6,
+   "parMonstre": 12.4,
+   "bat": 48
+  }
+ },
+ {
+  "cfg": {
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 2000,
+   "carte": "plateau",
+   "ennemis": {
+    "viperin": 9
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 1880,
+   "v0": 2000,
+   "perte": 120.4,
+   "ennemis": 9,
+   "tues": 9,
+   "parMonstre": 13.4,
+   "bat": 64
+  }
+ },
+ {
+  "cfg": {
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 2000,
+   "carte": "plateau",
+   "ennemis": {
+    "gluar": 1
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 1993,
+   "v0": 2000,
+   "perte": 6.7,
+   "ennemis": 1,
+   "tues": 1,
+   "parMonstre": 6.7,
+   "bat": 14
+  }
+ },
+ {
+  "cfg": {
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 2000,
+   "carte": "plateau",
+   "ennemis": {
+    "gluar": 2
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 1984,
+   "v0": 2000,
+   "perte": 15.7,
+   "ennemis": 2,
+   "tues": 2,
+   "parMonstre": 7.9,
+   "bat": 24
+  }
+ },
+ {
+  "cfg": {
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 2000,
+   "carte": "plateau",
+   "ennemis": {
+    "gluar": 3
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 1976,
+   "v0": 2000,
+   "perte": 23.6,
+   "ennemis": 3,
+   "tues": 3,
+   "parMonstre": 7.8,
+   "bat": 33
+  }
+ },
+ {
+  "cfg": {
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 2000,
+   "carte": "plateau",
+   "ennemis": {
+    "gluar": 4
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 1967,
+   "v0": 2000,
+   "perte": 32.9,
+   "ennemis": 4,
+   "tues": 4,
+   "parMonstre": 8.2,
+   "bat": 39
+  }
+ },
+ {
+  "cfg": {
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 2000,
+   "carte": "plateau",
+   "ennemis": {
+    "gluar": 6
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 1948,
+   "v0": 2000,
+   "perte": 52.5,
+   "ennemis": 6,
+   "tues": 6,
+   "parMonstre": 8.7,
+   "bat": 52
+  }
+ },
+ {
+  "cfg": {
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 2000,
+   "carte": "plateau",
+   "ennemis": {
+    "gluar": 9
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 1911,
+   "v0": 2000,
+   "perte": 89,
+   "ennemis": 9,
+   "tues": 9,
+   "parMonstre": 9.9,
+   "bat": 68
+  }
+ },
+ {
+  "cfg": {
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 2000,
+   "carte": "plateau",
+   "ennemis": {
+    "siphon": 1
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 1999,
+   "v0": 2000,
+   "perte": 1.3,
+   "ennemis": 1,
+   "tues": 1,
+   "parMonstre": 1.3,
+   "bat": 13
+  }
+ },
+ {
+  "cfg": {
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 2000,
+   "carte": "plateau",
+   "ennemis": {
+    "siphon": 2
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 1997,
+   "v0": 2000,
+   "perte": 3,
+   "ennemis": 2,
+   "tues": 2,
+   "parMonstre": 1.5,
+   "bat": 21
+  }
+ },
+ {
+  "cfg": {
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 2000,
+   "carte": "plateau",
+   "ennemis": {
+    "siphon": 3
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 1996,
+   "v0": 2000,
+   "perte": 4.4,
+   "ennemis": 3,
+   "tues": 3,
+   "parMonstre": 1.5,
+   "bat": 28
+  }
+ },
+ {
+  "cfg": {
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 2000,
+   "carte": "plateau",
+   "ennemis": {
+    "siphon": 4
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 1994,
+   "v0": 2000,
+   "perte": 6.1,
+   "ennemis": 4,
+   "tues": 4,
+   "parMonstre": 1.5,
+   "bat": 33
+  }
+ },
+ {
+  "cfg": {
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 2000,
+   "carte": "plateau",
+   "ennemis": {
+    "siphon": 6
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 1990,
+   "v0": 2000,
+   "perte": 10.5,
+   "ennemis": 6,
+   "tues": 6,
+   "parMonstre": 1.7,
+   "bat": 43
+  }
+ },
+ {
+  "cfg": {
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 2000,
+   "carte": "plateau",
+   "ennemis": {
+    "siphon": 9
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 1983,
+   "v0": 2000,
+   "perte": 17.3,
+   "ennemis": 9,
+   "tues": 9,
+   "parMonstre": 1.9,
+   "bat": 54
+  }
+ },
+ {
+  "cfg": {
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 2000,
+   "carte": "plateau",
+   "ennemis": {
+    "tapi": 1
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 1972,
+   "v0": 2000,
+   "perte": 28.4,
+   "ennemis": 1,
+   "tues": 1,
+   "parMonstre": 28.4,
+   "bat": 13
+  }
+ },
+ {
+  "cfg": {
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 2000,
+   "carte": "plateau",
+   "ennemis": {
+    "tapi": 2
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 1945,
+   "v0": 2000,
+   "perte": 55.3,
+   "ennemis": 2,
+   "tues": 2,
+   "parMonstre": 27.6,
+   "bat": 22
+  }
+ },
+ {
+  "cfg": {
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 2000,
+   "carte": "plateau",
+   "ennemis": {
+    "tapi": 3
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 1916,
+   "v0": 2000,
+   "perte": 84.1,
+   "ennemis": 3,
+   "tues": 3,
+   "parMonstre": 28,
+   "bat": 29
+  }
+ },
+ {
+  "cfg": {
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 2000,
+   "carte": "plateau",
+   "ennemis": {
+    "tapi": 4
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 1886,
+   "v0": 2000,
+   "perte": 113.5,
+   "ennemis": 4,
+   "tues": 4,
+   "parMonstre": 28.4,
+   "bat": 36
+  }
+ },
+ {
+  "cfg": {
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 2000,
+   "carte": "plateau",
+   "ennemis": {
+    "tapi": 6
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 1829,
+   "v0": 2000,
+   "perte": 170.6,
+   "ennemis": 6,
+   "tues": 6,
+   "parMonstre": 28.4,
+   "bat": 46
+  }
+ },
+ {
+  "cfg": {
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 2000,
+   "carte": "plateau",
+   "ennemis": {
+    "tapi": 9
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 1732,
+   "v0": 2000,
+   "perte": 267.8,
+   "ennemis": 9,
+   "tues": 9,
+   "parMonstre": 29.8,
+   "bat": 64
+  }
+ },
+ {
+  "cfg": {
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 2000,
+   "carte": "plateau",
+   "ennemis": {
+    "taupar": 1
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 1982,
+   "v0": 2000,
+   "perte": 18.3,
+   "ennemis": 1,
+   "tues": 1,
+   "parMonstre": 18.3,
+   "bat": 16
+  }
+ },
+ {
+  "cfg": {
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 2000,
+   "carte": "plateau",
+   "ennemis": {
+    "taupar": 2
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 1965,
+   "v0": 2000,
+   "perte": 34.9,
+   "ennemis": 2,
+   "tues": 2,
+   "parMonstre": 17.4,
+   "bat": 27
+  }
+ },
+ {
+  "cfg": {
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 2000,
+   "carte": "plateau",
+   "ennemis": {
+    "taupar": 3
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 1945,
+   "v0": 2000,
+   "perte": 54.8,
+   "ennemis": 3,
+   "tues": 3,
+   "parMonstre": 18.3,
+   "bat": 37
+  }
+ },
+ {
+  "cfg": {
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 2000,
+   "carte": "plateau",
+   "ennemis": {
+    "taupar": 4
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 1924,
+   "v0": 2000,
+   "perte": 76,
+   "ennemis": 4,
+   "tues": 4,
+   "parMonstre": 19,
+   "bat": 45
+  }
+ },
+ {
+  "cfg": {
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 2000,
+   "carte": "plateau",
+   "ennemis": {
+    "taupar": 6
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 1883,
+   "v0": 2000,
+   "perte": 116.8,
+   "ennemis": 6,
+   "tues": 6,
+   "parMonstre": 19.5,
+   "bat": 61
+  }
+ },
+ {
+  "cfg": {
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 2000,
+   "carte": "plateau",
+   "ennemis": {
+    "taupar": 9
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 1816,
+   "v0": 2000,
+   "perte": 183.5,
+   "ennemis": 9,
+   "tues": 9,
+   "parMonstre": 20.4,
+   "bat": 80
+  }
+ },
+ {
+  "cfg": {
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 2000,
+   "carte": "plateau",
+   "ennemis": {
+    "mastok": 1
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 1951,
+   "v0": 2000,
+   "perte": 49.4,
+   "ennemis": 1,
+   "tues": 1,
+   "parMonstre": 49.4,
+   "bat": 17
+  }
+ },
+ {
+  "cfg": {
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 2000,
+   "carte": "plateau",
+   "ennemis": {
+    "mastok": 2
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 1904,
+   "v0": 2000,
+   "perte": 95.9,
+   "ennemis": 2,
+   "tues": 2,
+   "parMonstre": 48,
+   "bat": 30
+  }
+ },
+ {
+  "cfg": {
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 2000,
+   "carte": "plateau",
+   "ennemis": {
+    "mastok": 3
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 1840,
+   "v0": 2000,
+   "perte": 160,
+   "ennemis": 3,
+   "tues": 3,
+   "parMonstre": 53.3,
+   "bat": 40
+  }
+ },
+ {
+  "cfg": {
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 2000,
+   "carte": "plateau",
+   "ennemis": {
+    "mastok": 4
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 1791,
+   "v0": 2000,
+   "perte": 208.6,
+   "ennemis": 4,
+   "tues": 4,
+   "parMonstre": 52.1,
+   "bat": 52
+  }
+ },
+ {
+  "cfg": {
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 2000,
+   "carte": "plateau",
+   "ennemis": {
+    "mastok": 6
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 1645,
+   "v0": 2000,
+   "perte": 354.8,
+   "ennemis": 6,
+   "tues": 6,
+   "parMonstre": 59.1,
+   "bat": 70
+  }
+ },
+ {
+  "cfg": {
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 2000,
+   "carte": "plateau",
+   "ennemis": {
+    "mastok": 9
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 1400,
+   "v0": 2000,
+   "perte": 600.3,
+   "ennemis": 9,
+   "tues": 9,
+   "parMonstre": 66.7,
+   "bat": 97
+  }
+ }
+]

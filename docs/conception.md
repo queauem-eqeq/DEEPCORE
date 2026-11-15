@@ -100,22 +100,31 @@ La partie est une **descente en 5 niveaux** (5 pour commencer ; on allongera). F
 
 | Niveau | Budget de menace (pour 1000 cases) | Gisements de métal de réparation (carte de taille 2) | Gisements de Matière (taille 2) |
 |---|---|---|---|
-| 1 | 60 | 3 | 1 |
-| 2 | 120 | 3 | 1 |
-| 3 | 180 | 2 | 2 |
-| 4 | 250 | 1 | 3 |
-| 5 | 320 | 1 | 3 |
+| 1 | 45 | 3 | 1 |
+| 2 | 90 | 3 | 1 |
+| 3 | 155 | 2 | 2 |
+| 4 | 240 | 1 | 3 |
+| 5 | 340 | 1 | 3 |
 
 Plus on descend : plus de menace, moins de quoi se réparer, plus de Matière.
 
-- **Menace** : chaque espèce a un coût, celui d'un duel pour la foreuse sans équipement, en points de vie (mesures.md) : Insectoïde 4 (estimé), Cafar 5 (compté en bande), Siphon 3, Gluar 12, Crabos 15, Crachin 15, Vipérin 20, Taupar 23, Tapi 26, Mastok 52. La menace d'une carte est la somme effectif × coût.
-- **Budget** : à chaque niveau, les effectifs du monde tiré sont mis à l'échelle pour atteindre le budget. Les intensités d'un biome ou d'un archétype **ne règlent donc plus que les proportions entre espèces** ; le total, c'est le niveau qui le fixe. Deux mondes au même niveau pèsent autant, qu'ils soient faits de quelques mastoks ou d'une nuée de cafars (au niveau 3 en taille 3 : 12 mastoks, ou 75 créatures en Galeries, ou 47 en Marécage).
-- Chaque espèce choisie garde au moins un individu (deux cafars). Un monde sans aucune espèce reste vide.
-- Le budget moyen reprend le niveau de difficulté d'avant ; ce qui change, c'est l'écart entre mondes. Avant, le niveau multipliait les effectifs (× 1,5 à × 5) et le Marécage pesait plus du double des Galeries : il s'allège, les Galeries et les Hautes herbes s'alourdissent.
+- **Menace** : ce que la foreuse sans équipement perdrait de points de vie en tuant tout ce qui vit sur la carte, selon le modèle mesuré au banc de combat (`mesures.md`) :
+
+      menace = terrain × [ Σ effectif × coût  +  (704 / surface) × ( Σ effectif × pression )² ]
+
+  Chaque espèce a un **coût** (pris un à un) et une **pression** (ce que la foule ajoute) : Insectoïde 3,3 / 0,15 · Cafar 2 / 0,3 · Siphon 1,1 / 0,31 · Gluar 5,7 / 0,67 · Crachin 4,9 / 1,12 · Crabos 7,3 / 0,86 · Vipérin 10,8 / 0,57 · Taupar 16,7 / 0,63 · Tapi 27,1 / 0,49 · Mastok 46 / 1,51. Le terme au carré fait monter la menace plus vite que le nombre : trente crabos pèsent bien plus que dix fois trois.
+- **Terrain** : coefficient du biome, mesuré avec les mêmes ennemis sur son relief : Plateau 1 · Marécage 0,87 · Hautes herbes 0,92 · Failles 0,95 · Pierrier 1,3 · Galeries 0,5. Un archétype enregistré vaut 1.
+- **Budget** : à chaque niveau, les effectifs du monde tiré sont mis à l'échelle pour atteindre le budget. Les intensités d'un biome ou d'un archétype **ne règlent que les proportions entre espèces** ; le total, c'est le niveau qui le fixe.
+- **Arrondi** : pas de minimum forcé par espèce ; une espèce trop chère pour le budget n'apparaît pas (les cafars vont au moins par deux ; il reste toujours au moins un individu).
+- Les budgets (45 à 340) reprennent la difficulté moyenne d'avant, traduite dans la nouvelle mesure. Vérification au banc : la faune posée tombe à ± 15 % du budget pour presque tous les biomes et niveaux, contre un écart du simple au quintuple avant.
 - **Les PV et les dégâts des ennemis ne changent pas avec la profondeur** (décision de l'utilisateur, 13 novembre 2026). Les fonctions `pvDe` / `dmgDe` restent le point d'entrée unique si l'on y revient.
-- Les coûts ne suivent pas les retouches du Bestiaire, et ne comptent ni les effets (poison, glu, énergie volée) ni le terrain. **Budget posé à la main** : à régler en jouant.
+- Historique du 15 novembre : d'abord un multiplicateur d'effectif par niveau (× 1,5 à × 5), puis un budget avec des coûts tirés de simples duels (60 à 320), enfin ce modèle mesuré.
 - **Gisements rares mais gros** : quatre en tout sur une carte de taille 2, répartis entre métal et Matière selon le niveau ; les autres tailles en proportion de leur surface (9 en taille 3). Chaque gisement vaut **30, 40 ou 50**.
 - **Cartes d'essai** : pas de budget, l'intensité donne directement le nombre.
+
+### Banc de combat (15 novembre 2026)
+
+Artefact à part (https://claude.ai/artifact/9BKRaoB4hzgdWhzYFx5A6q) : la page du jeu, plus un panneau qui remplace la colonne. On y choisit une carte de taille 1 (arène nue ou biome), des ennemis, un équipement, une consigne de pilote automatique (chasse ou traversée), et l'on lance une **série** sans affichage (moyennes : victoires, vie restante, points perdus, points perdus par ennemi tué, durée) ou **un combat à l'écran**. Options : ennemis en alerte, vie d'essai. Onglets « Mes résultats » (gardés dans le navigateur) et « Archives » (les séries de Claude ; un clic sur une ligne reprend la configuration). Il sert à régler les coûts de menace ; à relancer après tout changement de stats.
 
 ### Matière
 

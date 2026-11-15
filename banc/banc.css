@@ -40,3 +40,4 @@ body.surbanc .game{grid-template-columns:minmax(0,1fr) 480px}
 .btab tr.bad td:nth-child(2){color:var(--life)}.btab tr.ok td:nth-child(2){color:var(--c1)}
 .btab.poids td,.btab.poids th{text-align:right}.btab.poids td:first-child,.btab.poids th:first-child{text-align:left}
 @media (max-width:900px){body.surbanc .game{grid-template-columns:1fr}.banc{border-left:0;border-top:1px solid var(--line)}}
+.banc [hidden]{display:none!important}

@@ -182,20 +182,22 @@ function genPlanet(){
 }
 /* ---------- Descente : 5 niveaux, un biome par niveau (13 novembre 2026) ----------
    Un biome = un relief (réglages de génération), une faune (niveau d'intensité par espèce, voir NIVEAUX), une petite variation de palette.
-   rang : les biomes tirés pour une descente sont rangés du moins au plus dangereux. */
+   rang : les biomes tirés pour une descente sont rangés du moins au plus dangereux.
+   terrain : coefficient de menace du relief, mesuré au banc de combat (mêmes ennemis que sur le Plateau : couloirs et couvert protègent,
+   le Pierrier nu expose) ; un archétype enregistré vaut 1. */
 const NIV_MAX=5;
 const BIOMES={
-  plateau:{n:'Plateau',rang:1,d:'La surface, là où le vaisseau s’est posé : terrain ouvert, quelques massifs, peu de danger.',
+  plateau:{terrain:1,n:'Plateau',rang:1,d:'La surface, là où le vaisseau s’est posé : terrain ouvert, quelques massifs, peu de danger.',
     gen:{eau:8,montagne:10,gouffre:3,herbe:14,methode:'automate'},vie:{insectoide:2,crabos:1,cafar:1},teinte:[0,0,0,0,0]},
-  marecage:{n:'Marécage',rang:2,d:'De l’eau partout et de hautes herbes : les crabos y sont chez eux, et les tapis attendent dans les roseaux.',
+  marecage:{terrain:0.87,n:'Marécage',rang:2,d:'De l’eau partout et de hautes herbes : les crabos y sont chez eux, et les tapis attendent dans les roseaux.',
     gen:{eau:30,montagne:6,gouffre:1,herbe:28,methode:'automate'},vie:{crabos:3,tapi:2,gluar:2,viperin:1,insectoide:1},teinte:[0,-12,14,-4,-10]},
-  herbes:{n:'Hautes herbes',rang:2,d:'Une prairie à perte de vue : idéale pour se cacher, donc pour les embuscades.',
+  herbes:{terrain:0.92,n:'Hautes herbes',rang:2,d:'Une prairie à perte de vue : idéale pour se cacher, donc pour les embuscades.',
     gen:{eau:6,montagne:6,gouffre:2,herbe:55,methode:'automate'},vie:{tapi:3,insectoide:2,siphon:2,crachin:1},teinte:[0,-18,10,2,0]},
-  galeries:{n:'Galeries',rang:3,d:'De la roche presque partout, des couloirs étroits : les bandes de cafars y circulent et les taupars percent les parois.',
+  galeries:{terrain:0.5,n:'Galeries',rang:3,d:'De la roche presque partout, des couloirs étroits : les bandes de cafars y circulent et les taupars percent les parois.',
     gen:{eau:2,montagne:46,gouffre:3,herbe:4,methode:'bruit'},vie:{cafar:3,taupar:2,viperin:2,gluar:1},teinte:[0,0,-10,-8,-10]},
-  pierrier:{n:'Pierrier',rang:3,d:'Un désert de pierres, sec et à découvert : rien pour s’abriter des crachins.',
+  pierrier:{terrain:1.3,n:'Pierrier',rang:3,d:'Un désert de pierres, sec et à découvert : rien pour s’abriter des crachins.',
     gen:{eau:1,montagne:14,gouffre:6,herbe:2,methode:'bruit'},vie:{crachin:3,siphon:3,crabos:2,mastok:1},teinte:[0,0,-4,4,-25]},
-  failles:{n:'Failles',rang:4,d:'Un terrain éventré de gouffres, tout près du noyau : le territoire des mastoks et des vipérins.',
+  failles:{terrain:0.95,n:'Failles',rang:4,d:'Un terrain éventré de gouffres, tout près du noyau : le territoire des mastoks et des vipérins.',
     gen:{eau:4,montagne:22,gouffre:18,herbe:6,methode:'automate'},vie:{mastok:2,viperin:3,cafar:2,taupar:1},teinte:[6,12,-16,-6,0]}
 };
 // Courbe de difficulté, par niveau : menace = budget de menace pour 1000 cases (voir lifeMenace, 06-reglages) ; metal, mat = nombre de gisements
@@ -203,7 +205,7 @@ const BIOMES={
 // Plus on descend : plus de menace, moins de réparation, plus de Matière. Les PV et les dégâts des ennemis ne changent pas (décision du 13 novembre).
 // Jusqu'au 15 novembre 2026 le niveau multipliait les effectifs du monde (× 1,5 à × 5) : deux mondes au même niveau pouvaient être de difficulté
 // très différente (le Marécage pesait plus du double des Galeries). Le budget rend la courbe régulière quel que soit le monde ou l'archétype.
-const COURBE=[null,{menace:60,metal:3,mat:1},{menace:120,metal:3,mat:1},{menace:180,metal:2,mat:2},{menace:250,metal:1,mat:3},{menace:320,metal:1,mat:3}];
+const COURBE=[null,{menace:45,metal:3,mat:1},{menace:90,metal:3,mat:1},{menace:155,metal:2,mat:2},{menace:240,metal:1,mat:3},{menace:340,metal:1,mat:3}];
 // pvDe / dmgDe : points de vie et dégâts d'une espèce tels que le jeu les lit. Aujourd'hui ce sont les valeurs du Bestiaire, sans modification ;
 // ces deux fonctions restent le seul endroit à changer si l'on veut un jour les faire varier.
 const pvDe=sp=>sp.pv,dmgDe=sp=>sp.dmg;
@@ -226,7 +228,7 @@ function niveau(o){drilling=false;const g0=GEN,bio=o.test?null:biomeDe(o.biome),
   SANS_VAISSEAU=!!garde;try{genPlanet();}finally{GEN=g0;SANS_VAISSEAU=false;}
   G.w=W;G.h=H;G.mode=o.test?'test':'descente';G.niv=o.test?0:o.niv;G.biome=o.test?null:o.biome;G.suite=o.suite||null;
   const c=o.test?null:COURBE[o.niv];
-  if(o.test)lifeCalc();else lifeMenace(bio.vie,c.menace);
+  if(o.test)lifeCalc();else lifeMenace(bio.vie,c.menace,bio.terrain);
   {const a=W*H/(48*32),q=o.test?{metal:2,mat:2}:c;G.eff={};hideGems();hideOre(Math.max(1,Math.round(q.metal*a)),Math.max(1,Math.round(q.mat*a)));}
   G.sonar=1;   // sonar à émettre (voir sonarStart, 10-rendu) : il part 10 à 20 tours après l'arrivéeG.items={};G.tracks={};G.lastDir=null;G.beasts=[];G.blood={};G.fv=2;
   if(garde)Object.assign(G,garde);else{G.inv=invTest();G.log=[];}

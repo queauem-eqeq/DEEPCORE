@@ -171,6 +171,90 @@ Menace = somme effectif × coût d'un duel (colonne « vie restante » plus haut
 Les écarts qui restent (60 à 70 au niveau 1) viennent des arrondis et du minimum d'un individu par espèce. Deux archétypes extrêmes,
 « que des mastoks » et « tout infesté », tombent eux aussi sur le budget (60 à 72 au niveau 1, 316 au niveau 5).
 
+## Banc de combat : coût et pression par espèce (15 novembre 2026)
+
+Mesures faites sur le **banc de combat** (`outils/banc.py` l'assemble, `outils/banc_series.py` lance les séries ; artefact
+https://claude.ai/artifact/9BKRaoB4hzgdWhzYFx5A6q). Le vrai moteur tourne sur une **carte de taille 1** (32 × 22) générée à chaque essai ;
+un pilote automatique va tuer tout ce qui vit, en frappant le plus proche. Sauf mention, la foreuse est **sans équipement** et reçoit une
+vie d'essai très haute : on mesure les **dégâts encaissés**, sans que la mort n'arrête le combat. Environ 60 000 combats en tout,
+120 à 200 par configuration ; données brutes dans `banc/archives/2026-11-15/`, tableaux complets dans l'onglet Archives du banc.
+
+### Ce que coûte un ennemi
+
+| Espèce | Ancien coût (duels) | Coût de base | Pression | Par tête à 6, calmes | Par tête à 6, en alerte |
+|---|---|---|---|---|---|
+| Insectoïde | 4 | 3,3 | 0,15 | 3,5 | 3,9 |
+| Cafar | 5 | 2 | 0,3 | 2,4 | 2,8 |
+| Siphon | 3 | 1,1 | 0,31 | 1,7 | 4,1 |
+| Gluar | 12 | 5,7 | 0,67 | 8,7 | 14,3 |
+| Crachin | 15 | 4,9 | 1,12 | 12,5 | 23,8 |
+| Crabos | 15 | 7,3 | 0,86 | 11,6 | 26,4 |
+| Vipérin | 20 | 10,8 | 0,57 | 12,4 | 21,3 |
+| Taupar | 23 | 16,7 | 0,63 | 19,5 | 25,6 |
+| Tapi | 26 | 27,1 | 0,49 | 28,4 | 29,1 |
+| Mastok | 52 | 46 | 1,51 | 59,1 | 103,3 |
+
+- **Coût de base** : points de vie perdus par individu quand on les prend un à un, sans qu'ils soient avertis (la foreuse a souvent le
+  premier coup, par surprise). Les anciens coûts venaient de duels où l'ennemi chargeait déjà : ils étaient trop hauts pour presque tous.
+- **Pression** : ce que la foule ajoute. À 24 crabos sur la carte, chacun coûte 25 points au lieu de 7 ; à 24 crachins, 36 au lieu de 5.
+  Le Tapi, lui, coûte le même prix seul ou à quatorze : c'est son embuscade qui fait mal, pas le nombre.
+- **En alerte** (tous convergent d'emblée), le coût par tête double à six pour les crabos, les crachins et les mastoks.
+
+### Le modèle
+
+    menace = terrain × [ Σ effectif × coût  +  (704 / surface) × ( Σ effectif × pression )² ]
+
+Vérifié sur des **groupes mixtes** (série 4, terrain neutre) : l'écart entre prévu et mesuré reste sous 15 %, là où une simple somme
+des coûts se trompait du simple au triple (mélange Marécage × 3 : 776 points mesurés, 746 prévus, 282 par la somme simple).
+
+**Terrain** (mêmes ennemis, relief du biome au lieu du Plateau) : Marécage 0,87 · Hautes herbes 0,92 · Failles 0,95 · Pierrier 1,3 ·
+Galeries 0,5. Les Galeries sont le cas mal couvert : leurs couloirs protègent d'autant plus que la foule est grande (de 0,85 à 0,3) ;
+0,5 est juste vers le niveau 3, trop bas avant, trop haut après.
+
+### Le budget tient-il ?
+
+Dégâts mesurés ÷ budget visé, pour la faune que le jeu pose à chaque niveau (1 = pile sur le budget), niveaux 1 à 5 :
+
+| Biome | N1 | N2 | N3 | N4 | N5 |
+|---|---|---|---|---|---|
+| Plateau | 0,95 | 1,09 | 1,08 | 1,07 | 1,31 |
+| Marécage | 0,61 | 1,04 | 0,92 | 0,97 | 0,97 |
+| Hautes herbes | 1,09 | 1,13 | 1,06 | 1,00 | 1,04 |
+| Galeries | 1,69 | 1,12 | 0,95 | 0,75 | 0,55 |
+| Pierrier | 1,33 | 0,94 | 1,01 | 1,02 | 0,84 |
+| Failles | 0,48 | 0,75 | 1,32 | 1,07 | 0,91 |
+
+Avant ce réglage, les mêmes niveaux allaient de 0,56 à 2,9. Restent hors des clous : les Galeries (voir plus haut), le Plateau au
+niveau 5 (33 ennemis sur 704 cases : la pression est sous-estimée dans une telle cohue) et les tout petits budgets, où l'arrondi à
+trois ou quatre ennemis pèse lourd. Ce dernier point est propre à la taille 1 : en taille 3 les effectifs sont cinq fois plus grands.
+
+### Ce que ça veut dire en partie
+
+Même faune, vie normale. Victoires en tuant tout, foreuse **nue / équipée** (Scie circulaire, Châssis renforcé, Gyroscope, Viseur laser,
+Stabilisateur), puis part des **traversées** réussies (aller au site en se défendant seulement, foreuse nue) :
+
+| Biome | N1 | N2 | N3 | N4 | N5 |
+|---|---|---|---|---|---|
+| Plateau | 100 / 100 / 100 | 87 / 100 / 89 | 43 / 98 / 59 | 6 / 79 / 32 | 1 / 42 / 14 |
+| Marécage | 100 / 100 / 100 | 89 / 100 / 99 | 43 / 99 / 86 | 14 / 92 / 50 | 1 / 76 / 40 |
+| Hautes herbes | 100 / 100 / 100 | 98 / 100 / 100 | 19 / 92 / 100 | 0 / 38 / 99 | 0 / 0 / 86 |
+| Galeries | 97 / 100 / 98 | 76 / 100 / 78 | 45 / 99 / 65 | 41 / 92 / 64 | 56 / 88 / 58 |
+| Pierrier | 98 / 100 / 99 | 95 / 99 / 92 | 48 / 98 / 62 | 8 / 88 / 44 | 6 / 82 / 30 |
+| Failles | 100 / 100 / 100 | 99 / 100 / 98 | 20 / 93 / 48 | 5 / 92 / 29 | 1 / 88 / 27 |
+
+Lecture : tout nettoyer sans équipement n'est tenable qu'aux niveaux 1 et 2 ; équipée, la foreuse tient jusqu'au niveau 4 et commence
+à tomber au niveau 5. Traverser sans chercher le combat reste possible plus longtemps, surtout dans les Hautes herbes où les tapis ne
+frappent que si l'on passe à leur contact. C'est une carte de taille 1, où tout se rejoint vite : en taille 3 il y a de la place
+pour contourner.
+
+### Limites
+
+- Le pilote est simple : il fonce sur le plus proche, n'utilise ni la course, ni la discrétion, ni les consommables, ne fuit jamais.
+- Le coût ne compte que les points de vie : ni l'énergie volée par le Siphon, ni la glu du Gluar. Leur coût mesuré est donc bas, et un
+  monde qui n'aurait qu'eux en recevrait énormément.
+- Les coefficients de terrain ne valent que pour les six biomes d'origine ; un archétype enregistré vaut 1.
+- Les coûts ne suivent pas les retouches du Bestiaire : il faut relancer les séries après un changement de stats.
+
 ## Piège de méthode
 
 Une mesure à longue distance exige de **dégager toute la carte**. Un relief laissé au hasard coupe la

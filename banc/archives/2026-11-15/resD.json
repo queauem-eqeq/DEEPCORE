@@ -1,0 +1,1061 @@
+[
+ {
+  "cfg": {
+   "carte": "plateau",
+   "ennemis": {
+    "insectoide": 6,
+    "crabos": 2,
+    "cafar": 2
+   },
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 50000,
+   "alerte": false,
+   "_mix": "plateau",
+   "_k": 1
+  },
+  "res": {
+   "n": 150,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 49952,
+   "v0": 50000,
+   "perte": 47.5,
+   "ennemis": 10,
+   "tues": 10,
+   "parMonstre": 4.8,
+   "bat": 60
+  }
+ },
+ {
+  "cfg": {
+   "carte": "plateau",
+   "ennemis": {
+    "insectoide": 12,
+    "crabos": 4,
+    "cafar": 4
+   },
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 50000,
+   "alerte": false,
+   "_mix": "plateau",
+   "_k": 2
+  },
+  "res": {
+   "n": 150,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 49869,
+   "v0": 50000,
+   "perte": 130.7,
+   "ennemis": 20,
+   "tues": 20,
+   "parMonstre": 6.5,
+   "bat": 91
+  }
+ },
+ {
+  "cfg": {
+   "carte": "plateau",
+   "ennemis": {
+    "insectoide": 18,
+    "crabos": 6,
+    "cafar": 6
+   },
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 50000,
+   "alerte": false,
+   "_mix": "plateau",
+   "_k": 3
+  },
+  "res": {
+   "n": 150,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 49737,
+   "v0": 50000,
+   "perte": 263,
+   "ennemis": 30,
+   "tues": 30,
+   "parMonstre": 8.8,
+   "bat": 118
+  }
+ },
+ {
+  "cfg": {
+   "carte": "plateau",
+   "ennemis": {
+    "crabos": 6,
+    "tapi": 1,
+    "gluar": 1,
+    "viperin": 1,
+    "insectoide": 2
+   },
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 50000,
+   "alerte": false,
+   "_mix": "marecage",
+   "_k": 1
+  },
+  "res": {
+   "n": 150,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 49854,
+   "v0": 50000,
+   "perte": 146.2,
+   "ennemis": 11,
+   "tues": 11,
+   "parMonstre": 13.3,
+   "bat": 74
+  }
+ },
+ {
+  "cfg": {
+   "carte": "marecage",
+   "ennemis": {
+    "crabos": 6,
+    "tapi": 1,
+    "gluar": 1,
+    "viperin": 1,
+    "insectoide": 2
+   },
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 50000,
+   "alerte": false,
+   "_mix": "marecage",
+   "_k": 1
+  },
+  "res": {
+   "n": 150,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 49869,
+   "v0": 50000,
+   "perte": 131.4,
+   "ennemis": 11,
+   "tues": 11,
+   "parMonstre": 11.9,
+   "bat": 79
+  }
+ },
+ {
+  "cfg": {
+   "carte": "plateau",
+   "ennemis": {
+    "crabos": 12,
+    "tapi": 2,
+    "gluar": 2,
+    "viperin": 2,
+    "insectoide": 4
+   },
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 50000,
+   "alerte": false,
+   "_mix": "marecage",
+   "_k": 2
+  },
+  "res": {
+   "n": 150,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 49611,
+   "v0": 50000,
+   "perte": 389.3,
+   "ennemis": 22,
+   "tues": 22,
+   "parMonstre": 17.7,
+   "bat": 124
+  }
+ },
+ {
+  "cfg": {
+   "carte": "marecage",
+   "ennemis": {
+    "crabos": 12,
+    "tapi": 2,
+    "gluar": 2,
+    "viperin": 2,
+    "insectoide": 4
+   },
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 50000,
+   "alerte": false,
+   "_mix": "marecage",
+   "_k": 2
+  },
+  "res": {
+   "n": 150,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 49669,
+   "v0": 50000,
+   "perte": 330.8,
+   "ennemis": 22,
+   "tues": 22,
+   "parMonstre": 15,
+   "bat": 124
+  }
+ },
+ {
+  "cfg": {
+   "carte": "plateau",
+   "ennemis": {
+    "crabos": 18,
+    "tapi": 3,
+    "gluar": 3,
+    "viperin": 3,
+    "insectoide": 6
+   },
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 50000,
+   "alerte": false,
+   "_mix": "marecage",
+   "_k": 3
+  },
+  "res": {
+   "n": 150,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 49224,
+   "v0": 50000,
+   "perte": 775.8,
+   "ennemis": 33,
+   "tues": 33,
+   "parMonstre": 23.5,
+   "bat": 168
+  }
+ },
+ {
+  "cfg": {
+   "carte": "marecage",
+   "ennemis": {
+    "crabos": 18,
+    "tapi": 3,
+    "gluar": 3,
+    "viperin": 3,
+    "insectoide": 6
+   },
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 50000,
+   "alerte": false,
+   "_mix": "marecage",
+   "_k": 3
+  },
+  "res": {
+   "n": 150,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 49352,
+   "v0": 50000,
+   "perte": 647.8,
+   "ennemis": 33,
+   "tues": 33,
+   "parMonstre": 19.6,
+   "bat": 167
+  }
+ },
+ {
+  "cfg": {
+   "carte": "plateau",
+   "ennemis": {
+    "tapi": 2,
+    "insectoide": 6,
+    "siphon": 3,
+    "crachin": 1
+   },
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 50000,
+   "alerte": false,
+   "_mix": "herbes",
+   "_k": 1
+  },
+  "res": {
+   "n": 150,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 49899,
+   "v0": 50000,
+   "perte": 100.8,
+   "ennemis": 12,
+   "tues": 12,
+   "parMonstre": 8.4,
+   "bat": 75
+  }
+ },
+ {
+  "cfg": {
+   "carte": "herbes",
+   "ennemis": {
+    "tapi": 2,
+    "insectoide": 6,
+    "siphon": 3,
+    "crachin": 1
+   },
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 50000,
+   "alerte": false,
+   "_mix": "herbes",
+   "_k": 1
+  },
+  "res": {
+   "n": 150,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 49909,
+   "v0": 50000,
+   "perte": 90.9,
+   "ennemis": 12,
+   "tues": 12,
+   "parMonstre": 7.6,
+   "bat": 75
+  }
+ },
+ {
+  "cfg": {
+   "carte": "plateau",
+   "ennemis": {
+    "tapi": 4,
+    "insectoide": 12,
+    "siphon": 6,
+    "crachin": 2
+   },
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 50000,
+   "alerte": false,
+   "_mix": "herbes",
+   "_k": 2
+  },
+  "res": {
+   "n": 150,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 49761,
+   "v0": 50000,
+   "perte": 238.8,
+   "ennemis": 24,
+   "tues": 24,
+   "parMonstre": 9.9,
+   "bat": 115
+  }
+ },
+ {
+  "cfg": {
+   "carte": "herbes",
+   "ennemis": {
+    "tapi": 4,
+    "insectoide": 12,
+    "siphon": 6,
+    "crachin": 2
+   },
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 50000,
+   "alerte": false,
+   "_mix": "herbes",
+   "_k": 2
+  },
+  "res": {
+   "n": 150,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 49812,
+   "v0": 50000,
+   "perte": 188.2,
+   "ennemis": 24,
+   "tues": 24,
+   "parMonstre": 7.8,
+   "bat": 123
+  }
+ },
+ {
+  "cfg": {
+   "carte": "plateau",
+   "ennemis": {
+    "tapi": 6,
+    "insectoide": 18,
+    "siphon": 9,
+    "crachin": 3
+   },
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 50000,
+   "alerte": false,
+   "_mix": "herbes",
+   "_k": 3
+  },
+  "res": {
+   "n": 150,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 49589,
+   "v0": 50000,
+   "perte": 411.4,
+   "ennemis": 36,
+   "tues": 36,
+   "parMonstre": 11.4,
+   "bat": 151
+  }
+ },
+ {
+  "cfg": {
+   "carte": "herbes",
+   "ennemis": {
+    "tapi": 6,
+    "insectoide": 18,
+    "siphon": 9,
+    "crachin": 3
+   },
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 50000,
+   "alerte": false,
+   "_mix": "herbes",
+   "_k": 3
+  },
+  "res": {
+   "n": 150,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 49704,
+   "v0": 50000,
+   "perte": 296,
+   "ennemis": 36,
+   "tues": 36,
+   "parMonstre": 8.2,
+   "bat": 159
+  }
+ },
+ {
+  "cfg": {
+   "carte": "plateau",
+   "ennemis": {
+    "cafar": 12,
+    "taupar": 2,
+    "viperin": 2,
+    "gluar": 1
+   },
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 50000,
+   "alerte": false,
+   "_mix": "galeries",
+   "_k": 1
+  },
+  "res": {
+   "n": 150,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 49868,
+   "v0": 50000,
+   "perte": 131.9,
+   "ennemis": 17,
+   "tues": 17,
+   "parMonstre": 7.8,
+   "bat": 69
+  }
+ },
+ {
+  "cfg": {
+   "carte": "galeries",
+   "ennemis": {
+    "cafar": 12,
+    "taupar": 2,
+    "viperin": 2,
+    "gluar": 1
+   },
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 50000,
+   "alerte": false,
+   "_mix": "galeries",
+   "_k": 1
+  },
+  "res": {
+   "n": 150,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 49907,
+   "v0": 50000,
+   "perte": 92.9,
+   "ennemis": 16.2,
+   "tues": 16.2,
+   "parMonstre": 5.7,
+   "bat": 56
+  }
+ },
+ {
+  "cfg": {
+   "carte": "plateau",
+   "ennemis": {
+    "cafar": 24,
+    "taupar": 4,
+    "viperin": 4,
+    "gluar": 2
+   },
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 50000,
+   "alerte": false,
+   "_mix": "galeries",
+   "_k": 2
+  },
+  "res": {
+   "n": 150,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 49651,
+   "v0": 50000,
+   "perte": 348.7,
+   "ennemis": 34,
+   "tues": 34,
+   "parMonstre": 10.3,
+   "bat": 109
+  }
+ },
+ {
+  "cfg": {
+   "carte": "galeries",
+   "ennemis": {
+    "cafar": 24,
+    "taupar": 4,
+    "viperin": 4,
+    "gluar": 2
+   },
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 50000,
+   "alerte": false,
+   "_mix": "galeries",
+   "_k": 2
+  },
+  "res": {
+   "n": 150,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 49836,
+   "v0": 50000,
+   "perte": 164,
+   "ennemis": 27.9,
+   "tues": 27.9,
+   "parMonstre": 5.9,
+   "bat": 76
+  }
+ },
+ {
+  "cfg": {
+   "carte": "plateau",
+   "ennemis": {
+    "cafar": 36,
+    "taupar": 6,
+    "viperin": 6,
+    "gluar": 3
+   },
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 50000,
+   "alerte": false,
+   "_mix": "galeries",
+   "_k": 3
+  },
+  "res": {
+   "n": 150,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 49299,
+   "v0": 50000,
+   "perte": 700.8,
+   "ennemis": 51,
+   "tues": 51,
+   "parMonstre": 13.7,
+   "bat": 148
+  }
+ },
+ {
+  "cfg": {
+   "carte": "galeries",
+   "ennemis": {
+    "cafar": 36,
+    "taupar": 6,
+    "viperin": 6,
+    "gluar": 3
+   },
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 50000,
+   "alerte": false,
+   "_mix": "galeries",
+   "_k": 3
+  },
+  "res": {
+   "n": 150,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 49839,
+   "v0": 50000,
+   "perte": 160.5,
+   "ennemis": 34.1,
+   "tues": 34.1,
+   "parMonstre": 4.7,
+   "bat": 78
+  }
+ },
+ {
+  "cfg": {
+   "carte": "plateau",
+   "ennemis": {
+    "crachin": 4,
+    "siphon": 4,
+    "crabos": 2,
+    "mastok": 1
+   },
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 50000,
+   "alerte": false,
+   "_mix": "pierrier",
+   "_k": 1
+  },
+  "res": {
+   "n": 150,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 49822,
+   "v0": 50000,
+   "perte": 177.8,
+   "ennemis": 11,
+   "tues": 11,
+   "parMonstre": 16.2,
+   "bat": 80
+  }
+ },
+ {
+  "cfg": {
+   "carte": "pierrier",
+   "ennemis": {
+    "crachin": 4,
+    "siphon": 4,
+    "crabos": 2,
+    "mastok": 1
+   },
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 50000,
+   "alerte": false,
+   "_mix": "pierrier",
+   "_k": 1
+  },
+  "res": {
+   "n": 150,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 49764,
+   "v0": 50000,
+   "perte": 236,
+   "ennemis": 11,
+   "tues": 11,
+   "parMonstre": 21.5,
+   "bat": 83
+  }
+ },
+ {
+  "cfg": {
+   "carte": "plateau",
+   "ennemis": {
+    "crachin": 8,
+    "siphon": 8,
+    "crabos": 4,
+    "mastok": 2
+   },
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 50000,
+   "alerte": false,
+   "_mix": "pierrier",
+   "_k": 2
+  },
+  "res": {
+   "n": 150,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 49430,
+   "v0": 50000,
+   "perte": 570,
+   "ennemis": 22,
+   "tues": 22,
+   "parMonstre": 25.9,
+   "bat": 131
+  }
+ },
+ {
+  "cfg": {
+   "carte": "pierrier",
+   "ennemis": {
+    "crachin": 8,
+    "siphon": 8,
+    "crabos": 4,
+    "mastok": 2
+   },
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 50000,
+   "alerte": false,
+   "_mix": "pierrier",
+   "_k": 2
+  },
+  "res": {
+   "n": 150,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 49275,
+   "v0": 50000,
+   "perte": 724.6,
+   "ennemis": 22,
+   "tues": 22,
+   "parMonstre": 32.9,
+   "bat": 132
+  }
+ },
+ {
+  "cfg": {
+   "carte": "plateau",
+   "ennemis": {
+    "crachin": 12,
+    "siphon": 12,
+    "crabos": 6,
+    "mastok": 3
+   },
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 50000,
+   "alerte": false,
+   "_mix": "pierrier",
+   "_k": 3
+  },
+  "res": {
+   "n": 150,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 48885,
+   "v0": 50000,
+   "perte": 1114.6,
+   "ennemis": 33,
+   "tues": 33,
+   "parMonstre": 33.8,
+   "bat": 179
+  }
+ },
+ {
+  "cfg": {
+   "carte": "pierrier",
+   "ennemis": {
+    "crachin": 12,
+    "siphon": 12,
+    "crabos": 6,
+    "mastok": 3
+   },
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 50000,
+   "alerte": false,
+   "_mix": "pierrier",
+   "_k": 3
+  },
+  "res": {
+   "n": 150,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 48446,
+   "v0": 50000,
+   "perte": 1554.1,
+   "ennemis": 33,
+   "tues": 33,
+   "parMonstre": 47.1,
+   "bat": 180
+  }
+ },
+ {
+  "cfg": {
+   "carte": "plateau",
+   "ennemis": {
+    "mastok": 1,
+    "viperin": 4,
+    "cafar": 4,
+    "taupar": 1
+   },
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 50000,
+   "alerte": false,
+   "_mix": "failles",
+   "_k": 1
+  },
+  "res": {
+   "n": 150,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 49850,
+   "v0": 50000,
+   "perte": 150.3,
+   "ennemis": 10,
+   "tues": 10,
+   "parMonstre": 15,
+   "bat": 60
+  }
+ },
+ {
+  "cfg": {
+   "carte": "failles",
+   "ennemis": {
+    "mastok": 1,
+    "viperin": 4,
+    "cafar": 4,
+    "taupar": 1
+   },
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 50000,
+   "alerte": false,
+   "_mix": "failles",
+   "_k": 1
+  },
+  "res": {
+   "n": 150,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 49857,
+   "v0": 50000,
+   "perte": 143.2,
+   "ennemis": 9.9,
+   "tues": 9.9,
+   "parMonstre": 14.4,
+   "bat": 61
+  }
+ },
+ {
+  "cfg": {
+   "carte": "plateau",
+   "ennemis": {
+    "mastok": 2,
+    "viperin": 8,
+    "cafar": 8,
+    "taupar": 2
+   },
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 50000,
+   "alerte": false,
+   "_mix": "failles",
+   "_k": 2
+  },
+  "res": {
+   "n": 150,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 49618,
+   "v0": 50000,
+   "perte": 382.1,
+   "ennemis": 20,
+   "tues": 20,
+   "parMonstre": 19.1,
+   "bat": 100
+  }
+ },
+ {
+  "cfg": {
+   "carte": "failles",
+   "ennemis": {
+    "mastok": 2,
+    "viperin": 8,
+    "cafar": 8,
+    "taupar": 2
+   },
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 50000,
+   "alerte": false,
+   "_mix": "failles",
+   "_k": 2
+  },
+  "res": {
+   "n": 150,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 49685,
+   "v0": 50000,
+   "perte": 315.2,
+   "ennemis": 19.9,
+   "tues": 19.9,
+   "parMonstre": 15.9,
+   "bat": 96
+  }
+ },
+ {
+  "cfg": {
+   "carte": "plateau",
+   "ennemis": {
+    "mastok": 3,
+    "viperin": 12,
+    "cafar": 12,
+    "taupar": 3
+   },
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 50000,
+   "alerte": false,
+   "_mix": "failles",
+   "_k": 3
+  },
+  "res": {
+   "n": 150,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 49289,
+   "v0": 50000,
+   "perte": 711.1,
+   "ennemis": 30,
+   "tues": 30,
+   "parMonstre": 23.7,
+   "bat": 135
+  }
+ },
+ {
+  "cfg": {
+   "carte": "failles",
+   "ennemis": {
+    "mastok": 3,
+    "viperin": 12,
+    "cafar": 12,
+    "taupar": 3
+   },
+   "arme": "foreuse",
+   "armure": "",
+   "acc": [],
+   "pilote": "chasse",
+   "vie": 50000,
+   "alerte": false,
+   "_mix": "failles",
+   "_k": 3
+  },
+  "res": {
+   "n": 150,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 49458,
+   "v0": 50000,
+   "perte": 541.6,
+   "ennemis": 29.6,
+   "tues": 29.6,
+   "parMonstre": 18.3,
+   "bat": 126
+  }
+ }
+]

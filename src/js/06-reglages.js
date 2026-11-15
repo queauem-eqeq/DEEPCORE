@@ -40,14 +40,24 @@ function lifeCalc(niv,mult){const src=niv||INTENS,m=mult||1,surf=W*H/(96*64);   
   for(const k in INTENS){const [,c,mn]=NIVEAUX[src[k]||0];LIFE[k]=c?Math.max(mn,k==='cafar'?2:1,Math.round(LIFE_REF[k]*c*surf*m)):0;}}   // les cafars vont au moins par deux
 lifeCalc();
 /* Budget de menace (15 novembre 2026) : en descente, chaque niveau a un total de menace fixé, quel que soit le monde tiré.
-   MENACE_ESP : ce que coûte en moyenne un individu, en points de vie, à la foreuse sans équipement (duels de mesures.md ; l'insectoïde
-   est une estimation, les cafars sont comptés en bande). Les intensités d'un monde ne règlent alors plus que les PROPORTIONS entre
-   espèces : les effectifs sont mis à l'échelle pour que la somme effectif × coût atteigne le budget (parMille, pour 1000 cases). */
-const MENACE_ESP={insectoide:4,crabos:15,cafar:5,crachin:15,viperin:20,gluar:12,siphon:3,tapi:26,taupar:23,mastok:52};
-function lifeMenace(vie,parMille){const cible=parMille*W*H/1000,p={};let base=0;
-  for(const k in INTENS){p[k]=NIVEAUX[(vie&&vie[k])||0][1]*LIFE_REF[k];base+=p[k]*(MENACE_ESP[k]||10);}
-  const s=base?cible/base:0;for(const k in INTENS)LIFE[k]=p[k]?Math.max(k==='cafar'?2:1,Math.round(p[k]*s)):0;}
-const menaceTotale=()=>Object.keys(LIFE).reduce((t,k)=>t+LIFE[k]*(MENACE_ESP[k]||10),0);
+   La menace d'une carte est ce que la foreuse SANS ÉQUIPEMENT perd de points de vie en tuant tout ce qui s'y trouve, d'après les séries
+   du banc de combat (outils/banc.py, banc/resultats.js, docs/mesures.md) :
+       menace = terrain × [ Σ effectif × coût  +  (704 / surface) × ( Σ effectif × pression )² ]
+   - coût     : points de vie perdus par individu tué quand on les rencontre un à un ;
+   - pression : ce que chaque individu ajoute quand ils sont nombreux à la fois (les coups pleuvent pendant qu'on en frappe un seul) :
+                le terme au carré fait monter la menace plus vite que le nombre. 704 = surface de la carte de taille 1 où c'est mesuré ;
+   - terrain  : coefficient du biome (couloirs et couvert protègent, le terrain nu expose).
+   Les intensités d'un monde ne règlent que les PROPORTIONS entre espèces ; l'échelle est celle qui amène la menace au budget du niveau. */
+const MENACE_ESP={insectoide:[3.3,.15],cafar:[2,.3],siphon:[1.1,.31],crabos:[7.3,.86],crachin:[4.9,1.12],viperin:[10.8,.57],gluar:[5.7,.67],tapi:[27.1,.49],taupar:[16.7,.63],mastok:[46,1.51]};
+function menaceDe(eff,terrain){let l=0,q=0;for(const k in eff){const m=MENACE_ESP[k]||[10,.6];l+=eff[k]*m[0];q+=eff[k]*m[1];}return (terrain||1)*(l+704/(W*H)*q*q);}
+function lifeMenace(vie,parMille,terrain){const cible=parMille*W*H/1000/(terrain||1),p={};let L=0,Q=0;
+  for(const k in INTENS){p[k]=NIVEAUX[(vie&&vie[k])||0][1]*LIFE_REF[k];const m=MENACE_ESP[k]||[10,.6];L+=p[k]*m[0];Q+=p[k]*m[1];}
+  const a=704/(W*H)*Q*Q,s=!L?0:a?(-L+Math.sqrt(L*L+4*a*cible))/(2*a):cible/L;          // a·s² + L·s = cible
+  // arrondi simple : une espèce trop chère pour le budget disparaît (pas de minimum forcé, qui faisait déborder les petits budgets) ;
+  // les cafars vont au moins par deux ; s'il ne reste personne, un individu de l'espèce la plus présente
+  let tot=0,top=null;for(const k in INTENS){let n=Math.round(p[k]*s);if(k==='cafar'&&n===1)n=2;LIFE[k]=n;tot+=n;if(p[k]&&(!top||p[k]>p[top]))top=k;}
+  if(!tot&&top)LIFE[top]=top==='cafar'?2:1;}
+const menaceTotale=terrain=>menaceDe(LIFE,terrain);
 function intensAff(){LIFE_LBL.forEach(([k])=>{$('lr-'+k).value=INTENS[k];$('ll-'+k).textContent=NIVEAUX[INTENS[k]][0];});
   const v=Object.values(INTENS),m=v.every(x=>x===v[0]);$('lr-tout').value=m?v[0]:2;$('ll-tout').textContent=m?NIVEAUX[v[0]][0]:'Mixte';}
 function setIntens(k,v){v=Math.max(0,Math.min(4,Math.round(+v||0)));if(k==='tout')for(const q in INTENS)INTENS[q]=v;else INTENS[k]=v;
