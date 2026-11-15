@@ -93,6 +93,11 @@ addEventListener('keydown',ev=>{
   if(!$('bestiary').hidden){if(ev.key==='Escape'){ev.preventDefault();closeBest();}return;}
   if(!$('viseurs').hidden){if(ev.key==='Escape'){ev.preventDefault();closeCur();}return;}
   if(!$('overlay').hidden||ev.ctrlKey||ev.metaKey||ev.altKey||ev.target.tagName==='INPUT')return;const k=ev.key.toLowerCase();
+  if(VISEE){ev.preventDefault();                                  // visée d'une charge sismique : rien d'autre ne répond
+    if(KEYS[k])viseeVers(VISEE.x+KEYS[k][0],VISEE.y+KEYS[k][1]);
+    else if(k==='enter'||k===' ')viseeOk();
+    else if(k==='escape')viseeStop('Charge sismique annulée.');
+    return;}
   if(TRAV||REST||EXPL){if(!['shift','control','alt','meta'].includes(k)){ev.preventDefault();stopTravel('Trajet interrompu.');stopRest('Repos interrompu.');stopExplore('Exploration interrompue.');}return;}
   if(k==='v'){ev.preventDefault();toggleVision();return;}
   if(INSPECT){ev.preventDefault();

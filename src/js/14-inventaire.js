@@ -194,10 +194,10 @@ const ITEMS={
     use:st=>{G.eff.fum=5;for(const b of G.beasts||[])if(b.hunt){b.hunt=0;forget(b);}for(const a of G.animals||[]){a.aware=0;a.enraged=false;forget(a);}return 'les ennemis perdent votre trace';},
     art:["   ░░ ▒▒░  ░   ", "  ░▒▒▓▒▒▒░░    ", "    ░▒┌─┐▒░    ", "      │█│      ", "      │█│      ", "      └─┘      "],
     col:["...dd.ddd..d...", "..dwwwwwwdd....", "....dwdddwd....", "......d3d......", "......d3d......", "......ddd......"]},
-  charge:{n:'Charge sismique',f:1,conso:1,eff:'20 dégâts à 2 cases',
-    d:'Onde de choc : 20 dégâts à tous les ennemis à 2 cases ou moins. Très bruyante.',
-    plein:st=>!invCibles(2).length,non:'Aucun ennemi à 2 cases ou moins : charge inutile.',
-    use:st=>invBoum(2,20),
+  charge:{n:'Charge sismique',f:1,conso:1,eff:'30 dégâts sur 3 × 3, à placer',
+    d:'Onde de choc dirigée : on place un carré de 3 × 3 jusqu’à 4 cases de la foreuse, et tout ce qui s’y trouve prend 30 dégâts. Très bruyante.',
+    vise:1,plein:st=>false,non:'',
+    use:st=>'',
     art:["      ┌─┐   *  ", "    ▄▄┴─┴▄▄ │  ", "   █████████┘  ", "   ████▒████   ", "   █████████   ", "    ▀▀▀▀▀▀▀    "],
     col:["......ddd...r..", "....33ddd33.d..", "...333333333d..", "...3333r3333...", "...333333333...", "....3333333...."]}
 };
@@ -246,6 +246,34 @@ function invChanged(){robotTiles();computeFOV();turnStealth();render();}
 const ARME_FIXE='Il faut toujours une arme en main : équipez-en une autre pour la remplacer.';
 // consommables offensifs : ennemis à r cases ou moins, et onde de choc
 const invCibles=r=>[...(G.beasts||[]),...(G.animals||[])].filter(o=>Math.max(Math.abs(o.x-G.px),Math.abs(o.y-G.py))<=r);
+/* Charge sismique : visée d'une zone de 3 × 3 (16 novembre 2026).
+   Le carré s'ouvre une case devant la foreuse ; on le déplace à la souris ou aux touches de direction, dans un rayon de VISEE_R cases
+   autour d'elle ; Entrée ou un clic valide, Échap annule (la charge n'est pas consommée). Le carré est dessiné en rouge avec la tuile
+   « Bord croisé » (10-rendu.js). La validation frappe tout ce qui occupe une des neuf cases. */
+const VISEE_R=4,VISEE_DM=30;
+const DEVANT={u:[0,-1],r:[1,0],d:[0,1],l:[-1,0]};
+function viseeStart(i){const [dx,dy]=DEVANT[G.face||'u'];
+  VISEE={i,x:Math.max(1,Math.min(W-2,G.px+dx)),y:Math.max(1,Math.min(H-2,G.py+dy))};
+  invOpen(false);SAC_NAV=false;SAC_H='';
+  say('Charge sismique : placez la zone (déplacement ou souris), Entrée ou clic pour tirer, Échap pour annuler.','warn');render();}
+function viseeVers(x,y){if(!VISEE)return;
+  const cx=Math.max(G.px-VISEE_R,Math.min(G.px+VISEE_R,Math.max(1,Math.min(W-2,x)))),
+        cy=Math.max(G.py-VISEE_R,Math.min(G.py+VISEE_R,Math.max(1,Math.min(H-2,y))));
+  if(cx!==VISEE.x||cy!==VISEE.y){VISEE.x=cx;VISEE.y=cy;render();}}
+const viseeStop=m=>{VISEE=null;if(m)say(m);render();};
+function viseeOk(){if(!VISEE||G.over)return;const {i,x,y}=VISEE,o=G.inv[i];
+  if(!o||!ITEMS[o.k]||!ITEMS[o.k].vise){viseeStop();return;}
+  VISEE=null;lastAct='dig';
+  let n=0,k=0;
+  for(const c of [...(G.beasts||[]),...(G.animals||[])]){if(Math.abs(c.x-x)>1||Math.abs(c.y-y)>1)continue;
+    const isB=(G.beasts||[]).includes(c),sp=isB?BEASTS[c.sp]:SPECIES[c.sp];n++;
+    c.hp=(c.hp??pvDe(sp))-VISEE_DM;addFx({kind:'num',x:c.x,y:c.y,txt:'-'+VISEE_DM,col:PAL['3'],dur:900});
+    if(c.hp<=0){k++;(isB?G.beasts:G.animals).splice((isB?G.beasts:G.animals).indexOf(c),1);bleed(c.x,c.y);}
+    else if(isB){c.hunt=1;spot(c);}else{c.aware=1;c.enraged=true;spot(c);}}
+  engage();invTake(i);sacFix();SAC_H='';
+  addFx({kind:'shake',amp:8,dur:300});SFX.explode();
+  say(`Charge sismique : ${n?`${n} ennemi${n>1?'s':''} touché${n>1?'s':''}${k?`, ${k} abattu${k>1?'s':''}`:''}`:'personne dans la zone'}.`,n?'good':'warn');
+  render();}
 function invBoum(r,dm){let n=0,k=0;lastAct='dig';
   for(const o of invCibles(r)){n++;const isB=G.beasts.includes(o),sp=isB?BEASTS[o.sp]:SPECIES[o.sp];o.hp=(o.hp??pvDe(sp))-dm;
     addFx({kind:'num',x:o.x,y:o.y,txt:'-'+dm,col:PAL['3'],dur:900});
@@ -264,6 +292,7 @@ function robotTiles(){if(!TL.robot_u||!G||!G.inv)return;const porte=s=>{const o=
 function invTake(i){const o=G.inv[i];if((o.n||1)>1)o.n--;else{G.inv.splice(i,1);if(INV_SEL>i)INV_SEL--;invFix();}}
 // Entrée ou bouton principal : utiliser un consommable, équiper ou retirer un équipement
 function invEquip(i){const o=G.inv[i];if(!o||G.over)return;const d=ITEMS[o.k],e=accord(d);
+  if(d.vise){viseeStart(i);return;}   // objet qui se vise : on ouvre la visée au lieu de l'utiliser tout de suite
   if(d.conso){
     if(d.plein(G.st)){invSay(d.non,'warn');SFX.blocked();render();return;}
     const r=d.use(G.st);invTake(i);invSay(`${d.n} utilisé${e} : ${r}.`,'good');SFX.spot();invChanged();return;}

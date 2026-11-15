@@ -153,9 +153,11 @@ function moveInspect(dx,dy){const vc=Math.floor(vw/S),vr=Math.floor(vh/S);
 const cellAt=ev=>{const r=cv.getBoundingClientRect();return {x:Math.floor((ev.clientX-r.left)/S)+camX,y:Math.floor((ev.clientY-r.top)/S)+camY};};
 cv.addEventListener('pointerdown',ev=>{lastPT=ev.pointerType||'mouse';});
 cv.addEventListener('pointermove',ev=>{if(ev.pointerType==='touch'||!G)return;const c=cellAt(ev);if(c.x<0||c.y<0||c.x>=W||c.y>=H)return;
+  if(VISEE){viseeVers(c.x,c.y);return;}
   if(!HOV||HOV.x!==c.x||HOV.y!==c.y){HOV=c;render();}});
 cv.addEventListener('pointerleave',()=>{if(INSPECT||lastPT==='touch')return;if(HOV){HOV=null;render();}});
-cv.addEventListener('click',ev=>{if(busy())return;if(EXPL){stopExplore('Exploration interrompue.');return;}if(REST){stopRest('Repos interrompu.');return;}if(TRAV){stopTravel('Trajet interrompu.');return;}
+cv.addEventListener('click',ev=>{if(VISEE){const c=cellAt(ev);viseeVers(c.x,c.y);viseeOk();return;}
+  if(busy())return;if(EXPL){stopExplore('Exploration interrompue.');return;}if(REST){stopRest('Repos interrompu.');return;}if(TRAV){stopTravel('Trajet interrompu.');return;}
   const c=cellAt(ev);if(c.x<0||c.y<0||c.x>=W||c.y>=H)return;
   // écran tactile : un premier appui inspecte et montre le trajet, un second sur la même case lance le déplacement
   if(lastPT==='touch'&&(!HOV||HOV.x!==c.x||HOV.y!==c.y)){HOV=c;render();return;}

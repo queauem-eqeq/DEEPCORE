@@ -257,6 +257,7 @@ Version d'essai : tous les objets sont donnés au départ, non équipés sauf la
 - **Choisir** : à la souris (clic ; double-clic = Entrée) ou au clavier : ↑ ↓ (ou Z S, 8 2) pour parcourir, **Entrée** pour équiper ou retirer, **J** (ou Suppr) pour jeter, **G** pour ramasser ce qui est sous la foreuse, **T** ou **Échap** pour fermer.
 - **Équiper** est gratuit et instantané. Une arme ou une armure remplace celle qui est portée ; un 4ᵉ accessoire est refusé tant qu'un emplacement n'est pas libéré.
 - **Effets** : l'objet ajoute ses modificateurs aux stats tant qu'il est porté ; les stats modifiées s'affichent en couleur dans les statistiques de la fenêtre. Les bonus des joyaux s'additionnent.
+- **Charge sismique : une visée** (16 novembre 2026). L'utiliser n'explose pas tout de suite : un **carré de 3 × 3 en « Bord croisé » rouge** s'ouvre **une case devant la foreuse** (selon son orientation). On le déplace **à la souris** ou **aux touches de direction**, sans que la foreuse bouge, dans un **rayon de 4 cases** autour d'elle (butée nette). **Entrée** ou un **clic** tire : **30 dégâts** à chaque créature des neuf cases, puis la charge est consommée et le combat est engagé (les insectoïdes passent à l'attaque). **Échap** annule sans rien consommer. Pendant la visée, aucune autre commande ne répond. La zone ne casse pas la roche. La tuile rouge suit les retouches de « Bord croisé » au Tile editor.
 - **Consommables** : usage unique, gratuit et instantané pour l'instant, depuis le sous-menu Inventaire. Refusé si la jauge est déjà pleine (l'objet n'est pas perdu) ; le surplus au-delà du maximum est perdu. Les consommables identiques s'empilent (« ×2 »).
 - **Jeter** pose l'objet (un seul exemplaire pour une pile) au sol sous la foreuse (tuile « Objet au sol », retouchable au Tile editor). Repasser sur la case le ramasse ; sans bouger, touche G ou bouton « Ramasser ». La fiche de survol nomme les objets posés.
 - **Durée du coup** : une arme peut allonger ou raccourcir le coup de foreuse (§ 5 bis) ; plancher à 25.
@@ -284,7 +285,7 @@ Version d'essai : tous les objets sont donnés au départ, non équipés sauf la
 | Batterie (×2) | consommable | Énergie +50 |
 | Purge (×2) | consommable | supprime poison et glu |
 | Fumigène (×2) | consommable | les ennemis perdent la trace et ne voient plus la foreuse pendant 5 battements |
-| Charge sismique (×2) | consommable | 20 dégâts à tous les ennemis à 2 cases ou moins ; bruyante (comme un forage) |
+| Charge sismique (×2) | consommable | **visée** : un carré de 3 × 3 à placer jusqu'à 4 cases, **30 dégâts** à tout ce qui s'y trouve ; bruyante (comme un forage) |
 
 Vingt et un objets depuis le 13 novembre 2026. Règles ajoutées ce jour-là :
 

@@ -103,6 +103,9 @@ function ensureChasmOv(){if(!G)return;const key=(G.seed||'')+'|'+PAL['3']+'|'+G.
     if(dd<NT){const f=(NT-dd)/(NT+1);set(i,base.map(v=>Math.round(v*f)));}}}
   x.putImageData(img,0,0);c._g=G;CHASM_OV=c;CHASM_KEY=key;}
 function hexRgb3(h){const n=parseInt(h.slice(1),16);return [(n>>16)&255,(n>>8)&255,n&255];}
+// la tuile « Bord croisé » teinte en rouge, refaite si elle est retouchée au Tile editor
+let VIS_T=null,VIS_K='';
+function viseeTuile(){const r=rowsOf('nuage3'),k=r.join('');if(!VIS_T||VIS_K!==k){VIS_T=curCanvas(r,'#b8242a');VIS_K=k;}return VIS_T;}
 /* Texture du sol (16 novembre 2026, variante « plaques rugueuses » choisie sur la planche planches/sol-grain.js) :
    chaque case prend une nuance de la couleur monde très légèrement décalée (grandes plages douces, teinte ±4°, saturation ±13 %),
    et un grain de 0 à 11 pixels par case dont la DENSITÉ varie par zones : des coins presque lisses, d'autres nettement granuleux.
@@ -199,6 +202,10 @@ function render(){
     ctx.globalAlpha=1;ctx.drawImage(img,px,py,S,S);
     const fl=FX.find(f=>f.kind==='flash'&&f.beast===b);if(fl){ctx.globalCompositeOperation='lighter';ctx.globalAlpha=1-fxP(fl);ctx.drawImage(img,px,py,S,S);ctx.drawImage(img,px,py,S,S);ctx.globalCompositeOperation='source-over';ctx.globalAlpha=1;}
     barreVie(px,py,b.hp,pvDe(BEASTS[b.sp]));}
+  // zone visée d'une charge sismique : carré de 3 × 3 en « Bord croisé » rouge
+  if(VISEE){const t=viseeTuile();ctx.globalAlpha=1;
+    for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){const zx=VISEE.x+dx,zy=VISEE.y+dy;
+      if(zx<0||zy<0||zx>=W||zy>=H)continue;ctx.drawImage(t,(zx-camX)*S,(zy-camY)*S,S,S);}}
   const wreck=BOOM||(G.over&&G.over.dead);   // foreuse détruite : plus dessinée
   if(!wreck){const [lx,ly]=lungeOff(f=>f.kind==='lunge'&&f.robot);ctx.globalAlpha=1;ctx.drawImage(TL['robot_'+(G.face||'u')],(G.px-camX)*S+lx,(G.py-camY)*S+ly,S,S);}
   const ht=G.t[idx(G.px,G.py)];if(wreck){}else if(ht===LIQ)put(TL.wade,G.px,G.py,.95);else if(ht===DEEP)put(TL.wadeDeep,G.px,G.py,.95);

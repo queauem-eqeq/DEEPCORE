@@ -10,6 +10,7 @@ const GROUND=0,ROCK=1,MOUNT=2,LIQ=3,GRASS=4,FLAT=5,DEEP=6,CHASM=7,BRIDGE=8,RUBBL
 const TNAME=['sol rocheux','rocher','montagne','liquide','herbes hautes','herbes basses','eau profonde','gouffre','pont','gravats','(inutilisé)','coque du vaisseau','soute du vaisseau'];
 const DIRN=['est','ouest','sud','nord','sud-est','nord-est','sud-ouest','nord-ouest'];
 // (la table STATS de la colonne a disparu avec le sous-menu Statistiques, le 15 novembre 2026)
+let VISEE=null;   // visée d'une charge sismique en cours : {i, x, y} — voir 14-inventaire.js
 const CRIT_X=3;   // dégâts d'un coup critique
 const $=id=>document.getElementById(id);
 // Horodatage de la dernière retouche faite dans ce navigateur (palettes, tuiles, génération, faune, bestiaire) :
