@@ -374,7 +374,7 @@ function invOpen(on){const m=$('inventaire');
 const invToggle=()=>invOpen($('inventaire').hidden);
 // touches de la fenêtre : appelée par le gestionnaire de clavier (11-interface) tant qu'elle est ouverte
 function invKey(ev){if(ev.ctrlKey||ev.metaKey||ev.altKey)return;const k=ev.key.toLowerCase(),l=invEquipables(),d=KEYS[k];
-  if(k==='escape'||k==='e'){ev.preventDefault();invOpen(false);return;}
+  if(k==='escape'||k==='t'){ev.preventDefault();invOpen(false);return;}
   if(d&&d[0]===0&&l.length){ev.preventDefault();const p=l.indexOf(INV_SEL);INV_SEL=l[((p<0?0:p)+d[1]+l.length)%l.length];INV_MSG=null;invDraw();return;}
   if((k==='enter'||k===' ')&&ev.target.tagName==='BUTTON')return;        // un bouton a le focus : le laisser faire son clic
   if(k==='enter'||k===' '){ev.preventDefault();invEquip(INV_SEL);}

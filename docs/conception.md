@@ -176,7 +176,7 @@ Jugée trop haute et trop étroite (640 × 835), elle est passée à 940 × 390 
 | Montagne | brisée en 2 coups (sauf bord de carte) | bloquée | peut contenir le joyau ; 10 % contiennent des éclats de métal |
 | Eau peu profonde | oui | libre | −20 d'esquive ; **toutes les créatures y entrent** (15 novembre 2026) ; **terrain lent : pas ×1,5**, sauf pour les crabos qui nagent |
 | Eau profonde | oui | libre | −20 d'esquive ; **toutes les créatures y entrent** et y nagent droit (seule la foreuse dérive) ; **chaque pas a 50 % de chance de partir dans une autre direction tirée au hasard** (si cette case est bloquée, la foreuse est plaquée contre l'obstacle et ne bouge pas ; le tour passe) ; **attendre** dans l'eau profonde déplace la foreuse d'une case au hasard (le courant) ; **terrain lent : pas ×2**, sauf pour les crabos |
-| Herbes hautes | oui | bloquée | **deviennent des herbes basses** au passage ; +10 d'esquive pour qui s'y trouve ; froufrou au passage (bruitage refait le 13 novembre 2026 : trois coups de brosse décalés, tirés au hasard à chaque pas) |
+| Herbes hautes (assombries de moitié le 15 novembre 2026 : même teinte, luminosité divisée par deux, elles ressortaient trop) | oui | bloquée | **deviennent des herbes basses** au passage ; +10 d'esquive pour qui s'y trouve ; froufrou au passage (bruitage refait le 13 novembre 2026 : trois coups de brosse décalés, tirés au hasard à chaque pas) |
 | Herbes basses | oui | libre | **portée de discrétion ÷ 2** : c'est le couvert du jeu |
 | Gouffre | non | libre | — |
 | Pont / gravats | oui | libre | — |
@@ -241,10 +241,10 @@ Version d'essai : tous les objets sont donnés au départ, non équipés sauf la
   - **Dix places** (15 novembre 2026) : le compteur **[x/10]** s'affiche à droite du titre Inventaire. **Une place par sorte** de consommable, quel que soit le nombre d'exemplaires : le sac d'essai (2 de chaque, 5 sortes) occupe 5 places. Ramasser une sorte nouvelle quand les 10 places sont prises est refusé, et **l'objet reste au sol**.
   - **[X] détruit la pile entière** (c'est ce qui libère une place) ; un consommable ne peut plus être jeté au sol, seulement utilisé ou détruit.
   - **Touche I** : ouvre le sous-menu s'il est replié et choisit le premier consommable. Ensuite **↑ ↓** pour parcourir, **Entrée** pour utiliser, **Suppr** ou **J** pour détruire la pile, **Échap** ou **I** pour sortir. Toute autre touche de jeu sort de la navigation et agit normalement. La ligne choisie est encadrée en accent.
-- **Ouverture de l'équipement** : bouton « ÉQUIPEMENT » à côté de « MARCHE / COURSE », ou touche **E** (15 novembre 2026 ; **I** avant). **E** ou **Échap** referme. C'est une **fenêtre plein écran, comme le Tile editor** (le panneau dans la colonne, essayé d'abord, a été abandonné le 13 novembre). Le jeu ne reçoit plus les touches tant qu'elle est ouverte ; le temps ne passe pas.
+- **Ouverture de l'équipement** : bouton « ÉQUIPEMENT » à côté de « MARCHE / COURSE », ou touche **T** (15 novembre 2026 ; **I** avant, puis **E** quelques heures). **T** ou **Échap** referme. C'est une **fenêtre plein écran, comme le Tile editor** (le panneau dans la colonne, essayé d'abord, a été abandonné le 13 novembre). Le jeu ne reçoit plus les touches tant qu'elle est ouverte ; le temps ne passe pas.
 - **Liste à gauche** : une ligne par pièce d'équipement, précédée d'un signe (`/` arme, `[` armure, `=` accessoire), suivie de son type. Un objet **équipé reste dans la liste**, en couleur monde, avec la mention « équipé ».
 - **Fiche à droite** de l'objet choisi : dessin **ASCII coloré** aux couleurs de la palette, description, effets (en accent s'ils sont favorables, en rouge sinon), boutons **Équiper / Retirer** et **Jeter**. Le dernier message est répété sous la liste, le journal étant caché.
-- **Choisir** : à la souris (clic ; double-clic = Entrée) ou au clavier : ↑ ↓ (ou Z S, 8 2) pour parcourir, **Entrée** pour équiper ou retirer, **J** (ou Suppr) pour jeter, **G** pour ramasser ce qui est sous la foreuse, **E** ou **Échap** pour fermer.
+- **Choisir** : à la souris (clic ; double-clic = Entrée) ou au clavier : ↑ ↓ (ou Z S, 8 2) pour parcourir, **Entrée** pour équiper ou retirer, **J** (ou Suppr) pour jeter, **G** pour ramasser ce qui est sous la foreuse, **T** ou **Échap** pour fermer.
 - **Équiper** est gratuit et instantané. Une arme ou une armure remplace celle qui est portée ; un 4ᵉ accessoire est refusé tant qu'un emplacement n'est pas libéré.
 - **Effets** : l'objet ajoute ses modificateurs aux stats tant qu'il est porté ; les stats modifiées s'affichent en couleur dans les statistiques de la fenêtre. Les bonus des joyaux s'additionnent.
 - **Consommables** : usage unique, gratuit et instantané pour l'instant, depuis le sous-menu Inventaire. Refusé si la jauge est déjà pleine (l'objet n'est pas perdu) ; le surplus au-delà du maximum est perdu. Les consommables identiques s'empilent (« ×2 »).
@@ -389,7 +389,7 @@ La statistique **DÉT (détection)** par espèce a été supprimée le 13 novemb
 - Export / import texte : essayé puis retiré le 6 novembre 2026 (« on verra plus tard »).
 
 ### Touches
-ZQSD / flèches / pavé numérique : déplacer · A T W C : diagonales (↗ est passée de E à T le 15 novembre 2026, E ouvrant l'équipement) · Souris : survol = inspection, clic = y aller · X : inspection au clavier · R : courir / marcher · E : équipement · I : inventaire · O : exploration automatique · F : forer · Espace / 5 : attendre · P : repos jusqu’à l’énergie pleine · V : portée de discrétion · B : brouillard de guerre · ! : son · M : mode carte (déplacements = défilement, Maj = plus vite, Échap ou M pour revenir).
+ZQSD / flèches / pavé numérique : déplacer · A E W C : diagonales · Souris : survol = inspection, clic = y aller · X : inspection au clavier · R : courir / marcher · T : équipement · I : inventaire · O : exploration automatique · F : forer · Espace / 5 : attendre · P : repos jusqu’à l’énergie pleine · V : portée de discrétion · B : brouillard de guerre · ! : son · M : mode carte (déplacements = défilement, Maj = plus vite, Échap ou M pour revenir).
 
 ## 10. Sauvegarde des réglages
 

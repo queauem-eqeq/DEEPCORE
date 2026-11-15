@@ -82,7 +82,7 @@ function side(){
 
 /* ---------- Commandes ---------- */
 const KEYS={arrowup:[0,-1],arrowdown:[0,1],arrowleft:[-1,0],arrowright:[1,0],z:[0,-1],s:[0,1],q:[-1,0],d:[1,0],
-  a:[-1,-1],t:[1,-1],w:[-1,1],c:[1,1],   // ↗ est passée de E à T le 15 novembre 2026 : E ouvre l'équipement
+  a:[-1,-1],e:[1,-1],w:[-1,1],c:[1,1],   // ↗ est revenue sur E le 15 novembre 2026 au soir : c'est T qui ouvre l'équipement
   '8':[0,-1],'2':[0,1],'4':[-1,0],'6':[1,0],'7':[-1,-1],'9':[1,-1],'1':[-1,1],'3':[1,1]};
 addEventListener('keydown',ev=>{
   if(INTRO){ev.preventDefault();if(ev.key==='Escape'||ev.key===' '||ev.key==='Enter')skipIntro();return;}
@@ -107,7 +107,7 @@ addEventListener('keydown',ev=>{
   if(k==='m'){ev.preventDefault();setFreeCam(!freeCam);return;}
   if(ev.key==='!'){ev.preventDefault();toggleSound();return;}
   if(freeCam){if(KEYS[k]){ev.preventDefault();const st=ev.shiftKey?5:2;panCam(KEYS[k][0]*st,KEYS[k][1]*st);}else if(k==='escape'){ev.preventDefault();setFreeCam(false);}else if(k==='b'){ev.preventDefault();toggleFog();}return;}
-  if(KEYS[k]){ev.preventDefault();tryMove(...KEYS[k]);}else if(k==='f'){ev.preventDefault();askDrill();}else if(k==='b'){ev.preventDefault();toggleFog();}else if(k==='r'){ev.preventDefault();toggleSprint();}else if(k==='p'){ev.preventDefault();startRest();}else if(k==='e'){ev.preventDefault();invToggle();}else if(k==='i'){ev.preventDefault();sacNav(true);}else if(k==='o'){ev.preventDefault();startExplore();}else if(k===' '||k==='5'||k==='.'||ev.code==='Numpad5'){ev.preventDefault();waitTurn();}
+  if(KEYS[k]){ev.preventDefault();tryMove(...KEYS[k]);}else if(k==='f'){ev.preventDefault();askDrill();}else if(k==='b'){ev.preventDefault();toggleFog();}else if(k==='r'){ev.preventDefault();toggleSprint();}else if(k==='p'){ev.preventDefault();startRest();}else if(k==='t'){ev.preventDefault();invToggle();}else if(k==='i'){ev.preventDefault();sacNav(true);}else if(k==='o'){ev.preventDefault();startExplore();}else if(k===' '||k==='5'||k==='.'||ev.code==='Numpad5'){ev.preventDefault();waitTurn();}
 });
 $('pad').addEventListener('click',ev=>{const b=ev.target.closest('button[data-d]');if(!b||!$('overlay').hidden)return;const [dx,dy]=b.dataset.d.split(',').map(Number);if(freeCam)panCam(dx*2,dy*2);else tryMove(dx,dy);});
 $('waitPad').onclick=waitTurn;
