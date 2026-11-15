@@ -155,7 +155,13 @@ function genPlanet(){
       const c=rankFill(t,crev,Math.round(ct/2),CHASM),b=placeBlobs(t,ct-c,CHASM,cSize,fill,it,false);if(c+b<ct)rankFill(t,crev,ct-c-b,CHASM);}
     placeLakes(t,P('eau'));
     const gC=placeBlobs(t,P('herbe'),GRASS,()=>[rnd(SZ(10,4),SZ(22,6)),rnd(SZ(6,3),SZ(13,4))],.5,4,false);if(gC<P('herbe'))rankFill(t,sc(fbm()),P('herbe')-gC,GRASS);
-    {const gn=sc(fbm()),gc=[];for(let i=0;i<N;i++)if(t[i]===GRASS)gc.push(i);gc.sort((a,b)=>gn[a]-gn[b]);for(const i of gc.slice(0,gc.length>>1))t[i]=FLAT;}
+    // Herbes hautes / basses (15 novembre 2026) : plus de coupure nette moitié-moitié. Trois couches s'additionnent : de grandes zones
+    // (qui donnent parfois une forte majorité de hautes ou de basses), des bosquets et des touffes de 2 à 6 cases, et un grain case par case.
+    // Les grandes zones sont écrasées vers le milieu (mises au carré) : le plus souvent c'est le mélange qui l'emporte.
+    // La part d'herbes hautes varie d'une carte à l'autre, de 35 à 65 %.
+    {const gros=noise(SZ(15,5)),moyen=noise(SZ(6,3)),touffe=noise(SZ(3,2)),gc=[],gn=new Float32Array(N);for(let i=0;i<N;i++)if(t[i]===GRASS)gc.push(i);
+      for(const i of gc){const x=i%W,y=(i/W)|0,g=gros(x,y)*2-1;gn[i]=Math.sign(g)*g*g*1.5+(moyen(x,y)*2-1)*.45+(touffe(x,y)*2-1)*.6+(Math.random()*2-1)*.35;}
+      gc.sort((a,b)=>gn[a]-gn[b]);for(const i of gc.slice(0,Math.round(gc.length*(.35+Math.random()*.3))))t[i]=FLAT;}
     for(let i=0;i<N;i++)if(t[i]===GROUND&&Math.random()<.035)t[i]=ROCK;
     tidyChasms(t);connect(t);tidyChasms(t);separateWater(t);
     const ship=SANS_VAISSEAU?null:placeShip(t);let sx,sy;

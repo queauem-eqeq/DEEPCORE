@@ -40,7 +40,7 @@ Roguelike au tour par tour dans une esthétique inspirée de Cogmind et de Brogu
 - Connectivité garantie : les zones isolées sont reliées par le plus court chemin (pont sur gouffre, col dans la montagne, rocher dégagé) ; petites poches comblées.
 - L'eau ne touche jamais un gouffre (marge de 2 cases de terre ferme).
 - **Gouffres** : jamais de trou de moins de 4 cases reliées par les côtés, et jamais deux gouffres reliés seulement par un coin. Nettoyage avant et après la connexion automatique, et après la pose du vaisseau ; il ne fait que combler (gouffre → sol), donc la connexion reste garantie. Un pont qui ne franchit plus rien redevient du sol.
-- Curseurs de génération (en %) : Eau ≤ 60, Montagne ≤ 70, Gouffre ≤ 30, Herbe ≤ 80, total ≤ 80. Herbe répartie moitié haute, moitié basse.
+- Curseurs de génération (en %) : Eau ≤ 60, Montagne ≤ 70, Gouffre ≤ 30, Herbe ≤ 80, total ≤ 80. **Herbes hautes et basses mêlées de façon irrégulière** (15 novembre 2026 ; avant : deux moitiés égales, coupées net en grandes zones). Trois échelles s'additionnent : de grandes zones qui donnent *parfois* une forte majorité de hautes ou de basses, des bosquets et touffes de 2 à 6 cases, et un grain case par case ; le plus souvent c'est le mélange qui l'emporte. La part d'herbes hautes varie d'une carte à l'autre, de 35 à 65 %.
 - Bouton **REGEN** dans le titre « Génération » : nouvelle planète immédiate.
 
 ### Taille de la carte (13 novembre 2026)
