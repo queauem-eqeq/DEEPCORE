@@ -177,6 +177,9 @@ function render(){
   {const u=S/16;ctx.fillStyle=PAL['1'];
    for(const f of FX)if(f.kind==='tir'){const p=fxP(f),px=Math.round((f.x0+(f.x1-f.x0)*p+.5-camX)*16),py=Math.round((f.y0+(f.y1-f.y0)*p+.5-camY)*16);
      ctx.fillRect((px-1)*u,(py-2)*u,2*u,4*u);ctx.fillRect((px-2)*u,(py-1)*u,4*u,2*u);}                    // petite boule de 4 pixels de large
+   // « ! » d'un ennemi qui repère la foreuse : 2 × 8 pixels de tuile, blanc cerné de noir, au-dessus de lui ; il monte de 2 pixels puis s'éteint d'un coup
+   for(const f of FX)if(f.kind==='alerte'&&(G.beasts.includes(f.o)||G.animals.includes(f.o))&&vis[idx(f.o.x,f.o.y)]){const p=fxP(f),px=Math.round((f.o.x-camX)*16)+7,py=Math.round((f.o.y-camY)*16)-10-(reduced?2:Math.min(2,Math.floor(p*12)));
+     ctx.fillStyle='#000';ctx.fillRect((px-1)*u,(py-1)*u,4*u,10*u);ctx.fillStyle='#fff';ctx.fillRect(px*u,py*u,2*u,5*u);ctx.fillRect(px*u,(py+6)*u,2*u,2*u);ctx.fillStyle=PAL['1'];}
    for(const f of FX)if(f.kind==='sonar'){const R=fxP(f)*f.r*16,cx=Math.round((f.x+.5-camX)*16),cy=Math.round((f.y+.5-camY)*16),w=Math.ceil(vw/u),h=Math.ceil(vh/u),q=R*Math.SQRT1_2;
      const dot=(px,py)=>{if(px>=0&&py>=0&&px<w&&py<h)ctx.fillRect(px*u,py*u,u,u);};
      for(let d=-Math.ceil(q);d<=Math.ceil(q);d++){const e=Math.round(Math.sqrt(Math.max(0,R*R-d*d)));dot(cx+d,cy-e);dot(cx+d,cy+e);dot(cx-e,cy+d);dot(cx+e,cy+d);}}}

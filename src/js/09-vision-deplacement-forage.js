@@ -85,9 +85,9 @@ function tryMove(dx,dy){
   {const am=ambAt(nx,ny);if(am)ambWake(am,false);}   // on bute sur un embusqué : il est débusqué avant d'avoir frappé
   const bz=beastAt(nx,ny);
   if(bz){const sp=BEASTS[bz.sp];G.turn++;G.msg=null;const sur=!(bz.hunt>0),cr=sur||roll(G.st.crit??5);   // surprise : ne vous a pas repéré
-    {const ch=hitChance(G.st.pre,sp.esq+terrMod(nx,ny));if(!sur&&!roll(ch)){bz.hunt=1;spot(bz);addFx({kind:'lunge',robot:true,dx,dy,dur:180});addFx({kind:'num',x:nx,y:ny,txt:'0',col:'#8aa9a2',dur:750});
+    {const ch=hitChance(G.st.pre,sp.esq+terrMod(nx,ny));if(!sur&&!roll(ch)){if(!bz.hunt)alerte(bz);bz.hunt=1;spot(bz);addFx({kind:'lunge',robot:true,dx,dy,dur:180});addFx({kind:'num',x:nx,y:ny,txt:'0',col:'#8aa9a2',dur:750});
       say(`La foreuse rate le ${sp.n.toLowerCase()} (${ch} %).`);SFX.whoosh();pass(coupDur());computeFOV();render();if(G.over&&G.over.dead)dead();return;}}
-    const dm=G.st.degats*(cr?CRIT_X:1);bz.hp-=dm;bz.hunt=1;spot(bz);addFx({kind:'num',x:nx,y:ny,txt:'-'+dm+(cr?'!':''),col:cr?PAL['1']:PAL['3'],dur:cr?1000:750});if(cr){addFx({kind:'shake',amp:6,dur:220});SFX.crit();}
+    const dm=G.st.degats*(cr?CRIT_X:1);bz.hp-=dm;if(!bz.hunt&&bz.hp>0)alerte(bz);bz.hunt=1;spot(bz);addFx({kind:'num',x:nx,y:ny,txt:'-'+dm+(cr?'!':''),col:cr?PAL['1']:PAL['3'],dur:cr?1000:750});if(cr){addFx({kind:'shake',amp:6,dur:220});SFX.crit();}
     addFx({kind:'lunge',robot:true,dx,dy,dur:180});addFx({kind:'flash',beast:bz,dur:180});if(bz.hp<=0)addFx({kind:'shake',amp:4,dur:200});
     const tag=sur?'Coup par surprise ! ':cr?'Coup critique ! ':'';
     if(bz.hp<=0){G.beasts.splice(G.beasts.indexOf(bz),1);bleed(bz.x,bz.y);say(`${tag}La foreuse abat le ${sp.n.toLowerCase()}.`,'good');SFX.break();}
@@ -95,11 +95,11 @@ function tryMove(dx,dy){
     pass(coupDur());computeFOV();render();if(G.over&&G.over.dead)dead();return;}
   const an=animalAt(nx,ny);
   if(an){const sp=SPECIES[an.sp];G.turn++;G.msg=null;const sur=!an.aware,cr=sur||roll(G.st.crit??5);
-    {const ch=hitChance(G.st.pre,sp.esq+terrMod(nx,ny));if(!sur&&!roll(ch)){an.aware=1;spot(an);addFx({kind:'lunge',robot:true,dx,dy,dur:180});addFx({kind:'num',x:nx,y:ny,txt:'0',col:'#8aa9a2',dur:750});
+    {const ch=hitChance(G.st.pre,sp.esq+terrMod(nx,ny));if(!sur&&!roll(ch)){an.aware=1;an.enraged=true;spot(an);addFx({kind:'lunge',robot:true,dx,dy,dur:180});addFx({kind:'num',x:nx,y:ny,txt:'0',col:'#8aa9a2',dur:750});
       say(`La foreuse rate l’${sp.n.toLowerCase()} (${ch} %).`);SFX.whoosh();pass(coupDur());computeFOV();render();if(G.over&&G.over.dead)dead();return;}}
     const dm=G.st.degats*(cr?CRIT_X:1),tag=sur?'Coup par surprise ! ':cr?'Coup critique ! ':'';an.hp=(an.hp??pvDe(sp))-dm;addFx({kind:'num',x:nx,y:ny,txt:'-'+dm+(cr?'!':''),col:cr?PAL['1']:PAL['3'],dur:cr?1000:750});if(cr){addFx({kind:'shake',amp:6,dur:220});SFX.crit();}addFx({kind:'lunge',robot:true,dx,dy,dur:180});
     if(an.hp<=0){G.animals.splice(G.animals.indexOf(an),1);bleed(an.x,an.y);say(`${tag}La foreuse écrase l’${sp.n.toLowerCase()}.`,'warn');SFX.squish();}
-    else{an.aware=1;spot(an);say(`${tag}La foreuse heurte l’${sp.n.toLowerCase()}.`);SFX.crack();}
+    else{if(!an.aware)alerte(an);an.aware=1;an.enraged=true;spot(an);say(`${tag}La foreuse heurte l’${sp.n.toLowerCase()}.`);SFX.crack();}
    pass(coupDur());computeFOV();render();if(G.over&&G.over.dead)dead();return;}
   if(v===CHASM){say('Gouffre : passage impossible.');SFX.blocked();render();return;}
   if(v===SHIP){say('Coque du vaisseau : indestructible.');SFX.blocked();render();return;}
@@ -151,11 +151,8 @@ function waitTurn(){
 }
 function askDrill(){
   if(G.over||drilling||!$('overlay').hidden)return;const s=siteAt(G.px,G.py);if(!s)return;
-  const suite=G.mode==='test'?'Carte d’essai : le forage relance une nouvelle carte d’essai.':G.niv>=NIV_MAX?'C’est le dernier niveau : sous ce site, le noyau.':`La foreuse descendra au niveau ${G.niv+1} et ne pourra plus remonter. Elle garde sa vie, son énergie, son équipement et sa Matière.`;
-  $('card').innerHTML=`<div class="tag">Confirmation de forage</div><h2>SITE DE FORAGE</h2>
-    <p>Profondeur : <b style="color:var(--c3)">${s.depth}</b>. ${suite}</p>
-    <div class="row"><button class="go" id="yes">Lancer le forage</button><button id="no">Continuer l’exploration</button></div>`;
-  $('overlay').hidden=false;$('yes').onclick=()=>drill(s);$('no').onclick=()=>{$('overlay').hidden=true;};$('yes').focus();
+  if(TRAV)stopTravel();if(REST)stopRest();
+  $('overlay').hidden=false;drill(s);   // pas de confirmation (15 novembre 2026) : F fore tout de suite
 }
 function drill(s){drilling=true;let k=0;const n=12;
   const step=()=>{$('card').innerHTML=`<div class="tag">Forage en cours · site ${s.id}</div><h2>DESCENTE</h2><p class="prog">${'▮'.repeat(k)}${'·'.repeat(n-k)}</p>`;
@@ -172,14 +169,10 @@ $('offOn').onclick=()=>{$('off').hidden=true;try{if(AC)AC.resume();}catch(e){}un
 function end(s){
   drilling=false;const bilan=`<div class="stats"><span>${G.turn} tours · ${G.dist} cases parcourues</span><span>Matière en réserve : ${G.st.matiere||0}</span></div>`;
   if(G.mode==='test'){
-    $('card').innerHTML=`<div class="tag">Carte d’essai</div><h2>FORAGE<br>TERMINÉ</h2>${bilan}<button class="go" id="again">Nouvelle carte d’essai</button>`;
-    $('overlay').hidden=false;$('again').onclick=()=>{testGame();$('overlay').hidden=true;render();};$('again').focus();return;}
+    testGame();$('overlay').hidden=true;render();return;}
   if(G.niv>=NIV_MAX){G.over={site:s.id,win:true};
     $('card').innerHTML=`<div class="tag">Niveau ${NIV_MAX} foré</div><h2>NOYAU<br>ATTEINT</h2>${bilan}<p>La foreuse a traversé les ${NIV_MAX} niveaux.</p><button class="go" id="again">Nouvelle exploration</button>`;
     $('overlay').hidden=false;$('again').onclick=()=>{newGame();$('overlay').hidden=true;render();};$('again').focus();return;}
-  descendre();const b=biomeDe(G.biome);render();
-  $('card').innerHTML=`<div class="tag">Niveau ${G.niv} sur ${NIV_MAX}</div><h2>${b.n.toUpperCase()}</h2><p>${b.d}</p>
-    <div class="stats"><span>Faune : ${fauneTxt()}</span><span>Carte ${W} × ${H} · ${Object.values(G.ore).filter(v=>!oreMat(v)).length} gisements de métal · ${Object.values(G.ore).filter(oreMat).length} de Matière</span></div><button class="go" id="again">Continuer</button>`;
-  $('overlay').hidden=false;$('again').onclick=()=>{$('overlay').hidden=true;render();};$('again').focus();
+  descendre();$('overlay').hidden=true;render();   // pas de fiche d'arrivée (15 novembre 2026) : le niveau commence tout de suite, le journal l'annonce
 }
 

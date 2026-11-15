@@ -247,6 +247,12 @@ Lecture : tout nettoyer sans équipement n'est tenable qu'aux niveaux 1 et 2 ; �
 frappent que si l'on passe à leur contact. C'est une carte de taille 1, où tout se rejoint vite : en taille 3 il y a de la place
 pour contourner.
 
+### Après le retour de l'insectoïde fuyant (15 novembre 2026, soir)
+
+L'insectoïde recule de nouveau au contact et ne se bat que si la foreuse est engagée ou le frappe. Seul, il ne coûte plus que **1,3** point par
+tête (3,3 avant) ; mêlé à des ennemis qui chassent, rien ne change : le mélange du Plateau donne 43 points (48 avant) et son double 139
+(131 avant), dans le bruit de la mesure. Le coût de menace de 3,3 est donc gardé : il vaut pour l'insectoïde en compagnie, son cas normal.
+
 ### Limites
 
 - Le pilote est simple : il fonce sur le plus proche, n'utilise ni la course, ni la discrétion, ni les consommables, ne fuit jamais.

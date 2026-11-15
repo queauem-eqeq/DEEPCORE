@@ -173,7 +173,7 @@ const TDESC={[GROUND]:['Sol rocheux','Praticable. Les points au sol se densifien
   [RUBBLE]:['Gravats','Praticables. Restes d’une roche brisée.'],
   [SHIP]:['Coque du vaisseau','Infranchissable et indestructible, ne bloque pas la vue. Le cargo qui a déposé la foreuse.'],
   [DECK]:['Soute du vaisseau','Praticable. La foreuse peut toujours y revenir ; la porte est à l’arrière.']};
-const BEHAV={insectoide:'Suit la foreuse à 2 ou 3 cases ; passe à l’attaque si un ennemi la chasse à proximité, et ne recule plus ensuite.',
+const BEHAV={insectoide:'Suit la foreuse à 2 ou 3 cases et recule au contact ; passe à l’attaque si un ennemi la chasse à proximité ou si elle le frappe, et ne recule plus ensuite.',
   crabos:'Chasse la foreuse dès qu’il la voit et l’attaque au contact. Abandonne environ 8 tours après l’avoir perdue de vue.',
   cafar:'Vit en bande : ce qu’un membre voit, toute la bande le sait.',
   crachin:'Crache de l’acide jusqu’à 5 cases tant qu’il vous voit ; recule une fois sur deux quand on le serre. Fragile au contact.',

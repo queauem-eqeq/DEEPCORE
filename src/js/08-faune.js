@@ -52,6 +52,8 @@ function voitForeuse(o,chasse){
     return true;}
   if(d<=G.stealth&&Math.random()<NOTICE){o.lost=0;return true;}         // vous remarque (de nouveau)
   return false;}
+// Petit « ! » au-dessus d'un ennemi qui vient de repérer la foreuse (15 novembre 2026) : seulement s'il est en vue
+function alerte(o){if(vis[idx(o.x,o.y)])addFx({kind:'alerte',o,dur:900});}
 function spot(o){o.mem=[G.px,G.py];o.search=0;o.stuck=0;o.lost=0;const dx=Math.sign(G.px-o.x);if(dx)o.dir=dx;}
 /* Chance qu'un ennemi calme vous remarque ce tour-ci (affichée au survol) : plate dans la portée de
    discrétion et en ligne de vue, nulle au-delà. Voir la portée de discrétion dans 09. */
@@ -71,17 +73,17 @@ function animalsAct(){
   const backup=(G.beasts||[]).some(b=>b.hunt>0&&cheb(b,G.px,G.py)<=BACKUP_R);
   for(const a of G.animals){if(G.over)break;const sp=SPECIES[a.sp];a.mp=Math.min(2,a.mp+sp.v/5/slowOf(G.t[idx(a.x,a.y)],sp.swim));
     const d=Math.hypot(a.x-G.px,a.y-G.py),sees=voitForeuse(a,!!a.aware);
-    if(sees){a.aware=1;spot(a);}
+    if(sees){if(!a.aware)alerte(a);a.aware=1;spot(a);}
     else if(a.aware&&a.search>0&&--a.search===0){a.aware=0;a.enraged=false;forget(a);}   // fouille terminée : il oublie
     else if(a.aware&&!a.mem)a.aware=0;
     const prev=a.mode,c=cheb(a,G.px,G.py);
-    // une fois passé à l'attaque, l'insectoïde ne recule plus jamais
+    // l'insectoïde garde ses distances et recule au contact tant que la foreuse n'est pas engagée en combat (un ennemi la chasse tout près) ;
+    // frappé par la foreuse, il réplique (enraged, posé dans tryMove). Une fois passé à l'attaque, il ne recule plus jamais
     if(sees&&backup)a.enraged=true;
     a.mode=!a.aware?'':!sees?(a.search>0?'search':'seek'):a.enraged?'attack':c<=KEEP_MIN?'flee':c>KEEP_MAX?'follow':'hold';
     if(a.mode==='attack'&&prev!=='attack'&&vis[idx(a.x,a.y)])swarm=swarm||sp;
     if(a.mode==='flee'&&prev!=='flee'&&vis[idx(a.x,a.y)])fled=fled||sp;
-    // au contact de la foreuse, l'insectoïde attaque toujours, même s'il ne l'avait pas remarquée ou gardait ses distances (15 novembre 2026)
-    if(canHit(a)){if(!a.aware){a.aware=1;spot(a);}hurtRobot(a,sp);continue;}
+    if(a.mode==='attack'&&canHit(a)){hurtRobot(a,sp);continue;}
     while(a.mp>=1&&!G.over){a.mp-=1;
       if(a.mode==='attack'){if(canHit(a)){a.mp=Math.min(a.mp,.99);break;}stepToward(a,dist);}
       else if(a.mode==='flee')stepAway(a);
@@ -158,7 +160,7 @@ function effTick(){const E=G.eff;if(!E||G.over)return;
 const ambAt=(x,y)=>G.amb&&G.amb.find(a=>a.x===x&&a.y===y);
 function ambWake(a,hunt){G.amb.splice(G.amb.indexOf(a),1);const b={sp:a.sp,x:a.x,y:a.y,hp:a.hp,mp:0,hunt:hunt?1:0,dir:Math.sign(G.px-a.x)||1,pack:-1};G.beasts=G.beasts||[];G.beasts.push(b);return b;}
 function ambTick(){if(!G.amb||!G.amb.length||G.over)return;
-  for(const a of [...G.amb]){if(G.over)break;if(!canHit(a))continue;const sp=BEASTS[a.sp],b=ambWake(a,true);spot(b);b.skip=1;
+  for(const a of [...G.amb]){if(G.over)break;if(!canHit(a))continue;const sp=BEASTS[a.sp],b=ambWake(a,true);alerte(b);spot(b);b.skip=1;
     sayMore(`Un ${sp.n.toLowerCase()} surgit de sa cachette !`,'warn');SFX.roar();hurtRobot(b,sp,{sur:true});}}
 // Tireur : un pas pour s'éloigner de la foreuse (renvoie false s'il est acculé)
 function beastAway(b){let best=null,bd=(b.x-G.px)**2+(b.y-G.py)**2;
@@ -187,8 +189,8 @@ function beastsAct(){
   if(!G.beasts||!G.beasts.length||G.over)return;const distDry=robotDist(false),distWet=robotDist(true),DC={};let charged=null;const alarms=[];packTick();
   for(const b of G.beasts){if(G.over)break;if(b.skip){b.skip=0;continue;}const sp=BEASTS[b.sp];b.mp=Math.min(2,b.mp+sp.v/5/slowOf(G.t[idx(b.x,b.y)],sp.swim));
     const d=Math.hypot(b.x-G.px,b.y-G.py),sees=voitForeuse(b,b.hunt>0);
-    if(sees){if(!b.hunt&&sp.alarm)alarms.push(b);if(!b.hunt&&beastVisible(b))charged=charged||sp;b.hunt=1;spot(b);if(G.px!==b.x)b.dir=Math.sign(G.px-b.x);
-      if(sp.pack)for(const o of mates(b)){o.hunt=1;spot(o);}}                        // la bande partage ce qu'un membre voit
+    if(sees){if(!b.hunt&&sp.alarm)alarms.push(b);if(!b.hunt&&beastVisible(b))charged=charged||sp;if(!b.hunt)alerte(b);b.hunt=1;spot(b);if(G.px!==b.x)b.dir=Math.sign(G.px-b.x);
+      if(sp.pack)for(const o of mates(b)){if(!o.hunt)alerte(o);o.hunt=1;spot(o);}}                        // la bande partage ce qu'un membre voit
     else if(b.hunt&&b.search>0&&--b.search===0){b.hunt=0;forget(b);}                // fouille terminée : il oublie
     else if(b.hunt&&!b.mem)b.hunt=0;
     b.sees=sees;
@@ -248,8 +250,8 @@ function packStep(b){const m=mates(b);if(!m.length)return false;const [cx,cy]=pa
 // Cri d'alerte (désactivé le 13 novembre 2026 : sp.alarm=false pour tous) : tous les ennemis à 5 cases ou moins du cafar se mettent en chasse
 const ALARM_R=5;
 function raiseAlarm(b){const sp=BEASTS[b.sp];let n=0;
-  for(const o of G.beasts)if(o!==b&&Math.max(Math.abs(o.x-b.x),Math.abs(o.y-b.y))<=ALARM_R){if(!o.hunt)n++;o.hunt=1;spot(o);}   // le cri transmet la position de la foreuse
-  for(const a of (G.animals||[]))if(Math.max(Math.abs(a.x-b.x),Math.abs(a.y-b.y))<=ALARM_R){if(!a.aware)n++;a.aware=1;spot(a);}
+  for(const o of G.beasts)if(o!==b&&Math.max(Math.abs(o.x-b.x),Math.abs(o.y-b.y))<=ALARM_R){if(!o.hunt){n++;alerte(o);}o.hunt=1;spot(o);}   // le cri transmet la position de la foreuse
+  for(const a of (G.animals||[]))if(Math.max(Math.abs(a.x-b.x),Math.abs(a.y-b.y))<=ALARM_R){if(!a.aware){n++;alerte(a);}a.aware=1;spot(a);}
   if(beastVisible(b)||n){addFx({kind:'num',x:b.x,y:b.y,txt:'!',col:PAL['3'],dur:900});SFX.screech();
     sayMore(`Un cafar pousse un cri d’alerte${n?` : ${n} ennemi${n>1?'s':''} alerté${n>1?'s':''}`:''} !`,'warn');}}
 function bleed(x,y){G.blood=G.blood||{};G.blood[idx(x,y)]=rnd(0,1);gore(x,y);}
