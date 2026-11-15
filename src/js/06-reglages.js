@@ -57,7 +57,7 @@ function buildGen(){
    +`<div class="g2"><label for="gm">Méthode</label><select id="gm">${METHODS.map(([v,l])=>`<option value="${v}"${GEN.methode===v?' selected':''}>${l}</option>`).join('')}</select></div>`
    +`<div class="g2"><label for="gn-remplissage">Remplissage initial (%)</label><input type="number" id="gn-remplissage" min="35" max="70" value="${GEN.remplissage}"></div>`
    +`<div class="g2"><label for="gn-iterations">Itérations</label><input type="number" id="gn-iterations" min="1" max="10" value="${GEN.iterations}"></div>`
-   +'<button class="go" id="essaiBtn" title="Créer une carte d’essai avec ces réglages et ceux de Life, hors de la descente">CARTE D’ESSAI</button><div class="sum">Ces réglages et ceux de la faune ne servent qu’aux cartes d’essai. REGEN relance la descente au niveau 1, où chaque biome a son relief et sa faune.</div>';
+   +'<button class="go" id="essaiBtn" title="Créer une carte d’essai avec ces réglages et ceux de Life, hors de la descente">CARTE D’ESSAI</button><div class="sum">Ces réglages et ceux de la faune ne servent qu’aux cartes d’essai. REGEN relance la descente au niveau 1 : chaque niveau y tire un biome ou l’un de vos archétypes.</div>';
   $('essaiBtn').onclick=()=>{$('monde').hidden=true;unlock();SFX.start();testGame();started=true;$('overlay').hidden=true;render();};
   GEN_LBL.forEach(([k])=>{$('gr-'+k).addEventListener('input',e=>setGen(k,e.target.value));$('gn-'+k).addEventListener('change',e=>setGen(k,e.target.value));});
   $('gr-taille').addEventListener('input',e=>setTaille(e.target.value));$('gn-taille').addEventListener('change',e=>setTaille(e.target.value));setTaille(GEN.taille);

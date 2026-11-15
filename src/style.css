@@ -278,3 +278,23 @@ kbd{font-family:var(--mono);color:var(--fg);border:1px solid var(--line);padding
 @media (max-width:720px){.mdcols{grid-template-columns:1fr}}
 .mdcols .gen .g2{grid-template-columns:minmax(0,1fr) 190px}
 .col>.btnrow>button{flex:1 1 0;min-width:0}
+/* Discrétion : fenêtre large et basse (15 novembre 2026) */
+#discretion .mcard{width:min(940px,100%);gap:12px}
+.mhbtns{display:flex;gap:8px}
+.dtop{display:flex;flex-wrap:wrap;align-items:center;gap:6px 22px;border:1px solid var(--line);padding:8px 12px;font-size:12px}
+.dtop label{display:flex;align-items:center;gap:8px;color:var(--dim)}
+.dtop input{width:58px;font:inherit;color:var(--fg);background:var(--void);border:1px solid var(--line);padding:2px 4px;text-align:right}
+.dtop b{color:var(--c1);font-weight:700}
+.dtop .dhint{color:var(--dim);font-size:11px;margin-left:auto}
+.dcols{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:22px;align-items:start}
+.dcols h3{font-family:var(--display);font-size:11px;font-weight:500;letter-spacing:.24em;text-transform:uppercase;color:var(--dim);margin:0 0 6px}
+.dtab.dmod td,.dtab.dmod th{padding:4px 6px}
+.dtab.dmod td:first-child,.dtab.dmod th:first-child{width:26%}
+.dtab.dmod td:nth-child(2),.dtab.dmod th:nth-child(2){width:46%}
+.dtab.dmod td:nth-child(2){color:var(--dim)}
+.dtab.dmod small{color:var(--dim);font-size:10px}
+.dregles{font-size:12px}
+.dregles div{display:flex;justify-content:space-between;align-items:baseline;gap:14px;border-top:1px solid var(--line);padding:4px 0}
+.dregles span{color:var(--dim)}.dregles b{font-weight:400;text-align:right;white-space:nowrap}
+.dregles div:last-child b{white-space:normal}
+@media (max-width:760px){.dcols{grid-template-columns:1fr}.dtop .dhint{margin-left:0}}

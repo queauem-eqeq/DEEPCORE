@@ -75,9 +75,9 @@ Nombre de créatures = effectif de référence de l'espèce (colonne « Référe
 
 La partie est une **descente en 5 niveaux** (5 pour commencer ; on allongera). Forer le site d'un niveau fait arriver sur une nouvelle carte, d'un autre biome ; on ne remonte pas. Forer le site du niveau 5 atteint le noyau : écran « NOYAU ATTEINT ».
 
-- **Niveau 1** : toujours le biome Plateau, **taille 2** (48 × 32), avec le vaisseau.
-- **Niveaux 2 à 5** : taille **tirée au hasard entre 2 et 5** (la taille 1, trop petite, reste réservée aux essais) ; pas de vaisseau, la foreuse débouche du puits sur un carré de sol dégagé.
-- **Biomes** : quatre des cinq autres biomes sont tirés au début de la descente et rangés du moins au plus dangereux (rang).
+- **Niveau 1** : toujours le biome Plateau, avec le vaisseau.
+- **Taille** : l'atterrissage et tous les niveaux de la descente sont en **taille 3** (72 × 48) depuis le 15 novembre 2026 (avant : taille 2 à l'atterrissage, puis 2 à 5 au hasard). Aux niveaux 2 à 5, pas de vaisseau : la foreuse débouche du puits sur un carré de sol dégagé.
+- **Biomes** : quatre mondes sont tirés au début de la descente parmi les cinq autres biomes **et les archétypes enregistrés dans le menu Monde** (15 novembre 2026), puis rangés du moins au plus dangereux. Un archétype reçoit un rang moyen (2,5) et une petite teinte tirée de son nom ; sa taille enregistrée ne compte pas. Avec un archétype enregistré, il sort dans environ deux descentes sur trois.
 - **Ce que la foreuse emporte** : vie, énergie, équipement, bonus de joyaux, Matière, journal. Les effets durables (poison, glu) et les objets laissés au sol sont perdus.
 - **Carte d'arrivée** : une fiche annonce le niveau, le biome, sa faune et ses gisements, puis « Continuer ».
 - **En jeu** : « Niveau 2/5 · Marécage » sous le titre Statut.
@@ -130,7 +130,7 @@ Génération et Life ne sont plus deux sous-menus de la colonne : ils sont réun
 - **REGEN** relance la **descente au niveau 1** (c'est la partie normale).
 - À gauche la **Génération** (taille, eau, montagne, gouffre, herbe, méthode de relief), à droite la **Faune** (intensité par espèce). En bas, **CARTE D'ESSAI** crée une carte hors descente avec ces réglages : palette de base, 2 gisements de métal et 2 de Matière à la taille 2. « Carte d'essai » s'affiche alors sous Statut ; y forer relance une carte d'essai.
 - **Archétypes de monde** : en tête de la fenêtre, un champ **Nom** et **Enregistrer** gardent les réglages en cours (relief, taille, faune) sous ce nom ; la **liste déroulante** les recharge ; **Supprimer** retire l'archétype choisi. Enregistrer sous un nom existant le met à jour. Mémorisés sous `np-mondes` et joints à l'enregistrement dans la base du jeu.
-- La liste propose aussi les **six biomes de la descente**, à charger comme point de départ : on les modifie, on leur donne un nom, on obtient une variante. Les biomes eux-mêmes ne sont pas modifiables d'ici, et **la descente n'utilise pas encore les archétypes enregistrés** (à décider).
+- La liste propose aussi les **six biomes de la descente**, à charger comme point de départ : on les modifie, on leur donne un nom, on obtient une variante. Les biomes eux-mêmes ne sont pas modifiables d'ici. **Les archétypes enregistrés entrent dans le tirage de la descente** (voir plus haut).
 
 ## 3 ter. Exploration automatique (13 novembre 2026)
 
@@ -142,6 +142,10 @@ Touche **O** ou bouton **EXPLORER** (sous MARCHE / INVENTAIRE, à côté d'un bo
 - **Refusée** tant qu'un ennemi visible chasse la foreuse.
 - **Quand tout est exploré** : elle rejoint le site de forage s'il est connu (« [F] pour forer »), sinon « Plus rien à explorer sans forer la roche ».
 - Chaque pas est un déplacement normal : le temps passe, la course et la discrétion s'appliquent.
+
+### Fenêtre Discrétion (mise en page du 15 novembre 2026)
+
+Jugée trop haute et trop étroite (640 × 835), elle est passée à 940 × 390 environ : la base et la portée du moment sur une ligne, les six modificateurs en tableau à gauche (situation, effet, portée), les règles à droite (chance d'être remarqué, portée en chasse, perte de trace, plancher, arrondis, ordre). « Valeur par défaut » est monté dans l'en-tête, à côté de « Fermer ». Les règles elles-mêmes n'ont pas changé.
 
 ## 4. Terrains
 

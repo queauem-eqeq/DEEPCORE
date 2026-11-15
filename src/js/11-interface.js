@@ -79,7 +79,7 @@ function side(){
     stealth:sr!==STEALTH_BASE?`<span style="color:${sr<STEALTH_BASE?'var(--c1)':'var(--life)'}">${sr}</span>`:sr};
   $('stats').innerHTML=STATS.map(([k,l,t])=>`<div class="r" title="${t}"><span>${l}</span><span>${sv[k]}</span></div>`).join('');
   {const E=G.eff||{},l=[];if(E.poison>0)l.push(`<span style="color:var(--life)">Poison ${E.poison}</span>`);if(E.glu>0)l.push(`Englué ${E.glu}`);if(E.fum>0)l.push(`<span style="color:var(--c1)">Fumée ${E.fum}</span>`);$('effs').innerHTML=l.join(' · ');}
-  $('lvl').textContent=G.mode==='test'?'Carte d’essai':`Niveau ${G.niv}/${NIV_MAX} · ${BIOMES[G.biome].n}`;$('matN').textContent=G.st.matiere||0;
+  $('lvl').textContent=G.mode==='test'?'Carte d’essai':`Niveau ${G.niv}/${NIV_MAX} · ${biomeDe(G.biome).n}`;$('matN').textContent=G.st.matiere||0;
   if(!$('inventaire').hidden)invDraw();
   $('msg').innerHTML=seenHTML();
   const lg=(G.log||[]).slice(-5);

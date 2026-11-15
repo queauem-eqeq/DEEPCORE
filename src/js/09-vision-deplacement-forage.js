@@ -177,7 +177,7 @@ function end(s){
   if(G.niv>=NIV_MAX){G.over={site:s.id,win:true};
     $('card').innerHTML=`<div class="tag">Niveau ${NIV_MAX} foré</div><h2>NOYAU<br>ATTEINT</h2>${bilan}<p>La foreuse a traversé les ${NIV_MAX} niveaux.</p><button class="go" id="again">Nouvelle exploration</button>`;
     $('overlay').hidden=false;$('again').onclick=()=>{newGame();$('overlay').hidden=true;render();};$('again').focus();return;}
-  descendre();const b=BIOMES[G.biome];render();
+  descendre();const b=biomeDe(G.biome);render();
   $('card').innerHTML=`<div class="tag">Niveau ${G.niv} sur ${NIV_MAX}</div><h2>${b.n.toUpperCase()}</h2><p>${b.d}</p>
     <div class="stats"><span>Faune : ${fauneTxt()}</span><span>Carte ${W} × ${H} · ${Object.values(G.ore).filter(v=>!oreMat(v)).length} gisements de métal · ${Object.values(G.ore).filter(oreMat).length} de Matière</span></div><button class="go" id="again">Continuer</button>`;
   $('overlay').hidden=false;$('again').onclick=()=>{$('overlay').hidden=true;render();};$('again').focus();

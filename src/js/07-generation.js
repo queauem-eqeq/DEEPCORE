@@ -206,13 +206,21 @@ const COURBE=[null,{m:1.5,metal:3,mat:1},{m:2.2,metal:3,mat:1},{m:3,metal:2,mat:
 // pvDe / dmgDe : points de vie et dégâts d'une espèce tels que le jeu les lit. Aujourd'hui ce sont les valeurs du Bestiaire, sans modification ;
 // ces deux fonctions restent le seul endroit à changer si l'on veut un jour les faire varier.
 const pvDe=sp=>sp.pv,dmgDe=sp=>sp.dmg;
-const TAILLES_NIV=[2,3,4,5];           // tailles tirées au hasard à partir du niveau 2 (le niveau 1 est toujours de taille 2)
-// biomes des niveaux 2 à 5 : quatre des cinq autres, du moins au plus dangereux
-function tirageBiomes(){return Object.keys(BIOMES).filter(k=>k!=='plateau').sort(()=>Math.random()-.5).slice(0,NIV_MAX-1).sort((a,b)=>BIOMES[a].rang-BIOMES[b].rang||Math.random()-.5);}
+const TAILLE_DESC=3;                   // atterrissage et niveaux de la descente : toujours la taille 3 (72 × 48) depuis le 15 novembre 2026 (avant : 2 puis 2 à 5 au hasard)
+// Les archétypes enregistrés dans le menu Monde (MONDES, 06-reglages) entrent dans le tirage de la descente, sous la clé « u:Nom ».
+// biomeDe(clé) rend un biome d'origine ou un archétype mis en forme de biome : rang moyen, petite teinte tirée de son nom, taille ignorée.
+function biomeDe(k){if(BIOMES[k])return BIOMES[k];const n=String(k||'').slice(2),m=MONDES[n];
+  if(!m)return Object.assign({},BIOMES.plateau,{n:n||'Monde inconnu'});                       // archétype supprimé en cours de descente
+  let h=0;for(const c of n)h=(h*31+c.charCodeAt(0))%997;const g=Object.assign({},m.gen);delete g.taille;
+  return {n,rang:2.5,perso:1,d:'Un de vos archétypes de monde, enregistré dans le menu Monde.',gen:g,vie:m.vie||{},teinte:[0,h%25-12,(h>>2)%25-12,h%9-4,0]};}
+// biomes des niveaux 2 à 5 : quatre parmi les cinq autres biomes et vos archétypes, du moins au plus dangereux
+function tirageBiomes(){const pool=[...Object.keys(BIOMES).filter(k=>k!=='plateau'),...Object.keys(MONDES).map(n=>'u:'+n)];
+  for(let i=pool.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[pool[i],pool[j]]=[pool[j],pool[i]];}
+  return pool.slice(0,NIV_MAX-1).sort((a,b)=>biomeDe(a).rang-biomeDe(b).rang);}
 let SANS_VAISSEAU=false;
 // o : {niv, biome, taille, suite} pour la descente, {test:true} pour une carte d'essai (réglages Génération et Life) ;
 // o.garde : ce que la foreuse emporte d'un niveau au suivant
-function niveau(o){drilling=false;const g0=GEN,bio=o.test?null:BIOMES[o.biome],garde=o.garde;
+function niveau(o){drilling=false;const g0=GEN,bio=o.test?null:biomeDe(o.biome),garde=o.garde;
   if(bio)GEN=Object.assign({},g0,bio.gen,{taille:o.taille});
   SANS_VAISSEAU=!!garde;try{genPlanet();}finally{GEN=g0;SANS_VAISSEAU=false;}
   G.w=W;G.h=H;G.mode=o.test?'test':'descente';G.niv=o.test?0:o.niv;G.biome=o.test?null:o.biome;G.suite=o.suite||null;
@@ -224,13 +232,13 @@ function niveau(o){drilling=false;const g0=GEN,bio=o.test?null:BIOMES[o.biome],g
   G.st.matiere=G.st.matiere||0;G.sonarAt=(G.turn||0)+10+Math.floor(Math.random()*11);
   spawnAnimals();spawnBeasts();lastAct='move';palBiome(bio?bio.teinte:null);buildTiles();turnStealth();computeFOV();}
 const fauneTxt=()=>LIFE_LBL.filter(([k])=>LIFE[k]>0).map(([,l])=>l).join(', ')||'aucune';
-function newGame(){niveau({niv:1,biome:'plateau',taille:2,suite:tirageBiomes()});
+function newGame(){niveau({niv:1,biome:'plateau',taille:TAILLE_DESC,suite:tirageBiomes()});
   say(`Atterrissage confirmé. Niveau 1 sur ${NIV_MAX} : ${BIOMES.plateau.n}. Un site de forage signalé par l’orbiteur. La foreuse est dans la soute ; la porte est à l’arrière.`,'info');}
 function testGame(){niveau({test:true});say('Carte d’essai, hors descente : réglages Génération et Life. REGEN pour reprendre la descente au niveau 1.','info');}
 function descendre(){const n=G.niv+1,b=G.suite[n-2];
-  niveau({niv:n,biome:b,taille:TAILLES_NIV[Math.floor(Math.random()*TAILLES_NIV.length)],suite:G.suite,
+  niveau({niv:n,biome:b,taille:TAILLE_DESC,suite:G.suite,
     garde:{st:G.st,inv:G.inv,turn:G.turn,dist:G.dist,time:G.time,debt:0,beastSeen:G.beastSeen,log:G.log}});
-  say(`Niveau ${n} sur ${NIV_MAX} : ${BIOMES[b].n}. La foreuse débouche du puits ; impossible de remonter.`,'info');}
+  say(`Niveau ${n} sur ${NIV_MAX} : ${biomeDe(b).n}. La foreuse débouche du puits ; impossible de remonter.`,'info');}
 
 /* ---------- Bestiaire : édition des statistiques ---------- */
 const BFIELDS=[['v','Vitesse',1,10],['pv','PV',1,200],['dmg','Dégâts',0,100],['pre','Précision',0,100],['esq','Esquive',0,100],['crit','Crit %',0,100]];
@@ -248,23 +256,24 @@ function buildBest(){
 function buildDisc(){
   const b=STEALTH_BASE,c=(a,f,w,r)=>stealthCalc(b,a,f,w,r),now=G.stealth||STEALTH_BASE;
   const rows=[
-    ['Marcher','aucun',c('move',0,0)],
-    ['Briser une paroi (bruit)',`× ${String(DIG_MULT).replace('.',',')}, arrondi au supérieur ; le bruit s’entend aussi hors de vue`,c('dig',0,0)],
-    ['Attendre sur place (Espace ou 5)','÷ 2, arrondi au supérieur',c('wait',0,0)],
-    ['Sur des herbes basses (couvert)','÷ 2, arrondi au supérieur',c('move',1,0)],
-    ['Parois adjacentes (rocher ou montagne)',`− 1 par 2 parois (arrondi au supérieur), au plus − ${WALL_MAX}`,`${c('move',0,1)} (1-2 parois) · ${c('move',0,3)} (3-4 parois) · ${c('move',0,8)} (7-8 parois)`],
-    ['Courir (touche R)',`+ ${SPRINT_NOISE}, après tout le reste`,c('move',0,0,1)]];
-  $('discList').innerHTML=`<div class="bcard"><div class="bh"><div><b>Portée de discrétion</b><br><span>Rayon commun à tous les ennemis : dans ce rayon et en vue, ${Math.round(NOTICE*100)} % par tour de vous remarquer. Touche V : l’afficher sur la carte.</span></div></div>
-    <div class="fields"><label for="bf-stealth">Base<input type="number" id="bf-stealth" min="2" max="30" step="1" value="${b}"></label></div>
-    <p class="mnote">En ce moment : <b>${now}</b> case${now>1?'s':''}</p></div>
-  <div class="bcard"><div class="bh"><div><b>Modificateurs</b><br><span>Appliqués dans cet ordre : base, briser, attendre, herbes basses, parois, course. Plancher : ${STEALTH_MIN}.</span></div></div>
-    <table class="dtab eq3"><thead><tr><th>Situation</th><th>Modificateur</th><th>Portée (base ${b})</th></tr></thead><tbody>`
+    ['Marcher','—',c('move',0,0)],
+    ['Briser une paroi',`× ${String(DIG_MULT).replace('.',',')} · le bruit s’entend aussi hors de vue`,c('dig',0,0)],
+    ['Attendre sur place','÷ 2',c('wait',0,0)],
+    ['Herbes basses (couvert)','÷ 2',c('move',1,0)],
+    ['Parois adjacentes',`− 1 par 2 parois (max − ${WALL_MAX})`,`${c('move',0,1)} · ${c('move',0,3)} · ${c('move',0,8)} <small>(2, 4, 8 parois)</small>`],
+    ['Courir',`+ ${SPRINT_NOISE}, après tout le reste`,c('move',0,0,1)]];
+  // mise en page large et basse (15 novembre 2026) : la base et l'état en une ligne, les modificateurs à gauche, les règles à droite
+  $('discList').innerHTML=`<div class="dtop"><label for="bf-stealth">Base<input type="number" id="bf-stealth" min="2" max="30" step="1" value="${b}"></label>
+      <span>En ce moment : <b>${now}</b> case${now>1?'s':''}</span><span class="dhint">Rayon commun à tous les ennemis · mémorisé · touche V pour l’afficher</span></div>
+    <div class="dcols"><div><h3>Modificateurs</h3><table class="dtab dmod"><thead><tr><th>Situation</th><th>Effet</th><th>Portée (base ${b})</th></tr></thead><tbody>`
     +rows.map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td></tr>`).join('')+`</tbody></table></div>
-  <div class="bcard"><div class="bh"><div><b>Règles liées</b></div></div>
-    <table class="dtab"><tbody>
-    <tr><td>Un ennemi qui vous chasse vous garde en vue jusqu’à</td><td>× ${HUNT_MULT} la portée</td></tr>
-    <tr><td>Hors de la portée, il peut perdre votre trace (par tour)</td><td>${Math.round(LOSE_TRACK*100)} %</td></tr>
-    </tbody></table></div>`;
+    <div class="dregles"><h3>Règles</h3>
+      <div><span>Dans ce rayon et en vue, chance par tour d’être remarqué</span><b>${Math.round(NOTICE*100)} %</b></div>
+      <div><span>Un ennemi en chasse vous garde en vue jusqu’à</span><b>× ${HUNT_MULT} la portée</b></div>
+      <div><span>Au-delà, chance par tour qu’il perde votre trace</span><b>${Math.round(LOSE_TRACK*100)} %</b></div>
+      <div><span>Portée minimale</span><b>${STEALTH_MIN}</b></div>
+      <div><span>Arrondis</span><b>au supérieur</b></div>
+      <div><span>Ordre</span><b>base, briser, attendre, herbes, parois, course</b></div></div></div>`;
 }
 function openDisc(){buildDisc();$('discretion').hidden=false;$('discClose').focus();}
 function closeDisc(){$('discretion').hidden=true;$('discBtn').focus();render();}
