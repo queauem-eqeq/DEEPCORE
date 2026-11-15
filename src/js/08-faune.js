@@ -67,7 +67,7 @@ function searchStep(o,fits){if(Math.random()<.6){const [dx,dy]=DIRS[rnd(0,7)];if
 function stepAway(a){const cur=(a.x-G.px)**2+(a.y-G.py)**2;let best=null,bd=cur;
   for(const[dx,dy]of [...DIRS].sort(()=>Math.random()-.5)){const nx=a.x+dx,ny=a.y+dy;if(!animalOk(nx,ny)||!diagOk(a.x,a.y,dx,dy))continue;const nd=(nx-G.px)**2+(ny-G.py)**2;if(nd>bd){bd=nd;best=[nx,ny,dx];}}
   if(best){a.x=best[0];a.y=best[1];if(best[2])a.dir=best[2]>0?1:-1;}}
-// Le combat est engagé (15 novembre 2026) : la foreuse vient d'encaisser un coup, ou d'en porter un (même raté) à une créature.
+// Le combat est engagé (15 novembre 2026) : la foreuse vient d'être attaquée ou d'attaquer une créature, que le coup porte ou non.
 // Tous les insectoïdes qui la suivent (ceux qui l'ont repérée, en vue ou sur sa trace) passent à l'attaque, et ne reculeront plus.
 function engage(){for(const a of (G.animals||[]))if(a.aware)a.enraged=true;}
 function animalsAct(){
@@ -138,11 +138,11 @@ const chanceCol=ch=>ch>=70?'var(--c1)':ch>=40?'var(--c3)':'var(--life)';
    poison = vie perdue par battement · glu = pas deux fois plus longs · drain = énergie volée sur le coup.
    Une armure isolante (G.st.isol) divise les durées par deux. */
 function hurtRobot(b,sp,o){sp=sp||BEASTS[b.sp];o=o||{};const le=sp.n.match(/^[aeiouyéèêîïôâ]/i)?'L’':'Le ',nom=sp.n.toLowerCase(),verbe=o.tir?'crache':'attaque';
-  const ch=hitChance(sp.pre,robotEsq());
+  const ch=hitChance(sp.pre,robotEsq());engage();   // la foreuse est attaquée, que le coup porte ou non : les insectoïdes qui suivent attaquent
   const geste=()=>o.tir?addFx({kind:'tir',x0:b.x,y0:b.y,x1:G.px,y1:G.py,dur:260}):addFx({kind:'lunge',beast:b,dx:Math.sign(G.px-b.x),dy:Math.sign(G.py-b.y),dur:200});
   if(!o.sur&&!roll(ch)){geste();addFx({kind:'num',x:G.px,y:G.py,txt:'0',col:'#8aa9a2',dur:750});
     SFX.whoosh();sayMore(`${le}${nom} ${verbe} et rate (${ch} %).`);return;}
-  geste();engage();   // coup encaissé : les insectoïdes qui suivent attaquent
+  geste();
   const cr=o.sur||roll(sp.crit||0),dm=dmgDe(sp)*(cr?CRIT_X:1);   // coup critique de l'ennemi : selon sa stat CRIT
   addFx({kind:'shake',amp:cr?9:5,dur:cr?320:220});G.st.vie=Math.max(0,G.st.vie-dm);addFx({kind:'num',x:G.px,y:G.py,txt:'-'+dm+(cr?'!':''),col:'#ff3b3b',dur:cr?1000:750});SFX.bite();sayMore(`${le}${nom} ${verbe}${o.sur?' par surprise':cr?' : coup critique':''} : −${dm} vie.`,'warn');
   if(G.st.vie<=0){G.over={dead:true};return;}

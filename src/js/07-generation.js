@@ -251,7 +251,7 @@ function descendre(){const n=G.niv+1,b=G.suite[n-2];
 
 /* ---------- Bestiaire : édition des statistiques ---------- */
 const BFIELDS=[['v','Vitesse',1,10],['pv','PV',1,200],['dmg','Dégâts',0,100],['pre','Précision',0,100],['esq','Esquive',0,100],['crit','Crit %',0,100]];
-const BEST_LIST=()=>[{key:'insectoide',o:SPECIES[0],ic:'an0r',role:'Suit à distance et recule ; attaque dès qu’un coup est porté ou reçu'},...BEASTS.map((o,i)=>({key:o.key,o,ic:'bz'+i+'r',role:o.role}))];
+const BEST_LIST=()=>[{key:'insectoide',o:SPECIES[0],ic:'an0r',role:'Suit à distance et recule ; attaque dès qu’un coup est tenté, par vous ou contre vous'},...BEASTS.map((o,i)=>({key:o.key,o,ic:'bz'+i+'r',role:o.role}))];
 const BEST_DEF={};BEST_LIST().forEach(e=>{BEST_DEF[e.key]={};BFIELDS.forEach(([f])=>BEST_DEF[e.key][f]=e.o[f]);});
 try{const b=JSON.parse(localStorage.getItem('np-best')||'null');if(b)BEST_LIST().forEach(e=>{if(b[e.key])BFIELDS.forEach(([f])=>{if(typeof b[e.key][f]==='number')e.o[f]=b[e.key][f];});});}catch(e){}
 function saveBest(){const o={};BEST_LIST().forEach(e=>{o[e.key]={};BFIELDS.forEach(([f])=>o[e.key][f]=e.o[f]);});try{localStorage.setItem('np-best',JSON.stringify(o));}catch(e){}touchLocal();}
