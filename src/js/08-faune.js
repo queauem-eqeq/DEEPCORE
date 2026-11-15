@@ -90,6 +90,10 @@ function fumTick(){const F=G.fum;if(!F)return;let ks=Object.keys(F);if(!ks.lengt
       if(x<1||y<1||x>=W-1||y>=H-1)continue;const j=idx(x,y);
       if(F[j]||blocks(G.t[j]))continue;
       F[j]={v:Math.max(4,c.v-rnd(2,5)),k:2+rnd(0,3)};n--;}}
+  // les tuiles changent d'un battement à l'autre : une case bien entourée se densifie, les bords tournent — le nuage a l'air de vivre
+  for(const k in F){const i=+k,x=i%W,y=(i/W)|0;let n=0;
+    for(const [dx,dy] of DIRS)if(F[idx(x+dx,y+dy)])n++;
+    if(Math.random()<.55)F[k].k=n>=8?rnd(0,1):2+rnd(0,3);}
   for(const k in F)if(--F[k].v<=0)delete F[k];
   if(!Object.keys(F).length)sayMore('La fumée se dissipe.');}
 function animalsAct(){
