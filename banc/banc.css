@@ -1,0 +1,42 @@
+/* Banc de combat : le panneau remplace la colonne du jeu */
+body.surbanc .col{display:none}
+body.surbanc .game{grid-template-columns:minmax(0,1fr) 480px}
+.banc{border-left:1px solid var(--line);padding:16px 16px 40px;overflow-y:auto;display:grid;gap:12px;align-content:start;font-size:12px;min-width:0;scrollbar-width:thin}
+.banc h1{font-family:var(--display);font-size:18px;letter-spacing:.2em;text-transform:uppercase;color:var(--c1);margin:0}
+.banc h4{font-family:var(--display);font-size:11px;font-weight:500;letter-spacing:.22em;text-transform:uppercase;color:var(--dim);margin:8px 0 0;display:flex;justify-content:space-between;align-items:center}
+.banc section{display:grid;gap:8px}
+.bnote{margin:0;color:var(--dim);line-height:1.5;font-size:11px}
+.btabs{display:flex;gap:6px;border-bottom:1px solid var(--line);padding-bottom:8px}
+.btabs button{padding:4px 10px;font-size:11px;letter-spacing:.12em;border-color:var(--line);color:var(--dim)}
+.btabs button[aria-selected=true]{border-color:var(--c3);color:var(--c3)}
+.brow{display:grid;grid-template-columns:minmax(0,1fr) 210px;gap:8px;align-items:center}
+.brow label,.bcheck{color:var(--dim)}
+.banc select,.banc input[type=number]{width:100%;font:inherit;color:var(--fg);background:var(--void);border:1px solid var(--line);padding:3px 6px}
+.banc input[type=number]{text-align:right}
+.besp{display:grid;grid-template-columns:1fr 1fr;gap:5px 14px}
+.besp label{display:grid;grid-template-columns:24px minmax(0,1fr) 58px;gap:8px;align-items:center}
+.besp img{width:24px;height:24px;image-rendering:pixelated;background:var(--void);outline:1px solid var(--line)}
+.bacs{display:grid;grid-template-columns:1fr 1fr;gap:3px 14px;color:var(--dim)}
+.bacs label,.bcheck{display:flex;gap:6px;align-items:center}
+.bacs input,.bcheck input{accent-color:var(--c3)}
+.bbtns{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+.bbtns button{padding:5px 12px;font-size:11px;letter-spacing:.14em}
+.bbtns button:disabled{opacity:.4;cursor:default}
+.bmini{padding:1px 8px;font-size:10px;letter-spacing:.1em;border-color:var(--line);color:var(--dim)}
+.bprog{height:4px;background:var(--void);outline:1px solid var(--line)}
+.bprog i{display:block;height:100%;width:0;background:var(--c3)}
+.betat{min-height:1.4em;color:var(--dim)}.betat.ok{color:var(--c1)}.betat.bad{color:var(--life)}
+.bcarte{border:1px solid var(--line);padding:10px;display:grid;gap:6px}
+.bcarte>span{color:var(--dim);font-size:11px}.bcarte p{margin:0;color:var(--dim);font-size:11px}
+.bchif{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;font-size:16px;font-variant-numeric:tabular-nums}
+.bchif i{display:block;font-style:normal;font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);margin-bottom:2px}
+.bchif small{font-size:10px;color:var(--dim)}
+.btab{width:100%;border-collapse:collapse;font-size:11px;font-variant-numeric:tabular-nums}
+.btab th{color:var(--dim);font-weight:400;text-align:right;font-size:9px;letter-spacing:.04em;text-transform:uppercase;vertical-align:bottom;padding:4px 4px}
+.btab th:first-child,.btab td:first-child{text-align:left}
+.btab td{border-top:1px solid var(--line);padding:5px 4px;text-align:right;vertical-align:top}
+.btab td span{color:var(--dim);font-size:10px}
+.btab tr[data-src]{cursor:pointer}.btab tr[data-src]:hover td{background:rgba(255,255,255,.05)}
+.btab tr.bad td:nth-child(2){color:var(--life)}.btab tr.ok td:nth-child(2){color:var(--c1)}
+.btab.poids td,.btab.poids th{text-align:right}.btab.poids td:first-child,.btab.poids th:first-child{text-align:left}
+@media (max-width:900px){body.surbanc .game{grid-template-columns:1fr}.banc{border-left:0;border-top:1px solid var(--line)}}
