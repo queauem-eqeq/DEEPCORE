@@ -84,7 +84,7 @@ function tryMove(dx,dy){
   if(!diagOk(G.px,G.py,dx,dy)){say('Coin de paroi : pas de passage en diagonale.');SFX.blocked();render();return;}
   {const am=ambAt(nx,ny);if(am)ambWake(am,false);}   // on bute sur un embusqué : il est débusqué avant d'avoir frappé
   const bz=beastAt(nx,ny);
-  if(bz){const sp=BEASTS[bz.sp];G.turn++;G.msg=null;const sur=!(bz.hunt>0),cr=sur||roll(G.st.crit??5);   // surprise : ne vous a pas repéré
+  if(bz){const sp=BEASTS[bz.sp];G.turn++;G.msg=null;engage();const sur=!(bz.hunt>0),cr=sur||roll(G.st.crit??5);   // surprise : ne vous a pas repéré
     {const ch=hitChance(G.st.pre,sp.esq+terrMod(nx,ny));if(!sur&&!roll(ch)){if(!bz.hunt)alerte(bz);bz.hunt=1;spot(bz);addFx({kind:'lunge',robot:true,dx,dy,dur:180});addFx({kind:'num',x:nx,y:ny,txt:'0',col:'#8aa9a2',dur:750});
       say(`La foreuse rate le ${sp.n.toLowerCase()} (${ch} %).`);SFX.whoosh();pass(coupDur());computeFOV();render();if(G.over&&G.over.dead)dead();return;}}
     const dm=G.st.degats*(cr?CRIT_X:1);bz.hp-=dm;if(!bz.hunt&&bz.hp>0)alerte(bz);bz.hunt=1;spot(bz);addFx({kind:'num',x:nx,y:ny,txt:'-'+dm+(cr?'!':''),col:cr?PAL['1']:PAL['3'],dur:cr?1000:750});if(cr){addFx({kind:'shake',amp:6,dur:220});SFX.crit();}
@@ -94,7 +94,7 @@ function tryMove(dx,dy){
     else{say(`${tag}La foreuse percute le ${sp.n.toLowerCase()} : −${dm} PV (${bz.hp}/${pvDe(sp)}).`,'warn');SFX.crack();}
     pass(coupDur());computeFOV();render();if(G.over&&G.over.dead)dead();return;}
   const an=animalAt(nx,ny);
-  if(an){const sp=SPECIES[an.sp];G.turn++;G.msg=null;const sur=!an.aware,cr=sur||roll(G.st.crit??5);
+  if(an){const sp=SPECIES[an.sp];G.turn++;G.msg=null;engage();const sur=!an.aware,cr=sur||roll(G.st.crit??5);
     {const ch=hitChance(G.st.pre,sp.esq+terrMod(nx,ny));if(!sur&&!roll(ch)){an.aware=1;an.enraged=true;spot(an);addFx({kind:'lunge',robot:true,dx,dy,dur:180});addFx({kind:'num',x:nx,y:ny,txt:'0',col:'#8aa9a2',dur:750});
       say(`La foreuse rate l’${sp.n.toLowerCase()} (${ch} %).`);SFX.whoosh();pass(coupDur());computeFOV();render();if(G.over&&G.over.dead)dead();return;}}
     const dm=G.st.degats*(cr?CRIT_X:1),tag=sur?'Coup par surprise ! ':cr?'Coup critique ! ':'';an.hp=(an.hp??pvDe(sp))-dm;addFx({kind:'num',x:nx,y:ny,txt:'-'+dm+(cr?'!':''),col:cr?PAL['1']:PAL['3'],dur:cr?1000:750});if(cr){addFx({kind:'shake',amp:6,dur:220});SFX.crit();}addFx({kind:'lunge',robot:true,dx,dy,dur:180});

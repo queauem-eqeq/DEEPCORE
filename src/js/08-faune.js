@@ -12,7 +12,7 @@ function spawnAnimals(){
 }
 // Insectoïde : une fois le robot repéré, il le suit à 2 ou 3 cases (recule au contact,
 // se rapproche au-delà de 3). Quand un crabos chasse le robot à proximité, il passe à l'attaque.
-const KEEP_MIN=1,KEEP_MAX=3,BACKUP_R=4;
+const KEEP_MIN=1,KEEP_MAX=3;
 const cheb=(a,x,y)=>Math.max(Math.abs(a.x-x),Math.abs(a.y-y));
 function stepToward(a,dist){chaseStep(a,dist,animalOk);}
 // Distance à la foreuse en traitant les autres créatures comme des obstacles (soi-même exclu)
@@ -67,19 +67,20 @@ function searchStep(o,fits){if(Math.random()<.6){const [dx,dy]=DIRS[rnd(0,7)];if
 function stepAway(a){const cur=(a.x-G.px)**2+(a.y-G.py)**2;let best=null,bd=cur;
   for(const[dx,dy]of [...DIRS].sort(()=>Math.random()-.5)){const nx=a.x+dx,ny=a.y+dy;if(!animalOk(nx,ny)||!diagOk(a.x,a.y,dx,dy))continue;const nd=(nx-G.px)**2+(ny-G.py)**2;if(nd>bd){bd=nd;best=[nx,ny,dx];}}
   if(best){a.x=best[0];a.y=best[1];if(best[2])a.dir=best[2]>0?1:-1;}}
+// Le combat est engagé (15 novembre 2026) : la foreuse vient d'encaisser un coup, ou d'en porter un (même raté) à une créature.
+// Tous les insectoïdes qui la suivent (ceux qui l'ont repérée, en vue ou sur sa trace) passent à l'attaque, et ne reculeront plus.
+function engage(){for(const a of (G.animals||[]))if(a.aware)a.enraged=true;}
 function animalsAct(){
   turnStealth();
   if(!G.animals||G.over)return;let fled=null,swarm=null;const dist=robotDist(false),DC={};
-  const backup=(G.beasts||[]).some(b=>b.hunt>0&&cheb(b,G.px,G.py)<=BACKUP_R);
   for(const a of G.animals){if(G.over)break;const sp=SPECIES[a.sp];a.mp=Math.min(2,a.mp+sp.v/5/slowOf(G.t[idx(a.x,a.y)],sp.swim));
     const d=Math.hypot(a.x-G.px,a.y-G.py),sees=voitForeuse(a,!!a.aware);
     if(sees){if(!a.aware)alerte(a);a.aware=1;spot(a);}
     else if(a.aware&&a.search>0&&--a.search===0){a.aware=0;a.enraged=false;forget(a);}   // fouille terminée : il oublie
     else if(a.aware&&!a.mem)a.aware=0;
     const prev=a.mode,c=cheb(a,G.px,G.py);
-    // l'insectoïde garde ses distances et recule au contact tant que la foreuse n'est pas engagée en combat (un ennemi la chasse tout près) ;
-    // frappé par la foreuse, il réplique (enraged, posé dans tryMove). Une fois passé à l'attaque, il ne recule plus jamais
-    if(sees&&backup)a.enraged=true;
+    // l'insectoïde garde ses distances et recule au contact tant que le combat n'est pas engagé (voir engage) ;
+    // une fois passé à l'attaque (enraged), il ne recule plus jamais, jusqu'à ce qu'il oublie la foreuse
     a.mode=!a.aware?'':!sees?(a.search>0?'search':'seek'):a.enraged?'attack':c<=KEEP_MIN?'flee':c>KEEP_MAX?'follow':'hold';
     if(a.mode==='attack'&&prev!=='attack'&&vis[idx(a.x,a.y)])swarm=swarm||sp;
     if(a.mode==='flee'&&prev!=='flee'&&vis[idx(a.x,a.y)])fled=fled||sp;
@@ -94,7 +95,7 @@ function animalsAct(){
         if(animalOk(nx,ny)&&diagOk(a.x,a.y,dx,dy)&&(a.mode!=='hold'||cheb({x:nx,y:ny},G.px,G.py)>KEEP_MIN)){a.x=nx;a.y=ny;if(dx)a.dir=dx;}}
       else a.mp=Math.min(a.mp,.99);}
   }
-  if(swarm){sayMore(`Renforts de crabos : les ${swarm.n.toLowerCase()}s passent à l’attaque !`,'warn');SFX.chirp();}
+  if(swarm){sayMore(`Les ${swarm.n.toLowerCase()}s passent à l’attaque !`,'warn');SFX.chirp();}
   else if(fled){sayMore(`Un ${fled.n.toLowerCase()} recule.`);SFX.chirp();}
 }
 
@@ -141,7 +142,7 @@ function hurtRobot(b,sp,o){sp=sp||BEASTS[b.sp];o=o||{};const le=sp.n.match(/^[ae
   const geste=()=>o.tir?addFx({kind:'tir',x0:b.x,y0:b.y,x1:G.px,y1:G.py,dur:260}):addFx({kind:'lunge',beast:b,dx:Math.sign(G.px-b.x),dy:Math.sign(G.py-b.y),dur:200});
   if(!o.sur&&!roll(ch)){geste();addFx({kind:'num',x:G.px,y:G.py,txt:'0',col:'#8aa9a2',dur:750});
     SFX.whoosh();sayMore(`${le}${nom} ${verbe} et rate (${ch} %).`);return;}
-  geste();
+  geste();engage();   // coup encaissé : les insectoïdes qui suivent attaquent
   const cr=o.sur||roll(sp.crit||0),dm=dmgDe(sp)*(cr?CRIT_X:1);   // coup critique de l'ennemi : selon sa stat CRIT
   addFx({kind:'shake',amp:cr?9:5,dur:cr?320:220});G.st.vie=Math.max(0,G.st.vie-dm);addFx({kind:'num',x:G.px,y:G.py,txt:'-'+dm+(cr?'!':''),col:'#ff3b3b',dur:cr?1000:750});SFX.bite();sayMore(`${le}${nom} ${verbe}${o.sur?' par surprise':cr?' : coup critique':''} : −${dm} vie.`,'warn');
   if(G.st.vie<=0){G.over={dead:true};return;}

@@ -245,7 +245,7 @@ function invBoum(r,dm){let n=0,k=0;lastAct='dig';
     addFx({kind:'num',x:o.x,y:o.y,txt:'-'+dm,col:PAL['3'],dur:900});
     if(o.hp<=0){k++;(isB?G.beasts:G.animals).splice((isB?G.beasts:G.animals).indexOf(o),1);bleed(o.x,o.y);}
     else if(isB){o.hunt=1;spot(o);}else{o.aware=1;spot(o);}}
-  addFx({kind:'shake',amp:8,dur:300});SFX.explode();return `${n} ennemi${n>1?'s':''} touché${n>1?'s':''}${k?`, ${k} abattu${k>1?'s':''}`:''}`;}
+  if(n)engage();addFx({kind:'shake',amp:8,dur:300});SFX.explode();return `${n} ennemi${n>1?'s':''} touché${n>1?'s':''}${k?`, ${k} abattu${k>1?'s':''}`:''}`;}
 /* Visuel de la foreuse selon l'équipement : l'arme dessine la moitié avant (lignes 0 à 7, pointe en haut), l'armure la moitié arrière
    (lignes 8 à 15). Sans arme spéciale (la foreuse) ni armure, c'est la tuile « Foreuse » du Tile editor, retouches comprises. */
 const ARME_PIX={"foret": [".......ww.......", ".......ww.......", ".......22.......", "......2222......", "......2222......", "......2222......", ".....222222.....", ".....222222....."], "pilon": ["...2222222222...", "...2222222222...", "...2233333322...", "...2222222222...", "......2222......", "......2222......", "......2222......", ".....222222....."], "scie": ["......2w2w......", "....2w2222w2....", "...22222222w....", "...w22w22w22w...", "...w22w22w22w...", "....w22222222...", "....2w2222w2....", "......w2w2......"], "lance": [".......rr.......", "......r33r......", ".......33.......", ".......22.......", ".......22.......", "......2222......", "......2222......", ".....222222....."]};
