@@ -251,7 +251,7 @@ function niveau(o){drilling=false;const g0=GEN,bio=o.test?null:biomeDe(o.biome),
   G.w=W;G.h=H;G.mode=o.test?'test':'descente';G.niv=o.test?0:o.niv;G.biome=o.test?null:o.biome;G.suite=o.suite||null;
   const c=o.test?null:COURBE[o.niv];
   if(o.test)lifeCalc();else lifeMenace(bio.vie,c.menace,bio.terrain);
-  {const a=W*H/(48*32),q=o.test?{metal:2,mat:2}:c;G.eff={};hideGems();hideOre(Math.max(1,Math.round(q.metal*a)),Math.max(1,Math.round(q.mat*a)));}
+  {const a=W*H/(48*32),q=o.test?{metal:2,mat:2}:c;G.eff={};G.fum={};hideGems();hideOre(Math.max(1,Math.round(q.metal*a)),Math.max(1,Math.round(q.mat*a)));}
   G.sonar=1;   // sonar à émettre (voir sonarStart, 10-rendu) : il part 10 à 20 tours après l'arrivéeG.items={};G.tracks={};G.lastDir=null;G.beasts=[];G.blood={};G.fv=2;
   if(garde)Object.assign(G,garde);else{G.inv=invTest();G.log=[];}
   G.st.matiere=G.st.matiere||0;G.sonarAt=(G.turn||0)+10+Math.floor(Math.random()*11);

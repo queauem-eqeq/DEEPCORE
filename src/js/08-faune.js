@@ -71,6 +71,27 @@ function stepAway(a){const cur=(a.x-G.px)**2+(a.y-G.py)**2;let best=null,bd=cur;
 // Le combat est engagé (15 novembre 2026) : la foreuse vient d'être attaquée ou d'attaquer une créature, que le coup porte ou non.
 // Tous les insectoïdes qui la suivent (ceux qui l'ont repérée, en vue ou sur sa trace) passent à l'attaque, et ne reculeront plus.
 function engage(){for(const a of (G.animals||[]))if(a.aware)a.enraged=true;}
+/* Fumigène : un nuage de cases, et non plus un simple effet (16 novembre 2026).
+   À la pose, une galette ovale autour de la foreuse : 7 cases de large et de haut, 5 en diagonale (dx² + dy² ≤ 10, 37 cases).
+   Chaque case vit FUM_VIE battements, tirés un par un ; à chaque battement le nuage gagne une à trois cases voisines, au hasard,
+   avec une vie plus courte — il s'étend donc de travers, puis s'efface case par case. Une case de fumée est opaque (voir `opaque`). */
+const FUM_R2=10,FUM_VIE=[15,25],FUM_MAX=90;
+function fumPose(){const F=G.fum=G.fum||{};
+  for(let dy=-3;dy<=3;dy++)for(let dx=-3;dx<=3;dx++){const d2=dx*dx+dy*dy;if(d2>FUM_R2)continue;
+    const x=G.px+dx,y=G.py+dy;if(x<1||y<1||x>=W-1||y>=H-1)continue;const i=idx(x,y);if(blocks(G.t[i]))continue;
+    const v=rnd(FUM_VIE[0],FUM_VIE[1]);
+    F[i]={v:F[i]?Math.max(F[i].v,v):v,k:d2<=2?rnd(0,1):2+rnd(0,3)};}   // cœur : nuage plein ou texturé ; pourtour : les quatre bords
+  for(const b of G.beasts||[])if(b.hunt){b.hunt=0;forget(b);}
+  for(const a of G.animals||[]){a.aware=0;a.enraged=false;forget(a);}}
+function fumTick(){const F=G.fum;if(!F)return;let ks=Object.keys(F);if(!ks.length)return;
+  if(ks.length<FUM_MAX&&Math.random()<.7){let n=rnd(1,3);
+    for(let t=0;t<14&&n>0;t++){const i=+ks[rnd(0,ks.length-1)],c=F[i];if(c.v<6)continue;
+      const [dx,dy]=DIRS[rnd(0,7)],x=(i%W)+dx,y=((i/W)|0)+dy;
+      if(x<1||y<1||x>=W-1||y>=H-1)continue;const j=idx(x,y);
+      if(F[j]||blocks(G.t[j]))continue;
+      F[j]={v:Math.max(4,c.v-rnd(2,5)),k:2+rnd(0,3)};n--;}}
+  for(const k in F)if(--F[k].v<=0)delete F[k];
+  if(!Object.keys(F).length)sayMore('La fumée se dissipe.');}
 function animalsAct(){
   turnStealth();
   if(!G.animals||G.over)return;let fled=null,swarm=null;const dist=robotDist(false),DC={};
@@ -157,7 +178,7 @@ function effTick(){const E=G.eff;if(!E||G.over)return;
     if(G.st.vie<=0){G.over={dead:true};sayMore('Le poison achève la foreuse.','warn');return;}
     if(!E.poison)sayMore('Le poison est éliminé.','good');}
   if(E.glu>0&&--E.glu===0)sayMore('La glu se détache : la foreuse retrouve sa vitesse.','good');
-  if(E.fum>0&&--E.fum===0)sayMore('La fumée se dissipe.');}
+  fumTick();}
 // Embusqués : cachés (G.amb), ils ne bougent pas et ne figurent nulle part tant que la foreuse n'est pas à leur contact
 const ambAt=(x,y)=>G.amb&&G.amb.find(a=>a.x===x&&a.y===y);
 function ambWake(a,hunt){G.amb.splice(G.amb.indexOf(a),1);const b={sp:a.sp,x:a.x,y:a.y,hp:a.hp,mp:0,hunt:hunt?1:0,dir:Math.sign(G.px-a.x)||1,pack:-1};G.beasts=G.beasts||[];G.beasts.push(b);return b;}
