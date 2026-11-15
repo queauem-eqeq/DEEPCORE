@@ -227,6 +227,7 @@ Le jeu ne compte plus en tours mais en **unités de temps**, comme Brogue et Cog
 - Chance de toucher = précision de l'attaquant − esquive de la cible, bornée entre 5 et 95 %.
 - Foncer sur un animal = coup de foreuse (dégâts DEG). Coup raté : « 0 » affiché (gris). Frapper un animal ne consomme pas d'énergie.
 - Les animaux attaquent **une fois par battement au contact** ; leur vitesse ne règle que les déplacements (vitesse 5 = 1 case par battement), et l'eau les ralentit comme la foreuse, sauf les nageurs.
+- **Barre de vie au-dessus des créatures blessées** : petite barre rouge sur fond noir, dès que la créature n'est plus intacte. Les insectoïdes en étaient privés jusqu'au 16 novembre 2026 (seuls les prédateurs en avaient une) ; tout le monde en a une maintenant.
 - Animation : bond de l'attaquant, flash, chiffres de dégâts flottants (« -10 », « 0 » pour un coup raté, de part et d'autre), « +10 / +15 / +20 » en couleur bio au ramassage d'éclats de métal, tremblement d'écran quand le robot est touché ou qu'un ennemi meurt.
 - Un animal tué laisse une trace de sang.
 

@@ -161,12 +161,16 @@ function render(){
       const i=idx(x,y);if(Math.hypot(x-G.px,y-G.py)>r)continue;if(lastAct==='dig'||los(G.px,G.py,x,y))cells.add(i);}
     drawVisCells(cells,'#ffffff');}
   drawPath();
-  if(G.animals)for(const a of G.animals)if(!fog||vis[idx(a.x,a.y)]){const [lx,ly]=lungeOff(f=>f.kind==='lunge'&&f.beast===a);ctx.globalAlpha=1;ctx.drawImage(TL['an'+a.sp+(a.dir<0?'l':'r')],(a.x-camX)*S+lx,(a.y-camY)*S+ly,S,S);}
+  // barre de vie au-dessus d'une créature blessée (insectoïdes compris depuis le 16 novembre 2026 : ils en étaient privés)
+  const barreVie=(px,py,hp,pv)=>{if(hp>=pv)return;const w=S-6;ctx.fillStyle='#000';ctx.fillRect(px+3,py-4,w,3);ctx.fillStyle='#ff3b3b';ctx.fillRect(px+3,py-4,Math.round(w*Math.max(0,hp)/pv),3);};
+  if(G.animals)for(const a of G.animals)if(!fog||vis[idx(a.x,a.y)]){const [lx,ly]=lungeOff(f=>f.kind==='lunge'&&f.beast===a);
+    const px=(a.x-camX)*S+lx,py=(a.y-camY)*S+ly;ctx.globalAlpha=1;ctx.drawImage(TL['an'+a.sp+(a.dir<0?'l':'r')],px,py,S,S);
+    const sp=SPECIES[a.sp];barreVie(px,py,a.hp??pvDe(sp),pvDe(sp));}
   if(G.beasts)for(const b of G.beasts){if(!beastVisible(b))continue;const [lx,ly]=lungeOff(f=>f.kind==='lunge'&&f.beast===b);
     const px=(b.x-camX)*S+lx,py=(b.y-camY)*S+ly,img=TL['bz'+b.sp+(b.dir<0?'l':'r')];
     ctx.globalAlpha=1;ctx.drawImage(img,px,py,S,S);
     const fl=FX.find(f=>f.kind==='flash'&&f.beast===b);if(fl){ctx.globalCompositeOperation='lighter';ctx.globalAlpha=1-fxP(fl);ctx.drawImage(img,px,py,S,S);ctx.drawImage(img,px,py,S,S);ctx.globalCompositeOperation='source-over';ctx.globalAlpha=1;}
-    const pv=pvDe(BEASTS[b.sp]);if(b.hp<pv){const w=S-6;ctx.fillStyle='#000';ctx.fillRect(px+3,py-4,w,3);ctx.fillStyle='#ff3b3b';ctx.fillRect(px+3,py-4,Math.round(w*b.hp/pv),3);}}
+    barreVie(px,py,b.hp,pvDe(BEASTS[b.sp]));}
   const wreck=BOOM||(G.over&&G.over.dead);   // foreuse détruite : plus dessinée
   if(!wreck){const [lx,ly]=lungeOff(f=>f.kind==='lunge'&&f.robot);ctx.globalAlpha=1;ctx.drawImage(TL['robot_'+(G.face||'u')],(G.px-camX)*S+lx,(G.py-camY)*S+ly,S,S);}
   const ht=G.t[idx(G.px,G.py)];if(wreck){}else if(ht===LIQ)put(TL.wade,G.px,G.py,.95);else if(ht===DEEP)put(TL.wadeDeep,G.px,G.py,.95);
