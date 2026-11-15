@@ -237,13 +237,16 @@ Version d'essai : tous les objets sont donnés au départ, non équipés sauf la
 - **Emplacements** : 1 arme, 1 armure, 3 accessoires. Le sac n'a pas de limite pour l'instant.
 - **Deux endroits depuis le 15 novembre 2026**, un seul sac derrière :
   - la fenêtre **Équipement** ne contient plus que les **armes, armures et accessoires** ;
-  - les **consommables** sont passés dans un sous-menu repliable **Inventaire**, dans la colonne, **sous Statistiques**. Une ligne par consommable : signe `!`, nom, nombre (« ×2 ») et bouton **UTILISER**. Le survol donne la description. Ouvert ou fermé, l'état est mémorisé (`np-fd-sac`). Un consommable ne peut plus être jeté : seulement utilisé.
-- **Ouverture de l'équipement** : bouton « ÉQUIPEMENT » à côté de « MARCHE / COURSE », ou touche **I**. C'est une **fenêtre plein écran, comme le Tile editor** (le panneau dans la colonne, essayé d'abord, a été abandonné le 13 novembre). Le jeu ne reçoit plus les touches tant qu'elle est ouverte ; le temps ne passe pas.
+  - les **consommables** sont passés dans un sous-menu repliable **Inventaire**, dans la colonne. Une ligne par consommable : nom, nombre (« ×2 »), bouton **USE** et bouton **[X]**. Le survol donne la description. Ouvert ou fermé, l'état est mémorisé (`np-fd-sac`).
+  - **Dix places** (15 novembre 2026) : le compteur **[x/10]** s'affiche à droite du titre Inventaire. **Une place par sorte** de consommable, quel que soit le nombre d'exemplaires : le sac d'essai (2 de chaque, 5 sortes) occupe 5 places. Ramasser une sorte nouvelle quand les 10 places sont prises est refusé, et **l'objet reste au sol**.
+  - **[X] détruit la pile entière** (c'est ce qui libère une place) ; un consommable ne peut plus être jeté au sol, seulement utilisé ou détruit.
+  - **Touche I** : ouvre le sous-menu s'il est replié et choisit le premier consommable. Ensuite **↑ ↓** pour parcourir, **Entrée** pour utiliser, **Suppr** ou **J** pour détruire la pile, **Échap** ou **I** pour sortir. Toute autre touche de jeu sort de la navigation et agit normalement. La ligne choisie est encadrée en accent.
+- **Ouverture de l'équipement** : bouton « ÉQUIPEMENT » à côté de « MARCHE / COURSE », ou touche **E** (15 novembre 2026 ; **I** avant). **E** ou **Échap** referme. C'est une **fenêtre plein écran, comme le Tile editor** (le panneau dans la colonne, essayé d'abord, a été abandonné le 13 novembre). Le jeu ne reçoit plus les touches tant qu'elle est ouverte ; le temps ne passe pas.
 - **Liste à gauche** : une ligne par pièce d'équipement, précédée d'un signe (`/` arme, `[` armure, `=` accessoire), suivie de son type. Un objet **équipé reste dans la liste**, en couleur monde, avec la mention « équipé ».
 - **Fiche à droite** de l'objet choisi : dessin **ASCII coloré** aux couleurs de la palette, description, effets (en accent s'ils sont favorables, en rouge sinon), boutons **Équiper / Retirer** et **Jeter**. Le dernier message est répété sous la liste, le journal étant caché.
-- **Choisir** : à la souris (clic ; double-clic = Entrée) ou au clavier : ↑ ↓ (ou Z S, 8 2) pour parcourir, **Entrée** pour équiper ou retirer, **J** (ou Suppr) pour jeter, **G** pour ramasser ce qui est sous la foreuse, **I** ou **Échap** pour fermer.
+- **Choisir** : à la souris (clic ; double-clic = Entrée) ou au clavier : ↑ ↓ (ou Z S, 8 2) pour parcourir, **Entrée** pour équiper ou retirer, **J** (ou Suppr) pour jeter, **G** pour ramasser ce qui est sous la foreuse, **E** ou **Échap** pour fermer.
 - **Équiper** est gratuit et instantané. Une arme ou une armure remplace celle qui est portée ; un 4ᵉ accessoire est refusé tant qu'un emplacement n'est pas libéré.
-- **Effets** : l'objet ajoute ses modificateurs aux stats tant qu'il est porté ; les stats modifiées s'affichent en couleur dans « Statistiques ». Les bonus des joyaux s'additionnent.
+- **Effets** : l'objet ajoute ses modificateurs aux stats tant qu'il est porté ; les stats modifiées s'affichent en couleur dans les statistiques de la fenêtre. Les bonus des joyaux s'additionnent.
 - **Consommables** : usage unique, gratuit et instantané pour l'instant, depuis le sous-menu Inventaire. Refusé si la jauge est déjà pleine (l'objet n'est pas perdu) ; le surplus au-delà du maximum est perdu. Les consommables identiques s'empilent (« ×2 »).
 - **Jeter** pose l'objet (un seul exemplaire pour une pile) au sol sous la foreuse (tuile « Objet au sol », retouchable au Tile editor). Repasser sur la case le ramasse ; sans bouger, touche G ou bouton « Ramasser ». La fiche de survol nomme les objets posés.
 - **Durée du coup** : une arme peut allonger ou raccourcir le coup de foreuse (§ 5 bis) ; plancher à 25.
@@ -278,7 +281,7 @@ Vingt et un objets depuis le 13 novembre 2026. Règles ajoutées ce jour-là :
 - **La foreuse est une arme** : c'est l'arme de départ, déjà équipée. Il y a **toujours une arme en main** : on ne peut ni la retirer ni la jeter, seulement la remplacer. **Toute arme fore la roche pareil** (choix de l'utilisateur) : l'arme ne change que le combat et le visuel.
 - **Le visuel de la foreuse suit l'équipement** : l'arme dessine la moitié avant (la pointe), l'armure la moitié arrière (le corps), dans les quatre orientations. Sans armure et avec la foreuse d'origine, c'est la tuile « Foreuse » du Tile editor, retouches comprises ; les autres combinaisons ne sont pas encore retouchables.
 - **Maximum de vie ou d'énergie modifié par un objet** : la jauge garde sa proportion (100/100 devient 130/130, 50/100 devient 65/130). S'équiper ne soigne pas, ne blesse pas, et retirer puis remettre ne rapporte rien.
-- **Statistiques dans la fenêtre** : sous la fiche, les onze valeurs actuelles ; pour l'objet choisi, la valeur qu'aurait chaque stat après Entrée s'affiche à côté (« DEG 10 → 25 »), en accent si elle y gagne, en rouge si elle y perd.
+- **Statistiques dans la fenêtre** : sous la fiche, les onze valeurs actuelles ; **ESQ et DIS y sont donnés tels qu'ils comptent sur place** (terrain compris), depuis que le sous-menu Statistiques a disparu (15 novembre 2026) ; pour l'objet choisi, la valeur qu'aurait chaque stat après Entrée s'affiche à côté (« DEG 10 → 25 »), en accent si elle y gagne, en rouge si elle y perd.
 - Dessins ASCII agrandis (30 px).
 - **Tir d'un ennemi** : le projectile est une petite boule de 4 pixels de tuile, calée sur la grille et opaque (13 novembre 2026).
 
@@ -360,10 +363,10 @@ La statistique **DÉT (détection)** par espèce a été supprimée le 13 novemb
 - Plein écran ; colonne noire à droite, défilable à la molette ou au doigt mais sans barre de défilement (pour ne pas la déformer) ; journal de bord sous la carte (5 dernières lignes, numéro de tour, ×N pour les répétitions).
 - **Statut** : barres ASCII `█`/`░` (20 caractères) — Vie en couleur technologie, Énergie en couleur structure ; pas de chiffres.
 - **Statut** : barres Vie et Énergie suivies de leur valeur chiffrée (« 63/100 »), remises le 10 novembre 2026.
-- **Statistiques** (sous-menu repliable, sous Statut) en **grille 3 × 3** : VIT, EYE, DEG / PRE, ESQ, CRIT / POW, NUL 0, NUL 0 (deux emplacements libres) (ESQ affiche la valeur modifiée, colorée, sans le modificateur).
+- **Sous-menu Statistiques : supprimé le 15 novembre 2026.** Les onze stats sont dans la fenêtre Équipement, qui donne ESQ et DIS avec le terrain.
 - **En vue** (sans titre, sous la mini-carte) : fiche d'inspection de la case survolée en tête (voir ci-dessous), puis animaux visibles (icône, barre de vie ASCII 10 caractères, colonnes TOUCHER / SUBIR colorées). Joyaux, roches à joyau, éclats de métal et sites ne sont plus listés ici (retirés le 13 novembre 2026) : on les lit à la fiche de survol.
 - **Mini-carte** pleine largeur ; ennemis en points rouges ; un clic recentre la vue (mode carte) ; bouton maintenu + glisser = défilement en temps réel. Saisi à l'intérieur, le cadre suit le pointeur sans sauter ; saisi à l'extérieur, il se centre d'abord sous le pointeur. Fonctionne aussi au doigt.
-- Sous-menus repliables : **Statistiques**, **Inventaire** (les consommables, § 6 bis), **Génération** (+ bouton REGEN), **Life** (intensité par espèce, § 3), **Palette**, **Lab** (Bestiaire, Discrétion, Tile editor, Intro ; plus de bouton Enregistrer pour l'instant les réglages, aide des touches).
+- Sous-menus repliables : **Inventaire** (les consommables, § 6 bis), **Génération** (+ bouton REGEN), **Life** (intensité par espèce, § 3), **Palette**, **Lab** (Bestiaire, Discrétion, Tile editor, Intro ; plus de bouton Enregistrer pour l'instant les réglages, aide des touches).
 
 ### Souris et inspection (inspirées de Brogue)
 - Le curseur système est masqué sur la carte ; le **viseur** est dessiné sur la case survolée. Dès qu'on appuie sur une touche (hors mode inspection), le viseur, la fiche et le trajet disparaissent jusqu'au prochain mouvement de souris.
@@ -386,7 +389,7 @@ La statistique **DÉT (détection)** par espèce a été supprimée le 13 novemb
 - Export / import texte : essayé puis retiré le 6 novembre 2026 (« on verra plus tard »).
 
 ### Touches
-ZQSD / flèches / pavé numérique : déplacer · A E W C : diagonales · Souris : survol = inspection, clic = y aller · X : inspection au clavier · R : courir / marcher · I : équipement · O : exploration automatique · F : forer · Espace / 5 : attendre · P : repos jusqu’à l’énergie pleine · V : portée de discrétion · B : brouillard de guerre · ! : son · M : mode carte (déplacements = défilement, Maj = plus vite, Échap ou M pour revenir).
+ZQSD / flèches / pavé numérique : déplacer · A T W C : diagonales (↗ est passée de E à T le 15 novembre 2026, E ouvrant l'équipement) · Souris : survol = inspection, clic = y aller · X : inspection au clavier · R : courir / marcher · E : équipement · I : inventaire · O : exploration automatique · F : forer · Espace / 5 : attendre · P : repos jusqu’à l’énergie pleine · V : portée de discrétion · B : brouillard de guerre · ! : son · M : mode carte (déplacements = défilement, Maj = plus vite, Échap ou M pour revenir).
 
 ## 10. Sauvegarde des réglages
 

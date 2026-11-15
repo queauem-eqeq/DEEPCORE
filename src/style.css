@@ -260,12 +260,16 @@ kbd{font-family:var(--mono);color:var(--fg);border:1px solid var(--line);padding
 #inventaire .mcard.wide{width:min(900px,100%)}
 @media (max-width:720px){.iwrap{grid-template-columns:1fr}.idet{min-height:0}.iart{font-size:20px}}
 /* Sous-menu Inventaire de la colonne : les consommables, une ligne chacun */
+.fold summary .cnt{margin-left:auto;font-size:11px;color:var(--dim);font-variant-numeric:tabular-nums}
+.fold summary .cnt.full{color:var(--c1)}
 .sac{display:grid;gap:6px}
-.sac .cr{display:grid;grid-template-columns:10px minmax(0,1fr) auto auto;gap:6px;align-items:center}
-.sac .cr>i{font-style:normal;color:var(--c1)}
+.sac .cr{display:grid;grid-template-columns:minmax(0,1fr) auto auto auto;gap:5px;align-items:center;padding:1px 2px;font-size:12px}
+.sac .cr.sel{background:rgba(255,255,255,.08);outline:1px solid var(--c3)}
 .sac .cr>span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .sac .cr>em{font-style:normal;color:var(--dim);font-variant-numeric:tabular-nums}
-.sac .cr button{padding:1px 6px;font-size:10px;letter-spacing:.04em}
+.sac .cr button{padding:1px 5px;font-size:10px;letter-spacing:.04em}
+.sac .cr button.del{padding:1px 4px;color:var(--dim)}
+.sac .cr button.del:hover{color:var(--life);border-color:var(--life)}
 .sac .inone{margin:0;color:var(--dim);font-size:11px}
 .effs{font-size:11px;color:var(--c3);letter-spacing:.06em}
 .effs:empty{display:none}

@@ -69,15 +69,7 @@ function side(){
 
   for(const [t,v,mx,nm] of [['lifeT',st.vie,st.vieMax,'lifeN'],['enT',st.energie,st.energieMax,'enN']]){$(t).innerHTML=asciiBar(v,mx,ABAR_N);$(nm).textContent=Math.floor(v)+'/'+mx;$(t).setAttribute('aria-valuenow',Math.floor(v));$(t).setAttribute('aria-valuemax',mx);}
   {const b=$('sprintBtn');b.textContent=G.sprint?'COURSE':'MARCHE';b.classList.toggle('on',!!G.sprint);b.setAttribute('aria-pressed',!!G.sprint);}
-  const tm=terrMod(G.px,G.py),ev=st.esq+tm;
-  const sr=G.stealth||STEALTH_BASE;
-  // une stat modifiée par l'équipement s'affiche en couleur : accent si elle y gagne, rouge si elle y perd
-  const eqv=(k,v)=>{const b=invBonus(k);return b?`<span style="color:${b>0?'var(--c1)':'var(--life)'}">${v}</span>`:v;};
-  const sv={vitesse:eqv('vitesse',st.vitesse),degats:eqv('degats',st.degats),capteur:eqv('capteur',st.capteur),pre:eqv('pre',st.pre),
-    esq:tm?`<span style="color:${tm>0?'var(--c1)':'var(--life)'}">${ev}</span>`:eqv('esq',ev),
-    crit:eqv('crit',`${st.crit??5} %`),power:eqv('power',`${st.power}/t`),nul2:0,
-    stealth:sr!==STEALTH_BASE?`<span style="color:${sr<STEALTH_BASE?'var(--c1)':'var(--life)'}">${sr}</span>`:sr};
-  $('stats').innerHTML=STATS.map(([k,l,t])=>`<div class="r" title="${t}"><span>${l}</span><span>${sv[k]}</span></div>`).join('');
+  // Le sous-menu Statistiques a été retiré le 15 novembre 2026 : les stats sont dans la fenêtre Équipement.
   sacDraw();
   {const E=G.eff||{},l=[];if(E.poison>0)l.push(`<span style="color:var(--life)">Poison ${E.poison}</span>`);if(E.glu>0)l.push(`Englué ${E.glu}`);if(E.fum>0)l.push(`<span style="color:var(--c1)">Fumée ${E.fum}</span>`);$('effs').innerHTML=l.join(' · ');}
   $('lvl').textContent=G.mode==='test'?'Carte d’essai':`Niveau ${G.niv}/${NIV_MAX} · ${biomeDe(G.biome).n}`;$('matN').textContent=G.st.matiere||0;
@@ -90,10 +82,12 @@ function side(){
 
 /* ---------- Commandes ---------- */
 const KEYS={arrowup:[0,-1],arrowdown:[0,1],arrowleft:[-1,0],arrowright:[1,0],z:[0,-1],s:[0,1],q:[-1,0],d:[1,0],
-  a:[-1,-1],e:[1,-1],w:[-1,1],c:[1,1],'8':[0,-1],'2':[0,1],'4':[-1,0],'6':[1,0],'7':[-1,-1],'9':[1,-1],'1':[-1,1],'3':[1,1]};
+  a:[-1,-1],t:[1,-1],w:[-1,1],c:[1,1],   // ↗ est passée de E à T le 15 novembre 2026 : E ouvre l'équipement
+  '8':[0,-1],'2':[0,1],'4':[-1,0],'6':[1,0],'7':[-1,-1],'9':[1,-1],'1':[-1,1],'3':[1,1]};
 addEventListener('keydown',ev=>{
   if(INTRO){ev.preventDefault();if(ev.key==='Escape'||ev.key===' '||ev.key==='Enter')skipIntro();return;}
   if(!$('inventaire').hidden){invKey(ev);return;}
+  if(SAC_NAV&&$('overlay').hidden&&ev.target.tagName!=='INPUT'){if(sacKey(ev))return;}   // navigation au clavier dans le sous-menu Inventaire
   if(!$('monde').hidden){if(ev.key==='Escape'){ev.preventDefault();mondeClose();}return;}
   if(!$('discretion').hidden){if(ev.key==='Escape'){ev.preventDefault();closeDisc();}return;}
   if(!$('bestiary').hidden){if(ev.key==='Escape'){ev.preventDefault();closeBest();}return;}
@@ -113,7 +107,7 @@ addEventListener('keydown',ev=>{
   if(k==='m'){ev.preventDefault();setFreeCam(!freeCam);return;}
   if(ev.key==='!'){ev.preventDefault();toggleSound();return;}
   if(freeCam){if(KEYS[k]){ev.preventDefault();const st=ev.shiftKey?5:2;panCam(KEYS[k][0]*st,KEYS[k][1]*st);}else if(k==='escape'){ev.preventDefault();setFreeCam(false);}else if(k==='b'){ev.preventDefault();toggleFog();}return;}
-  if(KEYS[k]){ev.preventDefault();tryMove(...KEYS[k]);}else if(k==='f'){ev.preventDefault();askDrill();}else if(k==='b'){ev.preventDefault();toggleFog();}else if(k==='r'){ev.preventDefault();toggleSprint();}else if(k==='p'){ev.preventDefault();startRest();}else if(k==='i'){ev.preventDefault();invToggle();}else if(k==='o'){ev.preventDefault();startExplore();}else if(k===' '||k==='5'||k==='.'||ev.code==='Numpad5'){ev.preventDefault();waitTurn();}
+  if(KEYS[k]){ev.preventDefault();tryMove(...KEYS[k]);}else if(k==='f'){ev.preventDefault();askDrill();}else if(k==='b'){ev.preventDefault();toggleFog();}else if(k==='r'){ev.preventDefault();toggleSprint();}else if(k==='p'){ev.preventDefault();startRest();}else if(k==='e'){ev.preventDefault();invToggle();}else if(k==='i'){ev.preventDefault();sacNav(true);}else if(k==='o'){ev.preventDefault();startExplore();}else if(k===' '||k==='5'||k==='.'||ev.code==='Numpad5'){ev.preventDefault();waitTurn();}
 });
 $('pad').addEventListener('click',ev=>{const b=ev.target.closest('button[data-d]');if(!b||!$('overlay').hidden)return;const [dx,dy]=b.dataset.d.split(',').map(Number);if(freeCam)panCam(dx*2,dy*2);else tryMove(dx,dy);});
 $('waitPad').onclick=waitTurn;
@@ -177,6 +171,6 @@ const saveSnd=()=>{try{localStorage.setItem('np-son',JSON.stringify(SND));}catch
 function toggleSound(){SND.on=!SND.on;saveSnd();say(SND.on?'Son activé.':'Son coupé.','info');if(SND.on){unlock();SFX.spot();}render();}
 function toggleVision(){SHOWVIS=!SHOWVIS;say(SHOWVIS?'Portée de discrétion affichée.':'Portée de discrétion masquée.','info');render();}
 function toggleFog(){fog=!fog;try{localStorage.setItem('np-fog',fog?'on':'off');}catch(e){}say(fog?'Brouillard de guerre activé.':'Brouillard de guerre désactivé.','info');render();}
-['fd-stats','fd-sac','fd-pal','fd-lab'].forEach(id=>{const d=$(id);try{d.open=localStorage.getItem('np-'+id)==='open';}catch(e){}
+['fd-sac','fd-pal','fd-lab'].forEach(id=>{const d=$(id);try{d.open=localStorage.getItem('np-'+id)==='open';}catch(e){}
   d.addEventListener('toggle',()=>{try{localStorage.setItem('np-'+id,d.open?'open':'closed');}catch(e){}});});
 $('restart').onclick=e=>{e.preventDefault();e.stopPropagation();unlock();SFX.start();newGame();started=true;$('overlay').hidden=true;render();};
