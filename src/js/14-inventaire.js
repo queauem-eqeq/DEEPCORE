@@ -250,6 +250,9 @@ const invCibles=r=>[...(G.beasts||[]),...(G.animals||[])].filter(o=>Math.max(Mat
    Le carré s'ouvre une case devant la foreuse ; on le déplace à la souris ou aux touches de direction, dans un rayon de VISEE_R cases
    autour d'elle ; Entrée ou un clic valide, Échap annule (la charge n'est pas consommée). Le carré est dessiné en rouge avec la tuile
    « Bord croisé » (10-rendu.js). La validation frappe tout ce qui occupe une des neuf cases. */
+// Tout consommable prend un battement : les ennemis jouent, les effets durables se décomptent, l'énergie remonte (16 novembre 2026)
+// act : 'use' ne fait ni bruit ni discrétion ; la charge sismique passe 'dig', aussi bruyant qu'un coup de foreuse sur la roche
+function consoTemps(act){G.turn++;lastAct=act||'use';lastRun=false;pass(DUR.attente);computeFOV();if(G.over&&G.over.dead){render();dead();return true;}return false;}
 const VISEE_R=4,VISEE_DM=30;
 const DEVANT={u:[0,-1],r:[1,0],d:[0,1],l:[-1,0]};
 function viseeStart(i){const [dx,dy]=DEVANT[G.face||'u'];
@@ -273,6 +276,7 @@ function viseeOk(){if(!VISEE||G.over)return;const {i,x,y}=VISEE,o=G.inv[i];
   engage();invTake(i);sacFix();SAC_H='';
   addFx({kind:'shake',amp:8,dur:300});SFX.explode();
   say(`Charge sismique : ${n?`${n} ennemi${n>1?'s':''} touché${n>1?'s':''}${k?`, ${k} abattu${k>1?'s':''}`:''}`:'personne dans la zone'}.`,n?'good':'warn');
+  if(consoTemps('dig'))return;
   render();}
 function invBoum(r,dm){let n=0,k=0;lastAct='dig';
   for(const o of invCibles(r)){n++;const isB=G.beasts.includes(o),sp=isB?BEASTS[o.sp]:SPECIES[o.sp];o.hp=(o.hp??pvDe(sp))-dm;
@@ -295,7 +299,8 @@ function invEquip(i){const o=G.inv[i];if(!o||G.over)return;const d=ITEMS[o.k],e=
   if(d.vise){viseeStart(i);return;}   // objet qui se vise : on ouvre la visée au lieu de l'utiliser tout de suite
   if(d.conso){
     if(d.plein(G.st)){invSay(d.non,'warn');SFX.blocked();render();return;}
-    const r=d.use(G.st);invTake(i);invSay(`${d.n} utilisé${e} : ${r}.`,'good');SFX.spot();invChanged();return;}
+    const r=d.use(G.st);invTake(i);invSay(`${d.n} utilisé${e} : ${r}.`,'good');SFX.spot();
+    consoTemps();invChanged();return;}   // un consommable coûte un battement (16 novembre 2026)
   if(o.eq){if(d.slot==='arme'){invSay(ARME_FIXE,'warn');SFX.blocked();render();return;}
     invApply(o,-1);o.eq=0;invSay(`${d.n} retiré${e}.`);SFX.door();invChanged();return;}
   const sl=SLOTS[d.slot];let rem='';
