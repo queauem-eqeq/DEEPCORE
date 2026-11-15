@@ -103,18 +103,19 @@ function ensureChasmOv(){if(!G)return;const key=(G.seed||'')+'|'+PAL['3']+'|'+G.
     if(dd<NT){const f=(NT-dd)/(NT+1);set(i,base.map(v=>Math.round(v*f)));}}}
   x.putImageData(img,0,0);c._g=G;CHASM_OV=c;CHASM_KEY=key;}
 function hexRgb3(h){const n=parseInt(h.slice(1),16);return [(n>>16)&255,(n>>8)&255,n&255];}
-/* Sonar d'arrivée (13 novembre 2026) : en arrivant sur un niveau, la foreuse émet une onde circulaire qui balaie toute la carte et
-   détecte les gisements (éclats de métal et Matière). G.sonar : 1 = à émettre, 2 = émis. Les gisements détectés s'affichent sur la carte
-   et la mini-carte même là où la foreuse n'a rien vu, au fur et à mesure que l'onde les atteint. */
-const SONAR_V=38;                                       // cases par seconde
-function sonarStart(){G.sonar=2;G.sonX=G.px;G.sonY=G.py;const r=Math.hypot(Math.max(G.px,W-G.px),Math.max(G.py,H-G.py))+2;
-  addFx({kind:'sonar',x:G.px,y:G.py,r,dur:reduced?1:r/SONAR_V*1000});SFX.analyse();
-  const l=Object.values(G.ore||{}),m=l.filter(oreMat).length,n=l.length-m;
-  sayMore(`Sonar : ${n} gisement${n>1?'s':''} de métal et ${m} de Matière détecté${l.length>1?'s':''}.`,'info');}
+/* Sonar (13 novembre 2026, revu le 15) : 10 à 20 tours après l'arrivée sur un niveau, la foreuse émet une onde circulaire qui balaie toute
+   la carte et détecte les gisements (éclats de métal, Matière) et le joyau. G.sonar : 1 = à émettre (au tour G.sonarAt), 2 = émis.
+   Ce qui est détecté s'affiche sur la carte et la mini-carte, même là où la foreuse n'a rien vu, au fur et à mesure que l'onde l'atteint.
+   L'onde se dessine aussi sur la mini-carte ; un « blip blip » l'accompagne pendant tout le balayage. */
+const SONAR_V=38,SONAR_MIN=2600;                         // cases par seconde ; durée minimale du balayage, en ms
+function sonarStart(){G.sonar=2;G.sonX=G.px;G.sonY=G.py;const r=Math.hypot(Math.max(G.px,W-G.px),Math.max(G.py,H-G.py))+2,dur=reduced?1:Math.max(SONAR_MIN,r/SONAR_V*1000);
+  addFx({kind:'sonar',x:G.px,y:G.py,r,dur});SFX.sonar(dur/1000);
+  const l=Object.values(G.ore||{}),m=l.filter(oreMat).length,n=l.length-m,j=Object.keys(G.gems||{}).length;
+  sayMore(`Sonar : ${n} gisement${n>1?'s':''} de métal, ${m} de Matière${j?` et ${j} joyau${j>1?'x':''}`:''} détecté${l.length+j>1?'s':''}.`,'info');}
 function sonarR(){if(!G||G.sonar===1)return -1;const f=FX.find(f=>f.kind==='sonar');return f?fxP(f)*f.r:Infinity;}
 const sonarVu=(i,sr)=>Math.hypot(i%W-(G.sonX??G.px),((i/W)|0)-(G.sonY??G.py))<=sr;
 function render(){
-  if(G&&G.sonar===1&&started&&!INTRO&&!BOOM&&$('overlay').hidden&&$('introCv').hidden)sonarStart();
+  if(G&&G.sonar===1&&G.turn>=(G.sonarAt||0)&&started&&!INTRO&&!BOOM&&!G.over&&$('overlay').hidden&&$('introCv').hidden)sonarStart();
   if(!G||!TL.robot)return;ensureChasmOv();
   const vc=vw/S,vr=vh/S;
   const fx0=freeCam?camCX:G.px,fy0=freeCam?camCY:G.py;
@@ -144,7 +145,8 @@ function render(){
     const i=+k;if(tr.i==null||(fog&&!vis[i]))continue;put(TL[`tk${tr.i}${tr.o}${Math.max(0,age)}`],i%W,(i/W)|0,.6);}
   if(G.gems)for(const k in G.gems){if(G.gems[k]!=='visible')continue;const i=+k;if(fog&&!G.seen[i])continue;put(TL.gemDim,i%W,(i/W)|0,fog&&!vis[i]?.35:1);}
   if(G.ore)for(const k in G.ore){if(!oreSol(G.ore[k]))continue;const i=+k;if(fog&&!G.seen[i])continue;put(oreTile(G.ore[k],true),i%W,(i/W)|0,fog&&!vis[i]?.35:1);}
-  {const sr=sonarR();if(sr>0&&G.ore&&fog)for(const k in G.ore){const i=+k;if(G.seen[i]||!sonarVu(i,sr))continue;put(oreTile(G.ore[k],oreSol(G.ore[k])),i%W,(i/W)|0,1);}}   // gisements détectés par le sonar, même hors de vue
+  {const sr=sonarR();if(sr>0&&G.ore&&fog)for(const k in G.ore){const i=+k;if(G.seen[i]||!sonarVu(i,sr))continue;put(oreTile(G.ore[k],oreSol(G.ore[k])),i%W,(i/W)|0,1);}
+   if(sr>0&&G.gems&&fog)for(const k in G.gems){const i=+k;if(G.seen[i]||!sonarVu(i,sr))continue;put(TL.gem,i%W,(i/W)|0,1);}}   // gisements détectés par le sonar, même hors de vue
   if(G.items)for(const k in G.items){const i=+k;if(fog&&!G.seen[i])continue;put(TL.objet,i%W,(i/W)|0,fog&&!vis[i]?.35:1);}   // objets posés au sol
   if(G.splat)for(const [px,py,c,sz] of G.splat){const i=idx(Math.floor(px/S),Math.floor(py/S));if(fog&&!G.seen[i])continue;   // gouttes de sang au sol
     ctx.globalAlpha=fog&&!vis[i]?.3:1;ctx.fillStyle=c;ctx.fillRect(px-camX*S,py-camY*S,sz,sz);}

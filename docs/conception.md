@@ -117,15 +117,20 @@ Plus on descend : plus de monstres, moins de quoi se réparer, plus de Matière.
 
 Second métal, **couleur accent** (les éclats de réparation sont couleur bio), mêmes dessins et mêmes trois tailles. Pris dans la montagne, il tombe quand on brise la paroi (ou qu'un taupar la perce) ; passer dessus ajoute **30, 40 ou 50** à la réserve **Matière**, affichée sous les jauges. La Matière servira à construire de l'équipement (plus tard) ; elle ne sert encore à rien.
 
-### Sonar d'arrivée
+### Sonar
 
-En arrivant sur un niveau (atterrissage compris, une fois l'intro passée), la foreuse émet une **onde circulaire** qui part d'elle et balaie toute la carte à 38 cases par seconde : un cercle d'un pixel de tuile, calé sur la grille, opaque, couleur accent. Elle **détecte tous les gisements** (métal et Matière) : chacun apparaît quand l'onde l'atteint, sur la carte comme sur la mini-carte (bio pour le métal, accent pour la Matière), même en zone jamais vue et même au cœur d'un massif. Le journal donne le compte ; survoler un gisement détecté dit ce qu'il contient et s'il faudra forer.
+**10 à 20 tours après l'arrivée** sur un niveau (tirage au hasard ; à l'arrivée même jusqu'au 15 novembre 2026), la foreuse émet une **onde circulaire** qui part d'elle et balaie toute la carte : un cercle d'un pixel de tuile, calé sur la grille, opaque, couleur accent, à 38 cases par seconde et pendant 2,6 s au moins. L'onde se voit **aussi sur la mini-carte**, et un **« blip blip »** l'accompagne pendant tout le balayage.
 
-### Cartes d'essai
+Elle **détecte tous les gisements** (métal et Matière) **et le joyau** : chacun apparaît quand l'onde l'atteint, sur la carte comme sur la mini-carte (bio pour le métal, accent pour la Matière, blanc pour le joyau), même en zone jamais vue et même au cœur d'un massif. Le journal donne le compte ; survoler ce qui est détecté dit ce que c'est et s'il faudra forer.
+
+### Menu Monde et cartes d'essai (15 novembre 2026)
+
+Génération et Life ne sont plus deux sous-menus de la colonne : ils sont réunis dans une fenêtre **Monde**, plein écran comme le Tile editor, ouverte par le bouton **MONDE** (à côté de **REGEN**, sous la mini-carte).
 
 - **REGEN** relance la **descente au niveau 1** (c'est la partie normale).
-- Le bouton **CARTE D'ESSAI**, au bas du sous-menu Génération, crée une carte hors descente : taille, relief (Génération) et faune (Life) choisis par le joueur, palette de base, 2 gisements de métal et 2 de Matière à la taille 2. « Carte d'essai » s'affiche sous Statut à la place de « Niveau 1/5 · Plateau » ; y forer relance une carte d'essai.
-- Du 13 novembre 2026 après-midi jusqu'au soir, REGEN créait la carte d'essai et la descente se relançait depuis le Lab : l'utilisateur ne retrouvait plus les niveaux, inversé le jour même.
+- À gauche la **Génération** (taille, eau, montagne, gouffre, herbe, méthode de relief), à droite la **Faune** (intensité par espèce). En bas, **CARTE D'ESSAI** crée une carte hors descente avec ces réglages : palette de base, 2 gisements de métal et 2 de Matière à la taille 2. « Carte d'essai » s'affiche alors sous Statut ; y forer relance une carte d'essai.
+- **Archétypes de monde** : en tête de la fenêtre, un champ **Nom** et **Enregistrer** gardent les réglages en cours (relief, taille, faune) sous ce nom ; la **liste déroulante** les recharge ; **Supprimer** retire l'archétype choisi. Enregistrer sous un nom existant le met à jour. Mémorisés sous `np-mondes` et joints à l'enregistrement dans la base du jeu.
+- La liste propose aussi les **six biomes de la descente**, à charger comme point de départ : on les modifie, on leur donne un nom, on obtient une variante. Les biomes eux-mêmes ne sont pas modifiables d'ici, et **la descente n'utilise pas encore les archétypes enregistrés** (à décider).
 
 ## 3 ter. Exploration automatique (13 novembre 2026)
 
@@ -300,7 +305,7 @@ La statistique **DÉT (détection)** par espèce a été supprimée le 13 novemb
 - **Fenêtre Discrétion** (Lab → Discrétion, 13 novembre 2026) : affiche la **base** (modifiable, 2 à 30, défaut 10, bouton « Valeur par défaut », effet immédiat), la portée actuelle, le **tableau des modificateurs** (marcher, briser, attendre, herbes basses, parois adjacentes, avec la portée obtenue pour la base choisie) et les règles liées (×2 en chasse, 3 % de perte de trace). Calcul partagé avec le jeu (`stealthCalc`). Échap ou Fermer pour quitter.
 - **Touche V** (10 novembre 2026, refaite le 13 novembre) : affiche ou masque la **portée de discrétion** — les cases d'où un ennemi pourrait vous remarquer (rayon et ligne de vue depuis la foreuse), **entourées d'un contour pointillé blanc** (pixels de tuile opaques, un sur deux, sur le bord de la zone ; l'intérieur reste intact). Remplace l'ancien affichage du champ de vision de chaque ennemi.
 - **Crabos** : erre ; dès qu'il voit le robot, le chasse et l'attaque au contact ; le perd de vue → dernière position connue (ci-dessus).
-- **Insectoïde** : une fois le robot repéré, le suit à 2–3 cases (recule au contact, se rapproche au-delà de 3). Si un ennemi chasse le robot à 4 cases ou moins, il passe à l'attaque et **ne recule plus jamais** ensuite.
+- **Insectoïde** : une fois le robot repéré, le suit à 2–3 cases (recule au contact, se rapproche au-delà de 3). Si un ennemi chasse le robot à 4 cases ou moins, il passe à l'attaque et **ne recule plus jamais** ensuite. **Au contact de la foreuse, il attaque toujours** (15 novembre 2026), même s'il ne l'avait pas remarquée ou gardait ses distances : le coller n'est plus sans risque.
 - **Cafar** : vit en bande ; chaque individu reste à 4 cases au plus du centre de sa bande. Hors chasse, la bande voyage vers un point accessible tiré au hasard (≥ 10 cases), y fait une **pause de 50 tours**, puis repart. **Cri d'alerte retiré le 13 novembre 2026** (le code reste, désactivé par `alarm:false` dans la fiche de l'espèce) : seule la mémoire partagée de la bande subsiste, les autres ennemis ne sont plus alertés. La fiche du Bestiaire ne mentionne plus l'alerte (corrigé le 13 novembre 2026) ; la colonne « Critique % » y est devenue « Crit % », sur une seule ligne.
 
 ## 8. Objectifs et progression

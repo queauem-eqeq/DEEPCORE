@@ -265,3 +265,16 @@ kbd{font-family:var(--mono);color:var(--fg);border:1px solid var(--line);padding
 .gen .g.niv.tout label{color:var(--fg)}
 .lvl{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--c3);margin:-4px 0 8px}
 .bnum.mat{color:var(--c1)}
+/* Menu Monde : archétypes en tête, Génération et Faune côte à côte */
+#monde .mcard:focus{outline:none}
+.mdarch{display:flex;flex-wrap:wrap;gap:8px 10px;align-items:center;margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid var(--line);font-size:12px}
+.mdarch label{color:var(--dim);font-size:11px;letter-spacing:.14em;text-transform:uppercase}
+.mdarch select,.mdarch input{font:inherit;color:var(--fg);background:var(--void);border:1px solid var(--line);padding:4px 6px;min-width:0}
+.mdarch select{flex:1 1 180px;max-width:260px}.mdarch input{flex:1 1 140px;max-width:220px}
+.mdarch .saved{flex:1 1 100%;min-height:1.4em}.mdarch .saved.err{color:var(--life)}
+.mdcols{display:grid;grid-template-columns:1fr 1fr;gap:28px;align-items:start}
+.mdcols h3{font-family:var(--display);font-size:12px;font-weight:500;letter-spacing:.24em;text-transform:uppercase;color:var(--dim);margin:0 0 10px}
+.mdcols .gen{margin-bottom:0}
+@media (max-width:720px){.mdcols{grid-template-columns:1fr}}
+.mdcols .gen .g2{grid-template-columns:minmax(0,1fr) 190px}
+.col>.btnrow>button{flex:1 1 0;min-width:0}

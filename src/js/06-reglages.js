@@ -46,7 +46,7 @@ function setIntens(k,v){v=Math.max(0,Math.min(4,Math.round(+v||0)));if(k==='tout
 function buildLife(){
   const row=(k,l,cls)=>`<div class="g niv${cls||''}"><label for="lr-${k}">${l}</label><input type="range" id="lr-${k}" min="0" max="4" step="1" value="2" aria-label="Intensité : ${l}" aria-describedby="ll-${k}"><span id="ll-${k}"></span></div>`;
   $('life').innerHTML=row('tout','Toutes',' tout')+LIFE_LBL.map(([k,l])=>row(k,l)).join('')
-    +'<div class="sum">Intensité par espèce : Aucun, Rare, Normal, Nombreux, Infesté. Le nombre de créatures suit la taille de la carte. S’applique aux cartes d’essai (bouton CARTE D’ESSAI, dans Génération) ; en descente, chaque biome a sa faune.</div>';
+    +'<div class="sum">Intensité par espèce : Aucun, Rare, Normal, Nombreux, Infesté. Le nombre de créatures suit la taille de la carte. S’applique aux cartes d’essai ; en descente, chaque biome a sa faune.</div>';
   ['tout',...LIFE_LBL.map(l=>l[0])].forEach(k=>$('lr-'+k).addEventListener('input',e=>setIntens(k,e.target.value)));
   intensAff();
 }
@@ -57,8 +57,8 @@ function buildGen(){
    +`<div class="g2"><label for="gm">Méthode</label><select id="gm">${METHODS.map(([v,l])=>`<option value="${v}"${GEN.methode===v?' selected':''}>${l}</option>`).join('')}</select></div>`
    +`<div class="g2"><label for="gn-remplissage">Remplissage initial (%)</label><input type="number" id="gn-remplissage" min="35" max="70" value="${GEN.remplissage}"></div>`
    +`<div class="g2"><label for="gn-iterations">Itérations</label><input type="number" id="gn-iterations" min="1" max="10" value="${GEN.iterations}"></div>`
-   +'<button class="go" id="essaiBtn" title="Créer une carte d’essai avec ces réglages et ceux de Life, hors de la descente">CARTE D’ESSAI</button><div class="sum">Ces réglages et ceux de Life ne servent qu’aux cartes d’essai. REGEN relance la descente au niveau 1, où chaque biome a son relief et sa faune.</div>';
-  $('essaiBtn').onclick=()=>{$('essaiBtn').blur();unlock();SFX.start();testGame();started=true;$('overlay').hidden=true;render();};
+   +'<button class="go" id="essaiBtn" title="Créer une carte d’essai avec ces réglages et ceux de Life, hors de la descente">CARTE D’ESSAI</button><div class="sum">Ces réglages et ceux de la faune ne servent qu’aux cartes d’essai. REGEN relance la descente au niveau 1, où chaque biome a son relief et sa faune.</div>';
+  $('essaiBtn').onclick=()=>{$('monde').hidden=true;unlock();SFX.start();testGame();started=true;$('overlay').hidden=true;render();};
   GEN_LBL.forEach(([k])=>{$('gr-'+k).addEventListener('input',e=>setGen(k,e.target.value));$('gn-'+k).addEventListener('change',e=>setGen(k,e.target.value));});
   $('gr-taille').addEventListener('input',e=>setTaille(e.target.value));$('gn-taille').addEventListener('change',e=>setTaille(e.target.value));setTaille(GEN.taille);
   $('gm').addEventListener('change',e=>{GEN.methode=e.target.value;saveGen();caState();});
@@ -67,3 +67,35 @@ function buildGen(){
   GEN_LBL.forEach(([k,,mx])=>{if(GEN[k]>mx)GEN[k]=mx;});setGen('eau',GEN.eau);caState();
 }
 
+
+/* ---------- Menu Monde (15 novembre 2026) : Génération et Life réunis dans une fenêtre, comme le Tile editor ----------
+   Archétype de monde : les réglages en cours (relief, taille, faune) enregistrés sous un nom ; MONDES = {nom:{gen:{…},vie:{…}}}, mémorisé
+   sous np-mondes. La liste déroulante propose aussi les biomes de la descente, à charger comme point de départ (ils ne sont pas modifiables). */
+let MONDES={};try{const m=JSON.parse(localStorage.getItem('np-mondes')||'null');if(m&&typeof m==='object')MONDES=m;}catch(e){}
+const saveMondes=()=>{try{localStorage.setItem('np-mondes',JSON.stringify(MONDES));}catch(e){}touchLocal();};
+const mdEsc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+function mondeListe(sel){const noms=Object.keys(MONDES).sort((a,b)=>a.localeCompare(b,'fr')),o=(v,l)=>`<option value="${mdEsc(v)}">${mdEsc(l)}</option>`;
+  $('mdSel').innerHTML=o('','— Réglages en cours —')+(noms.length?`<optgroup label="Mes archétypes">${noms.map(n=>o('u:'+n,n)).join('')}</optgroup>`:'')
+    +`<optgroup label="Biomes de la descente">${Object.entries(BIOMES).map(([k,b])=>o('b:'+k,b.n)).join('')}</optgroup>`;
+  $('mdSel').value=sel||'';if($('mdSel').selectedIndex<0)$('mdSel').value='';}
+function mondeMsg(t,err){const m=$('mdMsg');m.textContent=t;m.className='saved'+(err?' err':'');}
+// applique un relief et une faune aux réglages en cours (les champs absents gardent leur valeur)
+function mondeApplique(gen,vie){
+  for(const k of ['taille','eau','montagne','gouffre','herbe','methode','remplissage','iterations'])if(gen&&gen[k]!=null)GEN[k]=gen[k];
+  if(!(GEN.taille>=1&&GEN.taille<=5))GEN.taille=4;saveGen();buildGen();
+  for(const k in INTENS)INTENS[k]=Math.max(0,Math.min(4,Math.round(+(vie&&vie[k])||0)));
+  intensAff();try{localStorage.setItem('np-intens',JSON.stringify(INTENS));}catch(e){}touchLocal();}
+function mondeCharge(v){
+  if(v.startsWith('u:')){const n=v.slice(2),m=MONDES[n];if(!m)return;mondeApplique(m.gen,m.vie);$('mdNom').value=n;mondeMsg(`« ${n} » chargé.`);}
+  else if(v.startsWith('b:')){const b=BIOMES[v.slice(2)];if(!b)return;mondeApplique(b.gen,b.vie);$('mdNom').value='';mondeMsg(`Biome « ${b.n} » chargé : donnez un nom pour en garder une variante.`);}
+  else mondeMsg('');}
+function mondeSave(){const n=$('mdNom').value.trim().replace(/\s+/g,' ');if(!n){mondeMsg('Donnez un nom à cet archétype.',true);$('mdNom').focus();return;}
+  const neuf=!MONDES[n];MONDES[n]={gen:Object.assign({},GEN),vie:Object.assign({},INTENS)};saveMondes();mondeListe('u:'+n);mondeMsg(neuf?`« ${n} » enregistré.`:`« ${n} » mis à jour.`);}
+function mondeDel(){const v=$('mdSel').value;if(!v.startsWith('u:')){mondeMsg('Choisissez un de vos archétypes dans la liste.',true);return;}
+  const n=v.slice(2);delete MONDES[n];saveMondes();mondeListe('');$('mdNom').value='';mondeMsg(`« ${n} » supprimé.`);}
+function mondeOpen(){if(TRAV)stopTravel();if(REST)stopRest();if(EXPL)stopExplore();mondeListe($('mdSel').value);mondeMsg('');$('monde').hidden=false;$('monde').querySelector('.mcard').focus();}
+function mondeClose(){$('monde').hidden=true;$('mondeBtn').focus();render();}
+$('mondeBtn').onclick=mondeOpen;$('mdClose').onclick=mondeClose;$('mdSave').onclick=mondeSave;$('mdDel').onclick=mondeDel;
+$('mdSel').addEventListener('change',e=>mondeCharge(e.target.value));
+$('mdNom').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();mondeSave();}});
+$('monde').addEventListener('pointerdown',ev=>{if(ev.target===$('monde'))mondeClose();});

@@ -80,7 +80,8 @@ function animalsAct(){
     a.mode=!a.aware?'':!sees?(a.search>0?'search':'seek'):a.enraged?'attack':c<=KEEP_MIN?'flee':c>KEEP_MAX?'follow':'hold';
     if(a.mode==='attack'&&prev!=='attack'&&vis[idx(a.x,a.y)])swarm=swarm||sp;
     if(a.mode==='flee'&&prev!=='flee'&&vis[idx(a.x,a.y)])fled=fled||sp;
-    if(a.mode==='attack'&&canHit(a)){hurtRobot(a,sp);continue;}
+    // au contact de la foreuse, l'insectoïde attaque toujours, même s'il ne l'avait pas remarquée ou gardait ses distances (15 novembre 2026)
+    if(canHit(a)){if(!a.aware){a.aware=1;spot(a);}hurtRobot(a,sp);continue;}
     while(a.mp>=1&&!G.over){a.mp-=1;
       if(a.mode==='attack'){if(canHit(a)){a.mp=Math.min(a.mp,.99);break;}stepToward(a,dist);}
       else if(a.mode==='flee')stepAway(a);
