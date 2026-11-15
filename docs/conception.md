@@ -48,6 +48,15 @@ Roguelike au tour par tour dans une esthétique inspirée de Cogmind et de Brogu
 - Curseurs de génération (en %) : Eau ≤ 60, Montagne ≤ 70, Gouffre ≤ 30, Herbe ≤ 80, total ≤ 80. **Herbes hautes et basses mêlées de façon irrégulière** (15 novembre 2026 ; avant : deux moitiés égales, coupées net en grandes zones). Trois échelles s'additionnent : de grandes zones qui donnent *parfois* une forte majorité de hautes ou de basses, des bosquets et touffes de 2 à 6 cases, et un grain case par case ; le plus souvent c'est le mélange qui l'emporte. La part d'herbes hautes varie d'une carte à l'autre, de 35 à 65 %.
 - Bouton **REGEN** dans le titre « Génération » : nouvelle planète immédiate.
 
+### Texture du sol (16 novembre 2026)
+
+Le sol n'est plus uni : sur le voile de couleur monde à 8 % posé sur chaque case, deux choses s'ajoutent, choisies sur la planche `planches/sol-grain.js` (variante 5, « plaques rugueuses », sur six proposées).
+
+- **Nuances par plages** : chaque case prend une nuance de la couleur monde très légèrement décalée (teinte ±4°, clarté ±2 %, saturation ±13 %), par un bruit lisse de grande échelle. Les plages sont larges et douces : on ne voit pas les cases, seulement un terrain qui n'est pas d'un seul ton.
+- **Grain à densité variable** : de 0 à 11 pixels par case, de la même couleur, à peine plus marqués que le fond. La densité suit un second bruit, d'échelle plus courte : certains coins sont presque lisses, d'autres nettement granuleux.
+- Calculé **une fois par planète et par palette**, dans une image de 16 pixels par case (comme les gouffres) : 110 à 140 ms à la génération, rien de plus à l'affichage. La cinématique d'intro utilise la même image, donc le raccord avec le jeu reste exact.
+- Le réglage tient en quatre nombres, en tête de `ensureSolOv` (`10-rendu.js`) : amplitudes des nuances, nombre maximal de pixels, et les deux opacités `A_FOND` et `A_GRAIN`.
+
 ### Taille de la carte (13 novembre 2026)
 
 Réglage « Taille de la carte » en tête du sous-menu Génération, de **1 à 5**, appliqué au prochain lancement (REGEN) :
@@ -171,7 +180,7 @@ Jugée trop haute et trop étroite (640 × 835), elle est passée à 940 × 390 
 
 | Terrain | Passage | Vue | Effet |
 |---|---|---|---|
-| Sol rocheux | oui | libre | **uni** : la tuile est vide depuis le 15 novembre 2026 (quatre petits points de couleur monde avant ; les points de plus en plus denses près d'un site avaient déjà disparu le 13). Seul reste le voile de couleur monde à 8 % posé sur chaque case. Retouchable au Tile editor : une tuile « Sol » déjà retouchée garde son dessin |
+| Sol rocheux | oui | libre | **texture « plaques rugueuses »** (16 novembre 2026, voir ci-dessous). La tuile « Sol » du Tile editor, elle, est vide depuis le 15 novembre 2026 (quatre petits points avant) : une tuile déjà retouchée garde son dessin |
 | Rocher | brisé en 2 coups | libre | laisse des gravats |
 | Montagne | brisée en 2 coups (sauf bord de carte) | bloquée | peut contenir le joyau ; 10 % contiennent des éclats de métal |
 | Eau peu profonde | oui | libre | −20 d'esquive ; **toutes les créatures y entrent** (15 novembre 2026) ; **terrain lent : pas ×1,5**, sauf pour les crabos qui nagent |

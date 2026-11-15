@@ -55,7 +55,7 @@ function boltImage(x0,y1,w,h){const P=2,trunk=new Set(),branch=new Set();
   const c=document.createElement('canvas');c.width=w;c.height=h;const g=c.getContext('2d');g.fillStyle=PAL['1'];   // tout en couleur accent
   for(const k of new Set([...trunk,...branch])){const [x,y]=k.split(',').map(Number);g.fillRect(x*P,y*P,P,P);}
   return c;}
-function introMapImg(){ensureChasmOv();const c=document.createElement('canvas');c.width=W*16;c.height=H*16;const x=c.getContext('2d');
+function introMapImg(){ensureChasmOv();ensureSolOv();const c=document.createElement('canvas');c.width=W*16;c.height=H*16;const x=c.getContext('2d');
   x.imageSmoothingEnabled=false;x.setTransform(16/S,0,0,16/S,0,0);
   for(let i=0;i<W*H;i++)introCell(x,i,(i%W)*S,((i/W)|0)*S);
   return c;}
@@ -93,7 +93,7 @@ introCv.addEventListener('pointerdown',()=>{unlock();});
 // une case de terrain, comme dans le jeu (sans brouillard ni créatures) ; le vaisseau au sol n'est pas dessiné
 function introCell(x,i,px,py){const t=G.t[i],h=hash(i%W,(i/W)|0),put2=(tl,a)=>{if(!tl)return;x.globalAlpha=a;x.drawImage(tl,px,py,S,S);};
   x.globalAlpha=1;x.fillStyle='#020605';x.fillRect(px,py,S,S);
-  if(t!==CHASM){x.globalAlpha=.08;x.fillStyle=PAL['3'];x.fillRect(px,py,S,S);}
+  if(t!==CHASM)voile(i%W,(i/W)|0,px,py,1,x);
   if(t!==BRIDGE)put2(TL.ground0,.6);
   if(t===ROCK)put2(h%3?TL.rock:TL.rock2,.95);
   else if(t===MOUNT){const up=i>=W&&G.t[i-W]===MOUNT;put2(up?TL.mtBody:TL.mtTop,.9);}
@@ -103,7 +103,7 @@ function introCell(x,i,px,py){const t=G.t[i],h=hash(i%W,(i/W)|0),put2=(tl,a)=>{i
   else if(t===RUBBLE)put2(TL.rubble,.65);else if(t===GRASS)put2(TL.grass0,.9);else if(t===FLAT)put2(TL.flat0,.75);
   x.globalAlpha=1;}
 const wrapIdx=(mx,my)=>(((my%H)+H)%H)*W+(((mx%W)+W)%W);
-function introFrame(now){const I=INTRO;if(!I)return;ensureChasmOv();
+function introFrame(now){const I=INTRO;if(!I)return;ensureChasmOv();ensureSolOv();
   const t=(now-I.t0)/1000,dt=Math.min(.05,(now-I.last)/1000);I.last=now;
   const dpr0=devicePixelRatio||1,dpr=dpr0>=2?Math.max(1,Math.floor(dpr0/2)):dpr0,w=innerWidth,h=innerHeight;if(introCv.width!==Math.round(w*dpr)||introCv.height!==Math.round(h*dpr)){introCv.width=Math.round(w*dpr);introCv.height=Math.round(h*dpr);}
   const x=ictx;x.setTransform(dpr,0,0,dpr,0,0);x.imageSmoothingEnabled=false;x.globalAlpha=1;x.globalCompositeOperation='source-over';x.fillStyle='#000';x.fillRect(0,0,w,h);
