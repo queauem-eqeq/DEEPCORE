@@ -421,6 +421,7 @@ Décisions validées le 6 novembre 2026 :
 
 Chiffres à l'appui dans `mesures.md`, points de comparaison avec Brogue dans `brogue.md`.
 
+- **Idées de Brogue sur les ennemis à reprendre** (relevé du 15 novembre 2026, `brogue.md`, section « Comment Brogue gère ses ennemis ») : hordes composées et liées, ennemis endormis à l'arrivée, renforts au fil du temps ; ensuite hors-profondeur, mutations, fuite des blessés.
 - Niveau 2 (sous-sol) : à concevoir (salles par accrétion ou caverne par automate cellulaire).
 - Donner un effet à la profondeur des sites (risque / récompense).
 - Récompenser les combats (fragments, énergie).
