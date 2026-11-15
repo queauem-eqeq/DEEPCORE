@@ -96,22 +96,26 @@ La partie est une **descente en 5 niveaux** (5 pour commencer ; on allongera). F
 
 **Palette** : la même partout (choix de l'utilisateur), avec une petite variation par biome appliquée à la palette du joueur : rotation de teinte de 4 à 18°, clarté et saturation de la couleur monde légèrement modifiées. Le sous-menu Palette règle toujours la palette de base.
 
-### Courbe de difficulté
+### Courbe de difficulté : un budget de menace par niveau (15 novembre 2026)
 
-| Niveau | Monstres (× l'effectif du biome) | Gisements de métal de réparation (carte de taille 2) | Gisements de Matière (taille 2) |
+| Niveau | Budget de menace (pour 1000 cases) | Gisements de métal de réparation (carte de taille 2) | Gisements de Matière (taille 2) |
 |---|---|---|---|
-| 1 | × 1,5 | 3 | 1 |
-| 2 | × 2,2 | 3 | 1 |
-| 3 | × 3 | 2 | 2 |
-| 4 | × 4 | 1 | 3 |
-| 5 | × 5 | 1 | 3 |
+| 1 | 60 | 3 | 1 |
+| 2 | 120 | 3 | 1 |
+| 3 | 180 | 2 | 2 |
+| 4 | 250 | 1 | 3 |
+| 5 | 320 | 1 | 3 |
 
-Plus on descend : plus de monstres, moins de quoi se réparer, plus de Matière.
+Plus on descend : plus de menace, moins de quoi se réparer, plus de Matière.
 
-- **Les PV et les dégâts des ennemis ne changent pas avec la profondeur** (décision de l'utilisateur, 13 novembre 2026) : la difficulté vient de leur **nombre**. Un renforcement de 25 % par niveau, essayé le même jour, a été retiré. Les fonctions `pvDe` / `dmgDe` restent le point d'entrée unique si l'on y revient.
-- Densités constatées : environ 8 créatures pour 1000 cases au niveau 1, 17 aux niveaux 2 et 3, 18 à 26 au niveau 5 (jusqu'à 350 créatures sur une carte de taille 5 ; le battement reste à 25 ms). La carte d'origine en comptait 11.
-- **Gisements rares mais gros** : quatre en tout sur une carte de taille 2, répartis entre métal et Matière selon le niveau ; les autres tailles en reçoivent en proportion de leur surface (16 en taille 4, 36 en taille 5). Chaque gisement vaut **30, 40 ou 50** (10, 15, 20 auparavant, pour des gisements beaucoup plus nombreux). Les cartes d'essai en ont 2 + 2 à la taille 2.
-- Historique de la courbe ce jour-là : × 0,7 à 1,5, puis × 1 à 2,5 avec ennemis renforcés, puis les valeurs ci-dessus. **Toujours posée à la main** : à régler en jouant.
+- **Menace** : chaque espèce a un coût, celui d'un duel pour la foreuse sans équipement, en points de vie (mesures.md) : Insectoïde 4 (estimé), Cafar 5 (compté en bande), Siphon 3, Gluar 12, Crabos 15, Crachin 15, Vipérin 20, Taupar 23, Tapi 26, Mastok 52. La menace d'une carte est la somme effectif × coût.
+- **Budget** : à chaque niveau, les effectifs du monde tiré sont mis à l'échelle pour atteindre le budget. Les intensités d'un biome ou d'un archétype **ne règlent donc plus que les proportions entre espèces** ; le total, c'est le niveau qui le fixe. Deux mondes au même niveau pèsent autant, qu'ils soient faits de quelques mastoks ou d'une nuée de cafars (au niveau 3 en taille 3 : 12 mastoks, ou 75 créatures en Galeries, ou 47 en Marécage).
+- Chaque espèce choisie garde au moins un individu (deux cafars). Un monde sans aucune espèce reste vide.
+- Le budget moyen reprend le niveau de difficulté d'avant ; ce qui change, c'est l'écart entre mondes. Avant, le niveau multipliait les effectifs (× 1,5 à × 5) et le Marécage pesait plus du double des Galeries : il s'allège, les Galeries et les Hautes herbes s'alourdissent.
+- **Les PV et les dégâts des ennemis ne changent pas avec la profondeur** (décision de l'utilisateur, 13 novembre 2026). Les fonctions `pvDe` / `dmgDe` restent le point d'entrée unique si l'on y revient.
+- Les coûts ne suivent pas les retouches du Bestiaire, et ne comptent ni les effets (poison, glu, énergie volée) ni le terrain. **Budget posé à la main** : à régler en jouant.
+- **Gisements rares mais gros** : quatre en tout sur une carte de taille 2, répartis entre métal et Matière selon le niveau ; les autres tailles en proportion de leur surface (9 en taille 3). Chaque gisement vaut **30, 40 ou 50**.
+- **Cartes d'essai** : pas de budget, l'intensité donne directement le nombre.
 
 ### Matière
 

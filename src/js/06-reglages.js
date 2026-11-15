@@ -39,6 +39,15 @@ let LIFE={};
 function lifeCalc(niv,mult){const src=niv||INTENS,m=mult||1,surf=W*H/(96*64);   // niv, mult : niveaux d'un biome et multiplicateur de profondeur (descente) ; sans eux, les réglages du joueur (carte d'essai)
   for(const k in INTENS){const [,c,mn]=NIVEAUX[src[k]||0];LIFE[k]=c?Math.max(mn,k==='cafar'?2:1,Math.round(LIFE_REF[k]*c*surf*m)):0;}}   // les cafars vont au moins par deux
 lifeCalc();
+/* Budget de menace (15 novembre 2026) : en descente, chaque niveau a un total de menace fixé, quel que soit le monde tiré.
+   MENACE_ESP : ce que coûte en moyenne un individu, en points de vie, à la foreuse sans équipement (duels de mesures.md ; l'insectoïde
+   est une estimation, les cafars sont comptés en bande). Les intensités d'un monde ne règlent alors plus que les PROPORTIONS entre
+   espèces : les effectifs sont mis à l'échelle pour que la somme effectif × coût atteigne le budget (parMille, pour 1000 cases). */
+const MENACE_ESP={insectoide:4,crabos:15,cafar:5,crachin:15,viperin:20,gluar:12,siphon:3,tapi:26,taupar:23,mastok:52};
+function lifeMenace(vie,parMille){const cible=parMille*W*H/1000,p={};let base=0;
+  for(const k in INTENS){p[k]=NIVEAUX[(vie&&vie[k])||0][1]*LIFE_REF[k];base+=p[k]*(MENACE_ESP[k]||10);}
+  const s=base?cible/base:0;for(const k in INTENS)LIFE[k]=p[k]?Math.max(k==='cafar'?2:1,Math.round(p[k]*s)):0;}
+const menaceTotale=()=>Object.keys(LIFE).reduce((t,k)=>t+LIFE[k]*(MENACE_ESP[k]||10),0);
 function intensAff(){LIFE_LBL.forEach(([k])=>{$('lr-'+k).value=INTENS[k];$('ll-'+k).textContent=NIVEAUX[INTENS[k]][0];});
   const v=Object.values(INTENS),m=v.every(x=>x===v[0]);$('lr-tout').value=m?v[0]:2;$('ll-tout').textContent=m?NIVEAUX[v[0]][0]:'Mixte';}
 function setIntens(k,v){v=Math.max(0,Math.min(4,Math.round(+v||0)));if(k==='tout')for(const q in INTENS)INTENS[q]=v;else INTENS[k]=v;
@@ -46,7 +55,7 @@ function setIntens(k,v){v=Math.max(0,Math.min(4,Math.round(+v||0)));if(k==='tout
 function buildLife(){
   const row=(k,l,cls)=>`<div class="g niv${cls||''}"><label for="lr-${k}">${l}</label><input type="range" id="lr-${k}" min="0" max="4" step="1" value="2" aria-label="Intensité : ${l}" aria-describedby="ll-${k}"><span id="ll-${k}"></span></div>`;
   $('life').innerHTML=row('tout','Toutes',' tout')+LIFE_LBL.map(([k,l])=>row(k,l)).join('')
-    +'<div class="sum">Intensité par espèce : Aucun, Rare, Normal, Nombreux, Infesté. Le nombre de créatures suit la taille de la carte. S’applique aux cartes d’essai ; en descente, chaque biome a sa faune.</div>';
+    +'<div class="sum">Intensité par espèce : Aucun, Rare, Normal, Nombreux, Infesté. Le nombre de créatures suit la taille de la carte. Sur une carte d’essai, l’intensité donne directement le nombre. En descente, elle ne règle que les proportions entre espèces : le total suit le budget de menace du niveau.</div>';
   ['tout',...LIFE_LBL.map(l=>l[0])].forEach(k=>$('lr-'+k).addEventListener('input',e=>setIntens(k,e.target.value)));
   intensAff();
 }

@@ -155,6 +155,22 @@ de l'utilisateur : les PV et les dégâts ne bougent plus, c'est le nombre d'enn
 référence, la foreuse équipée (Scie, Châssis renforcé, Gyroscope, Viseur, Stabilisateur) gagnait encore 79 % des combats face à des ennemis
 deux fois plus forts, quand la foreuse nue n'en gagnait aucun. **L'équipement pèse bien plus que la profondeur** tant qu'il est donné au départ.
 
+### Menace par monde et par niveau (15 novembre 2026)
+
+Menace = somme effectif × coût d'un duel (colonne « vie restante » plus haut, retranchée de 100). Valeurs pour 1000 cases, taille 3.
+
+| Monde | Avant (multiplicateur par niveau), niveaux 1 à 5 | Après (budget) |
+|---|---|---|
+| Plateau | 56 / 81 / 114 / 152 / 189 | 60 / 121 / 181 / 252 / 322 |
+| Marécage | 162 / 236 / 327 / 440 / 540 | 59 / 117 / 185 / 254 / 320 |
+| Hautes herbes | 85 / 117 / 163 / 218 / 274 | 59 / 122 / 181 / 250 / 323 |
+| Galeries | 68 / 100 / 140 / 188 / 233 | 62 / 117 / 182 / 253 / 319 |
+| Pierrier | 106 / 147 / 193 / 253 / 312 | 70 / 129 / 184 / 248 / 316 |
+| Failles | 80 / 106 / 159 / 194 / 257 | 68 / 110 / 178 / 249 / 326 |
+
+Les écarts qui restent (60 à 70 au niveau 1) viennent des arrondis et du minimum d'un individu par espèce. Deux archétypes extrêmes,
+« que des mastoks » et « tout infesté », tombent eux aussi sur le budget (60 à 72 au niveau 1, 316 au niveau 5).
+
 ## Piège de méthode
 
 Une mesure à longue distance exige de **dégager toute la carte**. Un relief laissé au hasard coupe la
