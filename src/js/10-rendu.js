@@ -111,15 +111,21 @@ let SOL_OV=null,SOL_KEY='';
 const solH=(a,b,k)=>{let n=((a*73856093)^(b*19349663)^(k*83492791))>>>0;n^=n<<13;n>>>=0;n^=n>>17;n^=n<<5;n>>>=0;return n/4294967296;};
 const solN=(a,b,sc)=>{const X=a/sc,Y=b/sc,x0=Math.floor(X),y0=Math.floor(Y),tx=X-x0,ty=Y-y0,sx=tx*tx*(3-2*tx),sy=ty*ty*(3-2*ty),v=(i,j)=>solH(i,j,7);
   return (v(x0,y0)*(1-sx)+v(x0+1,y0)*sx)*(1-sy)+(v(x0,y0+1)*(1-sx)+v(x0+1,y0+1)*sx)*sy;};
-function ensureSolOv(){if(!G)return;const key=(G.seed||'')+'|'+PAL['3']+'|'+G.t.length;if(SOL_OV&&SOL_KEY===key&&SOL_OV._g===G)return;
+/* Les six nombres du réglage. teinte, clarte, satu : amplitude totale des nuances d'une plage à l'autre (en degrés et en %).
+   grainMax : nombre maximal de pixels de grain sur une case, dans les coins les plus rugueux.
+   fond, grain : opacités sur 255 du voile et des pixels de grain (20 = les 8 % d'origine).
+   echPlage, echGrain : taille des plages et des zones de rugosité, en cases (un écran en fait une trentaine de large).
+   Valeurs renforcées le 16 novembre 2026 à la demande de l'utilisateur : grain plus marqué, plages plus contrastées et plus nombreuses. */
+const SOL_REG={teinte:18,clarte:9,satu:58,grainMax:20,fond:20,grain:72,echPlage:10,echGrain:5};
+function ensureSolOv(){if(!G)return;const R=SOL_REG,key=(G.seed||'')+'|'+PAL['3']+'|'+G.t.length+'|'+Object.values(R).join(',');
+  if(SOL_OV&&SOL_KEY===key&&SOL_OV._g===G)return;
   const PW=W*16,PH=H*16,c=document.createElement('canvas');c.width=PW;c.height=PH;const x=c.getContext('2d'),img=x.createImageData(PW,PH),d=img.data;
-  const A_FOND=20,A_GRAIN=40;   // le voile à 8 % et le grain par-dessus, en alpha sur 255
   for(let cy=0;cy<H;cy++)for(let cx=0;cx<W;cx++){
-    const [r,g,b]=hexRgb3(teinter(PAL['3'],(solN(cx,cy,14)-.5)*8,(solN(cx+99,cy,12)-.5)*4,(solN(cx,cy+99,16)-.5)*26));
-    for(let j=0;j<16;j++){let pi=((cy*16+j)*PW+cx*16)*4;for(let i=0;i<16;i++,pi+=4){d[pi]=r;d[pi+1]=g;d[pi+2]=b;d[pi+3]=A_FOND;}}
-    const n=Math.round(solN(cx,cy,5)*11);
+    const [r,g,b]=hexRgb3(teinter(PAL['3'],(solN(cx,cy,R.echPlage)-.5)*R.teinte,(solN(cx+99,cy,R.echPlage*.85)-.5)*R.clarte,(solN(cx,cy+99,R.echPlage*1.15)-.5)*R.satu));
+    for(let j=0;j<16;j++){let pi=((cy*16+j)*PW+cx*16)*4;for(let i=0;i<16;i++,pi+=4){d[pi]=r;d[pi+1]=g;d[pi+2]=b;d[pi+3]=R.fond;}}
+    const n=Math.round(solN(cx,cy,R.echGrain)*R.grainMax);
     for(let k=0;k<n;k++){const gx=Math.floor(solH(cx,cy,5+k*3)*16),gy=Math.floor(solH(cx,cy,5+k*3+1)*16);
-      d[((cy*16+gy)*PW+cx*16+gx)*4+3]=A_GRAIN;}}
+      d[((cy*16+gy)*PW+cx*16+gx)*4+3]=R.grain;}}
   x.putImageData(img,0,0);c._g=G;SOL_OV=c;SOL_KEY=key;}
 // le voile de couleur monde d'une case : l'image précalculée, ou la couleur unie tant qu'elle n'est pas prête
 function voile(x,y,px,py,a,cx2){const c=cx2||ctx;

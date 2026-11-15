@@ -52,10 +52,10 @@ Roguelike au tour par tour dans une esthétique inspirée de Cogmind et de Brogu
 
 Le sol n'est plus uni : sur le voile de couleur monde à 8 % posé sur chaque case, deux choses s'ajoutent, choisies sur la planche `planches/sol-grain.js` (variante 5, « plaques rugueuses », sur six proposées).
 
-- **Nuances par plages** : chaque case prend une nuance de la couleur monde très légèrement décalée (teinte ±4°, clarté ±2 %, saturation ±13 %), par un bruit lisse de grande échelle. Les plages sont larges et douces : on ne voit pas les cases, seulement un terrain qui n'est pas d'un seul ton.
-- **Grain à densité variable** : de 0 à 11 pixels par case, de la même couleur, à peine plus marqués que le fond. La densité suit un second bruit, d'échelle plus courte : certains coins sont presque lisses, d'autres nettement granuleux.
-- Calculé **une fois par planète et par palette**, dans une image de 16 pixels par case (comme les gouffres) : 110 à 140 ms à la génération, rien de plus à l'affichage. La cinématique d'intro utilise la même image, donc le raccord avec le jeu reste exact.
-- Le réglage tient en quatre nombres, en tête de `ensureSolOv` (`10-rendu.js`) : amplitudes des nuances, nombre maximal de pixels, et les deux opacités `A_FOND` et `A_GRAIN`.
+- **Nuances par plages** : chaque case prend une nuance de la couleur monde décalée (teinte ±9°, clarté ±4,5 %, saturation ±29 %), par un bruit lisse. Les plages font une dizaine de cases, donc trois ou quatre par écran : on ne voit pas les cases, seulement un terrain qui n'est pas d'un seul ton.
+- **Grain à densité variable** : de 0 à 20 pixels par case, de la même couleur, nettement plus marqués que le fond (opacité 72 contre 20 sur 255). La densité suit un second bruit, d'échelle plus courte (5 cases) : certains coins sont presque lisses, d'autres franchement granuleux.
+- Calculé **une fois par planète et par palette**, dans une image de 16 pixels par case (comme les gouffres) : 70 à 100 ms à la génération, rien de plus à l'affichage. La cinématique d'intro utilise la même image, donc le raccord avec le jeu reste exact.
+- Le réglage tient dans l'objet `SOL_REG` (`10-rendu.js`), huit nombres : `teinte`, `clarte`, `satu` (amplitude des nuances), `grainMax` (pixels par case au plus), `fond` et `grain` (opacités sur 255), `echPlage` et `echGrain` (taille des plages et des zones de rugosité, en cases). Valeurs renforcées le 16 novembre 2026 à la demande de l'utilisateur ; la planche `planches/sol-grain.js` sert à comparer d'autres réglages.
 
 ### Taille de la carte (13 novembre 2026)
 
