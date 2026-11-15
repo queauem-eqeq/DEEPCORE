@@ -152,7 +152,7 @@ Génération et Life ne sont plus deux sous-menus de la colonne : ils sont réun
 
 ## 3 ter. Exploration automatique (13 novembre 2026)
 
-Touche **O** ou bouton **EXPLORER** (sous MARCHE / INVENTAIRE, à côté d'un bouton REPOS) : la foreuse explore seule.
+Touche **O** ou bouton **EXPLORER** (sous MARCHE / ÉQUIPEMENT, à côté d'un bouton REPOS) : la foreuse explore seule.
 
 - **Où elle va** : vers la case connue la plus proche d'où l'on découvre du terrain. Au passage elle ramasse ce qui est en vue : objets, Matière, joyau, et les éclats de réparation **seulement si la vie n'est pas pleine** (sinon elle les contourne pour ne pas les gâcher).
 - **Ce qu'elle ne fait jamais** : forer la roche, attaquer. Elle n'entre dans l'eau profonde que s'il ne reste rien d'autre à voir.
@@ -230,18 +230,21 @@ Le jeu ne compte plus en tours mais en **unités de temps**, comme Brogue et Cog
 - Animation : bond de l'attaquant, flash, chiffres de dégâts flottants (« -10 », « 0 » pour un coup raté, de part et d'autre), « +10 / +15 / +20 » en couleur bio au ramassage d'éclats de métal, tremblement d'écran quand le robot est touché ou qu'un ennemi meurt.
 - Un animal tué laisse une trace de sang.
 
-## 6 bis. Inventaire et équipement (13 novembre 2026)
+## 6 bis. Équipement et inventaire (13 novembre 2026, séparés le 15)
 
 Version d'essai : tous les objets sont donnés au départ, non équipés sauf la foreuse, pour pouvoir tout essayer (choix confirmé le 13 novembre 2026 pour la phase d'équilibrage).
 
 - **Emplacements** : 1 arme, 1 armure, 3 accessoires. Le sac n'a pas de limite pour l'instant.
-- **Ouverture** : bouton « INVENTAIRE » à côté de « MARCHE / COURSE », ou touche **I**. L'inventaire est une **fenêtre plein écran, comme le Tile editor** (le panneau dans la colonne, essayé d'abord, a été abandonné le jour même). Le jeu ne reçoit plus les touches tant qu'elle est ouverte ; le temps ne passe pas.
-- **Liste à gauche** : une ligne par objet, précédée d'un signe (`/` arme, `[` armure, `=` accessoire, `!` consommable), suivie de son type. Un objet **équipé reste dans la liste**, en couleur monde, avec la mention « équipé ». Les consommables identiques s'empilent (« ×2 »).
-- **Fiche à droite** de l'objet choisi : dessin **ASCII coloré** aux couleurs de la palette, description, effets (en accent s'ils sont favorables, en rouge sinon), boutons **Équiper / Retirer / Utiliser** et **Jeter**. Le dernier message est répété sous la liste, le journal étant caché.
-- **Choisir** : à la souris (clic ; double-clic = Entrée) ou au clavier : ↑ ↓ (ou Z S, 8 2) pour parcourir, **Entrée** pour équiper, retirer ou utiliser, **J** (ou Suppr) pour jeter, **G** pour ramasser ce qui est sous la foreuse, **I** ou **Échap** pour fermer.
+- **Deux endroits depuis le 15 novembre 2026**, un seul sac derrière :
+  - la fenêtre **Équipement** ne contient plus que les **armes, armures et accessoires** ;
+  - les **consommables** sont passés dans un sous-menu repliable **Inventaire**, dans la colonne, **sous Statistiques**. Une ligne par consommable : signe `!`, nom, nombre (« ×2 ») et bouton **UTILISER**. Le survol donne la description. Ouvert ou fermé, l'état est mémorisé (`np-fd-sac`). Un consommable ne peut plus être jeté : seulement utilisé.
+- **Ouverture de l'équipement** : bouton « ÉQUIPEMENT » à côté de « MARCHE / COURSE », ou touche **I**. C'est une **fenêtre plein écran, comme le Tile editor** (le panneau dans la colonne, essayé d'abord, a été abandonné le 13 novembre). Le jeu ne reçoit plus les touches tant qu'elle est ouverte ; le temps ne passe pas.
+- **Liste à gauche** : une ligne par pièce d'équipement, précédée d'un signe (`/` arme, `[` armure, `=` accessoire), suivie de son type. Un objet **équipé reste dans la liste**, en couleur monde, avec la mention « équipé ».
+- **Fiche à droite** de l'objet choisi : dessin **ASCII coloré** aux couleurs de la palette, description, effets (en accent s'ils sont favorables, en rouge sinon), boutons **Équiper / Retirer** et **Jeter**. Le dernier message est répété sous la liste, le journal étant caché.
+- **Choisir** : à la souris (clic ; double-clic = Entrée) ou au clavier : ↑ ↓ (ou Z S, 8 2) pour parcourir, **Entrée** pour équiper ou retirer, **J** (ou Suppr) pour jeter, **G** pour ramasser ce qui est sous la foreuse, **I** ou **Échap** pour fermer.
 - **Équiper** est gratuit et instantané. Une arme ou une armure remplace celle qui est portée ; un 4ᵉ accessoire est refusé tant qu'un emplacement n'est pas libéré.
 - **Effets** : l'objet ajoute ses modificateurs aux stats tant qu'il est porté ; les stats modifiées s'affichent en couleur dans « Statistiques ». Les bonus des joyaux s'additionnent.
-- **Consommables** : usage unique, gratuit et instantané pour l'instant. Refusé si la jauge est déjà pleine (l'objet n'est pas perdu) ; le surplus au-delà du maximum est perdu.
+- **Consommables** : usage unique, gratuit et instantané pour l'instant, depuis le sous-menu Inventaire. Refusé si la jauge est déjà pleine (l'objet n'est pas perdu) ; le surplus au-delà du maximum est perdu. Les consommables identiques s'empilent (« ×2 »).
 - **Jeter** pose l'objet (un seul exemplaire pour une pile) au sol sous la foreuse (tuile « Objet au sol », retouchable au Tile editor). Repasser sur la case le ramasse ; sans bouger, touche G ou bouton « Ramasser ». La fiche de survol nomme les objets posés.
 - **Durée du coup** : une arme peut allonger ou raccourcir le coup de foreuse (§ 5 bis) ; plancher à 25.
 - « Pas de blindage » (§ 11) tient toujours : aucune armure ne réduit les dégâts, elles jouent sur la vie max, l'esquive ou la discrétion.
@@ -360,7 +363,7 @@ La statistique **DÉT (détection)** par espèce a été supprimée le 13 novemb
 - **Statistiques** (sous-menu repliable, sous Statut) en **grille 3 × 3** : VIT, EYE, DEG / PRE, ESQ, CRIT / POW, NUL 0, NUL 0 (deux emplacements libres) (ESQ affiche la valeur modifiée, colorée, sans le modificateur).
 - **En vue** (sans titre, sous la mini-carte) : fiche d'inspection de la case survolée en tête (voir ci-dessous), puis animaux visibles (icône, barre de vie ASCII 10 caractères, colonnes TOUCHER / SUBIR colorées). Joyaux, roches à joyau, éclats de métal et sites ne sont plus listés ici (retirés le 13 novembre 2026) : on les lit à la fiche de survol.
 - **Mini-carte** pleine largeur ; ennemis en points rouges ; un clic recentre la vue (mode carte) ; bouton maintenu + glisser = défilement en temps réel. Saisi à l'intérieur, le cadre suit le pointeur sans sauter ; saisi à l'extérieur, il se centre d'abord sous le pointeur. Fonctionne aussi au doigt.
-- Sous-menus repliables : **Statistiques**, **Génération** (+ bouton REGEN), **Life** (intensité par espèce, § 3), **Palette**, **Lab** (Bestiaire, Discrétion, Tile editor, Intro ; plus de bouton Enregistrer pour l'instant les réglages, aide des touches).
+- Sous-menus repliables : **Statistiques**, **Inventaire** (les consommables, § 6 bis), **Génération** (+ bouton REGEN), **Life** (intensité par espèce, § 3), **Palette**, **Lab** (Bestiaire, Discrétion, Tile editor, Intro ; plus de bouton Enregistrer pour l'instant les réglages, aide des touches).
 
 ### Souris et inspection (inspirées de Brogue)
 - Le curseur système est masqué sur la carte ; le **viseur** est dessiné sur la case survolée. Dès qu'on appuie sur une touche (hors mode inspection), le viseur, la fiche et le trajet disparaissent jusqu'au prochain mouvement de souris.
@@ -383,7 +386,7 @@ La statistique **DÉT (détection)** par espèce a été supprimée le 13 novemb
 - Export / import texte : essayé puis retiré le 6 novembre 2026 (« on verra plus tard »).
 
 ### Touches
-ZQSD / flèches / pavé numérique : déplacer · A E W C : diagonales · Souris : survol = inspection, clic = y aller · X : inspection au clavier · R : courir / marcher · I : inventaire · O : exploration automatique · F : forer · Espace / 5 : attendre · P : repos jusqu’à l’énergie pleine · V : portée de discrétion · B : brouillard de guerre · ! : son · M : mode carte (déplacements = défilement, Maj = plus vite, Échap ou M pour revenir).
+ZQSD / flèches / pavé numérique : déplacer · A E W C : diagonales · Souris : survol = inspection, clic = y aller · X : inspection au clavier · R : courir / marcher · I : équipement · O : exploration automatique · F : forer · Espace / 5 : attendre · P : repos jusqu’à l’énergie pleine · V : portée de discrétion · B : brouillard de guerre · ! : son · M : mode carte (déplacements = défilement, Maj = plus vite, Échap ou M pour revenir).
 
 ## 10. Sauvegarde des réglages
 

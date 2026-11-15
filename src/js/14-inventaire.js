@@ -233,6 +233,11 @@ function invApply(o,sg){const m=ITEMS[o.k].mod||{},st=G.st,v0=st.vieMax,e0=st.en
   if(st.vieMax!==v0&&st.vie>0)st.vie=Math.max(1,Math.round(st.vie*st.vieMax/v0));if(st.energieMax!==e0)st.energie=Math.round(st.energie*st.energieMax/e0);
   st.vie=Math.min(st.vieMax,st.vie);st.energie=Math.min(st.energieMax,st.energie);}
 const invCount=s=>G.inv.filter(o=>o.eq&&ITEMS[o.k].slot===s).length;
+/* Deux endroits depuis le 15 novembre 2026 : la fenêtre Équipement (armes, armures, accessoires) et le sous-menu « Inventaire »
+   de la colonne (consommables). Un seul sac derrière, G.inv ; INV_SEL est l'indice RÉEL dans G.inv de l'objet choisi dans la fenêtre. */
+const invEquipables=()=>G.inv.map((o,i)=>i).filter(i=>!ITEMS[G.inv[i].k].conso);
+const invConsos=()=>G.inv.map((o,i)=>i).filter(i=>ITEMS[G.inv[i].k].conso);
+function invFix(){const l=invEquipables();if(!l.length){INV_SEL=-1;return;}if(!l.includes(INV_SEL))INV_SEL=l[0];}
 
 let INV_SEL=0,INV_H=null,INV_MSG=null;   // INV_MSG : dernier message, répété dans la fenêtre (le journal est caché derrière)
 function invSay(m,c){say(m,c);INV_MSG={m,c:c||''};}
@@ -255,7 +260,7 @@ function robotTiles(){if(!TL.robot_u||!G||!G.inv)return;const porte=s=>{const o=
   TL.robot_u=tileCanvas(f);TL.robot_r=tileCanvas((x,y)=>f(y,15-x));TL.robot_d=tileCanvas((x,y)=>f(15-x,15-y));TL.robot_l=tileCanvas((x,y)=>f(15-y,x));
   try{ICON.robot_r=TL.robot_r.toDataURL();}catch(e){}}
 // retire un exemplaire de la ligne i (toute la ligne s'il n'en reste plus)
-function invTake(i){const o=G.inv[i];if((o.n||1)>1)o.n--;else{G.inv.splice(i,1);INV_SEL=Math.max(0,Math.min(INV_SEL,G.inv.length-1));}}
+function invTake(i){const o=G.inv[i];if((o.n||1)>1)o.n--;else{G.inv.splice(i,1);if(INV_SEL>i)INV_SEL--;invFix();}}
 // Entrée ou bouton principal : utiliser un consommable, équiper ou retirer un équipement
 function invEquip(i){const o=G.inv[i];if(!o||G.over)return;const d=ITEMS[o.k],e=accord(d);
   if(d.conso){
@@ -291,37 +296,46 @@ function statsHTML(o){const st=G.st,m=o?invDelta(o):{},val=k=>k==='dis'?STEALTH_
   return `<div class="isth">Statistiques${chg?` · <span>→ ${o.eq?'si vous le retirez':'si vous l’équipez'}</span>`:''}</div><div class="istats">${INV_STATS.map(([k,l])=>{const v=val(k),dv=m[k]||0,u=k==='crit'?' %':'';
     return `<span><i>${l}</i> ${v}${u}${dv?` <b style="color:${dv*MODS[k][1]>0?'var(--c1)':'var(--life)'}">→ ${v+dv}${u}</b>`:''}</span>`;}).join('')}</div>`;}
 /* Fenêtre plein écran (comme le Tile editor) : la liste à gauche, la fiche de l'objet choisi à droite. */
-function invHTML(){const inv=G.inv||[];INV_SEL=Math.max(0,Math.min(INV_SEL,inv.length-1));
+function invHTML(){const inv=G.inv||[],liste=invEquipables();invFix();
   const cnt=s=>`${SLOTS[s].nom} <b>${invCount(s)}/${SLOTS[s].n}</b>`;
   let h=`<div class="iwrap"><div class="ileft"><div class="islots"><span>${cnt('arme')}</span><span>${cnt('armure')}</span><span>${cnt('acc')}</span></div>`;
-  h+=inv.length?`<div class="ilist" role="listbox" aria-label="Objets portés">${inv.map((o,i)=>{const d=ITEMS[o.k];
-    return `<button class="it${o.eq?' eq':''}${i===INV_SEL?' sel':''}" data-i="${i}" role="option" aria-selected="${i===INV_SEL}"><i>${d.conso?'!':SLOTS[d.slot].g}</i><span>${d.n}${(o.n||1)>1?' ×'+o.n:''}</span><em>${typeNom(d)}</em><em class="st">${o.eq?'équipé':''}</em></button>`;}).join('')}</div>`
-    :'<p class="inone">Le sac est vide.</p>';
+  h+=liste.length?`<div class="ilist" role="listbox" aria-label="Équipement">${liste.map(i=>{const o=inv[i],d=ITEMS[o.k];
+    return `<button class="it${o.eq?' eq':''}${i===INV_SEL?' sel':''}" data-i="${i}" role="option" aria-selected="${i===INV_SEL}"><i>${SLOTS[d.slot].g}</i><span>${d.n}</span><em>${typeNom(d)}</em><em class="st">${o.eq?'équipé':''}</em></button>`;}).join('')}</div>`
+    :'<p class="inone">Aucun équipement.</p>';
   const sol=G.items&&G.items[idx(G.px,G.py)];
   if(sol&&sol.length)h+=`<div class="isol"><span>Au sol ici : ${sol.map(k=>ITEMS[k].n).join(', ')}</span><button class="pace" data-a="pick">Ramasser</button></div>`;
   h+='</div>';
-  const o=inv[INV_SEL];h+='<div class="iright">';
+  const o=INV_SEL>=0?inv[INV_SEL]:null;h+='<div class="iright">';
   if(o){const d=ITEMS[o.k];
     h+=`<div class="idet"><pre class="iart" aria-hidden="true">${artHTML(d)}</pre>
       <div class="inm"><b>${d.n}${(o.n||1)>1?' ×'+o.n:''}</b><span>${typeNom(d)}${o.eq?' · équipé':''}</span></div>
       <p>${d.d}</p><p class="imods">${modHTML(d)}</p>
-      <div class="ibtns"><button class="pace on" data-a="eq">${d.conso?'Utiliser':o.eq?'Retirer':'Équiper'}</button><button class="pace" data-a="drop">Jeter</button></div></div>`;}
-  else h+='<div class="idet"><p>Aucun objet à afficher.</p></div>';
+      <div class="ibtns"><button class="pace on" data-a="eq">${o.eq?'Retirer':'Équiper'}</button><button class="pace" data-a="drop">Jeter</button></div></div>`;}
+  else h+='<div class="idet"><p>Aucun équipement à afficher. Les consommables sont dans le sous-menu Inventaire de la colonne.</p></div>';
   h+=statsHTML(o)+'</div>';
   h+=`</div><p class="imsg ${INV_MSG?INV_MSG.c:''}" role="status">${INV_MSG?INV_MSG.m:'&nbsp;'}</p>`;
   return h;}
 // redessine seulement si quelque chose a changé : le rendu tourne en continu, et reconstruire les boutons ferait rater des clics
 function invDraw(){const el=$('inv');if(!el||!G||!G.inv)return;const h=invHTML();if(h===INV_H)return;el.innerHTML=h;INV_H=h;
   const s=el.querySelector('.it.sel');if(s)s.scrollIntoView({block:'nearest'});}
+/* Sous-menu « Inventaire » de la colonne (sous Statistiques) : les consommables, une ligne chacun, avec leur nombre et « Utiliser ».
+   Redessiné à chaque render par side() ; comme la fenêtre, seulement si quelque chose a changé, sinon un clic se perdrait. */
+let SAC_H='';
+function sacHTML(){const l=invConsos();
+  if(!l.length)return '<p class="inone">Aucun consommable.</p>';
+  return l.map(i=>{const o=G.inv[i],d=ITEMS[o.k];
+    return `<div class="cr"><i>!</i><span title="${d.d.replace(/"/g,'&quot;')}">${d.n}</span><em>×${o.n||1}</em><button class="pace" data-u="${i}" title="${d.d.replace(/"/g,'&quot;')}">UTILISER</button></div>`;}).join('');}
+function sacDraw(){const el=$('sac');if(!el||!G||!G.inv)return;const h=sacHTML();if(h===SAC_H)return;el.innerHTML=h;SAC_H=h;}
+$('sac').addEventListener('click',ev=>{const b=ev.target.closest('[data-u]');if(!b||G.over)return;b.blur();invEquip(+b.dataset.u);render();});
 function invOpen(on){const m=$('inventaire');
   if(on){if(TRAV||REST){stopTravel('Trajet interrompu.');stopRest('Repos interrompu.');}
     INV_MSG=null;invDraw();m.hidden=false;m.querySelector('.mcard').focus();}
   else{m.hidden=true;render();}}
 const invToggle=()=>invOpen($('inventaire').hidden);
 // touches de la fenêtre : appelée par le gestionnaire de clavier (11-interface) tant qu'elle est ouverte
-function invKey(ev){if(ev.ctrlKey||ev.metaKey||ev.altKey)return;const k=ev.key.toLowerCase(),n=G.inv.length,d=KEYS[k];
+function invKey(ev){if(ev.ctrlKey||ev.metaKey||ev.altKey)return;const k=ev.key.toLowerCase(),l=invEquipables(),d=KEYS[k];
   if(k==='escape'||k==='i'){ev.preventDefault();invOpen(false);return;}
-  if(d&&d[0]===0&&n){ev.preventDefault();INV_SEL=(INV_SEL+d[1]+n)%n;INV_MSG=null;invDraw();return;}
+  if(d&&d[0]===0&&l.length){ev.preventDefault();const p=l.indexOf(INV_SEL);INV_SEL=l[((p<0?0:p)+d[1]+l.length)%l.length];INV_MSG=null;invDraw();return;}
   if((k==='enter'||k===' ')&&ev.target.tagName==='BUTTON')return;        // un bouton a le focus : le laisser faire son clic
   if(k==='enter'||k===' '){ev.preventDefault();invEquip(INV_SEL);}
   else if(k==='j'||k==='delete'||k==='backspace'){ev.preventDefault();invDrop(INV_SEL);}

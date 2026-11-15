@@ -259,6 +259,14 @@ kbd{font-family:var(--mono);color:var(--fg);border:1px solid var(--line);padding
 .inv .imsg.warn{color:var(--c3)}.inv .imsg.good{color:var(--c1)}
 #inventaire .mcard.wide{width:min(900px,100%)}
 @media (max-width:720px){.iwrap{grid-template-columns:1fr}.idet{min-height:0}.iart{font-size:20px}}
+/* Sous-menu Inventaire de la colonne : les consommables, une ligne chacun */
+.sac{display:grid;gap:6px}
+.sac .cr{display:grid;grid-template-columns:10px minmax(0,1fr) auto auto;gap:6px;align-items:center}
+.sac .cr>i{font-style:normal;color:var(--c1)}
+.sac .cr>span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sac .cr>em{font-style:normal;color:var(--dim);font-variant-numeric:tabular-nums}
+.sac .cr button{padding:1px 6px;font-size:10px;letter-spacing:.04em}
+.sac .inone{margin:0;color:var(--dim);font-size:11px}
 .effs{font-size:11px;color:var(--c3);letter-spacing:.06em}
 .effs:empty{display:none}
 .gen .g.niv{grid-template-columns:minmax(0,1fr) 64px 62px}
