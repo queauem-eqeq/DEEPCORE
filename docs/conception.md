@@ -35,7 +35,12 @@ Roguelike au tour par tour dans une esthétique inspirée de Cogmind et de Brogu
 
 - Carte **96 × 64 cases** (depuis le 6 novembre 2026 ; avant : 72 × 48), 5 sites de forage, 1 joyau. Les tailles de lacs, massifs et distances sont calibrées pour cette taille (facteur d'échelle F = 1).
 - **Bord de carte irrégulier** : une bande de montagne d'épaisseur variable (de 1 à 10 cases, environ 3 en moyenne) suit les quatre côtés, tirée d'un bruit à deux échelles, puis 2 passes d'automate cellulaire cassent les angles droits (caps et baies). Elle prend environ 17 % de la surface, jamais plus de 19 % (tirage refait sinon). La rangée extérieure reste indestructible ; le reste de la bande se creuse comme une montagne normale.
-- Lacs posés par automate cellulaire (règle B5678/S45678) : cœur d'eau profonde + couronne de 2 cases d'eau peu profonde.
+- **Lacs (refaits le 15 novembre 2026)** : chaque lac est une forme tirée à l'automate cellulaire (règle B5678/S45678), puis **sa rive lui est propre**. Avant, tout lac était pareil : un cœur d'eau profonde entouré d'une couronne de deux cases d'eau peu profonde, et l'eau profonde ne touchait jamais la terre. Maintenant :
+  - **1 lac sur 5 est un étang** : pas une goutte d'eau profonde ;
+  - **1 lac sur 5 est un à-pic** : que de l'eau profonde, qui descend d'un coup depuis la rive ;
+  - les autres ont une rive de largeur moyenne tirée entre 0,4 et 3,6 cases, **ondulée de ×0,3 à ×1,9** par un bruit : une plage d'un côté, un bord franc de l'autre.
+  La profondeur se lit à la distance au rivage, diagonales comprises. Deux lacs qui se touchent n'en font qu'un : leur contact ne compte pas comme un rivage. Mesuré sur 12 cartes : 94 étendues d'eau, 23 % sans eau profonde, 7 % entièrement profondes, 70 % mêlées.
+  **L'eau profonde peut donc toucher la terre** : on peut tomber dedans d'un pas, sans bande d'eau peu profonde pour prévenir. Le puits d'arrivée des niveaux 2 à 5 débouche toujours au sec.
 - Relief (montagnes, gouffres) : méthode **Automate cellulaire**, **Bruit** ou **Mixte** ; réglages Remplissage (35–70 %) et Itérations (1–10).
 - Connectivité garantie : les zones isolées sont reliées par le plus court chemin (pont sur gouffre, col dans la montagne, rocher dégagé) ; petites poches comblées.
 - L'eau ne touche jamais un gouffre (marge de 2 cases de terre ferme).
@@ -169,8 +174,8 @@ Jugée trop haute et trop étroite (640 × 835), elle est passée à 940 × 390 
 | Sol rocheux | oui | libre | des points de plus en plus denses à 9, 6 et 3 cases d'un site |
 | Rocher | brisé en 2 coups | libre | laisse des gravats |
 | Montagne | brisée en 2 coups (sauf bord de carte) | bloquée | peut contenir le joyau ; 10 % contiennent des éclats de métal |
-| Eau peu profonde | oui | libre | −20 d'esquive ; évitée par les insectoïdes et les cafars, praticable pour les crabos ; **terrain lent : pas ×1,5** (sauf crabos) |
-| Eau profonde | oui | libre | −20 d'esquive ; **chaque pas a 50 % de chance de partir dans une autre direction tirée au hasard** (si cette case est bloquée, la foreuse est plaquée contre l'obstacle et ne bouge pas ; le tour passe) ; **attendre** dans l'eau profonde déplace la foreuse d'une case au hasard (le courant) ; seuls les crabos y entrent (sans dérive) ; **terrain lent : pas ×2** (sauf crabos) |
+| Eau peu profonde | oui | libre | −20 d'esquive ; **toutes les créatures y entrent** (15 novembre 2026) ; **terrain lent : pas ×1,5**, sauf pour les crabos qui nagent |
+| Eau profonde | oui | libre | −20 d'esquive ; **toutes les créatures y entrent** et y nagent droit (seule la foreuse dérive) ; **chaque pas a 50 % de chance de partir dans une autre direction tirée au hasard** (si cette case est bloquée, la foreuse est plaquée contre l'obstacle et ne bouge pas ; le tour passe) ; **attendre** dans l'eau profonde déplace la foreuse d'une case au hasard (le courant) ; **terrain lent : pas ×2**, sauf pour les crabos |
 | Herbes hautes | oui | bloquée | **deviennent des herbes basses** au passage ; +10 d'esquive pour qui s'y trouve ; froufrou au passage (bruitage refait le 13 novembre 2026 : trois coups de brosse décalés, tirés au hasard à chaque pas) |
 | Herbes basses | oui | libre | **portée de discrétion ÷ 2** : c'est le couvert du jeu |
 | Gouffre | non | libre | — |
@@ -312,7 +317,7 @@ La statistique **DÉT (détection)** par espèce a été supprimée le 13 novemb
 (Valeurs par défaut du code. Les valeurs réellement utilisées sont celles enregistrées par le joueur — voir § 10.)
 
 ### Comportements
-- **Eau** : les crabos entrent dans l'eau peu profonde et profonde (et y subissent −20 d'esquive) ; les insectoïdes et les cafars n'entrent dans aucune eau et la contournent (bandes de cafars comprises). Si la foreuse est dans l'eau, ils l'attaquent depuis la rive.
+- **Eau (15 novembre 2026)** : **toutes les créatures entrent dans l'eau**, peu profonde comme profonde, et y subissent −20 d'esquive comme la foreuse. Elles ne dérivent pas dans l'eau profonde : la dérive reste propre à la foreuse. Le **crabos** garde son avantage : seul nageur, il n'est pas ralenti par l'eau (les autres font des pas ×1,5 en eau peu profonde, ×2 en eau profonde). Avant cette date, seuls les crabos entraient dans l'eau et les autres la contournaient : se réfugier dans un lac ne protège plus.
 - **Poursuite (tous les ennemis)** : chaque ennemi qui chasse ou attaque suit le plus court chemin vers la foreuse. Si un autre ennemi bloque le passage, il contourne l'obstacle (détour de 10 cases au plus) vers une case libre autour de la foreuse, au lieu d'attendre : plusieurs ennemis peuvent ainsi l'encercler et attaquer en même temps (jusqu'à 8).
 - **Diagonales comme dans Brogue** (10 novembre 2026) : un pas ou un coup en diagonale est **impossible si l'une des deux cases voisines orthogonales est une paroi** (rocher, montagne, coque du vaisseau) — on ne coupe pas les coins. Vaut pour la foreuse (message « Coin de paroi »), tous les ennemis (déplacements et attaques), le courant de l'eau profonde, les trajets automatiques et la génération (connexion des zones et accès aux sites calculés avec la même règle). L'eau et les gouffres ne bloquent pas les diagonales. Dans le brouillard, le trajet ne tient compte que des coins déjà vus.
 - **Coup par surprise** : frapper un ennemi qui **ne vous a pas repéré** (ni en chasse, ni alerté, ni en train de vous chercher) **touche toujours** et est **toujours critique**. Message « Coup par surprise ! ».

@@ -56,8 +56,16 @@ function nearChasm(t){const n=new Uint8Array(W*H);
   for(let i=0;i<W*H;i++){if(t[i]!==CHASM&&t[i]!==BRIDGE)continue;const x=i%W,y=(i/W)|0;
     for(let dy=-GAP;dy<=GAP;dy++)for(let dx=-GAP;dx<=GAP;dx++){const a=x+dx,b=y+dy;if(a>=0&&b>=0&&a<W&&b<H)n[idx(a,b)]=1;}}
   return n;}
+/* Un lac : une forme tirée à l'automate, puis une rive propre à ce lac (15 novembre 2026).
+   Avant, tout lac était pareil : un cœur d'eau profonde entouré d'une couronne de deux cases d'eau peu profonde, et l'eau
+   profonde ne touchait jamais la terre. Maintenant chaque lac tire son caractère, et la largeur de sa rive ondule autour de lui
+   (bruit) : une plage d'un côté, un bord franc de l'autre.
+     - « étang » (1 sur 5)   : pas une goutte d'eau profonde ;
+     - « à-pic » (1 sur 5)   : que de l'eau profonde, qui descend d'un coup depuis la rive ;
+     - sinon                 : rive de largeur moyenne tirée entre 0,4 et 3,6 cases, ondulée de ×0,3 à ×1,9 autour du lac.
+   La profondeur se lit à la distance au rivage (en cases, diagonales comprises) : profond là où elle dépasse la largeur de rive. */
 function placeLakes(t,target){
-  const near=nearChasm(t),ok=i=>t[i]===GROUND&&!near[i];
+  const near=nearChasm(t),ok=i=>t[i]===GROUND&&!near[i],rive=noise(SZ(8,3));
   let count=0,tries=0;
   while(count<target&&tries<600){tries++;
     const p=count/Math.max(1,target),w=Math.max(6,Math.round((26-p*10)*F)),h=Math.max(4,Math.round((13-p*5)*F)),cells=caBlob(w,h,.55,5);if(cells.length<6)continue;
@@ -65,13 +73,21 @@ function placeLakes(t,target){
     // un lac qui empiète trop sur la marge d'un gouffre est refusé, pour garder des rives naturelles
     let hit=0;for(const [x,y] of cells)if(near[idx(ox+x,oy+y)])hit++;
     if(tries<450&&hit>cells.length*.15)continue;
-    const core=[];
-    for(const [x,y] of cells){const i=idx(ox+x,oy+y);if(ok(i)){t[i]=DEEP;core.push(i);count++;}}
-    for(const c of core){const cx=c%W,cy=(c/W)|0;for(let dy=-2;dy<=2;dy++)for(let dx=-2;dx<=2;dx++){const a=cx+dx,b=cy+dy;if(a<1||b<1||a>=W-1||b>=H-1)continue;const j=idx(a,b);if(ok(j)){t[j]=LIQ;count++;}}}
+    const lac=[],dans=new Set();
+    for(const [x,y] of cells){const i=idx(ox+x,oy+y);if(ok(i)){lac.push(i);dans.add(i);}}
+    if(lac.length<6)continue;
+    for(const i of lac)t[i]=LIQ;
+    count+=lac.length;
+    const r=Math.random(),large=r<.2?1e9:r<.4?0:.4+Math.random()*3.2;   // étang · à-pic · rive ordinaire
+    if(large>=1e9)continue;                                            // étang : tout reste peu profond
+    // distance au rivage : 1 au bord du lac, puis de proche en proche (8 directions)
+    const d=new Map();let bord=[];
+    for(const i of lac){const x=i%W,y=(i/W)|0;   // l'eau d'un lac déjà posé ne fait pas rivage : deux lacs qui se touchent n'en font qu'un
+      if(DIRS.some(([dx,dy])=>{const j=idx(x+dx,y+dy);return !dans.has(j)&&!isWater(t[j]);})){d.set(i,1);bord.push(i);}}
+    for(let k=0;k<bord.length;k++){const c=bord[k],x=c%W,y=(c/W)|0;
+      for(const [dx,dy] of DIRS){const j=idx(x+dx,y+dy);if(dans.has(j)&&!d.has(j)){d.set(j,d.get(c)+1);bord.push(j);}}}
+    for(const i of lac){const x=i%W,y=(i/W)|0;if((d.has(i)?d.get(i):1e9)>large*(.3+rive(x,y)*1.6))t[i]=DEEP;}   // aucun rivage atteint : pleine eau, donc profond
   }
-  // l'eau profonde ne touche jamais la terre : toute eau profonde au bord passe en peu profonde
-  for(let i=0;i<W*H;i++){if(t[i]!==DEEP)continue;const x=i%W,y=(i/W)|0;
-    if(DIRS.some(([dx,dy])=>{const v=t[idx(x+dx,y+dy)];return v!==DEEP&&v!==LIQ;}))t[i]=LIQ;}
 }
 // Sécurité finale : aucune case d'eau au contact d'un gouffre ou d'un pont
 function separateWater(t){const near=nearChasm(t);for(let i=0;i<W*H;i++)if((t[i]===LIQ||t[i]===DEEP)&&near[i])t[i]=GROUND;}
@@ -167,7 +183,7 @@ function genPlanet(){
     const ship=SANS_VAISSEAU?null:placeShip(t);let sx,sy;
     if(ship){sx=ship.x+2;sy=ship.y+2;}
     else{let ok=false;                                             // niveaux suivants : arrivée par le puits, sur un carré de sol dégagé
-      for(let k=0;k<4000&&!ok;k++){sx=rnd(4,W-5);sy=rnd(4,H-5);ok=true;for(let dy=-1;dy<=1&&ok;dy++)for(let dx=-1;dx<=1;dx++){const v=t[idx(sx+dx,sy+dy)];if(!canWalk(v,false)||v===LIQ){ok=false;break;}}}
+      for(let k=0;k<4000&&!ok;k++){sx=rnd(4,W-5);sy=rnd(4,H-5);ok=true;for(let dy=-1;dy<=1&&ok;dy++)for(let dx=-1;dx<=1;dx++){const v=t[idx(sx+dx,sy+dy)];if(!canWalk(v)||isWater(v)){ok=false;break;}}}   // le puits débouche toujours au sec
       if(ok)for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++)t[idx(sx+dx,sy+dy)]=GROUND;   // herbes comprises : le puits les a couchées (sans cela, un biome très herbu ne trouvait pas de place et la génération traînait)
       if(!ok){if(!last)continue;sx=W>>1;sy=H>>1;for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++)t[idx(sx+dx,sy+dy)]=GROUND;}}
     const st=idx(sx,sy);   // la foreuse démarre au fond du couloir (case du haut), mèche vers la porte
