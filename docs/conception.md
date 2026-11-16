@@ -319,16 +319,18 @@ Reste à faire : faire **trouver** les objets (au sol, lâchés par les ennemis,
 | Espèce | VIT | PV | DÉG | PRE | ESQ | CRIT | Référence (niveau Normal, taille 4) |
 |---|---|---|---|---|---|---|---|
 | Insectoïde | 6 | 10 | 3 | 60 | 30 | 5 % | 21 |
-| Crabos | 5 | 25 | 5 | 70 | 15 | 5 % | 15 |
-| Cafar | 5 | 10 | 5 | 60 | 0 | 5 % | 12 (bandes de 2 à 4 : tirage parmi 2, 3, 4, 4 — 2 à 5 avant le 13 novembre 2026) |
-| Crachin | 4 | 12 | 4 | 65 | 10 | 0 | 4 |
+| Crabos | 5 | 30 | 5 | 65 | 0 | 5 % | 15 |
+| Cafar | 5 | 15 | 5 | 50 | 10 | 5 % | 12 (bandes de 2 à 4 : tirage parmi 2, 3, 4, 4 — 2 à 5 avant le 13 novembre 2026) |
+| Crachin | 3 | 12 | 4 | 65 | 10 | 0 | 4 |
 | Vipérin | 6 | 12 | 3 | 70 | 25 | 5 % | 4 |
 | Gluar | 3 | 30 | 6 | 65 | 0 | 0 | 3 |
 | Siphon | 7 | 8 | 2 | 70 | 35 | 0 | 3 |
 | Tapi | 4 | 18 | 6 | 85 | 5 | 5 % | 4 |
-| Taupar | 3 | 35 | 7 | 70 | 5 | 5 % | 2 |
+| Taupar | 4 | 35 | 7 | 70 | 5 | 5 % | 2 |
 | Brochon | 7 | 14 | 5 | 70 | 25 | 5 % | 5 |
-| Mastok | 3 | 60 | 14 | 60 | 0 | 10 % | 1 |
+| Mastok | 4 | 60 | 14 | 60 | 0 | 10 % | 1 |
+
+Les chiffres du tableau sont ceux **réglés en jeu par le joueur** et recopiés dans le code le 16 novembre 2026 : ses retouches de tuiles (les neuf bêtes, l'herbe basse, la roche dure, le site inconnu), ses palettes et ses valeurs de stats sont désormais les valeurs par défaut, pour que la version en ligne ressemble à celle qu'il joue. L'insectoïde a gardé son dessin et ses valeurs d'origine, à sa demande. Attention : ces réglages vivent sinon dans le navigateur (`np-*`) et dans la base de l'artefact, qui n'existe pas sur GitHub Pages — d'où l'écart constaté ce jour-là entre l'artefact et le site.
 
 **Onze espèces depuis le 16 novembre 2026** (dix le 13 novembre). Les sept nouvelles ont chacune un rôle :
 

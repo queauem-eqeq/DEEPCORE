@@ -261,6 +261,20 @@ tête (3,3 avant) ; mêlé à des ennemis qui chassent, rien ne change : le mél
 - Les coefficients de terrain ne valent que pour les six biomes d'origine ; un archétype enregistré vaut 1.
 - Les coûts ne suivent pas les retouches du Bestiaire : il faut relancer les séries après un changement de stats.
 
+## Après la reprise des stats réglées en jeu (16 novembre 2026)
+
+Les valeurs du joueur ont été recopiées dans le code : **crabos** 30 PV / 65 préc. / 0 esq. (au lieu de 25 / 70 / 15),
+**cafar** 15 PV / 50 préc. / 10 esq. (au lieu de 10 / 60 / 0), **crachin** vitesse 3, **taupar** et **mastok** vitesse 4.
+
+Les duels d'équipement rejoués avec ces valeurs donnent **96 à 100 % de victoires** pour chaque objet sur le combat de
+référence (2 crabos + 1 vipérin), contre 80 à 100 % dans le tableau ci-dessus : le crabos, privé de son esquive et moins
+précis, est devenu nettement moins dangereux malgré ses 5 PV de plus. L'écart entre les armes spéciales et le reste de
+l'équipement s'écrase donc : la mesure ne sépare plus grand-chose.
+
+Le tableau ci-dessus n'est pas remplacé : il faudrait un combat de référence plus dur pour que la comparaison garde du
+sens, et les coûts de menace du banc sont à reprendre en même temps — l'utilisateur a demandé le 15 novembre d'attendre,
+les stats bougeant encore.
+
 ## Piège de méthode
 
 Une mesure à longue distance exige de **dégager toute la carte**. Un relief laissé au hasard coupe la
