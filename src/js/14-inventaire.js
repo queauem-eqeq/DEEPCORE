@@ -188,7 +188,7 @@ const ITEMS={
     use:st=>{G.eff.poison=0;G.eff.glu=0;return 'poison et glu éliminés';},
     art:["     ┌───┐     ", "     └┬─┬┘     ", "     ┌┘ └┐     ", "     │▒▒▒│     ", "     │███│     ", "     └───┘     "],
     col:[".....ddddd.....", ".....ddddd.....", ".....dd.dd.....", ".....d222d.....", ".....d222d.....", ".....ddddd....."]},
-  fumigene:{n:'Fumigène',conso:1,eff:'Nuage opaque de 7 cases',
+  fumigene:{n:'Fumigène',conso:1,son:'smoke',eff:'Nuage opaque de 7 cases',
     d:'Un nuage se répand autour de la foreuse, 7 cases de large et 5 en diagonale. Il cache la vue des deux côtés, s’étend de travers, puis se dissipe en une vingtaine de battements. Les ennemis perdent aussitôt votre trace.',
     plein:st=>false,non:'',
     use:st=>{fumPose();return 'le nuage se répand';},
@@ -299,7 +299,7 @@ function invEquip(i){const o=G.inv[i];if(!o||G.over)return;const d=ITEMS[o.k],e=
   if(d.vise){viseeStart(i);return;}   // objet qui se vise : on ouvre la visée au lieu de l'utiliser tout de suite
   if(d.conso){
     if(d.plein(G.st)){invSay(d.non,'warn');SFX.blocked();render();return;}
-    const r=d.use(G.st);invTake(i);invSay(`${d.n} utilisé${e} : ${r}.`,'good');SFX.spot();
+    const r=d.use(G.st);invTake(i);invSay(`${d.n} utilisé${e} : ${r}.`,'good');(d.son&&SFX[d.son]?SFX[d.son]:SFX.spot)();   // un objet peut avoir son propre bruit
     consoTemps();invChanged();return;}   // un consommable coûte un battement (16 novembre 2026)
   if(o.eq){if(d.slot==='arme'){invSay(ARME_FIXE,'warn');SFX.blocked();render();return;}
     invApply(o,-1);o.eq=0;invSay(`${d.n} retiré${e}.`);SFX.door();invChanged();return;}

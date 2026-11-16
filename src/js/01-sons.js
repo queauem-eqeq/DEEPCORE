@@ -48,6 +48,12 @@ const SFX={
   drill(k){tone(48+k*6,.12,'sawtooth',.09);noiz(.1,.12,600+k*120);},
   roar(){tone(140,.45,'sawtooth',.1,55);noiz(.35,.12,500,'lowpass',.05);},
   bite(){tone(90,.15,'square',.14,40);noiz(.12,.2,2500,'highpass');tone(600,.08,'square',.05,200,.05);},
+  // Fumigène (16 novembre 2026) : le bidon qui tombe, l'amorce qui claque, puis le jet sous pression qui s'épuise en nappe sourde
+  smoke(){tone(150,.07,'square',.09,70);
+    noiz(.12,.18,5200,'highpass',.03);
+    noiz(1.7,.17,2600,'bandpass',.05,700);
+    noiz(1.9,.07,900,'lowpass',.06,260);
+    tone(430,1.3,'sine',.018,120,.07);},
   squish(){noiz(.18,.25,900,'lowpass',0,250);tone(160,.12,'square',.07,60);},
   screech(){tone(2600,.09,'sawtooth',.06,3800);tone(3400,.12,'square',.04,2200,.08);noiz(.15,.08,5000,'highpass',.02);},
   chirp(){tone(1900,.05,'square',.035,2700);tone(2300,.05,'square',.03,1600,.07);},
