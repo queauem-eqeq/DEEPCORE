@@ -105,7 +105,14 @@ modification, marquer la version actuelle. Dernière version à fichier unique :
 ## Règles à ne pas casser
 - Les réglages du joueur (palettes, tuiles retouchées, intro déjà vue…) vivent dans le `localStorage` du navigateur
   (`np-*`) et dans la base de l'artefact (`reglages/courant`, chargée seulement si plus récente que `np-maj`).
-  Ne pas renommer ces clés. Renommer une tuile (clé de `PAT`) abandonne les retouches faites dessus : le signaler.
+  Ne pas renommer ces clés.
+  **L'utilisateur règle ses tuiles et ses stats dans l'artefact** (décision du 16 novembre 2026), parce que c'est la
+  seule des trois versions dont la session peut relire les réglages : sur GitHub Pages et dans la copie du disque, il
+  n'y a pas de base, et le stockage du navigateur n'est pas lisible depuis la session. Quand il demande que ses
+  réglages deviennent ceux du jeu publié, les lire avec `db_get` sur `reglages/courant` (artefact
+  `acb8696b-fff0-42ad-824a-fd58fe7cdf1e`) et les recopier dans `src/` : dessins dans `rows` des `BEASTS` et dans `PAT`,
+  stats dans les `BEASTS`, couleurs dans `PRESETS`. Ne pas recopier la configuration d'essai que la base contient aussi
+  (génération, intensités, état de la partie). Le 16 novembre, l'insectoïde a été laissé tel quel à sa demande. Renommer une tuile (clé de `PAT`) abandonne les retouches faites dessus : le signaler.
 - **Une nouvelle espèce s'ajoute à la fin de `BEASTS`**, jamais au milieu : les tuiles des créatures sont numérotées
   (`bz0`…`bz9`, dans l'ordre de la liste) et les retouches du joueur sont enregistrées sous ces numéros. Insérer une
   espèce décale toutes les suivantes et colle leurs retouches sur la mauvaise bête (16 novembre 2026 : le brochon,
