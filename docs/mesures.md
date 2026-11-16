@@ -275,6 +275,28 @@ Le tableau ci-dessus n'est pas remplacé : il faudrait un combat de référence 
 sens, et les coûts de menace du banc sont à reprendre en même temps — l'utilisateur a demandé le 15 novembre d'attendre,
 les stats bougeant encore.
 
+## Passage au modèle Brogue (16 novembre 2026)
+
+Défense multiplicative, dégâts en fourchette, POW requis (voir `conception.md` § 6). Conversion voulue **à puissance
+égale** : un duel contre un seul ennemi, foreuse sans équipement, pilote « chasse », 300 essais (1 000 pour le mastok).
+
+| Ennemi | Vie perdue avant | Vie perdue après | Battements avant → après |
+|---|---|---|---|
+| Insectoïde | 1,4 | 2,5 | 20 → 21 |
+| Crabos | 8,8 | 8,5 | 12 → 12 |
+| Crachin | 11,3 | 10,7 | 16 → 16 |
+| Vipérin | 14,2 | 14,2 | 11 → 12 |
+| Gluar | 9,6 | 10,8 | 12 → 13 |
+| Siphon | 2,0 | 2,3 | 10 → 11 |
+| Tapi | 26,0 | 27,5 | 12 → 12 |
+| Taupar | 19,7 | 21,3 | 15 → 15 |
+| Mastok | 51,5 | 57,4 | 16 → 16 |
+
+Les duels restent proches. La légère hausse (surtout le mastok, +11 %) vient de la fourchette : avec des dégâts fixes de
+10, il fallait exactement 6 coups pour 60 PV ; avec 7-13, il en faut parfois 7. Les coûts de menace (`MENACE_ESP`) n'ont
+pas été recalculés, l'écart restant dans le bruit de leur mesure. Cafar et brochon : non mesurables seuls sur l'arène.
+Détection et fuite (`simul.py`) : inchangées, ce changement n'y touche pas.
+
 ## Piège de méthode
 
 Une mesure à longue distance exige de **dégager toute la carte**. Un relief laissé au hasard coupe la

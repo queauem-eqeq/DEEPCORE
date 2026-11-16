@@ -197,7 +197,7 @@ function genPlanet(){
       if(sites.some(s=>Math.abs(s.x-x)+Math.abs(s.y-y)<(last?4:gap)))continue;sites.push({x,y});}
     if(sites.length<NSITES&&!last)continue;
     G={t,seen:new Array(N).fill(0),px:sx,py:sy,turn:0,dist:0,over:null,msg:null,ship,face:'d',
-      st:{vie:100,vieMax:100,energie:100,energieMax:100,repar:0,power:1,vitesse:5,degats:10,capteur:10,cout:10,pre:80,esq:10,crit:5},
+      st:{vie:100,vieMax:100,energie:100,energieMax:100,repar:0,power:1,vitesse:5,degats:10,capteur:10,cout:10,pre:80,def:12,crit:5},
       sites:sites.map((s,i)=>({x:s.x,y:s.y,depth:10,id:LETTERS[i],seen:false,known:false}))};
     return;
   }
@@ -230,7 +230,8 @@ const BIOMES={
 const COURBE=[null,{menace:45,metal:3,mat:1},{menace:90,metal:3,mat:1},{menace:155,metal:2,mat:2},{menace:240,metal:1,mat:3},{menace:340,metal:1,mat:3}];
 // pvDe / dmgDe : points de vie et dégâts d'une espèce tels que le jeu les lit. Aujourd'hui ce sont les valeurs du Bestiaire, sans modification ;
 // ces deux fonctions restent le seul endroit à changer si l'on veut un jour les faire varier.
-const pvDe=sp=>sp.pv,dmgDe=sp=>sp.dmg;
+// dégâts d'une créature : tirés à chaque coup entre dmin et dmax (16 novembre 2026 ; une valeur fixe avant)
+const pvDe=sp=>sp.pv,dmgDe=sp=>sp.dmin+Math.floor(Math.random()*(sp.dmax-sp.dmin+1)),dmgTxt=sp=>sp.dmin===sp.dmax?''+sp.dmin:sp.dmin+'-'+sp.dmax,dmgMoy=sp=>(sp.dmin+sp.dmax)/2;
 const TAILLE_DESC=3;                   // atterrissage et niveaux de la descente : toujours la taille 3 (72 × 48) depuis le 15 novembre 2026 (avant : 2 puis 2 à 5 au hasard)
 // Les archétypes enregistrés dans le menu Monde (MONDES, 06-reglages) entrent dans le tirage de la descente, sous la clé « u:Nom ».
 // biomeDe(clé) rend un biome d'origine ou un archétype mis en forme de biome : rang moyen, petite teinte tirée de son nom, taille ignorée.
@@ -267,7 +268,7 @@ function descendre(){const n=G.niv+1,b=G.suite[n-2];
   say(`Niveau ${n} sur ${NIV_MAX} : ${biomeDe(b).n}. La foreuse débouche du puits ; impossible de remonter.`,'info');}
 
 /* ---------- Bestiaire : édition des statistiques ---------- */
-const BFIELDS=[['v','Vitesse',1,10],['pv','PV',1,200],['dmg','Dégâts',0,100],['pre','Précision',0,100],['esq','Esquive',0,100],['crit','Crit %',0,100]];
+const BFIELDS=[['v','Vitesse',1,10],['pv','PV',1,200],['dmin','Dégâts min',0,100],['dmax','Dégâts max',0,100],['pre','Précision',0,250],['def','Défense',0,150],['crit','Crit %',0,100]];
 const BEST_LIST=()=>[{key:'insectoide',o:SPECIES[0],ic:'an0r',role:'Suit à distance et recule ; attaque dès qu’un coup est tenté, par vous ou contre vous'},...BEASTS.map((o,i)=>({key:o.key,o,ic:'bz'+i+'r',role:o.role}))];
 const BEST_DEF={};BEST_LIST().forEach(e=>{BEST_DEF[e.key]={};BFIELDS.forEach(([f])=>BEST_DEF[e.key][f]=e.o[f]);});
 try{const b=JSON.parse(localStorage.getItem('np-best')||'null');if(b)BEST_LIST().forEach(e=>{if(b[e.key])BFIELDS.forEach(([f])=>{if(typeof b[e.key][f]==='number')e.o[f]=b[e.key][f];});});}catch(e){}
@@ -319,9 +320,9 @@ const UPGRADES=[
   ['capteur','EYE (vision)','+1',st=>{st.capteur+=1;}],
   ['degats','DEG (dégâts)','+5',st=>{st.degats+=5;}],
   ['pre','PRE (précision)','+5',st=>{st.pre+=5;}],
-  ['esq','ESQ (esquive)','+5',st=>{st.esq+=5;}],
+  ['def','DEF (défense)','+6',st=>{st.def+=6;}],
   ['crit','CRIT (coup critique)','+5 %',st=>{st.crit=(st.crit??5)+5;}],
-  ['power','POW (énergie/tour)','+1',st=>{st.power+=1;}],
+  ['power','POW (énergie/tour, équipement lourd)','+1',st=>{st.power+=1;}],
   ['vitesse','VIT (vitesse)','+1',st=>{st.vitesse+=1;}]
 ];
 // Éclats de métal : ORE_PCT % des cases de montagne (hors rangée extérieure indestructible et joyau) en contiennent ; brisée, la roche les laisse

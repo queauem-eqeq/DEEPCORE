@@ -163,11 +163,27 @@ function distFrom(tx,ty,mouille){const d=new Int16Array(W*H).fill(-1),q=[idx(tx,
   for(let k=0;k<q.length;k++){const c=q[k],x=c%W,y=(c/W)|0;for(const[dx,dy]of DIRS){const a=x+dx,b=y+dy;if(a<1||b<1||a>=W-1||b>=H-1)continue;const j=idx(a,b),v=G.t[j];if(d[j]>=0||!diagOk(x,y,dx,dy)||!canWalk(v,mouille))continue;d[j]=d[c]+1;q.push(j);}}return d;}
 const footDist=(x,y,d)=>Math.min(...FOOT.map(([dx,dy])=>{const v=d[idx(x+dx,y+dy)];return v<0?9999:v;}));
 const nearRobot=b=>canHit(b);
-// Chance de toucher = précision − esquive, bornée entre 5 et 95 %.
-// Terrain de la cible : eau (peu profonde ou profonde) −20 d'esquive, herbes hautes +10 (caché).
-const terrMod=(x,y)=>{const v=G.t[idx(x,y)];return v===DEEP||v===LIQ?-20:v===GRASS?10:0;};
-const robotEsq=()=>G.st.esq+terrMod(G.px,G.py);
-const hitChance=(pre,esq)=>Math.max(5,Math.min(95,pre-esq));
+// Chance de toucher = précision × 0,987^défense, bornée entre 5 et 95 % (modèle Brogue, 16 novembre 2026 ;
+// précision − esquive avant). Chaque point de défense retire 1,3 % des coups ; 53 points les divisent par deux.
+// Terrain de la cible : eau (peu profonde ou profonde) −20 de défense, herbes hautes +12 (caché).
+const DEF_BASE=.987;
+const terrMod=(x,y)=>{const v=G.t[idx(x,y)];return v===DEEP||v===LIQ?-20:v===GRASS?12:0;};
+const hitChance=(pre,def)=>Math.max(5,Math.min(95,Math.round(pre*Math.pow(DEF_BASE,def))));
+/* POW requis (16 novembre 2026) : chaque arme et chaque armure demande un POW (champ req de l'objet).
+   Arme : chaque point manquant multiplie précision et dégâts par 0,75 ; chaque point en trop, par 1,03.
+   Armure : chaque point manquant retire 20 de défense ; chaque point en trop en ajoute 2.
+   Rien n'est écrit dans G.st : tout se recalcule à la lecture, donc gagner ou perdre du POW agit aussitôt. */
+const POW_MANQUE=.75,POW_EXCES=1.03,POW_DEF_MANQUE=20,POW_DEF_EXCES=2,DEG_VAR=.3;
+const eqDe=slot=>{const o=(G.inv||[]).find(o=>o.eq&&ITEMS[o.k]&&ITEMS[o.k].slot===slot);return o?ITEMS[o.k]:null;};
+const powEcart=(d,st)=>d&&d.req?st.power-d.req:0;
+const armeFact=(st,d)=>{const e=powEcart(d,st);return e<0?Math.pow(POW_MANQUE,-e):Math.pow(POW_EXCES,e);};
+const armureDef=(st,d)=>{const e=powEcart(d,st);return e<0?POW_DEF_MANQUE*e:POW_DEF_EXCES*e;};
+// stats de combat de la foreuse telles qu'elles comptent ; st, arme, armure : pour simuler un autre équipement (fenêtre Équipement)
+const robotPre=(st,d)=>{st=st||G.st;return Math.round(st.pre*armeFact(st,d===undefined?eqDe('arme'):d));};
+const robotDegs=(st,d)=>{st=st||G.st;const m=st.degats*armeFact(st,d===undefined?eqDe('arme'):d);return [Math.max(1,Math.round(m*(1-DEG_VAR))),Math.max(1,Math.round(m*(1+DEG_VAR)))];};
+const robotDeg=()=>{const [a,b]=robotDegs();return a+Math.floor(Math.random()*(b-a+1));};
+const robotDefNu=(st,d)=>{st=st||G.st;return st.def+armureDef(st,d===undefined?eqDe('armure'):d);};
+const robotDef=()=>robotDefNu()+terrMod(G.px,G.py);
 const roll=ch=>Math.random()*100<ch;
 const chanceCol=ch=>ch>=70?'var(--c1)':ch>=40?'var(--c3)':'var(--life)';
 /* Attaque d'un ennemi sur la foreuse. o.tir : attaque à distance (projectile) ; o.sur : par surprise (touche toujours, critique).
@@ -175,7 +191,7 @@ const chanceCol=ch=>ch>=70?'var(--c1)':ch>=40?'var(--c3)':'var(--life)';
    poison = vie perdue par battement · glu = pas deux fois plus longs · drain = énergie volée sur le coup.
    Une armure isolante (G.st.isol) divise les durées par deux. */
 function hurtRobot(b,sp,o){sp=sp||BEASTS[b.sp];o=o||{};const le=sp.n.match(/^[aeiouyéèêîïôâ]/i)?'L’':'Le ',nom=sp.n.toLowerCase(),verbe=o.tir?'crache':'attaque';
-  const ch=hitChance(sp.pre,robotEsq());engage();   // la foreuse est attaquée, que le coup porte ou non : les insectoïdes qui suivent attaquent
+  const ch=hitChance(sp.pre,robotDef());engage();   // la foreuse est attaquée, que le coup porte ou non : les insectoïdes qui suivent attaquent
   const geste=()=>o.tir?addFx({kind:'tir',x0:b.x,y0:b.y,x1:G.px,y1:G.py,dur:260}):addFx({kind:'lunge',beast:b,dx:Math.sign(G.px-b.x),dy:Math.sign(G.py-b.y),dur:200});
   if(!o.sur&&!roll(ch)){geste();addFx({kind:'num',x:G.px,y:G.py,txt:'0',col:'#8aa9a2',dur:750});
     SFX.whoosh();sayMore(`${le}${nom} ${verbe} et rate (${ch} %).`);return;}

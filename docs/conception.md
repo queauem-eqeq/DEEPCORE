@@ -184,11 +184,11 @@ Jugée trop haute et trop étroite (640 × 835), elle est passée à 940 × 390 
 | Sol rocheux | oui | libre | **texture « plaques rugueuses »** (16 novembre 2026, voir ci-dessous). La tuile « Sol » du Tile editor, elle, est vide depuis le 15 novembre 2026 (quatre petits points avant) : une tuile déjà retouchée garde son dessin |
 | Rocher | brisé en 2 coups | libre | laisse des gravats |
 | Montagne | brisée en 2 coups (sauf bord de carte) | bloquée | peut contenir le joyau ; 10 % contiennent des éclats de métal |
-| Eau peu profonde | oui | libre | −20 d'esquive ; **toutes les créatures y entrent** (15 novembre 2026) ; **terrain lent : pas ×1,5**, sauf pour les crabos qui nagent |
-| Eau profonde | oui | libre | −20 d'esquive ; **toutes les créatures y entrent** et y nagent droit (seule la foreuse dérive) ; **chaque pas a 50 % de chance de partir dans une autre direction tirée au hasard** (si cette case est bloquée, la foreuse est plaquée contre l'obstacle et ne bouge pas ; le tour passe) ; **attendre** dans l'eau profonde déplace la foreuse d'une case au hasard (le courant) ; **terrain lent : pas ×2**, sauf pour les crabos |
+| Eau peu profonde | oui | libre | −20 de défense ; **toutes les créatures y entrent** (15 novembre 2026) ; **terrain lent : pas ×1,5**, sauf pour les crabos qui nagent |
+| Eau profonde | oui | libre | −20 de défense ; **toutes les créatures y entrent** et y nagent droit (seule la foreuse dérive) ; **chaque pas a 50 % de chance de partir dans une autre direction tirée au hasard** (si cette case est bloquée, la foreuse est plaquée contre l'obstacle et ne bouge pas ; le tour passe) ; **attendre** dans l'eau profonde déplace la foreuse d'une case au hasard (le courant) ; **terrain lent : pas ×2**, sauf pour les crabos |
 | Fumée (fumigène) | oui | **bloquée** | nuage posé par un fumigène : cache la vue des deux côtés, se dissipe en 15 à 25 battements (§ 6 bis) |
 | Roche dure | non, **indestructible à la foreuse** | bloquée | le cœur des massifs (16 novembre 2026) : la foreuse n'y peut rien, seule une **charge sismique** la brise. **Ni joyau ni métal** à l'intérieur. Tuile « Roche dure », retouchable |
-| Herbes hautes (assombries de moitié le 15 novembre 2026 : même teinte, luminosité divisée par deux, elles ressortaient trop) | oui | bloquée | **deviennent des herbes basses** au passage ; +10 d'esquive pour qui s'y trouve ; froufrou au passage (bruitage refait le 13 novembre 2026 : trois coups de brosse décalés, tirés au hasard à chaque pas) |
+| Herbes hautes (assombries de moitié le 15 novembre 2026 : même teinte, luminosité divisée par deux, elles ressortaient trop) | oui | bloquée | **deviennent des herbes basses** au passage ; +12 de défense pour qui s'y trouve ; froufrou au passage (bruitage refait le 13 novembre 2026 : trois coups de brosse décalés, tirés au hasard à chaque pas) |
 | Herbes basses | oui | libre | **portée de discrétion ÷ 2** : c'est le couvert du jeu |
 | Gouffre | non | libre | — |
 | Pont / gravats | oui | libre | — |
@@ -210,9 +210,9 @@ Jugée trop haute et trop étroite (640 × 835), elle est passée à 940 × 390 
 | Énergie | 100 | se recharge de POW par battement (**1/t** au départ depuis le 13 novembre 2026, **× 2 en attendant sur place**) ; **se déplacer ne coûte plus d'énergie** (13 novembre 2026 ; 2 par pas avant, constante `MOVE_COST`), un coup de foreuse sur la roche 10 (frapper un animal : gratuit) |
 | VIT | 5 | **vitesse de déplacement** (13 novembre 2026) : un pas dure 100 × 5 ÷ VIT. À 5, un pas = un battement ; à 10, deux pas par battement. Ne joue ni sur les coups ni sur le forage. Améliorable par joyau (+1). |
 | EYE | 10 | rayon de vision (5 avant le 10 novembre 2026) |
-| DEG | 10 | dégâts par coup de foreuse |
+| DEG | 10 (soit 7-13) | dégâts moyens d'un coup de foreuse ; chaque coup est tiré à ±30 % autour (16 novembre 2026) |
 | PRE | 80 | précision |
-| ESQ | 10 | esquive (modifiée par le terrain) |
+| DEF | 12 | défense : fait rater les coups reçus, sans réduire les dégâts (modifiée par le terrain et par l'armure). A remplacé ESQ le 16 novembre 2026 |
 | CRIT | 5 % | chance de coup critique (×3 dégâts) ; coup par surprise toujours critique |
 | POW | 1 / battement | recharge d'énergie (doublée en attendant sur place) (5 avant le 13 novembre 2026 ; 6 puis 3 le 9 novembre) |
 
@@ -236,7 +236,12 @@ Le jeu ne compte plus en tours mais en **unités de temps**, comme Brogue et Cog
 
 ## 6. Combat
 
-- Chance de toucher = précision de l'attaquant − esquive de la cible, bornée entre 5 et 95 %.
+- **Modèle Brogue (16 novembre 2026)**, à la place de « précision − esquive » :
+  - **Chance de toucher = précision × 0,987^défense**, bornée entre 5 et 95 %. Chaque point de défense retire 1,3 % des coups ; 53 points les divisent par deux. La défense fait rater, elle ne réduit jamais les dégâts (« pas de blindage », § 11).
+  - **Dégâts en fourchette** : chaque coup est tiré entre un minimum et un maximum. Créatures : `dmin`-`dmax` par espèce. Foreuse : DEG ± 30 % (DEG 10 → 7 à 13).
+  - **POW requis** : chaque arme et chaque armure demande un POW (c'est la « force » de Brogue ; POW reste aussi la recharge d'énergie). **Arme** : chaque point manquant multiplie précision et dégâts par 0,75 ; chaque point en trop, par 1,03. **Armure** : chaque point manquant retire 20 de défense ; chaque point en trop en ajoute 2. Calculé à la lecture : gagner du POW (Condensateur, joyau) agit aussitôt.
+  - Les critiques (CRIT, × 3) et les coups par surprise sont gardés tels quels.
+  - Conversion **à puissance égale** : esquive 5 → défense 5, 10 → 10, 25 → 30, 30 → 35, 35 → 45 ; foreuse 10 → 12 ; dégâts fixes → fourchette de même moyenne. Vérifié au banc (voir `mesures.md`).
 - Foncer sur un animal = coup de foreuse (dégâts DEG). Coup raté : « 0 » affiché (gris). Frapper un animal ne consomme pas d'énergie.
 - Les animaux attaquent **une fois par battement au contact** ; leur vitesse ne règle que les déplacements (vitesse 5 = 1 case par battement), et l'eau les ralentit comme la foreuse, sauf les nageurs.
 - **Barre de vie au-dessus des créatures blessées** : petite barre rouge sur fond noir, dès que la créature n'est plus intacte. Les insectoïdes en étaient privés jusqu'au 16 novembre 2026 (seuls les prédateurs en avaient une) ; tout le monde en a une maintenant.
@@ -275,38 +280,38 @@ Version d'essai : tous les objets sont donnés au départ, non équipés sauf la
 - **Consommables** : usage unique, **coûtant un battement** depuis le 16 novembre 2026 (les ennemis jouent, les effets durables se décomptent, l'énergie remonte ; avant, c'était gratuit et instantané). Équiper, lui, reste gratuit. Se boire au sous-menu Inventaire. Refusé si la jauge est déjà pleine (l'objet n'est pas perdu) ; le surplus au-delà du maximum est perdu. Les consommables identiques s'empilent (« ×2 »).
 - **Jeter** pose l'objet (un seul exemplaire pour une pile) au sol sous la foreuse (tuile « Objet au sol », retouchable au Tile editor). Repasser sur la case le ramasse ; sans bouger, touche G ou bouton « Ramasser ». La fiche de survol nomme les objets posés.
 - **Durée du coup** : une arme peut allonger ou raccourcir le coup de foreuse (§ 5 bis) ; plancher à 25.
-- « Pas de blindage » (§ 11) tient toujours : aucune armure ne réduit les dégâts, elles jouent sur la vie max, l'esquive ou la discrétion.
+- « Pas de blindage » (§ 11) tient toujours : aucune armure ne réduit les dégâts, elles jouent sur la vie max, la défense (qui fait rater) ou la discrétion.
 
-| Objet | Type | Effets |
-|---|---|---|
-| Foreuse | arme | arme de départ, sans modificateur : DEG 10, coup 100 |
-| Foret diamant | arme | DEG −2, PRE +15, coup rapide (60) |
-| Marteau-pilon | arme | DEG +15, PRE −10, coup lent (150) |
-| Scie circulaire | arme | DEG +3, CRIT +15 % |
-| Lance thermique | arme | DEG +7, ESQ −10 |
-| Châssis renforcé | armure | Vie max +30, VIT −1 |
-| Coque furtive | armure | ESQ +5, DIS −2 (portée de discrétion) |
-| Châssis allégé | armure | VIT +1, ESQ +10, Vie max −15 |
-| Coque isolante | armure | poison et glu durent deux fois moins, Vie max +10 |
-| Servomoteur | accessoire | VIT +2 |
-| Téléobjectif | accessoire | EYE +3 |
-| Viseur laser | accessoire | CRIT +10 % |
-| Condensateur | accessoire | POW +1 |
-| Gyroscope | accessoire | ESQ +10 |
-| Stabilisateur | accessoire | PRE +10 |
-| Accumulateur | accessoire | Énergie max +40 |
-| Réparobots (×2) | consommable | Vie +50 ; petites **croix rouges** autour de la foreuse |
-| Batterie (×2) | consommable | Énergie +50 ; petites **flèches bio** qui montent |
-| Purge (×2) | consommable | supprime poison et glu ; un **filet ovale** pulse autour de la foreuse, à un pixel de la case |
-| Fumigène (×2) | consommable | **un nuage de fumée** de 7 cases de large autour de la foreuse, opaque des deux côtés, qui s'étend puis se dissipe (voir ci-dessous) |
-| Charge sismique (×2) | consommable | **visée** : un carré de 3 × 3 à placer jusqu'à 4 cases, **30 dégâts** à tout ce qui s'y trouve ; bruyante (comme un forage) |
+| Objet | Type | POW requis | Effets |
+|---|---|---|---|
+| Foreuse | arme | 1 | arme de départ, sans modificateur : DEG 10 (7-13), coup 100 |
+| Foret diamant | arme | 1 | DEG −2, PRE +15, coup rapide (60) |
+| Marteau-pilon | arme | 3 | DEG +15, PRE −10, coup lent (150) |
+| Scie circulaire | arme | 2 | DEG +3, CRIT +15 % |
+| Lance thermique | arme | 2 | DEG +7, DEF −12 |
+| Châssis renforcé | armure | 3 | Vie max +30, VIT −1 |
+| Coque furtive | armure | 1 | DEF +6, DIS −2 (portée de discrétion) |
+| Châssis allégé | armure | 1 | VIT +1, DEF +12, Vie max −15 |
+| Coque isolante | armure | 2 | poison et glu durent deux fois moins, Vie max +10 |
+| Servomoteur | accessoire | – | VIT +2 |
+| Téléobjectif | accessoire | – | EYE +3 |
+| Viseur laser | accessoire | – | CRIT +10 % |
+| Condensateur | accessoire | – | POW +1 |
+| Gyroscope | accessoire | – | DEF +12 |
+| Stabilisateur | accessoire | – | PRE +10 |
+| Accumulateur | accessoire | – | Énergie max +40 |
+| Réparobots (×2) | consommable | – | Vie +50 ; petites **croix rouges** autour de la foreuse |
+| Batterie (×2) | consommable | – | Énergie +50 ; petites **flèches bio** qui montent |
+| Purge (×2) | consommable | – | supprime poison et glu ; un **filet ovale** pulse autour de la foreuse, à un pixel de la case |
+| Fumigène (×2) | consommable | – | **un nuage de fumée** de 7 cases de large autour de la foreuse, opaque des deux côtés, qui s'étend puis se dissipe (voir ci-dessous) |
+| Charge sismique (×2) | consommable | – | **visée** : un carré de 3 × 3 à placer jusqu'à 4 cases, **30 dégâts** à tout ce qui s'y trouve ; bruyante (comme un forage) |
 
 Vingt et un objets depuis le 13 novembre 2026. Règles ajoutées ce jour-là :
 
 - **La foreuse est une arme** : c'est l'arme de départ, déjà équipée. Il y a **toujours une arme en main** : on ne peut ni la retirer ni la jeter, seulement la remplacer. **Toute arme fore la roche pareil** (choix de l'utilisateur) : l'arme ne change que le combat et le visuel.
 - **Le visuel de la foreuse suit l'équipement** : l'arme dessine la moitié avant (la pointe), l'armure la moitié arrière (le corps), dans les quatre orientations. Sans armure et avec la foreuse d'origine, c'est la tuile « Foreuse » du Tile editor, retouches comprises ; les autres combinaisons ne sont pas encore retouchables.
 - **Maximum de vie ou d'énergie modifié par un objet** : la jauge garde sa proportion (100/100 devient 130/130, 50/100 devient 65/130). S'équiper ne soigne pas, ne blesse pas, et retirer puis remettre ne rapporte rien.
-- **Statistiques dans la fenêtre** : sous la fiche, les onze valeurs actuelles ; **ESQ et DIS y sont donnés tels qu'ils comptent sur place** (terrain compris), depuis que le sous-menu Statistiques a disparu (15 novembre 2026) ; pour l'objet choisi, la valeur qu'aurait chaque stat après Entrée s'affiche à côté (« DEG 10 → 25 »), en accent si elle y gagne, en rouge si elle y perd.
+- **Statistiques dans la fenêtre** : sous la fiche, les onze valeurs actuelles ; **PRE, DEG, DEF et DIS y sont donnés tels qu'ils comptent sur place** (POW requis et terrain compris ; DEG en fourchette). La fiche d'une arme ou d'une armure affiche « POW requis N (vous : M) » et ce que l'écart coûte, en rouge s'il manque du POW, depuis que le sous-menu Statistiques a disparu (15 novembre 2026) ; pour l'objet choisi, la valeur qu'aurait chaque stat après Entrée s'affiche à côté (« DEG 10 → 25 »), en accent si elle y gagne, en rouge si elle y perd.
 - Dessins ASCII agrandis (30 px).
 - **Tir d'un ennemi** : le projectile est une petite boule de 4 pixels de tuile, calée sur la grille et opaque (13 novembre 2026).
 
@@ -316,19 +321,19 @@ Reste à faire : faire **trouver** les objets (au sol, lâchés par les ennemis,
 
 ## 7. Bestiaire
 
-| Espèce | VIT | PV | DÉG | PRE | ESQ | CRIT | Référence (niveau Normal, taille 4) |
+| Espèce | VIT | PV | DÉG | PRE | DEF | CRIT | Référence (niveau Normal, taille 4) |
 |---|---|---|---|---|---|---|---|
-| Insectoïde | 6 | 10 | 3 | 60 | 30 | 5 % | 21 |
-| Crabos | 5 | 30 | 5 | 65 | 0 | 5 % | 15 |
-| Cafar | 5 | 15 | 5 | 50 | 10 | 5 % | 12 (bandes de 2 à 4 : tirage parmi 2, 3, 4, 4 — 2 à 5 avant le 13 novembre 2026) |
-| Crachin | 3 | 12 | 4 | 65 | 10 | 0 | 4 |
-| Vipérin | 6 | 12 | 3 | 70 | 25 | 5 % | 4 |
-| Gluar | 3 | 30 | 6 | 65 | 0 | 0 | 3 |
-| Siphon | 7 | 8 | 2 | 70 | 35 | 0 | 3 |
-| Tapi | 4 | 18 | 6 | 85 | 5 | 5 % | 4 |
-| Taupar | 4 | 35 | 7 | 70 | 5 | 5 % | 2 |
-| Brochon | 7 | 14 | 5 | 70 | 25 | 5 % | 5 |
-| Mastok | 4 | 60 | 14 | 60 | 0 | 10 % | 1 |
+| Insectoïde | 6 | 10 | 2-4 | 60 | 35 | 5 % | 21 |
+| Crabos | 5 | 30 | 3-7 | 65 | 0 | 5 % | 15 |
+| Cafar | 5 | 15 | 3-7 | 50 | 10 | 5 % | 12 (bandes de 2 à 4 : tirage parmi 2, 3, 4, 4 — 2 à 5 avant le 13 novembre 2026) |
+| Crachin | 3 | 12 | 3-5 | 65 | 10 | 0 | 4 |
+| Vipérin | 6 | 12 | 2-4 | 70 | 30 | 5 % | 4 |
+| Gluar | 3 | 30 | 4-8 | 65 | 0 | 0 | 3 |
+| Siphon | 7 | 8 | 1-3 | 70 | 45 | 0 | 3 |
+| Tapi | 4 | 18 | 4-8 | 85 | 5 | 5 % | 4 |
+| Taupar | 4 | 35 | 5-9 | 70 | 5 | 5 % | 2 |
+| Brochon | 7 | 14 | 3-7 | 70 | 30 | 5 % | 5 |
+| Mastok | 4 | 60 | 10-18 | 60 | 0 | 10 % | 1 |
 
 Les chiffres du tableau sont ceux **réglés en jeu par le joueur** et recopiés dans le code le 16 novembre 2026 : ses retouches de tuiles (les neuf bêtes, l'herbe basse, la roche dure, le site inconnu), ses palettes et ses valeurs de stats sont désormais les valeurs par défaut, pour que la version en ligne ressemble à celle qu'il joue. L'insectoïde a gardé son dessin et ses valeurs d'origine, à sa demande. Attention : ces réglages vivent sinon dans le navigateur (`np-*`) et dans la base de l'artefact, qui n'existe pas sur GitHub Pages — d'où l'écart constaté ce jour-là entre l'artefact et le site.
 
@@ -356,7 +361,7 @@ La statistique **DÉT (détection)** par espèce a été supprimée le 13 novemb
   - **nageurs** — **Crabos, Vipérin, Siphon, Brochon** : ils y vont naturellement, en chasse comme en errance ;
   - **au sec** — **Cafar, Crachin, Tapi** : ils n'y mettent jamais une patte, même pour poursuivre, et contournent le lac ou renoncent ;
   - **les autres** — Insectoïde, Gluar, Taupar, Mastok : ils évitent l'eau en errance, mais la traversent pour **poursuivre la foreuse**.
-  Une créature déjà dans l'eau peut toujours en sortir, sinon elle y resterait coincée en cessant la poursuite. Toutes y subissent −20 d'esquive comme la foreuse, et aucune ne dérive en eau profonde : la dérive reste propre à la foreuse. Le **crabos** reste le seul à n'y être pas ralenti (les autres font des pas ×1,5 en eau peu profonde, ×2 en eau profonde). Vérifié sur une rivière de 3 cases : le cafar reste sur sa rive, le gluar et le crabos traversent.
+  Une créature déjà dans l'eau peut toujours en sortir, sinon elle y resterait coincée en cessant la poursuite. Toutes y subissent −20 de défense comme la foreuse, et aucune ne dérive en eau profonde : la dérive reste propre à la foreuse. Le **crabos** reste le seul à n'y être pas ralenti (les autres font des pas ×1,5 en eau peu profonde, ×2 en eau profonde). Vérifié sur une rivière de 3 cases : le cafar reste sur sa rive, le gluar et le crabos traversent.
 - **Poursuite (tous les ennemis)** : chaque ennemi qui chasse ou attaque suit le plus court chemin vers la foreuse. Si un autre ennemi bloque le passage, il contourne l'obstacle (détour de 10 cases au plus) vers une case libre autour de la foreuse, au lieu d'attendre : plusieurs ennemis peuvent ainsi l'encercler et attaquer en même temps (jusqu'à 8).
 - **Diagonales comme dans Brogue** (10 novembre 2026) : un pas ou un coup en diagonale est **impossible si l'une des deux cases voisines orthogonales est une paroi** (rocher, montagne, coque du vaisseau) — on ne coupe pas les coins. Vaut pour la foreuse (message « Coin de paroi »), tous les ennemis (déplacements et attaques), le courant de l'eau profonde, les trajets automatiques et la génération (connexion des zones et accès aux sites calculés avec la même règle). L'eau et les gouffres ne bloquent pas les diagonales. Dans le brouillard, le trajet ne tient compte que des coins déjà vus.
 - **Coup par surprise** : frapper un ennemi qui **ne vous a pas repéré** (ni en chasse, ni alerté, ni en train de vous chercher) **touche toujours** et est **toujours critique**. Message « Coup par surprise ! ».
@@ -381,7 +386,7 @@ La statistique **DÉT (détection)** par espèce a été supprimée le 13 novemb
 
 - **Un seul site de forage par carte** depuis le 13 novembre 2026 (5 auparavant), toujours de **profondeur 10** : simple valeur affichée, sans effet de jeu (choix de l'utilisateur). Il est placé dans le tiers de la carte le plus éloigné de l'arrivée : il faut la traverser. Forer fait descendre au niveau suivant (§ 3 bis).
 - Forage : touche F sur un site (ou clic sur la foreuse posée dessus) → **le forage part tout de suite, sans confirmation** (15 novembre 2026) : barre « Forage en cours » d'une seconde environ, puis le niveau suivant commence directement. Sur une carte d'essai, une nouvelle carte d'essai. Seule la fin (« NOYAU ATTEINT ») garde son écran.
-- **1 joyau** par planète, au cœur d'un massif (8 voisines en roche, jamais en bordure), visible dès que la case est vue. Briser la roche, le ramasser → choix de **3 améliorations tirées au hasard** parmi : Vie max +10, Énergie max +10, EYE +1, DEG +5, PRE +5, ESQ +5, POW +1, VIT +1 (13 novembre 2026).
+- **1 joyau** par planète, au cœur d'un massif (8 voisines en roche, jamais en bordure), visible dès que la case est vue. Briser la roche, le ramasser → choix de **3 améliorations tirées au hasard** parmi : Vie max +10, Énergie max +10, EYE +1, DEG +5, PRE +5, DEF +6, POW +1, VIT +1 (13 novembre 2026).
 - **Éclats de métal** (9 novembre 2026) : **10 % des cases de montagne** (hors rangée extérieure indestructible et joyau ; réglage `ORE_PCT` dans la génération) montrent des éclats de métal couleur bio — ceux pris au cœur d'un massif ne se voient qu'en creusant jusqu'à eux. Briser la paroi les fait **tomber au sol** ; la foreuse qui passe dessus les ramasse et regagne **autant de vie que d'énergie** (16 novembre 2026 ; la vie seule avant) selon la **densité** : **petits +10** (50 % des éclats), **moyens +15** (30 %), **gros +20** (20 %), sans dépasser les maximums. Deux chiffres flottants s'affichent, et les deux effets visuels des consommables partent en même temps (croix rouges et flèches bio) (réglages `ORE_PV`, `ORE_MIX`). Chaque densité a sa tuile, dans la paroi et au sol. Signalés dans la fiche de survol (plus de liste dans « En vue » depuis le 13 novembre 2026). Tuiles éditables : Éclats petits / moyens / gros, en montagne et au sol (dessins retouchés au Tile editor et adoptés comme norme le 9 novembre 2026).
 - **Mort d'un ennemi** (9 novembre 2026) : en plus de la tache de sang, une **petite giclée** de 24 à 35 gouttes (pixels de tuile opaques, rouges, 1 ou 2 pixels) projetées en l'air dès l'impact, vite (70 à 180 px/s, freinées par l'air, retombées en moins d'une demi-seconde, à une ou deux cases au plus) ; en retombant elles **restent collées au sol** (sauf dans l'eau, un gouffre ou un obstacle). Au plus 1 500 gouttes gardées sur la carte (les plus anciennes s'effacent) ; comme le sang, elles restent en souvenir (atténuées) hors de vue.
 - **Foreuse endommagée** (9 novembre 2026) : sous **50 PV** elle **fume** (grains gris opaques de 1 ou 2 pixels de tuile, calés sur la grille des pixels, qui montent en ondulant et disparaissent d'un coup — **pixel perfect, sans opacité ni changement de taille** ; la fumée reste sur place quand elle avance, comme une traînée) ; sous **20 PV** la fumée double et de **petites flammèches** (jaune, orange, rouge) s'échappent de la coque. Dessiné sur un calque transparent au-dessus de la vue, animé en continu sans redessiner la carte.
@@ -396,14 +401,14 @@ La statistique **DÉT (détection)** par espèce a été supprimée le 13 novemb
 - Plein écran ; colonne noire à droite, défilable à la molette ou au doigt mais sans barre de défilement (pour ne pas la déformer) ; journal de bord sous la carte (5 dernières lignes, numéro de tour, ×N pour les répétitions).
 - **Statut** : barres ASCII `█`/`░` (20 caractères) — Vie en couleur technologie, Énergie en couleur structure ; pas de chiffres.
 - **Statut** : barres Vie et Énergie suivies de leur valeur chiffrée (« 63/100 »), remises le 10 novembre 2026.
-- **Sous-menu Statistiques : supprimé le 15 novembre 2026.** Les onze stats sont dans la fenêtre Équipement, qui donne ESQ et DIS avec le terrain.
+- **Sous-menu Statistiques : supprimé le 15 novembre 2026.** Les onze stats sont dans la fenêtre Équipement, qui donne DEF et DIS avec le terrain.
 - **En vue** (sans titre, sous la mini-carte) : fiche d'inspection de la case survolée en tête (voir ci-dessous), puis animaux visibles (icône, barre de vie ASCII 10 caractères, colonnes TOUCHER / SUBIR colorées). Joyaux, roches à joyau, éclats de métal et sites ne sont plus listés ici (retirés le 13 novembre 2026) : on les lit à la fiche de survol.
 - **Mini-carte** pleine largeur ; ennemis en points rouges ; un clic recentre la vue (mode carte) ; bouton maintenu + glisser = défilement en temps réel. Saisi à l'intérieur, le cadre suit le pointeur sans sauter ; saisi à l'extérieur, il se centre d'abord sous le pointeur. Fonctionne aussi au doigt.
 - Sous-menus repliables : **Inventaire** (les consommables, § 6 bis), **Génération** (+ bouton REGEN), **Life** (intensité par espèce, § 3), **Palette**, **Lab** (Bestiaire, Discrétion, Tile editor, Intro ; plus de bouton Enregistrer pour l'instant les réglages, aide des touches).
 
 ### Souris et inspection (inspirées de Brogue)
 - Le curseur système est masqué sur la carte ; le **viseur** est dessiné sur la case survolée. Dès qu'on appuie sur une touche (hors mode inspection), le viseur, la fiche et le trajet disparaissent jusqu'au prochain mouvement de souris.
-- **Survol** : fiche complète dans « En vue » — terrain et ses effets, distance, créature (état, PV, DÉG, PRE, ESQ modifiée, VIT, chances Toucher / Subir, comportement), site (profondeur ou « non analysé »), joyau (libre ou pris dans la roche), roche fissurée, bord indestructible, traces de sang, « souvenir » si la case est hors de vue, et l'action du clic (« y aller · N tours », « frapper », « forer »).
+- **Survol** : fiche complète dans « En vue » — terrain et ses effets, distance, créature (état, PV, DÉG (fourchette), PRE, DEF modifiée, VIT, chances Toucher / Subir, comportement), site (profondeur ou « non analysé »), joyau (libre ou pris dans la roche), roche fissurée, bord indestructible, traces de sang, « souvenir » si la case est hors de vue, et l'action du clic (« y aller · N tours », « frapper », « forer »).
 - **Trajet** : le plus court chemin (Dijkstra, 8 directions, cases connues seulement, eau profonde évitée, créatures visibles contournées) s'affiche par un petit rond blanc en pixel art (4 × 4 pixels de tuile, opacité 70 %) au centre de chaque case intermédiaire, rien sur la case du viseur.
 - **Clic** : case voisine = action immédiate (pas, coup de foreuse, attaque) ; case lointaine = déplacement automatique, un pas toutes les 90 ms. Si la destination est une roche ou une créature, la dernière étape est un coup de foreuse. Clic sur la foreuse posée sur un site = forer.
 - **Clic dans le brouillard** (9 novembre 2026) : une case inexplorée (ou une case vue mais atteignable seulement en passant par l'inexploré) est une destination valide. Le trajet suppose franchissables les cases jamais vues, sans regarder ce qu'elles cachent (l'aperçu ne révèle donc rien), et **se recalcule à chaque pas** avec ce que la foreuse découvre. Elle ne fore jamais pendant un tel trajet : elle **s'arrête** quand plus aucun passage ne mène à la destination, ou quand la destination se révèle infranchissable (montagne, rocher, gouffre). Les autres arrêts (ennemi, site, joyau…) s'appliquent aussi.
@@ -465,7 +470,7 @@ Décisions validées le 6 novembre 2026 :
 - Police pixel pour les dégâts : essayée puis abandonnée.
 - Roches incassables à la place des gouffres : essayées puis annulées.
 - Gros prédateurs 2 × 2 : supprimés.
-- Pas de blindage, pas de réparation automatique.
+- Pas de blindage, pas de réparation automatique. (16 novembre 2026 : la défense façon Brogue fait rater les coups, elle ne réduit pas les dégâts ; la règle tient.)
 
 ## 12. Pistes ouvertes
 

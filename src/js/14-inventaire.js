@@ -3,21 +3,22 @@
    G.items : objets posés au sol, {case:[k, …]} ; la foreuse qui passe dessus les ramasse.
    Équiper un objet AJOUTE ses modificateurs (mod) aux stats de G.st, le retirer les ENLÈVE : le reste du jeu lit G.st
    sans rien savoir de l'équipement, et les joyaux (qui modifient aussi G.st) s'additionnent sans conflit.
-   Champs de mod : degats, pre, crit, esq, vitesse, capteur, power, vieMax,
+   Champs de mod : degats, pre, crit, def, vitesse, capteur, power, vieMax,
+   req : POW requis par une arme ou une armure (voir 08-faune : armeFact, armureDef).
                    dis (portée de discrétion, en cases), coup (durée d'un coup de foreuse, en unités de temps).
    Consommables (conso) : usage unique, empilés (n exemplaires sur une ligne).
    Dessins : art = lignes de caractères ; col = même grille, une couleur par caractère
              (w blanc · 1 accent · 2 bio · 3 monde · e énergie · r rouge · d gris · . couleur du texte). */
 const SLOTS={arme:{n:1,nom:'Arme',g:'/'},armure:{n:1,nom:'Armure',g:'['},acc:{n:3,nom:'Accessoire',g:'='}};
 // libellé, sens favorable (+1 : plus c'est haut mieux c'est ; −1 : l'inverse), unité
-const MODS={degats:['DEG',1,''],pre:['PRE',1,''],crit:['CRIT',1,' %'],esq:['ESQ',1,''],vitesse:['VIT',1,''],capteur:['EYE',1,''],
+const MODS={degats:['DEG',1,''],pre:['PRE',1,''],crit:['CRIT',1,' %'],def:['DEF',1,''],vitesse:['VIT',1,''],capteur:['EYE',1,''],
   power:['POW',1,''],vieMax:['Vie max',1,''],energieMax:['Énergie max',1,''],dis:['DIS',-1,''],coup:['Coup',-1,''],isol:['Isolation',1,'']};
 const ITEMS={
-  foreuse:{n:'Foreuse',f:1,slot:'arme',mod:{},base:1,
+  foreuse:{n:'Foreuse',f:1,slot:'arme',req:1,mod:{},base:1,
     d:'L’outil d’origine de la foreuse, équilibré : c’est l’arme de référence.',
     art:["  ▄▄▄▄         ", "  ████▄▄▄      ", "  ███████▄▄▄   ", "  ██████████▀▀ ", "  ███████▀▀▀   ", "  ████▀▀▀      "],
     col:["..1111.........", "..1111222......", "..1111222222...", "..111122222222.", "..1111222222...", "..1111222......"]},
-  foret:{n:'Foret diamant',slot:'arme',mod:{degats:-2,pre:15,coup:-40},
+  foret:{n:'Foret diamant',slot:'arme',req:1,mod:{degats:-2,pre:15,coup:-40},
     d:'Pointe fine et précise : des coups rapides qui touchent presque toujours, mais moins appuyés.',
     art:[' ┌─┐▄▄▄        ',
          ' │█├████▄▄▄    ',
@@ -29,7 +30,7 @@ const ITEMS={
          '.d3d3333www111.',
          '.d3d3333www....',
          '.ddd333........']},
-  pilon:{n:'Marteau-pilon',slot:'arme',mod:{degats:15,pre:-10,coup:50},
+  pilon:{n:'Marteau-pilon',slot:'arme',req:3,mod:{degats:15,pre:-10,coup:50},
     d:'Masse hydraulique. Frappe très fort, mais lentement et moins juste.',
     art:['    ╔═════╗    ',
          '    ║ ▒▒▒ ║    ',
@@ -43,7 +44,7 @@ const ITEMS={
          '......dwd......',
          '...333www333...',
          '...wwwwwwwww...']},
-  chassis:{n:'Châssis renforcé',slot:'armure',mod:{vieMax:30,vitesse:-1},
+  chassis:{n:'Châssis renforcé',slot:'armure',req:3,mod:{vieMax:30,vitesse:-1},
     d:'Structure épaissie : encaisse davantage, mais alourdit la foreuse.',
     art:['  ▄█████████▄  ',
          '  ██▀▀▀█▀▀▀██  ',
@@ -55,7 +56,7 @@ const ITEMS={
          '..ww.3.w.3.ww..',
          '..wwdddwdddww..',
          '....ddddddd....']},
-  furtif:{n:'Coque furtive',f:1,slot:'armure',mod:{esq:5,dis:-2},
+  furtif:{n:'Coque furtive',f:1,slot:'armure',req:1,mod:{def:6,dis:-2},
     d:'Revêtement mat à facettes : on vous remarque de moins loin.',
     art:['    ▄▄▄▄▄▄▄    ',
          '  ▄▀░░░░░░░▀▄  ',
@@ -115,7 +116,7 @@ const ITEMS={
          '..deeee.eeeed..',
          '..deeee.eeeed..',
          '..ddddddddddd..']},
-  gyro:{n:'Gyroscope',slot:'acc',mod:{esq:10},
+  gyro:{n:'Gyroscope',slot:'acc',mod:{def:12},
     d:'Stabilise les esquives : la foreuse est plus dure à toucher.',
     art:['       ▄       ',
          '    ▄▀▀█▀▀▄    ',
@@ -127,19 +128,19 @@ const ITEMS={
          '..dd3dd1dd3dd..',
          '....333w333....',
          '.......w.......']},
-  scie:{n:'Scie circulaire',f:1,slot:'arme',mod:{degats:3,crit:15},
+  scie:{n:'Scie circulaire',f:1,slot:'arme',req:2,mod:{degats:3,crit:15},
     d:'Disque denté : entaille profond, coups critiques fréquents.',
     art:["     ▄▄███▄▄   ", "   ▄█▀▀   ▀▀█▄ ", "═══█   ███   █ ", "   ▀█▄▄   ▄▄█▀ ", "     ▀▀███▀▀   "],
     col:[".....wwwwwww...", "...wwww...wwww.", "dddw...333...w.", "...wwww...wwww.", ".....wwwwwww..."]},
-  lance:{n:'Lance thermique',f:1,slot:'arme',mod:{degats:7,esq:-10},
+  lance:{n:'Lance thermique',f:1,slot:'arme',req:2,mod:{degats:7,def:-12},
     d:'Jet de plasma : gros dégâts, mais encombrante, on esquive moins bien.',
     art:[" ┌──┐          ", " │▓▓├──────┐░  ", " │▓▓│═══════▒░░", " │▓▓├──────┘░  ", " └──┘          "],
     col:[".dddd..........", ".d33dddddddd3..", ".d33dwwwwwwwr33", ".d33dddddddd3..", ".dddd.........."]},
-  leger:{n:'Châssis allégé',slot:'armure',mod:{vitesse:1,esq:10,vieMax:-15},
+  leger:{n:'Châssis allégé',slot:'armure',req:1,mod:{vitesse:1,def:12,vieMax:-15},
     d:'Structure ajourée : plus vive et plus mobile, mais plus fragile.',
     art:["    ┌──┬──┐    ", "  ┌─┤  │  ├─┐  ", "  │ │  ▓  │ │  ", "  └─┤  │  ├─┘  ", "    └──┴──┘    "],
     col:["....ddddddd....", "..ddd..d..ddd..", "..d.d..1..d.d..", "..ddd..d..ddd..", "....ddddddd...."]},
-  isolante:{n:'Coque isolante',f:1,slot:'armure',mod:{isol:1,vieMax:10},
+  isolante:{n:'Coque isolante',f:1,slot:'armure',req:2,mod:{isol:1,vieMax:10},
     d:'Joints étanches : poison et glu durent deux fois moins longtemps.',
     art:["   ▄▄▄▄▄▄▄▄▄   ", "  █▒▒▒▒▒▒▒▒▒█  ", "  █▒ ▄▄▄▄▄ ▒█  ", "  █▒ ▀▀▀▀▀ ▒█  ", "  █▒▒▒▒▒▒▒▒▒█  ", "   ▀▀▀▀▀▀▀▀▀   "],
     col:["...wwwwwwwww...", "..w222222222w..", "..w2.11111.2w..", "..w2.11111.2w..", "..w222222222w..", "...wwwwwwwww..."]},
@@ -339,16 +340,36 @@ function invPickup(more){const c=idx(G.px,G.py),l=G.items&&G.items[c];if(!l||!l.
   return true;}
 
 // Stats dans la fenêtre : valeur actuelle, puis « → nouvelle valeur » en couleur si Entrée sur l'objet choisi la changeait
-const INV_STATS=[['vieMax','VIE'],['energieMax','ÉNER'],['vitesse','VIT'],['capteur','EYE'],['degats','DEG'],['pre','PRE'],['esq','ESQ'],['crit','CRIT'],['power','POW'],['dis','DIS'],['coup','COUP']];
+const INV_STATS=[['vieMax','VIE'],['energieMax','ÉNER'],['vitesse','VIT'],['capteur','EYE'],['degats','DEG'],['pre','PRE'],['def','DEF'],['crit','CRIT'],['power','POW'],['dis','DIS'],['coup','COUP']];
 function invDelta(o){const d=ITEMS[o.k],m={};if(d.conso)return m;const add=(mm,sg)=>{for(const k in mm||{})m[k]=(m[k]||0)+sg*mm[k];};
   if(o.eq){if(d.slot!=='arme')add(d.mod,-1);return m;}
   const sl=SLOTS[d.slot];if(invCount(d.slot)>=sl.n){if(sl.n>1)return m;add(ITEMS[G.inv.find(p=>p.eq&&ITEMS[p.k].slot===d.slot).k].mod,-1);}
   add(d.mod,1);return m;}
-// ESQ et DIS sont donnés tels qu'ils comptent ici et maintenant (terrain compris) : c'est ce que la colonne affichait avant le 15 novembre 2026
-function statsHTML(o){const st=G.st,m=o?invDelta(o):{},val=k=>k==='dis'?(G.stealth||STEALTH_BASE+(st.dis||0)):k==='esq'?st.esq+terrMod(G.px,G.py):k==='coup'?DUR.coup+(st.coup||0):k==='crit'?(st.crit??5):st[k];
-  const chg=Object.keys(m).some(k=>m[k]&&k!=='isol');
-  return `<div class="isth">Statistiques${chg?` · <span>→ ${o.eq?'si vous le retirez':'si vous l’équipez'}</span>`:''}</div><div class="istats">${INV_STATS.map(([k,l])=>{const v=val(k),dv=m[k]||0,u=k==='crit'?' %':'';
-    return `<span><i>${l}</i> ${v}${u}${dv?` <b style="color:${dv*MODS[k][1]>0?'var(--c1)':'var(--life)'}">→ ${v+dv}${u}</b>`:''}</span>`;}).join('')}</div>`;}
+// POW requis par une arme ou une armure, et ce que l'écart coûte ou rapporte avec le POW actuel
+const fois=x=>'× '+x.toFixed(2).replace('.',',');
+function reqHTML(d){if(!d.req)return '';const e=G.st.power-d.req,arme=d.slot==='arme';
+  const eff=e===0?'':arme?` : précision et dégâts ${fois(armeFact(G.st,d))}`:` : défense ${signe(armureDef(G.st,d))}`;
+  return `<p class="imods"><span style="color:${e<0?'var(--life)':e>0?'var(--c1)':'var(--dim)'}">POW requis ${d.req} (vous : ${G.st.power})${eff}</span></p>`;}
+// ce que donnerait Entrée sur l'objet choisi : stats, arme et armure
+function invHyp(o){const st=Object.assign({},G.st),m=o?invDelta(o):{};for(const k in m)st[k]=(st[k]||0)+m[k];
+  let arme=eqDe('arme')||null,armure=eqDe('armure')||null;
+  if(o){const d=ITEMS[o.k];if(!d.conso){if(d.slot==='arme'&&!o.eq)arme=d;if(d.slot==='armure')armure=o.eq?null:d;}}
+  return {st,arme,armure,m};}
+// PRE, DEG, DEF et DIS sont donnés tels qu'ils comptent ici et maintenant (POW requis et terrain compris)
+function statVal(k,st,arme,armure,dDis){
+  if(k==='dis')return [(G.stealth||STEALTH_BASE+(G.st.dis||0))+dDis];
+  if(k==='def')return [robotDefNu(st,armure)+terrMod(G.px,G.py)];
+  if(k==='pre')return [robotPre(st,arme)];
+  if(k==='degats'){const [a,b]=robotDegs(st,arme);return [(a+b)/2,a===b?''+a:a+'-'+b];}
+  if(k==='coup')return [DUR.coup+(st.coup||0)];
+  if(k==='crit')return [st.crit??5];
+  return [st[k]];}
+function statsHTML(o){const H=invHyp(o),A=eqDe('arme')||null,B=eqDe('armure')||null;
+  const L=INV_STATS.map(([k,l])=>{const c=statVal(k,G.st,A,B,0),n=statVal(k,H.st,H.arme,H.armure,H.m.dis||0),u=k==='crit'?' %':'';
+    return {k,l,u,c,n,ct:c[1]??c[0],nt:n[1]??n[0]};});
+  const chg=L.some(e=>e.ct!==e.nt);
+  return `<div class="isth">Statistiques${chg?` · <span>→ ${o.eq?'si vous le retirez':'si vous l’équipez'}</span>`:''}</div><div class="istats">${L.map(e=>
+    `<span><i>${e.l}</i> ${e.ct}${e.u}${e.ct!==e.nt?` <b style="color:${(e.n[0]-e.c[0])*MODS[e.k][1]>0?'var(--c1)':'var(--life)'}">→ ${e.nt}${e.u}</b>`:''}</span>`).join('')}</div>`;}
 /* Fenêtre plein écran (comme le Tile editor) : la liste à gauche, la fiche de l'objet choisi à droite. */
 function invHTML(){const inv=G.inv||[],liste=invEquipables();invFix();
   const cnt=s=>`${SLOTS[s].nom} <b>${invCount(s)}/${SLOTS[s].n}</b>`;
@@ -363,7 +384,7 @@ function invHTML(){const inv=G.inv||[],liste=invEquipables();invFix();
   if(o){const d=ITEMS[o.k];
     h+=`<div class="idet"><pre class="iart" aria-hidden="true">${artHTML(d)}</pre>
       <div class="inm"><b>${d.n}${(o.n||1)>1?' ×'+o.n:''}</b><span>${typeNom(d)}${o.eq?' · équipé':''}</span></div>
-      <p>${d.d}</p><p class="imods">${modHTML(d)}</p>
+      <p>${d.d}</p><p class="imods">${modHTML(d)}</p>${reqHTML(d)}
       <div class="ibtns"><button class="pace on" data-a="eq">${o.eq?'Retirer':'Équiper'}</button><button class="pace" data-a="drop">Jeter</button></div></div>`;}
   else h+='<div class="idet"><p>Aucun équipement à afficher. Les consommables sont dans le sous-menu Inventaire de la colonne.</p></div>';
   h+=statsHTML(o)+'</div>';

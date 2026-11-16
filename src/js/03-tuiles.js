@@ -73,7 +73,7 @@ PAT.crackH=(x,y)=>{const c=(a,b)=>PAT.crack2[b]&&PAT.crack2[b][a]==='0';
 PAT.rubble=["................","..33.......3....","..3.....33......","........3...33..","....3.......3...",".33......3......","..........33....","...3..3.........","..33.......3....","........33......",".3...3......33..","...........3....","....33..........","..........3..3..",".3..3...........","................"];
 // Petits animaux : v = vitesse (5 = celle du robot), d = portée de détection en cases
 const SPECIES=[
-  {n:'Insectoïde',v:6,pv:10,dmg:3,pre:60,esq:30,crit:5,b:'2',a:'3',rx:4,ry:2,hr:1.6,legs:3,ears:'antennes',tail:'',pat:'rayures',
+  {n:'Insectoïde',v:6,pv:10,dmin:2,dmax:4,pre:60,def:35,crit:5,b:'2',a:'3',rx:4,ry:2,hr:1.6,legs:3,ears:'antennes',tail:'',pat:'rayures',
    // dessin retouché au Tile editor et adopté comme norme le 6 novembre 2026
    rows:["................", "................", "................", "................", "................", "...........3..3.", ".3........3..3..", "..3.......2222..", "..3.2232232220..", "...32232232222..", "....22322322....", ".....2.2.2.2....", "....2..2.2..2...", "....2..2..2.2...", "................", "................"]}
 ];
@@ -94,26 +94,26 @@ function critter(p){const cx=7,cy=9,hx=cx+p.rx+1,hy=cy-p.ry+1,top=hy-Math.ceil(p
     return '.';};}
 // Animal agressif (1 case) : v = vitesse, d = détection, pv = points de vie
 const BEASTS=[
-  {n:'Crabos',key:'crabos',nb:15,role:'Chasse le robot',v:5,pv:30,dmg:5,pre:65,esq:0,crit:5,swim:true,nage:true,rows:["................","................","................","................","......0..0......",".33...2..2...33.","3.33..2..2..33.3","3..3.222222.3..3",".33322222222333.","...2222222222...","..2.22222222.2..",".2..2.2..2.2..2.",".2.2..2..2..2.2.","................","................","................"]},
-  {n:'Cafar',key:'cafar',nb:12,role:'En bande de 2 à 4 ; ce qu’un membre voit, la bande le sait',v:5,pv:15,dmg:5,pre:50,esq:10,crit:5,pack:true,alarm:false,
+  {n:'Crabos',key:'crabos',nb:15,role:'Chasse le robot',v:5,pv:30,dmin:3,dmax:7,pre:65,def:0,crit:5,swim:true,nage:true,rows:["................","................","................","................","......0..0......",".33...2..2...33.","3.33..2..2..33.3","3..3.222222.3..3",".33322222222333.","...2222222222...","..2.22222222.2..",".2..2.2..2.2..2.",".2.2..2..2..2.2.","................","................","................"]},
+  {n:'Cafar',key:'cafar',nb:12,role:'En bande de 2 à 4 ; ce qu’un membre voit, la bande le sait',v:5,pv:15,dmin:3,dmax:7,pre:50,def:10,crit:5,pack:true,alarm:false,
    // dessin retouché au Tile editor et adopté comme norme le 6 novembre 2026
    sec:true,rows:["................","................","................","................","...2..2...2.....","....2..2.2......",".....23223......","....223223233...","....33233232....","....223223233...",".....23223......","....2..2.2......","...2..2...2.....","................","................","................"]},
-  {n:'Crachin',key:'crachin',nb:4,role:'Crache de l’acide à distance et recule quand on l’approche',v:3,pv:12,dmg:4,pre:65,esq:10,crit:0,range:5,
+  {n:'Crachin',key:'crachin',nb:4,role:'Crache de l’acide à distance et recule quand on l’approche',v:3,pv:12,dmin:3,dmax:5,pre:65,def:10,crit:0,range:5,
    sec:true,rows:["................","................","................","................",".....2222.......","....222222......","...22322322.....","...2222222233...","...22222222.33w.","...2232232233...","...22222222.....","....222222......","....2.2..2.2....","...2..2..2..2...","................","................"]},
-  {n:'Vipérin',key:'viperin',nb:4,role:'Morsure empoisonnée : le poison ronge la vie pendant plusieurs battements',v:6,pv:12,dmg:3,pre:70,esq:25,crit:5,poison:[2, 5],
+  {n:'Vipérin',key:'viperin',nb:4,role:'Morsure empoisonnée : le poison ronge la vie pendant plusieurs battements',v:6,pv:12,dmin:2,dmax:4,pre:70,def:30,crit:5,poison:[2, 5],
    nage:true,rows:["................","................","................","..........222...",".........22022..",".........2222r..","........223.....",".......322......","......223.......",".....322........","....223...22....","....32...2322...","....223.232.22..",".....22322...2..","................","................"]},
-  {n:'Gluar',key:'gluar',nb:3,role:'Lent et résistant ; sa glu ralentit la foreuse',v:3,pv:30,dmg:6,pre:65,esq:0,crit:0,slow:4,
+  {n:'Gluar',key:'gluar',nb:3,role:'Lent et résistant ; sa glu ralentit la foreuse',v:3,pv:30,dmin:4,dmax:8,pre:65,def:0,crit:0,slow:4,
    rows:["................","................","................","................","......2222......","....22222222....","...2223222222...","..222322222222..","..222222220202..","..222222222222..",".22222222222222.",".22.222.222.222.",".2...22..2...2..","................","................","................"]},
-  {n:'Siphon',key:'siphon',nb:3,role:'Rapide et fuyant ; chaque piqûre vole de l’énergie',v:7,pv:8,dmg:2,pre:70,esq:35,crit:0,drain:15,
+  {n:'Siphon',key:'siphon',nb:3,role:'Rapide et fuyant ; chaque piqûre vole de l’énergie',v:7,pv:8,dmin:1,dmax:3,pre:70,def:45,crit:0,drain:15,
    nage:true,rows:["................","................","....33....33....","...3333..3333...","....333..333....",".....33..33.....","....22222222....","...2222222202www","....22222222....",".....2.22.2.....","....2..22..2....","...2...22...2...","................","................","................","................"]},
-  {n:'Tapi',key:'tapi',nb:4,role:'Embusqué dans les herbes hautes, invisible ; frappe par surprise quand on passe à côté',v:4,pv:18,dmg:6,pre:85,esq:5,crit:5,ambush:true,
+  {n:'Tapi',key:'tapi',nb:4,role:'Embusqué dans les herbes hautes, invisible ; frappe par surprise quand on passe à côté',v:4,pv:18,dmin:4,dmax:8,pre:85,def:5,crit:5,ambush:true,
    sec:true,rows:["................","................","................","................","................","................","..3..3..3..3....","..3..3..3..3....",".2222222222222..",".2202222222w2w2.",".222222222w2w22.","..22222222222...","..2..2...2..2...","................","................","................"]},
-  {n:'Taupar',key:'taupar',nb:2,role:'Creuseur : perce la roche pour rejoindre la foreuse en ligne droite',v:4,pv:35,dmg:7,pre:70,esq:5,crit:5,dig:true,
+  {n:'Taupar',key:'taupar',nb:2,role:'Creuseur : perce la roche pour rejoindre la foreuse en ligne droite',v:4,pv:35,dmin:5,dmax:9,pre:70,def:5,crit:5,dig:true,
    rows:["................","................","................","................",".....222222.....","...2222222222...","..222222222222w.","..2222222220222w","..22222222222w..","..222222222222w.","...22222222223..","...22..22..2233.","..33...33...33..","................","................","................"]},
-  {n:'Mastok',key:'mastok',nb:1,role:'Colosse lent : très résistant, frappe très fort',v:4,pv:60,dmg:14,pre:60,esq:0,crit:10,
+  {n:'Mastok',key:'mastok',nb:1,role:'Colosse lent : très résistant, frappe très fort',v:4,pv:60,dmin:10,dmax:18,pre:60,def:0,crit:10,
    rows:["................","..3..........3..","..33........33..","...3222222223...","..222222222222..",".22220222202222.",".22222222222222.",".22223333332222.",".22222222222222.",".22222222222222.",".22222222222222.","..222222222222..","..2222....2222..","..2222....2222..","..222......222..","................"]},
   // Brochon (16 novembre 2026) : le poisson. Il ne quitte jamais l'eau (aqua) et disparaît dès qu'il plonge en eau profonde (cache).
-  {n:'Brochon',key:'brochon',nb:5,role:'Ne quitte jamais l’eau ; invisible dès qu’il plonge en eau profonde',v:7,pv:14,dmg:5,pre:70,esq:25,crit:5,nage:true,aqua:true,cache:true,
+  {n:'Brochon',key:'brochon',nb:5,role:'Ne quitte jamais l’eau ; invisible dès qu’il plonge en eau profonde',v:7,pv:14,dmin:3,dmax:7,pre:70,def:30,crit:5,nage:true,aqua:true,cache:true,
    rows:["................","................","................","................","........111.....","........111.....",".1....2222222...",".11..222222222..",".111.2222202222.",".11..222222222..",".1....2222222...","........11......","................","................","................","................"]},
 ];
 /* Capacités des nouvelles espèces (13 novembre 2026), lues par 08-faune :

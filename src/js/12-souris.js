@@ -168,9 +168,9 @@ const TDESC={[GROUND]:['Sol rocheux','Praticable. Les points au sol se densifien
   [ROCK]:['Rocher','Infranchissable, ne bloque pas la vue. Cède en 2 coups de foreuse et laisse des gravats.'],
   [MOUNT]:['Montagne','Infranchissable et opaque. Cède en 2 coups de foreuse, sauf en bordure de carte. Peut renfermer un joyau.'],
   [HARD]:['Roche dure','Le cœur des massifs : infranchissable et opaque, et la foreuse n’y peut rien. Seule une charge sismique la brise. Ni joyau ni métal à l’intérieur.'],
-  [LIQ]:['Eau peu profonde','Praticable par tous. Esquive −20 pour qui s’y trouve ; pas deux fois plus lent, sauf pour les crabos qui nagent.'],
-  [DEEP]:['Eau profonde','Praticable par tous. Esquive −20, pas deux fois plus lent (sauf crabos), et le courant fait dévier la foreuse. Les créatures, elles, nagent droit.'],
-  [GRASS]:['Herbes hautes','Praticables mais opaques. Esquive +10 pour qui s’y cache. Elles se couchent au passage.'],
+  [LIQ]:['Eau peu profonde','Praticable par tous. Défense −20 pour qui s’y trouve ; pas deux fois plus lent, sauf pour les crabos qui nagent.'],
+  [DEEP]:['Eau profonde','Praticable par tous. Défense −20, pas deux fois plus lent (sauf crabos), et le courant fait dévier la foreuse. Les créatures, elles, nagent droit.'],
+  [GRASS]:['Herbes hautes','Praticables mais opaques. Défense +12 pour qui s’y cache. Elles se couchent au passage.'],
   [FLAT]:['Herbes basses','Ne bloquent pas la vue. Vous y êtes deux fois plus discret.'],
   [CHASM]:['Gouffre','Infranchissable. Ne bloque pas la vue.'],[BRIDGE]:['Pont','Praticable. Permet de franchir un gouffre.'],
   [RUBBLE]:['Gravats','Praticables. Restes d’une roche brisée.'],
@@ -195,13 +195,13 @@ function inspectHTML(){const {x,y}=HOV;if(x<0||y<0||x>=W||y>=H)return '';
   const out=[],t=G.t[i],[tn,td]=TDESC[t]||['Terrain',''],border=x===0||y===0||x===W-1||y===H-1;
   const occ=see?occupant(x,y):null;
   if(d===0){const st=G.st;out.push(head(ICON.robot_r,'Foreuse U-7',dt),
-    `<div class="kv"><span>Vie <b>${Math.ceil(st.vie)}/${st.vieMax}</b></span><span>Énergie <b>${Math.floor(st.energie)}/${st.energieMax}</b></span><span>ESQ <b>${robotEsq()}</b></span></div>`);}
+    `<div class="kv"><span>Vie <b>${Math.ceil(st.vie)}/${st.vieMax}</b></span><span>Énergie <b>${Math.floor(st.energie)}/${st.energieMax}</b></span><span>DEF <b>${robotDef()}</b></span></div>`);}
   else if(occ){const isB=(G.beasts||[]).includes(occ),sp=isB?BEASTS[occ.sp]:SPECIES[occ.sp],key=isB?sp.key:'insectoide',hp=Math.max(0,occ.hp??pvDe(sp));
     const P=isB&&sp.pack&&G.packs?G.packs[occ.pack]:null;
     const state=isB?(occ.hunt>0?(occ.sees?'en chasse':occ.search>0?'fouille les environs':'se dirige vers votre dernière position connue'):P?(P.pause>0?'au repos':'en route'):'erre'):({attack:'attaque',flee:'recule',follow:'suit',hold:'observe',seek:'se dirige vers votre dernière position connue',search:'fouille les environs'}[occ.mode]||'ne vous a pas repéré');
-    const me=hitChance(G.st.pre,sp.esq+terrMod(x,y)),them=isB||occ.mode==='attack'?hitChance(sp.pre,robotEsq()):null;
+    const me=hitChance(robotPre(),sp.def+terrMod(x,y)),them=isB||occ.mode==='attack'?hitChance(sp.pre,robotDef()):null;
     out.push(head(ICON[isB?'bz'+occ.sp+'r':'an'+occ.sp+'r'],sp.n,`${state} · ${dt}`),
-      `<div class="kv"><span>PV <b>${hp}/${pvDe(sp)}</b></span><span>DÉG <b>${dmgDe(sp)}</b></span><span>PRE <b>${sp.pre}</b></span><span>ESQ <b>${sp.esq+terrMod(x,y)}</b></span><span>VIT <b>${sp.v}</b></span></div>`,
+      `<div class="kv"><span>PV <b>${hp}/${pvDe(sp)}</b></span><span>DÉG <b>${dmgTxt(sp)}</b></span><span>PRE <b>${sp.pre}</b></span><span>DEF <b>${sp.def+terrMod(x,y)}</b></span><span>VIT <b>${sp.v}</b></span></div>`,
       ((isB?!(occ.hunt>0):!occ.mode)?`<p class="eye" title="Chance qu’il vous repère à chaque tour">${EYE_SVG} <b>${detectChance(occ)} %</b></p>`:''),
       `<p>Toucher <b style="color:${chanceCol(me)}">${me} %</b> · Subir <b style="color:${them==null?'var(--dim)':chanceCol(100-them)}">${them==null?'—':them+' %'}</b></p>`,
       `<p>${BEHAV[key]}</p>`);}
