@@ -219,8 +219,8 @@ function niveau(){drilling=false;
   genPlanet();
   G.w=W;G.h=H;
   lifeCalc();
-  durcir();   // la roche dure avant les joyaux et les métaux : ils n'y apparaissent jamais
-  {const a=W*H/(48*32);G.eff={};G.fum={};hideGems();hideOre(Math.max(1,Math.round(GISEMENTS.metal*a)),Math.max(1,Math.round(GISEMENTS.mat*a)));}
+  durcir();   // la roche dure avant les métaux : ils n'y apparaissent jamais
+  {const a=W*H/(48*32);G.eff={};G.fum={};hideOre(Math.max(1,Math.round(GISEMENTS.metal*a)),Math.max(1,Math.round(GISEMENTS.mat*a)));}
   G.sonar=1;   // sonar à émettre (voir sonarStart, 10-rendu) : il part 10 à 20 tours après l'arrivée
   G.items={};G.tracks={};G.lastDir=null;G.beasts=[];G.blood={};G.fv=2;
   G.inv=invTest();G.log=[];
@@ -273,22 +273,7 @@ function bestHaut(){const l=$('bestList'),c=[...l.children];if(c.length<=9){l.st
   l.style.maxHeight=(c[0].offsetHeight+c[3].offsetHeight+c[6].offsetHeight+24+2)+'px';l.scrollTop=0;}
 function closeBest(){$('bestiary').hidden=true;$('bestBtn').focus();render();}
 
-/* ---------- Joyaux cachés dans la roche ---------- */
-// Les joyaux ne se trouvent que dans la roche des montagnes, jamais en bordure : il faut creuser pour les atteindre.
-// Une case peut en contenir un si ses 8 voisines sont aussi de la roche (et jamais au bord de la carte).
-const GEM_COUNT=1;
-const UPGRADES=[
-  ['vie','Vie max','+10',st=>{st.vieMax+=10;st.vie+=10;}],
-  ['energie','Énergie max','+10',st=>{st.energieMax+=10;st.energie+=10;}],
-  ['capteur','EYE (vision)','+1',st=>{st.capteur+=1;}],
-  ['degats','DEG (dégâts)','+5',st=>{st.degats+=5;}],
-  ['pre','PRE (précision)','+5',st=>{st.pre+=5;}],
-  ['def','DEF (défense)','+6',st=>{st.def+=6;}],
-  ['crit','CRIT (coup critique)','+5 %',st=>{st.crit=(st.crit??5)+5;}],
-  ['power','POW (énergie/tour, équipement lourd)','+1',st=>{st.power+=1;}],
-  ['vitesse','VIT (vitesse)','+1',st=>{st.vitesse+=1;}]
-];
-// Éclats de métal : ORE_PCT % des cases de montagne (hors rangée extérieure indestructible et joyau) en contiennent ; brisée, la roche les laisse
+// Éclats de métal : ORE_PCT % des cases de montagne (hors rangée extérieure indestructible) en contiennent ; brisée, la roche les laisse
 // tomber au sol ; la foreuse qui passe dessus les ramasse et regagne des points de vie selon la densité.
 // G.ore[i] = 'roche1|2|3' (dans la paroi) ou 'sol1|2|3' (tombés) ; 1 petits, 2 moyens, 3 gros (ORE_MIX : part de chaque densité)
 const ORE_PCT=10,ORE_PV=[0,30,40,50],   // gisements rares mais gros depuis le 13 novembre 2026 (avant : 10, 15, 20)
@@ -309,26 +294,6 @@ function durcir(){const t=G.t,d=new Int16Array(W*H).fill(-1),q=[];
   for(let i=0;i<W*H;i++){const x=i%W,y=(i/W)|0;if(t[i]!==MOUNT||x<1||y<1||x>=W-1||y>=H-1)continue;
     if(Math.random()<DURCIR[Math.min(d[i],DURCIR.length-1)])t[i]=HARD;}}
 function hideOre(nMetal=3,nMat=1){G.ore={};const lib=[];
-  for(let i=0;i<W*H;i++){const x=i%W,y=(i/W)|0;if(G.t[i]===MOUNT&&x>0&&y>0&&x<W-1&&y<H-1&&!(G.gems&&G.gems[i]))lib.push(i);}
+  for(let i=0;i<W*H;i++){const x=i%W,y=(i/W)|0;if(G.t[i]===MOUNT&&x>0&&y>0&&x<W-1&&y<H-1)lib.push(i);}
   for(let i=lib.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[lib[i],lib[j]]=[lib[j],lib[i]];}
   lib.slice(0,nMetal+nMat).forEach((i,k)=>{const r=Math.random();G.ore[i]=(k<nMetal?'':'m')+'roche'+(r<ORE_MIX[1]?1:r<ORE_MIX[1]+ORE_MIX[2]?2:3);});}
-function hideGems(){G.gems={};
-  // Toujours GEM_COUNT joyaux : d'abord au cœur des massifs (8 voisines en roche), sinon au plus profond disponible
-  const deep=i=>DIRS.filter(([dx,dy])=>G.t[idx(i%W+dx,((i/W)|0)+dy)]===MOUNT).length;
-  const cand=[];for(let i=0;i<W*H;i++){const x=i%W,y=(i/W)|0;if(G.t[i]!==MOUNT||x<2||y<2||x>W-3||y>H-3)continue;cand.push([i,deep(i)+Math.random()*.5]);}
-  cand.sort((a,b)=>b[1]-a[1]);
-  const full=cand.filter(c=>c[1]>=8),pool=(full.length>=GEM_COUNT?full:cand).slice();
-  for(let n=0;n<GEM_COUNT&&pool.length;n++){const k=full.length>=GEM_COUNT?Math.floor(Math.random()*pool.length):0;
-    const [i]=pool.splice(k,1)[0];G.gems[i]='cache';
-    for(let j=pool.length-1;j>=0;j--){const o=pool[j][0];if(Math.abs(o%W-i%W)+Math.abs(((o/W)|0)-((i/W)|0))<6)pool.splice(j,1);}}
-  // pas assez de massifs espacés : on complète avec les cases de roche restantes les plus profondes
-  for(const [i] of cand){if(Object.keys(G.gems).length>=GEM_COUNT)break;if(!G.gems[i])G.gems[i]='cache';}}
-function chooseUpgrade(){
-  $('card').innerHTML=`<div class="tag">Joyau récupéré</div><h2>AMÉLIORATION</h2>
-    <p>Le joyau peut renforcer un de ces trois systèmes de la foreuse. Choisissez lequel.</p>
-    <div class="upg">${[...UPGRADES.keys()].sort(()=>Math.random()-.5).slice(0,3).sort((a,b)=>a-b).map(i=>{const [k,l,v]=UPGRADES[i];return `<button data-u="${i}"><span>${l}</span><b>${v}</b></button>`;}).join('')}</div>`;
-  $('overlay').hidden=false;$('card').querySelector('button').focus();
-  $('card').querySelector('.upg').onclick=e=>{const b=e.target.closest('button[data-u]');if(!b)return;const u=UPGRADES[+b.dataset.u];
-    u[3](G.st);computeFOV();say(`Joyau intégré : ${u[1]} ${u[2]}.`,'good');SFX.done();$('overlay').hidden=true;render();};
-}
-

@@ -2,7 +2,7 @@
    G.inv   : objets portés, [{k:'foret',eq:0|1}, …]. Un objet équipé reste dans la liste, affiché d'une autre couleur.
    G.items : objets posés au sol, {case:[k, …]} ; la foreuse qui passe dessus les ramasse.
    Équiper un objet AJOUTE ses modificateurs (mod) aux stats de G.st, le retirer les ENLÈVE : le reste du jeu lit G.st
-   sans rien savoir de l'équipement, et les joyaux (qui modifient aussi G.st) s'additionnent sans conflit.
+   sans rien savoir de l'équipement, et les autres sources de bonus s'additionnent sans conflit.
    Champs de mod : degats, pre, crit, def, vitesse, capteur, power, vieMax,
    req : POW requis par une arme ou une armure (voir 08-faune : armeFact, armureDef).
                    dis (portée de discrétion, en cases), coup (durée d'un coup de foreuse, en unités de temps).
@@ -237,7 +237,6 @@ function viseeOk(){if(!VISEE||G.over)return;const {i,x,y}=VISEE,o=G.inv[i];
     if(zx<1||zy<1||zx>=W-1||zy>=H-1)continue;const j=idx(zx,zy),v=G.t[j];
     if(v!==ROCK&&v!==MOUNT&&v!==HARD)continue;
     G.t[j]=RUBBLE;if(G.dmg)delete G.dmg[j];roches++;
-    if(G.gems&&G.gems[j]==='cache'){G.gems[j]='visible';sayMore('Un joyau brille dans les gravats !','info');}
     if(G.ore&&G.ore[j]&&!oreSol(G.ore[j])){const l=oreLv(G.ore[j]),mt=oreMat(G.ore[j]);G.ore[j]=(mt?'m':'')+'sol'+l;
       sayMore(mt?'De la Matière tombe au sol.':'Des éclats de métal tombent au sol.','good');}}
   engage();invTake(i);sacFix();SAC_H='';

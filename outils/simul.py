@@ -123,7 +123,7 @@ COMBAT = COMMUN + """
 const N = 300, out = {};
 addFx = () => {}; render = () => {}; dead = () => {}; SND.on = false; fog = false;
 const neuf = () => { G.st = { vie: 100, vieMax: 100, energie: 100, energieMax: 100, repar: 0, power: 10, vitesse: 5, degats: 10, capteur: 10, cout: 10, pre: 100, def: 10, crit: 5 };
-  G.inv = invTest(); G.eff = {}; G.over = null; G.sprint = false; G.debt = 0; G.time = 0; G.items = {}; G.ore = {}; G.gems = {}; G.blood = {}; G.log = []; };
+  G.inv = invTest(); G.eff = {}; G.over = null; G.sprint = false; G.debt = 0; G.time = 0; G.items = {}; G.ore = {};  G.blood = {}; G.log = []; };
 const equipe = (ks) => { for (const k of ks) invEquip(G.inv.findIndex(o => o.k === k)); };
 const bete = (sp, x, y) => ({ sp, x, y, hp: pvDe(BEASTS[sp]), mp: 0, hunt: 1, dir: -1, pack: -1, mem: [G.px, G.py], search: 0, lost: 0 });
 const proche = () => { let b = null, bd = 1e9; for (const o of G.beasts) { const d = Math.max(Math.abs(o.x - G.px), Math.abs(o.y - G.py)); if (d < bd) { bd = d; b = o; } } return b; };

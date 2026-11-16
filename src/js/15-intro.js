@@ -258,7 +258,7 @@ function start(data){
   delete G.mode;delete G.niv;delete G.biome;delete G.suite;   // partie enregistrée avant le 16 novembre 2026 : la descente et ses biomes n'existent plus
   if(G.st.matiere==null)G.st.matiere=0;if(G.sonar==null)G.sonar=1;   // partie commencée avant la descente
   palBiome(null);buildTiles();   // partie commencée avant l'inventaire
-  if(!G.gems)hideGems();
+  delete G.gems;   // le joyau et son menu d'amélioration ont été retirés le 16 novembre 2026
   if(!G.beasts||!G.beasts.some(b=>b.sp===1)&&LIFE.cafar>0)spawnBeasts();
   if(G.fv!==2){G.fv=2;G.blood={};G.beasts=[];spawnAnimals();spawnBeasts();}started=!!data.started;computeFOV();}else newGame();
   new ResizeObserver(resize).observe($('mapwrap'));resize();

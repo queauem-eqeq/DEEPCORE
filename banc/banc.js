@@ -27,7 +27,7 @@ const PILOTES=[['chasse','Chasse : attaque tout ce qui vit'],['traversee','Trave
 function carte(cfg){const g0=GEN,gen=cfg.carte==='arene'?{eau:0,montagne:0,gouffre:0,herbe:0}:(RELIEFS[cfg.carte]||RELIEFS.plateau).gen;
   GEN=Object.assign({},g0,gen,{taille:1});SANS_VAISSEAU=true;try{genPlanet();}finally{GEN=g0;SANS_VAISSEAU=false;}
   if(cfg.carte==='arene')for(let y=1;y<H-1;y++)for(let x=1;x<W-1;x++)G.t[idx(x,y)]=GROUND;
-  Object.assign(G,{w:W,h:H,eff:{},gems:{},ore:{},items:{},tracks:{},lastDir:null,beasts:[],amb:[],blood:{},fv:2,inv:invTest(),log:[],sonar:2,over:null,time:0,debt:0,sprint:false});
+  Object.assign(G,{w:W,h:H,eff:{},ore:{},items:{},tracks:{},lastDir:null,beasts:[],amb:[],blood:{},fv:2,inv:invTest(),log:[],sonar:2,over:null,time:0,debt:0,sprint:false});
   G.st.matiere=0;for(const k in LIFE)LIFE[k]=Math.max(0,Math.round(+(cfg.ennemis||{})[k]||0));
   spawnAnimals();spawnBeasts();
   for(const k of [cfg.arme,cfg.armure,...(cfg.acc||[])])if(k&&k!=='foreuse'){const i=G.inv.findIndex(o=>o.k===k);if(i>=0&&!G.inv[i].eq)invEquip(i);}
