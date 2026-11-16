@@ -341,7 +341,7 @@ Reste à faire : faire **trouver** les objets (au sol, lâchés par les ennemis,
 | Tapi | embusqué | caché dans les **herbes hautes**, invisible et absent de toutes les listes ; frappe **par surprise** (touche toujours, critique) dès que la foreuse est à son contact, puis se bat normalement. Si la foreuse bute dessus avant, c'est elle qui a la surprise |
 | Taupar | creuseur | en chasse, il vient **en ligne droite en perçant la roche** (une paroi = un battement) ; les éclats et joyaux de la paroi tombent comme pour la foreuse |
 | Mastok | colosse | lent, 60 PV, 14 de dégâts : à éviter ou à fuir sans équipement |
-| Brochon | poisson | **ne quitte jamais l'eau** (16 novembre 2026) ; **invisible dès qu'il est en eau profonde** — absent du rendu, de « En vue », de la fiche de survol et des messages de repérage. Rapide et difficile à toucher. Il peuple le Marécage et le Pierrier |
+| Brochon (dernier de la liste : les tuiles sont numérotées, une espèce s'ajoute toujours à la fin) | poisson | **ne quitte jamais l'eau** (16 novembre 2026) ; **invisible dès qu'il est en eau profonde** — absent du rendu, de « En vue », de la fiche de survol et des messages de repérage. Rapide et difficile à toucher. Il peuple le Marécage et le Pierrier |
 
 Effets durables sur la foreuse : affichés sous les jauges (« Poison 4 · Englué 2 »), décomptés à chaque battement. La Coque isolante divise leur durée par deux, la Purge les supprime.
 

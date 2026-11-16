@@ -98,6 +98,10 @@ modification, marquer la version actuelle. Dernière version à fichier unique :
 - Les réglages du joueur (palettes, tuiles retouchées, intro déjà vue…) vivent dans le `localStorage` du navigateur
   (`np-*`) et dans la base de l'artefact (`reglages/courant`, chargée seulement si plus récente que `np-maj`).
   Ne pas renommer ces clés. Renommer une tuile (clé de `PAT`) abandonne les retouches faites dessus : le signaler.
+- **Une nouvelle espèce s'ajoute à la fin de `BEASTS`**, jamais au milieu : les tuiles des créatures sont numérotées
+  (`bz0`…`bz9`, dans l'ordre de la liste) et les retouches du joueur sont enregistrées sous ces numéros. Insérer une
+  espèce décale toutes les suivantes et colle leurs retouches sur la mauvaise bête (16 novembre 2026 : le brochon,
+  inséré avant le mastok, portait la tuile du mastok).
 - Tuiles : motifs 16×16 en texte. Codes : `.` transparent · `0` noir · `w` blanc · `r` rouge · `1` accent · `2` bio · `3` monde.
 - Pas de dépendance externe ni d'étape de compilation : ce qui est dans `src/` est ce qui est publié. Une bibliothèque
   ne peut venir que d'un des hôtes autorisés par l'artefact (cdnjs, jsdelivr, unpkg) ou être copiée dans `src/`.
