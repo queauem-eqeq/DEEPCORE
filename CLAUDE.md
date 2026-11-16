@@ -75,6 +75,14 @@ Artefact à part (https://claude.ai/artifact/9BKRaoB4hzgdWhzYFx5A6q) qui rejoue 
    Ne plus synchroniser de HTML dans le projet claude.ai « GAME » ; mettre à jour seulement
    `claude/noyau-profond-conception.md` (copie de `docs/conception.md`) quand ce document change.
 
+## Copie sur l'ordinateur de l'utilisateur
+**À chaque fois que l'utilisateur demande de pousser sur GitHub** (consigne du 16 novembre 2026), déposer en même temps
+le jeu sur son ordinateur, dans `F:\WORK\IAZONE\DEEPCORE`, **un dossier par version** nommé comme la branche de
+version : `version-AAAA-MM-JJ-n`. Y copier le contenu de `src/` tel quel (`index.html`, `style.css`, `js/*.js`), pour que
+le jeu se lance en ouvrant `index.html`. Passer par le pont vers l'ordinateur : copier les fichiers dans
+`/mnt/user-data/outputs/<version>/`, puis `device_commit_files` ; si le dossier n'est pas encore relié à la session,
+`device_request_folder_access` le demande. Inutile de recopier quand seuls des documents changent.
+
 ## Publication sur GitHub Pages
 Le jeu est en ligne sur https://queauem-eqeq.github.io/DEEPCORE/ à chaque fusion dans `main`.
 
