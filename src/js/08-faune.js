@@ -2,9 +2,16 @@
 const animalAt=(x,y)=>G.animals&&G.animals.find(a=>a.x===x&&a.y===y);
 // Eau : depuis le 15 novembre 2026, TOUTES les créatures y entrent (avant : seuls les crabos). Les nageurs (swim) gardent leur avantage :
 // eux seuls ne sont pas ralentis par l'eau (slowOf). L'argument swim encore passé à canWalk et distFrom est sans effet, il est ignoré.
-const isWater=v=>v===LIQ||v===DEEP,canWalk=v=>!blocks(v);
+/* Eau : trois rapports à l'eau selon l'espèce (16 novembre 2026).
+   - `nage` (crabos, vipérin, siphon, brochon) : elles y vont naturellement, en chasse comme en errance ;
+   - `sec` (cafar, crachin, tapi) : elles n'y mettent jamais une patte, même pour poursuivre ;
+   - les autres (insectoïde, gluar, taupar, mastok) : elles l'évitent, mais la traversent pour poursuivre la foreuse.
+   Une créature déjà dans l'eau peut toujours en sortir, sinon elle y resterait coincée en cessant la poursuite.
+   `swim` reste à part : il ne dit pas qui entre dans l'eau, mais qui n'y est pas ralenti (le crabos seul). */
+const isWater=v=>v===LIQ||v===DEEP,canWalk=(v,mouille)=>!blocks(v)&&(mouille||!isWater(v));
+const mouilleOk=(sp,o)=>!!sp.nage||(!sp.sec&&(o.hunt>0||!!o.aware||!!o.enraged))||isWater(G.t[idx(o.x,o.y)]);
 const canHit=o=>Math.max(Math.abs(o.x-G.px),Math.abs(o.y-G.py))<=1&&diagOk(o.x,o.y,Math.sign(G.px-o.x),Math.sign(G.py-o.y));   // pas d'attaque à travers un coin
-const animalOk=(x,y)=>{if(x<1||y<1||x>=W-1||y>=H-1)return false;const v=G.t[idx(x,y)];return canWalk(v,false)&&!(x===G.px&&y===G.py)&&!animalAt(x,y)&&!beastAt(x,y)&&!ambAt(x,y);};
+const animalOk=(x,y,m)=>{if(x<1||y<1||x>=W-1||y>=H-1)return false;const v=G.t[idx(x,y)];return canWalk(v,m)&&!(x===G.px&&y===G.py)&&!animalAt(x,y)&&!beastAt(x,y)&&!ambAt(x,y);};
 function spawnAnimals(){
   const pool=[...SPECIES.keys()].sort(()=>Math.random()-.5).slice(0,1);G.animals=[];G.fauna=[];G.pool=pool;
   for(let k=0,tries=0;k<LIFE.insectoide&&tries<LIFE.insectoide*300+500;tries++){const x=rnd(2,W-3),y=rnd(2,H-3),v=G.t[idx(x,y)];
@@ -15,20 +22,20 @@ function spawnAnimals(){
 // se rapproche au-delà de 3). Quand un crabos chasse le robot à proximité, il passe à l'attaque.
 const KEEP_MIN=1,KEEP_MAX=3;
 const cheb=(a,x,y)=>Math.max(Math.abs(a.x-x),Math.abs(a.y-y));
-function stepToward(a,dist){chaseStep(a,dist,animalOk);}
+function stepToward(a,dist,fits){chaseStep(a,dist,fits||animalOk);}
 // Distance à la foreuse en traitant les autres créatures comme des obstacles (soi-même exclu)
-function robotDistAvoid(self,tx=G.px,ty=G.py){const occ=new Uint8Array(W*H);
+function robotDistAvoid(self,tx=G.px,ty=G.py,mouille){const occ=new Uint8Array(W*H);
   for(const o of [...(G.beasts||[]),...(G.animals||[])])if(o!==self)occ[idx(o.x,o.y)]=1;
   const d=new Int16Array(W*H).fill(-1),q=[idx(tx,ty)];d[q[0]]=0;
   for(let k=0;k<q.length;k++){const c=q[k],x=c%W,y=(c/W)|0;for(const[dx,dy]of DIRS){const a=x+dx,b=y+dy;if(a<1||b<1||a>=W-1||b>=H-1)continue;
-    const j=idx(a,b),v=G.t[j];if(d[j]>=0||!diagOk(x,y,dx,dy)||!canWalk(v)||occ[j])continue;d[j]=d[c]+1;q.push(j);}}
+    const j=idx(a,b),v=G.t[j];if(d[j]>=0||!diagOk(x,y,dx,dy)||!canWalk(v,mouille)||occ[j])continue;d[j]=d[c]+1;q.push(j);}}
   return d;}
 // Poursuite commune à tous les ennemis : avance par le plus court chemin ; si un autre ennemi bloque le passage,
 // contourne l'obstacle (détour de 10 cases au plus) vers une case libre autour de la foreuse, pour attaquer à plusieurs
 const DETOUR_MAX=10;
 function chaseStep(o,dist,fits,tx=G.px,ty=G.py){const h=dist[idx(o.x,o.y)],cur=h<0?9999:h;let best=null,bv=cur;
   for(const[dx,dy]of DIRS){const nx=o.x+dx,ny=o.y+dy;if(!fits(nx,ny)||!diagOk(o.x,o.y,dx,dy))continue;const v=dist[idx(nx,ny)];if(v>=0&&v<bv){bv=v;best=[nx,ny,dx];}}
-  if(!best&&cur>1){const d2=robotDistAvoid(o,tx,ty),h2=d2[idx(o.x,o.y)];
+  if(!best&&cur>1){const d2=robotDistAvoid(o,tx,ty,mouilleOk(G.beasts&&G.beasts.includes(o)?BEASTS[o.sp]:SPECIES[o.sp],o)),h2=d2[idx(o.x,o.y)];
     if(h2>0&&h2<=cur+DETOUR_MAX){let b2=h2;
       for(const[dx,dy]of DIRS){const nx=o.x+dx,ny=o.y+dy;if(!fits(nx,ny)||!diagOk(o.x,o.y,dx,dy))continue;const v=d2[idx(nx,ny)];if(v>=0&&v<b2){b2=v;best=[nx,ny,dx];}}}}
   if(best){o.x=best[0];o.y=best[1];if(best[2])o.dir=best[2]>0?1:-1;return true;}return false;}
@@ -61,12 +68,12 @@ function spot(o){o.mem=[G.px,G.py];o.search=0;o.stuck=0;o.lost=0;const dx=Math.s
 function detectChance(o){return (Math.hypot(o.x-G.px,o.y-G.py)<=(G.stealth||STEALTH_BASE)&&(lastAct==='dig'||los(o.x,o.y,G.px,G.py)))?Math.round(NOTICE*100):0;}
 function forget(o){o.mem=null;o.search=0;o.stuck=0;o.lost=0;}
 // un pas vers la dernière position connue ; renvoie false quand il faut passer à la fouille
-function seekStep(o,fits,DC){const [mx,my]=o.mem,k=mx+','+my,d=DC[k]||(DC[k]=distFrom(mx,my)),h=d[idx(o.x,o.y)];
+function seekStep(o,fits,DC,m){const [mx,my]=o.mem,k=mx+','+my+','+(m?1:0),d=DC[k]||(DC[k]=distFrom(mx,my,m)),h=d[idx(o.x,o.y)];
   if(h<0){forget(o);return false;}if(h<=1){o.search=SEARCH_T;return false;}
   if(chaseStep(o,d,fits,mx,my)){o.stuck=0;return true;}if(++o.stuck>2)o.search=SEARCH_T;return false;}
 function searchStep(o,fits){if(Math.random()<.6){const [dx,dy]=DIRS[rnd(0,7)];if(fits(o.x+dx,o.y+dy)&&diagOk(o.x,o.y,dx,dy)){o.x+=dx;o.y+=dy;if(dx)o.dir=dx;}}}
-function stepAway(a){const cur=(a.x-G.px)**2+(a.y-G.py)**2;let best=null,bd=cur;
-  for(const[dx,dy]of [...DIRS].sort(()=>Math.random()-.5)){const nx=a.x+dx,ny=a.y+dy;if(!animalOk(nx,ny)||!diagOk(a.x,a.y,dx,dy))continue;const nd=(nx-G.px)**2+(ny-G.py)**2;if(nd>bd){bd=nd;best=[nx,ny,dx];}}
+function stepAway(a,fits){const cur=(a.x-G.px)**2+(a.y-G.py)**2;let best=null,bd=cur;const ok=fits||animalOk;
+  for(const[dx,dy]of [...DIRS].sort(()=>Math.random()-.5)){const nx=a.x+dx,ny=a.y+dy;if(!ok(nx,ny)||!diagOk(a.x,a.y,dx,dy))continue;const nd=(nx-G.px)**2+(ny-G.py)**2;if(nd>bd){bd=nd;best=[nx,ny,dx];}}
   if(best){a.x=best[0];a.y=best[1];if(best[2])a.dir=best[2]>0?1:-1;}}
 // Le combat est engagé (15 novembre 2026) : la foreuse vient d'être attaquée ou d'attaquer une créature, que le coup porte ou non.
 // Tous les insectoïdes qui la suivent (ceux qui l'ont repérée, en vue ou sur sa trace) passent à l'attaque, et ne reculeront plus.
@@ -98,8 +105,9 @@ function fumTick(){const F=G.fum;if(!F)return;let ks=Object.keys(F);if(!ks.lengt
   if(!Object.keys(F).length)sayMore('La fumée se dissipe.');}
 function animalsAct(){
   turnStealth();
-  if(!G.animals||G.over)return;let fled=null,swarm=null;const dist=robotDist(false),DC={};
+  if(!G.animals||G.over)return;let fled=null,swarm=null;const distSec=robotDist(false),distEau=robotDist(true),DC={};
   for(const a of G.animals){if(G.over)break;const sp=SPECIES[a.sp];a.mp=Math.min(2,a.mp+sp.v/5/slowOf(G.t[idx(a.x,a.y)],sp.swim));
+    const mA=mouilleOk(sp,a),okA=(x,y)=>animalOk(x,y,mA),dist=mA?distEau:distSec;
     const d=Math.hypot(a.x-G.px,a.y-G.py),sees=voitForeuse(a,!!a.aware);
     if(sees){if(!a.aware)alerte(a);a.aware=1;spot(a);}
     else if(a.aware&&a.search>0&&--a.search===0){a.aware=0;a.enraged=false;forget(a);}   // fouille terminée : il oublie
@@ -112,13 +120,13 @@ function animalsAct(){
     if(a.mode==='flee'&&prev!=='flee'&&vis[idx(a.x,a.y)])fled=fled||sp;
     if(a.mode==='attack'&&canHit(a)){hurtRobot(a,sp);continue;}
     while(a.mp>=1&&!G.over){a.mp-=1;
-      if(a.mode==='attack'){if(canHit(a)){a.mp=Math.min(a.mp,.99);break;}stepToward(a,dist);}
-      else if(a.mode==='flee')stepAway(a);
-      else if(a.mode==='follow')stepToward(a,dist);
-      else if(a.mode==='seek'){if(!seekStep(a,animalOk,DC)){a.mode=a.search>0?'search':'';break;}}
-      else if(a.mode==='search')searchStep(a,animalOk);
+      if(a.mode==='attack'){if(canHit(a)){a.mp=Math.min(a.mp,.99);break;}stepToward(a,dist,okA);}
+      else if(a.mode==='flee')stepAway(a,okA);
+      else if(a.mode==='follow')stepToward(a,dist,okA);
+      else if(a.mode==='seek'){if(!seekStep(a,okA,DC,mA)){a.mode=a.search>0?'search':'';break;}}
+      else if(a.mode==='search')searchStep(a,okA);
       else if(Math.random()<(a.mode==='hold'?.15:.3)){const [dx,dy]=DIRS[rnd(0,7)];const nx=a.x+dx,ny=a.y+dy;
-        if(animalOk(nx,ny)&&diagOk(a.x,a.y,dx,dy)&&(a.mode!=='hold'||cheb({x:nx,y:ny},G.px,G.py)>KEEP_MIN)){a.x=nx;a.y=ny;if(dx)a.dir=dx;}}
+        if(okA(nx,ny)&&diagOk(a.x,a.y,dx,dy)&&(a.mode!=='hold'||cheb({x:nx,y:ny},G.px,G.py)>KEEP_MIN)){a.x=nx;a.y=ny;if(dx)a.dir=dx;}}
       else a.mp=Math.min(a.mp,.99);}
   }
   if(swarm){sayMore(`Les ${swarm.n.toLowerCase()}s passent à l’attaque !`,'warn');SFX.chirp();}
@@ -128,9 +136,12 @@ function animalsAct(){
 /* ---------- Prédateurs ---------- */
 const FOOT=[[0,0]];
 const beastAt=(x,y)=>G.beasts&&G.beasts.find(b=>b.x===x&&b.y===y);
-function beastFits(b,x,y){for(const[dx,dy]of FOOT){const cx=x+dx,cy=y+dy;if(cx<1||cy<1||cx>=W-1||cy>=H-1)return false;const v=G.t[idx(cx,cy)];
-  if(!canWalk(v)||(cx===G.px&&cy===G.py)||animalAt(cx,cy)||ambAt(cx,cy))return false;const o=beastAt(cx,cy);if(o&&o!==b)return false;}return true;}
-const beastVisible=b=>!fog||FOOT.some(([dx,dy])=>vis[idx(b.x+dx,b.y+dy)]);
+function beastFits(b,x,y){const spB=BEASTS[b.sp],mB=mouilleOk(spB,b);
+  for(const[dx,dy]of FOOT){const cx=x+dx,cy=y+dy;if(cx<1||cy<1||cx>=W-1||cy>=H-1)return false;const v=G.t[idx(cx,cy)];
+  if(spB.aqua&&!isWater(v))return false;   // le brochon ne quitte jamais l'eau
+  if(!canWalk(v,mB)||(cx===G.px&&cy===G.py)||animalAt(cx,cy)||ambAt(cx,cy))return false;const o=beastAt(cx,cy);if(o&&o!==b)return false;}return true;}
+const beastCache=b=>!!BEASTS[b.sp].cache&&G.t[idx(b.x,b.y)]===DEEP;   // le brochon en eau profonde : invisible, même à côté
+const beastVisible=b=>!beastCache(b)&&(!fog||FOOT.some(([dx,dy])=>vis[idx(b.x+dx,b.y+dy)]));
 function spawnBeasts(){G.beasts=[];G.beastSeen={};G.packs={};let packId=0;
   const tryPut=(sp,x,y,pack)=>{const b={sp,x,y,hp:pvDe(BEASTS[sp]),mp:Math.random(),hunt:0,dir:-1,pack};if(!beastFits(b,x,y))return false;G.beasts.push(b);return true;};
   for(let k=0,t=0;k<LIFE.crabos&&t<LIFE.crabos*400+500;t++){const x=rnd(2,W-4),y=rnd(2,H-4);if(Math.hypot(x-G.px,y-G.py)<SZ(20,6))continue;if(tryPut(0,x,y,-1))k++;}
@@ -147,9 +158,9 @@ function spawnBeasts(){G.beasts=[];G.beastSeen={};G.packs={};let packId=0;
     for(let k=0,t=0;k<n&&t<n*400+500;t++){const x=rnd(2,W-3),y=rnd(2,H-3);if(Math.hypot(x-G.px,y-G.py)<SZ(sp.ambush?8:20,sp.ambush?3:6))continue;
       if(sp.ambush){const v=G.t[idx(x,y)];if(!(v===GRASS||(t>n*200&&canWalk(v,false)))||ambAt(x,y)||beastAt(x,y)||animalAt(x,y)||(x===G.px&&y===G.py))continue;G.amb.push({sp:i,x,y,hp:pvDe(sp)});k++;}
       else if(tryPut(i,x,y,-1))k++;}});}
-function robotDist(){return distFrom(G.px,G.py);}
-function distFrom(tx,ty){const d=new Int16Array(W*H).fill(-1),q=[idx(tx,ty)];d[q[0]]=0;
-  for(let k=0;k<q.length;k++){const c=q[k],x=c%W,y=(c/W)|0;for(const[dx,dy]of DIRS){const a=x+dx,b=y+dy;if(a<1||b<1||a>=W-1||b>=H-1)continue;const j=idx(a,b),v=G.t[j];if(d[j]>=0||!diagOk(x,y,dx,dy)||!canWalk(v))continue;d[j]=d[c]+1;q.push(j);}}return d;}
+function robotDist(m){return distFrom(G.px,G.py,m);}
+function distFrom(tx,ty,mouille){const d=new Int16Array(W*H).fill(-1),q=[idx(tx,ty)];d[q[0]]=0;
+  for(let k=0;k<q.length;k++){const c=q[k],x=c%W,y=(c/W)|0;for(const[dx,dy]of DIRS){const a=x+dx,b=y+dy;if(a<1||b<1||a>=W-1||b>=H-1)continue;const j=idx(a,b),v=G.t[j];if(d[j]>=0||!diagOk(x,y,dx,dy)||!canWalk(v,mouille))continue;d[j]=d[c]+1;q.push(j);}}return d;}
 const footDist=(x,y,d)=>Math.min(...FOOT.map(([dx,dy])=>{const v=d[idx(x+dx,y+dy)];return v<0?9999:v;}));
 const nearRobot=b=>canHit(b);
 // Chance de toucher = précision − esquive, bornée entre 5 et 95 %.
@@ -197,7 +208,7 @@ function beastAway(b){let best=null,bd=(b.x-G.px)**2+(b.y-G.py)**2;
 function rockFalls(i){if(G.dmg)delete G.dmg[i];G.t[i]=RUBBLE;if(G.gems&&G.gems[i]==='cache')G.gems[i]='visible';if(G.ore&&G.ore[i]&&!oreSol(G.ore[i]))G.ore[i]=(oreMat(G.ore[i])?'m':'')+'sol'+oreLv(G.ore[i]);}
 function digDist(tx,ty){const d=new Int16Array(W*H).fill(-1),q=[idx(tx,ty)];d[q[0]]=0;
   for(let k=0;k<q.length;k++){const c=q[k],x=c%W,y=(c/W)|0;for(let n=0;n<4;n++){const a=x+DIRS[n][0],b=y+DIRS[n][1];if(a<1||b<1||a>=W-1||b>=H-1)continue;
-    const j=idx(a,b),v=G.t[j];if(d[j]>=0||!(canWalk(v,false)||v===ROCK||v===MOUNT))continue;d[j]=d[c]+1;q.push(j);}}return d;}
+    const j=idx(a,b),v=G.t[j];if(d[j]>=0||!(canWalk(v,true)||v===ROCK||v===MOUNT))continue;d[j]=d[c]+1;q.push(j);}}return d;}   // le taupar perce la roche, mais pas la roche dure
 function digStep(b,sees){const t=sees?[G.px,G.py]:b.mem;if(!t){b.hunt=0;return false;}
   const d=digDist(t[0],t[1]),h=d[idx(b.x,b.y)];if(h<0){forget(b);b.hunt=0;return false;}
   if(h<=1){if(!sees)b.search=SEARCH_T;return false;}
@@ -213,7 +224,7 @@ function digStep(b,sees){const t=sees?[G.px,G.py]:b.mem;if(!t){b.hunt=0;return f
 function beastsAct(){
   turnStealth();
   ambTick();
-  if(!G.beasts||!G.beasts.length||G.over)return;const dist=robotDist(),DC={};let charged=null;const alarms=[];packTick();
+  if(!G.beasts||!G.beasts.length||G.over)return;const distSec=robotDist(false),distEau=robotDist(true),DC={};let charged=null;const alarms=[];packTick();
   for(const b of G.beasts){if(G.over)break;if(b.skip){b.skip=0;continue;}const sp=BEASTS[b.sp];b.mp=Math.min(2,b.mp+sp.v/5/slowOf(G.t[idx(b.x,b.y)],sp.swim));
     const d=Math.hypot(b.x-G.px,b.y-G.py),sees=voitForeuse(b,b.hunt>0);
     if(sees){if(!b.hunt&&sp.alarm)alarms.push(b);if(!b.hunt&&beastVisible(b))charged=charged||sp;if(!b.hunt)alerte(b);b.hunt=1;spot(b);if(G.px!==b.x)b.dir=Math.sign(G.px-b.x);
@@ -229,9 +240,9 @@ function beastsAct(){
       if(sp.dig&&b.hunt>0&&!(b.search>0)){if(!digStep(b,sees))break;continue;}          // creuseur : tout droit, à travers la roche
       if(b.hunt>0&&sees){
         if(nearRobot(b)){b.mp=Math.min(b.mp,.99);break;}
-        chaseStep(b,dist,(x,y)=>beastFits(b,x,y));}
+        chaseStep(b,mouilleOk(sp,b)?distEau:distSec,(x,y)=>beastFits(b,x,y));}
       else if(b.hunt>0&&b.search>0)searchStep(b,(x,y)=>beastFits(b,x,y));                // fouille autour du dernier point connu
-      else if(b.hunt>0){if(!seekStep(b,(x,y)=>beastFits(b,x,y),DC))break;}       // vers la dernière position connue
+      else if(b.hunt>0){if(!seekStep(b,(x,y)=>beastFits(b,x,y),DC,mouilleOk(sp,b)))break;}       // vers la dernière position connue
       else if(sp.pack){packMove(b);}
       else if(Math.random()<.25){const[dx,dy]=DIRS[rnd(0,7)];if(beastFits(b,b.x+dx,b.y+dy)&&diagOk(b.x,b.y,dx,dy)&&(!sp.pack||packOk(b,b.x+dx,b.y+dy))){b.x+=dx;b.y+=dy;if(dx)b.dir=dx;}}
       else b.mp=Math.min(b.mp,.99);}

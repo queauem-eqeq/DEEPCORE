@@ -41,6 +41,7 @@ Roguelike au tour par tour dans une esthétique inspirée de Cogmind et de Brogu
   - les autres ont une rive de largeur moyenne tirée entre 0,4 et 3,6 cases, **ondulée de ×0,3 à ×1,9** par un bruit : une plage d'un côté, un bord franc de l'autre.
   La profondeur se lit à la distance au rivage, diagonales comprises. Deux lacs qui se touchent n'en font qu'un : leur contact ne compte pas comme un rivage. Mesuré sur 12 cartes : 94 étendues d'eau, 23 % sans eau profonde, 7 % entièrement profondes, 70 % mêlées.
   **L'eau profonde peut donc toucher la terre** : on peut tomber dedans d'un pas, sans bande d'eau peu profonde pour prévenir. Le puits d'arrivée des niveaux 2 à 5 débouche toujours au sec.
+- **Roche dure au cœur des massifs** (16 novembre 2026) : une fois les montagnes posées, chaque case de montagne est durcie avec une chance qui monte avec sa **profondeur** dans le massif (distance au premier terrain qui n'est pas de la montagne, en 4 directions) : rien à une ou deux cases, puis 30 %, 65 %, 90 %, 100 %. Les massifs gardent donc une écorce tendre et un cœur impénétrable. Posée **avant** les joyaux et les métaux, qui n'apparaissent jamais dedans. La rangée extérieure de la carte reste de la montagne ordinaire.
 - Relief (montagnes, gouffres) : méthode **Automate cellulaire**, **Bruit** ou **Mixte** ; réglages Remplissage (35–70 %) et Itérations (1–10).
 - Connectivité garantie : les zones isolées sont reliées par le plus court chemin (pont sur gouffre, col dans la montagne, rocher dégagé) ; petites poches comblées.
 - L'eau ne touche jamais un gouffre (marge de 2 cases de terre ferme).
@@ -126,7 +127,7 @@ Plus on descend : plus de menace, moins de quoi se réparer, plus de Matière.
 
       menace = terrain × [ Σ effectif × coût  +  (704 / surface) × ( Σ effectif × pression )² ]
 
-  Chaque espèce a un **coût** (pris un à un) et une **pression** (ce que la foule ajoute) : Insectoïde 3,3 / 0,15 · Cafar 2 / 0,3 · Siphon 1,1 / 0,31 · Gluar 5,7 / 0,67 · Crachin 4,9 / 1,12 · Crabos 7,3 / 0,86 · Vipérin 10,8 / 0,57 · Taupar 16,7 / 0,63 · Tapi 27,1 / 0,49 · Mastok 46 / 1,51. Le terme au carré fait monter la menace plus vite que le nombre : trente crabos pèsent bien plus que dix fois trois.
+  Chaque espèce a un **coût** (pris un à un) et une **pression** (ce que la foule ajoute) : Brochon 6 / 0,5 (estimé, jamais passé au banc) · Insectoïde 3,3 / 0,15 · Cafar 2 / 0,3 · Siphon 1,1 / 0,31 · Gluar 5,7 / 0,67 · Crachin 4,9 / 1,12 · Crabos 7,3 / 0,86 · Vipérin 10,8 / 0,57 · Taupar 16,7 / 0,63 · Tapi 27,1 / 0,49 · Mastok 46 / 1,51. Le terme au carré fait monter la menace plus vite que le nombre : trente crabos pèsent bien plus que dix fois trois.
 - **Terrain** : coefficient du biome, mesuré avec les mêmes ennemis sur son relief : Plateau 1 · Marécage 0,87 · Hautes herbes 0,92 · Failles 0,95 · Pierrier 1,3 · Galeries 0,5. Un archétype enregistré vaut 1.
 - **Budget** : à chaque niveau, les effectifs du monde tiré sont mis à l'échelle pour atteindre le budget. Les intensités d'un biome ou d'un archétype **ne règlent que les proportions entre espèces** ; le total, c'est le niveau qui le fixe.
 - **Arrondi** : pas de minimum forcé par espèce ; une espèce trop chère pour le budget n'apparaît pas (les cafars vont au moins par deux ; il reste toujours au moins un individu).
@@ -186,6 +187,7 @@ Jugée trop haute et trop étroite (640 × 835), elle est passée à 940 × 390 
 | Eau peu profonde | oui | libre | −20 d'esquive ; **toutes les créatures y entrent** (15 novembre 2026) ; **terrain lent : pas ×1,5**, sauf pour les crabos qui nagent |
 | Eau profonde | oui | libre | −20 d'esquive ; **toutes les créatures y entrent** et y nagent droit (seule la foreuse dérive) ; **chaque pas a 50 % de chance de partir dans une autre direction tirée au hasard** (si cette case est bloquée, la foreuse est plaquée contre l'obstacle et ne bouge pas ; le tour passe) ; **attendre** dans l'eau profonde déplace la foreuse d'une case au hasard (le courant) ; **terrain lent : pas ×2**, sauf pour les crabos |
 | Fumée (fumigène) | oui | **bloquée** | nuage posé par un fumigène : cache la vue des deux côtés, se dissipe en 15 à 25 battements (§ 6 bis) |
+| Roche dure | non, **indestructible à la foreuse** | bloquée | le cœur des massifs (16 novembre 2026) : la foreuse n'y peut rien, seule une **charge sismique** la brise. **Ni joyau ni métal** à l'intérieur. Tuile « Roche dure », retouchable |
 | Herbes hautes (assombries de moitié le 15 novembre 2026 : même teinte, luminosité divisée par deux, elles ressortaient trop) | oui | bloquée | **deviennent des herbes basses** au passage ; +10 d'esquive pour qui s'y trouve ; froufrou au passage (bruitage refait le 13 novembre 2026 : trois coups de brosse décalés, tirés au hasard à chaque pas) |
 | Herbes basses | oui | libre | **portée de discrétion ÷ 2** : c'est le couvert du jeu |
 | Gouffre | non | libre | — |
@@ -269,7 +271,7 @@ Version d'essai : tous les objets sont donnés au départ, non équipés sauf la
   - **Batterie** : décharge électrique qui monte ; une dizaine de **petites flèches** couleur bio qui montent, parties plus bas et plus haut que les croix pour ne pas se perdre dans la foreuse, de la même couleur.
   - **Purge** : vidange sous pression ; un **filet ovale** d'un pixel entoure la case de la foreuse, à un pixel de distance (ellipse de 18 × 17 pixels de tuile, contour calculé une fois pour toutes), et **pulse** quatre fois en une seconde.
   - Pixel art strict comme le reste : taille fixe, opaques, calés sur la grille des pixels de tuile, chaque grain apparaît à son heure et s'efface d'un coup.
-- **Charge sismique : une visée** (16 novembre 2026). L'utiliser n'explose pas tout de suite : un **carré de 3 × 3 en « Bord croisé » rouge** s'ouvre **une case devant la foreuse** (selon son orientation). On le déplace **à la souris** ou **aux touches de direction**, sans que la foreuse bouge, dans un **rayon de 4 cases** autour d'elle (butée nette). **Entrée** ou un **clic** tire : **30 dégâts** à chaque créature des neuf cases, puis la charge est consommée et le combat est engagé (les insectoïdes passent à l'attaque). Le tir prend **un battement** et fait autant de bruit qu'un coup de foreuse sur la roche (portée de discrétion ×1,5 ce battement-là). **Échap** annule sans rien consommer. Pendant la visée, aucune autre commande ne répond. La zone ne casse pas la roche. La tuile rouge suit les retouches de « Bord croisé » au Tile editor.
+- **Charge sismique : une visée** (16 novembre 2026). L'utiliser n'explose pas tout de suite : un **carré de 3 × 3 en « Bord croisé » rouge** s'ouvre **une case devant la foreuse** (selon son orientation). On le déplace **à la souris** ou **aux touches de direction**, sans que la foreuse bouge, dans un **rayon de 4 cases** autour d'elle (butée nette). **Entrée** ou un **clic** tire : **30 dégâts** à chaque créature des neuf cases, et **la roche vole en éclats** — rocher, montagne et **roche dure**, qui ne cède qu'à cela ; joyaux et métaux tombent au sol comme sous un coup de foreuse, puis la charge est consommée et le combat est engagé (les insectoïdes passent à l'attaque). Le tir prend **un battement** et fait autant de bruit qu'un coup de foreuse sur la roche (portée de discrétion ×1,5 ce battement-là). **Échap** annule sans rien consommer. Pendant la visée, aucune autre commande ne répond. La zone ne casse pas la roche. La tuile rouge suit les retouches de « Bord croisé » au Tile editor.
 - **Consommables** : usage unique, **coûtant un battement** depuis le 16 novembre 2026 (les ennemis jouent, les effets durables se décomptent, l'énergie remonte ; avant, c'était gratuit et instantané). Équiper, lui, reste gratuit. Se boire au sous-menu Inventaire. Refusé si la jauge est déjà pleine (l'objet n'est pas perdu) ; le surplus au-delà du maximum est perdu. Les consommables identiques s'empilent (« ×2 »).
 - **Jeter** pose l'objet (un seul exemplaire pour une pile) au sol sous la foreuse (tuile « Objet au sol », retouchable au Tile editor). Repasser sur la case le ramasse ; sans bouger, touche G ou bouton « Ramasser ». La fiche de survol nomme les objets posés.
 - **Durée du coup** : une arme peut allonger ou raccourcir le coup de foreuse (§ 5 bis) ; plancher à 25.
@@ -325,9 +327,10 @@ Reste à faire : faire **trouver** les objets (au sol, lâchés par les ennemis,
 | Siphon | 7 | 8 | 2 | 70 | 35 | 0 | 3 |
 | Tapi | 4 | 18 | 6 | 85 | 5 | 5 % | 4 |
 | Taupar | 3 | 35 | 7 | 70 | 5 | 5 % | 2 |
+| Brochon | 7 | 14 | 5 | 70 | 25 | 5 % | 5 |
 | Mastok | 3 | 60 | 14 | 60 | 0 | 10 % | 1 |
 
-**Dix espèces depuis le 13 novembre 2026.** Les sept nouvelles ont chacune un rôle :
+**Onze espèces depuis le 16 novembre 2026** (dix le 13 novembre). Les sept nouvelles ont chacune un rôle :
 
 | Espèce | Rôle | Particularité |
 |---|---|---|
@@ -338,6 +341,7 @@ Reste à faire : faire **trouver** les objets (au sol, lâchés par les ennemis,
 | Tapi | embusqué | caché dans les **herbes hautes**, invisible et absent de toutes les listes ; frappe **par surprise** (touche toujours, critique) dès que la foreuse est à son contact, puis se bat normalement. Si la foreuse bute dessus avant, c'est elle qui a la surprise |
 | Taupar | creuseur | en chasse, il vient **en ligne droite en perçant la roche** (une paroi = un battement) ; les éclats et joyaux de la paroi tombent comme pour la foreuse |
 | Mastok | colosse | lent, 60 PV, 14 de dégâts : à éviter ou à fuir sans équipement |
+| Brochon (dernier de la liste : les tuiles sont numérotées, une espèce s'ajoute toujours à la fin) | poisson | **ne quitte jamais l'eau** (16 novembre 2026) ; **invisible dès qu'il est en eau profonde** — absent du rendu, de « En vue », de la fiche de survol et des messages de repérage. Rapide et difficile à toucher. Il peuple le Marécage et le Pierrier |
 
 Effets durables sur la foreuse : affichés sous les jauges (« Poison 4 · Englué 2 »), décomptés à chaque battement. La Coque isolante divise leur durée par deux, la Purge les supprime.
 
@@ -346,7 +350,11 @@ La statistique **DÉT (détection)** par espèce a été supprimée le 13 novemb
 (Valeurs par défaut du code. Les valeurs réellement utilisées sont celles enregistrées par le joueur — voir § 10.)
 
 ### Comportements
-- **Eau (15 novembre 2026)** : **toutes les créatures entrent dans l'eau**, peu profonde comme profonde, et y subissent −20 d'esquive comme la foreuse. Elles ne dérivent pas dans l'eau profonde : la dérive reste propre à la foreuse. Le **crabos** garde son avantage : seul nageur, il n'est pas ralenti par l'eau (les autres font des pas ×1,5 en eau peu profonde, ×2 en eau profonde). Avant cette date, seuls les crabos entraient dans l'eau et les autres la contournaient : se réfugier dans un lac ne protège plus.
+- **Eau : trois rapports à l'eau** (16 novembre 2026 ; le 15, tout le monde y entrait sans distinction) :
+  - **nageurs** — **Crabos, Vipérin, Siphon, Brochon** : ils y vont naturellement, en chasse comme en errance ;
+  - **au sec** — **Cafar, Crachin, Tapi** : ils n'y mettent jamais une patte, même pour poursuivre, et contournent le lac ou renoncent ;
+  - **les autres** — Insectoïde, Gluar, Taupar, Mastok : ils évitent l'eau en errance, mais la traversent pour **poursuivre la foreuse**.
+  Une créature déjà dans l'eau peut toujours en sortir, sinon elle y resterait coincée en cessant la poursuite. Toutes y subissent −20 d'esquive comme la foreuse, et aucune ne dérive en eau profonde : la dérive reste propre à la foreuse. Le **crabos** reste le seul à n'y être pas ralenti (les autres font des pas ×1,5 en eau peu profonde, ×2 en eau profonde). Vérifié sur une rivière de 3 cases : le cafar reste sur sa rive, le gluar et le crabos traversent.
 - **Poursuite (tous les ennemis)** : chaque ennemi qui chasse ou attaque suit le plus court chemin vers la foreuse. Si un autre ennemi bloque le passage, il contourne l'obstacle (détour de 10 cases au plus) vers une case libre autour de la foreuse, au lieu d'attendre : plusieurs ennemis peuvent ainsi l'encercler et attaquer en même temps (jusqu'à 8).
 - **Diagonales comme dans Brogue** (10 novembre 2026) : un pas ou un coup en diagonale est **impossible si l'une des deux cases voisines orthogonales est une paroi** (rocher, montagne, coque du vaisseau) — on ne coupe pas les coins. Vaut pour la foreuse (message « Coin de paroi »), tous les ennemis (déplacements et attaques), le courant de l'eau profonde, les trajets automatiques et la génération (connexion des zones et accès aux sites calculés avec la même règle). L'eau et les gouffres ne bloquent pas les diagonales. Dans le brouillard, le trajet ne tient compte que des coins déjà vus.
 - **Coup par surprise** : frapper un ennemi qui **ne vous a pas repéré** (ni en chasse, ni alerté, ni en train de vous chercher) **touche toujours** et est **toujours critique**. Message « Coup par surprise ! ».

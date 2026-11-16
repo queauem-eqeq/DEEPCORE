@@ -4,7 +4,7 @@ const EYE_SVG='<svg class="eyeic" viewBox="0 0 11 7" width="22" height="14" shap
 let HOV=null,INSPECT=false,TRAV=null,lastPT='mouse',PC={k:'',p:null};
 const busy=()=>!G||!!G.over||drilling||!$('overlay').hidden;
 // créature visible sur une case (les animaux cachés par le brouillard ne bloquent pas le tracé)
-function occupant(x,y){const seenHere=!fog||vis[idx(x,y)];if(!seenHere)return null;return beastAt(x,y)||animalAt(x,y)||null;}
+function occupant(x,y){const seenHere=!fog||vis[idx(x,y)];if(!seenHere)return null;const b=beastAt(x,y);return (b&&!beastCache(b)?b:null)||animalAt(x,y)||null;}
 // Plus court chemin (Dijkstra, 8 directions) sur les cases connues ; l'eau profonde est évitée autant que possible.
 // La destination peut être une créature ou une roche : la dernière étape devient alors un coup de foreuse.
 // explore : les cases jamais vues sont supposées franchissables (coût uniforme, sans regarder ce qu'elles cachent) ;
@@ -167,6 +167,7 @@ cv.addEventListener('click',ev=>{if(VISEE){const c=cellAt(ev);viseeVers(c.x,c.y)
 const TDESC={[GROUND]:['Sol rocheux','Praticable. Les points au sol se densifient à l’approche d’un site de forage.'],
   [ROCK]:['Rocher','Infranchissable, ne bloque pas la vue. Cède en 2 coups de foreuse et laisse des gravats.'],
   [MOUNT]:['Montagne','Infranchissable et opaque. Cède en 2 coups de foreuse, sauf en bordure de carte. Peut renfermer un joyau.'],
+  [HARD]:['Roche dure','Le cœur des massifs : infranchissable et opaque, et la foreuse n’y peut rien. Seule une charge sismique la brise. Ni joyau ni métal à l’intérieur.'],
   [LIQ]:['Eau peu profonde','Praticable par tous. Esquive −20 pour qui s’y trouve ; pas deux fois plus lent, sauf pour les crabos qui nagent.'],
   [DEEP]:['Eau profonde','Praticable par tous. Esquive −20, pas deux fois plus lent (sauf crabos), et le courant fait dévier la foreuse. Les créatures, elles, nagent droit.'],
   [GRASS]:['Herbes hautes','Praticables mais opaques. Esquive +10 pour qui s’y cache. Elles se couchent au passage.'],
@@ -224,6 +225,7 @@ function inspectHTML(){const {x,y}=HOV;if(x<0||y<0||x>=W||y>=H)return '';
   let act='';
   if(d===0)act=s?'<kbd>F</kbd> ou clic : forer ce site.':'';
   else if(d===1&&occ)act='Clic : frapper avec la foreuse.';
+  else if(d===1&&t===HARD)act='';
   else if(d===1&&(t===ROCK||t===MOUNT))act=border?'':'Clic : coup de foreuse (10 énergie).';
   else if(d===1&&t===CHASM)act='';
   else if(d===1)act='Clic : avancer d’une case.';
