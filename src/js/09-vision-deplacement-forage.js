@@ -161,7 +161,7 @@ function askDrill(){
   $('overlay').hidden=false;drill(s);   // pas de confirmation (15 novembre 2026) : F fore tout de suite
 }
 function drill(s){drilling=true;let k=0;const n=12;
-  const step=()=>{$('card').innerHTML=`<div class="tag">Forage en cours · site ${s.id}</div><h2>DESCENTE</h2><p class="prog">${'▮'.repeat(k)}${'·'.repeat(n-k)}</p>`;
+  const step=()=>{$('card').innerHTML=`<div class="tag">Forage en cours · site ${s.id}</div><h2>FORAGE</h2><p class="prog">${'▮'.repeat(k)}${'·'.repeat(n-k)}</p>`;
     if(k<n){SFX.drill(k);k++;setTimeout(step,reduced?0:110);}else{SFX.done();end(s);}};step();}
 // Mort : la foreuse explose (voir explode, rendu), puis un seul bouton pour repartir
 function dead(){if(G.over.boom)return;G.over.boom=true;if(TRAV)stopTravel();if(REST)stopRest();
@@ -172,13 +172,11 @@ function dead(){if(G.over.boom)return;G.over.boom=true;if(TRAV)stopTravel();if(R
 // Quitter : une page ne peut pas fermer son onglet ; tout s'éteint (écran noir, son coupé), un bouton discret rallume le jeu
 function quitGame(){$('overlay').hidden=true;$('off').hidden=false;try{if(AC)AC.suspend();}catch(e){}$('offOn').focus();}
 $('offOn').onclick=()=>{$('off').hidden=true;try{if(AC)AC.resume();}catch(e){}unlock();SFX.start();newGame();render();};
+// Site foré : le noyau est atteint, la partie est gagnée (16 novembre 2026 ; avant, on descendait au niveau suivant)
 function end(s){
   drilling=false;const bilan=`<div class="stats"><span>${G.turn} tours · ${G.dist} cases parcourues</span><span>Matière en réserve : ${G.st.matiere||0}</span></div>`;
-  if(G.mode==='test'){
-    testGame();$('overlay').hidden=true;render();return;}
-  if(G.niv>=NIV_MAX){G.over={site:s.id,win:true};
-    $('card').innerHTML=`<div class="tag">Niveau ${NIV_MAX} foré</div><h2>NOYAU<br>ATTEINT</h2>${bilan}<p>La foreuse a traversé les ${NIV_MAX} niveaux.</p><button class="go" id="again">Nouvelle exploration</button>`;
-    $('overlay').hidden=false;$('again').onclick=()=>{newGame();$('overlay').hidden=true;render();};$('again').focus();return;}
-  descendre();$('overlay').hidden=true;render();   // pas de fiche d'arrivée (15 novembre 2026) : le niveau commence tout de suite, le journal l'annonce
+  G.over={site:s.id,win:true};
+  $('card').innerHTML=`<div class="tag">Site ${s.id} foré</div><h2>NOYAU<br>ATTEINT</h2>${bilan}<p>La foreuse a percé jusqu’au noyau de la planète.</p><button class="go" id="again">Nouvelle exploration</button>`;
+  $('overlay').hidden=false;$('again').onclick=()=>{newGame();$('overlay').hidden=true;render();};$('again').focus();
 }
 

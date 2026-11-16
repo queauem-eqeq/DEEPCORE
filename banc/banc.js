@@ -9,15 +9,25 @@ const vrai={render,addFx,say,sayMore};
 dead=()=>{if(G.over)G.over.boom=true;};                        // pas d'explosion ni d'écran de fin sur le banc
 function muet(on){if(on){render=()=>{};addFx=()=>{};say=(m,c)=>{G.msg={m,c:c||''};};sayMore=say;}else{render=vrai.render;addFx=vrai.addFx;say=vrai.say;sayMore=vrai.sayMore;}}
 const ESP=()=>[{key:'insectoide',n:SPECIES[0].n,ic:'an0r'},...BEASTS.map((b,i)=>({key:b.key,n:b.n,ic:'bz'+i+'r'}))];
-const CARTES=()=>[['arene','Arène dégagée'],...Object.entries(BIOMES).map(([k,b])=>[k,b.n])];
+/* Reliefs d'essai du banc : les six reliefs des anciens biomes du jeu, gardés ici le 16 novembre 2026 quand la descente a été
+   retirée, pour que les mesures déjà archivées restent comparables. Ce sont des terrains de mesure, pas du contenu de jeu. */
+const RELIEFS={
+  plateau:{n:'Plateau',gen:{eau:8,montagne:10,gouffre:3,herbe:14,methode:'automate'}},
+  marecage:{n:'Marécage',gen:{eau:30,montagne:6,gouffre:1,herbe:28,methode:'automate'}},
+  herbes:{n:'Hautes herbes',gen:{eau:6,montagne:6,gouffre:2,herbe:55,methode:'automate'}},
+  galeries:{n:'Galeries',gen:{eau:2,montagne:46,gouffre:3,herbe:4,methode:'bruit'}},
+  pierrier:{n:'Pierrier',gen:{eau:1,montagne:14,gouffre:6,herbe:2,methode:'bruit'}},
+  failles:{n:'Failles',gen:{eau:4,montagne:22,gouffre:18,herbe:6,methode:'automate'}}
+};
+const CARTES=()=>[['arene','Arène dégagée'],...Object.entries(RELIEFS).map(([k,b])=>[k,b.n])];
 const OBJ=s=>Object.entries(ITEMS).filter(([,d])=>d.slot===s).map(([k,d])=>[k,d.n]);
 const PILOTES=[['chasse','Chasse : attaque tout ce qui vit'],['traversee','Traversée : va au site, se défend seulement']];
 
 /* --- une carte de taille 1 prête à jouer --- */
-function carte(cfg){const g0=GEN,gen=cfg.carte==='arene'?{eau:0,montagne:0,gouffre:0,herbe:0}:(BIOMES[cfg.carte]||BIOMES.plateau).gen;
+function carte(cfg){const g0=GEN,gen=cfg.carte==='arene'?{eau:0,montagne:0,gouffre:0,herbe:0}:(RELIEFS[cfg.carte]||RELIEFS.plateau).gen;
   GEN=Object.assign({},g0,gen,{taille:1});SANS_VAISSEAU=true;try{genPlanet();}finally{GEN=g0;SANS_VAISSEAU=false;}
   if(cfg.carte==='arene')for(let y=1;y<H-1;y++)for(let x=1;x<W-1;x++)G.t[idx(x,y)]=GROUND;
-  Object.assign(G,{w:W,h:H,mode:'test',niv:0,biome:null,suite:null,eff:{},gems:{},ore:{},items:{},tracks:{},lastDir:null,beasts:[],amb:[],blood:{},fv:2,inv:invTest(),log:[],sonar:2,over:null,time:0,debt:0,sprint:false});
+  Object.assign(G,{w:W,h:H,eff:{},gems:{},ore:{},items:{},tracks:{},lastDir:null,beasts:[],amb:[],blood:{},fv:2,inv:invTest(),log:[],sonar:2,over:null,time:0,debt:0,sprint:false});
   G.st.matiere=0;for(const k in LIFE)LIFE[k]=Math.max(0,Math.round(+(cfg.ennemis||{})[k]||0));
   spawnAnimals();spawnBeasts();
   for(const k of [cfg.arme,cfg.armure,...(cfg.acc||[])])if(k&&k!=='foreuse'){const i=G.inv.findIndex(o=>o.k===k);if(i>=0&&!G.inv[i].eq)invEquip(i);}

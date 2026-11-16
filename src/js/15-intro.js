@@ -255,8 +255,9 @@ function start(data){
     if(G.st)G.st.cout=10;if(G.st&&G.st.power<1)G.st.power=1;if(G.st&&G.st.power<6){G.st.power+=9;G.st.pre+=20;}   /* partie d'avant le POW de base 10 et la précision de base 100 */
     if(G.st&&(G.st.capteur<10||G.st.capteur===12||G.st.capteur===15))G.st.capteur=10;if(!G.ore)hideOre();if(!G.st||G.st.pre==null||G.st.energieMax==null){G.st={vie:100,vieMax:100,energie:100,energieMax:100,repar:0,power:10,vitesse:5,degats:10,capteur:10,cout:10,pre:100,def:10,crit:5};if(G.inv)G.inv.forEach(o=>o.eq=0);}
   if(!G.inv)G.inv=invTest();if(!G.items)G.items={};if(!G.eff)G.eff={};if(!G.fum)G.fum={};if(!G.amb)G.amb=[];G.w=W;G.h=H;invMigre();
-  if(!G.mode){G.mode='descente';G.niv=1;G.biome='plateau';G.suite=tirageBiomes();}if(G.st.matiere==null)G.st.matiere=0;if(G.sonar==null)G.sonar=1;   // partie commencée avant la descente
-  palBiome(G.biome?biomeDe(G.biome).teinte:null);buildTiles();   // partie commencée avant l'inventaire
+  delete G.mode;delete G.niv;delete G.biome;delete G.suite;   // partie enregistrée avant le 16 novembre 2026 : la descente et ses biomes n'existent plus
+  if(G.st.matiere==null)G.st.matiere=0;if(G.sonar==null)G.sonar=1;   // partie commencée avant la descente
+  palBiome(null);buildTiles();   // partie commencée avant l'inventaire
   if(!G.gems)hideGems();
   if(!G.beasts||!G.beasts.some(b=>b.sp===1)&&LIFE.cafar>0)spawnBeasts();
   if(G.fv!==2){G.fv=2;G.blood={};G.beasts=[];spawnAnimals();spawnBeasts();}started=!!data.started;computeFOV();}else newGame();

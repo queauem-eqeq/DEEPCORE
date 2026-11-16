@@ -86,60 +86,29 @@ Le sous-menu Life ne demande plus un nombre d'individus mais une **intensité** 
 
 Nombre de créatures = effectif de référence de l'espèce (colonne « Référence » du § 7) × coefficient × surface de la carte rapportée à la taille 4, avec le minimum du niveau (2 pour les cafars, qui vont en bande). En taille 4 et au niveau Normal on retrouve les effectifs d'avant ; en taille 1, un ou deux individus par espèce, et « Infesté » en donne au moins quatre. Les anciens réglages en nombres sont convertis au niveau le plus proche. Mémorisé sous `np-intens` (l'ancienne clé `np-life` n'est plus écrite).
 
-## 3 bis. Descente : niveaux, biomes, difficulté (13 novembre 2026)
+## 3 bis. Le niveau (16 novembre 2026)
 
-La partie est une **descente en 5 niveaux** (5 pour commencer ; on allongera). Forer le site d'un niveau fait arriver sur une nouvelle carte, d'un autre biome ; on ne remonte pas. Forer le site du niveau 5 atteint le noyau : écran « NOYAU ATTEINT ».
+La partie tient sur **une seule carte**, toujours celle de l'atterrissage : le vaisseau, un site de forage, le relief et
+la faune réglés dans le **menu Monde**. **REGEN** (et **GÉNÉRER LA CARTE**, dans le menu Monde) en tire une nouvelle avec
+les réglages du moment. Forer le site atteint le noyau : écran « NOYAU ATTEINT », puis une nouvelle carte. Mort : idem.
 
-- **Niveau 1** : toujours le biome Plateau, avec le vaisseau.
-- **Taille** : l'atterrissage et tous les niveaux de la descente sont en **taille 3** (72 × 48) depuis le 15 novembre 2026 (avant : taille 2 à l'atterrissage, puis 2 à 5 au hasard). Aux niveaux 2 à 5, pas de vaisseau : la foreuse débouche du puits sur un carré de sol dégagé.
-- **Biomes** : quatre mondes sont tirés au début de la descente parmi les cinq autres biomes **et les archétypes enregistrés dans le menu Monde** (15 novembre 2026), puis rangés du moins au plus dangereux. Un archétype reçoit un rang moyen (2,5) et une petite teinte tirée de son nom ; sa taille enregistrée ne compte pas. Avec un archétype enregistré, il sort dans environ deux descentes sur trois.
-- **Ce que la foreuse emporte** : vie, énergie, équipement, bonus de joyaux, Matière, journal. Les effets durables (poison, glu) et les objets laissés au sol sont perdus.
-- **Arrivée** : pas de fiche (retirée le 15 novembre 2026, à la demande de l'utilisateur) : le niveau commence tout de suite, le journal annonce « Niveau 2 sur 5 : Marécage… ».
-- **En jeu** : « Niveau 2/5 · Marécage » sous le titre Statut.
-- **Mort** : nouvelle descente au niveau 1.
+- **Taille** : celle du menu Monde (taille 4, 96 × 64, par défaut), et non plus une taille imposée.
+- **En jeu** : « Carte 96 × 64 » sous le titre Statut, à la place de « Niveau 2/5 · Marécage ».
+- **Gisements** : 3 de métal et 1 de Matière pour une carte de taille 2, les autres tailles en proportion de leur surface
+  (les valeurs de l'ancien niveau 1). Chaque gisement vaut **30, 40 ou 50**.
+- **Faune** : l'intensité réglée par espèce donne directement le nombre, à la taille de la carte près.
+- **Palette** : celle du joueur, sans variation (les teintes par biome sont parties avec les biomes).
 
-### Biomes : un relief, une faune
-
-| Biome | Rang | Relief (eau / montagne / gouffre / herbe, en %) | Faune (intensité, § 3) | Idée |
-|---|---|---|---|---|
-| Plateau | 1 | 8 / 10 / 3 / 14 | Insectoïde normal, Crabos rare, Cafar rare | l'arrivée : ouvert, peu de danger |
-| Marécage | 2 | 30 / 6 / 1 / 28 | Crabos nombreux, Tapi normal, Gluar normal, Vipérin rare, Insectoïde rare | les crabos nagent, la glu et l'eau ralentissent la fuite |
-| Hautes herbes | 2 | 6 / 6 / 2 / 55 | Tapi nombreux, Insectoïde normal, Siphon normal, Crachin rare | on se cache bien, les embusqués aussi |
-| Galeries | 3 | 2 / 46 / 3 / 4 (bruit) | Cafar nombreux, Taupar normal, Vipérin normal, Gluar rare | couloirs étroits, bandes, parois percées |
-| Pierrier | 3 | 1 / 14 / 6 / 2 (bruit) | Crachin nombreux, Siphon normal, Crabos rare, Mastok rare | à découvert sous les tirs |
-| Failles | 4 | 4 / 22 / 18 / 6 | Mastok nombreux, Vipérin nombreux, Cafar normal, Taupar rare | gouffres partout, les plus gros ennemis |
-
-**Palette** : la même partout (choix de l'utilisateur), avec une petite variation par biome appliquée à la palette du joueur : rotation de teinte de 4 à 18°, clarté et saturation de la couleur monde légèrement modifiées. Le sous-menu Palette règle toujours la palette de base.
-
-### Courbe de difficulté : un budget de menace par niveau (15 novembre 2026)
-
-| Niveau | Budget de menace (pour 1000 cases) | Gisements de métal de réparation (carte de taille 2) | Gisements de Matière (taille 2) |
-|---|---|---|---|
-| 1 | 45 | 3 | 1 |
-| 2 | 90 | 3 | 1 |
-| 3 | 155 | 2 | 2 |
-| 4 | 240 | 1 | 3 |
-| 5 | 340 | 1 | 3 |
-
-Plus on descend : plus de menace, moins de quoi se réparer, plus de Matière.
-
-- **Menace** : ce que la foreuse sans équipement perdrait de points de vie en tuant tout ce qui vit sur la carte, selon le modèle mesuré au banc de combat (`mesures.md`) :
-
-      menace = terrain × [ Σ effectif × coût  +  (704 / surface) × ( Σ effectif × pression )² ]
-
-  Chaque espèce a un **coût** (pris un à un) et une **pression** (ce que la foule ajoute) : Brochon 6 / 0,5 (estimé, jamais passé au banc) · Insectoïde 3,3 / 0,15 · Cafar 2 / 0,3 · Siphon 1,1 / 0,31 · Gluar 5,7 / 0,67 · Crachin 4,9 / 1,12 · Crabos 7,3 / 0,86 · Vipérin 10,8 / 0,57 · Taupar 16,7 / 0,63 · Tapi 27,1 / 0,49 · Mastok 46 / 1,51. Le terme au carré fait monter la menace plus vite que le nombre : trente crabos pèsent bien plus que dix fois trois.
-- **Terrain** : coefficient du biome, mesuré avec les mêmes ennemis sur son relief : Plateau 1 · Marécage 0,87 · Hautes herbes 0,92 · Failles 0,95 · Pierrier 1,3 · Galeries 0,5. Un archétype enregistré vaut 1.
-- **Budget** : à chaque niveau, les effectifs du monde tiré sont mis à l'échelle pour atteindre le budget. Les intensités d'un biome ou d'un archétype **ne règlent que les proportions entre espèces** ; le total, c'est le niveau qui le fixe.
-- **Arrondi** : pas de minimum forcé par espèce ; une espèce trop chère pour le budget n'apparaît pas (les cafars vont au moins par deux ; il reste toujours au moins un individu).
-- Les budgets (45 à 340) reprennent la difficulté moyenne d'avant, traduite dans la nouvelle mesure. Vérification au banc : la faune posée tombe à ± 15 % du budget pour presque tous les biomes et niveaux, contre un écart du simple au quintuple avant.
-- **Les PV et les dégâts des ennemis ne changent pas avec la profondeur** (décision de l'utilisateur, 13 novembre 2026). Les fonctions `pvDe` / `dmgDe` restent le point d'entrée unique si l'on y revient.
-- Historique du 15 novembre : d'abord un multiplicateur d'effectif par niveau (× 1,5 à × 5), puis un budget avec des coûts tirés de simples duels (60 à 320), enfin ce modèle mesuré.
-- **Gisements rares mais gros** : quatre en tout sur une carte de taille 2, répartis entre métal et Matière selon le niveau ; les autres tailles en proportion de leur surface (9 en taille 3). Chaque gisement vaut **30, 40 ou 50**.
-- **Cartes d'essai** : pas de budget, l'intensité donne directement le nombre.
+**Ce qui a été retiré ce jour-là, à la demande de l'utilisateur** : la descente en 5 niveaux et son écran de progression,
+les **six biomes** (Plateau, Marécage, Hautes herbes, Galeries, Pierrier, Failles) avec leurs reliefs, leurs faunes et
+leurs teintes, le **tirage des mondes** d'une descente, le **budget de menace par niveau** (`COURBE`, `lifeMenace`,
+`menaceDe`, `MENACE_ESP`) et les **cartes d'essai** (devenues le mode normal). Les **archétypes de monde enregistrés par
+l'utilisateur restent** : ce sont eux qui règlent la carte. Les six reliefs ont été recopiés dans le **banc de combat**
+(`banc/banc.js`, `RELIEFS`) comme terrains de mesure, pour que les séries déjà archivées restent comparables.
 
 ### Banc de combat (15 novembre 2026)
 
-Artefact à part (https://claude.ai/artifact/9BKRaoB4hzgdWhzYFx5A6q) : la page du jeu, plus un panneau qui remplace la colonne. On y choisit une carte de taille 1 (arène nue ou biome), des ennemis, un équipement, une consigne de pilote automatique (chasse ou traversée), et l'on lance une **série** sans affichage (moyennes : victoires, vie restante, points perdus, points perdus par ennemi tué, durée) ou **un combat à l'écran**. Options : ennemis en alerte, vie d'essai. Onglets « Mes résultats » (gardés dans le navigateur) et « Archives » (les séries de Claude ; un clic sur une ligne reprend la configuration). Il sert à régler les coûts de menace ; à relancer après tout changement de stats.
+Artefact à part (https://claude.ai/artifact/9BKRaoB4hzgdWhzYFx5A6q) : la page du jeu, plus un panneau qui remplace la colonne. On y choisit une carte de taille 1 (arène nue ou l'un des six reliefs d'essai, voir § 3 bis), des ennemis, un équipement, une consigne de pilote automatique (chasse ou traversée), et l'on lance une **série** sans affichage (moyennes : victoires, vie restante, points perdus, points perdus par ennemi tué, durée) ou **un combat à l'écran**. Options : ennemis en alerte, vie d'essai. Onglets « Mes résultats » (gardés dans le navigateur) et « Archives » (les séries de Claude ; un clic sur une ligne reprend la configuration). Il sert à régler les coûts de menace ; à relancer après tout changement de stats.
 
 ### Matière
 
@@ -147,18 +116,23 @@ Second métal, **couleur accent** (les éclats de réparation sont couleur bio),
 
 ### Sonar
 
-**10 à 20 tours après l'arrivée** sur un niveau (tirage au hasard ; à l'arrivée même jusqu'au 15 novembre 2026), la foreuse émet une **onde circulaire** qui part d'elle et balaie toute la carte : un cercle d'un pixel de tuile, calé sur la grille, opaque, couleur accent, à 38 cases par seconde et pendant 2,6 s au moins. L'onde se voit **aussi sur la mini-carte**, et un **« blip blip »** l'accompagne pendant tout le balayage.
+**10 à 20 tours après l'arrivée** sur la carte (tirage au hasard ; à l'arrivée même jusqu'au 15 novembre 2026), la foreuse émet une **onde circulaire** qui part d'elle et balaie toute la carte : un cercle d'un pixel de tuile, calé sur la grille, opaque, couleur accent, à 38 cases par seconde et pendant 2,6 s au moins. L'onde se voit **aussi sur la mini-carte**, et un **« blip blip »** l'accompagne pendant tout le balayage.
 
 Elle **détecte tous les gisements** (métal et Matière) **et le joyau** : chacun apparaît quand l'onde l'atteint, sur la carte comme sur la mini-carte (bio pour le métal, accent pour la Matière, blanc pour le joyau), même en zone jamais vue et même au cœur d'un massif. Le journal donne le compte ; survoler ce qui est détecté dit ce que c'est et s'il faudra forer.
 
-### Menu Monde et cartes d'essai (15 novembre 2026)
+### Menu Monde (15 novembre 2026, revu le 16)
 
-Génération et Life ne sont plus deux sous-menus de la colonne : ils sont réunis dans une fenêtre **Monde**, plein écran comme le Tile editor, ouverte par le bouton **MONDE** (à côté de **REGEN**, sous la mini-carte).
+Génération et Life ne sont plus deux sous-menus de la colonne : ils sont réunis dans une fenêtre **Monde**, plein écran
+comme le Tile editor, ouverte par le bouton **MONDE** (à côté de **REGEN**, sous la mini-carte).
 
-- **REGEN** relance la **descente au niveau 1** (c'est la partie normale).
-- À gauche la **Génération** (taille, eau, montagne, gouffre, herbe, méthode de relief), à droite la **Faune** (intensité par espèce). En bas, **CARTE D'ESSAI** crée une carte hors descente avec ces réglages : palette de base, 2 gisements de métal et 2 de Matière à la taille 2. « Carte d'essai » s'affiche alors sous Statut ; y forer relance une carte d'essai.
-- **Archétypes de monde** : en tête de la fenêtre, un champ **Nom** et **Enregistrer** gardent les réglages en cours (relief, taille, faune) sous ce nom ; la **liste déroulante** les recharge ; **Supprimer** retire l'archétype choisi. Enregistrer sous un nom existant le met à jour. Mémorisés sous `np-mondes` et joints à l'enregistrement dans la base du jeu.
-- La liste propose aussi les **six biomes de la descente**, à charger comme point de départ : on les modifie, on leur donne un nom, on obtient une variante. Les biomes eux-mêmes ne sont pas modifiables d'ici. **Les archétypes enregistrés entrent dans le tirage de la descente** (voir plus haut).
+- **REGEN** génère une **nouvelle carte avec les réglages en cours**.
+- À gauche la **Génération** (taille, eau, montagne, gouffre, herbe, méthode de relief), à droite la **Faune** (intensité
+  par espèce). En bas, **GÉNÉRER LA CARTE** ferme la fenêtre et génère aussitôt avec les réglages modifiés (ce bouton
+  s'appelait CARTE D'ESSAI jusqu'au 16 novembre 2026).
+- **Archétypes de monde** : en tête de la fenêtre, un champ **Nom** et **Enregistrer** gardent les réglages en cours
+  (relief, taille, faune) sous ce nom ; la **liste déroulante** les recharge ; **Supprimer** retire l'archétype choisi.
+  Enregistrer sous un nom existant le met à jour. Mémorisés sous `np-mondes` et joints à l'enregistrement dans la base
+  du jeu. La liste ne propose plus les six biomes, partis le 16 novembre 2026 avec la descente.
 
 ## 3 ter. Exploration automatique (13 novembre 2026)
 
@@ -250,7 +224,12 @@ Le jeu ne compte plus en tours mais en **unités de temps**, comme Brogue et Cog
 
 ## 6 bis. Équipement et inventaire (13 novembre 2026, séparés le 15)
 
-Version d'essai : tous les objets sont donnés au départ, non équipés sauf la foreuse, pour pouvoir tout essayer (choix confirmé le 13 novembre 2026 pour la phase d'équilibrage).
+**Le 16 novembre 2026, toutes les armes et armures ont été retirées sauf l'équipement d'origine** (Foreuse et Coque d'usine),
+à la demande de l'utilisateur : le Foret diamant, le Marteau-pilon, la Scie circulaire, la Lance thermique, le Châssis renforcé,
+la Coque furtive, le Châssis allégé et la Coque isolante n'existent plus. Les **accessoires et les consommables restent**.
+Une partie commencée avant, où l'un de ces objets était équipé, le voit retiré et son effet défait (`ITEMS_RETIRES`, `invMigre`).
+
+Version d'essai : tous les objets sont donnés au départ, non équipés sauf la foreuse et la Coque d'usine, pour pouvoir tout essayer (choix confirmé le 13 novembre 2026 pour la phase d'équilibrage).
 
 - **Emplacements** : 1 arme, 1 armure, 3 accessoires. Le sac n'a pas de limite pour l'instant.
 - **Deux endroits depuis le 15 novembre 2026**, un seul sac derrière :
@@ -270,7 +249,7 @@ Version d'essai : tous les objets sont donnés au départ, non équipés sauf la
   - Dessiné avec les **six tuiles de nuage** de l'intro (Tile editor, groupe « Intro ») : cœur en Nuage plein ou texturé, pourtour avec les quatre bords. Les tuiles pâlissent dans leurs quatre derniers battements.
   - **Les tuiles changent d'un battement à l'autre** (16 novembre 2026) : une case entourée de fumée sur ses huit voisines prend une tuile de cœur, les autres une tuile de bord, et une case sur deux retire sa tuile au hasard dans sa famille. Le cœur se déplace, les bords tournent : le nuage a l'air de vivre au lieu d'être une forme figée qui rétrécit.
   - **Bruitage au déploiement** (16 novembre 2026) : le bidon qui tombe, l'amorce qui claque, puis le jet sous pression qui s'épuise en nappe sourde, sur environ deux secondes (`SFX.smoke`). Un objet peut désormais déclarer son propre bruit par le champ `son` ; les autres consommables gardent le petit bip d'usage.
-  - Sous Statut, « Dans la fumée N » tant que la foreuse est dans une case de fumée. La fumée disparaît en changeant de niveau.
+  - Sous Statut, « Dans la fumée N » tant que la foreuse est dans une case de fumée. La fumée disparaît quand une nouvelle carte est générée.
 - **Bruitages et effets des consommables** (16 novembre 2026). Chaque objet peut déclarer son **bruit** (champ `son`) et son **effet visuel** (champ `fx`) ; les autres gardent le petit bip d'usage.
   - **Réparobots** : servos et soudure ; une dizaine de **petites croix rouges** (3 × 3 pixels de tuile) apparaissent autour de la foreuse et montent.
   - **Batterie** : décharge électrique qui monte ; une dizaine de **petites flèches** couleur bio qui montent, parties plus bas et plus haut que les croix pour ne pas se perdre dans la foreuse, de la même couleur.
@@ -284,16 +263,8 @@ Version d'essai : tous les objets sont donnés au départ, non équipés sauf la
 
 | Objet | Type | POW requis | Effets |
 |---|---|---|---|
-| Foreuse | arme | 10 | arme de départ, sans modificateur : DEG 10 (7-13), coup 100 |
-| Foret diamant | arme | 10 | DEG −2, PRE +15, coup rapide (60) |
-| Marteau-pilon | arme | 13 | DEG +15, PRE −10, coup lent (150) |
-| Scie circulaire | arme | 11 | DEG +3, CRIT +15 % |
-| Lance thermique | arme | 11 | DEG +7, DEF −12 |
-| Coque d'usine | armure | 10 | armure de départ, déjà équipée : DEF +10 (16 novembre 2026 au soir) |
-| Châssis renforcé | armure | 13 | Vie max +30, VIT −1 |
-| Coque furtive | armure | 10 | DEF +6, DIS −2 (portée de discrétion) |
-| Châssis allégé | armure | 10 | VIT +1, DEF +12, Vie max −15 |
-| Coque isolante | armure | 11 | poison et glu durent deux fois moins, Vie max +10 |
+| Foreuse | arme | 10 | **seule arme**, portée d'origine, sans modificateur : DEG 10 (7-13), coup 100 |
+| Coque d'usine | armure | 10 | **seule armure**, portée d'origine : DEF +10 (son effet est déjà compris dans les stats de départ) |
 | Servomoteur | accessoire | – | VIT +2 |
 | Téléobjectif | accessoire | – | EYE +3 |
 | Viseur laser | accessoire | – | CRIT +10 % |
@@ -385,8 +356,8 @@ La statistique **DÉT (détection)** par espèce a été supprimée le 13 novemb
 
 ## 8. Objectifs et progression
 
-- **Un seul site de forage par carte** depuis le 13 novembre 2026 (5 auparavant), toujours de **profondeur 10** : simple valeur affichée, sans effet de jeu (choix de l'utilisateur). Il est placé dans le tiers de la carte le plus éloigné de l'arrivée : il faut la traverser. Forer fait descendre au niveau suivant (§ 3 bis).
-- Forage : touche F sur un site (ou clic sur la foreuse posée dessus) → **le forage part tout de suite, sans confirmation** (15 novembre 2026) : barre « Forage en cours » d'une seconde environ, puis le niveau suivant commence directement. Sur une carte d'essai, une nouvelle carte d'essai. Seule la fin (« NOYAU ATTEINT ») garde son écran.
+- **Un seul site de forage par carte** depuis le 13 novembre 2026 (5 auparavant), toujours de **profondeur 10** : simple valeur affichée, sans effet de jeu (choix de l'utilisateur). Il est placé dans le tiers de la carte le plus éloigné de l'arrivée : il faut la traverser. Forer atteint le noyau et gagne la partie (§ 3 bis).
+- Forage : touche F sur un site (ou clic sur la foreuse posée dessus) → **le forage part tout de suite, sans confirmation** (15 novembre 2026) : barre « Forage en cours » d'une seconde environ, puis l'écran **« NOYAU ATTEINT »** (bilan en tours et en cases parcourues, Matière en réserve) et un bouton **Nouvelle exploration**.
 - **1 joyau** par planète, au cœur d'un massif (8 voisines en roche, jamais en bordure), visible dès que la case est vue. Briser la roche, le ramasser → choix de **3 améliorations tirées au hasard** parmi : Vie max +10, Énergie max +10, EYE +1, DEG +5, PRE +5, DEF +6, POW +1, VIT +1 (13 novembre 2026).
 - **Éclats de métal** (9 novembre 2026) : **10 % des cases de montagne** (hors rangée extérieure indestructible et joyau ; réglage `ORE_PCT` dans la génération) montrent des éclats de métal couleur bio — ceux pris au cœur d'un massif ne se voient qu'en creusant jusqu'à eux. Briser la paroi les fait **tomber au sol** ; la foreuse qui passe dessus les ramasse et regagne **autant de vie que d'énergie** (16 novembre 2026 ; la vie seule avant) selon la **densité** : **petits +10** (50 % des éclats), **moyens +15** (30 %), **gros +20** (20 %), sans dépasser les maximums. Deux chiffres flottants s'affichent, et les deux effets visuels des consommables partent en même temps (croix rouges et flèches bio) (réglages `ORE_PV`, `ORE_MIX`). Chaque densité a sa tuile, dans la paroi et au sol. Signalés dans la fiche de survol (plus de liste dans « En vue » depuis le 13 novembre 2026). Tuiles éditables : Éclats petits / moyens / gros, en montagne et au sol (dessins retouchés au Tile editor et adoptés comme norme le 9 novembre 2026).
 - **Mort d'un ennemi** (9 novembre 2026) : en plus de la tache de sang, une **petite giclée** de 24 à 35 gouttes (pixels de tuile opaques, rouges, 1 ou 2 pixels) projetées en l'air dès l'impact, vite (70 à 180 px/s, freinées par l'air, retombées en moins d'une demi-seconde, à une ou deux cases au plus) ; en retombant elles **restent collées au sol** (sauf dans l'eau, un gouffre ou un obstacle). Au plus 1 500 gouttes gardées sur la carte (les plus anciennes s'effacent) ; comme le sang, elles restent en souvenir (atténuées) hors de vue.
@@ -478,7 +449,7 @@ Décisions validées le 6 novembre 2026 :
 Chiffres à l'appui dans `mesures.md`, points de comparaison avec Brogue dans `brogue.md`.
 
 - **Idées de Brogue sur les ennemis à reprendre** (relevé du 15 novembre 2026, `brogue.md`, section « Comment Brogue gère ses ennemis ») : hordes composées et liées, ennemis endormis à l'arrivée, renforts au fil du temps ; ensuite hors-profondeur, mutations, fuite des blessés.
-- Niveau 2 (sous-sol) : à concevoir (salles par accrétion ou caverne par automate cellulaire).
+- **Progression à reconstruire** (16 novembre 2026) : la descente, ses biomes et son budget de menace ont été retirés pour repartir d'une carte unique et d'un équipement d'origine (§ 3 bis, § 6 bis). À concevoir : d'où viennent les objets, comment la difficulté monte, et ce qui tient lieu de profondeur.
 - Donner un effet à la profondeur des sites (risque / récompense).
 - Récompenser les combats (fragments, énergie).
 - **Inventaire et équipement** : première version faite le 13 novembre 2026 (§ 6 bis). Suite : provenance des objets (sol, ennemis, fabrication), attaques spéciales, équilibrage.

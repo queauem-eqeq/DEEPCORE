@@ -18,44 +18,6 @@ const ITEMS={
     d:'L’outil d’origine de la foreuse, équilibré : c’est l’arme de référence.',
     art:["  ▄▄▄▄         ", "  ████▄▄▄      ", "  ███████▄▄▄   ", "  ██████████▀▀ ", "  ███████▀▀▀   ", "  ████▀▀▀      "],
     col:["..1111.........", "..1111222......", "..1111222222...", "..111122222222.", "..1111222222...", "..1111222......"]},
-  foret:{n:'Foret diamant',slot:'arme',req:10,mod:{degats:-2,pre:15,coup:-40},
-    d:'Pointe fine et précise : des coups rapides qui touchent presque toujours, mais moins appuyés.',
-    art:[' ┌─┐▄▄▄        ',
-         ' │█├████▄▄▄    ',
-         ' │█├███████▀█> ',
-         ' │█├████▀▀▀    ',
-         ' └─┘▀▀▀        '],
-    col:['.ddd333........',
-         '.d3d3333www....',
-         '.d3d3333www111.',
-         '.d3d3333www....',
-         '.ddd333........']},
-  pilon:{n:'Marteau-pilon',slot:'arme',req:13,mod:{degats:15,pre:-10,coup:50},
-    d:'Masse hydraulique. Frappe très fort, mais lentement et moins juste.',
-    art:['    ╔═════╗    ',
-         '    ║ ▒▒▒ ║    ',
-         '    ╚═╦═╦═╝    ',
-         '      ║█║      ',
-         '   ▄▄▄███▄▄▄   ',
-         '   █████████   '],
-    col:['....ddddddd....',
-         '....d.333.d....',
-         '....ddddddd....',
-         '......dwd......',
-         '...333www333...',
-         '...wwwwwwwww...']},
-  chassis:{n:'Châssis renforcé',slot:'armure',req:13,mod:{vieMax:30,vitesse:-1},
-    d:'Structure épaissie : encaisse davantage, mais alourdit la foreuse.',
-    art:['  ▄█████████▄  ',
-         '  ██▀▀▀█▀▀▀██  ',
-         '  ██ ▓ █ ▓ ██  ',
-         '  ▀█▄▄▄█▄▄▄█▀  ',
-         '    ▀▀▀▀▀▀▀    '],
-    col:['..wwwwwwwwwww..',
-         '..wwdddwdddww..',
-         '..ww.3.w.3.ww..',
-         '..wwdddwdddww..',
-         '....ddddddd....']},
   usine:{n:'Coque d’usine',slot:'armure',req:10,mod:{def:10},
     d:'La coque de série, montée au départ. Sans elle, la foreuse n’a aucune défense.',
     art:['    ▄▄▄▄▄▄▄    ',
@@ -63,22 +25,10 @@ const ITEMS={
          '  █▒▒░░░░░▒▒█  ',
          '  ▀▄▒▒▒▒▒▒▒▄▀  ',
          '    ▀▀▀▀▀▀▀    '],
-    col:['....wwwwwww....',
-         '..wwdddddddww..',
-         '..wdd22222ddw..',
-         '..wwdddddddww..',
-         '....wwwwwww....']},
-  furtif:{n:'Coque furtive',f:1,slot:'armure',req:10,mod:{def:6,dis:-2},
-    d:'Revêtement mat à facettes : on vous remarque de moins loin.',
-    art:['    ▄▄▄▄▄▄▄    ',
-         '  ▄▀░░░░░░░▀▄  ',
-         '  █░░▒▒▒▒▒░░█  ',
-         '  ▀▄░░░░░░░▄▀  ',
-         '    ▀▀▀▀▀▀▀    '],
     col:['....ddddddd....',
-         '..dd2222222dd..',
-         '..d221111122d..',
-         '..dd2222222dd..',
+         '..dd3333333dd..',
+         '..d331111133d..',
+         '..dd3333333dd..',
          '....ddddddd....']},
   servo:{n:'Servomoteur',slot:'acc',mod:{vitesse:2},
     d:'Entraînement plus nerveux : la foreuse se déplace plus vite.',
@@ -140,22 +90,6 @@ const ITEMS={
          '..dd3dd1dd3dd..',
          '....333w333....',
          '.......w.......']},
-  scie:{n:'Scie circulaire',f:1,slot:'arme',req:11,mod:{degats:3,crit:15},
-    d:'Disque denté : entaille profond, coups critiques fréquents.',
-    art:["     ▄▄███▄▄   ", "   ▄█▀▀   ▀▀█▄ ", "═══█   ███   █ ", "   ▀█▄▄   ▄▄█▀ ", "     ▀▀███▀▀   "],
-    col:[".....wwwwwww...", "...wwww...wwww.", "dddw...333...w.", "...wwww...wwww.", ".....wwwwwww..."]},
-  lance:{n:'Lance thermique',f:1,slot:'arme',req:11,mod:{degats:7,def:-12},
-    d:'Jet de plasma : gros dégâts, mais encombrante, on esquive moins bien.',
-    art:[" ┌──┐          ", " │▓▓├──────┐░  ", " │▓▓│═══════▒░░", " │▓▓├──────┘░  ", " └──┘          "],
-    col:[".dddd..........", ".d33dddddddd3..", ".d33dwwwwwwwr33", ".d33dddddddd3..", ".dddd.........."]},
-  leger:{n:'Châssis allégé',slot:'armure',req:10,mod:{vitesse:1,def:12,vieMax:-15},
-    d:'Structure ajourée : plus vive et plus mobile, mais plus fragile.',
-    art:["    ┌──┬──┐    ", "  ┌─┤  │  ├─┐  ", "  │ │  ▓  │ │  ", "  └─┤  │  ├─┘  ", "    └──┴──┘    "],
-    col:["....ddddddd....", "..ddd..d..ddd..", "..d.d..1..d.d..", "..ddd..d..ddd..", "....ddddddd...."]},
-  isolante:{n:'Coque isolante',f:1,slot:'armure',req:11,mod:{isol:1,vieMax:10},
-    d:'Joints étanches : poison et glu durent deux fois moins longtemps.',
-    art:["   ▄▄▄▄▄▄▄▄▄   ", "  █▒▒▒▒▒▒▒▒▒█  ", "  █▒ ▄▄▄▄▄ ▒█  ", "  █▒ ▀▀▀▀▀ ▒█  ", "  █▒▒▒▒▒▒▒▒▒█  ", "   ▀▀▀▀▀▀▀▀▀   "],
-    col:["...wwwwwwwww...", "..w222222222w..", "..w2.11111.2w..", "..w2.11111.2w..", "..w222222222w..", "...wwwwwwwww..."]},
   stabil:{n:'Stabilisateur',slot:'acc',mod:{pre:10},
     d:'Compense les secousses : la foreuse touche plus souvent.',
     art:["  ┌─────────┐  ", "  │ ·  │  · │  ", "  ├────┼────┤  ", "  │ ·  │  · │  ", "  └─────────┘  "],
@@ -216,15 +150,25 @@ const ITEMS={
 };
 // Objets donnés au départ, non équipés (phase d'essai : plus tard ils se trouveront au sol ou sur les ennemis).
 // Le second terme est le nombre d'exemplaires d'un consommable : ils s'empilent sur une seule ligne (« ×2 »).
-const INV_TEST=[['foreuse'],['foret'],['pilon'],['scie'],['lance'],['usine'],['chassis'],['furtif'],['leger'],['isolante'],['servo'],['optique'],['viseur'],['conden'],['gyro'],['stabil'],['accu'],
+const INV_TEST=[['foreuse'],['usine'],['servo'],['optique'],['viseur'],['conden'],['gyro'],['stabil'],['accu'],
   ['repar',2],['batterie',2],['purge',2],['fumigene',2],['charge',2]];
 // la foreuse est l'arme de départ, déjà équipée (ses modificateurs sont nuls : ce sont les stats de base) ;
 // la Coque d'usine est l'armure de départ, déjà équipée elle aussi : sa DEF +10 est comprise dans le def:10 de départ (07-generation)
 const invTest=()=>INV_TEST.map(([k,n])=>n?{k,eq:0,n}:{k,eq:k==='foreuse'||k==='usine'?1:0});
 // partie commencée avant un ajout d'objets : on complète le sac, et il y a toujours une arme en main
+/* Armes et armures retirées du jeu le 16 novembre 2026 (il ne reste que l'équipement d'origine) : leurs modificateurs sont
+   gardés ici, et là seulement, pour défaire proprement l'effet d'un objet encore équipé dans une partie commencée avant. */
+const ITEMS_RETIRES={foret:{degats:-2,pre:15,coup:-40},pilon:{degats:15,pre:-10,coup:50},scie:{degats:3,crit:15},
+  lance:{degats:7,def:-12},chassis:{vieMax:30,vitesse:-1},furtif:{def:6,dis:-2},leger:{vitesse:1,def:12,vieMax:-15},isolante:{isol:1,vieMax:10}};
 function invMigre(){for(const [k,n] of INV_TEST)if(!G.inv.some(o=>o.k===k))G.inv.push(n?{k,eq:0,n}:{k,eq:0});
+  for(const o of G.inv)if(o.eq&&!ITEMS[o.k]&&ITEMS_RETIRES[o.k]){const m=ITEMS_RETIRES[o.k],v0=G.st.vieMax;
+    for(const k in m)G.st[k]=(G.st[k]||0)-m[k];
+    if(G.st.vieMax!==v0&&G.st.vie>0)G.st.vie=Math.max(1,Math.round(G.st.vie*G.st.vieMax/v0));}
   G.inv=G.inv.filter(o=>ITEMS[o.k]);G.inv.sort((a,b)=>INV_TEST.findIndex(t=>t[0]===a.k)-INV_TEST.findIndex(t=>t[0]===b.k));
-  if(!G.inv.some(o=>o.eq&&ITEMS[o.k].slot==='arme'))G.inv.find(o=>o.k==='foreuse').eq=1;}
+  if(!G.inv.some(o=>o.eq&&ITEMS[o.k].slot==='arme'))G.inv.find(o=>o.k==='foreuse').eq=1;
+  // la Coque d'usine est portée d'origine : son DEF +10 est déjà compris dans les stats de départ, donc on la marque équipée sans appliquer son effet
+  if(!G.inv.some(o=>o.eq&&ITEMS[o.k].slot==='armure'))G.inv.find(o=>o.k==='usine').eq=1;
+  G.st.vie=Math.min(G.st.vieMax,G.st.vie);G.st.energie=Math.min(G.st.energieMax,G.st.energie);}
 const ACOL={w:'#fff','1':'var(--c1)','2':'var(--c2)','3':'var(--c3)',e:'var(--energy)',r:'var(--life)',d:'var(--dim)'};
 const escH=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 // dessin ASCII coloré : regroupe les caractères voisins de même couleur

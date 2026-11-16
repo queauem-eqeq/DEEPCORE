@@ -207,7 +207,7 @@ function inspectHTML(){const {x,y}=HOV;if(x<0||y<0||x>=W||y>=H)return '';
       `<p>${BEHAV[key]}</p>`);}
   else out.push(head('',tn,dt));
   const s=siteAt(x,y);
-  if(s)out.push(`<p><b>Site de forage</b> · ${s.known?`profondeur ${s.depth}. [F] pour forer et descendre.`:'non analysé : placez la foreuse dessus.'}</p>`);
+  if(s)out.push(`<p><b>Site de forage</b> · ${s.known?`profondeur ${s.depth}. [F] pour forer.`:'non analysé : placez la foreuse dessus.'}</p>`);
   const gm=G.gems&&G.gems[i];
   if(gm==='visible')out.push('<p><b>Joyau</b> · placez la foreuse dessus pour le ramasser et choisir une amélioration.</p>');
   else if(gm==='cache')out.push('<p><b>Joyau pris dans la roche</b> · brisez la roche pour le libérer.</p>');
