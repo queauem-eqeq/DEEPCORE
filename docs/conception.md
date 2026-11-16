@@ -267,7 +267,7 @@ Version d'essai : tous les objets sont donnés au départ, non équipés sauf la
 - **Bruitages et effets des consommables** (16 novembre 2026). Chaque objet peut déclarer son **bruit** (champ `son`) et son **effet visuel** (champ `fx`) ; les autres gardent le petit bip d'usage.
   - **Réparobots** : servos et soudure ; une dizaine de **petites croix rouges** (3 × 3 pixels de tuile) apparaissent autour de la foreuse et montent.
   - **Batterie** : décharge électrique qui monte ; une dizaine de **petites flèches** couleur bio qui montent, parties plus bas et plus haut que les croix pour ne pas se perdre dans la foreuse, de la même couleur.
-  - **Purge** : vidange sous pression ; un **filet** d'un pixel entoure la case de la foreuse, à un pixel de distance, et **pulse** quatre fois en une seconde.
+  - **Purge** : vidange sous pression ; un **filet ovale** d'un pixel entoure la case de la foreuse, à un pixel de distance (ellipse de 18 × 17 pixels de tuile, contour calculé une fois pour toutes), et **pulse** quatre fois en une seconde.
   - Pixel art strict comme le reste : taille fixe, opaques, calés sur la grille des pixels de tuile, chaque grain apparaît à son heure et s'efface d'un coup.
 - **Charge sismique : une visée** (16 novembre 2026). L'utiliser n'explose pas tout de suite : un **carré de 3 × 3 en « Bord croisé » rouge** s'ouvre **une case devant la foreuse** (selon son orientation). On le déplace **à la souris** ou **aux touches de direction**, sans que la foreuse bouge, dans un **rayon de 4 cases** autour d'elle (butée nette). **Entrée** ou un **clic** tire : **30 dégâts** à chaque créature des neuf cases, puis la charge est consommée et le combat est engagé (les insectoïdes passent à l'attaque). Le tir prend **un battement** et fait autant de bruit qu'un coup de foreuse sur la roche (portée de discrétion ×1,5 ce battement-là). **Échap** annule sans rien consommer. Pendant la visée, aucune autre commande ne répond. La zone ne casse pas la roche. La tuile rouge suit les retouches de « Bord croisé » au Tile editor.
 - **Consommables** : usage unique, **coûtant un battement** depuis le 16 novembre 2026 (les ennemis jouent, les effets durables se décomptent, l'énergie remonte ; avant, c'était gratuit et instantané). Équiper, lui, reste gratuit. Se boire au sous-menu Inventaire. Refusé si la jauge est déjà pleine (l'objet n'est pas perdu) ; le surplus au-delà du maximum est perdu. Les consommables identiques s'empilent (« ×2 »).
@@ -295,7 +295,7 @@ Version d'essai : tous les objets sont donnés au départ, non équipés sauf la
 | Accumulateur | accessoire | Énergie max +40 |
 | Réparobots (×2) | consommable | Vie +50 ; petites **croix rouges** autour de la foreuse |
 | Batterie (×2) | consommable | Énergie +50 ; petites **flèches bio** qui montent |
-| Purge (×2) | consommable | supprime poison et glu ; un **filet** pulse autour de la foreuse, à un pixel de la case |
+| Purge (×2) | consommable | supprime poison et glu ; un **filet ovale** pulse autour de la foreuse, à un pixel de la case |
 | Fumigène (×2) | consommable | **un nuage de fumée** de 7 cases de large autour de la foreuse, opaque des deux côtés, qui s'étend puis se dissipe (voir ci-dessous) |
 | Charge sismique (×2) | consommable | **visée** : un carré de 3 × 3 à placer jusqu'à 4 cases, **30 dégâts** à tout ce qui s'y trouve ; bruyante (comme un forage) |
 
