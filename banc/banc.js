@@ -117,7 +117,7 @@ function monter(){
     <div class="besp">${ESP().map(s=>`<label for="bq-${s.key}"><img src="${ICON[s.ic]||''}" alt=""><span>${esc(s.n)}</span><input type="number" id="bq-${s.key}" min="0" max="60" step="1" value="0"></label>`).join('')}</div>
     <h4>Foreuse</h4>
     <div class="brow"><label for="barme">Arme</label><select id="barme">${OBJ('arme').map(([k,l])=>`<option value="${k}">${esc(l)}</option>`).join('')}</select></div>
-    <div class="brow"><label for="barmure">Armure</label><select id="barmure"><option value="">Aucune</option>${OBJ('armure').map(([k,l])=>`<option value="${k}">${esc(l)}</option>`).join('')}</select></div>
+    <div class="brow"><label for="barmure">Armure</label><select id="barmure"><option value="">Coque d’usine (départ)</option>${OBJ('armure').map(([k,l])=>`<option value="${k}">${esc(l)}</option>`).join('')}</select></div>
     <div class="bacs">${OBJ('acc').map(([k,l])=>`<label><input type="checkbox" class="bacc" value="${k}">${esc(l)}</label>`).join('')}</div>
     <div class="brow"><label for="bvie" title="0 : la vie normale de la foreuse. Une grande valeur (1000) sert à mesurer les dégâts encaissés sans que la mort n’arrête le combat.">Vie d’essai (0 = normale)</label><input type="number" id="bvie" min="0" max="9999" step="100" value="0"></div>
     <h4>Pilote automatique</h4>

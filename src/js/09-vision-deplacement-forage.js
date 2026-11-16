@@ -152,7 +152,7 @@ function tryMove(dx,dy){
 
 /* ---------- Forage ---------- */
 function waitTurn(){
-  if(G.over||drilling||!$('overlay').hidden)return;lastAct='wait';lastRun=false;G.turn++;G.msg=null;if(!REST)say(`Le robot attend : recharge ${WAIT_REGEN} fois plus vite (${G.st.power*WAIT_REGEN}/t).`);
+  if(G.over||drilling||!$('overlay').hidden)return;lastAct='wait';lastRun=false;G.turn++;G.msg=null;if(!REST)say(`Le robot attend : recharge ${WAIT_REGEN} fois plus vite (${+(G.st.power/POW_BASE*WAIT_REGEN).toFixed(1)}/t).`);
   pass(DUR.attente,true);computeFOV();render();if(G.over&&G.over.dead)dead();
 }
 function askDrill(){

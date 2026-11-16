@@ -170,10 +170,12 @@ const DEF_BASE=.987;
 const terrMod=(x,y)=>{const v=G.t[idx(x,y)];return v===DEEP||v===LIQ?-20:v===GRASS?12:0;};
 const hitChance=(pre,def)=>Math.max(5,Math.min(95,Math.round(pre*Math.pow(DEF_BASE,def))));
 /* POW requis (16 novembre 2026) : chaque arme et chaque armure demande un POW (champ req de l'objet).
-   Arme : chaque point manquant multiplie précision et dégâts par 0,75 ; chaque point en trop, par 1,03.
-   Armure : chaque point manquant retire 20 de défense ; chaque point en trop en ajoute 2.
+   POW de base 10 (échelle de la force de Brogue, 16 novembre 2026 au soir ; 1 avant).
+   Arme : chaque point manquant multiplie précision et dégâts par 0,85 ; chaque point en trop, par 1,015.
+   Armure : chaque point manquant retire 10 de défense ; chaque point en trop en ajoute 1.
+   La recharge d'énergie vaut POW/10 par battement : 1 à POW 10, comme avant.
    Rien n'est écrit dans G.st : tout se recalcule à la lecture, donc gagner ou perdre du POW agit aussitôt. */
-const POW_MANQUE=.75,POW_EXCES=1.03,POW_DEF_MANQUE=20,POW_DEF_EXCES=2,DEG_VAR=.3;
+const POW_MANQUE=.85,POW_EXCES=1.015,POW_DEF_MANQUE=10,POW_DEF_EXCES=1,DEG_VAR=.3,POW_BASE=10;
 const eqDe=slot=>{const o=(G.inv||[]).find(o=>o.eq&&ITEMS[o.k]&&ITEMS[o.k].slot===slot);return o?ITEMS[o.k]:null;};
 const powEcart=(d,st)=>d&&d.req?st.power-d.req:0;
 const armeFact=(st,d)=>{const e=powEcart(d,st);return e<0?Math.pow(POW_MANQUE,-e):Math.pow(POW_EXCES,e);};
@@ -267,7 +269,7 @@ function beastsAct(){
 }
 // Plus de réparation automatique : seule l'énergie se recharge à chaque battement.
 // Attendre sur place la recharge WAIT_REGEN fois plus vite (13 novembre 2026) : 2/t au lieu de 1/t à POW 1.
-function regen(wait){if(G.over)return;G.st.energie=Math.min(G.st.energieMax,G.st.energie+G.st.power*(wait?WAIT_REGEN:1));}
+function regen(wait){if(G.over)return;G.st.energie=Math.min(G.st.energieMax,G.st.energie+G.st.power/POW_BASE*(wait?WAIT_REGEN:1));}
 // Coup de foreuse : consomme de l'énergie ; refusé si la réserve est insuffisante
 function spend(){if(G.st.energie<G.st.cout){say(`Énergie insuffisante pour frapper (${Math.floor(G.st.energie)}/${G.st.cout}). Attendez qu’elle se recharge.`,'warn');SFX.blocked();render();return false;}G.st.energie-=G.st.cout;return true;}
 const TRACK_LIFE=5;

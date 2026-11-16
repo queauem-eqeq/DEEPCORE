@@ -252,7 +252,8 @@ function start(data){
   const fromHot=!!(data&&data.G&&data.G.t&&data.G.t.length===W*H);
   if(data&&data.G&&data.G.t&&data.G.st&&data.G.t.length===W*H){G=data.G;G.dmg=G.dmg||{};for(let i=0;i<G.t.length;i++)if(G.t[i]===LOW)G.t[i]=FLAT;   // herbes basses et couchées fusionnées
     if(G.st&&G.st.crit==null)G.st.crit=5;if(G.st&&G.st.def==null&&G.st.esq!=null){G.st.def=Math.round(G.st.esq*1.2);delete G.st.esq;}   /* partie d'avant le 16 novembre 2026 : l'esquive devient la défense */
-    if(G.st)G.st.cout=10;if(G.st&&G.st.power<1)G.st.power=1;if(G.st&&(G.st.capteur<10||G.st.capteur===12||G.st.capteur===15))G.st.capteur=10;if(!G.ore)hideOre();if(!G.st||G.st.pre==null||G.st.energieMax==null){G.st={vie:100,vieMax:100,energie:100,energieMax:100,repar:0,power:5,vitesse:5,degats:10,capteur:10,cout:10,pre:80,def:12,crit:5};if(G.inv)G.inv.forEach(o=>o.eq=0);}
+    if(G.st)G.st.cout=10;if(G.st&&G.st.power<1)G.st.power=1;if(G.st&&G.st.power<6){G.st.power+=9;G.st.pre+=20;}   /* partie d'avant le POW de base 10 et la précision de base 100 */
+    if(G.st&&(G.st.capteur<10||G.st.capteur===12||G.st.capteur===15))G.st.capteur=10;if(!G.ore)hideOre();if(!G.st||G.st.pre==null||G.st.energieMax==null){G.st={vie:100,vieMax:100,energie:100,energieMax:100,repar:0,power:10,vitesse:5,degats:10,capteur:10,cout:10,pre:100,def:10,crit:5};if(G.inv)G.inv.forEach(o=>o.eq=0);}
   if(!G.inv)G.inv=invTest();if(!G.items)G.items={};if(!G.eff)G.eff={};if(!G.fum)G.fum={};if(!G.amb)G.amb=[];G.w=W;G.h=H;invMigre();
   if(!G.mode){G.mode='descente';G.niv=1;G.biome='plateau';G.suite=tirageBiomes();}if(G.st.matiere==null)G.st.matiere=0;if(G.sonar==null)G.sonar=1;   // partie commencée avant la descente
   palBiome(G.biome?biomeDe(G.biome).teinte:null);buildTiles();   // partie commencée avant l'inventaire

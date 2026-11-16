@@ -297,6 +297,26 @@ Les duels restent proches. La légère hausse (surtout le mastok, +11 %) vient d
 pas été recalculés, l'écart restant dans le bruit de leur mesure. Cafar et brochon : non mesurables seuls sur l'arène.
 Détection et fuite (`simul.py`) : inchangées, ce changement n'y touche pas.
 
+## Nouvelles stats de base (16 novembre 2026, soir)
+
+Précision 100 (80 avant), POW 10 (1 avant, seuils et pénalités remis à l'échelle), DEF 10 apportée par la Coque d'usine
+équipée au départ (12 de base avant). Mêmes duels, 300 essais, foreuse avec son équipement de départ.
+
+| Ennemi | Vie perdue (modèle Brogue, précision 80) | Vie perdue (précision 100) | Battements |
+|---|---|---|---|
+| Insectoide | 2,5 | 1,7 | 21 → 20 |
+| Crabos | 8,5 | 7,6 | 12 → 12 |
+| Crachin | 10,7 | 9,8 | 16 → 15 |
+| Viperin | 14,2 | 11,1 | 12 → 10 |
+| Gluar | 10,8 | 9,7 | 13 → 13 |
+| Siphon | 2,3 | 1,7 | 11 → 10 |
+| Tapi | 27,5 | 24 | 12 → 12 |
+| Taupar | 21,3 | 16,3 | 15 → 14 |
+| Mastok | 62,2 | 49,5 | 16 → 15 |
+
+La foreuse touche plus souvent, donc les combats sont plus courts et coûtent moins de vie : le jeu est plus facile
+qu'avant ce changement, c'est voulu par la demande. Coûts de menace non recalculés.
+
 ## Piège de méthode
 
 Une mesure à longue distance exige de **dégager toute la carte**. Un relief laissé au hasard coupe la

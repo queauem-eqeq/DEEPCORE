@@ -211,10 +211,10 @@ Jugée trop haute et trop étroite (640 × 835), elle est passée à 940 × 390 
 | VIT | 5 | **vitesse de déplacement** (13 novembre 2026) : un pas dure 100 × 5 ÷ VIT. À 5, un pas = un battement ; à 10, deux pas par battement. Ne joue ni sur les coups ni sur le forage. Améliorable par joyau (+1). |
 | EYE | 10 | rayon de vision (5 avant le 10 novembre 2026) |
 | DEG | 10 (soit 7-13) | dégâts moyens d'un coup de foreuse ; chaque coup est tiré à ±30 % autour (16 novembre 2026) |
-| PRE | 80 | précision |
-| DEF | 12 | défense : fait rater les coups reçus, sans réduire les dégâts (modifiée par le terrain et par l'armure). A remplacé ESQ le 16 novembre 2026 |
+| PRE | 100 | précision (80 avant le 16 novembre 2026 au soir) |
+| DEF | 10 (0 de base + 10 de la Coque d'usine équipée au départ) | défense : fait rater les coups reçus, sans réduire les dégâts (modifiée par le terrain et par l'armure). A remplacé ESQ le 16 novembre 2026 |
 | CRIT | 5 % | chance de coup critique (×3 dégâts) ; coup par surprise toujours critique |
-| POW | 1 / battement | recharge d'énergie (doublée en attendant sur place) (5 avant le 13 novembre 2026 ; 6 puis 3 le 9 novembre) |
+| POW | 10 | seuil d'équipement (POW requis) et recharge d'énergie : POW/10 par battement, soit 1 au départ (doublée en attendant sur place) ; valait 1 avant le 16 novembre 2026 au soir (5 avant le 13 novembre 2026 ; 6 puis 3 le 9 novembre) |
 
 - Un coup de foreuse sur une **roche** coûte **10 d'énergie** (refusé sous 10) ; **attaquer un animal ne coûte plus d'énergie** (13 novembre 2026).
 - **Aperçu derrière les obstacles** (foreuse seulement, depuis le 6 novembre 2026) : dans le rayon EYE, la case juste derrière un obstacle à la vue (montagne, herbes hautes) est aperçue en **mode souvenir** — terrain affiché assombri comme une case explorée hors de vue, sans les créatures. Une seule case : un obstacle de 2 cases d'épaisseur cache toujours la suite. Les ennemis ne voient pas à travers les obstacles.
@@ -239,7 +239,7 @@ Le jeu ne compte plus en tours mais en **unités de temps**, comme Brogue et Cog
 - **Modèle Brogue (16 novembre 2026)**, à la place de « précision − esquive » :
   - **Chance de toucher = précision × 0,987^défense**, bornée entre 5 et 95 %. Chaque point de défense retire 1,3 % des coups ; 53 points les divisent par deux. La défense fait rater, elle ne réduit jamais les dégâts (« pas de blindage », § 11).
   - **Dégâts en fourchette** : chaque coup est tiré entre un minimum et un maximum. Créatures : `dmin`-`dmax` par espèce. Foreuse : DEG ± 30 % (DEG 10 → 7 à 13).
-  - **POW requis** : chaque arme et chaque armure demande un POW (c'est la « force » de Brogue ; POW reste aussi la recharge d'énergie). **Arme** : chaque point manquant multiplie précision et dégâts par 0,75 ; chaque point en trop, par 1,03. **Armure** : chaque point manquant retire 20 de défense ; chaque point en trop en ajoute 2. Calculé à la lecture : gagner du POW (Condensateur, joyau) agit aussitôt.
+  - **POW requis** : chaque arme et chaque armure demande un POW (c'est la « force » de Brogue ; POW reste aussi la recharge d'énergie). **POW de base 10** (échelle de la force de Brogue, 16 novembre 2026 au soir ; 1 avant) ; la recharge d'énergie vaut POW/10 par battement, soit 1 au départ comme avant. **Arme** : chaque point manquant multiplie précision et dégâts par 0,85 ; chaque point en trop, par 1,015. **Armure** : chaque point manquant retire 10 de défense ; chaque point en trop en ajoute 1. Calculé à la lecture : gagner du POW (Condensateur, joyau) agit aussitôt.
   - Les critiques (CRIT, × 3) et les coups par surprise sont gardés tels quels.
   - Conversion **à puissance égale** : esquive 5 → défense 5, 10 → 10, 25 → 30, 30 → 35, 35 → 45 ; foreuse 10 → 12 ; dégâts fixes → fourchette de même moyenne. Vérifié au banc (voir `mesures.md`).
 - Foncer sur un animal = coup de foreuse (dégâts DEG). Coup raté : « 0 » affiché (gris). Frapper un animal ne consomme pas d'énergie.
@@ -284,15 +284,16 @@ Version d'essai : tous les objets sont donnés au départ, non équipés sauf la
 
 | Objet | Type | POW requis | Effets |
 |---|---|---|---|
-| Foreuse | arme | 1 | arme de départ, sans modificateur : DEG 10 (7-13), coup 100 |
-| Foret diamant | arme | 1 | DEG −2, PRE +15, coup rapide (60) |
-| Marteau-pilon | arme | 3 | DEG +15, PRE −10, coup lent (150) |
-| Scie circulaire | arme | 2 | DEG +3, CRIT +15 % |
-| Lance thermique | arme | 2 | DEG +7, DEF −12 |
-| Châssis renforcé | armure | 3 | Vie max +30, VIT −1 |
-| Coque furtive | armure | 1 | DEF +6, DIS −2 (portée de discrétion) |
-| Châssis allégé | armure | 1 | VIT +1, DEF +12, Vie max −15 |
-| Coque isolante | armure | 2 | poison et glu durent deux fois moins, Vie max +10 |
+| Foreuse | arme | 10 | arme de départ, sans modificateur : DEG 10 (7-13), coup 100 |
+| Foret diamant | arme | 10 | DEG −2, PRE +15, coup rapide (60) |
+| Marteau-pilon | arme | 13 | DEG +15, PRE −10, coup lent (150) |
+| Scie circulaire | arme | 11 | DEG +3, CRIT +15 % |
+| Lance thermique | arme | 11 | DEG +7, DEF −12 |
+| Coque d'usine | armure | 10 | armure de départ, déjà équipée : DEF +10 (16 novembre 2026 au soir) |
+| Châssis renforcé | armure | 13 | Vie max +30, VIT −1 |
+| Coque furtive | armure | 10 | DEF +6, DIS −2 (portée de discrétion) |
+| Châssis allégé | armure | 10 | VIT +1, DEF +12, Vie max −15 |
+| Coque isolante | armure | 11 | poison et glu durent deux fois moins, Vie max +10 |
 | Servomoteur | accessoire | – | VIT +2 |
 | Téléobjectif | accessoire | – | EYE +3 |
 | Viseur laser | accessoire | – | CRIT +10 % |

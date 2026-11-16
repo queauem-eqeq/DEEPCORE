@@ -14,11 +14,11 @@ const SLOTS={arme:{n:1,nom:'Arme',g:'/'},armure:{n:1,nom:'Armure',g:'['},acc:{n:
 const MODS={degats:['DEG',1,''],pre:['PRE',1,''],crit:['CRIT',1,' %'],def:['DEF',1,''],vitesse:['VIT',1,''],capteur:['EYE',1,''],
   power:['POW',1,''],vieMax:['Vie max',1,''],energieMax:['Énergie max',1,''],dis:['DIS',-1,''],coup:['Coup',-1,''],isol:['Isolation',1,'']};
 const ITEMS={
-  foreuse:{n:'Foreuse',f:1,slot:'arme',req:1,mod:{},base:1,
+  foreuse:{n:'Foreuse',f:1,slot:'arme',req:10,mod:{},base:1,
     d:'L’outil d’origine de la foreuse, équilibré : c’est l’arme de référence.',
     art:["  ▄▄▄▄         ", "  ████▄▄▄      ", "  ███████▄▄▄   ", "  ██████████▀▀ ", "  ███████▀▀▀   ", "  ████▀▀▀      "],
     col:["..1111.........", "..1111222......", "..1111222222...", "..111122222222.", "..1111222222...", "..1111222......"]},
-  foret:{n:'Foret diamant',slot:'arme',req:1,mod:{degats:-2,pre:15,coup:-40},
+  foret:{n:'Foret diamant',slot:'arme',req:10,mod:{degats:-2,pre:15,coup:-40},
     d:'Pointe fine et précise : des coups rapides qui touchent presque toujours, mais moins appuyés.',
     art:[' ┌─┐▄▄▄        ',
          ' │█├████▄▄▄    ',
@@ -30,7 +30,7 @@ const ITEMS={
          '.d3d3333www111.',
          '.d3d3333www....',
          '.ddd333........']},
-  pilon:{n:'Marteau-pilon',slot:'arme',req:3,mod:{degats:15,pre:-10,coup:50},
+  pilon:{n:'Marteau-pilon',slot:'arme',req:13,mod:{degats:15,pre:-10,coup:50},
     d:'Masse hydraulique. Frappe très fort, mais lentement et moins juste.',
     art:['    ╔═════╗    ',
          '    ║ ▒▒▒ ║    ',
@@ -44,7 +44,7 @@ const ITEMS={
          '......dwd......',
          '...333www333...',
          '...wwwwwwwww...']},
-  chassis:{n:'Châssis renforcé',slot:'armure',req:3,mod:{vieMax:30,vitesse:-1},
+  chassis:{n:'Châssis renforcé',slot:'armure',req:13,mod:{vieMax:30,vitesse:-1},
     d:'Structure épaissie : encaisse davantage, mais alourdit la foreuse.',
     art:['  ▄█████████▄  ',
          '  ██▀▀▀█▀▀▀██  ',
@@ -56,7 +56,19 @@ const ITEMS={
          '..ww.3.w.3.ww..',
          '..wwdddwdddww..',
          '....ddddddd....']},
-  furtif:{n:'Coque furtive',f:1,slot:'armure',req:1,mod:{def:6,dis:-2},
+  usine:{n:'Coque d’usine',slot:'armure',req:10,mod:{def:10},
+    d:'La coque de série, montée au départ. Sans elle, la foreuse n’a aucune défense.',
+    art:['    ▄▄▄▄▄▄▄    ',
+         '  ▄▀▒▒▒▒▒▒▒▀▄  ',
+         '  █▒▒░░░░░▒▒█  ',
+         '  ▀▄▒▒▒▒▒▒▒▄▀  ',
+         '    ▀▀▀▀▀▀▀    '],
+    col:['....wwwwwww....',
+         '..wwdddddddww..',
+         '..wdd22222ddw..',
+         '..wwdddddddww..',
+         '....wwwwwww....']},
+  furtif:{n:'Coque furtive',f:1,slot:'armure',req:10,mod:{def:6,dis:-2},
     d:'Revêtement mat à facettes : on vous remarque de moins loin.',
     art:['    ▄▄▄▄▄▄▄    ',
          '  ▄▀░░░░░░░▀▄  ',
@@ -128,19 +140,19 @@ const ITEMS={
          '..dd3dd1dd3dd..',
          '....333w333....',
          '.......w.......']},
-  scie:{n:'Scie circulaire',f:1,slot:'arme',req:2,mod:{degats:3,crit:15},
+  scie:{n:'Scie circulaire',f:1,slot:'arme',req:11,mod:{degats:3,crit:15},
     d:'Disque denté : entaille profond, coups critiques fréquents.',
     art:["     ▄▄███▄▄   ", "   ▄█▀▀   ▀▀█▄ ", "═══█   ███   █ ", "   ▀█▄▄   ▄▄█▀ ", "     ▀▀███▀▀   "],
     col:[".....wwwwwww...", "...wwww...wwww.", "dddw...333...w.", "...wwww...wwww.", ".....wwwwwww..."]},
-  lance:{n:'Lance thermique',f:1,slot:'arme',req:2,mod:{degats:7,def:-12},
+  lance:{n:'Lance thermique',f:1,slot:'arme',req:11,mod:{degats:7,def:-12},
     d:'Jet de plasma : gros dégâts, mais encombrante, on esquive moins bien.',
     art:[" ┌──┐          ", " │▓▓├──────┐░  ", " │▓▓│═══════▒░░", " │▓▓├──────┘░  ", " └──┘          "],
     col:[".dddd..........", ".d33dddddddd3..", ".d33dwwwwwwwr33", ".d33dddddddd3..", ".dddd.........."]},
-  leger:{n:'Châssis allégé',slot:'armure',req:1,mod:{vitesse:1,def:12,vieMax:-15},
+  leger:{n:'Châssis allégé',slot:'armure',req:10,mod:{vitesse:1,def:12,vieMax:-15},
     d:'Structure ajourée : plus vive et plus mobile, mais plus fragile.',
     art:["    ┌──┬──┐    ", "  ┌─┤  │  ├─┐  ", "  │ │  ▓  │ │  ", "  └─┤  │  ├─┘  ", "    └──┴──┘    "],
     col:["....ddddddd....", "..ddd..d..ddd..", "..d.d..1..d.d..", "..ddd..d..ddd..", "....ddddddd...."]},
-  isolante:{n:'Coque isolante',f:1,slot:'armure',req:2,mod:{isol:1,vieMax:10},
+  isolante:{n:'Coque isolante',f:1,slot:'armure',req:11,mod:{isol:1,vieMax:10},
     d:'Joints étanches : poison et glu durent deux fois moins longtemps.',
     art:["   ▄▄▄▄▄▄▄▄▄   ", "  █▒▒▒▒▒▒▒▒▒█  ", "  █▒ ▄▄▄▄▄ ▒█  ", "  █▒ ▀▀▀▀▀ ▒█  ", "  █▒▒▒▒▒▒▒▒▒█  ", "   ▀▀▀▀▀▀▀▀▀   "],
     col:["...wwwwwwwww...", "..w222222222w..", "..w2.11111.2w..", "..w2.11111.2w..", "..w222222222w..", "...wwwwwwwww..."]},
@@ -204,10 +216,11 @@ const ITEMS={
 };
 // Objets donnés au départ, non équipés (phase d'essai : plus tard ils se trouveront au sol ou sur les ennemis).
 // Le second terme est le nombre d'exemplaires d'un consommable : ils s'empilent sur une seule ligne (« ×2 »).
-const INV_TEST=[['foreuse'],['foret'],['pilon'],['scie'],['lance'],['chassis'],['furtif'],['leger'],['isolante'],['servo'],['optique'],['viseur'],['conden'],['gyro'],['stabil'],['accu'],
+const INV_TEST=[['foreuse'],['foret'],['pilon'],['scie'],['lance'],['usine'],['chassis'],['furtif'],['leger'],['isolante'],['servo'],['optique'],['viseur'],['conden'],['gyro'],['stabil'],['accu'],
   ['repar',2],['batterie',2],['purge',2],['fumigene',2],['charge',2]];
-// la foreuse est l'arme de départ, déjà équipée (ses modificateurs sont nuls : ce sont les stats de base)
-const invTest=()=>INV_TEST.map(([k,n])=>n?{k,eq:0,n}:{k,eq:k==='foreuse'?1:0});
+// la foreuse est l'arme de départ, déjà équipée (ses modificateurs sont nuls : ce sont les stats de base) ;
+// la Coque d'usine est l'armure de départ, déjà équipée elle aussi : sa DEF +10 est comprise dans le def:10 de départ (07-generation)
+const invTest=()=>INV_TEST.map(([k,n])=>n?{k,eq:0,n}:{k,eq:k==='foreuse'||k==='usine'?1:0});
 // partie commencée avant un ajout d'objets : on complète le sac, et il y a toujours une arme en main
 function invMigre(){for(const [k,n] of INV_TEST)if(!G.inv.some(o=>o.k===k))G.inv.push(n?{k,eq:0,n}:{k,eq:0});
   G.inv=G.inv.filter(o=>ITEMS[o.k]);G.inv.sort((a,b)=>INV_TEST.findIndex(t=>t[0]===a.k)-INV_TEST.findIndex(t=>t[0]===b.k));
