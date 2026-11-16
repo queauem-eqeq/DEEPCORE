@@ -83,6 +83,184 @@ précision de ces chiffres : **40 essais par cas**, donc ± 15 points ; deux mes
   portée, la course suffit presque toujours. Contre un insectoïde (vitesse 6), l'avance gagnée est
   un peu plus faible.
 
+## Combats (13 novembre 2026)
+
+Duels simulés dans le vrai moteur (`python3 outils/simul.py combat`) : la foreuse, 100 PV, marche sur l'ennemi et frappe jusqu'à
+la mort de l'un des deux, sur terrain dégagé, ennemis déjà en chasse à 6 cases. **300 essais par cas**, soit ± 3 points sur les
+victoires et ± 2 sur la vie. « Vie restante » : moyenne sur les combats gagnés, poison restant déduit.
+
+### Un ennemi, puis des groupes, foreuse sans équipement
+
+| Adversaires | Victoires | Vie restante | Durée (battements) |
+|---|---|---|---|
+| 1 Crabos | 100 % | 85 | 7 |
+| 1 Cafar | 100 % | 97 | 4 |
+| 1 Crachin | 100 % | 85 | 11 |
+| 1 Vipérin | 100 % | 80 | 7 |
+| 1 Gluar | 100 % | 88 | 8 |
+| 1 Siphon | 100 % | 97 | 5 |
+| 1 Tapi (embusqué) | 100 % | 74 | 4 |
+| 1 Taupar | 100 % | 77 | 9 |
+| 1 Mastok | 92 % | 48 | 11 |
+| 2 Crabos | 100 % | 59 | 12 |
+| 3 Cafars | 100 % | 85 | 7 |
+| 4 Cafars | 100 % | 76 | 8 |
+| 2 Crachins | 100 % | 56 | 20 |
+| 2 Vipérins | 100 % | 62 | 10 |
+| Mastok + 2 Crabos | 28 % | 25 | 15 |
+
+Lecture : un ennemi seul coûte de 3 à 26 points de vie, le Mastok une cinquantaine (et une défaite sur douze). Sans réparation
+automatique, c'est l'accumulation qui tue : deux crabos coûtent déjà 40 points. Le Siphon et le Gluar font peu de dégâts, leur
+danger est ailleurs (énergie volée, fuite ralentie) et ne se lit pas dans un duel. « Mastok + 2 Crabos » est voulu comme un
+combat à fuir.
+
+### Ce que vaut chaque objet
+
+Même combat de référence pour tous : **2 Crabos + 1 Vipérin**, un seul objet équipé.
+
+| Équipement | Victoires | Vie restante | Durée |
+|---|---|---|---|
+| foreuse nue | 81 % | 28 | 14 |
+| Foret diamant | 100 % | 52 | 10 |
+| Marteau-pilon | 97 % | 55 | 12 |
+| Châssis renforcé | 94 % | 47 | 16 |
+| Coque furtive | 86 % | 28 | 15 |
+| Servomoteur | 87 % | 32 | 14 |
+| Téléobjectif | 80 % | 28 | 15 |
+| Viseur laser | 82 % | 33 | 14 |
+| Condensateur | 84 % | 27 | 15 |
+| Gyroscope | 92 % | 32 | 15 |
+| Scie circulaire | 98 % | 53 | 11 |
+| Lance thermique | 98 % | 46 | 11 |
+| Châssis allégé | 88 % | 28 | 14 |
+| Coque isolante | 87 % | 38 | 15 |
+| Stabilisateur | 93 % | 34 | 13 |
+| Accumulateur | 82 % | 27 | 15 |
+
+Contre un Mastok seul : Marteau-pilon 97 % / 57 PV · Foret diamant 99 % / 60 PV · Scie circulaire 97 % / 62 PV · Lance thermique 99 % / 54 PV (foreuse nue : 92 % / 48 PV).
+
+Lecture : les quatre armes spéciales se tiennent (97 à 100 % de victoires, 46 à 55 PV restants) et valent toutes nettement mieux que
+la foreuse nue (81 %, 28 PV). Le Châssis renforcé est la seule armure qui pèse dans un duel ; Coque furtive, Châssis allégé,
+Servomoteur, Téléobjectif, Condensateur et Accumulateur servent hors du corps à corps (discrétion, fuite, vision, énergie), ce que
+ce test ne mesure pas.
+
+Réglages faits à la suite de la première mesure : Foret diamant affaibli (il gagnait 100 % des combats avec 70 PV), Marteau-pilon
+renforcé (il faisait moins bien que la foreuse nue), Stabilisateur ramené de +15 à +10, Gluar porté de 4 à 6 de dégâts, et la vie
+qui suit le maximum quand on équipe un châssis (sans quoi les +30 PV ne servaient à rien dans un combat).
+
+### Renforcement des ennemis par niveau : essayé puis retiré (13 novembre 2026)
+
+Deux essais de renforcement avec la profondeur (+15 %, puis +25 % de PV et de dégâts par niveau) ont été mesurés puis abandonnés à la demande
+de l'utilisateur : les PV et les dégâts ne bougent plus, c'est le nombre d'ennemis qui monte. À retenir de ces mesures : sur le combat de
+référence, la foreuse équipée (Scie, Châssis renforcé, Gyroscope, Viseur, Stabilisateur) gagnait encore 79 % des combats face à des ennemis
+deux fois plus forts, quand la foreuse nue n'en gagnait aucun. **L'équipement pèse bien plus que la profondeur** tant qu'il est donné au départ.
+
+### Menace par monde et par niveau (15 novembre 2026)
+
+Menace = somme effectif × coût d'un duel (colonne « vie restante » plus haut, retranchée de 100). Valeurs pour 1000 cases, taille 3.
+
+| Monde | Avant (multiplicateur par niveau), niveaux 1 à 5 | Après (budget) |
+|---|---|---|
+| Plateau | 56 / 81 / 114 / 152 / 189 | 60 / 121 / 181 / 252 / 322 |
+| Marécage | 162 / 236 / 327 / 440 / 540 | 59 / 117 / 185 / 254 / 320 |
+| Hautes herbes | 85 / 117 / 163 / 218 / 274 | 59 / 122 / 181 / 250 / 323 |
+| Galeries | 68 / 100 / 140 / 188 / 233 | 62 / 117 / 182 / 253 / 319 |
+| Pierrier | 106 / 147 / 193 / 253 / 312 | 70 / 129 / 184 / 248 / 316 |
+| Failles | 80 / 106 / 159 / 194 / 257 | 68 / 110 / 178 / 249 / 326 |
+
+Les écarts qui restent (60 à 70 au niveau 1) viennent des arrondis et du minimum d'un individu par espèce. Deux archétypes extrêmes,
+« que des mastoks » et « tout infesté », tombent eux aussi sur le budget (60 à 72 au niveau 1, 316 au niveau 5).
+
+## Banc de combat : coût et pression par espèce (15 novembre 2026)
+
+Mesures faites sur le **banc de combat** (`outils/banc.py` l'assemble, `outils/banc_series.py` lance les séries ; artefact
+https://claude.ai/artifact/9BKRaoB4hzgdWhzYFx5A6q). Le vrai moteur tourne sur une **carte de taille 1** (32 × 22) générée à chaque essai ;
+un pilote automatique va tuer tout ce qui vit, en frappant le plus proche. Sauf mention, la foreuse est **sans équipement** et reçoit une
+vie d'essai très haute : on mesure les **dégâts encaissés**, sans que la mort n'arrête le combat. Environ 60 000 combats en tout,
+120 à 200 par configuration ; données brutes dans `banc/archives/2026-11-15/`, tableaux complets dans l'onglet Archives du banc.
+
+### Ce que coûte un ennemi
+
+| Espèce | Ancien coût (duels) | Coût de base | Pression | Par tête à 6, calmes | Par tête à 6, en alerte |
+|---|---|---|---|---|---|
+| Insectoïde | 4 | 3,3 | 0,15 | 3,5 | 3,9 |
+| Cafar | 5 | 2 | 0,3 | 2,4 | 2,8 |
+| Siphon | 3 | 1,1 | 0,31 | 1,7 | 4,1 |
+| Gluar | 12 | 5,7 | 0,67 | 8,7 | 14,3 |
+| Crachin | 15 | 4,9 | 1,12 | 12,5 | 23,8 |
+| Crabos | 15 | 7,3 | 0,86 | 11,6 | 26,4 |
+| Vipérin | 20 | 10,8 | 0,57 | 12,4 | 21,3 |
+| Taupar | 23 | 16,7 | 0,63 | 19,5 | 25,6 |
+| Tapi | 26 | 27,1 | 0,49 | 28,4 | 29,1 |
+| Mastok | 52 | 46 | 1,51 | 59,1 | 103,3 |
+
+- **Coût de base** : points de vie perdus par individu quand on les prend un à un, sans qu'ils soient avertis (la foreuse a souvent le
+  premier coup, par surprise). Les anciens coûts venaient de duels où l'ennemi chargeait déjà : ils étaient trop hauts pour presque tous.
+- **Pression** : ce que la foule ajoute. À 24 crabos sur la carte, chacun coûte 25 points au lieu de 7 ; à 24 crachins, 36 au lieu de 5.
+  Le Tapi, lui, coûte le même prix seul ou à quatorze : c'est son embuscade qui fait mal, pas le nombre.
+- **En alerte** (tous convergent d'emblée), le coût par tête double à six pour les crabos, les crachins et les mastoks.
+
+### Le modèle
+
+    menace = terrain × [ Σ effectif × coût  +  (704 / surface) × ( Σ effectif × pression )² ]
+
+Vérifié sur des **groupes mixtes** (série 4, terrain neutre) : l'écart entre prévu et mesuré reste sous 15 %, là où une simple somme
+des coûts se trompait du simple au triple (mélange Marécage × 3 : 776 points mesurés, 746 prévus, 282 par la somme simple).
+
+**Terrain** (mêmes ennemis, relief du biome au lieu du Plateau) : Marécage 0,87 · Hautes herbes 0,92 · Failles 0,95 · Pierrier 1,3 ·
+Galeries 0,5. Les Galeries sont le cas mal couvert : leurs couloirs protègent d'autant plus que la foule est grande (de 0,85 à 0,3) ;
+0,5 est juste vers le niveau 3, trop bas avant, trop haut après.
+
+### Le budget tient-il ?
+
+Dégâts mesurés ÷ budget visé, pour la faune que le jeu pose à chaque niveau (1 = pile sur le budget), niveaux 1 à 5 :
+
+| Biome | N1 | N2 | N3 | N4 | N5 |
+|---|---|---|---|---|---|
+| Plateau | 0,95 | 1,09 | 1,08 | 1,07 | 1,31 |
+| Marécage | 0,61 | 1,04 | 0,92 | 0,97 | 0,97 |
+| Hautes herbes | 1,09 | 1,13 | 1,06 | 1,00 | 1,04 |
+| Galeries | 1,69 | 1,12 | 0,95 | 0,75 | 0,55 |
+| Pierrier | 1,33 | 0,94 | 1,01 | 1,02 | 0,84 |
+| Failles | 0,48 | 0,75 | 1,32 | 1,07 | 0,91 |
+
+Avant ce réglage, les mêmes niveaux allaient de 0,56 à 2,9. Restent hors des clous : les Galeries (voir plus haut), le Plateau au
+niveau 5 (33 ennemis sur 704 cases : la pression est sous-estimée dans une telle cohue) et les tout petits budgets, où l'arrondi à
+trois ou quatre ennemis pèse lourd. Ce dernier point est propre à la taille 1 : en taille 3 les effectifs sont cinq fois plus grands.
+
+### Ce que ça veut dire en partie
+
+Même faune, vie normale. Victoires en tuant tout, foreuse **nue / équipée** (Scie circulaire, Châssis renforcé, Gyroscope, Viseur laser,
+Stabilisateur), puis part des **traversées** réussies (aller au site en se défendant seulement, foreuse nue) :
+
+| Biome | N1 | N2 | N3 | N4 | N5 |
+|---|---|---|---|---|---|
+| Plateau | 100 / 100 / 100 | 87 / 100 / 89 | 43 / 98 / 59 | 6 / 79 / 32 | 1 / 42 / 14 |
+| Marécage | 100 / 100 / 100 | 89 / 100 / 99 | 43 / 99 / 86 | 14 / 92 / 50 | 1 / 76 / 40 |
+| Hautes herbes | 100 / 100 / 100 | 98 / 100 / 100 | 19 / 92 / 100 | 0 / 38 / 99 | 0 / 0 / 86 |
+| Galeries | 97 / 100 / 98 | 76 / 100 / 78 | 45 / 99 / 65 | 41 / 92 / 64 | 56 / 88 / 58 |
+| Pierrier | 98 / 100 / 99 | 95 / 99 / 92 | 48 / 98 / 62 | 8 / 88 / 44 | 6 / 82 / 30 |
+| Failles | 100 / 100 / 100 | 99 / 100 / 98 | 20 / 93 / 48 | 5 / 92 / 29 | 1 / 88 / 27 |
+
+Lecture : tout nettoyer sans équipement n'est tenable qu'aux niveaux 1 et 2 ; équipée, la foreuse tient jusqu'au niveau 4 et commence
+à tomber au niveau 5. Traverser sans chercher le combat reste possible plus longtemps, surtout dans les Hautes herbes où les tapis ne
+frappent que si l'on passe à leur contact. C'est une carte de taille 1, où tout se rejoint vite : en taille 3 il y a de la place
+pour contourner.
+
+### Après le retour de l'insectoïde fuyant (15 novembre 2026, soir)
+
+L'insectoïde recule de nouveau au contact et ne se bat que si la foreuse est engagée ou le frappe. Seul, il ne coûte plus que **1,3** point par
+tête (3,3 avant) ; mêlé à des ennemis qui chassent, rien ne change : le mélange du Plateau donne 43 points (48 avant) et son double 139
+(131 avant), dans le bruit de la mesure. Le coût de menace de 3,3 est donc gardé : il vaut pour l'insectoïde en compagnie, son cas normal.
+
+### Limites
+
+- Le pilote est simple : il fonce sur le plus proche, n'utilise ni la course, ni la discrétion, ni les consommables, ne fuit jamais.
+- Le coût ne compte que les points de vie : ni l'énergie volée par le Siphon, ni la glu du Gluar. Leur coût mesuré est donc bas, et un
+  monde qui n'aurait qu'eux en recevrait énormément.
+- Les coefficients de terrain ne valent que pour les six biomes d'origine ; un archétype enregistré vaut 1.
+- Les coûts ne suivent pas les retouches du Bestiaire : il faut relancer les séries après un changement de stats.
+
 ## Piège de méthode
 
 Une mesure à longue distance exige de **dégager toute la carte**. Un relief laissé au hasard coupe la

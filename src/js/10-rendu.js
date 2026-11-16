@@ -72,6 +72,15 @@ function drawBoom(){const fl=1-(performance.now()-BOOM.t0)/180;
   if(fl>0){ctx.globalAlpha=fl*.8;ctx.fillStyle='#ffffff';ctx.beginPath();ctx.arc((G.px+.5-camX)*S,(G.py+.5-camY)*S,S*1.6,0,Math.PI*2);ctx.fill();}   // éclair de l'explosion
   ctx.globalAlpha=1;for(const q of BOOM.p){ctx.fillStyle=q.c;ctx.fillRect(Math.round((q.x-camX)*S/2)*2,Math.round((q.y-q.z-camY)*S/2)*2,q.sz,q.sz);}}
 function addFx(f){f.t0=performance.now();if(f.kind==='num')f.stack=FX.filter(o=>o.kind==='num'&&o.x===f.x&&o.y===f.y&&fxP(o)<.5).length;FX.push(f);if(!fxRaf)fxRaf=requestAnimationFrame(fxLoop);}
+/* Contour ovale d'une case, à un pixel de distance : les pixels de tuile du bord d'une ellipse de 18 × 17,
+   calculés une fois pour toutes. Décalages depuis le coin de la case, de −1 à 16. */
+const OVALE=(()=>{const R=[],rx=9,ry=8.2,dans=(x,y)=>((x+.5-9)/rx)**2+((y+.5-9)/ry)**2<=1;
+  for(let y=-1;y<17;y++)for(let x=-1;x<17;x++){const gx=x+1,gy=y+1;
+    if(!dans(gx,gy)||(dans(gx-1,gy)&&dans(gx+1,gy)&&dans(gx,gy-1)&&dans(gx,gy+1)))continue;
+    R.push([x,y]);}
+  return R;})();
+// grains d'un effet de consommable : position dans la case et instant d'apparition, tirés une fois pour toutes
+const fxGrains=n=>Array.from({length:n},()=>({x:rnd(0,13),y:rnd(3,14),d:Math.random()*.55}));
 function fxLoop(){const now=performance.now();FX=FX.filter(f=>now-f.t0<f.dur);render();fxRaf=FX.length?requestAnimationFrame(fxLoop):0;}
 const fxP=f=>Math.min(1,(performance.now()-f.t0)/f.dur);
 function lungeOff(match){if(reduced)return [0,0];const f=FX.find(match);if(!f)return [0,0];const k=Math.sin(Math.PI*fxP(f))*.4*S;return [f.dx*k,f.dy*k];}
@@ -103,8 +112,51 @@ function ensureChasmOv(){if(!G)return;const key=(G.seed||'')+'|'+PAL['3']+'|'+G.
     if(dd<NT){const f=(NT-dd)/(NT+1);set(i,base.map(v=>Math.round(v*f)));}}}
   x.putImageData(img,0,0);c._g=G;CHASM_OV=c;CHASM_KEY=key;}
 function hexRgb3(h){const n=parseInt(h.slice(1),16);return [(n>>16)&255,(n>>8)&255,n&255];}
+// la tuile « Bord croisé » teinte en rouge, refaite si elle est retouchée au Tile editor
+let VIS_T=null,VIS_K='';
+function viseeTuile(){const r=rowsOf('nuage3'),k=r.join('');if(!VIS_T||VIS_K!==k){VIS_T=curCanvas(r,'#b8242a');VIS_K=k;}return VIS_T;}
+/* Texture du sol (16 novembre 2026, variante « plaques rugueuses » choisie sur la planche planches/sol-grain.js) :
+   chaque case prend une nuance de la couleur monde très légèrement décalée (grandes plages douces, teinte ±4°, saturation ±13 %),
+   et un grain de 0 à 11 pixels par case dont la DENSITÉ varie par zones : des coins presque lisses, d'autres nettement granuleux.
+   Comme les gouffres, c'est calculé une fois par planète et par palette, dans une image de 16 pixels par case. */
+let SOL_OV=null,SOL_KEY='';
+const solH=(a,b,k)=>{let n=((a*73856093)^(b*19349663)^(k*83492791))>>>0;n^=n<<13;n>>>=0;n^=n>>17;n^=n<<5;n>>>=0;return n/4294967296;};
+const solN=(a,b,sc)=>{const X=a/sc,Y=b/sc,x0=Math.floor(X),y0=Math.floor(Y),tx=X-x0,ty=Y-y0,sx=tx*tx*(3-2*tx),sy=ty*ty*(3-2*ty),v=(i,j)=>solH(i,j,7);
+  return (v(x0,y0)*(1-sx)+v(x0+1,y0)*sx)*(1-sy)+(v(x0,y0+1)*(1-sx)+v(x0+1,y0+1)*sx)*sy;};
+/* Les six nombres du réglage. teinte, clarte, satu : amplitude totale des nuances d'une plage à l'autre (en degrés et en %).
+   grainMax : nombre maximal de pixels de grain sur une case, dans les coins les plus rugueux.
+   fond, grain : opacités sur 255 du voile et des pixels de grain (20 = les 8 % d'origine).
+   echPlage, echGrain : taille des plages et des zones de rugosité, en cases (un écran en fait une trentaine de large).
+   Valeurs renforcées le 16 novembre 2026 à la demande de l'utilisateur : grain plus marqué, plages plus contrastées et plus nombreuses. */
+const SOL_REG={teinte:18,clarte:9,satu:58,grainMax:20,fond:20,grain:72,echPlage:10,echGrain:5};
+function ensureSolOv(){if(!G)return;const R=SOL_REG,key=(G.seed||'')+'|'+PAL['3']+'|'+G.t.length+'|'+Object.values(R).join(',');
+  if(SOL_OV&&SOL_KEY===key&&SOL_OV._g===G)return;
+  const PW=W*16,PH=H*16,c=document.createElement('canvas');c.width=PW;c.height=PH;const x=c.getContext('2d'),img=x.createImageData(PW,PH),d=img.data;
+  for(let cy=0;cy<H;cy++)for(let cx=0;cx<W;cx++){
+    const [r,g,b]=hexRgb3(teinter(PAL['3'],(solN(cx,cy,R.echPlage)-.5)*R.teinte,(solN(cx+99,cy,R.echPlage*.85)-.5)*R.clarte,(solN(cx,cy+99,R.echPlage*1.15)-.5)*R.satu));
+    for(let j=0;j<16;j++){let pi=((cy*16+j)*PW+cx*16)*4;for(let i=0;i<16;i++,pi+=4){d[pi]=r;d[pi+1]=g;d[pi+2]=b;d[pi+3]=R.fond;}}
+    const n=Math.round(solN(cx,cy,R.echGrain)*R.grainMax);
+    for(let k=0;k<n;k++){const gx=Math.floor(solH(cx,cy,5+k*3)*16),gy=Math.floor(solH(cx,cy,5+k*3+1)*16);
+      d[((cy*16+gy)*PW+cx*16+gx)*4+3]=R.grain;}}
+  x.putImageData(img,0,0);c._g=G;SOL_OV=c;SOL_KEY=key;}
+// le voile de couleur monde d'une case : l'image précalculée, ou la couleur unie tant qu'elle n'est pas prête
+function voile(x,y,px,py,a,cx2){const c=cx2||ctx;
+  if(SOL_OV&&SOL_OV._g===G){c.globalAlpha=a;c.drawImage(SOL_OV,x*16,y*16,16,16,px,py,S,S);return;}
+  c.globalAlpha=.08*a;c.fillStyle=PAL['3'];c.fillRect(px,py,S,S);}
+/* Sonar (13 novembre 2026, revu le 15) : 10 à 20 tours après l'arrivée sur un niveau, la foreuse émet une onde circulaire qui balaie toute
+   la carte et détecte les gisements (éclats de métal, Matière) et le joyau. G.sonar : 1 = à émettre (au tour G.sonarAt), 2 = émis.
+   Ce qui est détecté s'affiche sur la carte et la mini-carte, même là où la foreuse n'a rien vu, au fur et à mesure que l'onde l'atteint.
+   L'onde se dessine aussi sur la mini-carte ; un « blip blip » l'accompagne pendant tout le balayage. */
+const SONAR_V=38,SONAR_MIN=2600;                         // cases par seconde ; durée minimale du balayage, en ms
+function sonarStart(){G.sonar=2;G.sonX=G.px;G.sonY=G.py;const r=Math.hypot(Math.max(G.px,W-G.px),Math.max(G.py,H-G.py))+2,dur=reduced?1:Math.max(SONAR_MIN,r/SONAR_V*1000);
+  addFx({kind:'sonar',x:G.px,y:G.py,r,dur});SFX.sonar(dur/1000);
+  const l=Object.values(G.ore||{}),m=l.filter(oreMat).length,n=l.length-m,j=Object.keys(G.gems||{}).length;
+  sayMore(`Sonar : ${n} gisement${n>1?'s':''} de métal, ${m} de Matière${j?` et ${j} joyau${j>1?'x':''}`:''} détecté${l.length+j>1?'s':''}.`,'info');}
+function sonarR(){if(!G||G.sonar===1)return -1;const f=FX.find(f=>f.kind==='sonar');return f?fxP(f)*f.r:Infinity;}
+const sonarVu=(i,sr)=>Math.hypot(i%W-(G.sonX??G.px),((i/W)|0)-(G.sonY??G.py))<=sr;
 function render(){
-  if(!G||!TL.robot)return;ensureChasmOv();
+  if(G&&G.sonar===1&&G.turn>=(G.sonarAt||0)&&started&&!INTRO&&!BOOM&&!G.over&&$('overlay').hidden&&$('introCv').hidden)sonarStart();
+  if(!G||!TL.robot)return;ensureChasmOv();ensureSolOv();
   const vc=vw/S,vr=vh/S;
   const fx0=freeCam?camCX:G.px,fy0=freeCam?camCY:G.py;
   camX=Math.max(0,Math.min(W-Math.floor(vc),fx0-Math.floor(vc/2)));camY=Math.max(0,Math.min(H-Math.floor(vr),fy0-Math.floor(vr/2)));
@@ -114,7 +166,7 @@ function render(){
   if(sh){const a=(1-fxP(sh))*sh.amp;ctx.translate(Math.round((Math.random()*2-1)*a),Math.round((Math.random()*2-1)*a));}
   for(let y=camY;y<Math.min(H,camY+rows+1);y++)for(let x=camX;x<Math.min(W,camX+cols+1);x++){
     const i=idx(x,y),v=fog?vis[i]:1;if(!v&&!G.seen[i])continue;const t=G.t[i],h=hash(x,y),k=v?1:.28;
-    if(t!==CHASM){ctx.globalAlpha=.08*k;ctx.fillStyle=PAL['3'];ctx.fillRect((x-camX)*S,(y-camY)*S,S,S);}
+    if(t!==CHASM)voile(x,y,(x-camX)*S,(y-camY)*S,k);
     if(t!==BRIDGE)put(TL.ground0,x,y,.6*k);   // sol uniforme : plus de variations près des sites (13 novembre 2026)
     if(t===ROCK)put(h%3?TL.rock:TL.rock2,x,y,.95*k);
     else if(t===MOUNT)put(y>0&&G.t[idx(x,y-1)]===MOUNT?TL.mtBody:TL.mtTop,x,y,.9*k);
@@ -125,19 +177,23 @@ function render(){
     else if(t===DEEP){ctx.globalAlpha=k;ctx.fillStyle='#01060c';ctx.fillRect((x-camX)*S,(y-camY)*S,S,S);ctx.globalAlpha=.08*k;ctx.fillStyle=PAL['2'];ctx.fillRect((x-camX)*S,(y-camY)*S,S,S);put((liqFrame+(h%2))%2?TL.deep1:TL.deep0,x,y,.4*k);}
     else if(t===CHASM){ctx.globalAlpha=1;ctx.fillStyle='#000';ctx.fillRect((x-camX)*S,(y-camY)*S,S,S);if(CHASM_OV){ctx.globalAlpha=k;ctx.drawImage(CHASM_OV,x*16,y*16,16,16,(x-camX)*S,(y-camY)*S,S,S);}}
     else if(t===RUBBLE)put(TL.rubble,x,y,.65*k);
-    else if(t===GRASS)put(TL.grass0,x,y,.9*k);
-    else if(t===FLAT)put(TL.flat0,x,y,.75*k);
+    // herbes assombries de moitié le 15 novembre 2026 (elles ressortaient trop) : même teinte, luminosité divisée par deux
+    else if(t===GRASS)put(TL.grass0,x,y,.45*k);
+    else if(t===FLAT)put(TL.flat0,x,y,.38*k);
     const dm=G.dmg&&G.dmg[i];if(dm&&(t===ROCK||t===MOUNT))put(TL.crackH,x,y,.95*k);
   }
   if(G.tracks)for(const k in G.tracks){const tr=G.tracks[k],age=G.turn-tr.t;if(age>=TRACK_LIFE){delete G.tracks[k];continue;}
     const i=+k;if(tr.i==null||(fog&&!vis[i]))continue;put(TL[`tk${tr.i}${tr.o}${Math.max(0,age)}`],i%W,(i/W)|0,.6);}
   if(G.gems)for(const k in G.gems){if(G.gems[k]!=='visible')continue;const i=+k;if(fog&&!G.seen[i])continue;put(TL.gemDim,i%W,(i/W)|0,fog&&!vis[i]?.35:1);}
   if(G.ore)for(const k in G.ore){if(!oreSol(G.ore[k]))continue;const i=+k;if(fog&&!G.seen[i])continue;put(oreTile(G.ore[k],true),i%W,(i/W)|0,fog&&!vis[i]?.35:1);}
+  {const sr=sonarR();if(sr>0&&G.ore&&fog)for(const k in G.ore){const i=+k;if(G.seen[i]||!sonarVu(i,sr))continue;put(oreTile(G.ore[k],oreSol(G.ore[k])),i%W,(i/W)|0,1);}
+   if(sr>0&&G.gems&&fog)for(const k in G.gems){const i=+k;if(G.seen[i]||!sonarVu(i,sr))continue;put(TL.gem,i%W,(i/W)|0,1);}}   // gisements détectés par le sonar, même hors de vue
+  if(G.items)for(const k in G.items){const i=+k;if(fog&&!G.seen[i])continue;put(TL.objet,i%W,(i/W)|0,fog&&!vis[i]?.35:1);}   // objets posés au sol
   if(G.splat)for(const [px,py,c,sz] of G.splat){const i=idx(Math.floor(px/S),Math.floor(py/S));if(fog&&!G.seen[i])continue;   // gouttes de sang au sol
     ctx.globalAlpha=fog&&!vis[i]?.3:1;ctx.fillStyle=c;ctx.fillRect(px-camX*S,py-camY*S,sz,sz);}
   ctx.globalAlpha=1;
   if(G.blood)for(const k in G.blood){const i=+k,bx=i%W,by=(i/W)|0;if(fog&&!G.seen[i])continue;put(TL['blood'+G.blood[k]],bx,by,fog&&!vis[i]?.3:.9);}
-  for(const s of G.sites){if(fog&&!G.seen[idx(s.x,s.y)])continue;put(s.known?TL['site'+s.depth]:TL.siteUnknown,s.x,s.y,!fog||vis[idx(s.x,s.y)]?1:.35);}
+  for(const s of G.sites){if(fog&&!G.seen[idx(s.x,s.y)])continue;put(s.known?(TL['site'+s.depth]||TL.site10):TL.siteUnknown,s.x,s.y,!fog||vis[idx(s.x,s.y)]?1:.35);}
   // touche V : portée de discrétion de la foreuse — les cases d'où un ennemi peut vous remarquer, entourées d'un pointillé
   if(SHOWVIS&&!G.over){
     const r=G.stealth||STEALTH_BASE,cells=new Set();
@@ -145,12 +201,24 @@ function render(){
       const i=idx(x,y);if(Math.hypot(x-G.px,y-G.py)>r)continue;if(lastAct==='dig'||los(G.px,G.py,x,y))cells.add(i);}
     drawVisCells(cells,'#ffffff');}
   drawPath();
-  if(G.animals)for(const a of G.animals)if(!fog||vis[idx(a.x,a.y)]){const [lx,ly]=lungeOff(f=>f.kind==='lunge'&&f.beast===a);ctx.globalAlpha=1;ctx.drawImage(TL['an'+a.sp+(a.dir<0?'l':'r')],(a.x-camX)*S+lx,(a.y-camY)*S+ly,S,S);}
+  // barre de vie au-dessus d'une créature blessée (insectoïdes compris depuis le 16 novembre 2026 : ils en étaient privés)
+  const barreVie=(px,py,hp,pv)=>{if(hp>=pv)return;const w=S-6;ctx.fillStyle='#000';ctx.fillRect(px+3,py-4,w,3);ctx.fillStyle='#ff3b3b';ctx.fillRect(px+3,py-4,Math.round(w*Math.max(0,hp)/pv),3);};
+  if(G.animals)for(const a of G.animals)if(!fog||vis[idx(a.x,a.y)]){const [lx,ly]=lungeOff(f=>f.kind==='lunge'&&f.beast===a);
+    const px=(a.x-camX)*S+lx,py=(a.y-camY)*S+ly;ctx.globalAlpha=1;ctx.drawImage(TL['an'+a.sp+(a.dir<0?'l':'r')],px,py,S,S);
+    const sp=SPECIES[a.sp];barreVie(px,py,a.hp??pvDe(sp),pvDe(sp));}
   if(G.beasts)for(const b of G.beasts){if(!beastVisible(b))continue;const [lx,ly]=lungeOff(f=>f.kind==='lunge'&&f.beast===b);
     const px=(b.x-camX)*S+lx,py=(b.y-camY)*S+ly,img=TL['bz'+b.sp+(b.dir<0?'l':'r')];
     ctx.globalAlpha=1;ctx.drawImage(img,px,py,S,S);
     const fl=FX.find(f=>f.kind==='flash'&&f.beast===b);if(fl){ctx.globalCompositeOperation='lighter';ctx.globalAlpha=1-fxP(fl);ctx.drawImage(img,px,py,S,S);ctx.drawImage(img,px,py,S,S);ctx.globalCompositeOperation='source-over';ctx.globalAlpha=1;}
-    const pv=BEASTS[b.sp].pv;if(b.hp<pv){const w=S-6;ctx.fillStyle='#000';ctx.fillRect(px+3,py-4,w,3);ctx.fillStyle='#ff3b3b';ctx.fillRect(px+3,py-4,Math.round(w*b.hp/pv),3);}}
+    barreVie(px,py,b.hp,pvDe(BEASTS[b.sp]));}
+  // nuage d'un fumigène : les tuiles de nuage par-dessus le terrain et les créatures, sous la foreuse ; elles pâlissent en se dissipant
+  // la fumée se voit même là où elle coupe la vue : sinon on ne verrait que les neuf cases autour de la foreuse
+  if(G.fum)for(const k in G.fum){const i=+k;if(fog&&!vis[i]&&!G.seen[i])continue;const c=G.fum[k],t=TL['nuage'+c.k];
+    if(t)put(t,i%W,(i/W)|0,Math.min(1,c.v/4)*(c.k<2?.72:.5)*(vis[i]?1:.55));}
+  // zone visée d'une charge sismique : carré de 3 × 3 en « Bord croisé » rouge
+  if(VISEE){const t=viseeTuile();ctx.globalAlpha=1;
+    for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){const zx=VISEE.x+dx,zy=VISEE.y+dy;
+      if(zx<0||zy<0||zx>=W||zy>=H)continue;ctx.drawImage(t,(zx-camX)*S,(zy-camY)*S,S,S);}}
   const wreck=BOOM||(G.over&&G.over.dead);   // foreuse détruite : plus dessinée
   if(!wreck){const [lx,ly]=lungeOff(f=>f.kind==='lunge'&&f.robot);ctx.globalAlpha=1;ctx.drawImage(TL['robot_'+(G.face||'u')],(G.px-camX)*S+lx,(G.py-camY)*S+ly,S,S);}
   const ht=G.t[idx(G.px,G.py)];if(wreck){}else if(ht===LIQ)put(TL.wade,G.px,G.py,.95);else if(ht===DEEP)put(TL.wadeDeep,G.px,G.py,.95);
@@ -158,6 +226,28 @@ function render(){
     ctx.globalAlpha=p<.6?1:1-(p-.6)/.4;ctx.font='bold 14px "JetBrains Mono", ui-monospace, monospace';ctx.textAlign='center';ctx.textBaseline='bottom';
     const tx=(f.x-camX)*S+S/2,ty=(f.y-camY)*S-2-rise-(f.stack||0)*14;ctx.fillStyle='#000';ctx.fillText(f.txt,tx+1,ty+1);ctx.fillStyle=f.col;ctx.fillText(f.txt,tx,ty);}
   ctx.globalAlpha=1;
+  // Consommables : + rouges (réparobots) et flèches bio (batterie) qui montent, filet pulsé autour de la foreuse (purge).
+  // Pixel art strict : taille fixe, opaques, calés sur la grille des pixels de tuile ; chaque grain apparaît à son heure et s'efface d'un coup.
+  {const u=S/16;
+   for(const f of FX){if(f.kind!=='soin'&&f.kind!=='ener')continue;const p=fxP(f),bx=(f.x-camX)*16,by=(f.y-camY)*16;
+     ctx.fillStyle=f.kind==='soin'?'#ff3b3b':PAL['2'];
+     const bas=f.kind==='ener'?7:0,mont=f.kind==='ener'?24:13;   // les flèches partent plus bas et montent plus haut : sinon elles se perdent dans la foreuse, de la même couleur
+     for(const g of f.gr){const q=(p-g.d)*2.2;if(q<0||q>1)continue;const gx=Math.round(bx+g.x),gy=Math.round(by+g.y+bas-q*mont);
+       if(f.kind==='soin'){ctx.fillRect(gx*u,(gy+1)*u,3*u,u);ctx.fillRect((gx+1)*u,gy*u,u,3*u);}           // une petite croix
+       else{ctx.fillRect((gx+1)*u,gy*u,u,4*u);ctx.fillRect(gx*u,(gy+1)*u,u,u);ctx.fillRect((gx+2)*u,(gy+1)*u,u,u);}}}   // une flèche vers le haut
+   for(const f of FX){if(f.kind!=='purge')continue;const p=fxP(f);if(Math.floor(p*7)%2)continue;   // le filet pulse : allumé, éteint, quatre fois
+     const bx=(f.x-camX)*16,by=(f.y-camY)*16;ctx.fillStyle=PAL['1'];
+     for(const [ox,oy] of OVALE)ctx.fillRect((bx+ox)*u,(by+oy)*u,u,u);}}
+  // Dessins au pixel de tuile (u = 1/16 de case), calés sur la grille, opaques : le projectile d'un tireur et l'onde du sonar
+  {const u=S/16;ctx.fillStyle=PAL['1'];
+   for(const f of FX)if(f.kind==='tir'){const p=fxP(f),px=Math.round((f.x0+(f.x1-f.x0)*p+.5-camX)*16),py=Math.round((f.y0+(f.y1-f.y0)*p+.5-camY)*16);
+     ctx.fillRect((px-1)*u,(py-2)*u,2*u,4*u);ctx.fillRect((px-2)*u,(py-1)*u,4*u,2*u);}                    // petite boule de 4 pixels de large
+   // « ! » d'un ennemi qui repère la foreuse : un trait d'un pixel de tuile, blanc cerné de noir, au-dessus de lui ; il monte de 2 pixels puis s'éteint d'un coup (affiné le 16 novembre 2026)
+   for(const f of FX)if(f.kind==='alerte'&&(G.beasts.includes(f.o)||G.animals.includes(f.o))&&vis[idx(f.o.x,f.o.y)]){const p=fxP(f),px=Math.round((f.o.x-camX)*16)+7,py=Math.round((f.o.y-camY)*16)-10-(reduced?2:Math.min(2,Math.floor(p*12)));
+     ctx.fillStyle='#000';ctx.fillRect((px-1)*u,(py-1)*u,3*u,9*u);ctx.fillStyle='#fff';ctx.fillRect(px*u,py*u,u,5*u);ctx.fillRect(px*u,(py+6)*u,u,u);ctx.fillStyle=PAL['1'];}
+   for(const f of FX)if(f.kind==='sonar'){const R=fxP(f)*f.r*16,cx=Math.round((f.x+.5-camX)*16),cy=Math.round((f.y+.5-camY)*16),w=Math.ceil(vw/u),h=Math.ceil(vh/u),q=R*Math.SQRT1_2;
+     const dot=(px,py)=>{if(px>=0&&py>=0&&px<w&&py<h)ctx.fillRect(px*u,py*u,u,u);};
+     for(let d=-Math.ceil(q);d<=Math.ceil(q);d++){const e=Math.round(Math.sqrt(Math.max(0,R*R-d*d)));dot(cx+d,cy-e);dot(cx+d,cy+e);dot(cx-e,cy+d);dot(cx+e,cy+d);}}}
   if(BOOM)drawBoom();
   ctx.restore();
   smokeKick();

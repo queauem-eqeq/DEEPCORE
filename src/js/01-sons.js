@@ -41,11 +41,26 @@ const SFX={
   explode(){noiz(1.1,.5,900,'lowpass',0,120);tone(70,.9,'sawtooth',.16,28);noiz(.35,.3,4000,'highpass',.02);noiz(.6,.18,600,'bandpass',.25,200);},
   break(){noiz(.45,.35,1500,'lowpass',0,200);tone(95,.35,'sawtooth',.12,35);noiz(.2,.15,3500,'highpass',.05);},
   spot(){tone(880,.07,'square',.05);tone(1320,.09,'square',.05,null,.08);},
+  // sonar : « blip blip » répété pendant toute la durée du balayage (s, en secondes)
+  sonar(s){const n=Math.max(3,Math.ceil(s/.62));for(let i=0;i<n;i++){tone(1480,.13,'sine',.09,1380,i*.62);tone(1480,.11,'sine',.045,1380,i*.62+.17);}},
   analyse(){[660,880,1100,1320].forEach((f,i)=>tone(f,.08,'triangle',.07,null,i*.07));},
   start(){tone(110,.6,'sawtooth',.06,440);tone(220,.6,'square',.03,880,.05);},
   drill(k){tone(48+k*6,.12,'sawtooth',.09);noiz(.1,.12,600+k*120);},
   roar(){tone(140,.45,'sawtooth',.1,55);noiz(.35,.12,500,'lowpass',.05);},
   bite(){tone(90,.15,'square',.14,40);noiz(.12,.2,2500,'highpass');tone(600,.08,'square',.05,200,.05);},
+  // Consommables (16 novembre 2026) : réparobots (petits servos et soudure), batterie (décharge qui monte), purge (vidange sous pression)
+  repair(){tone(520,.1,'triangle',.05,780);tone(780,.12,'triangle',.05,1040,.09);
+    noiz(.3,.05,2800,'bandpass',0,1400);tone(1180,.22,'sine',.045,1560,.2);},
+  battery(){tone(180,.3,'sawtooth',.05,900);tone(360,.3,'square',.025,1800,.02);
+    noiz(.1,.07,3600,'highpass',.26);tone(1760,.12,'sine',.05,2640,.28);},
+  purge(){noiz(.5,.16,2200,'bandpass',0,420);tone(300,.35,'sine',.04,90);
+    noiz(.22,.09,5200,'highpass',.3);tone(660,.14,'triangle',.035,990,.34);},
+  // Fumigène (16 novembre 2026) : le bidon qui tombe, l'amorce qui claque, puis le jet sous pression qui s'épuise en nappe sourde
+  smoke(){tone(150,.07,'square',.09,70);
+    noiz(.12,.18,5200,'highpass',.03);
+    noiz(1.7,.17,2600,'bandpass',.05,700);
+    noiz(1.9,.07,900,'lowpass',.06,260);
+    tone(430,1.3,'sine',.018,120,.07);},
   squish(){noiz(.18,.25,900,'lowpass',0,250);tone(160,.12,'square',.07,60);},
   screech(){tone(2600,.09,'sawtooth',.06,3800);tone(3400,.12,'square',.04,2200,.08);noiz(.15,.08,5000,'highpass',.02);},
   chirp(){tone(1900,.05,'square',.035,2700);tone(2300,.05,'square',.03,1600,.07);},

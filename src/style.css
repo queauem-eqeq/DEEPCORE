@@ -31,8 +31,8 @@ body{margin:0;background:var(--black);color:var(--fg);font:13px/1.45 var(--mono)
 .eye{display:flex;align-items:center;gap:8px}.eyeic{color:var(--c3);flex:none}
 .stats2{display:grid;grid-template-columns:repeat(3,1fr);gap:6px 12px}
 .stats2 .r{display:flex;gap:8px;justify-content:flex-start;align-items:baseline}
-.stats2 .r span:first-child{font-size:11px;letter-spacing:.12em;min-width:3.2em}
-.stats2 .r span:last-child{font-variant-numeric:tabular-nums}
+.stats2 .r>span:first-child{font-size:11px;letter-spacing:.12em;min-width:3.2em}
+.stats2 .r>span:last-child{font-variant-numeric:tabular-nums;white-space:nowrap}
 .r{display:flex;justify-content:space-between;gap:8px;font-variant-numeric:tabular-nums}
 .r span:first-child{color:var(--dim)}
 .meter{display:grid;gap:3px}
@@ -126,7 +126,9 @@ body{margin:0;background:var(--black);color:var(--fg);font:13px/1.45 var(--mono)
 .mhead h2{font-family:var(--display);font-size:18px;letter-spacing:.2em;color:var(--c1);margin:0;text-transform:uppercase}
 .mhead button,.mfoot button{padding:6px 12px;border-color:var(--line)}
 .mnote{margin:0;color:var(--dim);font-size:12px}
-.beasts{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+.beasts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--line) transparent;padding:1px}
+#bestiary .mcard{width:min(940px,100%)}
+@media (max-width:760px){.beasts{grid-template-columns:1fr}}
 .bcard{border:1px solid var(--line);padding:12px;display:grid;gap:10px;min-width:0}
 .bcard .bh{display:flex;align-items:center;gap:10px}
 .bcard .bh img{width:32px;height:32px;image-rendering:pixelated;background:var(--void);outline:1px solid var(--line)}
@@ -217,3 +219,96 @@ kbd{font-family:var(--mono);color:var(--fg);border:1px solid var(--line);padding
 /* Allure : bouton marche / course */
 .pace{font:inherit;font-size:12px;letter-spacing:.08em;padding:2px 10px;background:transparent;color:var(--dim);border:1px solid currentColor;cursor:pointer}
 .pace.on{color:var(--c3);background:color-mix(in srgb,var(--c3) 14%,transparent)}
+
+/* Inventaire (14-inventaire.js) : fenêtre plein écran, la liste à gauche, la fiche de l'objet choisi (dessin ASCII coloré) à droite */
+.btnrow{display:flex;gap:8px}
+.btnrow .pace{flex:1 1 0;min-width:0}
+#inventaire .mcard:focus{outline:none}
+.inv{display:grid;gap:10px}
+.inv p{margin:0;color:var(--dim);line-height:1.5}
+.iwrap{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:16px;align-items:start}
+.ileft{display:grid;gap:10px;min-width:0}
+.islots{display:flex;gap:18px;font-size:12px;color:var(--dim)}
+.islots b{font-weight:400;color:var(--fg);font-variant-numeric:tabular-nums}
+.ilist{display:grid;max-height:min(66vh,640px);overflow-y:auto;scrollbar-width:thin}
+.ilist .it{display:grid;grid-template-columns:1.2em minmax(0,1fr) 7.5em 4.5em;gap:8px;align-items:baseline;text-align:left;padding:2px 8px;border:0;border-left:2px solid transparent;
+  font-size:13px;letter-spacing:0;text-transform:none;color:var(--fg)}
+.ilist .it i{font-style:normal;color:var(--dim)}
+.ilist .it span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ilist .it em{font-style:normal;font-size:11px;color:var(--dim);white-space:nowrap}
+.ilist .it em.st{font-size:10px;letter-spacing:.14em;text-transform:uppercase;text-align:right}
+.ilist .it.eq,.ilist .it.eq i,.ilist .it.eq em{color:var(--c3)}        /* équipé : reste dans la liste, en couleur monde */
+.ilist .it.sel{border-left-color:currentColor;background:rgba(255,255,255,.08)}
+.iright{display:grid;gap:10px;min-width:0}
+.idet{display:grid;gap:8px;border:1px solid var(--line);padding:14px;font-size:12px;align-content:start;min-height:400px}
+.isth{font-family:var(--display);font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--dim)}
+.isth span{letter-spacing:.04em;text-transform:none;font-family:var(--mono);color:var(--fg)}
+.istats{display:grid;grid-template-columns:repeat(3,1fr);gap:4px 10px;font-size:12px;font-variant-numeric:tabular-nums}
+.istats span{white-space:nowrap}
+.istats i{font-style:normal;font-size:11px;letter-spacing:.1em;color:var(--dim);margin-right:2px}
+.istats b{font-weight:400}
+.iart{margin:6px auto 10px;font:30px/1.15 var(--mono);color:var(--fg);white-space:pre;min-height:calc(6 * 1.15em)}
+.inm{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.inm b{font-weight:700;color:var(--fg);font-size:14px}
+.inm span{color:var(--dim);font-size:11px;white-space:nowrap}
+.ibtns{display:flex;gap:8px;margin-top:4px}
+.ibtns .pace{flex:1 1 0;text-transform:uppercase;padding:5px 10px}
+.isol{display:flex;align-items:center;justify-content:space-between;gap:8px;color:var(--dim);font-size:12px;border-top:1px solid var(--line);padding-top:8px}
+.isol .pace{text-transform:uppercase;white-space:nowrap}
+.imsg{font-size:12px;min-height:1.5em}
+.inv .imsg.warn{color:var(--c3)}.inv .imsg.good{color:var(--c1)}
+#inventaire .mcard.wide{width:min(900px,100%)}
+@media (max-width:720px){.iwrap{grid-template-columns:1fr}.idet{min-height:0}.iart{font-size:20px}}
+/* Sous-menu Inventaire de la colonne : les consommables, une ligne chacun */
+.fold summary .cnt{margin-left:auto;font-size:11px;color:var(--dim);font-variant-numeric:tabular-nums}
+.fold summary .cnt.full{color:var(--c1)}
+.sac{display:grid;gap:6px}
+.sac .cr{display:grid;grid-template-columns:minmax(0,1fr) auto auto auto;gap:5px;align-items:center;padding:1px 2px;font-size:12px}
+.sac .cr.sel{background:rgba(255,255,255,.08);outline:1px solid var(--c3)}
+.sac .cr>span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sac .cr>em{font-style:normal;color:var(--dim);font-variant-numeric:tabular-nums}
+.sac .cr button{padding:1px 5px;font-size:10px;letter-spacing:.04em}
+.sac .cr button.del{padding:1px 4px;color:var(--dim)}
+.sac .cr button.del:hover{color:var(--life);border-color:var(--life)}
+.sac .inone{margin:0;color:var(--dim);font-size:11px}
+.effs{font-size:11px;color:var(--c3);letter-spacing:.06em}
+.effs:empty{display:none}
+.gen .g.niv{grid-template-columns:minmax(0,1fr) 64px 62px}
+.gen .g.niv span{font-size:11px;color:var(--fg);text-align:right;white-space:nowrap}
+.gen .g.niv.tout{padding-bottom:6px;border-bottom:1px solid var(--line)}
+.gen .g.niv.tout label{color:var(--fg)}
+.lvl{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--c3);margin:-4px 0 8px}
+.bnum.mat{color:var(--c1)}
+/* Menu Monde : archétypes en tête, Génération et Faune côte à côte */
+#monde .mcard:focus{outline:none}
+.mdarch{display:flex;flex-wrap:wrap;gap:8px 10px;align-items:center;margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid var(--line);font-size:12px}
+.mdarch label{color:var(--dim);font-size:11px;letter-spacing:.14em;text-transform:uppercase}
+.mdarch select,.mdarch input{font:inherit;color:var(--fg);background:var(--void);border:1px solid var(--line);padding:4px 6px;min-width:0}
+.mdarch select{flex:1 1 180px;max-width:260px}.mdarch input{flex:1 1 140px;max-width:220px}
+.mdarch .saved{flex:1 1 100%;min-height:1.4em}.mdarch .saved.err{color:var(--life)}
+.mdcols{display:grid;grid-template-columns:1fr 1fr;gap:28px;align-items:start}
+.mdcols h3{font-family:var(--display);font-size:12px;font-weight:500;letter-spacing:.24em;text-transform:uppercase;color:var(--dim);margin:0 0 10px}
+.mdcols .gen{margin-bottom:0}
+@media (max-width:720px){.mdcols{grid-template-columns:1fr}}
+.mdcols .gen .g2{grid-template-columns:minmax(0,1fr) 190px}
+.col>.btnrow>button{flex:1 1 0;min-width:0}
+/* Discrétion : fenêtre large et basse (15 novembre 2026) */
+#discretion .mcard{width:min(940px,100%);gap:12px}
+.mhbtns{display:flex;gap:8px}
+.dtop{display:flex;flex-wrap:wrap;align-items:center;gap:6px 22px;border:1px solid var(--line);padding:8px 12px;font-size:12px}
+.dtop label{display:flex;align-items:center;gap:8px;color:var(--dim)}
+.dtop input{width:58px;font:inherit;color:var(--fg);background:var(--void);border:1px solid var(--line);padding:2px 4px;text-align:right}
+.dtop b{color:var(--c1);font-weight:700}
+.dtop .dhint{color:var(--dim);font-size:11px;margin-left:auto}
+.dcols{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:22px;align-items:start}
+.dcols h3{font-family:var(--display);font-size:11px;font-weight:500;letter-spacing:.24em;text-transform:uppercase;color:var(--dim);margin:0 0 6px}
+.dtab.dmod td,.dtab.dmod th{padding:4px 6px}
+.dtab.dmod td:first-child,.dtab.dmod th:first-child{width:26%}
+.dtab.dmod td:nth-child(2),.dtab.dmod th:nth-child(2){width:46%}
+.dtab.dmod td:nth-child(2){color:var(--dim)}
+.dtab.dmod small{color:var(--dim);font-size:10px}
+.dregles{font-size:12px}
+.dregles div{display:flex;justify-content:space-between;align-items:baseline;gap:14px;border-top:1px solid var(--line);padding:4px 0}
+.dregles span{color:var(--dim)}.dregles b{font-weight:400;text-align:right;white-space:nowrap}
+.dregles div:last-child b{white-space:normal}
+@media (max-width:760px){.dcols{grid-template-columns:1fr}.dtop .dhint{margin-left:0}}
