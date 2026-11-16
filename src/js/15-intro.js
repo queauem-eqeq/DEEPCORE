@@ -97,6 +97,7 @@ function introCell(x,i,px,py){const t=G.t[i],h=hash(i%W,(i/W)|0),put2=(tl,a)=>{i
   if(t!==BRIDGE)put2(TL.ground0,.6);
   if(t===ROCK)put2(h%3?TL.rock:TL.rock2,.95);
   else if(t===MOUNT){const up=i>=W&&G.t[i-W]===MOUNT;put2(up?TL.mtBody:TL.mtTop,.9);}
+  else if(t===HARD)put2(TL.hard,.95);
   else if(t===LIQ){x.globalAlpha=.24;x.fillStyle=PAL['2'];x.fillRect(px,py,S,S);put2(h%2?TL.liq1:TL.liq0,.9);}
   else if(t===DEEP){x.globalAlpha=1;x.fillStyle='#01060c';x.fillRect(px,py,S,S);x.globalAlpha=.08;x.fillStyle=PAL['2'];x.fillRect(px,py,S,S);put2(h%2?TL.deep1:TL.deep0,.4);}
   else if(t===CHASM){x.globalAlpha=1;x.fillStyle='#000';x.fillRect(px,py,S,S);if(CHASM_OV)x.drawImage(CHASM_OV,(i%W)*16,((i/W)|0)*16,16,16,px,py,S,S);}
@@ -181,7 +182,7 @@ function introFrame(now){const I=INTRO;if(!I)return;ensureChasmOv();ensureSolOv(
       I.parts.push({x:shipFX+Math.cos(an)*r,y:shipFY+Math.sin(an)*r*.85,z:Math.random()*8,vx:Math.cos(an)*v,vy:Math.sin(an)*v*.85,vz:60+Math.random()*240,
         l:l0+Math.random()*(l1-l0),a:0,sz:2+(Math.random()<.35?1:0)});}};
   const cellAt=(px,py)=>{const mx=camX2+Math.floor((px-mr.left)/S),my=camY2+Math.floor((py-mr.top)/S);return mx<0||my<0||mx>=W||my>=H?ROCK:G.t[my*W+mx];};
-  const hard=v=>v===ROCK||v===MOUNT||v===SHIP;
+  const hard=v=>v===ROCK||v===MOUNT||v===HARD||v===SHIP;
   if(e5>.45&&e5<.985)puff(Math.round(12*e5),Math.hypot(SGW,SGH)*S*.3,40,160,.25,.7);                          // souffle des réacteurs
   if(e5>=.985&&ev('touch')){SFX.touchdown();puff(650,Math.hypot(SGW,SGH)*S*.36,80,520,.35,1.35);}              // impact : tout est retombé avant le brouillard
   if(I.parts.length){let n=0;x.fillStyle=PAL['3'];x.globalAlpha=1;

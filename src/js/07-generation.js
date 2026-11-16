@@ -11,7 +11,7 @@ function logPush(m,c){G.log=G.log||[];const last=G.log[G.log.length-1];
   if(G.log.length>60)G.log.shift();}
 function say(m,c){G.msg={m,c:c||''};logPush(m,c);}
 function sayMore(m,c){G.msg=G.msg?{m:G.msg.m+' '+m,c:c||G.msg.c}:{m,c:c||''};logPush(m,c);}
-const blocks=v=>v===ROCK||v===MOUNT||v===CHASM||v===SHIP;
+const blocks=v=>v===ROCK||v===MOUNT||v===HARD||v===CHASM||v===SHIP;
 // Diagonales comme dans Brogue : un pas (ou un coup) en diagonale est impossible si l'une des deux cases voisines
 // orthogonales est une paroi (rocher, montagne, coque du vaisseau) — on ne coupe pas les coins. Vaut pour tout le monde.
 const wallish=v=>v===ROCK||v===MOUNT||v===SHIP;
@@ -183,7 +183,7 @@ function genPlanet(){
     const ship=SANS_VAISSEAU?null:placeShip(t);let sx,sy;
     if(ship){sx=ship.x+2;sy=ship.y+2;}
     else{let ok=false;                                             // niveaux suivants : arrivée par le puits, sur un carré de sol dégagé
-      for(let k=0;k<4000&&!ok;k++){sx=rnd(4,W-5);sy=rnd(4,H-5);ok=true;for(let dy=-1;dy<=1&&ok;dy++)for(let dx=-1;dx<=1;dx++){const v=t[idx(sx+dx,sy+dy)];if(!canWalk(v)||isWater(v)){ok=false;break;}}}   // le puits débouche toujours au sec
+      for(let k=0;k<4000&&!ok;k++){sx=rnd(4,W-5);sy=rnd(4,H-5);ok=true;for(let dy=-1;dy<=1&&ok;dy++)for(let dx=-1;dx<=1;dx++){const v=t[idx(sx+dx,sy+dy)];if(!canWalk(v,true)||isWater(v)){ok=false;break;}}}   // le puits débouche toujours au sec
       if(ok)for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++)t[idx(sx+dx,sy+dy)]=GROUND;   // herbes comprises : le puits les a couchées (sans cela, un biome très herbu ne trouvait pas de place et la génération traînait)
       if(!ok){if(!last)continue;sx=W>>1;sy=H>>1;for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++)t[idx(sx+dx,sy+dy)]=GROUND;}}
     const st=idx(sx,sy);   // la foreuse démarre au fond du couloir (case du haut), mèche vers la porte
@@ -212,13 +212,13 @@ const BIOMES={
   plateau:{terrain:1,n:'Plateau',rang:1,d:'La surface, là où le vaisseau s’est posé : terrain ouvert, quelques massifs, peu de danger.',
     gen:{eau:8,montagne:10,gouffre:3,herbe:14,methode:'automate'},vie:{insectoide:2,crabos:1,cafar:1},teinte:[0,0,0,0,0]},
   marecage:{terrain:0.87,n:'Marécage',rang:2,d:'De l’eau partout et de hautes herbes : les crabos y sont chez eux, et les tapis attendent dans les roseaux.',
-    gen:{eau:30,montagne:6,gouffre:1,herbe:28,methode:'automate'},vie:{crabos:3,tapi:2,gluar:2,viperin:1,insectoide:1},teinte:[0,-12,14,-4,-10]},
+    gen:{eau:30,montagne:6,gouffre:1,herbe:28,methode:'automate'},vie:{crabos:3,tapi:2,gluar:2,viperin:1,insectoide:1,brochon:2},teinte:[0,-12,14,-4,-10]},
   herbes:{terrain:0.92,n:'Hautes herbes',rang:2,d:'Une prairie à perte de vue : idéale pour se cacher, donc pour les embuscades.',
     gen:{eau:6,montagne:6,gouffre:2,herbe:55,methode:'automate'},vie:{tapi:3,insectoide:2,siphon:2,crachin:1},teinte:[0,-18,10,2,0]},
   galeries:{terrain:0.5,n:'Galeries',rang:3,d:'De la roche presque partout, des couloirs étroits : les bandes de cafars y circulent et les taupars percent les parois.',
     gen:{eau:2,montagne:46,gouffre:3,herbe:4,methode:'bruit'},vie:{cafar:3,taupar:2,viperin:2,gluar:1},teinte:[0,0,-10,-8,-10]},
   pierrier:{terrain:1.3,n:'Pierrier',rang:3,d:'Un désert de pierres, sec et à découvert : rien pour s’abriter des crachins.',
-    gen:{eau:1,montagne:14,gouffre:6,herbe:2,methode:'bruit'},vie:{crachin:3,siphon:3,crabos:2,mastok:1},teinte:[0,0,-4,4,-25]},
+    gen:{eau:1,montagne:14,gouffre:6,herbe:2,methode:'bruit'},vie:{crachin:3,siphon:3,crabos:2,mastok:1,brochon:1},teinte:[0,0,-4,4,-25]},
   failles:{terrain:0.95,n:'Failles',rang:4,d:'Un terrain éventré de gouffres, tout près du noyau : le territoire des mastoks et des vipérins.',
     gen:{eau:4,montagne:22,gouffre:18,herbe:6,methode:'automate'},vie:{mastok:2,viperin:3,cafar:2,taupar:1},teinte:[6,12,-16,-6,0]}
 };
@@ -251,6 +251,7 @@ function niveau(o){drilling=false;const g0=GEN,bio=o.test?null:biomeDe(o.biome),
   G.w=W;G.h=H;G.mode=o.test?'test':'descente';G.niv=o.test?0:o.niv;G.biome=o.test?null:o.biome;G.suite=o.suite||null;
   const c=o.test?null:COURBE[o.niv];
   if(o.test)lifeCalc();else lifeMenace(bio.vie,c.menace,bio.terrain);
+  durcir();   // la roche dure avant les joyaux et les métaux : ils n'y apparaissent jamais
   {const a=W*H/(48*32),q=o.test?{metal:2,mat:2}:c;G.eff={};G.fum={};hideGems();hideOre(Math.max(1,Math.round(q.metal*a)),Math.max(1,Math.round(q.mat*a)));}
   G.sonar=1;   // sonar à émettre (voir sonarStart, 10-rendu) : il part 10 à 20 tours après l'arrivéeG.items={};G.tracks={};G.lastDir=null;G.beasts=[];G.blood={};G.fv=2;
   if(garde)Object.assign(G,garde);else{G.inv=invTest();G.log=[];}
@@ -331,6 +332,18 @@ const ORE_PCT=10,ORE_PV=[0,30,40,50],   // gisements rares mais gros depuis le 1
 // Matière (13 novembre 2026) : second métal, couleur accent, même code précédé de « m » ('mroche2', 'msol2'). Ramassée, elle remplit la réserve G.st.matiere.
 const oreLv=v=>+String(v).slice(-1)||3,oreSol=v=>/^m?sol/.test(String(v)),oreMat=v=>String(v)[0]==='m',oreTile=(v,sol)=>{const l=oreLv(v);return TL[(oreMat(v)?'mat':'ore')+(sol?'Sol':'')+(l===3?'':l)];};
 // nMetal gisements d'éclats de métal et nMat de Matière, tirés parmi les cases de montagne (dans la limite des places)
+/* Roche dure (16 novembre 2026) : plus on s'enfonce dans un massif, plus la montagne devient dure.
+   La profondeur d'une case est sa distance au premier terrain qui n'est pas de la montagne (4 directions) ;
+   la chance de durcir monte avec elle, de sorte qu'un massif garde une écorce tendre et un cœur impénétrable.
+   La rangée extérieure de la carte reste de la montagne ordinaire (déjà indestructible par ailleurs). */
+const DURCIR=[0,0,0,.3,.65,.9,1];   // rien sous deux cases de profondeur : les massifs gardent une écorce tendre
+function durcir(){const t=G.t,d=new Int16Array(W*H).fill(-1),q=[];
+  for(let i=0;i<W*H;i++)if(t[i]!==MOUNT){d[i]=0;q.push(i);}
+  for(let k=0;k<q.length;k++){const c=q[k],x=c%W,y=(c/W)|0;
+    for(let n=0;n<4;n++){const a=x+DIRS[n][0],b=y+DIRS[n][1];if(a<0||b<0||a>=W||b>=H)continue;const j=idx(a,b);
+      if(d[j]<0){d[j]=d[c]+1;q.push(j);}}}
+  for(let i=0;i<W*H;i++){const x=i%W,y=(i/W)|0;if(t[i]!==MOUNT||x<1||y<1||x>=W-1||y>=H-1)continue;
+    if(Math.random()<DURCIR[Math.min(d[i],DURCIR.length-1)])t[i]=HARD;}}
 function hideOre(nMetal=3,nMat=1){G.ore={};const lib=[];
   for(let i=0;i<W*H;i++){const x=i%W,y=(i/W)|0;if(G.t[i]===MOUNT&&x>0&&y>0&&x<W-1&&y<H-1&&!(G.gems&&G.gems[i]))lib.push(i);}
   for(let i=lib.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[lib[i],lib[j]]=[lib[j],lib[i]];}

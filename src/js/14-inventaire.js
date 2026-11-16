@@ -194,8 +194,8 @@ const ITEMS={
     use:st=>{fumPose();return 'le nuage se répand';},
     art:["   ░░ ▒▒░  ░   ", "  ░▒▒▓▒▒▒░░    ", "    ░▒┌─┐▒░    ", "      │█│      ", "      │█│      ", "      └─┘      "],
     col:["...dd.ddd..d...", "..dwwwwwwdd....", "....dwdddwd....", "......d3d......", "......d3d......", "......ddd......"]},
-  charge:{n:'Charge sismique',f:1,conso:1,eff:'30 dégâts sur 3 × 3, à placer',
-    d:'Onde de choc dirigée : on place un carré de 3 × 3 jusqu’à 4 cases de la foreuse, et tout ce qui s’y trouve prend 30 dégâts. Très bruyante.',
+  charge:{n:'Charge sismique',f:1,conso:1,eff:'30 dégâts et roche brisée sur 3 × 3',
+    d:'Onde de choc dirigée : on place un carré de 3 × 3 jusqu’à 4 cases de la foreuse. Tout ce qui s’y trouve prend 30 dégâts, et la roche vole en éclats — y compris la roche dure, que rien d’autre n’entame. Très bruyante.',
     vise:1,plein:st=>false,non:'',
     use:st=>'',
     art:["      ┌─┐   *  ", "    ▄▄┴─┴▄▄ │  ", "   █████████┘  ", "   ████▒████   ", "   █████████   ", "    ▀▀▀▀▀▀▀    "],
@@ -273,9 +273,18 @@ function viseeOk(){if(!VISEE||G.over)return;const {i,x,y}=VISEE,o=G.inv[i];
     c.hp=(c.hp??pvDe(sp))-VISEE_DM;addFx({kind:'num',x:c.x,y:c.y,txt:'-'+VISEE_DM,col:PAL['3'],dur:900});
     if(c.hp<=0){k++;(isB?G.beasts:G.animals).splice((isB?G.beasts:G.animals).indexOf(c),1);bleed(c.x,c.y);}
     else if(isB){c.hunt=1;spot(c);}else{c.aware=1;c.enraged=true;spot(c);}}
+  // l'onde brise aussi la roche, la montagne et la roche dure (16 novembre 2026) : c'est le seul moyen d'entamer la roche dure
+  let roches=0;
+  for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){const zx=x+dx,zy=y+dy;
+    if(zx<1||zy<1||zx>=W-1||zy>=H-1)continue;const j=idx(zx,zy),v=G.t[j];
+    if(v!==ROCK&&v!==MOUNT&&v!==HARD)continue;
+    G.t[j]=RUBBLE;if(G.dmg)delete G.dmg[j];roches++;
+    if(G.gems&&G.gems[j]==='cache'){G.gems[j]='visible';sayMore('Un joyau brille dans les gravats !','info');}
+    if(G.ore&&G.ore[j]&&!oreSol(G.ore[j])){const l=oreLv(G.ore[j]),mt=oreMat(G.ore[j]);G.ore[j]=(mt?'m':'')+'sol'+l;
+      sayMore(mt?'De la Matière tombe au sol.':'Des éclats de métal tombent au sol.','good');}}
   engage();invTake(i);sacFix();SAC_H='';
   addFx({kind:'shake',amp:8,dur:300});SFX.explode();
-  say(`Charge sismique : ${n?`${n} ennemi${n>1?'s':''} touché${n>1?'s':''}${k?`, ${k} abattu${k>1?'s':''}`:''}`:'personne dans la zone'}.`,n?'good':'warn');
+  say(`Charge sismique : ${n?`${n} ennemi${n>1?'s':''} touché${n>1?'s':''}${k?`, ${k} abattu${k>1?'s':''}`:''}`:'personne dans la zone'}${roches?`, ${roches} case${roches>1?'s':''} de roche pulvérisée${roches>1?'s':''}`:''}.`,n||roches?'good':'warn');
   if(consoTemps('dig'))return;
   render();}
 function invBoum(r,dm){let n=0,k=0;lastAct='dig';

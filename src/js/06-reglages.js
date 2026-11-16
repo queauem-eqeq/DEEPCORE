@@ -48,7 +48,7 @@ lifeCalc();
                 le terme au carré fait monter la menace plus vite que le nombre. 704 = surface de la carte de taille 1 où c'est mesuré ;
    - terrain  : coefficient du biome (couloirs et couvert protègent, le terrain nu expose).
    Les intensités d'un monde ne règlent que les PROPORTIONS entre espèces ; l'échelle est celle qui amène la menace au budget du niveau. */
-const MENACE_ESP={insectoide:[3.3,.15],cafar:[2,.3],siphon:[1.1,.31],crabos:[7.3,.86],crachin:[4.9,1.12],viperin:[10.8,.57],gluar:[5.7,.67],tapi:[27.1,.49],taupar:[16.7,.63],mastok:[46,1.51]};
+const MENACE_ESP={brochon:[6,.5],insectoide:[3.3,.15],cafar:[2,.3],siphon:[1.1,.31],crabos:[7.3,.86],crachin:[4.9,1.12],viperin:[10.8,.57],gluar:[5.7,.67],tapi:[27.1,.49],taupar:[16.7,.63],mastok:[46,1.51]};
 function menaceDe(eff,terrain){let l=0,q=0;for(const k in eff){const m=MENACE_ESP[k]||[10,.6];l+=eff[k]*m[0];q+=eff[k]*m[1];}return (terrain||1)*(l+704/(W*H)*q*q);}
 function lifeMenace(vie,parMille,terrain){const cible=parMille*W*H/1000/(terrain||1),p={};let L=0,Q=0;
   for(const k in INTENS){p[k]=NIVEAUX[(vie&&vie[k])||0][1]*LIFE_REF[k];const m=MENACE_ESP[k]||[10,.6];L+=p[k]*m[0];Q+=p[k]*m[1];}

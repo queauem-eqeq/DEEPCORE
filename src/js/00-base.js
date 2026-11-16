@@ -4,7 +4,8 @@ const SIZES=[null,[32,22],[48,32],[72,48],[96,64],[144,96]];
 function setSize(n){const s=SIZES[n]||SIZES[4];W=s[0];H=s[1];F=W/96;}
 // Échelle de génération : 1 pour une planète de 96 × 64 (taille actuelle) ; les tailles de relief, lacs et distances suivent
 let F=W/96;const SZ=(v,mn)=>Math.max(mn||2,Math.round(v*F));
-const GROUND=0,ROCK=1,MOUNT=2,LIQ=3,GRASS=4,FLAT=5,DEEP=6,CHASM=7,BRIDGE=8,RUBBLE=9,LOW=10,SHIP=11,DECK=12;
+const GROUND=0,ROCK=1,MOUNT=2,LIQ=3,GRASS=4,FLAT=5,DEEP=6,CHASM=7,BRIDGE=8,RUBBLE=9,LOW=10,SHIP=11,DECK=12,HARD=13;
+// HARD = roche dure (16 novembre 2026) : au cœur des massifs, impossible à creuser ; seule la charge sismique en vient à bout.
 // FLAT = herbes basses (13 novembre 2026 : les herbes couchées et les herbes basses n'en font plus qu'une).
 // LOW n'est plus produit ; il ne sert qu'à convertir une partie commencée avant ce changement.
 const TNAME=['sol rocheux','rocher','montagne','liquide','herbes hautes','herbes basses','eau profonde','gouffre','pont','gravats','(inutilisé)','coque du vaisseau','soute du vaisseau'];
