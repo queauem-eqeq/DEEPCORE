@@ -152,7 +152,7 @@ const ITEMS={
     art:["   ▄▄  ▄▄  ▄▄  ", "  ┌██┐┌██┐┌██┐ ", "  │██││██││▒▒│ ", "  │██││▒▒││░░│ ", "  └──┘└──┘└──┘ "],
     col:["...ww..ww..ww..", "..deeddeeddeed.", "..deeddeeddeed.", "..deeddeeddeed.", "..dddddddddddd."]},
   // Consommables : conso = usage unique ; plein(st) = inutile dans cet état ; use(st) applique l'effet et renvoie ce qu'il a rendu
-  repar:{n:'Réparobots',pl:1,conso:1,eff:'Vie +50',
+  repar:{n:'Réparobots',pl:1,conso:1,son:'repair',fx:'soin',eff:'Vie +50',
     d:'Essaim de micro-robots réparateurs : rend 50 points de vie.',
     plein:st=>st.vie>=st.vieMax,non:'Vie déjà au maximum : réparobots inutiles.',
     use:st=>{const a=st.vie;st.vie=Math.min(st.vieMax,st.vie+50);return `+${Math.round(st.vie-a)} PV`;},
@@ -168,7 +168,7 @@ const ITEMS={
          '..w.2222222.w..',
          '..w...222...w..',
          '..wwwwwwwwwww..']},
-  batterie:{n:'Batterie',f:1,conso:1,eff:'Énergie +50',
+  batterie:{n:'Batterie',f:1,conso:1,son:'battery',fx:'ener',eff:'Énergie +50',
     d:'Cellule de secours : rend 50 points d’énergie.',
     plein:st=>st.energie>=st.energieMax,non:'Énergie déjà au maximum : batterie inutile.',
     use:st=>{const a=st.energie;st.energie=Math.min(st.energieMax,st.energie+50);return `+${Math.round(st.energie-a)} énergie`;},
@@ -182,7 +182,7 @@ const ITEMS={
          '..deeeeeeeeeww.',
          '..deeeeeeeeeww.',
          '..ddddddddddd..']},
-  purge:{n:'Purge',f:1,conso:1,eff:'Élimine poison et glu',
+  purge:{n:'Purge',f:1,conso:1,son:'purge',fx:'purge',eff:'Élimine poison et glu',
     d:'Solvant injecté dans les circuits : chasse le poison et dissout la glu.',
     plein:st=>!(G.eff&&(G.eff.poison>0||G.eff.glu>0)),non:'Ni poison ni glu : purge inutile.',
     use:st=>{G.eff.poison=0;G.eff.glu=0;return 'poison et glu éliminés';},
@@ -299,7 +299,8 @@ function invEquip(i){const o=G.inv[i];if(!o||G.over)return;const d=ITEMS[o.k],e=
   if(d.vise){viseeStart(i);return;}   // objet qui se vise : on ouvre la visée au lieu de l'utiliser tout de suite
   if(d.conso){
     if(d.plein(G.st)){invSay(d.non,'warn');SFX.blocked();render();return;}
-    const r=d.use(G.st);invTake(i);invSay(`${d.n} utilisé${e} : ${r}.`,'good');(d.son&&SFX[d.son]?SFX[d.son]:SFX.spot)();   // un objet peut avoir son propre bruit
+    const r=d.use(G.st);invTake(i);invSay(`${d.n} utilisé${e} : ${r}.`,'good');(d.son&&SFX[d.son]?SFX[d.son]:SFX.spot)();   // un objet peut avoir son propre bruit et son propre effet
+    if(d.fx)addFx(d.fx==='purge'?{kind:'purge',x:G.px,y:G.py,dur:1000}:{kind:d.fx,x:G.px,y:G.py,dur:1000,gr:fxGrains(12)});
     consoTemps();invChanged();return;}   // un consommable coûte un battement (16 novembre 2026)
   if(o.eq){if(d.slot==='arme'){invSay(ARME_FIXE,'warn');SFX.blocked();render();return;}
     invApply(o,-1);o.eq=0;invSay(`${d.n} retiré${e}.`);SFX.door();invChanged();return;}

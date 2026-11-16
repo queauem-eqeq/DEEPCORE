@@ -72,6 +72,8 @@ function drawBoom(){const fl=1-(performance.now()-BOOM.t0)/180;
   if(fl>0){ctx.globalAlpha=fl*.8;ctx.fillStyle='#ffffff';ctx.beginPath();ctx.arc((G.px+.5-camX)*S,(G.py+.5-camY)*S,S*1.6,0,Math.PI*2);ctx.fill();}   // éclair de l'explosion
   ctx.globalAlpha=1;for(const q of BOOM.p){ctx.fillStyle=q.c;ctx.fillRect(Math.round((q.x-camX)*S/2)*2,Math.round((q.y-q.z-camY)*S/2)*2,q.sz,q.sz);}}
 function addFx(f){f.t0=performance.now();if(f.kind==='num')f.stack=FX.filter(o=>o.kind==='num'&&o.x===f.x&&o.y===f.y&&fxP(o)<.5).length;FX.push(f);if(!fxRaf)fxRaf=requestAnimationFrame(fxLoop);}
+// grains d'un effet de consommable : position dans la case et instant d'apparition, tirés une fois pour toutes
+const fxGrains=n=>Array.from({length:n},()=>({x:rnd(0,13),y:rnd(3,14),d:Math.random()*.55}));
 function fxLoop(){const now=performance.now();FX=FX.filter(f=>now-f.t0<f.dur);render();fxRaf=FX.length?requestAnimationFrame(fxLoop):0;}
 const fxP=f=>Math.min(1,(performance.now()-f.t0)/f.dur);
 function lungeOff(match){if(reduced)return [0,0];const f=FX.find(match);if(!f)return [0,0];const k=Math.sin(Math.PI*fxP(f))*.4*S;return [f.dx*k,f.dy*k];}
@@ -217,6 +219,18 @@ function render(){
     ctx.globalAlpha=p<.6?1:1-(p-.6)/.4;ctx.font='bold 14px "JetBrains Mono", ui-monospace, monospace';ctx.textAlign='center';ctx.textBaseline='bottom';
     const tx=(f.x-camX)*S+S/2,ty=(f.y-camY)*S-2-rise-(f.stack||0)*14;ctx.fillStyle='#000';ctx.fillText(f.txt,tx+1,ty+1);ctx.fillStyle=f.col;ctx.fillText(f.txt,tx,ty);}
   ctx.globalAlpha=1;
+  // Consommables : + rouges (réparobots) et flèches bio (batterie) qui montent, filet pulsé autour de la foreuse (purge).
+  // Pixel art strict : taille fixe, opaques, calés sur la grille des pixels de tuile ; chaque grain apparaît à son heure et s'efface d'un coup.
+  {const u=S/16;
+   for(const f of FX){if(f.kind!=='soin'&&f.kind!=='ener')continue;const p=fxP(f),bx=(f.x-camX)*16,by=(f.y-camY)*16;
+     ctx.fillStyle=f.kind==='soin'?'#ff3b3b':PAL['2'];
+     const bas=f.kind==='ener'?7:0,mont=f.kind==='ener'?24:13;   // les flèches partent plus bas et montent plus haut : sinon elles se perdent dans la foreuse, de la même couleur
+     for(const g of f.gr){const q=(p-g.d)*2.2;if(q<0||q>1)continue;const gx=Math.round(bx+g.x),gy=Math.round(by+g.y+bas-q*mont);
+       if(f.kind==='soin'){ctx.fillRect(gx*u,(gy+1)*u,3*u,u);ctx.fillRect((gx+1)*u,gy*u,u,3*u);}           // une petite croix
+       else{ctx.fillRect((gx+1)*u,gy*u,u,4*u);ctx.fillRect(gx*u,(gy+1)*u,u,u);ctx.fillRect((gx+2)*u,(gy+1)*u,u,u);}}}   // une flèche vers le haut
+   for(const f of FX){if(f.kind!=='purge')continue;const p=fxP(f);if(Math.floor(p*7)%2)continue;   // le filet pulse : allumé, éteint, quatre fois
+     const bx=(f.x-camX)*16-1,by=(f.y-camY)*16-1,w=18;ctx.fillStyle=PAL['1'];
+     ctx.fillRect(bx*u,by*u,w*u,u);ctx.fillRect(bx*u,(by+w-1)*u,w*u,u);ctx.fillRect(bx*u,by*u,u,w*u);ctx.fillRect((bx+w-1)*u,by*u,u,w*u);}}
   // Dessins au pixel de tuile (u = 1/16 de case), calés sur la grille, opaques : le projectile d'un tireur et l'onde du sonar
   {const u=S/16;ctx.fillStyle=PAL['1'];
    for(const f of FX)if(f.kind==='tir'){const p=fxP(f),px=Math.round((f.x0+(f.x1-f.x0)*p+.5-camX)*16),py=Math.round((f.y0+(f.y1-f.y0)*p+.5-camY)*16);

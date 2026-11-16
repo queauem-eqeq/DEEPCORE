@@ -135,9 +135,13 @@ function tryMove(dx,dy){
   pass(stepDur(v,run));
   {const oi=idx(G.px,G.py);if(G.ore&&G.ore[oi]&&oreSol(G.ore[oi])){const l=oreLv(G.ore[oi]),mt=oreMat(G.ore[oi]);delete G.ore[oi];
     if(mt){G.st.matiere=(G.st.matiere||0)+ORE_PV[l];addFx({kind:'num',x:G.px,y:G.py,txt:'+'+ORE_PV[l],col:PAL['1'],dur:750});sayMore(`Matière récupérée : +${ORE_PV[l]} (réserve : ${G.st.matiere}).`,'good');SFX.spot();}
-    else{const av=G.st.vie;G.st.vie=Math.min(G.st.vieMax,G.st.vie+ORE_PV[l]);
-    addFx({kind:'num',x:G.px,y:G.py,txt:'+'+(G.st.vie-av),col:PAL['2'],dur:750});   // affiché comme les dégâts, couleur des éclats
-    sayMore(`Éclats de métal récupérés : +${G.st.vie-av} PV.`,'good');SFX.spot();}}}
+    else{const av=G.st.vie,ae=G.st.energie;   // les éclats refont le plein de vie ET d'énergie (16 novembre 2026)
+    G.st.vie=Math.min(G.st.vieMax,G.st.vie+ORE_PV[l]);G.st.energie=Math.min(G.st.energieMax,G.st.energie+ORE_PV[l]);
+    const dv=Math.round(G.st.vie-av),de=Math.round(G.st.energie-ae);
+    addFx({kind:'num',x:G.px,y:G.py,txt:'+'+dv,col:PAL['2'],dur:750});   // affiché comme les dégâts, couleur des éclats
+    if(de)addFx({kind:'num',x:G.px,y:G.py,txt:'+'+de,col:PAL['1'],dur:750,stack:1});
+    sayMore(`Éclats de métal récupérés : +${dv} PV, +${de} d’énergie.`,'good');SFX.spot();
+    if(dv)addFx({kind:'soin',x:G.px,y:G.py,dur:900,gr:fxGrains(9)});if(de)addFx({kind:'ener',x:G.px,y:G.py,dur:900,gr:fxGrains(9)});}}}
   invPickup(true);
   {const gi=idx(G.px,G.py);if(G.gems&&G.gems[gi]==='visible'){delete G.gems[gi];computeFOV();render();SFX.analyse();chooseUpgrade();return;}}
   const s=siteAt(G.px,G.py);
