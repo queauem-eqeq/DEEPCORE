@@ -183,7 +183,7 @@ Jugée trop haute et trop étroite (640 × 835), elle est passée à 940 × 390 
 | Énergie | 100 | se recharge de POW par battement (**1/t** au départ depuis le 13 novembre 2026, **× 2 en attendant sur place**) ; **se déplacer ne coûte plus d'énergie** (13 novembre 2026 ; 2 par pas avant, constante `MOVE_COST`), un coup de foreuse sur la roche 10 (frapper un animal : gratuit) |
 | VIT | 5 | **vitesse de déplacement** (13 novembre 2026) : un pas dure 100 × 5 ÷ VIT. À 5, un pas = un battement ; à 10, deux pas par battement. Ne joue ni sur les coups ni sur le forage. |
 | EYE | 10 | rayon de vision (5 avant le 10 novembre 2026) |
-| DEG | 10 (soit 7-13) | dégâts moyens d'un coup de foreuse ; chaque coup est tiré à ±30 % autour (16 novembre 2026) |
+| DEG | 0 | **bonus fixe** ajouté au jet de dés de l'arme (17 novembre 2026). Les dégâts eux-mêmes viennent de l'arme : la foreuse d'origine fait **1d6+5**, soit 6 à 11, chaque valeur une fois sur six. Avant, DEG valait 10 et le coup était tiré à ±30 % autour |
 | PRE | 100 | précision (80 avant le 16 novembre 2026 au soir) |
 | DEF | 10 (0 de base + 10 de la Coque d'usine équipée au départ) | défense : fait rater les coups reçus, sans réduire les dégâts (modifiée par le terrain et par l'armure). A remplacé ESQ le 16 novembre 2026 |
 | CRIT | 5 % | chance de coup critique (×3 dégâts) ; coup par surprise toujours critique |
@@ -211,7 +211,8 @@ Le jeu ne compte plus en tours mais en **unités de temps**, comme Brogue et Cog
 
 - **Modèle Brogue (16 novembre 2026)**, à la place de « précision − esquive » :
   - **Chance de toucher = précision × 0,987^défense**, bornée entre 5 et 95 %. Chaque point de défense retire 1,3 % des coups ; 53 points les divisent par deux. La défense fait rater, elle ne réduit jamais les dégâts (« pas de blindage », § 11).
-  - **Dégâts en fourchette** : chaque coup est tiré entre un minimum et un maximum. Créatures : `dmin`-`dmax` par espèce. Foreuse : DEG ± 30 % (DEG 10 → 7 à 13).
+  - **Dégâts en fourchette** : chaque coup est tiré entre un minimum et un maximum. Créatures : `dmin`-`dmax` par espèce. Foreuse : **dés de l'arme + DEG**, puis le facteur de POW requis (17 novembre 2026 ; DEG ± 30 % avant).
+  - **Dés de dégâts** (17 novembre 2026) : chaque arme porte ses dés, `de:{n,f,p}` dans `ITEMS` — `n` dés à `f` faces plus `p`. La foreuse d'origine : **1d6+5**. Le jet est ajouté à DEG (bonus fixe, 0 au départ), puis multiplié par le facteur du POW requis. La fiche de l'objet affiche les dés et la fourchette obtenue.
   - **POW requis** : chaque arme et chaque armure demande un POW (c'est la « force » de Brogue ; POW reste aussi la recharge d'énergie). **POW de base 10** (échelle de la force de Brogue, 16 novembre 2026 au soir ; 1 avant) ; la recharge d'énergie vaut POW/10 par battement, soit 1 au départ comme avant. **Arme** : chaque point manquant multiplie précision et dégâts par 0,85 ; chaque point en trop, par 1,015. **Armure** : chaque point manquant retire 10 de défense ; chaque point en trop en ajoute 1. Calculé à la lecture : gagner du POW (Condensateur) agit aussitôt.
   - Les critiques (CRIT, × 3) et les coups par surprise sont gardés tels quels.
   - Conversion **à puissance égale** : esquive 5 → défense 5, 10 → 10, 25 → 30, 30 → 35, 35 → 45 ; foreuse 10 → 12 ; dégâts fixes → fourchette de même moyenne. Vérifié au banc (voir `mesures.md`).
@@ -262,7 +263,7 @@ Version d'essai : tous les objets sont donnés au départ, non équipés sauf la
 
 | Objet | Type | POW requis | Effets |
 |---|---|---|---|
-| Foreuse | arme | 10 | **seule arme**, portée d'origine, sans modificateur : DEG 10 (7-13), coup 100 |
+| Foreuse | arme | 10 | **seule arme**, portée d'origine, sans modificateur : dégâts **1d6+5** (6 à 11), coup 100 |
 | Coque d'usine | armure | 10 | **seule armure**, portée d'origine : DEF +10 (son effet est déjà compris dans les stats de départ) |
 | Servomoteur | accessoire | – | VIT +2 |
 | Téléobjectif | accessoire | – | EYE +3 |

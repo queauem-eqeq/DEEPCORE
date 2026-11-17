@@ -175,15 +175,23 @@ const hitChance=(pre,def)=>Math.max(5,Math.min(95,Math.round(pre*Math.pow(DEF_BA
    Armure : chaque point manquant retire 10 de défense ; chaque point en trop en ajoute 1.
    La recharge d'énergie vaut POW/10 par battement : 1 à POW 10, comme avant.
    Rien n'est écrit dans G.st : tout se recalcule à la lecture, donc gagner ou perdre du POW agit aussitôt. */
-const POW_MANQUE=.85,POW_EXCES=1.015,POW_DEF_MANQUE=10,POW_DEF_EXCES=1,DEG_VAR=.3,POW_BASE=10;
+const POW_MANQUE=.85,POW_EXCES=1.015,POW_DEF_MANQUE=10,POW_DEF_EXCES=1,POW_BASE=10;
+/* Dés de dégâts d'une arme (17 novembre 2026) : {n:nombre de dés, f:faces, p:bonus fixe}. La foreuse d'origine fait
+   1d6+5, soit 6 à 11. Avant, les dégâts étaient une stat unique (DEG 10) étalée de ±30 %. La stat DEG reste, mais
+   comme un bonus fixe ajouté au jet (0 au départ) : un futur objet qui donne « DEG +2 » marche sans rien changer ici. */
+const DE_DEFAUT={n:1,f:6,p:5};
+const armeDe=d=>(d&&d.de)||DE_DEFAUT;
+const deTxt=d=>`${d.n}d${d.f}${d.p?(d.p>0?'+':'')+d.p:''}`;
+const deTire=d=>{let s=d.p;for(let i=0;i<d.n;i++)s+=1+Math.floor(Math.random()*d.f);return s;};
 const eqDe=slot=>{const o=(G.inv||[]).find(o=>o.eq&&ITEMS[o.k]&&ITEMS[o.k].slot===slot);return o?ITEMS[o.k]:null;};
 const powEcart=(d,st)=>d&&d.req?st.power-d.req:0;
 const armeFact=(st,d)=>{const e=powEcart(d,st);return e<0?Math.pow(POW_MANQUE,-e):Math.pow(POW_EXCES,e);};
 const armureDef=(st,d)=>{const e=powEcart(d,st);return e<0?POW_DEF_MANQUE*e:POW_DEF_EXCES*e;};
 // stats de combat de la foreuse telles qu'elles comptent ; st, arme, armure : pour simuler un autre équipement (fenêtre Équipement)
 const robotPre=(st,d)=>{st=st||G.st;return Math.round(st.pre*armeFact(st,d===undefined?eqDe('arme'):d));};
-const robotDegs=(st,d)=>{st=st||G.st;const m=st.degats*armeFact(st,d===undefined?eqDe('arme'):d);return [Math.max(1,Math.round(m*(1-DEG_VAR))),Math.max(1,Math.round(m*(1+DEG_VAR)))];};
-const robotDeg=()=>{const [a,b]=robotDegs();return a+Math.floor(Math.random()*(b-a+1));};
+const robotDegs=(st,d)=>{st=st||G.st;const a=d===undefined?eqDe('arme'):d,de=armeDe(a),k=armeFact(st,a),b=st.degats||0;
+  return [Math.max(1,Math.round((de.n+de.p+b)*k)),Math.max(1,Math.round((de.n*de.f+de.p+b)*k))];};
+const robotDeg=()=>{const a=eqDe('arme');return Math.max(1,Math.round((deTire(armeDe(a))+(G.st.degats||0))*armeFact(G.st,a)));};
 const robotDefNu=(st,d)=>{st=st||G.st;return st.def+armureDef(st,d===undefined?eqDe('armure'):d);};
 const robotDef=()=>robotDefNu()+terrMod(G.px,G.py);
 const roll=ch=>Math.random()*100<ch;

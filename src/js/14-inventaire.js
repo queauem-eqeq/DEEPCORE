@@ -3,6 +3,7 @@
    G.items : objets posés au sol, {case:[k, …]} ; la foreuse qui passe dessus les ramasse.
    Équiper un objet AJOUTE ses modificateurs (mod) aux stats de G.st, le retirer les ENLÈVE : le reste du jeu lit G.st
    sans rien savoir de l'équipement, et les autres sources de bonus s'additionnent sans conflit.
+   de : dés de dégâts d'une arme, {n:dés, f:faces, p:bonus} (voir 08-faune) ; mod.degats est un bonus ajouté au jet.
    Champs de mod : degats, pre, crit, def, vitesse, capteur, power, vieMax,
    req : POW requis par une arme ou une armure (voir 08-faune : armeFact, armureDef).
                    dis (portée de discrétion, en cases), coup (durée d'un coup de foreuse, en unités de temps).
@@ -14,7 +15,7 @@ const SLOTS={arme:{n:1,nom:'Arme',g:'/'},armure:{n:1,nom:'Armure',g:'['},acc:{n:
 const MODS={degats:['DEG',1,''],pre:['PRE',1,''],crit:['CRIT',1,' %'],def:['DEF',1,''],vitesse:['VIT',1,''],capteur:['EYE',1,''],
   power:['POW',1,''],vieMax:['Vie max',1,''],energieMax:['Énergie max',1,''],dis:['DIS',-1,''],coup:['Coup',-1,''],isol:['Isolation',1,'']};
 const ITEMS={
-  foreuse:{n:'Foreuse',f:1,slot:'arme',req:10,mod:{},base:1,
+  foreuse:{n:'Foreuse',f:1,slot:'arme',req:10,de:{n:1,f:6,p:5},mod:{},base:1,
     d:'L’outil d’origine de la foreuse, équilibré : c’est l’arme de référence.',
     art:["  ▄▄▄▄         ", "  ████▄▄▄      ", "  ███████▄▄▄   ", "  ██████████▀▀ ", "  ███████▀▀▀   ", "  ████▀▀▀      "],
     col:["..1111.........", "..1111222......", "..1111222222...", "..111122222222.", "..1111222222...", "..1111222......"]},
@@ -301,6 +302,9 @@ function invDelta(o){const d=ITEMS[o.k],m={};if(d.conso)return m;const add=(mm,s
   if(o.eq){if(d.slot!=='arme')add(d.mod,-1);return m;}
   const sl=SLOTS[d.slot];if(invCount(d.slot)>=sl.n){if(sl.n>1)return m;add(ITEMS[G.inv.find(p=>p.eq&&ITEMS[p.k].slot===d.slot).k].mod,-1);}
   add(d.mod,1);return m;}
+// Dés de dégâts d'une arme, et la fourchette qu'ils donnent une fois le POW requis pris en compte
+function deHTML(d){if(d.slot!=='arme'||!d.de)return '';const [a,b]=robotDegs(G.st,d);
+  return `<p class="imods"><span>Dégâts ${deTxt(d.de)}${G.st.degats?` ${G.st.degats>0?'+':''}${G.st.degats} (DEG)`:''} → ${a===b?a:a+' à '+b}</span></p>`;}
 // POW requis par une arme ou une armure, et ce que l'écart coûte ou rapporte avec le POW actuel
 const fois=x=>'× '+x.toFixed(2).replace('.',',');
 function reqHTML(d){if(!d.req)return '';const e=G.st.power-d.req,arme=d.slot==='arme';
@@ -340,7 +344,7 @@ function invHTML(){const inv=G.inv||[],liste=invEquipables();invFix();
   if(o){const d=ITEMS[o.k];
     h+=`<div class="idet"><pre class="iart" aria-hidden="true">${artHTML(d)}</pre>
       <div class="inm"><b>${d.n}${(o.n||1)>1?' ×'+o.n:''}</b><span>${typeNom(d)}${o.eq?' · équipé':''}</span></div>
-      <p>${d.d}</p><p class="imods">${modHTML(d)}</p>${reqHTML(d)}
+      <p>${d.d}</p><p class="imods">${modHTML(d)}</p>${deHTML(d)}${reqHTML(d)}
       <div class="ibtns"><button class="pace on" data-a="eq">${o.eq?'Retirer':'Équiper'}</button><button class="pace" data-a="drop">Jeter</button></div></div>`;}
   else h+='<div class="idet"><p>Aucun équipement à afficher. Les consommables sont dans le sous-menu Inventaire de la colonne.</p></div>';
   h+=statsHTML(o)+'</div>';

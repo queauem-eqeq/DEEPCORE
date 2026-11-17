@@ -320,6 +320,27 @@ Précision 100 (80 avant), POW 10 (1 avant, seuils et pénalités remis à l'éc
 La foreuse touche plus souvent, donc les combats sont plus courts et coûtent moins de vie : le jeu est plus facile
 qu'avant ce changement, c'est voulu par la demande. Coûts de menace non recalculés.
 
+## Dégâts de la foreuse en 1d6+5 (17 novembre 2026)
+
+La foreuse ne fait plus DEG 10 étalé de ±30 % (7-13, moyenne 10) mais **1d6+5** (6 à 11, moyenne 8,5, chaque valeur une
+fois sur six). Mêmes duels, 300 essais, foreuse avec son équipement de départ.
+
+| Ennemi | Vie perdue (DEG 10, 7-13) | Vie perdue (1d6+5) | Battements |
+|---|---|---|---|
+| Insectoide | 1,7 | 2,8 | 20 → 20 |
+| Crabos | 7,6 | 8 | 12 → 11 |
+| Crachin | 9,8 | 10,7 | 15 → 15 |
+| Viperin | 11,1 | 12,6 | 10 → 11 |
+| Gluar | 9,7 | 11,1 | 13 → 13 |
+| Siphon | 1,7 | 2,1 | 10 → 11 |
+| Tapi | 24 | 25 | 12 → 12 |
+| Taupar | 16,3 | 19,2 | 14 → 14 |
+| Mastok | 49,5 | 58,1 | 15 → 16 |
+
+Les combats coûtent **15 à 20 % de vie en plus**, pour une moyenne de dégâts en baisse de 15 % : la foreuse met un coup
+de plus à abattre les grosses cibles et encaisse d'autant. Le mastok (60 PV) passe de 6 à 7 coups. Toujours 100 % de
+victoires en duel : c'est l'attrition qui monte, pas le risque de perdre un combat isolé.
+
 ## Piège de méthode
 
 Une mesure à longue distance exige de **dégager toute la carte**. Un relief laissé au hasard coupe la
