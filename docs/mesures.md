@@ -355,6 +355,21 @@ Après le retrait de six espèces, duel contre un seul ennemi, foreuse avec son 
 La torpille ne quitte jamais l'eau : sur l'arène sèche il n'attaque pas, et le relais ne se mesure pas seul (il va en
 bande). Ces deux-là demandent une carte avec de l'eau et une bande pour être évalués.
 
+## Après les stats revues par l'utilisateur (17 novembre 2026, soir)
+
+Bestiaire revu dans le Lab puis adopté comme norme : Puce 2-3 dégâts, PRE 80, DEF 20, CRIT 2 % ; Crabot 22 PV, 3-6
+dégâts, CRIT 2 % ; Relais 3-4 dégâts ; Torpille 4-5 dégâts, PRE 80, DEF 20 ; Broyeur CRIT 0 %. Duel contre un seul
+ennemi, 300 essais.
+
+| Ennemi | Vie perdue (avant) | Vie perdue (après) | Battements |
+|---|---|---|---|
+| Puce | 2,4 | 1,9 | 20 → 19 |
+| Crabot | 9 | 7,1 | 11 → 11 |
+| Broyeur | 58,3 | 48,7 | 16 → 16 |
+
+Chaque duel coûte 15 à 20 % de vie en moins : le Crabot perd 8 PV et le Broyeur son critique, et les deux espèces
+rapides touchent plus souvent mais pour moins cher. Relais et Torpille ne se mesurent pas en duel sur l'arène sèche.
+
 ## Piège de méthode
 
 Une mesure à longue distance exige de **dégager toute la carte**. Un relief laissé au hasard coupe la

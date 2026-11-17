@@ -295,11 +295,11 @@ Reste à faire : faire **trouver** les objets (au sol, lâchés par les ennemis,
 
 | Espèce | VIT | PV | DÉG | PRE | DEF | CRIT | Référence (niveau Normal, taille 4) |
 |---|---|---|---|---|---|---|---|
-| Puce | 6 | 10 | 2-4 | 60 | 35 | 5 % | 21 |
-| Crabot | 5 | 30 | 3-7 | 65 | 0 | 5 % | 15 |
-| Relais | 5 | 15 | 3-7 | 50 | 10 | 5 % | 12 (bandes de 2 à 4 : tirage parmi 2, 3, 4, 4 — 2 à 5 avant le 13 novembre 2026) |
-| Torpille | 7 | 14 | 3-7 | 70 | 30 | 5 % | 5 |
-| Broyeur | 4 | 60 | 10-18 | 60 | 0 | 10 % | 1 |
+| Puce | 6 | 10 | 2-3 | 80 | 20 | 2 % | 21 |
+| Crabot | 5 | 22 | 3-6 | 65 | 0 | 2 % | 15 |
+| Relais | 5 | 15 | 3-4 | 50 | 10 | 5 % | 12 (bandes de 2 à 4 : tirage parmi 2, 3, 4, 4 — 2 à 5 avant le 13 novembre 2026) |
+| Torpille | 7 | 14 | 4-5 | 80 | 20 | 2 % | 5 |
+| Broyeur | 4 | 60 | 10-18 | 60 | 0 | 0 % | 1 |
 
 **Le 17 novembre 2026, six espèces ont été retirées** à la demande de l'utilisateur : Crachin, Vipérin, Gluar, Siphon,
 Tapi et Taupar. Il reste l'Puce (petit animal) et quatre bêtes : Crabot, Relais, Broyeur, Torpille. Les **capacités**
@@ -316,6 +316,12 @@ vivant, disparaît. Seuls les **noms affichés** changent : les clés internes (
 intensités de faune et les archétypes de monde déjà enregistrés continuent de marcher. Les retouches faites sur les
 anciens dessins sont jetées une seule fois (`np-robo17`), sans quoi elles masqueraient entièrement les nouveaux.
 
+**Réglages du joueur adoptés comme norme le 17 novembre 2026, au soir** : il a redessiné les cinq créatures **et la
+foreuse** dans le Tile editor, et revu leurs statistiques dans le Bestiaire. Les dessins et les stats du dépôt sont
+désormais les siens (lus dans `reglages/courant`, base de l'artefact). La palette **Rouille** qu'il a réglée remplace
+celle du code. Les créatures y gagnent beaucoup en lisibilité : corps clair, accents vifs, contour marqué.
+
+
 
 
 Les chiffres du tableau sont ceux **réglés en jeu par le joueur** et recopiés dans le code le 16 novembre 2026 : ses retouches de tuiles (les neuf bêtes, l'herbe basse, la roche dure, le site inconnu), ses palettes et ses valeurs de stats sont désormais les valeurs par défaut, pour que la version en ligne ressemble à celle qu'il joue. L'puce a gardé son dessin et ses valeurs d'origine, à sa demande. Attention : ces réglages vivent sinon dans le navigateur (`np-*`) et dans la base de l'artefact, qui n'existe pas sur GitHub Pages — d'où l'écart constaté ce jour-là entre l'artefact et le site.
@@ -330,7 +336,7 @@ Les chiffres du tableau sont ceux **réglés en jeu par le joueur** et recopiés
 | Siphon | harceleur | chaque piqûre **vole 15 d'énergie** ; rapide, difficile à toucher, très fragile |
 | Tapi | embusqué | caché dans les **herbes hautes**, invisible et absent de toutes les listes ; frappe **par surprise** (touche toujours, critique) dès que la foreuse est à son contact, puis se bat normalement. Si la foreuse bute dessus avant, c'est elle qui a la surprise |
 | Taupar | creuseur | en chasse, il vient **en ligne droite en perçant la roche** (une paroi = un battement) ; les éclats de la paroi tombent comme pour la foreuse |
-| Broyeur | colosse | lent, 60 PV, 14 de dégâts : à éviter ou à fuir sans équipement |
+| Broyeur | colosse | lent, 60 PV, 10 à 18 de dégâts : à éviter ou à fuir sans équipement |
 | Torpille (dernier de la liste : les tuiles sont numérotées, une espèce s'ajoute toujours à la fin) | poisson | **ne quitte jamais l'eau** (16 novembre 2026) ; **invisible dès qu'il est en eau profonde** — absent du rendu, de « En vue », de la fiche de survol et des messages de repérage. Rapide et difficile à toucher. Il peuple le Marécage et le Pierrier |
 
 Effets durables sur la foreuse : affichés sous les jauges (« Poison 4 · Englué 2 »), décomptés à chaque battement. La Coque isolante divise leur durée par deux, la Purge les supprime.
