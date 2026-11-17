@@ -298,14 +298,16 @@ Reste à faire : faire **trouver** les objets (au sol, lâchés par les ennemis,
 | Insectoïde | 6 | 10 | 2-4 | 60 | 35 | 5 % | 21 |
 | Crabos | 5 | 30 | 3-7 | 65 | 0 | 5 % | 15 |
 | Cafar | 5 | 15 | 3-7 | 50 | 10 | 5 % | 12 (bandes de 2 à 4 : tirage parmi 2, 3, 4, 4 — 2 à 5 avant le 13 novembre 2026) |
-| Crachin | 3 | 12 | 3-5 | 65 | 10 | 0 | 4 |
-| Vipérin | 6 | 12 | 2-4 | 70 | 30 | 5 % | 4 |
-| Gluar | 3 | 30 | 4-8 | 65 | 0 | 0 | 3 |
-| Siphon | 7 | 8 | 1-3 | 70 | 45 | 0 | 3 |
-| Tapi | 4 | 18 | 4-8 | 85 | 5 | 5 % | 4 |
-| Taupar | 4 | 35 | 5-9 | 70 | 5 | 5 % | 2 |
 | Brochon | 7 | 14 | 3-7 | 70 | 30 | 5 % | 5 |
 | Mastok | 4 | 60 | 10-18 | 60 | 0 | 10 % | 1 |
+
+**Le 17 novembre 2026, six espèces ont été retirées** à la demande de l'utilisateur : Crachin, Vipérin, Gluar, Siphon,
+Tapi et Taupar. Il reste l'Insectoïde (petit animal) et quatre bêtes : Crabos, Cafar, Mastok, Brochon. Les **capacités**
+qu'elles portaient (`range`, `poison`, `slow`, `drain`, `ambush`, `dig`) **restent dans le moteur** : ce sont des
+réglages d'espèce, prêts pour les créatures à venir. Les tuiles étant numérotées par rang (`bz0`…), le Mastok passe de
+`bz8` à `bz2` et le Brochon de `bz9` à `bz3` ; les retouches du joueur suivent, celles des espèces disparues sont
+jetées (`migreBz`, une seule fois, marqué par `np-bz17`), et une partie enregistrée perd ses créatures disparues.
+
 
 Les chiffres du tableau sont ceux **réglés en jeu par le joueur** et recopiés dans le code le 16 novembre 2026 : ses retouches de tuiles (les neuf bêtes, l'herbe basse, la roche dure, le site inconnu), ses palettes et ses valeurs de stats sont désormais les valeurs par défaut, pour que la version en ligne ressemble à celle qu'il joue. L'insectoïde a gardé son dessin et ses valeurs d'origine, à sa demande. Attention : ces réglages vivent sinon dans le navigateur (`np-*`) et dans la base de l'artefact, qui n'existe pas sur GitHub Pages — d'où l'écart constaté ce jour-là entre l'artefact et le site.
 

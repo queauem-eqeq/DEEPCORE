@@ -256,6 +256,9 @@ function start(data){
     if(G.st&&G.st.degats===10)G.st.degats=0;   /* 17 novembre 2026 : DEG n'est plus les dégâts eux-mêmes mais un bonus au jet de dés de l'arme */
     if(G.st&&(G.st.capteur<10||G.st.capteur===12||G.st.capteur===15))G.st.capteur=10;if(!G.ore)hideOre();if(!G.st||G.st.pre==null||G.st.energieMax==null){G.st={vie:100,vieMax:100,energie:100,energieMax:100,repar:0,power:10,vitesse:5,degats:0,capteur:10,cout:10,pre:100,def:10,crit:5};if(G.inv)G.inv.forEach(o=>o.eq=0);}
   if(!G.inv)G.inv=invTest();if(!G.items)G.items={};if(!G.eff)G.eff={};if(!G.fum)G.fum={};if(!G.amb)G.amb=[];G.w=W;G.h=H;invMigre();
+  /* 17 novembre 2026 : six espèces retirées. Dans une partie enregistrée, les créatures portent le rang de leur espèce :
+     on retire celles des espèces disparues (rangs 2 à 7) et on renumérote le Mastok (8 → 2) et le Brochon (9 → 3). */
+  if(!G.bz17){if(G.beasts)G.beasts=G.beasts.filter(b=>!(b.sp>=2&&b.sp<=7)).map(b=>{if(b.sp===8)b.sp=2;else if(b.sp===9)b.sp=3;return b;});G.bz17=1;}
   delete G.mode;delete G.niv;delete G.biome;delete G.suite;   // partie enregistrée avant le 16 novembre 2026 : la descente et ses biomes n'existent plus
   if(G.st.matiere==null)G.st.matiere=0;if(G.sonar==null)G.sonar=1;   // partie commencée avant la descente
   palBiome(null);buildTiles();   // partie commencée avant l'inventaire

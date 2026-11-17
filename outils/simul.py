@@ -147,8 +147,8 @@ return JSON.stringify(out, null, 1);
 CAS_COMBAT = """BEASTS.forEach((sp, i) => { if (sp.ambush) duel('1 ' + sp.n + ' (embusqué)', () => { G.amb.push({ sp: i, x: 31, y: 32, hp: sp.pv }); }); else duel('1 ' + sp.n, seul(i)); });
 const I = k => BEASTS.findIndex(b => b.key === k);
 duel('2 Crabos', groupe(I('crabos'), 2)); duel('3 Cafars', groupe(I('cafar'), 3)); duel('4 Cafars', groupe(I('cafar'), 4));
-duel('2 Crachins', groupe(I('crachin'), 2)); duel('2 Vipérins', groupe(I('viperin'), 2)); duel('Mastok + 2 Crabos', () => { groupe(I('crabos'), 2)(); G.beasts.push(bete(I('mastok'), 38, 32)); });
-const ref = () => { groupe(I('crabos'), 2)(); G.beasts.push(bete(I('viperin'), 38, 32)); };
+duel('Mastok + 2 Crabos', () => { groupe(I('crabos'), 2)(); G.beasts.push(bete(I('mastok'), 38, 32)); });
+const ref = () => { groupe(I('crabos'), 2)(); G.beasts.push(bete(I('cafar'), 38, 32)); };
 duel('RÉF. (2 Crabos + 1 Vipérin) · foreuse nue', ref);
 // accessoires seulement : depuis le 16 novembre 2026 la foreuse et la Coque d'usine sont le seul équipement, déjà porté
 for (const k of Object.keys(ITEMS)) { const d = ITEMS[k]; if (d.conso || d.base || d.slot !== 'acc') continue; duel('RÉF. avec ' + d.n, ref, [k]); }

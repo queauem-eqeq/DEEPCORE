@@ -341,6 +341,20 @@ Les combats coûtent **15 à 20 % de vie en plus**, pour une moyenne de dégâts
 de plus à abattre les grosses cibles et encaisse d'autant. Le mastok (60 PV) passe de 6 à 7 coups. Toujours 100 % de
 victoires en duel : c'est l'attrition qui monte, pas le risque de perdre un combat isolé.
 
+## Les quatre bêtes restantes (17 novembre 2026)
+
+Après le retrait de six espèces, duel contre un seul ennemi, foreuse avec son équipement de départ, 300 essais.
+
+| Ennemi | Vie perdue | Battements |
+|---|---|---|
+| Insectoïde | 2,4 | 20 |
+| Crabos | 9 | 11 |
+| Mastok | 58,3 | 16 |
+| Brochon | 0 | 0 |
+
+Le brochon ne quitte jamais l'eau : sur l'arène sèche il n'attaque pas, et le cafar ne se mesure pas seul (il va en
+bande). Ces deux-là demandent une carte avec de l'eau et une bande pour être évalués.
+
 ## Piège de méthode
 
 Une mesure à longue distance exige de **dégager toute la carte**. Un relief laissé au hasard coupe la

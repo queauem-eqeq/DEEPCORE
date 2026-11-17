@@ -175,12 +175,6 @@ const TDESC={[GROUND]:['Sol rocheux','Praticable. Les points au sol se densifien
 const BEHAV={insectoide:'Suit la foreuse à 2 ou 3 cases et recule au contact. Dès qu’elle est attaquée ou attaque, même si le coup rate, tous ceux qui la suivent passent à l’attaque et ne reculent plus.',
   crabos:'Chasse la foreuse dès qu’il la voit et l’attaque au contact. Abandonne environ 8 tours après l’avoir perdue de vue.',
   cafar:'Vit en bande : ce qu’un membre voit, toute la bande le sait.',
-  crachin:'Crache de l’acide jusqu’à 5 cases tant qu’il vous voit ; recule une fois sur deux quand on le serre. Fragile au contact.',
-  viperin:'Morsure empoisonnée : 2 points de vie perdus par battement pendant 5 battements.',
-  gluar:'Lent et résistant. Sa glu double la durée de vos pas pendant 4 battements.',
-  siphon:'Rapide, difficile à toucher. Chaque piqûre vole 15 d’énergie.',
-  tapi:'Embusqué dans les herbes hautes, invisible : frappe par surprise (coup critique) quand on passe à son contact.',
-  taupar:'Creuseur : une fois en chasse, il vient en ligne droite en perçant la roche.',
   mastok:'Colosse lent : beaucoup de points de vie, des coups très lourds. Mieux vaut l’éviter ou le fuir.'};
 function inspectHTML(){const {x,y}=HOV;if(x<0||y<0||x>=W||y>=H)return '';
   const i=idx(x,y),seen=!fog||G.seen[i],see=!fog||vis[i],d=Math.max(Math.abs(x-G.px),Math.abs(y-G.py)),dt=d?`${d} case${d>1?'s':''}`:'ici';

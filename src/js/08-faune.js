@@ -3,9 +3,9 @@ const animalAt=(x,y)=>G.animals&&G.animals.find(a=>a.x===x&&a.y===y);
 // Eau : depuis le 15 novembre 2026, TOUTES les créatures y entrent (avant : seuls les crabos). Les nageurs (swim) gardent leur avantage :
 // eux seuls ne sont pas ralentis par l'eau (slowOf). L'argument swim encore passé à canWalk et distFrom est sans effet, il est ignoré.
 /* Eau : trois rapports à l'eau selon l'espèce (16 novembre 2026).
-   - `nage` (crabos, vipérin, siphon, brochon) : elles y vont naturellement, en chasse comme en errance ;
-   - `sec` (cafar, crachin, tapi) : elles n'y mettent jamais une patte, même pour poursuivre ;
-   - les autres (insectoïde, gluar, taupar, mastok) : elles l'évitent, mais la traversent pour poursuivre la foreuse.
+   - `nage` (crabos, brochon) : elles y vont naturellement, en chasse comme en errance ;
+   - `sec` (cafar) : elles n'y mettent jamais une patte, même pour poursuivre ;
+   - les autres (insectoïde, mastok) : elles l'évitent, mais la traversent pour poursuivre la foreuse.
    Une créature déjà dans l'eau peut toujours en sortir, sinon elle y resterait coincée en cessant la poursuite.
    `swim` reste à part : il ne dit pas qui entre dans l'eau, mais qui n'y est pas ralenti (le crabos seul). */
 const isWater=v=>v===LIQ||v===DEEP,canWalk=(v,mouille)=>!blocks(v)&&(mouille||!isWater(v));
@@ -234,7 +234,7 @@ function beastAway(b){let best=null,bd=(b.x-G.px)**2+(b.y-G.py)**2;
 function rockFalls(i){if(G.dmg)delete G.dmg[i];G.t[i]=RUBBLE;if(G.ore&&G.ore[i]&&!oreSol(G.ore[i]))G.ore[i]=(oreMat(G.ore[i])?'m':'')+'sol'+oreLv(G.ore[i]);}
 function digDist(tx,ty){const d=new Int16Array(W*H).fill(-1),q=[idx(tx,ty)];d[q[0]]=0;
   for(let k=0;k<q.length;k++){const c=q[k],x=c%W,y=(c/W)|0;for(let n=0;n<4;n++){const a=x+DIRS[n][0],b=y+DIRS[n][1];if(a<1||b<1||a>=W-1||b>=H-1)continue;
-    const j=idx(a,b),v=G.t[j];if(d[j]>=0||!(canWalk(v,true)||v===ROCK||v===MOUNT))continue;d[j]=d[c]+1;q.push(j);}}return d;}   // le taupar perce la roche, mais pas la roche dure
+    const j=idx(a,b),v=G.t[j];if(d[j]>=0||!(canWalk(v,true)||v===ROCK||v===MOUNT))continue;d[j]=d[c]+1;q.push(j);}}return d;}   // un creuseur perce la roche, mais pas la roche dure
 function digStep(b,sees){const t=sees?[G.px,G.py]:b.mem;if(!t){b.hunt=0;return false;}
   const d=digDist(t[0],t[1]),h=d[idx(b.x,b.y)];if(h<0){forget(b);b.hunt=0;return false;}
   if(h<=1){if(!sees)b.search=SEARCH_T;return false;}

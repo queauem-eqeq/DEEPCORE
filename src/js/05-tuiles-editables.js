@@ -21,6 +21,20 @@ let TILE_OV={},TILE_BASE={};   // TILE_BASE : dernières tuiles enregistrées, a
 try{const o=JSON.parse(localStorage.getItem('np-tiles-base')||'null');if(o&&typeof o==='object')for(const k in o)if(validTile(o[k],k))TILE_BASE[k]=o[k];}catch(e){}
 function commitTileBase(){TILE_BASE=JSON.parse(JSON.stringify(TILE_OV));try{localStorage.setItem('np-tiles-base',JSON.stringify(TILE_BASE));}catch(e){}}
 try{const o=JSON.parse(localStorage.getItem('np-tiles')||'null');if(o&&typeof o==='object')for(const k in o)if(validTile(o[k],k))TILE_OV[k]=o[k];}catch(e){}
+/* 17 novembre 2026 : six espèces retirées (Crachin, Vipérin, Gluar, Siphon, Tapi, Taupar). Les tuiles des créatures
+   sont numérotées par leur rang dans BEASTS : le Mastok passe de bz8 à bz2, le Brochon de bz9 à bz3. On déplace donc
+   les retouches du joueur et on jette celles des espèces disparues, sans quoi elles se colleraient sur la mauvaise
+   bête. Fait une seule fois, marqué par np-bz17 : rejoué, ce remaniement effacerait les tuiles déjà déplacées. */
+const BZ_DEPLACE={8:2,9:3};
+function migreBz(o){const n={};for(const k in o){const m=/^bz(\d+)([rl])$/.exec(k);
+  if(!m){n[k]=o[k];continue;}
+  const i=+m[1];if(i<2)n[k]=o[k];else if(BZ_DEPLACE[i]!=null)n['bz'+BZ_DEPLACE[i]+m[2]]=o[k];}
+  return n;}
+try{if(!localStorage.getItem('np-bz17')){
+  TILE_OV=migreBz(TILE_OV);TILE_BASE=migreBz(TILE_BASE);
+  localStorage.setItem('np-tiles',JSON.stringify(TILE_OV));
+  localStorage.setItem('np-tiles-base',JSON.stringify(TILE_BASE));
+  localStorage.setItem('np-bz17','1');}}catch(e){}
 const saveTiles=()=>{try{localStorage.setItem('np-tiles',JSON.stringify(TILE_OV));}catch(e){}touchLocal();};
 // version retouchée si elle existe, sinon l'originale
 const TF=k=>{const o=TILE_OV[k];if(o)return (x,y)=>o[y][x];const p=PAT_ORIG[k];return typeof p==='function'?p:(x,y)=>p[y][x];};
