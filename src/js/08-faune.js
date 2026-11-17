@@ -129,8 +129,8 @@ function animalsAct(){
         if(okA(nx,ny)&&diagOk(a.x,a.y,dx,dy)&&(a.mode!=='hold'||cheb({x:nx,y:ny},G.px,G.py)>KEEP_MIN)){a.x=nx;a.y=ny;if(dx)a.dir=dx;}}
       else a.mp=Math.min(a.mp,.99);}
   }
-  if(swarm){sayMore(`Les ${swarm.n.toLowerCase()}s passent à l’attaque !`,'warn');SFX.chirp();}
-  else if(fled){sayMore(`Un ${fled.n.toLowerCase()} recule.`);SFX.chirp();}
+  if(swarm){sayMore(`${LesNoms(swarm)} passent à l’attaque !`,'warn');SFX.chirp();}
+  else if(fled){sayMore(`${UnNom(fled)} recule.`);SFX.chirp();}
 }
 
 /* ---------- Prédateurs ---------- */
@@ -200,7 +200,16 @@ const chanceCol=ch=>ch>=70?'var(--c1)':ch>=40?'var(--c3)':'var(--life)';
    Effets durables posés par le coup (G.eff, décomptés à chaque battement par effTick) :
    poison = vie perdue par battement · glu = pas deux fois plus longs · drain = énergie volée sur le coup.
    Une armure isolante (G.st.isol) divise les durées par deux. */
-function hurtRobot(b,sp,o){sp=sp||BEASTS[b.sp];o=o||{};const le=sp.n.match(/^[aeiouyéèêîïôâ]/i)?'L’':'Le ',nom=sp.n.toLowerCase(),verbe=o.tir?'crache':'attaque';
+/* Articles (17 novembre 2026) : chaque espèce porte son genre (`fem`), au lieu de l'article figé d'avant, qui donnait
+   « l'puce » et « le torpille ». Élision devant une voyelle, et pas de s au pluriel sur un nom qui finit déjà par s
+   (le Relais). Nom toujours en minuscules dans les messages. */
+const nomDe=sp=>sp.n.toLowerCase();
+const leNom=sp=>{const n=nomDe(sp);return /^[aeiouyéèêîïôâ]/i.test(n)?'l’'+n:(sp.fem?'la ':'le ')+n;};
+const LeNom=sp=>{const a=leNom(sp);return a[0].toUpperCase()+a.slice(1);};
+const unNom=sp=>(sp.fem?'une ':'un ')+nomDe(sp);
+const UnNom=sp=>{const a=unNom(sp);return a[0].toUpperCase()+a.slice(1);};
+const LesNoms=sp=>{const n=nomDe(sp);return 'Les '+n+(/s$/.test(n)?'':'s');};
+function hurtRobot(b,sp,o){sp=sp||BEASTS[b.sp];o=o||{};const le=LeNom(sp),nom='',verbe=o.tir?'crache':'attaque';
   const ch=hitChance(sp.pre,robotDef());engage();   // la foreuse est attaquée, que le coup porte ou non : les insectoïdes qui suivent attaquent
   const geste=()=>o.tir?addFx({kind:'tir',x0:b.x,y0:b.y,x1:G.px,y1:G.py,dur:260}):addFx({kind:'lunge',beast:b,dx:Math.sign(G.px-b.x),dy:Math.sign(G.py-b.y),dur:200});
   if(!o.sur&&!roll(ch)){geste();addFx({kind:'num',x:G.px,y:G.py,txt:'0',col:'#8aa9a2',dur:750});
@@ -225,7 +234,7 @@ const ambAt=(x,y)=>G.amb&&G.amb.find(a=>a.x===x&&a.y===y);
 function ambWake(a,hunt){G.amb.splice(G.amb.indexOf(a),1);const b={sp:a.sp,x:a.x,y:a.y,hp:a.hp,mp:0,hunt:hunt?1:0,dir:Math.sign(G.px-a.x)||1,pack:-1};G.beasts=G.beasts||[];G.beasts.push(b);return b;}
 function ambTick(){if(!G.amb||!G.amb.length||G.over)return;
   for(const a of [...G.amb]){if(G.over)break;if(!canHit(a))continue;const sp=BEASTS[a.sp],b=ambWake(a,true);alerte(b);spot(b);b.skip=1;
-    sayMore(`Un ${sp.n.toLowerCase()} surgit de sa cachette !`,'warn');SFX.roar();hurtRobot(b,sp,{sur:true});}}
+    sayMore(`${UnNom(sp)} surgit de sa cachette !`,'warn');SFX.roar();hurtRobot(b,sp,{sur:true});}}
 // Tireur : un pas pour s'éloigner de la foreuse (renvoie false s'il est acculé)
 function beastAway(b){let best=null,bd=(b.x-G.px)**2+(b.y-G.py)**2;
   for(const[dx,dy]of [...DIRS].sort(()=>Math.random()-.5)){const nx=b.x+dx,ny=b.y+dy;if(!diagOk(b.x,b.y,dx,dy)||!beastFits(b,nx,ny))continue;const nd=(nx-G.px)**2+(ny-G.py)**2;if(nd>bd){bd=nd;best=[nx,ny,dx];}}
@@ -244,7 +253,7 @@ function digStep(b,sees){const t=sees?[G.px,G.py]:b.mem;if(!t){b.hunt=0;return f
   if(!best)return false;
   if(best[2])b.dir=best[2];
   if(best[3]){rockFalls(idx(best[0],best[1]));b.mp=0;
-    if(cheb(b,G.px,G.py)<=10){SFX.crack();sayMore(vis[idx(b.x,b.y)]?`Le ${BEASTS[b.sp].n.toLowerCase()} perce la roche !`:'Un bruit de roche brisée, tout près.','warn');}
+    if(cheb(b,G.px,G.py)<=10){SFX.crack();sayMore(vis[idx(b.x,b.y)]?`${LeNom(BEASTS[b.sp])} perce la roche !`:'Un bruit de roche brisée, tout près.','warn');}
     return false;}
   b.x=best[0];b.y=best[1];return true;}
 function beastsAct(){
@@ -273,7 +282,7 @@ function beastsAct(){
       else if(Math.random()<.25){const[dx,dy]=DIRS[rnd(0,7)];if(beastFits(b,b.x+dx,b.y+dy)&&diagOk(b.x,b.y,dx,dy)&&(!sp.pack||packOk(b,b.x+dx,b.y+dy))){b.x+=dx;b.y+=dy;if(dx)b.dir=dx;}}
       else b.mp=Math.min(b.mp,.99);}
   }
-  if(charged){sayMore(`Le ${charged.n.toLowerCase()} vous a repéré et charge !`,'warn');SFX.roar();}
+  if(charged){sayMore(`${LeNom(charged)} vous a repéré et charge !`,'warn');SFX.roar();}
 }
 // Plus de réparation automatique : seule l'énergie se recharge à chaque battement.
 // Attendre sur place la recharge WAIT_REGEN fois plus vite (13 novembre 2026) : 2/t au lieu de 1/t à POW 1.

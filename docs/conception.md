@@ -321,6 +321,11 @@ foreuse** dans le Tile editor, et revu leurs statistiques dans le Bestiaire. Les
 désormais les siens (lus dans `reglages/courant`, base de l'artefact). La palette **Rouille** qu'il a réglée remplace
 celle du code. Les créatures y gagnent beaucoup en lisibilité : corps clair, accents vifs, contour marqué.
 
+Les noms des créatures étant devenus féminins pour deux d'entre elles, **les articles des messages suivent maintenant le
+genre de l'espèce** (champ `fem`), avec élision devant une voyelle et pas de s au pluriel sur un nom qui en porte déjà un :
+« la puce », « la torpille », « le crabot », « les relais ». Avant, l'article était figé et donnait « l'puce » ou « le torpille ».
+
+
 
 
 

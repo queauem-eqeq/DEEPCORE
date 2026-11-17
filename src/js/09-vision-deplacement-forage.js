@@ -87,20 +87,20 @@ function tryMove(dx,dy){
   const bz=beastAt(nx,ny);
   if(bz){const sp=BEASTS[bz.sp];G.turn++;G.msg=null;engage();const sur=!(bz.hunt>0),cr=sur||roll(G.st.crit??5);   // surprise : ne vous a pas repéré
     {const ch=hitChance(robotPre(),sp.def+terrMod(nx,ny));if(!sur&&!roll(ch)){if(!bz.hunt)alerte(bz);bz.hunt=1;spot(bz);addFx({kind:'lunge',robot:true,dx,dy,dur:180});addFx({kind:'num',x:nx,y:ny,txt:'0',col:'#8aa9a2',dur:750});
-      say(`La foreuse rate le ${sp.n.toLowerCase()} (${ch} %).`);SFX.whoosh();pass(coupDur());computeFOV();render();if(G.over&&G.over.dead)dead();return;}}
+      say(`La foreuse rate ${leNom(sp)} (${ch} %).`);SFX.whoosh();pass(coupDur());computeFOV();render();if(G.over&&G.over.dead)dead();return;}}
     const dm=robotDeg()*(cr?CRIT_X:1);bz.hp-=dm;if(!bz.hunt&&bz.hp>0)alerte(bz);bz.hunt=1;spot(bz);addFx({kind:'num',x:nx,y:ny,txt:'-'+dm+(cr?'!':''),col:cr?PAL['1']:PAL['3'],dur:cr?1000:750});if(cr){addFx({kind:'shake',amp:6,dur:220});SFX.crit();}
     addFx({kind:'lunge',robot:true,dx,dy,dur:180});addFx({kind:'flash',beast:bz,dur:180});if(bz.hp<=0)addFx({kind:'shake',amp:4,dur:200});
     const tag=sur?'Coup par surprise ! ':cr?'Coup critique ! ':'';
-    if(bz.hp<=0){G.beasts.splice(G.beasts.indexOf(bz),1);bleed(bz.x,bz.y);say(`${tag}La foreuse abat le ${sp.n.toLowerCase()}.`,'good');SFX.break();}
-    else{say(`${tag}La foreuse percute le ${sp.n.toLowerCase()} : −${dm} PV (${bz.hp}/${pvDe(sp)}).`,'warn');SFX.crack();}
+    if(bz.hp<=0){G.beasts.splice(G.beasts.indexOf(bz),1);bleed(bz.x,bz.y);say(`${tag}La foreuse abat ${leNom(sp)}.`,'good');SFX.break();}
+    else{say(`${tag}La foreuse percute ${leNom(sp)} : −${dm} PV (${bz.hp}/${pvDe(sp)}).`,'warn');SFX.crack();}
     pass(coupDur());computeFOV();render();if(G.over&&G.over.dead)dead();return;}
   const an=animalAt(nx,ny);
   if(an){const sp=SPECIES[an.sp];G.turn++;G.msg=null;engage();const sur=!an.aware,cr=sur||roll(G.st.crit??5);
     {const ch=hitChance(robotPre(),sp.def+terrMod(nx,ny));if(!sur&&!roll(ch)){an.aware=1;an.enraged=true;spot(an);addFx({kind:'lunge',robot:true,dx,dy,dur:180});addFx({kind:'num',x:nx,y:ny,txt:'0',col:'#8aa9a2',dur:750});
-      say(`La foreuse rate l’${sp.n.toLowerCase()} (${ch} %).`);SFX.whoosh();pass(coupDur());computeFOV();render();if(G.over&&G.over.dead)dead();return;}}
+      say(`La foreuse rate ${leNom(sp)} (${ch} %).`);SFX.whoosh();pass(coupDur());computeFOV();render();if(G.over&&G.over.dead)dead();return;}}
     const dm=robotDeg()*(cr?CRIT_X:1),tag=sur?'Coup par surprise ! ':cr?'Coup critique ! ':'';an.hp=(an.hp??pvDe(sp))-dm;addFx({kind:'num',x:nx,y:ny,txt:'-'+dm+(cr?'!':''),col:cr?PAL['1']:PAL['3'],dur:cr?1000:750});if(cr){addFx({kind:'shake',amp:6,dur:220});SFX.crit();}addFx({kind:'lunge',robot:true,dx,dy,dur:180});
-    if(an.hp<=0){G.animals.splice(G.animals.indexOf(an),1);bleed(an.x,an.y);say(`${tag}La foreuse écrase l’${sp.n.toLowerCase()}.`,'warn');SFX.squish();}
-    else{if(!an.aware)alerte(an);an.aware=1;an.enraged=true;spot(an);say(`${tag}La foreuse heurte l’${sp.n.toLowerCase()}.`);SFX.crack();}
+    if(an.hp<=0){G.animals.splice(G.animals.indexOf(an),1);bleed(an.x,an.y);say(`${tag}La foreuse écrase ${leNom(sp)}.`,'warn');SFX.squish();}
+    else{if(!an.aware)alerte(an);an.aware=1;an.enraged=true;spot(an);say(`${tag}La foreuse heurte ${leNom(sp)}.`);SFX.crack();}
    pass(coupDur());computeFOV();render();if(G.over&&G.over.dead)dead();return;}
   if(v===CHASM){say('Gouffre : passage impossible.');SFX.blocked();render();return;}
   if(v===SHIP){say('Coque du vaisseau : indestructible.');SFX.blocked();render();return;}

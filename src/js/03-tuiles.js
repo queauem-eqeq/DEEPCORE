@@ -85,7 +85,7 @@ PAT.crackH=(x,y)=>{const c=(a,b)=>PAT.crack2[b]&&PAT.crack2[b][a]==='0';
 PAT.rubble=["................","..33.......3....","..3.....33......","........3...33..","....3.......3...",".33......3......","..........33....","...3..3.........","..33.......3....","........33......",".3...3......33..","...........3....","....33..........","..........3..3..",".3..3...........","................"];
 // Petits animaux : v = vitesse (5 = celle du robot), d = portée de détection en cases
 const SPECIES=[
-  {n:'Puce',v:6,pv:10,dmin:2,dmax:3,pre:80,def:20,crit:2,b:'2',a:'3',rx:4,ry:2,hr:1.6,legs:3,ears:'antennes',tail:'',pat:'rayures',
+  {n:'Puce',fem:true,v:6,pv:10,dmin:2,dmax:3,pre:80,def:20,crit:2,b:'2',a:'3',rx:4,ry:2,hr:1.6,legs:3,ears:'antennes',tail:'',pat:'rayures',
    // dessin robotique adopté comme norme le 17 novembre 2026
    rows:["................",
      "................",
@@ -173,7 +173,7 @@ const BEASTS=[
      "....22....22....",
      "...2222..2222..."]},
   // Brochon (16 novembre 2026) : le poisson. Il ne quitte jamais l'eau (aqua) et disparaît dès qu'il plonge en eau profonde (cache).
-  {n:'Torpille',key:'brochon',nb:5,role:'Ne quitte jamais l’eau ; invisible dès qu’il plonge en eau profonde',v:7,pv:14,dmin:4,dmax:5,pre:80,def:20,crit:2,nage:true,aqua:true,cache:true,
+  {n:'Torpille',fem:true,key:'brochon',nb:5,role:'Ne quitte jamais l’eau ; invisible dès qu’il plonge en eau profonde',v:7,pv:14,dmin:4,dmax:5,pre:80,def:20,crit:2,nage:true,aqua:true,cache:true,
    rows:["................",
      "................",
      "................",
