@@ -6,7 +6,7 @@ function curOutline(r){return r.map((l,y)=>[...l].map((c,x)=>c!=='.'?c:[[1,0],[-
 const CURSOR_DEF=curOutline(curGen((x,y)=>((y===0||y===15)&&(x<5||x>10))||((x===0||x===15)&&(y<5||y>10))));   // viseur « Crochets »
 const TILE_LIST=[
   ['Viseur',[['cursor','Viseur']]],
-  ['Foreuse et faune',[['robot_u','Foreuse'],['an0r','Insectoïde'],['bz0r','Crabos'],['bz1r','Cafar'],...BEASTS.slice(2).map((b,i)=>['bz'+(i+2)+'r',b.n])]],
+  ['Foreuse et faune',[['robot_u','Foreuse'],['an0r',SPECIES[0].n],...BEASTS.map((b,i)=>['bz'+i+'r',b.n])]],
   ['Terrain',[['ground0','Sol'],['rock','Rocher'],['rock2','Rocher 2'],['mtTop','Crête'],['mtBody','Montagne'],['hard','Roche dure'],['liq0','Eau A'],['liq1','Eau B'],['deep0','Eau profonde'],['grass0','Herbes hautes'],['flat0','Herbes basses'],['rubble','Gravats'],['crackH','Fissures'],['wade','Remous'],['wadeDeep','Remous profond']]],
   ['Objets',[['siteUnknown','Site'],['objet','Objet au sol'],['ore1','Éclats petits (montagne)'],['ore2','Éclats moyens (montagne)'],['ore','Éclats gros (montagne)'],['oreSol1','Éclats petits (sol)'],['oreSol2','Éclats moyens (sol)'],['oreSol','Éclats gros (sol)'],['blood0','Sang A'],['blood1','Sang B']]],
   ['Vaisseau',[['ship','Cargo']]],
@@ -35,6 +35,14 @@ try{if(!localStorage.getItem('np-bz17')){
   localStorage.setItem('np-tiles',JSON.stringify(TILE_OV));
   localStorage.setItem('np-tiles-base',JSON.stringify(TILE_BASE));
   localStorage.setItem('np-bz17','1');}}catch(e){}
+/* 17 novembre 2026 : les cinq créatures sont redessinées en machines (contour noir, blindage, capteur rouge).
+   Une retouche faite sur l'ancien dessin masquerait complètement le nouveau, alors on la jette — une seule fois,
+   marquée par np-robo17. Les autres tuiles retouchées ne bougent pas. */
+try{if(!localStorage.getItem('np-robo17')){
+  for(const k of ['an0r','an0l','bz0r','bz0l','bz1r','bz1l','bz2r','bz2l','bz3r','bz3l']){delete TILE_OV[k];delete TILE_BASE[k];}
+  localStorage.setItem('np-tiles',JSON.stringify(TILE_OV));
+  localStorage.setItem('np-tiles-base',JSON.stringify(TILE_BASE));
+  localStorage.setItem('np-robo17','1');}}catch(e){}
 const saveTiles=()=>{try{localStorage.setItem('np-tiles',JSON.stringify(TILE_OV));}catch(e){}touchLocal();};
 // version retouchée si elle existe, sinon l'originale
 const TF=k=>{const o=TILE_OV[k];if(o)return (x,y)=>o[y][x];const p=PAT_ORIG[k];return typeof p==='function'?p:(x,y)=>p[y][x];};

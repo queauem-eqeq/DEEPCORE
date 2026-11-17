@@ -28,7 +28,7 @@ function caState(){const off=GEN.methode==='bruit';$('gn-remplissage').disabled=
 // nom, coefficient, effectif minimal (pour qu'un niveau élevé se voie même sur une toute petite carte)
 const NIVEAUX=[['Aucun',0,0],['Rare',.5,1],['Normal',1,1],['Nombreux',2,2],['Infesté',4,4]];
 const LIFE_REF={insectoide:21};BEASTS.forEach(b=>{LIFE_REF[b.key]=b.nb;});
-const LIFE_LBL=[['insectoide','Insectoïde'],...BEASTS.map(b=>[b.key,b.n])];
+const LIFE_LBL=[['insectoide',SPECIES[0].n],...BEASTS.map(b=>[b.key,b.n])];   // la clé reste 'insectoide' : elle porte les intensités déjà enregistrées, seul le nom affiché a changé le 17 novembre 2026
 let INTENS={};LIFE_LBL.forEach(([k])=>{INTENS[k]=2;});
 // anciens réglages en nombres : ramenés au niveau le plus proche
 const nivDe=(k,n)=>{const r=n/(LIFE_REF[k]||1);return n<=0?0:r<=.75?1:r<=1.5?2:r<=3?3:4;};

@@ -174,8 +174,8 @@ const TDESC={[GROUND]:['Sol rocheux','Praticable. Les points au sol se densifien
   [DECK]:['Soute du vaisseau','Praticable. La foreuse peut toujours y revenir ; la porte est à l’arrière.']};
 const BEHAV={insectoide:'Suit la foreuse à 2 ou 3 cases et recule au contact. Dès qu’elle est attaquée ou attaque, même si le coup rate, tous ceux qui la suivent passent à l’attaque et ne reculent plus.',
   crabos:'Chasse la foreuse dès qu’il la voit et l’attaque au contact. Abandonne environ 8 tours après l’avoir perdue de vue.',
-  cafar:'Vit en bande : ce qu’un membre voit, toute la bande le sait.',
-  mastok:'Colosse lent : beaucoup de points de vie, des coups très lourds. Mieux vaut l’éviter ou le fuir.'};
+  cafar:'Va en groupe : ce qu’un relais voit, tout le groupe le sait.',
+  mastok:'Machine lente et massive : beaucoup de points de vie, des coups très lourds. Mieux vaut l’éviter ou la fuir.'};
 function inspectHTML(){const {x,y}=HOV;if(x<0||y<0||x>=W||y>=H)return '';
   const i=idx(x,y),seen=!fog||G.seen[i],see=!fog||vis[i],d=Math.max(Math.abs(x-G.px),Math.abs(y-G.py)),dt=d?`${d} case${d>1?'s':''}`:'ici';
   const head=(ic,n,ex)=>`<div class="ih">${ic?`<img src="${ic}" alt="">`:''}<b>${n}</b><span>${ex||''}</span></div>`;

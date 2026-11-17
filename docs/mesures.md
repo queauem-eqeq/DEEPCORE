@@ -347,12 +347,12 @@ Après le retrait de six espèces, duel contre un seul ennemi, foreuse avec son 
 
 | Ennemi | Vie perdue | Battements |
 |---|---|---|
-| Insectoïde | 2,4 | 20 |
-| Crabos | 9 | 11 |
-| Mastok | 58,3 | 16 |
-| Brochon | 0 | 0 |
+| Puce | 2,4 | 20 |
+| Crabot | 9 | 11 |
+| Broyeur | 58,3 | 16 |
+| Torpille | 0 | 0 |
 
-Le brochon ne quitte jamais l'eau : sur l'arène sèche il n'attaque pas, et le cafar ne se mesure pas seul (il va en
+La torpille ne quitte jamais l'eau : sur l'arène sèche il n'attaque pas, et le relais ne se mesure pas seul (il va en
 bande). Ces deux-là demandent une carte avec de l'eau et une bande pour être évalués.
 
 ## Piège de méthode

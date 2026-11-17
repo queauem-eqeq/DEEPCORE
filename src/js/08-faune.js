@@ -18,7 +18,7 @@ function spawnAnimals(){
     if(!(v===GROUND||v===GRASS||v===FLAT)||Math.hypot(x-G.px,y-G.py)<SZ(10,4)||animalAt(x,y))continue;
     G.animals.push({sp:pool[k%pool.length],x,y,hp:pvDe(SPECIES[pool[k%pool.length]]),mp:Math.random(),flee:0,dir:Math.random()<.5?1:-1});k++;}
 }
-// Insectoïde : une fois le robot repéré, il le suit à 2 ou 3 cases (recule au contact,
+// Petit animal (la Puce) : une fois le robot repéré, il le suit à 2 ou 3 cases (recule au contact,
 // se rapproche au-delà de 3). Quand un crabos chasse le robot à proximité, il passe à l'attaque.
 const KEEP_MIN=1,KEEP_MAX=3;
 const cheb=(a,x,y)=>Math.max(Math.abs(a.x-x),Math.abs(a.y-y));
