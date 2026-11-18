@@ -112,7 +112,7 @@ function connect(t){
     while(hp.size){const [d,c]=hp.pop();if(d>dist[c])continue;if(lab[c]===other){hit=c;break;}
       const x=c%W,y=(c/W)|0;
       for(let k=0;k<4;k++){const a=x+DIRS[k][0],b=y+DIRS[k][1];if(a<1||b<1||a>=W-1||b>=H-1)continue;const j=idx(a,b),v=t[j];
-        if(v===SHIP)continue;const cost=v===CHASM?3:v===ROCK?2:v===MOUNT?7:1;const nd=d+cost;if(nd<dist[j]){dist[j]=nd;prev[j]=c;hp.push(j,nd);}}}
+        if(v===SHIP||v===WALL||v===PILLAR)continue;const cost=v===CHASM?3:v===ROCK?2:v===MOUNT?7:1;const nd=d+cost;if(nd<dist[j]){dist[j]=nd;prev[j]=c;hp.push(j,nd);}}}
     for(let c=hit;c>=0;c=prev[c]){const v=t[c];if(v===CHASM)t[c]=BRIDGE;else if(v===ROCK||v===MOUNT)t[c]=GROUND;}
   }
 }
@@ -218,7 +218,7 @@ let SANS_VAISSEAU=false;
 function niveau(){drilling=false;
   genPlanet();
   G.w=W;G.h=H;
-  pieceEssai();   // bâtiments, étape 1 : une pièce posée à la main près du vaisseau
+  batiments();   // structures bâties (07b), avant la roche dure et les métaux
   lifeCalc();
   durcir();   // la roche dure avant les métaux : ils n'y apparaissent jamais
   {const a=W*H/(48*32);G.eff={};G.fum={};hideOre(Math.max(1,Math.round(GISEMENTS.metal*a)),Math.max(1,Math.round(GISEMENTS.mat*a)));}
