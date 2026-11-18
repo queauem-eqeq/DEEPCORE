@@ -480,6 +480,20 @@ Décisions validées le 6 novembre 2026 :
 Chiffres à l'appui dans `mesures.md`, points de comparaison avec Brogue dans `brogue.md`.
 
 - **Idées de Brogue sur les ennemis à reprendre** (relevé du 15 novembre 2026, `brogue.md`, section « Comment Brogue gère ses ennemis ») : hordes composées et liées, ennemis endormis à l'arrivée, renforts au fil du temps ; ensuite hors-profondeur, mutations, fuite des blessés.
+- **Bâtiments : décidé le 18 novembre 2026, pas encore construit.** Les cartes porteront des structures bâties, en plus du relief naturel.
+  - **Principe de création : l'accrétion**, celle de Brogue. On pose une première pièce, puis on tire une forme et on la **colle** à un mur existant avec une porte à la jonction ; on retire quand elle ne rentre pas. La structure obtenue est un arbre.
+  - **Plusieurs itinéraires** : seconde passe sur chaque mur séparant deux espaces praticables. Recherche de chemin **bornée à une quinzaine de pas** entre les deux côtés : si elle aboutit, la porte n'apporterait rien et on ne perce pas ; si elle échoue, on perce. Critère objectif, réglé par un seul nombre, qui ne produit que des raccourcis utiles.
+  - **Salles isolées**, trois degrés : cul-de-sac (une porte, gratuit, c'est ce que l'arbre donne), **pièce murée** (porte refermée : il faut ouvrir le mur), et pièce **derrière un gouffre** (pont unique, ou aucun).
+  - **Formes de pièces** : rectangle, L, croix, salle ronde, long hall, caverne (automate cellulaire, parties effondrées). De 4 × 4 à 12 × 9.
+  - **Piliers** : paramètre de pièce, posés en quinconce avec vérification qu'ils ne bouchent aucun passage. Ils coupent la ligne de vue sans bloquer le pas, et comptent comme parois adjacentes : **une salle à piliers rend plus discret**.
+  - **Gouffres et ponts** : un gouffre coupe une grande salle, un pont la franchit. Le pont est un goulot.
+  - **Deux structures par carte** : la carte est découpée en **lots**, un par structure, avec une marge. Chaque structure a un **style** qui règle ses paramètres d'un coup — avant-poste (petites pièces, peu de boucles), hangar (très grandes, piliers), complexe de forage (enfilades, gouffres, beaucoup de boucles), ruine (cavernes, effondré).
+  - **Murs des bâtiments : la foreuse ne les perce pas.** Seule la **charge sismique** les ouvre (choix de l'utilisateur, 18 novembre 2026). Entrer dans une salle murée coûte donc un consommable rare.
+  - **Le site de forage est dans la pièce la plus profonde** d'une structure : traverser le bâtiment est l'objectif de la partie.
+  - **Les créatures vivent à l'intérieur, plus densément que dehors** : couloirs et portes dangereux, salles à piliers utiles pour semer.
+  - Acquis sans décision à prendre : portes fermées coupant la ligne de vue et s'ouvrant en entrant, murs comptés comme parois pour la discrétion, ennemis qui passent les portes (le contournement existe déjà), vaisseau et gouffres naturels hors des lots, connexion de la carte vérifiée comme aujourd'hui.
+  - **Ordre de construction** : 1. les tuiles (mur, sol, porte, pilier) et une pièce posée à la main, pour vérifier rendu, ligne de vue, discrétion et ennemis ; 2. l'accrétion ; 3. boucles et salles isolées ; 4. gouffres, ponts, piliers ; 5. deux structures, styles et réglages dans MONDE. Chaque étape publiée sur l'artefact.
+  - **Mesure** : `simul.py` sortira sur cent cartes le nombre d'itinéraires distincts entre l'entrée et la pièce la plus profonde, la part de culs-de-sac et la part de carte occupée — pour détecter les réglages qui donnent un labyrinthe ou un plateau vide.
 - **Progression à reconstruire** (16 novembre 2026) : la descente, ses biomes et son budget de menace, les armes et armures autres que l'équipement d'origine, puis le joyau et son menu d'améliorations ont été retirés pour repartir d'une base nue (§ 3 bis, § 6 bis, § 8). Il ne reste **aucune progression permanente** dans le jeu. À concevoir : d'où viennent les objets, comment la foreuse se renforce, comment la difficulté monte, et ce qui tient lieu de profondeur.
 - Donner un effet à la profondeur des sites (risque / récompense).
 - Récompenser les combats (fragments, énergie).
