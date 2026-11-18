@@ -52,7 +52,7 @@ function buildLife(){
   intensAff();
 }
 // Colonne « Structures » du menu Monde (19 novembre 2026) : tout ce qui règle les bâtiments.
-const S_NUM=[['structure','Surface bâtie (%)',0,30,'Part de la carte occupée par les bâtiments, murs compris. 0 : aucune structure.'],
+const S_NUM=[['structure','Surface bâtie (%)',0,70,'Part de la carte occupée par les bâtiments, murs compris. 0 : aucune structure.'],
   ['sPieces','Pièces par structure',0,40,'0 : autant que la surface le permet. Sinon la structure s’arrête à ce nombre de pièces, même si la surface n’est pas atteinte.'],
   ['sEntrees','Portes d’entrée',0,4,'0 : une à trois selon la taille. Sinon ce nombre, si les murs le permettent.'],
   ['sOuvert','Ouvertures sans porte (%)',0,100,'Part des passages intérieurs laissés ouverts : on voit à travers, rien ne se referme.'],

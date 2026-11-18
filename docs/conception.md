@@ -518,7 +518,7 @@ Chiffres à l'appui dans `mesures.md`, points de comparaison avec Brogue dans `b
     - **Menu MONDE en deux colonnes (19 novembre 2026)** : à gauche **Monde** (taille, eau, montagne, gouffre, herbe, méthode de relief), à droite **Structures**. Les réglages de structure sont enregistrés avec les archétypes de monde (`GEN.structure`, `sStyle`, `sNb`, `sPieces`, `sEntrees`, `sOuvert`, `sVerrous`) :
       - **Archétype de structure** : au hasard, avant-poste, hangar, complexe de forage ou ruine ;
       - **Nombre de structures** : une ou deux (au hasard), une, deux ;
-      - **Surface bâtie (%)** : l'ancien « Structures (%) », 0 à 30, 10 par défaut ;
+      - **Surface bâtie (%)** : l'ancien « Structures (%) », **0 à 70** (30 au plus avant le 19 novembre 2026 au soir), 10 par défaut. Mesuré : 30 % demandés donnent 25 %, 50 % donnent 40 %, 70 % donnent 67 % (le terrain enfermé entre les murs, changé en mur plein, compte) ;
       - **Pièces par structure** : 0 = autant que la surface le permet ; sinon la structure s'arrête à ce nombre (jusqu'à 40) ;
       - **Portes d'entrée** : 0 = une à trois selon la taille ; sinon 1 à 4, si les murs le permettent ;
       - **Ouvertures sans porte (%)** : part des passages intérieurs laissés ouverts (25 par défaut) : on voit à travers, rien ne se referme. Les entrées gardent toujours une porte ;
