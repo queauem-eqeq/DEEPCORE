@@ -164,6 +164,10 @@ const TDESC={[GROUND]:['Sol rocheux','Praticable. Les points au sol se densifien
   [ROCK]:['Rocher','Infranchissable, ne bloque pas la vue. Cède en 2 coups de foreuse et laisse des gravats.'],
   [MOUNT]:['Montagne','Infranchissable et opaque. Cède en 2 coups de foreuse, sauf en bordure de carte.'],
   [HARD]:['Roche dure','Le cœur des massifs : infranchissable et opaque, et la foreuse n’y peut rien. Seule une charge sismique la brise. Pas de métal à l’intérieur.'],
+  [WALL]:['Mur bâti','Infranchissable et opaque. La foreuse ne l’entame pas : seule une charge sismique l’ouvre. Compte comme une paroi pour la discrétion.'],
+  [FLOOR]:['Sol bâti','Praticable. L’intérieur d’une structure.'],
+  [DOOR]:['Porte','Praticable. Fermée, elle cache la vue ; elle s’ouvre quand on s’y tient et se referme derrière soi.'],
+  [PILLAR]:['Pilier','Infranchissable et opaque : il coupe la ligne de vue. Compte comme une paroi pour la discrétion.'],
   [LIQ]:['Eau peu profonde','Praticable par tous. Défense −20 pour qui s’y trouve ; pas deux fois plus lent, sauf pour les crabos qui nagent.'],
   [DEEP]:['Eau profonde','Praticable par tous. Défense −20, pas deux fois plus lent (sauf crabos), et le courant fait dévier la foreuse. Les créatures, elles, nagent droit.'],
   [GRASS]:['Herbes hautes','Praticables mais opaques. Défense +12 pour qui s’y cache. Elles se couchent au passage.'],
@@ -211,7 +215,7 @@ function inspectHTML(){const {x,y}=HOV;if(x<0||y<0||x>=W||y>=H)return '';
   let act='';
   if(d===0)act=s?'<kbd>F</kbd> ou clic : forer ce site.':'';
   else if(d===1&&occ)act='Clic : frapper avec la foreuse.';
-  else if(d===1&&t===HARD)act='';
+  else if(d===1&&(t===HARD||bati(t)))act='';
   else if(d===1&&(t===ROCK||t===MOUNT))act=border?'':'Clic : coup de foreuse (10 énergie).';
   else if(d===1&&t===CHASM)act='';
   else if(d===1)act='Clic : avancer d’une case.';

@@ -1,13 +1,17 @@
 /* ---------- Vision ---------- */
 const opaque=(x,y)=>{const i=idx(x,y);if(G.fum&&G.fum[i])return true;   // la fumée d'un fumigène cache la vue, des deux côtés (16 novembre 2026)
-  const v=G.t[i];return v===MOUNT||v===HARD||v===GRASS;};
+  const v=G.t[i];if(v===DOOR)return !porteOuverte(x,y);   // une porte cache la vue tant que personne ne se tient dedans
+  return v===MOUNT||v===HARD||v===GRASS||v===WALL||v===PILLAR;};
+const porteOuverte=(x,y)=>(G.px===x&&G.py===y)||!!(beastAt(x,y)||animalAt(x,y));
 function line(x0,y0,x1,y1){const p=[];let dx=Math.abs(x1-x0),dy=-Math.abs(y1-y0),sx=x0<x1?1:-1,sy=y0<y1?1:-1,e=dx+dy;
   for(;;){p.push([x0,y0]);if(x0===x1&&y0===y1)break;const e2=2*e;if(e2>=dy){e+=dy;x0+=sx;}if(e2<=dx){e+=dx;y0+=sy;}}return p;}
 function los(x0,y0,x1,y1){const p=line(x0,y0,x1,y1);for(let i=1;i<p.length-1;i++)if(opaque(p[i][0],p[i][1]))return false;return true;}
 // Capteur de la foreuse (elle seule) : la case juste derrière un obstacle à la vue (montagne, herbes hautes) est aperçue
 // en mode souvenir — terrain affiché assombri, sans les créatures. Les ennemis, eux, ne voient pas à travers.
 function peekBehind(x0,y0,x1,y1){const p=line(x0,y0,x1,y1),n=p.length;if(n<3)return false;
-  for(let i=1;i<n-2;i++)if(opaque(p[i][0],p[i][1]))return false;return opaque(p[n-2][0],p[n-2][1]);}
+  for(let i=1;i<n-2;i++)if(opaque(p[i][0],p[i][1]))return false;
+  const o=G.t[idx(p[n-2][0],p[n-2][1])];if(bati(o)||o===DOOR)return false;   // le capteur ne devine rien derrière un mur bâti ou une porte
+  return opaque(p[n-2][0],p[n-2][1]);}
 function computeFOV(){vis=new Uint8Array(W*H);const r=G.st.capteur,px=G.px,py=G.py;
   for(let y=py-r;y<=py+r;y++)for(let x=px-r;x<=px+r;x++){if(x<0||y<0||x>=W||y>=H)continue;if((x-px)**2+(y-py)**2>r*r+r)continue;
     if(los(px,py,x,y)){vis[idx(x,y)]=1;G.seen[idx(x,y)]=1;}else if(peekBehind(px,py,x,y))G.seen[idx(x,y)]=1;}
@@ -41,7 +45,7 @@ function stealthCalc(base,act,flat,walls,run){           // flat : sur des herbe
   r=Math.max(STEALTH_MIN,r-Math.min(Math.ceil(walls/2),WALL_MAX));
   return r+(run?SPRINT_NOISE:0);}                      // la course s'entend : + 2, après tout le reste
 function stealthRange(act){
-  let walls=0;for(const [dx,dy] of DIRS){const x=G.px+dx,y=G.py+dy;if(x<0||y<0||x>=W||y>=H)continue;const v=G.t[idx(x,y)];if(v===ROCK||v===MOUNT)walls++;}
+  let walls=0;for(const [dx,dy] of DIRS){const x=G.px+dx,y=G.py+dy;if(x<0||y<0||x>=W||y>=H)continue;const v=G.t[idx(x,y)];if(v===ROCK||v===MOUNT||bati(v))walls++;}
   return stealthCalc(Math.max(STEALTH_MIN,STEALTH_BASE+(G.st.dis||0)),act,G.t[idx(G.px,G.py)]===FLAT,walls,lastRun);}
 function turnStealth(){G.stealth=stealthRange(lastAct);}
 
@@ -73,7 +77,7 @@ const siteAt=(x,y)=>G.sites.find(s=>s.x===x&&s.y===y);
 function drift(wait){if(!wait)return;
   if(G.t[idx(G.px,G.py)]!==DEEP)return;
   const k=rnd(0,7),[dx,dy]=DIRS[k],nx=G.px+dx,ny=G.py+dy,v=G.t[idx(nx,ny)];
-  if(v===ROCK||v===MOUNT||v===CHASM||!diagOk(G.px,G.py,dx,dy)||beastAt(nx,ny)||animalAt(nx,ny)){SFX.thud();sayMore(`Le courant plaque le robot contre un obstacle (${DIRN[k]}).`,'warn');return;}
+  if(v===ROCK||v===MOUNT||v===CHASM||bati(v)||!diagOk(G.px,G.py,dx,dy)||beastAt(nx,ny)||animalAt(nx,ny)){SFX.thud();sayMore(`Le courant plaque le robot contre un obstacle (${DIRN[k]}).`,'warn');return;}
   G.px=nx;G.py=ny;G.lastDir=null;if(v===GRASS)G.t[idx(nx,ny)]=FLAT;
   SFX.drift();sayMore(`Eau profonde : le courant entraîne le robot vers ${['l’est','l’ouest','le sud','le nord','le sud-est','le nord-est','le sud-ouest','le nord-ouest'][k]}.`,'warn');
 }
@@ -105,6 +109,7 @@ function tryMove(dx,dy){
   if(v===CHASM){say('Gouffre : passage impossible.');SFX.blocked();render();return;}
   if(v===SHIP){say('Coque du vaisseau : indestructible.');SFX.blocked();render();return;}
   if(v===HARD){say('Roche dure : la foreuse ne l’entame pas. Seule une charge sismique en vient à bout.');SFX.blocked();render();return;}
+  if(bati(v)){say((v===WALL?'Mur bâti':'Pilier')+' : la foreuse ne l’entame pas. Seule une charge sismique l’ouvre.');SFX.blocked();render();return;}
   if(v===ROCK||v===MOUNT){
     if(nx===0||ny===0||nx===W-1||ny===H-1){say('Bord de la carte : roche impossible à briser.');SFX.blocked();render();return;}
     if(!spend())return;

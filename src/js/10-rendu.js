@@ -57,7 +57,7 @@ function explode(done){
       l:.6+Math.random()*1.6,a:0,sz:2+(Math.random()<.3?1:0)+(Math.random()<.06?2:0),c:cols[(Math.random()*cols.length)|0]});}
   BOOM={p,last:performance.now(),t0:performance.now(),done};SFX.explode();addFx({kind:'shake',amp:10,dur:600});
   if(reduced){BOOM=null;render();setTimeout(done,400);return;}
-  const hard=(x,y)=>{const a=Math.floor(x),b=Math.floor(y);if(a<0||b<0||a>=W||b>=H)return true;const i=idx(a,b),v=G.t[i];return v===ROCK||v===MOUNT||v===HARD||v===SHIP||(fog&&!vis[i]);};   // la zone hors de vue arrête les éclats
+  const hard=(x,y)=>{const a=Math.floor(x),b=Math.floor(y);if(a<0||b<0||a>=W||b>=H)return true;const i=idx(a,b),v=G.t[i];return v===ROCK||v===MOUNT||v===HARD||v===SHIP||bati(v)||(fog&&!vis[i]);};   // la zone hors de vue arrête les éclats
   const step=now=>{if(!BOOM)return;const dt=Math.min(.05,(now-BOOM.last)/1000);BOOM.last=now;let n=0;
     for(const q of BOOM.p){q.a+=dt;if(q.a>=q.l)continue;const air=q.z>0||q.vz>0,dr=Math.exp(-(air?1:7)*dt);q.vx*=dr;q.vy*=dr;
       const nx=q.x+q.vx*dt,ny=q.y+q.vy*dt;
@@ -167,6 +167,7 @@ function render(){
   for(let y=camY;y<Math.min(H,camY+rows+1);y++)for(let x=camX;x<Math.min(W,camX+cols+1);x++){
     const i=idx(x,y),v=fog?vis[i]:1;if(!v&&!G.seen[i])continue;const t=G.t[i],h=hash(x,y),k=v?1:.28;
     if(t!==CHASM)voile(x,y,(x-camX)*S,(y-camY)*S,k);
+    if(t>=WALL)batiTuile(t,x,y,(tl,a)=>put(tl,x,y,a*k));else
     if(t!==BRIDGE)put(TL.ground0,x,y,.6*k);   // sol uniforme : plus de variations près des sites (13 novembre 2026)
     if(t===ROCK)put(h%3?TL.rock:TL.rock2,x,y,.95*k);
     else if(t===MOUNT)put(y>0&&G.t[idx(x,y-1)]===MOUNT?TL.mtBody:TL.mtTop,x,y,.9*k);
