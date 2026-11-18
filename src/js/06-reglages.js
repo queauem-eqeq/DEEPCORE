@@ -57,7 +57,7 @@ function buildGen(){
    +`<div class="g2"><label for="gm">Méthode</label><select id="gm">${METHODS.map(([v,l])=>`<option value="${v}"${GEN.methode===v?' selected':''}>${l}</option>`).join('')}</select></div>`
    +`<div class="g2"><label for="gn-remplissage">Remplissage initial (%)</label><input type="number" id="gn-remplissage" min="35" max="70" value="${GEN.remplissage}"></div>`
    +`<div class="g2"><label for="gn-iterations">Itérations</label><input type="number" id="gn-iterations" min="1" max="10" value="${GEN.iterations}"></div>`
-   +'<button class="go" id="essaiBtn" title="Fermer et générer une nouvelle carte avec ces réglages et ceux de la faune">GÉNÉRER LA CARTE</button><div class="sum">Ces réglages donnent le relief et la faune de la carte. GÉNÉRER LA CARTE, comme REGEN, en tire une nouvelle avec les réglages du moment.</div>';
+   +'<button class="go" id="essaiBtn" title="Fermer et générer une nouvelle carte avec ces réglages">GÉNÉRER LA CARTE</button><div class="sum">Ces réglages donnent le relief et la taille de la carte. GÉNÉRER LA CARTE, comme REGEN, en tire une nouvelle avec les réglages du moment. La faune se règle à part, bouton LIFE.</div>';
   $('essaiBtn').onclick=()=>{$('monde').hidden=true;unlock();SFX.start();newGame();started=true;$('overlay').hidden=true;render();};
   GEN_LBL.forEach(([k])=>{$('gr-'+k).addEventListener('input',e=>setGen(k,e.target.value));$('gn-'+k).addEventListener('change',e=>setGen(k,e.target.value));});
   $('gr-taille').addEventListener('input',e=>setTaille(e.target.value));$('gn-taille').addEventListener('change',e=>setTaille(e.target.value));setTaille(GEN.taille);
@@ -72,26 +72,34 @@ function buildGen(){
    Archétype de monde : les réglages en cours (relief, taille, faune) enregistrés sous un nom ; MONDES = {nom:{gen:{…},vie:{…}}}, mémorisé
    sous np-mondes. (Les six biomes de la descente ont disparu de la liste le 16 novembre 2026, avec la descente elle-même.) */
 let MONDES={};try{const m=JSON.parse(localStorage.getItem('np-mondes')||'null');if(m&&typeof m==='object')MONDES=m;}catch(e){}
+let mdPurge=false;for(const n in MONDES)if(MONDES[n]&&MONDES[n].vie){delete MONDES[n].vie;mdPurge=true;}   // archétypes d'avant le 18 novembre 2026 : la faune qu'ils portaient est jetée
 const saveMondes=()=>{try{localStorage.setItem('np-mondes',JSON.stringify(MONDES));}catch(e){}touchLocal();};
+if(mdPurge)saveMondes();
 const mdEsc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 function mondeListe(sel){const noms=Object.keys(MONDES).sort((a,b)=>a.localeCompare(b,'fr')),o=(v,l)=>`<option value="${mdEsc(v)}">${mdEsc(l)}</option>`;
   $('mdSel').innerHTML=o('','— Réglages en cours —')+(noms.length?`<optgroup label="Mes archétypes">${noms.map(n=>o('u:'+n,n)).join('')}</optgroup>`:'');
   $('mdSel').value=sel||'';if($('mdSel').selectedIndex<0)$('mdSel').value='';}
 function mondeMsg(t,err){const m=$('mdMsg');m.textContent=t;m.className='saved'+(err?' err':'');}
-// applique un relief et une faune aux réglages en cours (les champs absents gardent leur valeur)
-function mondeApplique(gen,vie){
+/* Un archétype n'enregistre que la génération (18 novembre 2026, demande de l'utilisateur) : relief, taille, méthode.
+   La faune a son propre menu (bouton LIFE) et ne suit plus l'archétype — charger un monde ne touche plus aux espèces.
+   Les archétypes enregistrés avant cette date gardent une clé « vie » : on l'efface une fois, au chargement du jeu. */
+// applique un relief aux réglages en cours (les champs absents gardent leur valeur)
+function mondeApplique(gen){
   for(const k of ['taille','eau','montagne','gouffre','herbe','methode','remplissage','iterations'])if(gen&&gen[k]!=null)GEN[k]=gen[k];
-  if(!(GEN.taille>=1&&GEN.taille<=5))GEN.taille=4;saveGen();buildGen();
-  for(const k in INTENS)INTENS[k]=Math.max(0,Math.min(4,Math.round(+(vie&&vie[k])||0)));
-  intensAff();try{localStorage.setItem('np-intens',JSON.stringify(INTENS));}catch(e){}touchLocal();}
+  if(!(GEN.taille>=1&&GEN.taille<=5))GEN.taille=4;saveGen();buildGen();}
 function mondeCharge(v){
-  if(v.startsWith('u:')){const n=v.slice(2),m=MONDES[n];if(!m)return;mondeApplique(m.gen,m.vie);$('mdNom').value=n;mondeMsg(`« ${n} » chargé.`);}
+  if(v.startsWith('u:')){const n=v.slice(2),m=MONDES[n];if(!m)return;mondeApplique(m.gen);$('mdNom').value=n;mondeMsg(`« ${n} » chargé (relief et taille ; la faune ne change pas).`);}
   else mondeMsg('');}
 function mondeSave(){const n=$('mdNom').value.trim().replace(/\s+/g,' ');if(!n){mondeMsg('Donnez un nom à cet archétype.',true);$('mdNom').focus();return;}
-  const neuf=!MONDES[n];MONDES[n]={gen:Object.assign({},GEN),vie:Object.assign({},INTENS)};saveMondes();mondeListe('u:'+n);mondeMsg(neuf?`« ${n} » enregistré.`:`« ${n} » mis à jour.`);}
+  const neuf=!MONDES[n];MONDES[n]={gen:Object.assign({},GEN)};saveMondes();mondeListe('u:'+n);mondeMsg(neuf?`« ${n} » enregistré.`:`« ${n} » mis à jour.`);}
 function mondeDel(){const v=$('mdSel').value;if(!v.startsWith('u:')){mondeMsg('Choisissez un de vos archétypes dans la liste.',true);return;}
   const n=v.slice(2);delete MONDES[n];saveMondes();mondeListe('');$('mdNom').value='';mondeMsg(`« ${n} » supprimé.`);}
 function mondeOpen(){if(TRAV)stopTravel();if(REST)stopRest();if(EXPL)stopExplore();mondeListe($('mdSel').value);mondeMsg('');$('monde').hidden=false;$('monde').querySelector('.mcard').focus();}
+// Fenêtre Life : la faune, sortie du menu Monde le 18 novembre 2026
+function lifeOpen(){if(TRAV)stopTravel();if(REST)stopRest();if(EXPL)stopExplore();$('faune').hidden=false;$('faune').querySelector('.mcard').focus();}
+function lifeClose(){$('faune').hidden=true;$('lifeBtn').focus();render();}
+$('lifeBtn').onclick=lifeOpen;$('lfClose').onclick=lifeClose;
+$('faune').addEventListener('pointerdown',ev=>{if(ev.target===$('faune'))lifeClose();});
 function mondeClose(){$('monde').hidden=true;$('mondeBtn').focus();render();}
 $('mondeBtn').onclick=mondeOpen;$('mdClose').onclick=mondeClose;$('mdSave').onclick=mondeSave;$('mdDel').onclick=mondeDel;
 $('mdSel').addEventListener('change',e=>mondeCharge(e.target.value));

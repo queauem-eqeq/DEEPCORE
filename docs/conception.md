@@ -119,19 +119,23 @@ Second métal, **couleur accent** (les éclats de réparation sont couleur bio),
 
 Elle **détecte tous les gisements** (métal et Matière) : chacun apparaît quand l'onde l'atteint, sur la carte comme sur la mini-carte (bio pour le métal, accent pour la Matière), même en zone jamais vue et même au cœur d'un massif. Le journal donne le compte ; survoler ce qui est détecté dit ce que c'est et s'il faudra forer.
 
-### Menu Monde (15 novembre 2026, revu le 16)
+### Menus Monde et Life (15 novembre 2026, revus les 16 et 18)
 
-Génération et Life ne sont plus deux sous-menus de la colonne : ils sont réunis dans une fenêtre **Monde**, plein écran
-comme le Tile editor, ouverte par le bouton **MONDE** (à côté de **REGEN**, sous la mini-carte).
+Deux fenêtres, ouvertes par deux boutons côte à côte sous la mini-carte, à côté de **REGEN** : **MONDE** (le relief) et
+**LIFE** (la faune). Elles n'étaient qu'une jusqu'au 18 novembre 2026, où la faune a été sortie de Monde à la demande
+de l'utilisateur, parce qu'un archétype de monde ne doit décrire **que la génération**.
 
 - **REGEN** génère une **nouvelle carte avec les réglages en cours**.
-- À gauche la **Génération** (taille, eau, montagne, gouffre, herbe, méthode de relief), à droite la **Faune** (intensité
-  par espèce). En bas, **GÉNÉRER LA CARTE** ferme la fenêtre et génère aussitôt avec les réglages modifiés (ce bouton
-  s'appelait CARTE D'ESSAI jusqu'au 16 novembre 2026).
-- **Archétypes de monde** : en tête de la fenêtre, un champ **Nom** et **Enregistrer** gardent les réglages en cours
-  (relief, taille, faune) sous ce nom ; la **liste déroulante** les recharge ; **Supprimer** retire l'archétype choisi.
-  Enregistrer sous un nom existant le met à jour. Mémorisés sous `np-mondes` et joints à l'enregistrement dans la base
-  du jeu. La liste ne propose plus les six biomes, partis le 16 novembre 2026 avec la descente.
+- **Monde** : taille, eau, montagne, gouffre, herbe, méthode de relief, remplissage, itérations. En bas, **GÉNÉRER LA
+  CARTE** ferme la fenêtre et génère aussitôt (ce bouton s'appelait CARTE D'ESSAI jusqu'au 16 novembre 2026).
+- **Life** : l'intensité par espèce. Ces réglages **ne font partie d'aucun archétype** : ils valent pour toutes les
+  cartes jusqu'à ce qu'on les change.
+- **Archétypes de monde** : en tête de la fenêtre Monde, un champ **Nom** et **Enregistrer** gardent **les seuls
+  réglages de génération** sous ce nom ; la **liste déroulante** les recharge ; **Supprimer** retire l'archétype choisi.
+  Charger un archétype ne touche donc plus à la faune. Enregistrer sous un nom existant le met à jour. Mémorisés sous
+  `np-mondes` et joints à l'enregistrement dans la base du jeu. Les archétypes enregistrés avant le 18 novembre 2026
+  portaient aussi une faune : elle est effacée une fois, au premier chargement. La liste ne propose plus les six biomes,
+  partis le 16 novembre 2026 avec la descente.
 
 ## 3 ter. Exploration automatique (13 novembre 2026)
 
