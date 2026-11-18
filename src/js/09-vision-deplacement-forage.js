@@ -32,7 +32,7 @@ try{const s=+localStorage.getItem('np-stealth');if(s>=2&&s<=30)STEALTH_BASE=s;}c
 function setStealthBase(v){STEALTH_BASE=Math.max(2,Math.min(30,v|0));try{localStorage.setItem('np-stealth',STEALTH_BASE);}catch(e){}touchLocal();}
 let lastAct='move';                                   // ce que la foreuse vient de faire : 'move', 'wait' ou 'dig'
 let lastRun=false;                                     // ce pas a-t-il été couru ? (portée de discrétion + SPRINT_NOISE)
-const WALL_MAX=4;                                      // retrait maximal dû aux parois adjacentes (−4)
+const WALL_MAX=2;                                      // retrait maximal dû aux parois adjacentes (−2 depuis le 18 novembre 2026 ; −4 avant)
 function stealthCalc(base,act,flat,walls,run){           // flat : sur des herbes basses ; walls : parois adjacentes (0 à 8) : retrait = parois ÷ 2 arrondi au supérieur, au plus WALL_MAX
   let r=base;
   if(act==='dig')r=Math.ceil(r*DIG_MULT);

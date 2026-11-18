@@ -41,9 +41,13 @@ function chaseStep(o,dist,fits,tx=G.px,ty=G.py){const h=dist[idx(o.x,o.y)],cur=h
   if(best){o.x=best[0];o.y=best[1];if(best[2])o.dir=best[2]>0?1:-1;return true;}return false;}
 /* Mémoire des ennemis (10 novembre 2026) : un ennemi qui voit la foreuse retient sa position (o.mem) ; quand il ne la voit
    plus, il se dirige vers cette dernière position connue — celle de son groupe pour une bande de cafars (partagée entre
-   membres). Arrivé, il fouille SEARCH_T tours autour, puis oublie et reprend son errance.
+   membres). Arrivé, il fouille la zone pendant SEARCH_T battements, puis oublie et reprend son errance.
    Plus aucune connaissance de la position réelle de la foreuse sans la voir. */
-const SEARCH_T=4;
+/* Fouille (18 novembre 2026) : il ratisse la zone. Il se choisit un point accessible à une dizaine de cases du dernier
+   endroit où il a vu la foreuse, s'y rend par le plus court chemin, puis en choisit un autre, pendant SEARCH_T
+   battements. Les points sont toujours tirés autour de ce dernier point connu, jamais autour de lui : il tourne donc
+   dans la zone au lieu de dériver. Avant le 18 novembre, il faisait 4 battements de pas au hasard et s'éloignait. */
+const SEARCH_T=30,SEARCH_R=10,SEARCH_VAR=3;
 /* Perte de trace (13 novembre 2026, les 3 % de Brogue) : une bête qui vous chasse hors du rayon de discrétion,
    mais encore dans la bande de chasse (HUNT_MULT ×), a LOSE_TRACK par tour de vous perdre. Elle garde alors sa
    dernière position connue et s'y rend, mais ne vous suit plus de loin : il lui faut vous remarquer de nouveau
@@ -62,16 +66,30 @@ function voitForeuse(o,chasse){
   return false;}
 // Petit « ! » au-dessus d'un ennemi qui vient de repérer la foreuse (15 novembre 2026) : seulement s'il est en vue
 function alerte(o){if(vis[idx(o.x,o.y)])addFx({kind:'alerte',o,dur:900});}
-function spot(o){o.mem=[G.px,G.py];o.search=0;o.stuck=0;o.lost=0;const dx=Math.sign(G.px-o.x);if(dx)o.dir=dx;}
+function spot(o){o.mem=[G.px,G.py];o.search=0;o.stuck=0;o.lost=0;o.sg=null;const dx=Math.sign(G.px-o.x);if(dx)o.dir=dx;}
 /* Chance qu'un ennemi calme vous remarque ce tour-ci (affichée au survol) : plate dans la portée de
    discrétion et en ligne de vue, nulle au-delà. Voir la portée de discrétion dans 09. */
 function detectChance(o){return (Math.hypot(o.x-G.px,o.y-G.py)<=(G.stealth||STEALTH_BASE)&&(lastAct==='dig'||los(o.x,o.y,G.px,G.py)))?Math.round(NOTICE*100):0;}
-function forget(o){o.mem=null;o.search=0;o.stuck=0;o.lost=0;}
+function forget(o){o.mem=null;o.search=0;o.stuck=0;o.lost=0;o.sg=null;}
 // un pas vers la dernière position connue ; renvoie false quand il faut passer à la fouille
 function seekStep(o,fits,DC,m){const [mx,my]=o.mem,k=mx+','+my+','+(m?1:0),d=DC[k]||(DC[k]=distFrom(mx,my,m)),h=d[idx(o.x,o.y)];
   if(h<0){forget(o);return false;}if(h<=1){o.search=SEARCH_T;return false;}
   if(chaseStep(o,d,fits,mx,my)){o.stuck=0;return true;}if(++o.stuck>2)o.search=SEARCH_T;return false;}
-function searchStep(o,fits){if(Math.random()<.6){const [dx,dy]=DIRS[rnd(0,7)];if(fits(o.x+dx,o.y+dy)&&diagOk(o.x,o.y,dx,dy)){o.x+=dx;o.y+=dy;if(dx)o.dir=dx;}}}
+// un point à fouiller : accessible depuis le dernier point connu, à SEARCH_R cases environ de lui, et pas là où il est déjà
+function searchGoal(o,fits,DC,m){const [mx,my]=o.mem,k=mx+','+my+','+(m?1:0),d=DC[k]||(DC[k]=distFrom(mx,my,m));
+  for(let t=0;t<20;t++){const a=Math.random()*Math.PI*2,r=SEARCH_R+rnd(-SEARCH_VAR,SEARCH_VAR);
+    const x=Math.round(mx+Math.cos(a)*r),y=Math.round(my+Math.sin(a)*r);
+    if(x<1||y<1||x>=W-1||y>=H-1||Math.abs(x-o.x)+Math.abs(y-o.y)<2)continue;
+    const h=d[idx(x,y)];if(h<0||h>SEARCH_R*2||!fits(x,y))continue;
+    return [x,y];}
+  return null;}
+function searchStep(o,fits,DC,m){
+  if(o.sg&&o.x===o.sg[0]&&o.y===o.sg[1])o.sg=null;                                   // arrivé : il lui en faut un autre
+  if(!o.sg){o.sg=searchGoal(o,fits,DC,m);o.sstuck=0;}
+  if(o.sg){const [gx,gy]=o.sg,k=gx+','+gy+','+(m?1:0),d=DC[k]||(DC[k]=distFrom(gx,gy,m));
+    if(chaseStep(o,d,fits,gx,gy)){o.sstuck=0;return;}
+    if(++o.sstuck>2)o.sg=null;}                                                      // bloqué : il change de point
+  if(Math.random()<.6){const [dx,dy]=DIRS[rnd(0,7)];if(fits(o.x+dx,o.y+dy)&&diagOk(o.x,o.y,dx,dy)){o.x+=dx;o.y+=dy;if(dx)o.dir=dx;}}}
 function stepAway(a,fits){const cur=(a.x-G.px)**2+(a.y-G.py)**2;let best=null,bd=cur;const ok=fits||animalOk;
   for(const[dx,dy]of [...DIRS].sort(()=>Math.random()-.5)){const nx=a.x+dx,ny=a.y+dy;if(!ok(nx,ny)||!diagOk(a.x,a.y,dx,dy))continue;const nd=(nx-G.px)**2+(ny-G.py)**2;if(nd>bd){bd=nd;best=[nx,ny,dx];}}
   if(best){a.x=best[0];a.y=best[1];if(best[2])a.dir=best[2]>0?1:-1;}}
@@ -124,7 +142,7 @@ function animalsAct(){
       else if(a.mode==='flee')stepAway(a,okA);
       else if(a.mode==='follow')stepToward(a,dist,okA);
       else if(a.mode==='seek'){if(!seekStep(a,okA,DC,mA)){a.mode=a.search>0?'search':'';break;}}
-      else if(a.mode==='search')searchStep(a,okA);
+      else if(a.mode==='search')searchStep(a,okA,DC,mA);
       else if(Math.random()<(a.mode==='hold'?.15:.3)){const [dx,dy]=DIRS[rnd(0,7)];const nx=a.x+dx,ny=a.y+dy;
         if(okA(nx,ny)&&diagOk(a.x,a.y,dx,dy)&&(a.mode!=='hold'||cheb({x:nx,y:ny},G.px,G.py)>KEEP_MIN)){a.x=nx;a.y=ny;if(dx)a.dir=dx;}}
       else a.mp=Math.min(a.mp,.99);}
@@ -276,7 +294,7 @@ function beastsAct(){
       if(b.hunt>0&&sees){
         if(nearRobot(b)){b.mp=Math.min(b.mp,.99);break;}
         chaseStep(b,mouilleOk(sp,b)?distEau:distSec,(x,y)=>beastFits(b,x,y));}
-      else if(b.hunt>0&&b.search>0)searchStep(b,(x,y)=>beastFits(b,x,y));                // fouille autour du dernier point connu
+      else if(b.hunt>0&&b.search>0)searchStep(b,(x,y)=>beastFits(b,x,y),DC,mouilleOk(sp,b));                // fouille autour du dernier point connu
       else if(b.hunt>0){if(!seekStep(b,(x,y)=>beastFits(b,x,y),DC,mouilleOk(sp,b)))break;}       // vers la dernière position connue
       else if(sp.pack){packMove(b);}
       else if(Math.random()<.25){const[dx,dy]=DIRS[rnd(0,7)];if(beastFits(b,b.x+dx,b.y+dy)&&diagOk(b.x,b.y,dx,dy)&&(!sp.pack||packOk(b,b.x+dx,b.y+dy))){b.x+=dx;b.y+=dy;if(dx)b.dir=dx;}}

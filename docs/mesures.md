@@ -370,6 +370,14 @@ ennemi, 300 essais.
 Chaque duel coûte 15 à 20 % de vie en moins : le Crabot perd 8 PV et le Broyeur son critique, et les deux espèces
 rapides touchent plus souvent mais pour moins cher. Relais et Torpille ne se mesurent pas en duel sur l'arène sèche.
 
+## Parois adjacentes plafonnées à −2 (18 novembre 2026)
+
+`WALL_MAX` passe de 4 à 2 : 1 ou 2 parois voisines retirent 1 au rayon, 3 et plus en retirent 2. Attendre dans un
+recoin donne donc **3** au lieu de 2. `simul.py` après le changement : détection et fuite **inchangées** — les scènes
+mesurées se jouent en terrain dégagé ou en herbes hautes, où aucune paroi ne touche la foreuse. La zone de rochers
+épars reste « jamais semée » : ces rochers gênent la foreuse plus qu'ils ne coupent la ligne de vue, le plafond n'y
+change rien.
+
 ## Piège de méthode
 
 Une mesure à longue distance exige de **dégager toute la carte**. Un relief laissé au hasard coupe la
