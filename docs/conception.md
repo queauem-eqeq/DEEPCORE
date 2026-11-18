@@ -515,6 +515,18 @@ Chiffres à l'appui dans `mesures.md`, points de comparaison avec Brogue dans `b
     - **Piliers** : dans les pièces rectangulaires, en croix ou rondes sans gouffre, tous les 2 ou 3 pas, jamais contre un mur ni devant une porte.
     - **Portes d'entrée : une à trois** selon le nombre de pièces (une, deux à partir de 7 pièces, trois à partir de 16), éloignées les unes des autres, de préférence sur un dehors déjà praticable. **Si l'entrée donne sur de la roche, un couloir est percé** jusqu'au reste de la carte. Un terrain enfermé entre des murs, que rien ne pourrait rejoindre, devient du mur plein.
     - **Le site de forage est déplacé dans la pièce la plus profonde** de la plus grande structure (la plus éloignée des entrées).
+    - **Menu MONDE en deux colonnes (19 novembre 2026)** : à gauche **Monde** (taille, eau, montagne, gouffre, herbe, méthode de relief), à droite **Structures**. Les réglages de structure sont enregistrés avec les archétypes de monde (`GEN.structure`, `sStyle`, `sNb`, `sPieces`, `sEntrees`, `sOuvert`, `sVerrous`) :
+      - **Archétype de structure** : au hasard, avant-poste, hangar, complexe de forage ou ruine ;
+      - **Nombre de structures** : une ou deux (au hasard), une, deux ;
+      - **Surface bâtie (%)** : l'ancien « Structures (%) », 0 à 30, 10 par défaut ;
+      - **Pièces par structure** : 0 = autant que la surface le permet ; sinon la structure s'arrête à ce nombre (jusqu'à 40) ;
+      - **Portes d'entrée** : 0 = une à trois selon la taille ; sinon 1 à 4, si les murs le permettent ;
+      - **Ouvertures sans porte (%)** : part des passages intérieurs laissés ouverts (25 par défaut) : on voit à travers, rien ne se referme. Les entrées gardent toujours une porte ;
+      - **Portes verrouillées** : 0 à 3, **1 par défaut**.
+    - **Portes verrouillées et clés (19 novembre 2026)**. Une porte verrouillée est un mur tant qu'elle est fermée : infranchissable et opaque pour tous, ennemis compris. **Avancer dessus avec une clé l'ouvre** (la clé est consommée, cela prend un battement, elle devient une porte ordinaire) ; une **charge sismique** la détruit aussi. Les **clés sont posées au sol**, une par serrure, et se ramassent en passant dessus ; le compte s'affiche sous Statut (« Clés »). L'exploration automatique va les chercher.
+      - Une porte n'est verrouillée que si elle est **le seul passage** vers ce qu'il y a derrière (au moins 6 cases). On choisit d'abord celle qui **enferme le site de forage**, s'il y en a une (mesuré : une carte sur deux environ), sinon la plus petite réserve. Les portes d'entrée ne sont jamais verrouillées.
+      - **Aucune impasse** : toutes les clés sont posées là où l'on arrive sans rien ouvrir, de préférence à l'intérieur d'une structure et loin du départ. Les clés sont toutes pareilles.
+      - Tuiles « Porte verrouillée » et « Clé », retouchables au Tile editor.
     - **Pas encore fait** : pièces murées, densité de créatures à l'intérieur, mesures sur cent cartes dans `simul.py`.
   - **Mesure** : `simul.py` sortira sur cent cartes le nombre d'itinéraires distincts entre l'entrée et la pièce la plus profonde, la part de culs-de-sac et la part de carte occupée — pour détecter les réglages qui donnent un labyrinthe ou un plateau vide.
 - **Progression à reconstruire** (16 novembre 2026) : la descente, ses biomes et son budget de menace, les armes et armures autres que l'équipement d'origine, puis le joyau et son menu d'améliorations ont été retirés pour repartir d'une base nue (§ 3 bis, § 6 bis, § 8). Il ne reste **aucune progression permanente** dans le jeu. À concevoir : d'où viennent les objets, comment la foreuse se renforce, comment la difficulté monte, et ce qui tient lieu de profondeur.

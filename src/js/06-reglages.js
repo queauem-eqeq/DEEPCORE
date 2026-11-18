@@ -11,11 +11,10 @@ function buildCursor(){const r=rowsOf('cursor');CURT=curCanvas(r);CURT_DIM=curCa
 // des couloirs partout ; gouffre : la carte devient un réseau de ponts). L'herbe ne gêne que la vue.
 const GEN_LBL=[['eau','Eau',60],['montagne','Montagne',70],['gouffre','Gouffre',30],['herbe','Herbe',80]],GEN_SUM=80;
 const METHODS=[['automate','Automate cellulaire'],['bruit','Bruit (chaînes)'],['mixte','Mixte']];
-let GEN={taille:4,eau:10,montagne:12,gouffre:4,herbe:15,methode:'automate',remplissage:55,iterations:5,structure:10};   // structure : part de la carte occupée par les bâtiments (19 novembre 2026)
+let GEN={taille:4,eau:10,montagne:12,gouffre:4,herbe:15,methode:'automate',remplissage:55,iterations:5,structure:10,sNb:0,sStyle:'',sPieces:0,sEntrees:0,sOuvert:25,sVerrous:1};   // structure : part de la carte occupée par les bâtiments (19 novembre 2026)
 try{const g=JSON.parse(localStorage.getItem('np-gen')||'null');if(g&&typeof g.eau==='number')GEN=Object.assign(GEN,g);}catch(e){}
 if(!(GEN.taille>=1&&GEN.taille<=5))GEN.taille=4;
 if(!(GEN.structure>=0&&GEN.structure<=30))GEN.structure=10;
-function setStruct(v){v=Math.max(0,Math.min(30,Math.round(+v||0)));GEN.structure=v;$('gr-structure').value=v;$('gn-structure').value=v;saveGen();}
 function setTaille(v){v=Math.max(1,Math.min(5,Math.round(+v||4)));GEN.taille=v;$('gr-taille').value=v;$('gn-taille').value=v;
   $('genTaille').textContent=`${SIZES[v][0]} × ${SIZES[v][1]} cases${v===4?' (taille d’origine)':''}. Appliqué au prochain lancement.`;saveGen();}
 const saveGen=()=>{try{localStorage.setItem('np-gen',JSON.stringify(GEN));}catch(e){}touchLocal();};
@@ -52,12 +51,30 @@ function buildLife(){
   ['tout',...LIFE_LBL.map(l=>l[0])].forEach(k=>$('lr-'+k).addEventListener('input',e=>setIntens(k,e.target.value)));
   intensAff();
 }
+// Colonne « Structures » du menu Monde (19 novembre 2026) : tout ce qui règle les bâtiments.
+const S_NUM=[['structure','Surface bâtie (%)',0,30,'Part de la carte occupée par les bâtiments, murs compris. 0 : aucune structure.'],
+  ['sPieces','Pièces par structure',0,40,'0 : autant que la surface le permet. Sinon la structure s’arrête à ce nombre de pièces, même si la surface n’est pas atteinte.'],
+  ['sEntrees','Portes d’entrée',0,4,'0 : une à trois selon la taille. Sinon ce nombre, si les murs le permettent.'],
+  ['sOuvert','Ouvertures sans porte (%)',0,100,'Part des passages intérieurs laissés ouverts : on voit à travers, rien ne se referme.'],
+  ['sVerrous','Portes verrouillées',0,3,'Chacune ferme une partie de la structure ; autant de clés sont posées au sol, toutes accessibles sans ouvrir de serrure.']];
+function setS(k,v){const [, ,mn,mx]=S_NUM.find(l=>l[0]===k);v=Math.max(mn,Math.min(mx,Math.round(+v||0)));GEN[k]=v;$('gr-'+k).value=v;$('gn-'+k).value=v;saveGen();}
+function setStruct(v){setS('structure',v);}
+function buildStruct(){
+  for(const [k,,mn,mx] of S_NUM)if(!(GEN[k]>=mn&&GEN[k]<=mx))GEN[k]={structure:10,sOuvert:25,sVerrous:1}[k]||0;
+  if(![0,1,2].includes(GEN.sNb))GEN.sNb=0;if(GEN.sStyle&&!STYLES_LBL.some(([v])=>v===GEN.sStyle))GEN.sStyle='';
+  $('genS').innerHTML=`<div class="g2"><label for="gs-style">Archétype de structure</label><select id="gs-style"><option value="">Au hasard</option>${STYLES_LBL.map(([v,l])=>`<option value="${v}"${GEN.sStyle===v?' selected':''}>${l}</option>`).join('')}</select></div>`
+   +`<div class="g2"><label for="gs-nb">Nombre de structures</label><select id="gs-nb">${[[0,'Une ou deux'],[1,'Une'],[2,'Deux']].map(([v,l])=>`<option value="${v}"${GEN.sNb===v?' selected':''}>${l}</option>`).join('')}</select></div>`
+   +S_NUM.map(([k,l,mn,mx,aide])=>`<div class="g"><label for="gn-${k}">${l}</label><input type="range" id="gr-${k}" min="${mn}" max="${mx}" step="1" value="${GEN[k]}" aria-label="${l}"><input type="number" id="gn-${k}" min="${mn}" max="${mx}" step="1" value="${GEN[k]}"></div><div class="sum">${aide}</div>`).join('')
+   +'<div class="sum">Avant-poste : petites pièces, peu de boucles. Hangar : grandes salles à piliers. Complexe de forage : couloirs et gouffres. Ruine : cavernes effondrées.</div>';
+  $('gs-style').addEventListener('change',e=>{GEN.sStyle=e.target.value;saveGen();});
+  $('gs-nb').addEventListener('change',e=>{GEN.sNb=+e.target.value;saveGen();});
+  S_NUM.forEach(([k])=>{$('gr-'+k).addEventListener('input',e=>setS(k,e.target.value));$('gn-'+k).addEventListener('change',e=>setS(k,e.target.value));});
+}
+const STYLES_LBL=[['avant','Avant-poste'],['hangar','Hangar'],['forage','Complexe de forage'],['ruine','Ruine']];
 function buildGen(){
   $('gen').innerHTML=`<div class="g"><label for="gn-taille">Taille de la carte</label><input type="range" id="gr-taille" min="1" max="5" step="1" value="${GEN.taille}" aria-label="Taille de la carte, de 1 à 5"><input type="number" id="gn-taille" min="1" max="5" step="1" value="${GEN.taille}"></div><div class="sum" id="genTaille"></div>`
    +GEN_LBL.map(([k,l,mx])=>`<div class="g"><label for="gn-${k}">${l} (%)</label><input type="range" id="gr-${k}" min="0" max="${mx}" step="1" value="${GEN[k]}" aria-label="${l} en pourcentage"><input type="number" id="gn-${k}" min="0" max="${mx}" step="1" value="${GEN[k]}"></div>`).join('')
-   +'<div class="sum" id="genSum"></div><div class="sub">Structures bâties</div>'
-   +`<div class="g"><label for="gn-structure">Structures (%)</label><input type="range" id="gr-structure" min="0" max="30" step="1" value="${GEN.structure}" aria-label="Part de la carte occupée par les structures, en pourcentage"><input type="number" id="gn-structure" min="0" max="30" step="1" value="${GEN.structure}"></div>`
-   +'<div class="sum">Part de la carte occupée par les bâtiments (une ou deux structures, murs compris). Elles peuvent recouvrir la montagne et l’eau. 0 : aucune.</div><div class="sub">Relief (montagnes et gouffres)</div>'
+   +'<div class="sum" id="genSum"></div><div class="sub">Relief (montagnes et gouffres)</div>'
    +`<div class="g2"><label for="gm">Méthode</label><select id="gm">${METHODS.map(([v,l])=>`<option value="${v}"${GEN.methode===v?' selected':''}>${l}</option>`).join('')}</select></div>`
    +`<div class="g2"><label for="gn-remplissage">Remplissage initial (%)</label><input type="number" id="gn-remplissage" min="35" max="70" value="${GEN.remplissage}"></div>`
    +`<div class="g2"><label for="gn-iterations">Itérations</label><input type="number" id="gn-iterations" min="1" max="10" value="${GEN.iterations}"></div>`
@@ -65,7 +82,7 @@ function buildGen(){
   $('essaiBtn').onclick=()=>{$('monde').hidden=true;unlock();SFX.start();newGame();started=true;$('overlay').hidden=true;render();};
   GEN_LBL.forEach(([k])=>{$('gr-'+k).addEventListener('input',e=>setGen(k,e.target.value));$('gn-'+k).addEventListener('change',e=>setGen(k,e.target.value));});
   $('gr-taille').addEventListener('input',e=>setTaille(e.target.value));$('gn-taille').addEventListener('change',e=>setTaille(e.target.value));setTaille(GEN.taille);
-  $('gr-structure').addEventListener('input',e=>setStruct(e.target.value));$('gn-structure').addEventListener('change',e=>setStruct(e.target.value));
+  buildStruct();
   $('gm').addEventListener('change',e=>{GEN.methode=e.target.value;saveGen();caState();});
   $('gn-remplissage').addEventListener('change',e=>setCA('remplissage',e.target.value,35,70));
   $('gn-iterations').addEventListener('change',e=>setCA('iterations',e.target.value,1,10));
@@ -90,7 +107,7 @@ function mondeMsg(t,err){const m=$('mdMsg');m.textContent=t;m.className='saved'+
    Les archétypes enregistrés avant cette date gardent une clé « vie » : on l'efface une fois, au chargement du jeu. */
 // applique un relief aux réglages en cours (les champs absents gardent leur valeur)
 function mondeApplique(gen){
-  for(const k of ['taille','eau','montagne','gouffre','herbe','methode','remplissage','iterations','structure'])if(gen&&gen[k]!=null)GEN[k]=gen[k];
+  for(const k of ['taille','eau','montagne','gouffre','herbe','methode','remplissage','iterations','structure','sNb','sStyle','sPieces','sEntrees','sOuvert','sVerrous'])if(gen&&gen[k]!=null)GEN[k]=gen[k];
   if(!(GEN.taille>=1&&GEN.taille<=5))GEN.taille=4;saveGen();buildGen();}
 function mondeCharge(v){
   if(v.startsWith('u:')){const n=v.slice(2),m=MONDES[n];if(!m)return;mondeApplique(m.gen);$('mdNom').value=n;mondeMsg(`« ${n} » chargé (relief et taille ; la faune ne change pas).`);}

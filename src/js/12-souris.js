@@ -69,7 +69,7 @@ function travelStep(){const T=TRAV;if(!T)return;if(busy()){stopTravel();return;}
 let EXPL=null;
 const EXPL_VUS=new WeakSet();   // créatures déjà signalées : chacune n'interrompt l'exploration qu'une fois (sinon un insectoïde qui suit la foreuse l'arrêterait sans cesse)
 function exploreScan(E,deep){const N=W*H,prev=new Int32Array(N).fill(-2),q=[idx(G.px,G.py)];prev[q[0]]=-1;const plein=G.st.vie>=G.st.vieMax;
-  const butin=j=>{if(G.items&&G.items[j]&&G.items[j].length)return 'un objet';const o=G.ore&&G.ore[j];if(o&&oreSol(o)&&(oreMat(o)||!plein))return oreMat(o)?'de la Matière':'des éclats de métal';
+  const butin=j=>{if(G.cles&&G.cles[j])return 'une clé';if(G.items&&G.items[j]&&G.items[j].length)return 'un objet';const o=G.ore&&G.ore[j];if(o&&oreSol(o)&&(oreMat(o)||!plein))return oreMat(o)?'de la Matière':'des éclats de métal';
     return null;};
   for(let k=0;k<q.length;k++){const c=q[k],x=c%W,y=(c/W)|0;
     if(k>0){if(butin(c))return {c,prev};
@@ -167,6 +167,7 @@ const TDESC={[GROUND]:['Sol rocheux','Praticable. Les points au sol se densifien
   [WALL]:['Mur bâti','Infranchissable et opaque. La foreuse ne l’entame pas : seule une charge sismique l’ouvre. Compte comme une paroi pour la discrétion.'],
   [FLOOR]:['Sol bâti','Praticable. L’intérieur d’une structure.'],
   [DOOR]:['Porte','Praticable. Fermée, elle cache la vue ; elle s’ouvre quand on s’y tient et se referme derrière soi.'],
+  [LOCK]:['Porte verrouillée','Infranchissable et opaque tant qu’elle est fermée. Une clé l’ouvre (avancer dessus) ; une charge sismique la détruit.'],
   [PILLAR]:['Pilier','Infranchissable et opaque : il coupe la ligne de vue. Compte comme une paroi pour la discrétion.'],
   [LIQ]:['Eau peu profonde','Praticable par tous. Défense −20 pour qui s’y trouve ; pas deux fois plus lent, sauf pour les crabos qui nagent.'],
   [DEEP]:['Eau profonde','Praticable par tous. Défense −20, pas deux fois plus lent (sauf crabos), et le courant fait dévier la foreuse. Les créatures, elles, nagent droit.'],
@@ -205,6 +206,7 @@ function inspectHTML(){const {x,y}=HOV;if(x<0||y<0||x>=W||y>=H)return '';
   if(om&&oreMat(om))out.push(oreSol(om)?`<p><b>Matière</b> · placez la foreuse dessus pour la ramasser : +${ORE_PV[oreLv(om)]} en réserve.</p>`:`<p><b>Matière prise dans la montagne</b> · brisez la paroi pour la faire tomber (+${ORE_PV[oreLv(om)]}).</p>`);
   else if(om&&oreSol(om))out.push(`<p><b>Éclats de métal ${ORE_NOM[oreLv(om)]}</b> · placez la foreuse dessus pour les ramasser : +${ORE_PV[oreLv(om)]} PV.</p>`);
   else if(om)out.push('<p><b>Éclats de métal '+ORE_NOM[oreLv(om)]+' pris dans la montagne</b> · brisez la paroi pour les faire tomber (+'+ORE_PV[oreLv(om)]+' PV).</p>');
+  if(G.cles&&G.cles[i])out.push('<p>Une clé : passer dessus pour la ramasser.</p>');
   const sol=G.items&&G.items[i];
   if(sol&&sol.length)out.push(`<p><b>${sol.length>1?'Objets au sol':'Objet au sol'}</b> · ${sol.map(k=>ITEMS[k].n).join(', ')} · placez la foreuse dessus pour ramasser.</p>`);
   if(G.blood&&G.blood[i]!=null)out.push('<p>Traces de sang.</p>');
@@ -215,6 +217,7 @@ function inspectHTML(){const {x,y}=HOV;if(x<0||y<0||x>=W||y>=H)return '';
   let act='';
   if(d===0)act=s?'<kbd>F</kbd> ou clic : forer ce site.':'';
   else if(d===1&&occ)act='Clic : frapper avec la foreuse.';
+  else if(d===1&&t===LOCK)act=G.st.cles>0?'Clic : ouvrir avec une clé.':'';
   else if(d===1&&(t===HARD||bati(t)))act='';
   else if(d===1&&(t===ROCK||t===MOUNT))act=border?'':'Clic : coup de foreuse (10 énergie).';
   else if(d===1&&t===CHASM)act='';

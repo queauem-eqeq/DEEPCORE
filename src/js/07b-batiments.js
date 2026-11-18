@@ -4,6 +4,7 @@
    docs/conception.md, « Bâtiments ». Réglage : GEN.structure (menu MONDE), part de la carte occupée par les structures. */
 // dessin d'une case bâtie ; put(tuile, opacité) vient du rendu de la partie ou de celui de l'intro
 function batiTuile(t,x,y,put){
+  if(t===LOCK){put(TL.floor,.5);put(TL.lock,1);return;}
   if(t===WALL){put(y<H-1&&G.t[idx(x,y+1)]===WALL?TL.wall:TL.wallFace,.95);return;}
   put(TL.floor,.5);
   if(t===PILLAR)put(TL.pillar,.95);
@@ -43,7 +44,8 @@ function accretion(B,lot,cible,st){
   for(let k=0;k<200&&!pieces.length;k++){const f=formePiece(st),ox=rnd(lx0+1,Math.max(lx0+1,lx1-12)),oy=rnd(ly0+1,Math.max(ly0+1,ly1-9)),cells=f.c.map(([x,y])=>[x+ox,y+oy]);
     if(tient(cells,-1))pose(cells,f.g);}
   if(!pieces.length)return null;
-  for(let k=0,kmax=Math.max(800,cible*8);k<kmax&&emprise<cible;k++){
+  const maxP=GEN.sPieces>0?GEN.sPieces:1e9;let nP=1;
+  for(let k=0,kmax=Math.max(800,cible*8);k<kmax&&emprise<cible&&nP<maxP;k++){
     const p=pieces[rnd(0,pieces.length-1)],fi=p.c[rnd(0,p.c.length-1)],fx=fi%W,fy=(fi/W)|0,[dx,dy]=D4[rnd(0,3)],cx=fx+dx,cy=fy+dy,ci=idx(cx,cy);
     if(!vide(cx,cy)||!vide(cx+dy,cy+dx)||!vide(cx-dy,cy-dx))continue;   // la porte veut un mur de chaque côté
     const f=formePiece(st),bord=f.c.filter(([x,y])=>!f.c.some(q=>q[0]===x-dx&&q[1]===y-dy)),[ex,ey]=bord[rnd(0,bord.length-1)];
@@ -53,7 +55,7 @@ function accretion(B,lot,cible,st){
     if(!tient(cou.concat(cells),ci))continue;
     porte[ci]=1;if(!pied[ci]){pied[ci]=1;emprise++;}
     if(L)pose(cou,'couloir');
-    pose(cells,f.g);}
+    pose(cells,f.g);nP++;}
   return {pieces,emprise,st};
 }
 // Distance de marche dans les structures (sols et portes), bornée ; Infinity au-delà
@@ -118,14 +120,14 @@ function entrees(B,S,t,atteint){const {own,porte,pied,interdit}=B,cand=[];
       cand.push({c,o,x:cx,y:cy,libre:!blocks(t[o])&&!isWater(t[o])});}}}
   if(!cand.length)return [];
   cand.sort((a,b)=>(b.libre-a.libre)||Math.random()-.5);
-  const n=1+(S.pieces.length>=7?1:0)+(S.pieces.length>=16?1:0),pris=[],ecart=Math.max(8,Math.sqrt(S.emprise)*.7);
+  const n=GEN.sEntrees>0?GEN.sEntrees:1+(S.pieces.length>=7?1:0)+(S.pieces.length>=16?1:0),pris=[],ecart=Math.max(GEN.sEntrees>0?4:8,Math.sqrt(S.emprise)*(GEN.sEntrees>0?.35:.7));
   for(const e of cand){if(pris.length>=n)break;if(pris.some(q=>Math.hypot(q.x-e.x,q.y-e.y)<ecart))continue;pris.push(e);}
   for(const e of pris){porte[e.c]=1;pied[e.c]=1;}
   return pris;}
 // Pose les structures sur la carte déjà générée (relief, vaisseau, site). Elles peuvent recouvrir la montagne et l'eau ;
 // si une entrée donne sur de la roche, un couloir est percé jusqu'à elle (connect).
 function batiments(){
-  G.batis=[];const pct=GEN.structure||0,N=W*H;if(pct<=0)return;
+  G.batis=[];G.cles={};const pct=GEN.structure||0,N=W*H;if(pct<=0)return;
   const total=Math.round(N*pct/100);if(total<45)return;
   const t0=G.t.slice();
   for(let essai=0;essai<6;essai++){
@@ -134,8 +136,8 @@ function batiments(){
       if(x<2||y<2||x>=W-2||y>=H-2||v===CHASM||v===BRIDGE)B.interdit[i]=1;
       else if(v===SHIP||v===DECK)for(let dy=-3;dy<=3;dy++)for(let dx=-2;dx<=2;dx++)B.interdit[idx(Math.max(0,Math.min(W-1,x+dx)),Math.max(0,Math.min(H-1,y+dy)))]=1;}
     for(let dy=-2;dy<=2;dy++)for(let dx=-2;dx<=2;dx++)B.interdit[idx(Math.max(0,Math.min(W-1,G.px+dx)),Math.max(0,Math.min(H-1,G.py+dy)))]=1;
-    const deux=total>=260&&Math.random()<.5,part=deux?.35+Math.random()*.3:1,cibles=deux?[Math.round(total*part),total-Math.round(total*part)]:[total];
-    const cles=Object.keys(STYLES).sort(()=>Math.random()-.5),lots=[],strs=[];
+    const deux=GEN.sNb===2?total>=90:GEN.sNb===1?false:total>=260&&Math.random()<.5,part=deux?.35+Math.random()*.3:1,cibles=deux?[Math.round(total*part),total-Math.round(total*part)]:[total];
+    const cles=STYLES[GEN.sStyle]?[GEN.sStyle]:Object.keys(STYLES).sort(()=>Math.random()-.5),lots=[],strs=[];
     for(let s=0;s<cibles.length;s++){const cible=cibles[s],aire=cible*1.7,asp=1+Math.random()*.9;
       let lw=Math.min(W-6,Math.round(Math.sqrt(aire*asp))),lh=Math.min(H-6,Math.round(aire/lw));if(lw<10)lw=Math.min(W-6,10);if(lh<8)lh=Math.min(H-6,8);
       let best=null,bb=1e9;
@@ -148,7 +150,7 @@ function batiments(){
       const garde=new Set();for(const S of strs)for(const p of S.pieces)for(const i of p.c)garde.add(i);
       for(let i=0;i<N;i++){if(B.own[i]&&garde.has(i))t[i]=B.sol[i];}
       for(let i=0;i<N;i++){if(t[i]>=WALL||(B.own[i]&&garde.has(i)))continue;const x=i%W,y=(i/W)|0;
-        if(B.porte[i]&&D4.some(([dx,dy])=>garde.has(idx(x+dx,y+dy)))){t[i]=DOOR;continue;}
+        if(B.porte[i]&&D4.some(([dx,dy])=>garde.has(idx(x+dx,y+dy)))){t[i]=Math.random()*100<(GEN.sOuvert||0)?FLOOR:DOOR;continue;}   // porte, ou simple ouverture
         let m=false;for(let dy=-1;dy<=1&&!m;dy++)for(let dx=-1;dx<=1;dx++){const a=x+dx,b=y+dy;if(a>=0&&b>=0&&a<W&&b<H&&garde.has(idx(a,b))){m=true;break;}}
         if(m)t[i]=WALL;}
       const atteint=boucher(t,garde);let ok=true;
@@ -157,7 +159,7 @@ function batiments(){
       if(ok)connect(t);
       if(ok&&connectedAll(t)){
         G.batis=strs.map(S=>({style:S.st.n,pieces:S.pieces.filter(p=>p.g!=='couloir').length,cases:S.emprise,entrees:S.entrees.map(e=>[e.x,e.y])}));
-        siteAuFond(B,strs);return;}
+        siteAuFond(B,strs);verrous(B,strs);return;}
     }
     for(let i=0;i<N;i++)G.t[i]=t0[i];
   }
@@ -180,3 +182,27 @@ function siteAuFond(B,strs){const S=strs.reduce((a,b)=>b.emprise>a.emprise?b:a),
     const mx=ok.reduce((a,i)=>a+i%W,0)/ok.length,my=ok.reduce((a,i)=>a+((i/W)|0),0)/ok.length;
     best=ok.reduce((a,i)=>Math.hypot(i%W-mx,((i/W)|0)-my)<Math.hypot(a%W-mx,((a/W)|0)-my)?i:a);}
   if(best>=0&&G.sites[0]){G.sites[0].x=best%W;G.sites[0].y=(best/W)|0;G.siteProf=bd;}}
+// Portes verrouillées et clés (19 novembre 2026). Une porte ne peut être verrouillée que si elle est le seul passage vers ce
+// qu'il y a derrière ; on préfère celle qui enferme le site de forage. Les clés sont posées là où l'on arrive sans rien ouvrir :
+// on peut donc toujours toutes les ramasser avant la première serrure, aucune impasse possible.
+function verrous(B,strs){const n=GEN.sVerrous||0,t=G.t,N=W*H;if(n<=0)return;
+  const dehors=()=>{const vu=new Uint8Array(N),q=[idx(G.px,G.py)];vu[q[0]]=1;
+    for(let k=0;k<q.length;k++){const c=q[k],x=c%W,y=(c/W)|0;for(const [dx,dy] of D4){const j=idx(x+dx,y+dy);if(!vu[j]&&!blocks(t[j])){vu[j]=1;q.push(j);}}}return vu;};
+  const site=G.sites[0]?idx(G.sites[0].x,G.sites[0].y):-1,ent=new Set();for(const S of strs)for(const e of S.entrees)ent.add(e.c);
+  let poses=0;
+  for(let v=0;v<n;v++){const portes=[];for(let i=0;i<N;i++)if(t[i]===DOOR&&B.porte[i]&&!ent.has(i))portes.push(i);
+    let best=null;const avant=dehors();
+    for(const p of portes){t[p]=LOCK;const vu=dehors();t[p]=DOOR;let derriere=0,aSite=false;
+      for(let i=0;i<N;i++)if(avant[i]&&!vu[i]&&i!==p){derriere++;if(i===site)aSite=true;}
+      if(derriere<6)continue;const note=(aSite?1e6:0)-derriere+Math.random()*4;   // le site d'abord, puis la plus petite réserve
+      if(!best||note>best.note)best={p,note};}
+    if(!best)break;t[best.p]=LOCK;poses++;}
+  if(!poses)return;
+  // les clés : sur un sol bâti atteignable toutes serrures fermées, loin de l'entrée ; à défaut n'importe où dehors
+  const vu=dehors(),d=new Int32Array(N).fill(-1),q=[idx(G.px,G.py)];d[q[0]]=0;
+  for(let k=0;k<q.length;k++){const c=q[k],x=c%W,y=(c/W)|0;for(const [dx,dy] of D4){const j=idx(x+dx,y+dy);if(d[j]<0&&!blocks(t[j])){d[j]=d[c]+1;q.push(j);}}}
+  let lieux=[];for(let i=0;i<N;i++)if(vu[i]&&t[i]===FLOOR&&B.own[i]&&i!==site&&!D4.some(([dx,dy])=>{const w=t[idx(i%W+dx,((i/W)|0)+dy)];return w===DOOR||w===LOCK;}))lieux.push(i);
+  if(lieux.length<poses){lieux=[];for(let i=0;i<N;i++)if(vu[i]&&(t[i]===GROUND||t[i]===FLAT)&&d[i]>8)lieux.push(i);}
+  lieux.sort((a,b)=>d[b]-d[a]);lieux=lieux.slice(0,Math.max(poses,Math.ceil(lieux.length/2)));   // la moitié la plus lointaine
+  for(let k=0;k<poses&&lieux.length;k++){const i=lieux.splice(rnd(0,lieux.length-1),1)[0];G.cles[i]=1;}
+  G.verrous=poses;}
