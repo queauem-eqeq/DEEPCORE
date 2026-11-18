@@ -28,7 +28,7 @@ function caState(){const off=GEN.methode==='bruit';$('gn-remplissage').disabled=
 // nom, coefficient, effectif minimal (pour qu'un niveau élevé se voie même sur une toute petite carte)
 const NIVEAUX=[['Aucun',0,0],['Rare',.5,1],['Normal',1,1],['Nombreux',2,2],['Infesté',4,4]];
 const LIFE_REF={insectoide:21};BEASTS.forEach(b=>{LIFE_REF[b.key]=b.nb;});
-const LIFE_LBL=[['insectoide','Insectoïde'],...BEASTS.map(b=>[b.key,b.n])];
+const LIFE_LBL=[['insectoide',SPECIES[0].n],...BEASTS.map(b=>[b.key,b.n])];   // la clé reste 'insectoide' : elle porte les intensités déjà enregistrées, seul le nom affiché a changé le 17 novembre 2026
 let INTENS={};LIFE_LBL.forEach(([k])=>{INTENS[k]=2;});
 // anciens réglages en nombres : ramenés au niveau le plus proche
 const nivDe=(k,n)=>{const r=n/(LIFE_REF[k]||1);return n<=0?0:r<=.75?1:r<=1.5?2:r<=3?3:4;};
@@ -36,28 +36,9 @@ try{const i=JSON.parse(localStorage.getItem('np-intens')||'null');
   if(i&&typeof i==='object'){for(const k in INTENS)if(i[k]>=0&&i[k]<=4)INTENS[k]=Math.round(i[k]);}
   else{const l=JSON.parse(localStorage.getItem('np-life')||'null');if(l&&typeof l.crabos==='number')for(const k in INTENS)if(typeof l[k]==='number')INTENS[k]=nivDe(k,l[k]);}}catch(e){}
 let LIFE={};
-function lifeCalc(niv,mult){const src=niv||INTENS,m=mult||1,surf=W*H/(96*64);   // niv, mult : niveaux d'un biome et multiplicateur de profondeur (descente) ; sans eux, les réglages du joueur (carte d'essai)
+function lifeCalc(){const src=INTENS,m=1,surf=W*H/(96*64);   // effectifs tirés des intensités réglées dans le menu Monde (le budget de menace par niveau est parti avec la descente, 16 novembre 2026)
   for(const k in INTENS){const [,c,mn]=NIVEAUX[src[k]||0];LIFE[k]=c?Math.max(mn,k==='cafar'?2:1,Math.round(LIFE_REF[k]*c*surf*m)):0;}}   // les cafars vont au moins par deux
 lifeCalc();
-/* Budget de menace (15 novembre 2026) : en descente, chaque niveau a un total de menace fixé, quel que soit le monde tiré.
-   La menace d'une carte est ce que la foreuse SANS ÉQUIPEMENT perd de points de vie en tuant tout ce qui s'y trouve, d'après les séries
-   du banc de combat (outils/banc.py, banc/resultats.js, docs/mesures.md) :
-       menace = terrain × [ Σ effectif × coût  +  (704 / surface) × ( Σ effectif × pression )² ]
-   - coût     : points de vie perdus par individu tué quand on les rencontre un à un ;
-   - pression : ce que chaque individu ajoute quand ils sont nombreux à la fois (les coups pleuvent pendant qu'on en frappe un seul) :
-                le terme au carré fait monter la menace plus vite que le nombre. 704 = surface de la carte de taille 1 où c'est mesuré ;
-   - terrain  : coefficient du biome (couloirs et couvert protègent, le terrain nu expose).
-   Les intensités d'un monde ne règlent que les PROPORTIONS entre espèces ; l'échelle est celle qui amène la menace au budget du niveau. */
-const MENACE_ESP={brochon:[6,.5],insectoide:[3.3,.15],cafar:[2,.3],siphon:[1.1,.31],crabos:[7.3,.86],crachin:[4.9,1.12],viperin:[10.8,.57],gluar:[5.7,.67],tapi:[27.1,.49],taupar:[16.7,.63],mastok:[46,1.51]};
-function menaceDe(eff,terrain){let l=0,q=0;for(const k in eff){const m=MENACE_ESP[k]||[10,.6];l+=eff[k]*m[0];q+=eff[k]*m[1];}return (terrain||1)*(l+704/(W*H)*q*q);}
-function lifeMenace(vie,parMille,terrain){const cible=parMille*W*H/1000/(terrain||1),p={};let L=0,Q=0;
-  for(const k in INTENS){p[k]=NIVEAUX[(vie&&vie[k])||0][1]*LIFE_REF[k];const m=MENACE_ESP[k]||[10,.6];L+=p[k]*m[0];Q+=p[k]*m[1];}
-  const a=704/(W*H)*Q*Q,s=!L?0:a?(-L+Math.sqrt(L*L+4*a*cible))/(2*a):cible/L;          // a·s² + L·s = cible
-  // arrondi simple : une espèce trop chère pour le budget disparaît (pas de minimum forcé, qui faisait déborder les petits budgets) ;
-  // les cafars vont au moins par deux ; s'il ne reste personne, un individu de l'espèce la plus présente
-  let tot=0,top=null;for(const k in INTENS){let n=Math.round(p[k]*s);if(k==='cafar'&&n===1)n=2;LIFE[k]=n;tot+=n;if(p[k]&&(!top||p[k]>p[top]))top=k;}
-  if(!tot&&top)LIFE[top]=top==='cafar'?2:1;}
-const menaceTotale=terrain=>menaceDe(LIFE,terrain);
 function intensAff(){LIFE_LBL.forEach(([k])=>{$('lr-'+k).value=INTENS[k];$('ll-'+k).textContent=NIVEAUX[INTENS[k]][0];});
   const v=Object.values(INTENS),m=v.every(x=>x===v[0]);$('lr-tout').value=m?v[0]:2;$('ll-tout').textContent=m?NIVEAUX[v[0]][0]:'Mixte';}
 function setIntens(k,v){v=Math.max(0,Math.min(4,Math.round(+v||0)));if(k==='tout')for(const q in INTENS)INTENS[q]=v;else INTENS[k]=v;
@@ -65,7 +46,7 @@ function setIntens(k,v){v=Math.max(0,Math.min(4,Math.round(+v||0)));if(k==='tout
 function buildLife(){
   const row=(k,l,cls)=>`<div class="g niv${cls||''}"><label for="lr-${k}">${l}</label><input type="range" id="lr-${k}" min="0" max="4" step="1" value="2" aria-label="Intensité : ${l}" aria-describedby="ll-${k}"><span id="ll-${k}"></span></div>`;
   $('life').innerHTML=row('tout','Toutes',' tout')+LIFE_LBL.map(([k,l])=>row(k,l)).join('')
-    +'<div class="sum">Intensité par espèce : Aucun, Rare, Normal, Nombreux, Infesté. Le nombre de créatures suit la taille de la carte. Sur une carte d’essai, l’intensité donne directement le nombre. En descente, elle ne règle que les proportions entre espèces : le total suit le budget de menace du niveau.</div>';
+    +'<div class="sum">Intensité par espèce : Aucun, Rare, Normal, Nombreux, Infesté. L’intensité donne directement le nombre de créatures, à la taille de la carte près.</div>';
   ['tout',...LIFE_LBL.map(l=>l[0])].forEach(k=>$('lr-'+k).addEventListener('input',e=>setIntens(k,e.target.value)));
   intensAff();
 }
@@ -76,8 +57,8 @@ function buildGen(){
    +`<div class="g2"><label for="gm">Méthode</label><select id="gm">${METHODS.map(([v,l])=>`<option value="${v}"${GEN.methode===v?' selected':''}>${l}</option>`).join('')}</select></div>`
    +`<div class="g2"><label for="gn-remplissage">Remplissage initial (%)</label><input type="number" id="gn-remplissage" min="35" max="70" value="${GEN.remplissage}"></div>`
    +`<div class="g2"><label for="gn-iterations">Itérations</label><input type="number" id="gn-iterations" min="1" max="10" value="${GEN.iterations}"></div>`
-   +'<button class="go" id="essaiBtn" title="Créer une carte d’essai avec ces réglages et ceux de Life, hors de la descente">CARTE D’ESSAI</button><div class="sum">Ces réglages et ceux de la faune ne servent qu’aux cartes d’essai. REGEN relance la descente au niveau 1 : chaque niveau y tire un biome ou l’un de vos archétypes.</div>';
-  $('essaiBtn').onclick=()=>{$('monde').hidden=true;unlock();SFX.start();testGame();started=true;$('overlay').hidden=true;render();};
+   +'<button class="go" id="essaiBtn" title="Fermer et générer une nouvelle carte avec ces réglages">GÉNÉRER LA CARTE</button><div class="sum">Ces réglages donnent le relief et la taille de la carte. GÉNÉRER LA CARTE, comme REGEN, en tire une nouvelle avec les réglages du moment. La faune se règle à part, bouton LIFE.</div>';
+  $('essaiBtn').onclick=()=>{$('monde').hidden=true;unlock();SFX.start();newGame();started=true;$('overlay').hidden=true;render();};
   GEN_LBL.forEach(([k])=>{$('gr-'+k).addEventListener('input',e=>setGen(k,e.target.value));$('gn-'+k).addEventListener('change',e=>setGen(k,e.target.value));});
   $('gr-taille').addEventListener('input',e=>setTaille(e.target.value));$('gn-taille').addEventListener('change',e=>setTaille(e.target.value));setTaille(GEN.taille);
   $('gm').addEventListener('change',e=>{GEN.methode=e.target.value;saveGen();caState();});
@@ -89,30 +70,36 @@ function buildGen(){
 
 /* ---------- Menu Monde (15 novembre 2026) : Génération et Life réunis dans une fenêtre, comme le Tile editor ----------
    Archétype de monde : les réglages en cours (relief, taille, faune) enregistrés sous un nom ; MONDES = {nom:{gen:{…},vie:{…}}}, mémorisé
-   sous np-mondes. La liste déroulante propose aussi les biomes de la descente, à charger comme point de départ (ils ne sont pas modifiables). */
+   sous np-mondes. (Les six biomes de la descente ont disparu de la liste le 16 novembre 2026, avec la descente elle-même.) */
 let MONDES={};try{const m=JSON.parse(localStorage.getItem('np-mondes')||'null');if(m&&typeof m==='object')MONDES=m;}catch(e){}
+let mdPurge=false;for(const n in MONDES)if(MONDES[n]&&MONDES[n].vie){delete MONDES[n].vie;mdPurge=true;}   // archétypes d'avant le 18 novembre 2026 : la faune qu'ils portaient est jetée
 const saveMondes=()=>{try{localStorage.setItem('np-mondes',JSON.stringify(MONDES));}catch(e){}touchLocal();};
+if(mdPurge)saveMondes();
 const mdEsc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 function mondeListe(sel){const noms=Object.keys(MONDES).sort((a,b)=>a.localeCompare(b,'fr')),o=(v,l)=>`<option value="${mdEsc(v)}">${mdEsc(l)}</option>`;
-  $('mdSel').innerHTML=o('','— Réglages en cours —')+(noms.length?`<optgroup label="Mes archétypes">${noms.map(n=>o('u:'+n,n)).join('')}</optgroup>`:'')
-    +`<optgroup label="Biomes de la descente">${Object.entries(BIOMES).map(([k,b])=>o('b:'+k,b.n)).join('')}</optgroup>`;
+  $('mdSel').innerHTML=o('','— Réglages en cours —')+(noms.length?`<optgroup label="Mes archétypes">${noms.map(n=>o('u:'+n,n)).join('')}</optgroup>`:'');
   $('mdSel').value=sel||'';if($('mdSel').selectedIndex<0)$('mdSel').value='';}
 function mondeMsg(t,err){const m=$('mdMsg');m.textContent=t;m.className='saved'+(err?' err':'');}
-// applique un relief et une faune aux réglages en cours (les champs absents gardent leur valeur)
-function mondeApplique(gen,vie){
+/* Un archétype n'enregistre que la génération (18 novembre 2026, demande de l'utilisateur) : relief, taille, méthode.
+   La faune a son propre menu (bouton LIFE) et ne suit plus l'archétype — charger un monde ne touche plus aux espèces.
+   Les archétypes enregistrés avant cette date gardent une clé « vie » : on l'efface une fois, au chargement du jeu. */
+// applique un relief aux réglages en cours (les champs absents gardent leur valeur)
+function mondeApplique(gen){
   for(const k of ['taille','eau','montagne','gouffre','herbe','methode','remplissage','iterations'])if(gen&&gen[k]!=null)GEN[k]=gen[k];
-  if(!(GEN.taille>=1&&GEN.taille<=5))GEN.taille=4;saveGen();buildGen();
-  for(const k in INTENS)INTENS[k]=Math.max(0,Math.min(4,Math.round(+(vie&&vie[k])||0)));
-  intensAff();try{localStorage.setItem('np-intens',JSON.stringify(INTENS));}catch(e){}touchLocal();}
+  if(!(GEN.taille>=1&&GEN.taille<=5))GEN.taille=4;saveGen();buildGen();}
 function mondeCharge(v){
-  if(v.startsWith('u:')){const n=v.slice(2),m=MONDES[n];if(!m)return;mondeApplique(m.gen,m.vie);$('mdNom').value=n;mondeMsg(`« ${n} » chargé.`);}
-  else if(v.startsWith('b:')){const b=BIOMES[v.slice(2)];if(!b)return;mondeApplique(b.gen,b.vie);$('mdNom').value='';mondeMsg(`Biome « ${b.n} » chargé : donnez un nom pour en garder une variante.`);}
+  if(v.startsWith('u:')){const n=v.slice(2),m=MONDES[n];if(!m)return;mondeApplique(m.gen);$('mdNom').value=n;mondeMsg(`« ${n} » chargé (relief et taille ; la faune ne change pas).`);}
   else mondeMsg('');}
 function mondeSave(){const n=$('mdNom').value.trim().replace(/\s+/g,' ');if(!n){mondeMsg('Donnez un nom à cet archétype.',true);$('mdNom').focus();return;}
-  const neuf=!MONDES[n];MONDES[n]={gen:Object.assign({},GEN),vie:Object.assign({},INTENS)};saveMondes();mondeListe('u:'+n);mondeMsg(neuf?`« ${n} » enregistré.`:`« ${n} » mis à jour.`);}
+  const neuf=!MONDES[n];MONDES[n]={gen:Object.assign({},GEN)};saveMondes();mondeListe('u:'+n);mondeMsg(neuf?`« ${n} » enregistré.`:`« ${n} » mis à jour.`);}
 function mondeDel(){const v=$('mdSel').value;if(!v.startsWith('u:')){mondeMsg('Choisissez un de vos archétypes dans la liste.',true);return;}
   const n=v.slice(2);delete MONDES[n];saveMondes();mondeListe('');$('mdNom').value='';mondeMsg(`« ${n} » supprimé.`);}
 function mondeOpen(){if(TRAV)stopTravel();if(REST)stopRest();if(EXPL)stopExplore();mondeListe($('mdSel').value);mondeMsg('');$('monde').hidden=false;$('monde').querySelector('.mcard').focus();}
+// Fenêtre Life : la faune, sortie du menu Monde le 18 novembre 2026
+function lifeOpen(){if(TRAV)stopTravel();if(REST)stopRest();if(EXPL)stopExplore();$('faune').hidden=false;$('faune').querySelector('.mcard').focus();}
+function lifeClose(){$('faune').hidden=true;$('lifeBtn').focus();render();}
+$('lifeBtn').onclick=lifeOpen;$('lfClose').onclick=lifeClose;
+$('faune').addEventListener('pointerdown',ev=>{if(ev.target===$('faune'))lifeClose();});
 function mondeClose(){$('monde').hidden=true;$('mondeBtn').focus();render();}
 $('mondeBtn').onclick=mondeOpen;$('mdClose').onclick=mondeClose;$('mdSave').onclick=mondeSave;$('mdDel').onclick=mondeDel;
 $('mdSel').addEventListener('change',e=>mondeCharge(e.target.value));

@@ -5,7 +5,7 @@ const PRESETS=[
   {n:'Mars',c:['#8b5b22','#4fb8ff','#8b51d7']},
   {n:'Glace',c:['#e8f6ff','#7fc8ff','#b28bff']},
   {n:'Néon',c:['#ff4fd8','#33f0ff','#fff05a']},
-  {n:'Rouille',c:['#c9b79c','#7fa6a1','#e0703b']},
+  {n:'Rouille',c:['#df49ab','#b4efe3','#e0703b']},
   {n:'Abysse',c:['#4fb8ff','#dee9f8','#227dc9']},
   {n:'Ambre',c:['#c23029','#adcef5','#307e67']}
 ];

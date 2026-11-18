@@ -3,9 +3,9 @@ const animalAt=(x,y)=>G.animals&&G.animals.find(a=>a.x===x&&a.y===y);
 // Eau : depuis le 15 novembre 2026, TOUTES les créatures y entrent (avant : seuls les crabos). Les nageurs (swim) gardent leur avantage :
 // eux seuls ne sont pas ralentis par l'eau (slowOf). L'argument swim encore passé à canWalk et distFrom est sans effet, il est ignoré.
 /* Eau : trois rapports à l'eau selon l'espèce (16 novembre 2026).
-   - `nage` (crabos, vipérin, siphon, brochon) : elles y vont naturellement, en chasse comme en errance ;
-   - `sec` (cafar, crachin, tapi) : elles n'y mettent jamais une patte, même pour poursuivre ;
-   - les autres (insectoïde, gluar, taupar, mastok) : elles l'évitent, mais la traversent pour poursuivre la foreuse.
+   - `nage` (crabos, brochon) : elles y vont naturellement, en chasse comme en errance ;
+   - `sec` (cafar) : elles n'y mettent jamais une patte, même pour poursuivre ;
+   - les autres (insectoïde, mastok) : elles l'évitent, mais la traversent pour poursuivre la foreuse.
    Une créature déjà dans l'eau peut toujours en sortir, sinon elle y resterait coincée en cessant la poursuite.
    `swim` reste à part : il ne dit pas qui entre dans l'eau, mais qui n'y est pas ralenti (le crabos seul). */
 const isWater=v=>v===LIQ||v===DEEP,canWalk=(v,mouille)=>!blocks(v)&&(mouille||!isWater(v));
@@ -18,7 +18,7 @@ function spawnAnimals(){
     if(!(v===GROUND||v===GRASS||v===FLAT)||Math.hypot(x-G.px,y-G.py)<SZ(10,4)||animalAt(x,y))continue;
     G.animals.push({sp:pool[k%pool.length],x,y,hp:pvDe(SPECIES[pool[k%pool.length]]),mp:Math.random(),flee:0,dir:Math.random()<.5?1:-1});k++;}
 }
-// Insectoïde : une fois le robot repéré, il le suit à 2 ou 3 cases (recule au contact,
+// Petit animal (la Puce) : une fois le robot repéré, il le suit à 2 ou 3 cases (recule au contact,
 // se rapproche au-delà de 3). Quand un crabos chasse le robot à proximité, il passe à l'attaque.
 const KEEP_MIN=1,KEEP_MAX=3;
 const cheb=(a,x,y)=>Math.max(Math.abs(a.x-x),Math.abs(a.y-y));
@@ -41,9 +41,13 @@ function chaseStep(o,dist,fits,tx=G.px,ty=G.py){const h=dist[idx(o.x,o.y)],cur=h
   if(best){o.x=best[0];o.y=best[1];if(best[2])o.dir=best[2]>0?1:-1;return true;}return false;}
 /* Mémoire des ennemis (10 novembre 2026) : un ennemi qui voit la foreuse retient sa position (o.mem) ; quand il ne la voit
    plus, il se dirige vers cette dernière position connue — celle de son groupe pour une bande de cafars (partagée entre
-   membres). Arrivé, il fouille SEARCH_T tours autour, puis oublie et reprend son errance.
+   membres). Arrivé, il fouille la zone pendant SEARCH_T battements, puis oublie et reprend son errance.
    Plus aucune connaissance de la position réelle de la foreuse sans la voir. */
-const SEARCH_T=4;
+/* Fouille (18 novembre 2026) : il ratisse la zone. Il se choisit un point accessible à une dizaine de cases du dernier
+   endroit où il a vu la foreuse, s'y rend par le plus court chemin, puis en choisit un autre, pendant SEARCH_T
+   battements. Les points sont toujours tirés autour de ce dernier point connu, jamais autour de lui : il tourne donc
+   dans la zone au lieu de dériver. Avant le 18 novembre, il faisait 4 battements de pas au hasard et s'éloignait. */
+const SEARCH_T=30,SEARCH_R=10,SEARCH_VAR=3;
 /* Perte de trace (13 novembre 2026, les 3 % de Brogue) : une bête qui vous chasse hors du rayon de discrétion,
    mais encore dans la bande de chasse (HUNT_MULT ×), a LOSE_TRACK par tour de vous perdre. Elle garde alors sa
    dernière position connue et s'y rend, mais ne vous suit plus de loin : il lui faut vous remarquer de nouveau
@@ -62,16 +66,30 @@ function voitForeuse(o,chasse){
   return false;}
 // Petit « ! » au-dessus d'un ennemi qui vient de repérer la foreuse (15 novembre 2026) : seulement s'il est en vue
 function alerte(o){if(vis[idx(o.x,o.y)])addFx({kind:'alerte',o,dur:900});}
-function spot(o){o.mem=[G.px,G.py];o.search=0;o.stuck=0;o.lost=0;const dx=Math.sign(G.px-o.x);if(dx)o.dir=dx;}
+function spot(o){o.mem=[G.px,G.py];o.search=0;o.stuck=0;o.lost=0;o.sg=null;const dx=Math.sign(G.px-o.x);if(dx)o.dir=dx;}
 /* Chance qu'un ennemi calme vous remarque ce tour-ci (affichée au survol) : plate dans la portée de
    discrétion et en ligne de vue, nulle au-delà. Voir la portée de discrétion dans 09. */
 function detectChance(o){return (Math.hypot(o.x-G.px,o.y-G.py)<=(G.stealth||STEALTH_BASE)&&(lastAct==='dig'||los(o.x,o.y,G.px,G.py)))?Math.round(NOTICE*100):0;}
-function forget(o){o.mem=null;o.search=0;o.stuck=0;o.lost=0;}
+function forget(o){o.mem=null;o.search=0;o.stuck=0;o.lost=0;o.sg=null;}
 // un pas vers la dernière position connue ; renvoie false quand il faut passer à la fouille
 function seekStep(o,fits,DC,m){const [mx,my]=o.mem,k=mx+','+my+','+(m?1:0),d=DC[k]||(DC[k]=distFrom(mx,my,m)),h=d[idx(o.x,o.y)];
   if(h<0){forget(o);return false;}if(h<=1){o.search=SEARCH_T;return false;}
   if(chaseStep(o,d,fits,mx,my)){o.stuck=0;return true;}if(++o.stuck>2)o.search=SEARCH_T;return false;}
-function searchStep(o,fits){if(Math.random()<.6){const [dx,dy]=DIRS[rnd(0,7)];if(fits(o.x+dx,o.y+dy)&&diagOk(o.x,o.y,dx,dy)){o.x+=dx;o.y+=dy;if(dx)o.dir=dx;}}}
+// un point à fouiller : accessible depuis le dernier point connu, à SEARCH_R cases environ de lui, et pas là où il est déjà
+function searchGoal(o,fits,DC,m){const [mx,my]=o.mem,k=mx+','+my+','+(m?1:0),d=DC[k]||(DC[k]=distFrom(mx,my,m));
+  for(let t=0;t<20;t++){const a=Math.random()*Math.PI*2,r=SEARCH_R+rnd(-SEARCH_VAR,SEARCH_VAR);
+    const x=Math.round(mx+Math.cos(a)*r),y=Math.round(my+Math.sin(a)*r);
+    if(x<1||y<1||x>=W-1||y>=H-1||Math.abs(x-o.x)+Math.abs(y-o.y)<2)continue;
+    const h=d[idx(x,y)];if(h<0||h>SEARCH_R*2||!fits(x,y))continue;
+    return [x,y];}
+  return null;}
+function searchStep(o,fits,DC,m){
+  if(o.sg&&o.x===o.sg[0]&&o.y===o.sg[1])o.sg=null;                                   // arrivé : il lui en faut un autre
+  if(!o.sg){o.sg=searchGoal(o,fits,DC,m);o.sstuck=0;}
+  if(o.sg){const [gx,gy]=o.sg,k=gx+','+gy+','+(m?1:0),d=DC[k]||(DC[k]=distFrom(gx,gy,m));
+    if(chaseStep(o,d,fits,gx,gy)){o.sstuck=0;return;}
+    if(++o.sstuck>2)o.sg=null;}                                                      // bloqué : il change de point
+  if(Math.random()<.6){const [dx,dy]=DIRS[rnd(0,7)];if(fits(o.x+dx,o.y+dy)&&diagOk(o.x,o.y,dx,dy)){o.x+=dx;o.y+=dy;if(dx)o.dir=dx;}}}
 function stepAway(a,fits){const cur=(a.x-G.px)**2+(a.y-G.py)**2;let best=null,bd=cur;const ok=fits||animalOk;
   for(const[dx,dy]of [...DIRS].sort(()=>Math.random()-.5)){const nx=a.x+dx,ny=a.y+dy;if(!ok(nx,ny)||!diagOk(a.x,a.y,dx,dy))continue;const nd=(nx-G.px)**2+(ny-G.py)**2;if(nd>bd){bd=nd;best=[nx,ny,dx];}}
   if(best){a.x=best[0];a.y=best[1];if(best[2])a.dir=best[2]>0?1:-1;}}
@@ -124,13 +142,13 @@ function animalsAct(){
       else if(a.mode==='flee')stepAway(a,okA);
       else if(a.mode==='follow')stepToward(a,dist,okA);
       else if(a.mode==='seek'){if(!seekStep(a,okA,DC,mA)){a.mode=a.search>0?'search':'';break;}}
-      else if(a.mode==='search')searchStep(a,okA);
+      else if(a.mode==='search')searchStep(a,okA,DC,mA);
       else if(Math.random()<(a.mode==='hold'?.15:.3)){const [dx,dy]=DIRS[rnd(0,7)];const nx=a.x+dx,ny=a.y+dy;
         if(okA(nx,ny)&&diagOk(a.x,a.y,dx,dy)&&(a.mode!=='hold'||cheb({x:nx,y:ny},G.px,G.py)>KEEP_MIN)){a.x=nx;a.y=ny;if(dx)a.dir=dx;}}
       else a.mp=Math.min(a.mp,.99);}
   }
-  if(swarm){sayMore(`Les ${swarm.n.toLowerCase()}s passent à l’attaque !`,'warn');SFX.chirp();}
-  else if(fled){sayMore(`Un ${fled.n.toLowerCase()} recule.`);SFX.chirp();}
+  if(swarm){sayMore(`${LesNoms(swarm)} passent à l’attaque !`,'warn');SFX.chirp();}
+  else if(fled){sayMore(`${UnNom(fled)} recule.`);SFX.chirp();}
 }
 
 /* ---------- Prédateurs ---------- */
@@ -163,19 +181,54 @@ function distFrom(tx,ty,mouille){const d=new Int16Array(W*H).fill(-1),q=[idx(tx,
   for(let k=0;k<q.length;k++){const c=q[k],x=c%W,y=(c/W)|0;for(const[dx,dy]of DIRS){const a=x+dx,b=y+dy;if(a<1||b<1||a>=W-1||b>=H-1)continue;const j=idx(a,b),v=G.t[j];if(d[j]>=0||!diagOk(x,y,dx,dy)||!canWalk(v,mouille))continue;d[j]=d[c]+1;q.push(j);}}return d;}
 const footDist=(x,y,d)=>Math.min(...FOOT.map(([dx,dy])=>{const v=d[idx(x+dx,y+dy)];return v<0?9999:v;}));
 const nearRobot=b=>canHit(b);
-// Chance de toucher = précision − esquive, bornée entre 5 et 95 %.
-// Terrain de la cible : eau (peu profonde ou profonde) −20 d'esquive, herbes hautes +10 (caché).
-const terrMod=(x,y)=>{const v=G.t[idx(x,y)];return v===DEEP||v===LIQ?-20:v===GRASS?10:0;};
-const robotEsq=()=>G.st.esq+terrMod(G.px,G.py);
-const hitChance=(pre,esq)=>Math.max(5,Math.min(95,pre-esq));
+// Chance de toucher = précision × 0,987^défense, bornée entre 5 et 95 % (modèle Brogue, 16 novembre 2026 ;
+// précision − esquive avant). Chaque point de défense retire 1,3 % des coups ; 53 points les divisent par deux.
+// Terrain de la cible : eau (peu profonde ou profonde) −20 de défense, herbes hautes +12 (caché).
+const DEF_BASE=.987;
+const terrMod=(x,y)=>{const v=G.t[idx(x,y)];return v===DEEP||v===LIQ?-20:v===GRASS?12:0;};
+const hitChance=(pre,def)=>Math.max(5,Math.min(95,Math.round(pre*Math.pow(DEF_BASE,def))));
+/* POW requis (16 novembre 2026) : chaque arme et chaque armure demande un POW (champ req de l'objet).
+   POW de base 10 (échelle de la force de Brogue, 16 novembre 2026 au soir ; 1 avant).
+   Arme : chaque point manquant multiplie précision et dégâts par 0,85 ; chaque point en trop, par 1,015.
+   Armure : chaque point manquant retire 10 de défense ; chaque point en trop en ajoute 1.
+   La recharge d'énergie vaut POW/10 par battement : 1 à POW 10, comme avant.
+   Rien n'est écrit dans G.st : tout se recalcule à la lecture, donc gagner ou perdre du POW agit aussitôt. */
+const POW_MANQUE=.85,POW_EXCES=1.015,POW_DEF_MANQUE=10,POW_DEF_EXCES=1,POW_BASE=10;
+/* Dés de dégâts d'une arme (17 novembre 2026) : {n:nombre de dés, f:faces, p:bonus fixe}. La foreuse d'origine fait
+   1d6+5, soit 6 à 11. Avant, les dégâts étaient une stat unique (DEG 10) étalée de ±30 %. La stat DEG reste, mais
+   comme un bonus fixe ajouté au jet (0 au départ) : un futur objet qui donne « DEG +2 » marche sans rien changer ici. */
+const DE_DEFAUT={n:1,f:6,p:5};
+const armeDe=d=>(d&&d.de)||DE_DEFAUT;
+const deTxt=d=>`${d.n}d${d.f}${d.p?(d.p>0?'+':'')+d.p:''}`;
+const deTire=d=>{let s=d.p;for(let i=0;i<d.n;i++)s+=1+Math.floor(Math.random()*d.f);return s;};
+const eqDe=slot=>{const o=(G.inv||[]).find(o=>o.eq&&ITEMS[o.k]&&ITEMS[o.k].slot===slot);return o?ITEMS[o.k]:null;};
+const powEcart=(d,st)=>d&&d.req?st.power-d.req:0;
+const armeFact=(st,d)=>{const e=powEcart(d,st);return e<0?Math.pow(POW_MANQUE,-e):Math.pow(POW_EXCES,e);};
+const armureDef=(st,d)=>{const e=powEcart(d,st);return e<0?POW_DEF_MANQUE*e:POW_DEF_EXCES*e;};
+// stats de combat de la foreuse telles qu'elles comptent ; st, arme, armure : pour simuler un autre équipement (fenêtre Équipement)
+const robotPre=(st,d)=>{st=st||G.st;return Math.round(st.pre*armeFact(st,d===undefined?eqDe('arme'):d));};
+const robotDegs=(st,d)=>{st=st||G.st;const a=d===undefined?eqDe('arme'):d,de=armeDe(a),k=armeFact(st,a),b=st.degats||0;
+  return [Math.max(1,Math.round((de.n+de.p+b)*k)),Math.max(1,Math.round((de.n*de.f+de.p+b)*k))];};
+const robotDeg=()=>{const a=eqDe('arme');return Math.max(1,Math.round((deTire(armeDe(a))+(G.st.degats||0))*armeFact(G.st,a)));};
+const robotDefNu=(st,d)=>{st=st||G.st;return st.def+armureDef(st,d===undefined?eqDe('armure'):d);};
+const robotDef=()=>robotDefNu()+terrMod(G.px,G.py);
 const roll=ch=>Math.random()*100<ch;
 const chanceCol=ch=>ch>=70?'var(--c1)':ch>=40?'var(--c3)':'var(--life)';
 /* Attaque d'un ennemi sur la foreuse. o.tir : attaque à distance (projectile) ; o.sur : par surprise (touche toujours, critique).
    Effets durables posés par le coup (G.eff, décomptés à chaque battement par effTick) :
    poison = vie perdue par battement · glu = pas deux fois plus longs · drain = énergie volée sur le coup.
    Une armure isolante (G.st.isol) divise les durées par deux. */
-function hurtRobot(b,sp,o){sp=sp||BEASTS[b.sp];o=o||{};const le=sp.n.match(/^[aeiouyéèêîïôâ]/i)?'L’':'Le ',nom=sp.n.toLowerCase(),verbe=o.tir?'crache':'attaque';
-  const ch=hitChance(sp.pre,robotEsq());engage();   // la foreuse est attaquée, que le coup porte ou non : les insectoïdes qui suivent attaquent
+/* Articles (17 novembre 2026) : chaque espèce porte son genre (`fem`), au lieu de l'article figé d'avant, qui donnait
+   « l'puce » et « le torpille ». Élision devant une voyelle, et pas de s au pluriel sur un nom qui finit déjà par s
+   (le Relais). Nom toujours en minuscules dans les messages. */
+const nomDe=sp=>sp.n.toLowerCase();
+const leNom=sp=>{const n=nomDe(sp);return /^[aeiouyéèêîïôâ]/i.test(n)?'l’'+n:(sp.fem?'la ':'le ')+n;};
+const LeNom=sp=>{const a=leNom(sp);return a[0].toUpperCase()+a.slice(1);};
+const unNom=sp=>(sp.fem?'une ':'un ')+nomDe(sp);
+const UnNom=sp=>{const a=unNom(sp);return a[0].toUpperCase()+a.slice(1);};
+const LesNoms=sp=>{const n=nomDe(sp);return 'Les '+n+(/s$/.test(n)?'':'s');};
+function hurtRobot(b,sp,o){sp=sp||BEASTS[b.sp];o=o||{};const le=LeNom(sp),nom='',verbe=o.tir?'crache':'attaque';
+  const ch=hitChance(sp.pre,robotDef());engage();   // la foreuse est attaquée, que le coup porte ou non : les insectoïdes qui suivent attaquent
   const geste=()=>o.tir?addFx({kind:'tir',x0:b.x,y0:b.y,x1:G.px,y1:G.py,dur:260}):addFx({kind:'lunge',beast:b,dx:Math.sign(G.px-b.x),dy:Math.sign(G.py-b.y),dur:200});
   if(!o.sur&&!roll(ch)){geste();addFx({kind:'num',x:G.px,y:G.py,txt:'0',col:'#8aa9a2',dur:750});
     SFX.whoosh();sayMore(`${le}${nom} ${verbe} et rate (${ch} %).`);return;}
@@ -199,16 +252,16 @@ const ambAt=(x,y)=>G.amb&&G.amb.find(a=>a.x===x&&a.y===y);
 function ambWake(a,hunt){G.amb.splice(G.amb.indexOf(a),1);const b={sp:a.sp,x:a.x,y:a.y,hp:a.hp,mp:0,hunt:hunt?1:0,dir:Math.sign(G.px-a.x)||1,pack:-1};G.beasts=G.beasts||[];G.beasts.push(b);return b;}
 function ambTick(){if(!G.amb||!G.amb.length||G.over)return;
   for(const a of [...G.amb]){if(G.over)break;if(!canHit(a))continue;const sp=BEASTS[a.sp],b=ambWake(a,true);alerte(b);spot(b);b.skip=1;
-    sayMore(`Un ${sp.n.toLowerCase()} surgit de sa cachette !`,'warn');SFX.roar();hurtRobot(b,sp,{sur:true});}}
+    sayMore(`${UnNom(sp)} surgit de sa cachette !`,'warn');SFX.roar();hurtRobot(b,sp,{sur:true});}}
 // Tireur : un pas pour s'éloigner de la foreuse (renvoie false s'il est acculé)
 function beastAway(b){let best=null,bd=(b.x-G.px)**2+(b.y-G.py)**2;
   for(const[dx,dy]of [...DIRS].sort(()=>Math.random()-.5)){const nx=b.x+dx,ny=b.y+dy;if(!diagOk(b.x,b.y,dx,dy)||!beastFits(b,nx,ny))continue;const nd=(nx-G.px)**2+(ny-G.py)**2;if(nd>bd){bd=nd;best=[nx,ny,dx];}}
   if(best){b.x=best[0];b.y=best[1];if(best[2])b.dir=best[2]>0?1:-1;return true;}return false;}
 // Creuseur : chemin le plus court en comptant la roche comme franchissable (4 directions) ; une paroi sur le chemin est percée, ce qui prend le battement
-function rockFalls(i){if(G.dmg)delete G.dmg[i];G.t[i]=RUBBLE;if(G.gems&&G.gems[i]==='cache')G.gems[i]='visible';if(G.ore&&G.ore[i]&&!oreSol(G.ore[i]))G.ore[i]=(oreMat(G.ore[i])?'m':'')+'sol'+oreLv(G.ore[i]);}
+function rockFalls(i){if(G.dmg)delete G.dmg[i];G.t[i]=RUBBLE;if(G.ore&&G.ore[i]&&!oreSol(G.ore[i]))G.ore[i]=(oreMat(G.ore[i])?'m':'')+'sol'+oreLv(G.ore[i]);}
 function digDist(tx,ty){const d=new Int16Array(W*H).fill(-1),q=[idx(tx,ty)];d[q[0]]=0;
   for(let k=0;k<q.length;k++){const c=q[k],x=c%W,y=(c/W)|0;for(let n=0;n<4;n++){const a=x+DIRS[n][0],b=y+DIRS[n][1];if(a<1||b<1||a>=W-1||b>=H-1)continue;
-    const j=idx(a,b),v=G.t[j];if(d[j]>=0||!(canWalk(v,true)||v===ROCK||v===MOUNT))continue;d[j]=d[c]+1;q.push(j);}}return d;}   // le taupar perce la roche, mais pas la roche dure
+    const j=idx(a,b),v=G.t[j];if(d[j]>=0||!(canWalk(v,true)||v===ROCK||v===MOUNT))continue;d[j]=d[c]+1;q.push(j);}}return d;}   // un creuseur perce la roche, mais pas la roche dure
 function digStep(b,sees){const t=sees?[G.px,G.py]:b.mem;if(!t){b.hunt=0;return false;}
   const d=digDist(t[0],t[1]),h=d[idx(b.x,b.y)];if(h<0){forget(b);b.hunt=0;return false;}
   if(h<=1){if(!sees)b.search=SEARCH_T;return false;}
@@ -218,7 +271,7 @@ function digStep(b,sees){const t=sees?[G.px,G.py]:b.mem;if(!t){b.hunt=0;return f
   if(!best)return false;
   if(best[2])b.dir=best[2];
   if(best[3]){rockFalls(idx(best[0],best[1]));b.mp=0;
-    if(cheb(b,G.px,G.py)<=10){SFX.crack();sayMore(vis[idx(b.x,b.y)]?`Le ${BEASTS[b.sp].n.toLowerCase()} perce la roche !`:'Un bruit de roche brisée, tout près.','warn');}
+    if(cheb(b,G.px,G.py)<=10){SFX.crack();sayMore(vis[idx(b.x,b.y)]?`${LeNom(BEASTS[b.sp])} perce la roche !`:'Un bruit de roche brisée, tout près.','warn');}
     return false;}
   b.x=best[0];b.y=best[1];return true;}
 function beastsAct(){
@@ -241,17 +294,17 @@ function beastsAct(){
       if(b.hunt>0&&sees){
         if(nearRobot(b)){b.mp=Math.min(b.mp,.99);break;}
         chaseStep(b,mouilleOk(sp,b)?distEau:distSec,(x,y)=>beastFits(b,x,y));}
-      else if(b.hunt>0&&b.search>0)searchStep(b,(x,y)=>beastFits(b,x,y));                // fouille autour du dernier point connu
+      else if(b.hunt>0&&b.search>0)searchStep(b,(x,y)=>beastFits(b,x,y),DC,mouilleOk(sp,b));                // fouille autour du dernier point connu
       else if(b.hunt>0){if(!seekStep(b,(x,y)=>beastFits(b,x,y),DC,mouilleOk(sp,b)))break;}       // vers la dernière position connue
       else if(sp.pack){packMove(b);}
       else if(Math.random()<.25){const[dx,dy]=DIRS[rnd(0,7)];if(beastFits(b,b.x+dx,b.y+dy)&&diagOk(b.x,b.y,dx,dy)&&(!sp.pack||packOk(b,b.x+dx,b.y+dy))){b.x+=dx;b.y+=dy;if(dx)b.dir=dx;}}
       else b.mp=Math.min(b.mp,.99);}
   }
-  if(charged){sayMore(`Le ${charged.n.toLowerCase()} vous a repéré et charge !`,'warn');SFX.roar();}
+  if(charged){sayMore(`${LeNom(charged)} vous a repéré et charge !`,'warn');SFX.roar();}
 }
 // Plus de réparation automatique : seule l'énergie se recharge à chaque battement.
 // Attendre sur place la recharge WAIT_REGEN fois plus vite (13 novembre 2026) : 2/t au lieu de 1/t à POW 1.
-function regen(wait){if(G.over)return;G.st.energie=Math.min(G.st.energieMax,G.st.energie+G.st.power*(wait?WAIT_REGEN:1));}
+function regen(wait){if(G.over)return;G.st.energie=Math.min(G.st.energieMax,G.st.energie+G.st.power/POW_BASE*(wait?WAIT_REGEN:1));}
 // Coup de foreuse : consomme de l'énergie ; refusé si la réserve est insuffisante
 function spend(){if(G.st.energie<G.st.cout){say(`Énergie insuffisante pour frapper (${Math.floor(G.st.energie)}/${G.st.cout}). Attendez qu’elle se recharge.`,'warn');SFX.blocked();render();return false;}G.st.energie-=G.st.cout;return true;}
 const TRACK_LIFE=5;

@@ -171,6 +171,9 @@ Menace = somme effectif × coût d'un duel (colonne « vie restante » plus haut
 Les écarts qui restent (60 à 70 au niveau 1) viennent des arrondis et du minimum d'un individu par espèce. Deux archétypes extrêmes,
 « que des mastoks » et « tout infesté », tombent eux aussi sur le budget (60 à 72 au niveau 1, 316 au niveau 5).
 
+> **Note du 16 novembre 2026** : les mesures de coût et de pression ci-dessous servaient au budget de menace par niveau,
+> retiré ce jour-là avec la descente (`conception.md` § 3 bis). Elles restent utiles pour comparer la dangerosité des espèces.
+
 ## Banc de combat : coût et pression par espèce (15 novembre 2026)
 
 Mesures faites sur le **banc de combat** (`outils/banc.py` l'assemble, `outils/banc_series.py` lance les séries ; artefact
@@ -274,6 +277,106 @@ l'équipement s'écrase donc : la mesure ne sépare plus grand-chose.
 Le tableau ci-dessus n'est pas remplacé : il faudrait un combat de référence plus dur pour que la comparaison garde du
 sens, et les coûts de menace du banc sont à reprendre en même temps — l'utilisateur a demandé le 15 novembre d'attendre,
 les stats bougeant encore.
+
+## Passage au modèle Brogue (16 novembre 2026)
+
+Défense multiplicative, dégâts en fourchette, POW requis (voir `conception.md` § 6). Conversion voulue **à puissance
+égale** : un duel contre un seul ennemi, foreuse sans équipement, pilote « chasse », 300 essais (1 000 pour le mastok).
+
+| Ennemi | Vie perdue avant | Vie perdue après | Battements avant → après |
+|---|---|---|---|
+| Insectoïde | 1,4 | 2,5 | 20 → 21 |
+| Crabos | 8,8 | 8,5 | 12 → 12 |
+| Crachin | 11,3 | 10,7 | 16 → 16 |
+| Vipérin | 14,2 | 14,2 | 11 → 12 |
+| Gluar | 9,6 | 10,8 | 12 → 13 |
+| Siphon | 2,0 | 2,3 | 10 → 11 |
+| Tapi | 26,0 | 27,5 | 12 → 12 |
+| Taupar | 19,7 | 21,3 | 15 → 15 |
+| Mastok | 51,5 | 57,4 | 16 → 16 |
+
+Les duels restent proches. La légère hausse (surtout le mastok, +11 %) vient de la fourchette : avec des dégâts fixes de
+10, il fallait exactement 6 coups pour 60 PV ; avec 7-13, il en faut parfois 7. Les coûts de menace (`MENACE_ESP`) n'ont
+pas été recalculés, l'écart restant dans le bruit de leur mesure. Cafar et brochon : non mesurables seuls sur l'arène.
+Détection et fuite (`simul.py`) : inchangées, ce changement n'y touche pas.
+
+## Nouvelles stats de base (16 novembre 2026, soir)
+
+Précision 100 (80 avant), POW 10 (1 avant, seuils et pénalités remis à l'échelle), DEF 10 apportée par la Coque d'usine
+équipée au départ (12 de base avant). Mêmes duels, 300 essais, foreuse avec son équipement de départ.
+
+| Ennemi | Vie perdue (modèle Brogue, précision 80) | Vie perdue (précision 100) | Battements |
+|---|---|---|---|
+| Insectoide | 2,5 | 1,7 | 21 → 20 |
+| Crabos | 8,5 | 7,6 | 12 → 12 |
+| Crachin | 10,7 | 9,8 | 16 → 15 |
+| Viperin | 14,2 | 11,1 | 12 → 10 |
+| Gluar | 10,8 | 9,7 | 13 → 13 |
+| Siphon | 2,3 | 1,7 | 11 → 10 |
+| Tapi | 27,5 | 24 | 12 → 12 |
+| Taupar | 21,3 | 16,3 | 15 → 14 |
+| Mastok | 62,2 | 49,5 | 16 → 15 |
+
+La foreuse touche plus souvent, donc les combats sont plus courts et coûtent moins de vie : le jeu est plus facile
+qu'avant ce changement, c'est voulu par la demande. Coûts de menace non recalculés.
+
+## Dégâts de la foreuse en 1d6+5 (17 novembre 2026)
+
+La foreuse ne fait plus DEG 10 étalé de ±30 % (7-13, moyenne 10) mais **1d6+5** (6 à 11, moyenne 8,5, chaque valeur une
+fois sur six). Mêmes duels, 300 essais, foreuse avec son équipement de départ.
+
+| Ennemi | Vie perdue (DEG 10, 7-13) | Vie perdue (1d6+5) | Battements |
+|---|---|---|---|
+| Insectoide | 1,7 | 2,8 | 20 → 20 |
+| Crabos | 7,6 | 8 | 12 → 11 |
+| Crachin | 9,8 | 10,7 | 15 → 15 |
+| Viperin | 11,1 | 12,6 | 10 → 11 |
+| Gluar | 9,7 | 11,1 | 13 → 13 |
+| Siphon | 1,7 | 2,1 | 10 → 11 |
+| Tapi | 24 | 25 | 12 → 12 |
+| Taupar | 16,3 | 19,2 | 14 → 14 |
+| Mastok | 49,5 | 58,1 | 15 → 16 |
+
+Les combats coûtent **15 à 20 % de vie en plus**, pour une moyenne de dégâts en baisse de 15 % : la foreuse met un coup
+de plus à abattre les grosses cibles et encaisse d'autant. Le mastok (60 PV) passe de 6 à 7 coups. Toujours 100 % de
+victoires en duel : c'est l'attrition qui monte, pas le risque de perdre un combat isolé.
+
+## Les quatre bêtes restantes (17 novembre 2026)
+
+Après le retrait de six espèces, duel contre un seul ennemi, foreuse avec son équipement de départ, 300 essais.
+
+| Ennemi | Vie perdue | Battements |
+|---|---|---|
+| Puce | 2,4 | 20 |
+| Crabot | 9 | 11 |
+| Broyeur | 58,3 | 16 |
+| Torpille | 0 | 0 |
+
+La torpille ne quitte jamais l'eau : sur l'arène sèche il n'attaque pas, et le relais ne se mesure pas seul (il va en
+bande). Ces deux-là demandent une carte avec de l'eau et une bande pour être évalués.
+
+## Après les stats revues par l'utilisateur (17 novembre 2026, soir)
+
+Bestiaire revu dans le Lab puis adopté comme norme : Puce 2-3 dégâts, PRE 80, DEF 20, CRIT 2 % ; Crabot 22 PV, 3-6
+dégâts, CRIT 2 % ; Relais 3-4 dégâts ; Torpille 4-5 dégâts, PRE 80, DEF 20 ; Broyeur CRIT 0 %. Duel contre un seul
+ennemi, 300 essais.
+
+| Ennemi | Vie perdue (avant) | Vie perdue (après) | Battements |
+|---|---|---|---|
+| Puce | 2,4 | 1,9 | 20 → 19 |
+| Crabot | 9 | 7,1 | 11 → 11 |
+| Broyeur | 58,3 | 48,7 | 16 → 16 |
+
+Chaque duel coûte 15 à 20 % de vie en moins : le Crabot perd 8 PV et le Broyeur son critique, et les deux espèces
+rapides touchent plus souvent mais pour moins cher. Relais et Torpille ne se mesurent pas en duel sur l'arène sèche.
+
+## Parois adjacentes plafonnées à −2 (18 novembre 2026)
+
+`WALL_MAX` passe de 4 à 2 : 1 ou 2 parois voisines retirent 1 au rayon, 3 et plus en retirent 2. Attendre dans un
+recoin donne donc **3** au lieu de 2. `simul.py` après le changement : détection et fuite **inchangées** — les scènes
+mesurées se jouent en terrain dégagé ou en herbes hautes, où aucune paroi ne touche la foreuse. La zone de rochers
+épars reste « jamais semée » : ces rochers gênent la foreuse plus qu'ils ne coupent la ligne de vue, le plafond n'y
+change rien.
 
 ## Piège de méthode
 
