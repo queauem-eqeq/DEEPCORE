@@ -42,17 +42,23 @@
 <div class="modal" id="monde" role="dialog" aria-modal="true" aria-labelledby="mdTitle" hidden>
   <div class="mcard wide" tabindex="-1">
     <div class="mhead"><h2 id="mdTitle">Monde</h2><button id="mdClose" aria-label="Fermer le menu Monde">Fermer</button></div>
-    <p class="mnote">Relief et faune des cartes d’essai. Les réglages en cours peuvent être enregistrés comme archétype de monde, sous le nom de votre choix, puis rechargés depuis la liste. Vos archétypes entrent dans le tirage des niveaux de la descente (REGEN), avec ses six biomes. La descente est toujours en taille 3, et chaque niveau y a un budget de menace fixe : vos intensités n’y règlent que les proportions entre espèces.</p>
+    <p class="mnote">Relief et taille de la carte. Un archétype enregistre ces réglages-là, et eux seuls : la faune a son propre bouton LIFE et ne suit pas l’archétype. REGEN et GÉNÉRER LA CARTE tirent une nouvelle carte avec les réglages du moment.</p>
     <div class="mdarch">
       <label for="mdSel">Archétype</label><select id="mdSel"></select>
       <label for="mdNom">Nom</label><input type="text" id="mdNom" maxlength="30" placeholder="Nom du monde" autocomplete="off">
       <button class="go" id="mdSave">Enregistrer</button><button id="mdDel">Supprimer</button>
       <span class="saved" id="mdMsg" role="status"></span>
     </div>
-    <div class="mdcols">
-      <section><h3>Génération</h3><div class="gen" id="gen"></div></section>
-      <section><h3>Faune</h3><div class="gen" id="life"></div></section>
-    </div>
+    <section><h3>Génération</h3><div class="gen" id="gen"></div></section>
+  </div>
+</div>
+<!-- Fenêtre Life (faune), sortie du menu Monde le 18 novembre 2026 : la faune ne fait pas partie d'un archétype de monde.
+     Le conteneur garde l'identifiant « life » qu'il avait dans Monde ; la fenêtre s'appelle « faune ». -->
+<div class="modal" id="faune" role="dialog" aria-modal="true" aria-labelledby="lfTitle" hidden>
+  <div class="mcard" tabindex="-1">
+    <div class="mhead"><h2 id="lfTitle">Life</h2><button id="lfClose" aria-label="Fermer le menu Life">Fermer</button></div>
+    <p class="mnote">Combien de créatures de chaque espèce sur la carte. Ces réglages ne sont pas enregistrés dans les archétypes de monde : ils valent pour toutes les cartes, jusqu’à ce que vous les changiez.</p>
+    <section><h3>Faune</h3><div class="gen" id="life"></div></section>
   </div>
 </div>
 <!-- Fenêtre Équipement (armes, armures, accessoires). Les consommables sont dans le sous-menu « Inventaire » de la colonne (#fd-sac).
@@ -105,7 +111,7 @@
     </div>
     <canvas id="mini" aria-label="Mini-carte des zones explorées"></canvas>
     <div class="seenwrap"><div class="seen" id="msg" role="region" aria-label="En vue"></div></div>
-    <div class="btnrow"><button class="go" id="restart" title="Nouvelle descente : repartir du niveau 1">REGEN</button><button id="mondeBtn" aria-haspopup="dialog" title="Relief, faune, archétypes de monde et carte d’essai">MONDE</button></div>
+    <div class="btnrow"><button class="go" id="restart" title="Générer une nouvelle carte avec les réglages en cours">REGEN</button><button id="mondeBtn" aria-haspopup="dialog" title="Relief, taille et archétypes de monde">MONDE</button><button id="lifeBtn" aria-haspopup="dialog" title="Faune : combien de créatures de chaque espèce">LIFE</button></div>
     <details class="fold" id="fd-pal">
       <summary><h2>Palette</h2></summary>
       <div class="pal">

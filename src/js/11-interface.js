@@ -26,10 +26,8 @@ function mini(){
   const C=[[PAL['3'],.14],[PAL['3'],.55],[PAL['3'],.85],[PAL['2'],.6],[PAL['1'],.55],[PAL['1'],.22],[PAL['2'],.22],['#000',1],[PAL['3'],.3],[PAL['3'],.3],[PAL['1'],.35],[PAL['1'],.9],[PAL['2'],.35],[PAL['3'],1]];   // 13 = roche dure : la plus marquée de la mini-carte
   for(let y=0;y<H;y++)for(let x=0;x<W;x++){const i=idx(x,y);if(fog&&!G.seen[i])continue;const [c,a]=C[G.t[i]]||C[0];mctx.globalAlpha=a;mctx.fillStyle=c;cell(x,y);}
   mctx.globalAlpha=1;
-  if(G.gems){mctx.fillStyle=PAL['2'];for(const k in G.gems){const i=+k;if(fog&&!G.seen[i])continue;cell(i%W,(i/W)|0);}}
   for(const s of G.sites){if(fog&&!s.seen)continue;mctx.fillStyle=s.known?PAL['3']:PAL['2'];cell(s.x-1,s.y-1,3,3);}
-  {const sr=sonarR();if(sr>0&&G.ore){const d=Math.max(3,Math.round(k*1.4));for(const o in G.ore){const i=+o;if(!sonarVu(i,sr))continue;mctx.fillStyle=oreMat(G.ore[o])?PAL['1']:PAL['2'];mctx.fillRect(Math.round((i%W+.5)*k-d/2),Math.round((((i/W)|0)+.5)*k-d/2),d,d);}
-    if(G.gems){mctx.fillStyle='#ffffff';for(const o in G.gems){const i=+o;if(sonarVu(i,sr))mctx.fillRect(Math.round((i%W+.5)*k-d/2),Math.round((((i/W)|0)+.5)*k-d/2),d,d);}}}
+  {const sr=sonarR();if(sr>0&&G.ore){const d=Math.max(3,Math.round(k*1.4));for(const o in G.ore){const i=+o;if(!sonarVu(i,sr))continue;mctx.fillStyle=oreMat(G.ore[o])?PAL['1']:PAL['2'];mctx.fillRect(Math.round((i%W+.5)*k-d/2),Math.round((((i/W)|0)+.5)*k-d/2),d,d);}}
    // l'onde elle-même, au pixel, sans transparence
    for(const f of FX)if(f.kind==='sonar'){const u=Math.max(1,Math.round(dpr)),R=fxP(f)*f.r*k/u,cx=Math.round((f.x+.5)*k/u),cy=Math.round((f.y+.5)*k/u),w=Math.ceil(pw/u),h=Math.ceil(ph/u),q=R*Math.SQRT1_2;mctx.fillStyle=PAL['1'];
      const dot=(px,py)=>{if(px>=0&&py>=0&&px<w&&py<h)mctx.fillRect(px*u,py*u,u,u);};
@@ -43,9 +41,14 @@ function mini(){
 }
 /* ---------- Panneau « En vue » : chaque élément visible, sans répétition ---------- */
 let ICON={};
-// Barre ASCII : █ pour la part restante, ░ (même couleur, plus sombre) pour la part perdue
-const ABAR_N=20,EBAR_N=10;
-function asciiBar(v,max,n){const f=Math.max(0,Math.min(n,Math.round(v/max*n)));return `<span class="af">${'█'.repeat(f)}</span><span class="ae">${'░'.repeat(n-f)}</span>`;}
+/* Barre ASCII : ░ sur toute la largeur, recouvert d'un calque de █ découpé à la largeur exacte (16 novembre 2026).
+   Avant, la barre était faite de 20 caractères et la colonne n'en montrait que 14 : le reste était rogné à droite, si
+   bien que 70 % de vie remplissait presque toute la largeur visible. La longueur est maintenant un pourcentage, donc
+   juste à toute largeur de colonne et à toute taille de police. Le nombre de caractères n'est plus qu'un remplissage :
+   il en faut assez pour déborder, le trop-plein est masqué. */
+const ABAR_CH=48;
+function asciiBar(v,max){const p=max>0?Math.max(0,Math.min(100,v/max*100)):0;
+  return `<span class="ae">${'░'.repeat(ABAR_CH)}</span><span class="af" style="width:${p.toFixed(2)}%">${'█'.repeat(ABAR_CH)}</span>`;}
 function seenHTML(){
   const ter=new Map(),out=[];
   for(let i=0;i<W*H;i++)if(vis[i]){const v=G.t[i];ter.set(v,(ter.get(v)||0)+1);}
@@ -54,10 +57,10 @@ function seenHTML(){
              ...(G.animals||[]).filter(a=>vis[idx(a.x,a.y)]).map(a=>({o:a,sp:SPECIES[a.sp],ic:'an'+a.sp+'r',hp:a.hp??pvDe(SPECIES[a.sp]),st:{attack:'attaque',flee:'recule',follow:'suit',hold:'observe',seek:'cherche',search:'fouille'}[a.mode]||'',agg:a.mode==='attack'}))]
     .sort((p,q)=>near(p.o,q.o));
   if(ans.length){const max=6;
-    const calc=e=>{const tmA=terrMod(e.o.x,e.o.y),tmR=terrMod(G.px,G.py),me=hitChance(G.st.pre,e.sp.esq+tmA),them=e.agg?hitChance(e.sp.pre,robotEsq()):null;return {tmA,tmR,me,them};};
+    const calc=e=>{const tmA=terrMod(e.o.x,e.o.y),tmR=terrMod(G.px,G.py),me=hitChance(robotPre(),e.sp.def+tmA),them=e.agg?hitChance(e.sp.pre,robotDef()):null;return {tmA,tmR,me,them};};
     const head='<div class="hd"><span></span><span>Vie</span><span title="Votre chance de le toucher">Toucher</span><span title="Sa chance de vous toucher">Subir</span></div>';
     out.push('<div class="grp">'+head+ans.slice(0,max).map(e=>{const pv=pvDe(e.sp),d=Math.max(Math.abs(e.o.x-G.px),Math.abs(e.o.y-G.py)),c=calc(e);
-      return `<div class="an${e.agg&&e.st?' hunt':''}" title="${e.sp.n}${e.st?' · '+e.st:''} · ${d} case${d>1?'s':''} · ${Math.max(0,e.hp)}/${pv} PV"><img src="${ICON[e.ic]||''}" alt="${e.sp.n}"><span class="hp">${asciiBar(Math.max(0,e.hp),pv,EBAR_N)}</span><span class="n" style="color:${chanceCol(c.me)}">${c.me} %</span><span class="n" style="color:${c.them==null?'var(--dim)':chanceCol(100-c.them)}">${c.them==null?'—':c.them+' %'}</span></div>`;}).join('')
+      return `<div class="an${e.agg&&e.st?' hunt':''}" title="${e.sp.n}${e.st?' · '+e.st:''} · ${d} case${d>1?'s':''} · ${Math.max(0,e.hp)}/${pv} PV"><img src="${ICON[e.ic]||''}" alt="${e.sp.n}"><span class="hp">${asciiBar(Math.max(0,e.hp),pv)}</span><span class="n" style="color:${chanceCol(c.me)}">${c.me} %</span><span class="n" style="color:${c.them==null?'var(--dim)':chanceCol(100-c.them)}">${c.them==null?'—':c.them+' %'}</span></div>`;}).join('')
     +(ans.length>max?`<div class="none">+ ${ans.length-max} autre${ans.length-max>1?'s':''}</div>`:'')+'</div>');
   }
   const ins=HOV&&!busy()?inspectHTML():'';
@@ -67,12 +70,12 @@ function segs(el,v,max,n){n=n||max;const on=Math.ceil(v/max*n-1e-9);el.innerHTML
 function side(){
   const st=G.st;
 
-  for(const [t,v,mx,nm] of [['lifeT',st.vie,st.vieMax,'lifeN'],['enT',st.energie,st.energieMax,'enN']]){$(t).innerHTML=asciiBar(v,mx,ABAR_N);$(nm).textContent=Math.floor(v)+'/'+mx;$(t).setAttribute('aria-valuenow',Math.floor(v));$(t).setAttribute('aria-valuemax',mx);}
+  for(const [t,v,mx,nm] of [['lifeT',st.vie,st.vieMax,'lifeN'],['enT',st.energie,st.energieMax,'enN']]){$(t).innerHTML=asciiBar(v,mx);$(nm).textContent=Math.floor(v)+'/'+mx;$(t).setAttribute('aria-valuenow',Math.floor(v));$(t).setAttribute('aria-valuemax',mx);}
   {const b=$('sprintBtn');b.textContent=G.sprint?'COURSE':'MARCHE';b.classList.toggle('on',!!G.sprint);b.setAttribute('aria-pressed',!!G.sprint);}
   // Le sous-menu Statistiques a été retiré le 15 novembre 2026 : les stats sont dans la fenêtre Équipement.
   sacDraw();
   {const E=G.eff||{},l=[];if(E.poison>0)l.push(`<span style="color:var(--life)">Poison ${E.poison}</span>`);if(E.glu>0)l.push(`Englué ${E.glu}`);{const f=G.fum&&G.fum[idx(G.px,G.py)];if(f)l.push(`<span style="color:var(--c1)">Dans la fumée ${f.v}</span>`);}$('effs').innerHTML=l.join(' · ');}
-  $('lvl').textContent=G.mode==='test'?'Carte d’essai':`Niveau ${G.niv}/${NIV_MAX} · ${biomeDe(G.biome).n}`;$('matN').textContent=G.st.matiere||0;
+  $('lvl').textContent=`Carte ${W} × ${H}`;   // plus de niveau ni de biome depuis le 16 novembre 2026 : une seule carte, réglée dans le menu Monde$('matN').textContent=G.st.matiere||0;
   if(!$('inventaire').hidden)invDraw();
   $('msg').innerHTML=seenHTML();
   const lg=(G.log||[]).slice(-5);
@@ -89,6 +92,7 @@ addEventListener('keydown',ev=>{
   if(!$('inventaire').hidden){invKey(ev);return;}
   if(SAC_NAV&&$('overlay').hidden&&ev.target.tagName!=='INPUT'){if(sacKey(ev))return;}   // navigation au clavier dans le sous-menu Inventaire
   if(!$('monde').hidden){if(ev.key==='Escape'){ev.preventDefault();mondeClose();}return;}
+  if(!$('faune').hidden){if(ev.key==='Escape'){ev.preventDefault();lifeClose();}return;}
   if(!$('discretion').hidden){if(ev.key==='Escape'){ev.preventDefault();closeDisc();}return;}
   if(!$('bestiary').hidden){if(ev.key==='Escape'){ev.preventDefault();closeBest();}return;}
   if(!$('viseurs').hidden){if(ev.key==='Escape'){ev.preventDefault();closeCur();}return;}
@@ -151,7 +155,7 @@ async function saveSettings(b,m){b=b instanceof HTMLElement?b:$('saveBtn');m=m||
   if(!DB||!b)return;b.disabled=true;b.textContent='Enregistrement…';m.className='saved';m.textContent='';
   const best={};BEST_LIST().forEach(e=>{best[e.key]={nom:e.o.n};BFIELDS.forEach(([f])=>best[e.key][f]=e.o[f]);});
   const data={enregistreLe:new Date().toISOString(),bestiaire:best,discretion:STEALTH_BASE,intensite:Object.assign({},INTENS),generation:Object.assign({},GEN),mondes:JSON.parse(JSON.stringify(MONDES)),
-    planete:{largeur:W,hauteur:H,joyaux:GEM_COUNT},robot:G&&G.st?Object.assign({},G.st):null,
+    planete:{largeur:W,hauteur:H},robot:G&&G.st?Object.assign({},G.st):null,
     palette:{active:PRESETS[PRESET_ACTIVE].n,palettes:PRESETS.map(p=>({nom:p.n,couleurs:p.c.slice()}))},
     tuiles:Object.assign({},TILE_OV)};
   try{await DB.doc('reglages/courant').set(data);commitTileBase();try{localStorage.setItem('np-maj',String(Date.parse(data.enregistreLe)));}catch(e){}if(!$('viseurs').hidden)drawCurEd();const t=new Date();m.className='saved ok';m.textContent=`Réglages enregistrés à ${String(t.getHours()).padStart(2,'0')}:${String(t.getMinutes()).padStart(2,'0')}.`;}

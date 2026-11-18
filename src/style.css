@@ -41,6 +41,9 @@ body{margin:0;background:var(--black);color:var(--fg);font:13px/1.45 var(--mono)
 .bar2>span:first-child{color:var(--dim)}
 .abar{white-space:nowrap;overflow:hidden;line-height:1;letter-spacing:0;font-size:12px}
 .abar .ae,.seen .an .hp .ae{opacity:1}
+/* Barre ASCII : le calque plein est posé sur le fond et découpé à la largeur exacte (voir asciiBar, 11-interface) */
+.abar,.seen .an .hp{position:relative}
+.abar .af,.seen .an .hp .af{position:absolute;left:0;top:0;bottom:0;overflow:hidden}
 .abar.life{color:var(--c2)}.abar.energy{color:var(--c1)}
 .track{position:relative;height:9px;overflow:hidden}
 .track::before{content:"";position:absolute;inset:0;background:currentColor;opacity:.2}

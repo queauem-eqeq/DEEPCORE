@@ -37,7 +37,7 @@ Artefact à part (https://claude.ai/artifact/9BKRaoB4hzgdWhzYFx5A6q) qui rejoue 
 - `python3 outils/banc.py` assemble `banc/site/` (non versionné) à partir de `src/` : c'est ce dossier qu'on publie sur l'artefact du banc
   (`publish_files`, mêmes chemins). **À republier quand le moteur change**, sinon le banc mesure l'ancien jeu.
 - `python3 outils/banc_series.py CONFIGS.json SORTIE.json [essais] [processus]` lance des séries en lot.
-- Les coûts de menace du jeu (`MENACE_ESP`, `terrain` des biomes) en sortent : après un changement de stats, relancer et mettre à jour.
+- Les six **reliefs d'essai** du banc (`RELIEFS` dans `banc/banc.js`) sont ceux des anciens biomes, gardés le 16 novembre 2026 pour que les séries archivées restent comparables.
 
 ## L'utilisateur
 - Ne code pas : il décrit ce qu'il veut, en français. Répondre en **français**, de façon concise.
@@ -52,7 +52,7 @@ Artefact à part (https://claude.ai/artifact/9BKRaoB4hzgdWhzYFx5A6q) qui rejoue 
   attention aux noms en double (`const` redéclarée = erreur de syntaxe) et aux noms qui existent déjà dans `window`.
   Un nouveau fichier doit aussi être ajouté en balise `<script>` dans `index.html`.
   00 base · 01 sons · 02 palette · 03 tuiles (motifs 16×16) · 04 vaisseau · 05 tuiles éditables · 06 réglages ·
-  07 génération de carte · 08 faune et prédateurs · 09 vision, déplacement, forage · 10 rendu et gouffres ·
+  07 génération de la carte · 08 faune et prédateurs · 09 vision, déplacement, forage · 10 rendu et gouffres ·
   11 interface (mode carte, « En vue », commandes, enregistrement) · 12 souris et inspection · 13 éditeur de tuiles ·
   14 inventaire et équipement · 15 cinématique d'intro (qui lance aussi le jeu : rester le dernier).
 - `docs/` : conception, mesures, notes sur Brogue (voir plus haut). `planches/` : planches de travail

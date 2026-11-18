@@ -122,8 +122,8 @@ COMBAT = COMMUN + """
 (() => {
 const N = 300, out = {};
 addFx = () => {}; render = () => {}; dead = () => {}; SND.on = false; fog = false;
-const neuf = () => { G.st = { vie: 100, vieMax: 100, energie: 100, energieMax: 100, repar: 0, power: 1, vitesse: 5, degats: 10, capteur: 10, cout: 10, pre: 80, esq: 10, crit: 5 };
-  G.inv = invTest(); G.eff = {}; G.mode = 'test'; G.niv = 0; G.over = null; G.sprint = false; G.debt = 0; G.time = 0; G.items = {}; G.ore = {}; G.gems = {}; G.blood = {}; G.log = []; };
+const neuf = () => { G.st = { vie: 100, vieMax: 100, energie: 100, energieMax: 100, repar: 0, power: 10, vitesse: 5, degats: 0, capteur: 10, cout: 10, pre: 100, def: 10, crit: 5 };
+  G.inv = invTest(); G.eff = {}; G.over = null; G.sprint = false; G.debt = 0; G.time = 0; G.items = {}; G.ore = {};  G.blood = {}; G.log = []; };
 const equipe = (ks) => { for (const k of ks) invEquip(G.inv.findIndex(o => o.k === k)); };
 const bete = (sp, x, y) => ({ sp, x, y, hp: pvDe(BEASTS[sp]), mp: 0, hunt: 1, dir: -1, pack: -1, mem: [G.px, G.py], search: 0, lost: 0 });
 const proche = () => { let b = null, bd = 1e9; for (const o of G.beasts) { const d = Math.max(Math.abs(o.x - G.px), Math.abs(o.y - G.py)); if (d < bd) { bd = d; b = o; } } return b; };
@@ -147,12 +147,12 @@ return JSON.stringify(out, null, 1);
 CAS_COMBAT = """BEASTS.forEach((sp, i) => { if (sp.ambush) duel('1 ' + sp.n + ' (embusqué)', () => { G.amb.push({ sp: i, x: 31, y: 32, hp: sp.pv }); }); else duel('1 ' + sp.n, seul(i)); });
 const I = k => BEASTS.findIndex(b => b.key === k);
 duel('2 Crabos', groupe(I('crabos'), 2)); duel('3 Cafars', groupe(I('cafar'), 3)); duel('4 Cafars', groupe(I('cafar'), 4));
-duel('2 Crachins', groupe(I('crachin'), 2)); duel('2 Vipérins', groupe(I('viperin'), 2)); duel('Mastok + 2 Crabos', () => { groupe(I('crabos'), 2)(); G.beasts.push(bete(I('mastok'), 38, 32)); });
-const ref = () => { groupe(I('crabos'), 2)(); G.beasts.push(bete(I('viperin'), 38, 32)); };
+duel('Mastok + 2 Crabos', () => { groupe(I('crabos'), 2)(); G.beasts.push(bete(I('mastok'), 38, 32)); });
+const ref = () => { groupe(I('crabos'), 2)(); G.beasts.push(bete(I('cafar'), 38, 32)); };
 duel('RÉF. (2 Crabos + 1 Vipérin) · foreuse nue', ref);
-for (const k of Object.keys(ITEMS)) { const d = ITEMS[k]; if (d.conso || d.base) continue; duel('RÉF. avec ' + d.n, ref, [k]); }
-duel('Mastok avec Marteau-pilon', seul(I('mastok')), ['pilon']); duel('Mastok avec Foret diamant', seul(I('mastok')), ['foret']);
-duel('Mastok avec Scie circulaire', seul(I('mastok')), ['scie']); duel('Mastok avec Lance thermique', seul(I('mastok')), ['lance']);
+// accessoires seulement : depuis le 16 novembre 2026 la foreuse et la Coque d'usine sont le seul équipement, déjà porté
+for (const k of Object.keys(ITEMS)) { const d = ITEMS[k]; if (d.conso || d.base || d.slot !== 'acc') continue; duel('RÉF. avec ' + d.n, ref, [k]); }
+duel('Mastok seul', seul(I('mastok')));
 """
 COMBAT = COMBAT.replace('/*CAS*/', CAS_COMBAT)
 
@@ -168,7 +168,7 @@ async def principal(quoi: str) -> int:
             if not await page.locator('#introCv').is_visible():
                 break
         # les scénarios supposent la carte d'origine (96 × 64) : la partie démarre maintenant sur une carte de taille 2
-        await page.evaluate("setTaille(4);testGame();started=true")
+        await page.evaluate("setTaille(4);newGame();started=true")
 
         for nom, code in (('DÉTECTION', DETECTION), ('FUITE', FUITE), ('COMBAT', COMBAT)):
             if quoi in ('tout', nom.lower().replace('é', 'e')):

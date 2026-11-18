@@ -197,77 +197,41 @@ function genPlanet(){
       if(sites.some(s=>Math.abs(s.x-x)+Math.abs(s.y-y)<(last?4:gap)))continue;sites.push({x,y});}
     if(sites.length<NSITES&&!last)continue;
     G={t,seen:new Array(N).fill(0),px:sx,py:sy,turn:0,dist:0,over:null,msg:null,ship,face:'d',
-      st:{vie:100,vieMax:100,energie:100,energieMax:100,repar:0,power:1,vitesse:5,degats:10,capteur:10,cout:10,pre:80,esq:10,crit:5},
+      st:{vie:100,vieMax:100,energie:100,energieMax:100,repar:0,power:10,vitesse:5,degats:0,capteur:10,cout:10,pre:100,def:10,crit:5},
       sites:sites.map((s,i)=>({x:s.x,y:s.y,depth:10,id:LETTERS[i],seen:false,known:false}))};
     return;
   }
 }
-/* ---------- Descente : 5 niveaux, un biome par niveau (13 novembre 2026) ----------
-   Un biome = un relief (réglages de génération), une faune (niveau d'intensité par espèce, voir NIVEAUX), une petite variation de palette.
-   rang : les biomes tirés pour une descente sont rangés du moins au plus dangereux.
-   terrain : coefficient de menace du relief, mesuré au banc de combat (mêmes ennemis que sur le Plateau : couloirs et couvert protègent,
-   le Pierrier nu expose) ; un archétype enregistré vaut 1. */
-const NIV_MAX=5;
-const BIOMES={
-  plateau:{terrain:1,n:'Plateau',rang:1,d:'La surface, là où le vaisseau s’est posé : terrain ouvert, quelques massifs, peu de danger.',
-    gen:{eau:8,montagne:10,gouffre:3,herbe:14,methode:'automate'},vie:{insectoide:2,crabos:1,cafar:1},teinte:[0,0,0,0,0]},
-  marecage:{terrain:0.87,n:'Marécage',rang:2,d:'De l’eau partout et de hautes herbes : les crabos y sont chez eux, et les tapis attendent dans les roseaux.',
-    gen:{eau:30,montagne:6,gouffre:1,herbe:28,methode:'automate'},vie:{crabos:3,tapi:2,gluar:2,viperin:1,insectoide:1,brochon:2},teinte:[0,-12,14,-4,-10]},
-  herbes:{terrain:0.92,n:'Hautes herbes',rang:2,d:'Une prairie à perte de vue : idéale pour se cacher, donc pour les embuscades.',
-    gen:{eau:6,montagne:6,gouffre:2,herbe:55,methode:'automate'},vie:{tapi:3,insectoide:2,siphon:2,crachin:1},teinte:[0,-18,10,2,0]},
-  galeries:{terrain:0.5,n:'Galeries',rang:3,d:'De la roche presque partout, des couloirs étroits : les bandes de cafars y circulent et les taupars percent les parois.',
-    gen:{eau:2,montagne:46,gouffre:3,herbe:4,methode:'bruit'},vie:{cafar:3,taupar:2,viperin:2,gluar:1},teinte:[0,0,-10,-8,-10]},
-  pierrier:{terrain:1.3,n:'Pierrier',rang:3,d:'Un désert de pierres, sec et à découvert : rien pour s’abriter des crachins.',
-    gen:{eau:1,montagne:14,gouffre:6,herbe:2,methode:'bruit'},vie:{crachin:3,siphon:3,crabos:2,mastok:1,brochon:1},teinte:[0,0,-4,4,-25]},
-  failles:{terrain:0.95,n:'Failles',rang:4,d:'Un terrain éventré de gouffres, tout près du noyau : le territoire des mastoks et des vipérins.',
-    gen:{eau:4,montagne:22,gouffre:18,herbe:6,methode:'automate'},vie:{mastok:2,viperin:3,cafar:2,taupar:1},teinte:[6,12,-16,-6,0]}
-};
-// Courbe de difficulté, par niveau : menace = budget de menace pour 1000 cases (voir lifeMenace, 06-reglages) ; metal, mat = nombre de gisements
-// d'éclats de métal (réparation) et de Matière (construction) pour une carte de TAILLE 2, les autres tailles en proportion de leur surface.
-// Plus on descend : plus de menace, moins de réparation, plus de Matière. Les PV et les dégâts des ennemis ne changent pas (décision du 13 novembre).
-// Jusqu'au 15 novembre 2026 le niveau multipliait les effectifs du monde (× 1,5 à × 5) : deux mondes au même niveau pouvaient être de difficulté
-// très différente (le Marécage pesait plus du double des Galeries). Le budget rend la courbe régulière quel que soit le monde ou l'archétype.
-const COURBE=[null,{menace:45,metal:3,mat:1},{menace:90,metal:3,mat:1},{menace:155,metal:2,mat:2},{menace:240,metal:1,mat:3},{menace:340,metal:1,mat:3}];
+/* ---------- Le niveau (16 novembre 2026) ----------
+   Un seul niveau, toujours celui de l'atterrissage : le vaisseau, un site de forage, et le relief et la faune réglés
+   dans le menu Monde. La descente en 5 niveaux, ses six biomes, ses archétypes de monde, son budget de menace par
+   niveau et les cartes d'essai ont été retirés ce jour-là, à la demande de l'utilisateur : le jeu se règle maintenant
+   entièrement depuis le menu Monde, et REGEN tire une nouvelle carte avec les mêmes réglages. */
 // pvDe / dmgDe : points de vie et dégâts d'une espèce tels que le jeu les lit. Aujourd'hui ce sont les valeurs du Bestiaire, sans modification ;
 // ces deux fonctions restent le seul endroit à changer si l'on veut un jour les faire varier.
-const pvDe=sp=>sp.pv,dmgDe=sp=>sp.dmg;
-const TAILLE_DESC=3;                   // atterrissage et niveaux de la descente : toujours la taille 3 (72 × 48) depuis le 15 novembre 2026 (avant : 2 puis 2 à 5 au hasard)
-// Les archétypes enregistrés dans le menu Monde (MONDES, 06-reglages) entrent dans le tirage de la descente, sous la clé « u:Nom ».
-// biomeDe(clé) rend un biome d'origine ou un archétype mis en forme de biome : rang moyen, petite teinte tirée de son nom, taille ignorée.
-function biomeDe(k){if(BIOMES[k])return BIOMES[k];const n=String(k||'').slice(2),m=MONDES[n];
-  if(!m)return Object.assign({},BIOMES.plateau,{n:n||'Monde inconnu'});                       // archétype supprimé en cours de descente
-  let h=0;for(const c of n)h=(h*31+c.charCodeAt(0))%997;const g=Object.assign({},m.gen);delete g.taille;
-  return {n,rang:2.5,perso:1,d:'Un de vos archétypes de monde, enregistré dans le menu Monde.',gen:g,vie:m.vie||{},teinte:[0,h%25-12,(h>>2)%25-12,h%9-4,0]};}
-// biomes des niveaux 2 à 5 : quatre parmi les cinq autres biomes et vos archétypes, du moins au plus dangereux
-function tirageBiomes(){const pool=[...Object.keys(BIOMES).filter(k=>k!=='plateau'),...Object.keys(MONDES).map(n=>'u:'+n)];
-  for(let i=pool.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[pool[i],pool[j]]=[pool[j],pool[i]];}
-  return pool.slice(0,NIV_MAX-1).sort((a,b)=>biomeDe(a).rang-biomeDe(b).rang);}
+// dégâts d'une créature : tirés à chaque coup entre dmin et dmax (16 novembre 2026 ; une valeur fixe avant)
+const pvDe=sp=>sp.pv,dmgDe=sp=>sp.dmin+Math.floor(Math.random()*(sp.dmax-sp.dmin+1)),dmgTxt=sp=>sp.dmin===sp.dmax?''+sp.dmin:sp.dmin+'-'+sp.dmax,dmgMoy=sp=>(sp.dmin+sp.dmax)/2;
+// Gisements pour une carte de taille 2 ; les autres tailles en proportion de leur surface.
+const GISEMENTS={metal:3,mat:1};
 let SANS_VAISSEAU=false;
-// o : {niv, biome, taille, suite} pour la descente, {test:true} pour une carte d'essai (réglages Génération et Life) ;
-// o.garde : ce que la foreuse emporte d'un niveau au suivant
-function niveau(o){drilling=false;const g0=GEN,bio=o.test?null:biomeDe(o.biome),garde=o.garde;
-  if(bio)GEN=Object.assign({},g0,bio.gen,{taille:o.taille});
-  SANS_VAISSEAU=!!garde;try{genPlanet();}finally{GEN=g0;SANS_VAISSEAU=false;}
-  G.w=W;G.h=H;G.mode=o.test?'test':'descente';G.niv=o.test?0:o.niv;G.biome=o.test?null:o.biome;G.suite=o.suite||null;
-  const c=o.test?null:COURBE[o.niv];
-  if(o.test)lifeCalc();else lifeMenace(bio.vie,c.menace,bio.terrain);
-  durcir();   // la roche dure avant les joyaux et les métaux : ils n'y apparaissent jamais
-  {const a=W*H/(48*32),q=o.test?{metal:2,mat:2}:c;G.eff={};G.fum={};hideGems();hideOre(Math.max(1,Math.round(q.metal*a)),Math.max(1,Math.round(q.mat*a)));}
-  G.sonar=1;   // sonar à émettre (voir sonarStart, 10-rendu) : il part 10 à 20 tours après l'arrivéeG.items={};G.tracks={};G.lastDir=null;G.beasts=[];G.blood={};G.fv=2;
-  if(garde)Object.assign(G,garde);else{G.inv=invTest();G.log=[];}
+// Génère la carte à partir des réglages en cours du menu Monde (relief, taille, faune), avec le vaisseau.
+function niveau(){drilling=false;
+  genPlanet();
+  G.w=W;G.h=H;
+  lifeCalc();
+  durcir();   // la roche dure avant les métaux : ils n'y apparaissent jamais
+  {const a=W*H/(48*32);G.eff={};G.fum={};hideOre(Math.max(1,Math.round(GISEMENTS.metal*a)),Math.max(1,Math.round(GISEMENTS.mat*a)));}
+  G.sonar=1;   // sonar à émettre (voir sonarStart, 10-rendu) : il part 10 à 20 tours après l'arrivée
+  G.items={};G.tracks={};G.lastDir=null;G.beasts=[];G.blood={};G.fv=2;
+  G.inv=invTest();G.log=[];
   G.st.matiere=G.st.matiere||0;G.sonarAt=(G.turn||0)+10+Math.floor(Math.random()*11);
-  spawnAnimals();spawnBeasts();lastAct='move';palBiome(bio?bio.teinte:null);buildTiles();turnStealth();computeFOV();}
+  spawnAnimals();spawnBeasts();lastAct='move';palBiome(null);buildTiles();turnStealth();computeFOV();}
 const fauneTxt=()=>LIFE_LBL.filter(([k])=>LIFE[k]>0).map(([,l])=>l).join(', ')||'aucune';
-function newGame(){niveau({niv:1,biome:'plateau',taille:TAILLE_DESC,suite:tirageBiomes()});
-  say(`Atterrissage confirmé. Niveau 1 sur ${NIV_MAX} : ${BIOMES.plateau.n}. Un site de forage signalé par l’orbiteur. La foreuse est dans la soute ; la porte est à l’arrière.`,'info');}
-function testGame(){niveau({test:true});say('Carte d’essai, hors descente : réglages Génération et Life. REGEN pour reprendre la descente au niveau 1.','info');}
-function descendre(){const n=G.niv+1,b=G.suite[n-2];
-  niveau({niv:n,biome:b,taille:TAILLE_DESC,suite:G.suite,
-    garde:{st:G.st,inv:G.inv,turn:G.turn,dist:G.dist,time:G.time,debt:0,beastSeen:G.beastSeen,log:G.log}});
-  say(`Niveau ${n} sur ${NIV_MAX} : ${biomeDe(b).n}. La foreuse débouche du puits ; impossible de remonter.`,'info');}
+function newGame(){niveau();
+  say('Atterrissage confirmé. Un site de forage signalé par l’orbiteur. La foreuse est dans la soute ; la porte est à l’arrière.','info');}
 
 /* ---------- Bestiaire : édition des statistiques ---------- */
-const BFIELDS=[['v','Vitesse',1,10],['pv','PV',1,200],['dmg','Dégâts',0,100],['pre','Précision',0,100],['esq','Esquive',0,100],['crit','Crit %',0,100]];
+const BFIELDS=[['v','Vitesse',1,10],['pv','PV',1,200],['dmin','Dégâts min',0,100],['dmax','Dégâts max',0,100],['pre','Précision',0,250],['def','Défense',0,150],['crit','Crit %',0,100]];
 const BEST_LIST=()=>[{key:'insectoide',o:SPECIES[0],ic:'an0r',role:'Suit à distance et recule ; attaque dès qu’un coup est tenté, par vous ou contre vous'},...BEASTS.map((o,i)=>({key:o.key,o,ic:'bz'+i+'r',role:o.role}))];
 const BEST_DEF={};BEST_LIST().forEach(e=>{BEST_DEF[e.key]={};BFIELDS.forEach(([f])=>BEST_DEF[e.key][f]=e.o[f]);});
 try{const b=JSON.parse(localStorage.getItem('np-best')||'null');if(b)BEST_LIST().forEach(e=>{if(b[e.key])BFIELDS.forEach(([f])=>{if(typeof b[e.key][f]==='number')e.o[f]=b[e.key][f];});});}catch(e){}
@@ -309,22 +273,7 @@ function bestHaut(){const l=$('bestList'),c=[...l.children];if(c.length<=9){l.st
   l.style.maxHeight=(c[0].offsetHeight+c[3].offsetHeight+c[6].offsetHeight+24+2)+'px';l.scrollTop=0;}
 function closeBest(){$('bestiary').hidden=true;$('bestBtn').focus();render();}
 
-/* ---------- Joyaux cachés dans la roche ---------- */
-// Les joyaux ne se trouvent que dans la roche des montagnes, jamais en bordure : il faut creuser pour les atteindre.
-// Une case peut en contenir un si ses 8 voisines sont aussi de la roche (et jamais au bord de la carte).
-const GEM_COUNT=1;
-const UPGRADES=[
-  ['vie','Vie max','+10',st=>{st.vieMax+=10;st.vie+=10;}],
-  ['energie','Énergie max','+10',st=>{st.energieMax+=10;st.energie+=10;}],
-  ['capteur','EYE (vision)','+1',st=>{st.capteur+=1;}],
-  ['degats','DEG (dégâts)','+5',st=>{st.degats+=5;}],
-  ['pre','PRE (précision)','+5',st=>{st.pre+=5;}],
-  ['esq','ESQ (esquive)','+5',st=>{st.esq+=5;}],
-  ['crit','CRIT (coup critique)','+5 %',st=>{st.crit=(st.crit??5)+5;}],
-  ['power','POW (énergie/tour)','+1',st=>{st.power+=1;}],
-  ['vitesse','VIT (vitesse)','+1',st=>{st.vitesse+=1;}]
-];
-// Éclats de métal : ORE_PCT % des cases de montagne (hors rangée extérieure indestructible et joyau) en contiennent ; brisée, la roche les laisse
+// Éclats de métal : ORE_PCT % des cases de montagne (hors rangée extérieure indestructible) en contiennent ; brisée, la roche les laisse
 // tomber au sol ; la foreuse qui passe dessus les ramasse et regagne des points de vie selon la densité.
 // G.ore[i] = 'roche1|2|3' (dans la paroi) ou 'sol1|2|3' (tombés) ; 1 petits, 2 moyens, 3 gros (ORE_MIX : part de chaque densité)
 const ORE_PCT=10,ORE_PV=[0,30,40,50],   // gisements rares mais gros depuis le 13 novembre 2026 (avant : 10, 15, 20)
@@ -345,26 +294,6 @@ function durcir(){const t=G.t,d=new Int16Array(W*H).fill(-1),q=[];
   for(let i=0;i<W*H;i++){const x=i%W,y=(i/W)|0;if(t[i]!==MOUNT||x<1||y<1||x>=W-1||y>=H-1)continue;
     if(Math.random()<DURCIR[Math.min(d[i],DURCIR.length-1)])t[i]=HARD;}}
 function hideOre(nMetal=3,nMat=1){G.ore={};const lib=[];
-  for(let i=0;i<W*H;i++){const x=i%W,y=(i/W)|0;if(G.t[i]===MOUNT&&x>0&&y>0&&x<W-1&&y<H-1&&!(G.gems&&G.gems[i]))lib.push(i);}
+  for(let i=0;i<W*H;i++){const x=i%W,y=(i/W)|0;if(G.t[i]===MOUNT&&x>0&&y>0&&x<W-1&&y<H-1)lib.push(i);}
   for(let i=lib.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[lib[i],lib[j]]=[lib[j],lib[i]];}
   lib.slice(0,nMetal+nMat).forEach((i,k)=>{const r=Math.random();G.ore[i]=(k<nMetal?'':'m')+'roche'+(r<ORE_MIX[1]?1:r<ORE_MIX[1]+ORE_MIX[2]?2:3);});}
-function hideGems(){G.gems={};
-  // Toujours GEM_COUNT joyaux : d'abord au cœur des massifs (8 voisines en roche), sinon au plus profond disponible
-  const deep=i=>DIRS.filter(([dx,dy])=>G.t[idx(i%W+dx,((i/W)|0)+dy)]===MOUNT).length;
-  const cand=[];for(let i=0;i<W*H;i++){const x=i%W,y=(i/W)|0;if(G.t[i]!==MOUNT||x<2||y<2||x>W-3||y>H-3)continue;cand.push([i,deep(i)+Math.random()*.5]);}
-  cand.sort((a,b)=>b[1]-a[1]);
-  const full=cand.filter(c=>c[1]>=8),pool=(full.length>=GEM_COUNT?full:cand).slice();
-  for(let n=0;n<GEM_COUNT&&pool.length;n++){const k=full.length>=GEM_COUNT?Math.floor(Math.random()*pool.length):0;
-    const [i]=pool.splice(k,1)[0];G.gems[i]='cache';
-    for(let j=pool.length-1;j>=0;j--){const o=pool[j][0];if(Math.abs(o%W-i%W)+Math.abs(((o/W)|0)-((i/W)|0))<6)pool.splice(j,1);}}
-  // pas assez de massifs espacés : on complète avec les cases de roche restantes les plus profondes
-  for(const [i] of cand){if(Object.keys(G.gems).length>=GEM_COUNT)break;if(!G.gems[i])G.gems[i]='cache';}}
-function chooseUpgrade(){
-  $('card').innerHTML=`<div class="tag">Joyau récupéré</div><h2>AMÉLIORATION</h2>
-    <p>Le joyau peut renforcer un de ces trois systèmes de la foreuse. Choisissez lequel.</p>
-    <div class="upg">${[...UPGRADES.keys()].sort(()=>Math.random()-.5).slice(0,3).sort((a,b)=>a-b).map(i=>{const [k,l,v]=UPGRADES[i];return `<button data-u="${i}"><span>${l}</span><b>${v}</b></button>`;}).join('')}</div>`;
-  $('overlay').hidden=false;$('card').querySelector('button').focus();
-  $('card').querySelector('.upg').onclick=e=>{const b=e.target.closest('button[data-u]');if(!b)return;const u=UPGRADES[+b.dataset.u];
-    u[3](G.st);computeFOV();say(`Joyau intégré : ${u[1]} ${u[2]}.`,'good');SFX.done();$('overlay').hidden=true;render();};
-}
-
