@@ -133,7 +133,7 @@ function batiments(){
   for(let essai=0;essai<6;essai++){
     const t=G.t,B={own:new Int16Array(N),porte:new Uint8Array(N),pied:new Uint8Array(N),interdit:new Uint8Array(N),sol:new Uint8Array(N).fill(FLOOR),pieces:[]};
     for(let i=0;i<N;i++){const x=i%W,y=(i/W)|0,v=t[i];
-      if(x<2||y<2||x>=W-2||y>=H-2||v===CHASM||v===BRIDGE)B.interdit[i]=1;
+      if(x<2||y<2||x>=W-2||y>=H-2)B.interdit[i]=1;   // les gouffres naturels ne gênent plus : une pièce posée dessus les change en sol (19 novembre 2026)
       else if(v===SHIP||v===DECK)for(let dy=-3;dy<=3;dy++)for(let dx=-2;dx<=2;dx++)B.interdit[idx(Math.max(0,Math.min(W-1,x+dx)),Math.max(0,Math.min(H-1,y+dy)))]=1;}
     for(let dy=-2;dy<=2;dy++)for(let dx=-2;dx<=2;dx++)B.interdit[idx(Math.max(0,Math.min(W-1,G.px+dx)),Math.max(0,Math.min(H-1,G.py+dy)))]=1;
     const deux=GEN.sNb===2?total>=90:GEN.sNb===1?false:total>=260&&Math.random()<.5,part=deux?.35+Math.random()*.3:1,cibles=deux?[Math.round(total*part),total-Math.round(total*part)]:[total];
@@ -148,11 +148,13 @@ function batiments(){
       boucles(B,S);amenager(B,S);S.cle=cles[s%cles.length];strs.push(S);}
     if(strs.length){
       const garde=new Set();for(const S of strs)for(const p of S.pieces)for(const i of p.c)garde.add(i);
-      for(let i=0;i<N;i++){if(B.own[i]&&garde.has(i))t[i]=B.sol[i];}
+      for(let i=0;i<N;i++){if(B.own[i]&&garde.has(i))t[i]=FLOOR;}
       for(let i=0;i<N;i++){if(t[i]>=WALL||(B.own[i]&&garde.has(i)))continue;const x=i%W,y=(i/W)|0;
         if(B.porte[i]&&D4.some(([dx,dy])=>garde.has(idx(x+dx,y+dy)))){t[i]=Math.random()*100<(GEN.sOuvert||0)?FLOOR:DOOR;continue;}   // porte, ou simple ouverture
         let m=false;for(let dy=-1;dy<=1&&!m;dy++)for(let dx=-1;dx<=1;dx++){const a=x+dx,b=y+dy;if(a>=0&&b>=0&&a<W&&b<H&&garde.has(idx(a,b))){m=true;break;}}
         if(m)t[i]=WALL;}
+      tidyChasms(t);   // ce qui reste d'un gouffre naturel entamé : pas de petit trou, pas de pont qui ne franchit plus rien
+      for(let i=0;i<N;i++){if(B.own[i]&&garde.has(i))t[i]=B.sol[i];}   // puis les gouffres, ponts et piliers des pièces
       const atteint=boucher(t,garde);let ok=true;
       for(const S of strs){S.entrees=entrees(B,S,t,atteint);if(!S.entrees.length)ok=false;
         for(const e of S.entrees){t[e.c]=DOOR;if(blocks(t[e.o]))t[e.o]=GROUND;}}   // la porte, et l'amorce du couloir d'entrée
