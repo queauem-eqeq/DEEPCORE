@@ -16,13 +16,21 @@ function drawVisCells(cells,col){ctx.globalAlpha=1;ctx.fillStyle=col||'#ffffff';
    Particules en pixels de carte (case × S) : la fumée qui s'élève reste sur place quand la foreuse avance (traînée).
    Pixel art strict : grains opaques de 1 ou 2 pixels de tuile, sans fondu ni agrandissement ; chacun disparaît d'un coup. */
 const SMOKE={p:[],raf:0,last:0,acc:0,accF:0};
-// Giclée de sang à la mort d'un ennemi : une trentaine de gouttes (pixels de tuile, opaques) projetées en l'air ;
-// en retombant elles restent collées au sol (G.splat, pixels de carte), sauf dans l'eau ou un gouffre. Au plus SPLAT_MAX gouttes gardées.
-const SPLAT_MAX=1500,BLOOD_COLS=['#b8242a','#b8242a','#8a1a20','#d8333a'];
-function gore(x,y){const cx=(x+.5)*S,cy=(y+.5)*S,n=24+((Math.random()*12)|0);
-  for(let j=0;j<n;j++){const an=Math.random()*Math.PI*2,v=70+Math.random()*110,r0=3+Math.random()*6;   // giclée vive : départ rapide, déjà écartée du centre
-    SMOKE.p.push({x:cx+Math.cos(an)*r0,y:cy+Math.sin(an)*r0*.8,z:4+Math.random()*8,vx:Math.cos(an)*v,vy:Math.sin(an)*v*.8,vz:90+Math.random()*170,a:0,l:9,sz:Math.random()<.2?4:2,
-      c:BLOOD_COLS[(Math.random()*BLOOD_COLS.length)|0],blood:true});}
+/* Destruction d'un ennemi (19 novembre 2026 ; avant : une giclée de sang et une tache). Les ennemis sont des machines :
+   - un éclat blanc d'un instant sur la case (FX 'pof', dessiné dans render) ;
+   - une gerbe d'étincelles (blanc, jaune, orange) qui filent droit, très vite, avec une courte traîne, et s'éteignent en
+     un quart de seconde ;
+   - des débris de carcasse, aux couleurs des créatures, projetés en l'air : ils retombent, rebondissent une ou deux fois,
+     puis restent au sol (G.splat, pixels de carte), sauf dans l'eau ou un gouffre. Au plus SPLAT_MAX débris gardés.
+   Pixel art strict : grains opaques de 1 ou 2 pixels de tuile, calés sur la grille, qui disparaissent d'un coup. */
+const SPLAT_MAX=1500,ETINC_COLS=['#ffffff','#ffffff','#fff3a0','#ffd23a','#ff9a1f'];
+function gore(x,y){const cx=(x+.5)*S,cy=(y+.5)*S,deb=[PAL['2'],PAL['2'],'#ffffff','#b8242a',PAL['3'],'#5a6468'];   // les teintes des machines : blindage bio, blanc, capteur rouge, un peu de monde et de gris
+  addFx({kind:'pof',x,y,dur:150});
+  for(let j=0,n=34+((Math.random()*14)|0);j<n;j++){const an=Math.random()*Math.PI*2,v=150+Math.random()*330;
+    SMOKE.p.push({x:cx+Math.cos(an)*4,y:cy+Math.sin(an)*4,vx:Math.cos(an)*v,vy:Math.sin(an)*v-40,a:0,l:.1+Math.random()*.3,sz:2,c:ETINC_COLS[(Math.random()*ETINC_COLS.length)|0],spark:true});}
+  for(let j=0,n=14+((Math.random()*8)|0);j<n;j++){const an=Math.random()*Math.PI*2,v=50+Math.random()*150,r0=2+Math.random()*5;
+    SMOKE.p.push({x:cx+Math.cos(an)*r0,y:cy+Math.sin(an)*r0*.8,z:4+Math.random()*8,vx:Math.cos(an)*v,vy:Math.sin(an)*v*.8,vz:120+Math.random()*220,a:0,l:9,sz:Math.random()<.3?4:2,
+      c:deb[(Math.random()*deb.length)|0],blood:true,reb:1+((Math.random()*2)|0)});}
   smokeKick();}
 function smokeOn(){return G&&!G.over&&G.st&&G.st.vie<50&&$('introCv').hidden;}
 function smokeKick(){if(!SMOKE.raf&&(smokeOn()||SMOKE.p.length)){SMOKE.last=performance.now();SMOKE.raf=requestAnimationFrame(smokeStep);}}
@@ -37,10 +45,14 @@ function smokeStep(now){const dt=Math.min(.05,(now-SMOKE.last)/1000);SMOKE.last=
   fctx.clearRect(0,0,vw,vh);let n=0,landed=false;
   for(const q of SMOKE.p){q.a+=dt;if(q.a>=q.l)continue;
     if(q.blood){const dr=Math.exp(-5*dt);q.vx*=dr;q.vy*=dr;q.x+=q.vx*dt;q.y+=q.vy*dt;q.vz-=1100*dt;q.z+=q.vz*dt;
+      if(q.z<=0&&q.reb>0&&q.vz<-80){q.z=0;q.vz=-q.vz*.42;q.vx*=.6;q.vy*=.6;q.reb--;}   // un débris rebondit avant de s'immobiliser
       if(q.z<=0){const mx=Math.floor(q.x/S),my=Math.floor(q.y/S),t=mx>=0&&my>=0&&mx<W&&my<H?G.t[idx(mx,my)]:ROCK;
         if(t!==LIQ&&t!==DEEP&&t!==CHASM&&!blocks(t)){G.splat=G.splat||[];G.splat.push([Math.round(q.x/2)*2,Math.round(q.y/2)*2,q.c,q.sz]);
           if(G.splat.length>SPLAT_MAX)G.splat.splice(0,G.splat.length-SPLAT_MAX);landed=true;}continue;}
-      SMOKE.p[n++]=q;fctx.fillStyle=q.c;fctx.fillRect(Math.round((q.x-camX*S)/2)*2,Math.round((q.y-q.z-camY*S)/2)*2,q.sz,q.sz);continue;}q.x+=(q.vx+Math.sin(now/600+q.l*9)*4)*dt;q.y+=q.vy*dt;if(q.smoke)q.vy*=Math.exp(-.6*dt);
+      SMOKE.p[n++]=q;fctx.fillStyle=q.c;fctx.fillRect(Math.round((q.x-camX*S)/2)*2,Math.round((q.y-q.z-camY*S)/2)*2,q.sz,q.sz);continue;}
+    if(q.spark){const dr=Math.exp(-7*dt);q.vx*=dr;q.vy*=dr;q.x+=q.vx*dt;q.y+=q.vy*dt;SMOKE.p[n++]=q;fctx.fillStyle=q.c;   // étincelle : le grain et sa traîne, un cran derrière
+      fctx.fillRect(Math.round((q.x-camX*S)/2)*2,Math.round((q.y-camY*S)/2)*2,2,2);fctx.fillRect(Math.round((q.x-q.vx*.018-camX*S)/2)*2,Math.round((q.y-q.vy*.018-camY*S)/2)*2,2,2);continue;}
+    q.x+=(q.vx+Math.sin(now/600+q.l*9)*4)*dt;q.y+=q.vy*dt;if(q.smoke)q.vy*=Math.exp(-.6*dt);
     SMOKE.p[n++]=q;   // pixel art strict : taille fixe, opaque, calé sur la grille des pixels de tuile (2 px), disparaît d'un coup
     fctx.fillStyle=q.c;fctx.fillRect(Math.round((q.x-camX*S)/2)*2,Math.round((q.y-camY*S)/2)*2,q.sz,q.sz);}
   SMOKE.p.length=n;fctx.globalAlpha=1;if(landed)render();
@@ -192,10 +204,10 @@ function render(){
   {const sr=sonarR();if(sr>0&&G.ore&&fog)for(const k in G.ore){const i=+k;if(G.seen[i]||!sonarVu(i,sr))continue;put(oreTile(G.ore[k],oreSol(G.ore[k])),i%W,(i/W)|0,1);}}   // gisements détectés par le sonar, même hors de vue
   if(G.cles)for(const k in G.cles){const i=+k;if(fog&&!G.seen[i])continue;put(TL.cle,i%W,(i/W)|0,fog&&!vis[i]?.35:1);}   // clés au sol
   if(G.items)for(const k in G.items){const i=+k;if(fog&&!G.seen[i])continue;put(TL.objet,i%W,(i/W)|0,fog&&!vis[i]?.35:1);}   // objets posés au sol
-  if(G.splat)for(const [px,py,c,sz] of G.splat){const i=idx(Math.floor(px/S),Math.floor(py/S));if(fog&&!G.seen[i])continue;   // gouttes de sang au sol
+  if(G.splat)for(const [px,py,c,sz] of G.splat){const i=idx(Math.floor(px/S),Math.floor(py/S));if(fog&&!G.seen[i])continue;   // débris au sol
     ctx.globalAlpha=fog&&!vis[i]?.3:1;ctx.fillStyle=c;ctx.fillRect(px-camX*S,py-camY*S,sz,sz);}
   ctx.globalAlpha=1;
-  if(G.blood)for(const k in G.blood){const i=+k,bx=i%W,by=(i/W)|0;if(fog&&!G.seen[i])continue;put(TL['blood'+G.blood[k]],bx,by,fog&&!vis[i]?.3:.9);}
+  // (les taches de sang ne sont plus dessinées depuis le 19 novembre 2026 : les ennemis laissent des débris)
   for(const s of G.sites){if(fog&&!G.seen[idx(s.x,s.y)])continue;put(s.known?(TL['site'+s.depth]||TL.site10):TL.siteUnknown,s.x,s.y,!fog||vis[idx(s.x,s.y)]?1:.35);}
   // touche V : portée de discrétion de la foreuse — les cases d'où un ennemi peut vous remarquer, entourées d'un pointillé
   if(SHOWVIS&&!G.over){
@@ -256,6 +268,10 @@ function render(){
      if(G.beasts)for(const b of G.beasts)if(b.grip)laser(cx(b),cy(b),(G.px+.5-camX)*16,(G.py+.5-camY)*16,b.x*3.1+b.y*7.7,5);
      // tir manqué : le même trait, mais il tape à côté de la foreuse, crépite un instant, puis s'éteint d'un coup
      for(const f of FX)if(f.kind==='laserRate'&&G.beasts.includes(f.o)&&fxP(f)<.7)laser(cx(f.o),cy(f.o),(f.x+.5-camX)*16+f.ox,(f.y+.5-camY)*16+f.oy,f.ox*5.3+f.oy,3);}
+   for(const f of FX)if(f.kind==='pof'){const p=fxP(f),bx=Math.round((f.x-camX)*16),by=Math.round((f.y-camY)*16);ctx.fillStyle='#fff';
+     if(p<.45){ctx.fillRect((bx+4)*u,(by+2)*u,8*u,12*u);ctx.fillRect((bx+2)*u,(by+4)*u,12*u,8*u);}
+     else{ctx.fillRect((bx+7)*u,(by-1)*u,2*u,18*u);ctx.fillRect((bx-1)*u,(by+7)*u,18*u,2*u);}
+     ctx.fillStyle=PAL['1'];}
    // Explosion d'une mine : le carré de 3 × 3 en pavés de 4 pixels — blanc plein, puis damier accent, puis braises rouges éparses
    for(const f of FX)if(f.kind==='boom'){const p=fxP(f),ph=p<.25?0:p<.6?1:2;ctx.fillStyle=ph===0?'#fff':ph===1?PAL['1']:'#ff3b3b';
      for(let cy=-1;cy<=1;cy++)for(let cx=-1;cx<=1;cx++){const bx=Math.round((f.x+cx-camX)*16),by=Math.round((f.y+cy-camY)*16);

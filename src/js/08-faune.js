@@ -342,10 +342,10 @@ function gripPas(dx,dy){const L=G.beasts.filter(b=>b.grip);let mieux=false;
 const paralyse=()=>!!(G&&G.beasts&&G.beasts.some(b=>b.grip));
 const animVif=()=>!!(G&&G.beasts&&G.beasts.some(b=>b.grip||b.fuse>0));   // un effet permanent est à l'écran : le rendu doit tourner
 function gripAtk(b,sp){engage();
-  if(!b.grip){const ch=hitChance(sp.pre,robotDef());if(G.px!==b.x)b.dir=Math.sign(G.px-b.x);
+  if(!b.grip){const ch=hitChance(sp.pre,robotDef());if(G.px!==b.x)b.dir=Math.sign(G.px-b.x);SFX.laser();
     if(!roll(ch)){const an=Math.random()*Math.PI*2,r=10+Math.random()*5;addFx({kind:'laserRate',o:b,x:G.px,y:G.py,ox:Math.round(Math.cos(an)*r),oy:Math.round(Math.sin(an)*r),dur:520});
-      addFx({kind:'num',x:G.px,y:G.py,txt:'0',col:'#8aa9a2',dur:750});SFX.whoosh();sayMore(`${LeNom(sp)} tire et rate (${ch} %).`);return;}
-    b.grip=1;addFx({kind:'shake',amp:5,dur:220});SFX.bite();sayMore(`${LeNom(sp)} s’accroche : la foreuse est paralysée tant qu’il vit.`,'warn');}
+      addFx({kind:'num',x:G.px,y:G.py,txt:'0',col:'#8aa9a2',dur:750});sayMore(`${LeNom(sp)} tire et rate (${ch} %).`);return;}
+    b.grip=1;addFx({kind:'shake',amp:5,dur:220});sayMore(`${LeNom(sp)} s’accroche : la foreuse est paralysée tant qu’il vit.`,'warn');}
   const dm=dmgDe(sp);G.st.vie=Math.max(0,G.st.vie-dm);addFx({kind:'num',x:G.px,y:G.py,txt:'-'+dm,col:'#ff3b3b',dur:750});
   if(G.st.vie<=0){G.over={dead:true};sayMore(`${LeNom(sp)} achève la foreuse.`,'warn');}}
 function beastsAct(){
@@ -423,5 +423,5 @@ function raiseAlarm(b){const sp=BEASTS[b.sp];let n=0;
   for(const a of (G.animals||[]))if(Math.max(Math.abs(a.x-b.x),Math.abs(a.y-b.y))<=ALARM_R){if(!a.aware){n++;alerte(a);}a.aware=1;spot(a);}
   if(beastVisible(b)||n){addFx({kind:'num',x:b.x,y:b.y,txt:'!',col:PAL['3'],dur:900});SFX.screech();
     sayMore(`Un cafar pousse un cri d’alerte${n?` : ${n} ennemi${n>1?'s':''} alerté${n>1?'s':''}`:''} !`,'warn');}}
-function bleed(x,y){G.blood=G.blood||{};G.blood[idx(x,y)]=rnd(0,1);gore(x,y);}
+function bleed(x,y){gore(x,y);}   // plus de tache de sang : étincelles et débris (10-rendu)
 

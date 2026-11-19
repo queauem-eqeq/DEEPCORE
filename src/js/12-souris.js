@@ -210,7 +210,6 @@ function inspectHTML(){const {x,y}=HOV;if(x<0||y<0||x>=W||y>=H)return '';
   if(G.cles&&G.cles[i])out.push('<p>Une clé : passer dessus pour la ramasser.</p>');
   const sol=G.items&&G.items[i];
   if(sol&&sol.length)out.push(`<p><b>${sol.length>1?'Objets au sol':'Objet au sol'}</b> · ${sol.map(k=>ITEMS[k].n).join(', ')} · placez la foreuse dessus pour ramasser.</p>`);
-  if(G.blood&&G.blood[i]!=null)out.push('<p>Traces de sang.</p>');
   if(d!==0&&occ||d===0)out.push(`<p><b>${tn}</b> · ${td}</p>`);else out.push(`<p>${td}</p>`);
   const dm=G.dmg&&G.dmg[i];if(dm&&(t===ROCK||t===MOUNT))out.push('<p>Fissurée : encore 1 coup pour la briser.</p>');
   if(border&&(t===ROCK||t===MOUNT))out.push('<p>Bord de la carte : indestructible.</p>');
