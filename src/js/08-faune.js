@@ -47,7 +47,7 @@ function chaseStep(o,dist,fits,tx=G.px,ty=G.py){const h=dist[idx(o.x,o.y)],cur=h
    endroit où il a vu la foreuse, s'y rend par le plus court chemin, puis en choisit un autre, pendant SEARCH_T
    battements. Les points sont toujours tirés autour de ce dernier point connu, jamais autour de lui : il tourne donc
    dans la zone au lieu de dériver. Avant le 18 novembre, il faisait 4 battements de pas au hasard et s'éloignait. */
-const SEARCH_T=30,SEARCH_R=10,SEARCH_VAR=3;
+const SEARCH_T=20,SEARCH_R=10,SEARCH_VAR=3;
 /* Perte de trace (13 novembre 2026, les 3 % de Brogue) : une bête qui vous chasse hors du rayon de discrétion,
    mais encore dans la bande de chasse (HUNT_MULT ×), a LOSE_TRACK par tour de vous perdre. Elle garde alors sa
    dernière position connue et s'y rend, mais ne vous suit plus de loin : il lui faut vous remarquer de nouveau
@@ -73,7 +73,7 @@ function detectChance(o){return (Math.hypot(o.x-G.px,o.y-G.py)<=(G.stealth||STEA
 function forget(o){o.mem=null;o.search=0;o.stuck=0;o.lost=0;o.sg=null;}
 // un pas vers la dernière position connue ; renvoie false quand il faut passer à la fouille
 function seekStep(o,fits,DC,m){const [mx,my]=o.mem,k=mx+','+my+','+(m?1:0),d=DC[k]||(DC[k]=distFrom(mx,my,m)),h=d[idx(o.x,o.y)];
-  if(h<0){forget(o);return false;}if(h<=1){o.search=SEARCH_T;return false;}
+  if(h<0){forget(o);return false;}if(h<=(G.t[idx(mx,my)]===DOOR?0:1)){o.search=SEARCH_T;return false;}   // la foreuse a disparu derrière une porte : il vient jusque dans l'embrasure, ce qui l'ouvre et lui rend la vue
   if(chaseStep(o,d,fits,mx,my)){o.stuck=0;return true;}if(++o.stuck>2)o.search=SEARCH_T;return false;}
 // un point à fouiller : accessible depuis le dernier point connu, à SEARCH_R cases environ de lui, et pas là où il est déjà
 function searchGoal(o,fits,DC,m){const [mx,my]=o.mem,k=mx+','+my+','+(m?1:0),d=DC[k]||(DC[k]=distFrom(mx,my,m));

@@ -1,13 +1,17 @@
 /* ---------- Vision ---------- */
 const opaque=(x,y)=>{const i=idx(x,y);if(G.fum&&G.fum[i])return true;   // la fumée d'un fumigène cache la vue, des deux côtés (16 novembre 2026)
-  const v=G.t[i];return v===MOUNT||v===HARD||v===GRASS;};
+  const v=G.t[i];if(v===DOOR)return !porteOuverte(x,y);   // une porte cache la vue tant que personne ne se tient dedans
+  return v===MOUNT||v===HARD||v===GRASS||v===WALL||v===PILLAR||v===LOCK||v===SECRET;};
+const porteOuverte=(x,y)=>(G.px===x&&G.py===y)||!!(beastAt(x,y)||animalAt(x,y));
 function line(x0,y0,x1,y1){const p=[];let dx=Math.abs(x1-x0),dy=-Math.abs(y1-y0),sx=x0<x1?1:-1,sy=y0<y1?1:-1,e=dx+dy;
   for(;;){p.push([x0,y0]);if(x0===x1&&y0===y1)break;const e2=2*e;if(e2>=dy){e+=dy;x0+=sx;}if(e2<=dx){e+=dx;y0+=sy;}}return p;}
 function los(x0,y0,x1,y1){const p=line(x0,y0,x1,y1);for(let i=1;i<p.length-1;i++)if(opaque(p[i][0],p[i][1]))return false;return true;}
 // Capteur de la foreuse (elle seule) : la case juste derrière un obstacle à la vue (montagne, herbes hautes) est aperçue
 // en mode souvenir — terrain affiché assombri, sans les créatures. Les ennemis, eux, ne voient pas à travers.
 function peekBehind(x0,y0,x1,y1){const p=line(x0,y0,x1,y1),n=p.length;if(n<3)return false;
-  for(let i=1;i<n-2;i++)if(opaque(p[i][0],p[i][1]))return false;return opaque(p[n-2][0],p[n-2][1]);}
+  for(let i=1;i<n-2;i++)if(opaque(p[i][0],p[i][1]))return false;
+  const o=G.t[idx(p[n-2][0],p[n-2][1])];if(bati(o)||o===DOOR)return false;   // le capteur ne devine rien derrière un mur bâti ou une porte
+  return opaque(p[n-2][0],p[n-2][1]);}
 function computeFOV(){vis=new Uint8Array(W*H);const r=G.st.capteur,px=G.px,py=G.py;
   for(let y=py-r;y<=py+r;y++)for(let x=px-r;x<=px+r;x++){if(x<0||y<0||x>=W||y>=H)continue;if((x-px)**2+(y-py)**2>r*r+r)continue;
     if(los(px,py,x,y)){vis[idx(x,y)]=1;G.seen[idx(x,y)]=1;}else if(peekBehind(px,py,x,y))G.seen[idx(x,y)]=1;}
@@ -41,7 +45,7 @@ function stealthCalc(base,act,flat,walls,run){           // flat : sur des herbe
   r=Math.max(STEALTH_MIN,r-Math.min(Math.ceil(walls/2),WALL_MAX));
   return r+(run?SPRINT_NOISE:0);}                      // la course s'entend : + 2, après tout le reste
 function stealthRange(act){
-  let walls=0;for(const [dx,dy] of DIRS){const x=G.px+dx,y=G.py+dy;if(x<0||y<0||x>=W||y>=H)continue;const v=G.t[idx(x,y)];if(v===ROCK||v===MOUNT)walls++;}
+  let walls=0;for(const [dx,dy] of DIRS){const x=G.px+dx,y=G.py+dy;if(x<0||y<0||x>=W||y>=H)continue;const v=G.t[idx(x,y)];if(v===ROCK||v===MOUNT||bati(v))walls++;}
   return stealthCalc(Math.max(STEALTH_MIN,STEALTH_BASE+(G.st.dis||0)),act,G.t[idx(G.px,G.py)]===FLAT,walls,lastRun);}
 function turnStealth(){G.stealth=stealthRange(lastAct);}
 
@@ -60,8 +64,11 @@ const slowOf=(v,swim)=>swim?1:(SLOW[v]||1);             // les nageurs (crabos) 
 const coupDur=()=>Math.max(25,DUR.coup+(G.st.coup||0));   // une arme peut allonger ou raccourcir le coup (14-inventaire)
 const robotVit=()=>Math.max(1,G.st.vitesse||5);
 function stepDur(v,run){return DUR.pas*5/robotVit()*slowOf(v)*(run?SPRINT_MULT:1)*(G.eff&&G.eff.glu>0?2:1);}   // englué : pas deux fois plus longs
+// Une créature qui pousse une porte à portée de vue s'entend (19 novembre 2026) : on compare les portes occupées avant et après le battement.
+function portesPrises(){const s=new Set();for(const l of [G.animals,G.beasts])for(const o of l||[]){const i=idx(o.x,o.y);if(G.t[i]===DOOR)s.add(i);}return s;}
+function portesBruit(av){for(const i of portesPrises())if(!av.has(i)&&vis[i]){SFX.porte(.6);return;}}
 function pass(d,wait){G.time=(G.time||0)+d;G.debt=(G.debt||0)+d;
-  while(G.debt>=TICK-1e-6&&!G.over){G.debt-=TICK;if(wait)drift(true);animalsAct();beastsAct();effTick();regen(wait);}
+  while(G.debt>=TICK-1e-6&&!G.over){G.debt-=TICK;if(wait)drift(true);const av=portesPrises();animalsAct();beastsAct();portesBruit(av);effTick();regen(wait);}
   if(!G.over)turnStealth();}                            // une action rapide peut ne faire battre personne : la portée affichée reste juste
 function toggleSprint(){if(!G||G.over)return;
   if(!G.sprint&&G.st.energie<SPRINT_COST){say(`Énergie insuffisante pour courir (${Math.floor(G.st.energie)}/${SPRINT_COST}).`,'warn');SFX.blocked();render();return;}
@@ -73,7 +80,7 @@ const siteAt=(x,y)=>G.sites.find(s=>s.x===x&&s.y===y);
 function drift(wait){if(!wait)return;
   if(G.t[idx(G.px,G.py)]!==DEEP)return;
   const k=rnd(0,7),[dx,dy]=DIRS[k],nx=G.px+dx,ny=G.py+dy,v=G.t[idx(nx,ny)];
-  if(v===ROCK||v===MOUNT||v===CHASM||!diagOk(G.px,G.py,dx,dy)||beastAt(nx,ny)||animalAt(nx,ny)){SFX.thud();sayMore(`Le courant plaque le robot contre un obstacle (${DIRN[k]}).`,'warn');return;}
+  if(v===ROCK||v===MOUNT||v===CHASM||bati(v)||!diagOk(G.px,G.py,dx,dy)||beastAt(nx,ny)||animalAt(nx,ny)){SFX.thud();sayMore(`Le courant plaque le robot contre un obstacle (${DIRN[k]}).`,'warn');return;}
   G.px=nx;G.py=ny;G.lastDir=null;if(v===GRASS)G.t[idx(nx,ny)]=FLAT;
   SFX.drift();sayMore(`Eau profonde : le courant entraîne le robot vers ${['l’est','l’ouest','le sud','le nord','le sud-est','le nord-est','le sud-ouest','le nord-ouest'][k]}.`,'warn');
 }
@@ -105,6 +112,10 @@ function tryMove(dx,dy){
   if(v===CHASM){say('Gouffre : passage impossible.');SFX.blocked();render();return;}
   if(v===SHIP){say('Coque du vaisseau : indestructible.');SFX.blocked();render();return;}
   if(v===HARD){say('Roche dure : la foreuse ne l’entame pas. Seule une charge sismique en vient à bout.');SFX.blocked();render();return;}
+  if(v===LOCK){const i=idx(nx,ny);
+    if(!(G.st.cles>0)){say('Porte verrouillée : il faut une clé.');SFX.blocked();render();return;}
+    G.st.cles--;G.t[i]=DOOR;G.turn++;G.msg=null;SFX.serrure();say('La clé tourne dans la serrure : la porte est ouverte.','good');pass(DUR.wait||100);computeFOV();render();return;}
+  if(bati(v)){say((v===PILLAR?'Pilier':'Mur bâti')+' : la foreuse ne l’entame pas. Seule une charge sismique l’ouvre.');SFX.blocked();render();return;}
   if(v===ROCK||v===MOUNT){
     if(nx===0||ny===0||nx===W-1||ny===H-1){say('Bord de la carte : roche impossible à briser.');SFX.blocked();render();return;}
     if(!spend())return;
@@ -133,6 +144,8 @@ function tryMove(dx,dy){
   if(run)SFX.motor();
   if(doorway){SFX.door();say(v===DECK?'La porte du vaisseau s’ouvre : la foreuse rentre dans la soute.':'La porte du vaisseau s’ouvre : la foreuse sort.','info');}
   pass(stepDur(v,run));
+  if(G.t[idx(G.px,G.py)]===DOOR)SFX.porte();   // la foreuse pousse une porte
+  {const ci=idx(G.px,G.py);if(G.cles&&G.cles[ci]){delete G.cles[ci];G.st.cles=(G.st.cles||0)+1;SFX.spot();addFx({kind:'num',x:G.px,y:G.py,txt:'clé',col:PAL['1'],dur:900});sayMore(`Clé ramassée (${G.st.cles} en poche). Elle ouvre une porte verrouillée.`,'good');}}
   {const oi=idx(G.px,G.py);if(G.ore&&G.ore[oi]&&oreSol(G.ore[oi])){const l=oreLv(G.ore[oi]),mt=oreMat(G.ore[oi]);delete G.ore[oi];
     if(mt){G.st.matiere=(G.st.matiere||0)+ORE_PV[l];addFx({kind:'num',x:G.px,y:G.py,txt:'+'+ORE_PV[l],col:PAL['1'],dur:750});sayMore(`Matière récupérée : +${ORE_PV[l]} (réserve : ${G.st.matiere}).`,'good');SFX.spot();}
     else{const av=G.st.vie,ae=G.st.energie;   // les éclats refont le plein de vie ET d'énergie (16 novembre 2026)
@@ -151,7 +164,7 @@ function tryMove(dx,dy){
 /* ---------- Forage ---------- */
 function waitTurn(){
   if(G.over||drilling||!$('overlay').hidden)return;lastAct='wait';lastRun=false;G.turn++;G.msg=null;if(!REST)say(`Le robot attend : recharge ${WAIT_REGEN} fois plus vite (${+(G.st.power/POW_BASE*WAIT_REGEN).toFixed(1)}/t).`);
-  pass(DUR.attente,true);computeFOV();render();if(G.over&&G.over.dead)dead();
+  pass(DUR.attente,true);chercheSecrets();computeFOV();render();if(G.over&&G.over.dead)dead();
 }
 function askDrill(){
   if(G.over||drilling||!$('overlay').hidden)return;const s=siteAt(G.px,G.py);if(!s)return;

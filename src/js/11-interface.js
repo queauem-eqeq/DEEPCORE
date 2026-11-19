@@ -23,7 +23,7 @@ function mini(){
   if(mv.width!==pw||mv.height!==ph){mv.width=pw;mv.height=ph;mv.style.height=Math.round(cw*H/W)+'px';}
   const k=pw/W,X=x=>Math.floor(x*k),Y=y=>Math.floor(y*k),cell=(x,y,w,h)=>mctx.fillRect(X(x),Y(y),X(x+(w||1))-X(x),Y(y+(h||1))-Y(y));
   mctx.setTransform(1,0,0,1,0,0);mctx.globalAlpha=1;mctx.fillStyle='#020605';mctx.fillRect(0,0,pw,ph);
-  const C=[[PAL['3'],.14],[PAL['3'],.55],[PAL['3'],.85],[PAL['2'],.6],[PAL['1'],.55],[PAL['1'],.22],[PAL['2'],.22],['#000',1],[PAL['3'],.3],[PAL['3'],.3],[PAL['1'],.35],[PAL['1'],.9],[PAL['2'],.35],[PAL['3'],1]];   // 13 = roche dure : la plus marquée de la mini-carte
+  const C=[[PAL['3'],.14],[PAL['3'],.55],[PAL['3'],.85],[PAL['2'],.6],[PAL['1'],.55],[PAL['1'],.22],[PAL['2'],.22],['#000',1],[PAL['3'],.3],[PAL['3'],.3],[PAL['1'],.35],[PAL['1'],.9],[PAL['2'],.35],[PAL['3'],1],[PAL['3'],.95],[PAL['3'],.05],[PAL['1'],1],[PAL['3'],.7],['#ffffff',1],[PAL['3'],.95]];   // 13 = roche dure : la plus marquée de la mini-carte ; 14 à 17 = mur, sol bâti, porte, pilier
   for(let y=0;y<H;y++)for(let x=0;x<W;x++){const i=idx(x,y);if(fog&&!G.seen[i])continue;const [c,a]=C[G.t[i]]||C[0];mctx.globalAlpha=a;mctx.fillStyle=c;cell(x,y);}
   mctx.globalAlpha=1;
   for(const s of G.sites){if(fog&&!s.seen)continue;mctx.fillStyle=s.known?PAL['3']:PAL['2'];cell(s.x-1,s.y-1,3,3);}
@@ -75,7 +75,7 @@ function side(){
   // Le sous-menu Statistiques a été retiré le 15 novembre 2026 : les stats sont dans la fenêtre Équipement.
   sacDraw();
   {const E=G.eff||{},l=[];if(E.poison>0)l.push(`<span style="color:var(--life)">Poison ${E.poison}</span>`);if(E.glu>0)l.push(`Englué ${E.glu}`);{const f=G.fum&&G.fum[idx(G.px,G.py)];if(f)l.push(`<span style="color:var(--c1)">Dans la fumée ${f.v}</span>`);}$('effs').innerHTML=l.join(' · ');}
-  $('lvl').textContent=`Carte ${W} × ${H}`;   // plus de niveau ni de biome depuis le 16 novembre 2026 : une seule carte, réglée dans le menu Monde$('matN').textContent=G.st.matiere||0;
+  $('lvl').textContent=`Carte ${W} × ${H}`;   // plus de niveau ni de biome depuis le 16 novembre 2026 : une seule carte, réglée dans le menu Monde$('matN').textContent=G.st.matiere||0;$('cleN').textContent=G.st.cles||0;
   if(!$('inventaire').hidden)invDraw();
   $('msg').innerHTML=seenHTML();
   const lg=(G.log||[]).slice(-5);

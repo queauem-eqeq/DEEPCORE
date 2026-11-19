@@ -68,6 +68,25 @@ referme pas la fuite, parce qu'une fois lancée la foreuse sort de toute façon 
 précision de ces chiffres : **40 essais par cas**, donc ± 15 points ; deux mesures d'affilée du cas à
 4 cases ont donné 43 % puis 65 %. Seuls les écarts francs (jamais / toujours) sont solides.
 
+### Avec la fouille de 20 battements (18 novembre 2026, soir)
+
+Depuis le 18 novembre 2026 l'ennemi ratisse la zone avant d'oublier ; la fouille passe ce soir de 30 à 20 battements.
+« Semée » compte désormais le temps de fouille, d'où des durées plus longues que dans les tableaux ci-dessus. 40 essais par cas.
+
+| Situation | En marchant | En courant |
+|---|---|---|
+| Terrain dégagé, 4 cases d'avance | jamais semée | 43 %, en 47 tours |
+| Terrain dégagé, 12 cases d'avance | 43 %, en 44 tours | à tous les coups, en 50 tours |
+| Terrain dégagé, 21 cases d'avance | à tous les coups, en 41 tours | — |
+| Herbes hautes, en ligne droite | 85 %, en 27 tours | à tous les coups, en 29 tours |
+| Herbes hautes, en zigzag | à tous les coups, en 24 tours | — |
+| Ouverture dans un mur, puis obliquer | 45 %, en 31 tours | 95 %, en 30 tours |
+| La même, avec 12 cases d'avance | 68 %, en 37 tours | — |
+| Zone de rochers épars | jamais semée | — |
+
+Détection inchangée (portée 10, repérée à tous les coups jusqu'à 8 cases, jamais à 11). La fuite est bornée à 55 tours :
+une partie des « non semée » sont des fouilles encore en cours à la fin de l'essai.
+
 ### Ce que ces chiffres disent
 
 - **De près, à découvert, on ne sème personne.** Le crabos va aussi vite que la foreuse (vitesse 5

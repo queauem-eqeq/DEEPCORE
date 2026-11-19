@@ -52,7 +52,7 @@ Artefact à part (https://claude.ai/artifact/9BKRaoB4hzgdWhzYFx5A6q) qui rejoue 
   attention aux noms en double (`const` redéclarée = erreur de syntaxe) et aux noms qui existent déjà dans `window`.
   Un nouveau fichier doit aussi être ajouté en balise `<script>` dans `index.html`.
   00 base · 01 sons · 02 palette · 03 tuiles (motifs 16×16) · 04 vaisseau · 05 tuiles éditables · 06 réglages ·
-  07 génération de la carte · 08 faune et prédateurs · 09 vision, déplacement, forage · 10 rendu et gouffres ·
+  07 génération de la carte · 07b bâtiments · 08 faune et prédateurs · 09 vision, déplacement, forage · 10 rendu et gouffres ·
   11 interface (mode carte, « En vue », commandes, enregistrement) · 12 souris et inspection · 13 éditeur de tuiles ·
   14 inventaire et équipement · 15 cinématique d'intro (qui lance aussi le jeu : rester le dernier).
 - `docs/` : conception, mesures, notes sur Brogue (voir plus haut). `planches/` : planches de travail
