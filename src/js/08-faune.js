@@ -362,7 +362,7 @@ function beastsAct(){
   for(const b of G.beasts){if(G.over)break;if(b.skip){b.skip=0;continue;}const sp=BEASTS[b.sp];b.mp=Math.min(2,b.mp+sp.v/5/slowOf(G.t[idx(b.x,b.y)],sp.swim));
     const d=Math.hypot(b.x-G.px,b.y-G.py),sees=voitForeuse(b,b.hunt>0);
     if(sees){if(!b.hunt&&sp.alarm)alarms.push(b);if(!b.hunt&&beastVisible(b))charged=charged||sp;if(!b.hunt)alerte(b);b.hunt=1;spot(b);if(G.px!==b.x)b.dir=Math.sign(G.px-b.x);
-      if(sp.pack)for(const o of mates(b)){if(!o.hunt)alerte(o);o.hunt=1;spot(o);}}                        // la bande partage ce qu'un membre voit
+      if(sp.pack)for(const o of mates(b))if(BEASTS[o.sp].pack){if(!o.hunt)alerte(o);o.hunt=1;spot(o);}}   // seuls les relais partagent ce qu'un des leurs voit — pas les autres espèces de leur groupe (20 novembre 2026)
     else if(b.hunt&&b.search>0&&--b.search===0){b.hunt=0;forget(b);}                // fouille terminée : il oublie
     else if(b.hunt&&!b.mem)b.hunt=0;
     b.sees=sees;
