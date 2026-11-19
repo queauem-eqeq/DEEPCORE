@@ -85,7 +85,7 @@ function exploreEvent(E){
   if(nv)return `${(G.beasts.includes(nv)?BEASTS:SPECIES)[nv.sp].n.toLowerCase()} en vue`;
   if((G.beasts||[]).some(b=>b.hunt>0&&vis[idx(b.x,b.y)]))return 'un ennemi vous chasse';
   if(G.sites.filter(s=>s.seen).length>E.sites)return 'site de forage repéré';
-  const ef=G.eff||{};if(ef.poison>0||ef.glu>0)return 'la foreuse subit un effet';
+  const ef=G.eff||{};if(ef.poison>0||ef.glu>0||paralyse())return 'la foreuse subit un effet';
   if(G.msg&&G.msg.c==='warn')return 'alerte';
   return null;}
 function stopExplore(m,c){if(!EXPL)return;clearTimeout(EXPL.tm);EXPL=null;$('explBtn').classList.remove('on');if(m)sayMore(m,c||'warn');render();}

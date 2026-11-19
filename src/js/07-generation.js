@@ -219,15 +219,14 @@ function niveau(){drilling=false;
   genPlanet();
   G.w=W;G.h=H;
   batiments();   // structures bâties (07b), avant la roche dure et les métaux
-  lifeCalc();
   durcir();   // la roche dure avant les métaux : ils n'y apparaissent jamais
   {const a=W*H/(48*32);G.eff={};G.fum={};hideOre(Math.max(1,Math.round(GISEMENTS.metal*a)),Math.max(1,Math.round(GISEMENTS.mat*a)));}
   G.sonar=1;   // sonar à émettre (voir sonarStart, 10-rendu) : il part 10 à 20 tours après l'arrivée
   G.items={};G.tracks={};G.lastDir=null;G.beasts=[];G.blood={};G.fv=2;
   G.inv=invTest();G.log=[];
   G.st.matiere=G.st.matiere||0;G.sonarAt=(G.turn||0)+10+Math.floor(Math.random()*11);
-  spawnAnimals();spawnBeasts();lastAct='move';palBiome(null);buildTiles();turnStealth();computeFOV();}
-const fauneTxt=()=>LIFE_LBL.filter(([k])=>LIFE[k]>0).map(([,l])=>l).join(', ')||'aucune';
+  spawnGroupes();lastAct='move';palBiome(null);buildTiles();turnStealth();computeFOV();}
+const fauneTxt=()=>[...new Set([...(G.animals||[]).map(a=>SPECIES[a.sp].n),...(G.beasts||[]).map(b=>BEASTS[b.sp].n)])].join(', ')||'aucune';
 function newGame(){niveau();
   say('Atterrissage confirmé. Un site de forage signalé par l’orbiteur. La foreuse est dans la soute ; la porte est à l’arrière.','info');}
 
@@ -239,10 +238,20 @@ try{const b=JSON.parse(localStorage.getItem('np-best')||'null');if(b)BEST_LIST()
 function saveBest(){const o={};BEST_LIST().forEach(e=>{o[e.key]={};BFIELDS.forEach(([f])=>o[e.key][f]=e.o[f]);});try{localStorage.setItem('np-best',JSON.stringify(o));}catch(e){}touchLocal();}
 try{if(localStorage.getItem('np-mig')!=='eq1'){SPECIES[0].v=6;BEASTS[0].pv=25;saveBest();
   localStorage.setItem('np-mig','eq1');}}catch(e){}
-function buildBest(){
-  $('bestList').innerHTML=BEST_LIST().map(e=>`<div class="bcard"><div class="bh"><img src="${ICON[e.ic]||''}" alt=""><div><b>${e.o.n}</b><br><span>${e.role}</span></div></div>
-    <div class="fields">${BFIELDS.map(([f,l,mn,mx])=>`<label for="bf-${e.key}-${f}">${l}<input type="number" id="bf-${e.key}-${f}" data-k="${e.key}" data-f="${f}" min="${mn}" max="${mx}" step="1" value="${e.o[f]}"></label>`).join('')}</div></div>`).join('');
-}
+/* Fenêtre Bestiaire (refaite le 19 novembre 2026) : à droite la liste des espèces en colonne ; à gauche, jusqu'à quatre
+   espèces choisies, côte à côte dans un tableau — une ligne par statistique — pour les modifier et les comparer.
+   Un clic dans la liste ajoute ou retire une espèce ; la cinquième choisie remplace la plus ancienne. */
+let BEST_SEL=null;
+function buildBest(){const L=BEST_LIST();
+  if(!BEST_SEL)BEST_SEL=L.slice(0,4).map(e=>e.key);BEST_SEL=BEST_SEL.filter(k=>L.some(e=>e.key===k));
+  const S=BEST_SEL.map(k=>L.find(e=>e.key===k));
+  $('bestSide').innerHTML=L.map(e=>{const n=BEST_SEL.indexOf(e.key);return `<button class="bli${n>=0?' sel':''}" data-k="${e.key}" aria-pressed="${n>=0}"><img src="${ICON[e.ic]||''}" alt=""><b>${e.o.n}</b><span>${n>=0?n+1:''}</span></button>`;}).join('');
+  $('bestList').innerHTML=!S.length?'<p class="mnote">Choisissez jusqu’à quatre espèces dans la liste.</p>':`<table class="btab"><thead><tr><th></th>${S.map(e=>`<th scope="col"><img src="${ICON[e.ic]||''}" alt=""><b>${e.o.n}</b><button class="gx" data-x="${e.key}" aria-label="Retirer ${e.o.n} de la comparaison" title="Retirer">×</button></th>`).join('')}</tr></thead>
+    <tbody>${BFIELDS.map(([f,l,mn,mx])=>`<tr><th scope="row">${l}</th>${S.map(e=>`<td><input type="number" id="bf-${e.key}-${f}" data-k="${e.key}" data-f="${f}" min="${mn}" max="${mx}" step="1" value="${e.o[f]}" aria-label="${l} : ${e.o.n}"></td>`).join('')}</tr>`).join('')}
+    <tr class="brole"><th scope="row">Rôle</th>${S.map(e=>`<td>${e.role}</td>`).join('')}</tr></tbody></table>`;}
+function bestToggle(k){const i=BEST_SEL.indexOf(k);if(i>=0)BEST_SEL.splice(i,1);else{BEST_SEL.push(k);if(BEST_SEL.length>4)BEST_SEL.shift();}buildBest();}
+$('bestSide').addEventListener('click',e=>{const b=e.target.closest('.bli');if(!b)return;bestToggle(b.dataset.k);const n=$('bestSide').querySelector(`.bli[data-k="${b.dataset.k}"]`);if(n)n.focus();});
+$('bestList').addEventListener('click',e=>{const b=e.target.closest('button[data-x]');if(b)bestToggle(b.dataset.x);});
 /* ---------- Discrétion : base modifiable et liste des modificateurs (13 novembre 2026) ---------- */
 function buildDisc(){
   const b=STEALTH_BASE,c=(a,f,w,r)=>stealthCalc(b,a,f,w,r),now=G.stealth||STEALTH_BASE;
@@ -269,9 +278,7 @@ function buildDisc(){
 function openDisc(){buildDisc();$('discretion').hidden=false;$('discClose').focus();}
 function closeDisc(){$('discretion').hidden=true;$('discBtn').focus();render();}
 function openBest(){buildBest();$('bestiary').hidden=false;bestHaut();$('bestClose').focus();}
-// trois fiches par ligne ; au-delà de trois lignes la liste défile (molette) : sa hauteur est celle des trois premières lignes
-function bestHaut(){const l=$('bestList'),c=[...l.children];if(c.length<=9){l.style.maxHeight='';return;}
-  l.style.maxHeight=(c[0].offsetHeight+c[3].offsetHeight+c[6].offsetHeight+24+2)+'px';l.scrollTop=0;}
+function bestHaut(){}
 function closeBest(){$('bestiary').hidden=true;$('bestBtn').focus();render();}
 
 // Éclats de métal : ORE_PCT % des cases de montagne (hors rangée extérieure indestructible) en contiennent ; brisée, la roche les laisse

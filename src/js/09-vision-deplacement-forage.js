@@ -77,7 +77,7 @@ function toggleSprint(){if(!G||G.over)return;
 /* ---------- Déplacement ---------- */
 const siteAt=(x,y)=>G.sites.find(s=>s.x===x&&s.y===y);
 // Dérive dans l'eau profonde : seulement quand la foreuse attend (un pas, lui, est dévié au moment même : DEEP_MISS)
-function drift(wait){if(!wait)return;
+function drift(wait){if(!wait||paralyse())return;
   if(G.t[idx(G.px,G.py)]!==DEEP)return;
   const k=rnd(0,7),[dx,dy]=DIRS[k],nx=G.px+dx,ny=G.py+dy,v=G.t[idx(nx,ny)];
   if(v===ROCK||v===MOUNT||v===CHASM||bati(v)||!diagOk(G.px,G.py,dx,dy)||beastAt(nx,ny)||animalAt(nx,ny)){SFX.thud();sayMore(`Le courant plaque le robot contre un obstacle (${DIRN[k]}).`,'warn');return;}
@@ -90,7 +90,6 @@ function tryMove(dx,dy){
   let v=G.t[idx(nx,ny)];
   G.face=dx>0?'r':dx<0?'l':dy>0?'d':'u';
   if(!diagOk(G.px,G.py,dx,dy)){say('Coin de paroi : pas de passage en diagonale.');SFX.blocked();render();return;}
-  {const am=ambAt(nx,ny);if(am)ambWake(am,false);}   // on bute sur un embusqué : il est débusqué avant d'avoir frappé
   const bz=beastAt(nx,ny);
   if(bz){const sp=BEASTS[bz.sp];G.turn++;G.msg=null;engage();const sur=!(bz.hunt>0),cr=sur||roll(G.st.crit??5);   // surprise : ne vous a pas repéré
     {const ch=hitChance(robotPre(),sp.def+terrMod(nx,ny));if(!sur&&!roll(ch)){if(!bz.hunt)alerte(bz);bz.hunt=1;spot(bz);addFx({kind:'lunge',robot:true,dx,dy,dur:180});addFx({kind:'num',x:nx,y:ny,txt:'0',col:'#8aa9a2',dur:750});
@@ -109,6 +108,7 @@ function tryMove(dx,dy){
     if(an.hp<=0){G.animals.splice(G.animals.indexOf(an),1);bleed(an.x,an.y);say(`${tag}La foreuse écrase ${leNom(sp)}.`,'warn');SFX.squish();}
     else{if(!an.aware)alerte(an);an.aware=1;an.enraged=true;spot(an);say(`${tag}La foreuse heurte ${leNom(sp)}.`);SFX.crack();}
    pass(coupDur());computeFOV();render();if(G.over&&G.over.dead)dead();return;}
+  if(paralyse()&&v!==ROCK&&v!==MOUNT){say('Paralysée : la foreuse ne peut plus se déplacer tant que le paralyzor est en vie.','warn');SFX.blocked();render();return;}
   if(v===CHASM){say('Gouffre : passage impossible.');SFX.blocked();render();return;}
   if(v===SHIP){say('Coque du vaisseau : indestructible.');SFX.blocked();render();return;}
   if(v===HARD){say('Roche dure : la foreuse ne l’entame pas. Seule une charge sismique en vient à bout.');SFX.blocked();render();return;}

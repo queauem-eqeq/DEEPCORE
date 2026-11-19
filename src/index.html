@@ -8,7 +8,7 @@
   <div class="mcard">
     <div class="mhead"><h2 id="bestTitle">Bestiaire</h2><button id="bestClose" aria-label="Fermer le bestiaire">Fermer</button></div>
     <p class="mnote">Les modifications s’appliquent immédiatement à la partie en cours et restent mémorisées.</p>
-    <div class="beasts" id="bestList"></div>
+    <div class="bcols"><section class="bedit" id="bestList" aria-label="Espèces choisies : modification et comparaison"></section><section class="bside" id="bestSide" aria-label="Espèces"></section></div>
     <div class="mfoot"><button id="bestReset">Valeurs par défaut</button><button class="go" id="bestSave" title="Enregistrer ces valeurs dans la base du jeu, lisible par Claude, pour qu’elles deviennent les valeurs de référence">Enregistrer</button><span class="saved" id="bestMsg" role="status"></span></div>
   </div>
 </div>
@@ -51,12 +51,26 @@
     <div class="mdcols"><section><h3>Monde</h3><div class="gen" id="gen"></div></section><section><h3>Structures</h3><div class="gen" id="genS"></div></section></div>
   </div>
 </div>
+<!-- Fenêtre Groupes (Lab, 19 novembre 2026) : création et réglage des groupes d'ennemis. -->
+<div class="modal" id="groupes" role="dialog" aria-modal="true" aria-labelledby="grTitle" hidden>
+  <div class="mcard" tabindex="-1">
+    <div class="mhead"><h2 id="grTitle">Groupes</h2><button id="grClose" aria-label="Fermer les groupes">Fermer</button></div>
+    <p class="mnote">Un groupe réunit une ou plusieurs espèces et porte une valeur de menace. À chaque nouvelle carte, le budget achète au hasard des groupes actifs, jusqu’à épuisement. Les changements sont mémorisés et valent à la prochaine carte (REGEN).</p>
+    <div class="grtop"><label for="grBudget">Budget de menace<input type="number" id="grBudget" min="0" max="2000" step="5"></label><span id="grInfo" role="status"></span></div>
+    <div class="grcols">
+      <section class="gredit" id="grEdit" aria-label="Réglage du groupe choisi"></section>
+      <section class="grside" aria-label="Groupes existants"><div class="grliste" id="grList"></div>
+        <div class="mfoot"><button class="go" id="grAdd">+ Nouveau groupe</button><button id="grReset">Groupes par défaut</button></div>
+        <div class="mfoot"><button class="go" id="grSave" title="Enregistrer les groupes et leurs valeurs dans la base du jeu, lisible par Claude, pour qu’ils deviennent ceux du jeu publié">Enregistrer</button><span class="saved" id="grMsg" role="status"></span></div></section>
+    </div>
+  </div>
+</div>
 <!-- Fenêtre Life (faune), sortie du menu Monde le 18 novembre 2026 : la faune ne fait pas partie d'un archétype de monde.
      Le conteneur garde l'identifiant « life » qu'il avait dans Monde ; la fenêtre s'appelle « faune ». -->
 <div class="modal" id="faune" role="dialog" aria-modal="true" aria-labelledby="lfTitle" hidden>
   <div class="mcard" tabindex="-1">
     <div class="mhead"><h2 id="lfTitle">Life</h2><button id="lfClose" aria-label="Fermer le menu Life">Fermer</button></div>
-    <p class="mnote">Combien de créatures de chaque espèce sur la carte. Ces réglages ne sont pas enregistrés dans les archétypes de monde : ils valent pour toutes les cartes, jusqu’à ce que vous les changiez.</p>
+    <p class="mnote">Quels groupes d’ennemis peuvent apparaître, et pour quel budget de menace. Ces réglages ne sont pas enregistrés dans les archétypes de monde : ils valent pour toutes les cartes, jusqu’à ce que vous les changiez.</p>
     <section><h3>Faune</h3><div class="gen" id="life"></div></section>
   </div>
 </div>
@@ -111,7 +125,7 @@
     </div>
     <canvas id="mini" aria-label="Mini-carte des zones explorées"></canvas>
     <div class="seenwrap"><div class="seen" id="msg" role="region" aria-label="En vue"></div></div>
-    <div class="btnrow"><button class="go" id="restart" title="Générer une nouvelle carte avec les réglages en cours">REGEN</button><button id="mondeBtn" aria-haspopup="dialog" title="Relief, taille et archétypes de monde">MONDE</button><button id="lifeBtn" aria-haspopup="dialog" title="Faune : combien de créatures de chaque espèce">LIFE</button></div>
+    <div class="btnrow"><button class="go" id="restart" title="Générer une nouvelle carte avec les réglages en cours">REGEN</button><button id="mondeBtn" aria-haspopup="dialog" title="Relief, taille et archétypes de monde">MONDE</button><button id="lifeBtn" aria-haspopup="dialog" title="Faune : budget de menace et groupes d’ennemis">LIFE</button></div>
     <details class="fold" id="fd-pal">
       <summary><h2>Palette</h2></summary>
       <div class="pal">
@@ -128,6 +142,7 @@
       <div class="foldwrap">
         <div class="labbtns">
           <button id="bestBtn">Bestiaire</button>
+          <button id="grBtn" aria-haspopup="dialog" title="Créer et régler les groupes d’ennemis">Groupes</button>
           <button id="discBtn">Discrétion</button>
           <button id="curBtn">Tile editor</button>
           <button id="introBtn" title="Générer une nouvelle planète et rejouer la cinématique d’arrivée">Intro</button>
@@ -145,6 +160,7 @@
 <script src="js/04-vaisseau.js"></script>
 <script src="js/05-tuiles-editables.js"></script>
 <script src="js/06-reglages.js"></script>
+<script src="js/06b-groupes.js"></script>
 <script src="js/07-generation.js"></script>
 <script src="js/07b-batiments.js"></script>
 <script src="js/08-faune.js"></script>
