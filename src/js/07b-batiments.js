@@ -81,6 +81,8 @@ function boucles(B,S){const {own,porte,interdit,pied}=B,cand=[],miens=new Set(S.
       for(let j=1;j<=m;j++)for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++)pied[idx(fx+dx*j+a,fy+dy*j+b)]=1;
       B.pieces.push(p);S.pieces.push(p);longs++;}}
 }
+// Gouffres intérieurs retirés « pour l'instant » le 20 novembre 2026, à la demande de l'utilisateur : le code reste, coupé par ce drapeau.
+const GOUFFRES_INT=false;
 // Gouffres et piliers d'une structure, écrits dans B.sol (FLOOR par défaut) ; chaque ajout est annulé s'il coupe la structure.
 function amenager(B,S){const {own,porte,sol}=B;
   const relie=()=>{let s0=-1,tot=0;for(const p of S.pieces)for(const i of p.c)if(sol[i]!==CHASM&&sol[i]!==PILLAR){tot++;if(s0<0)s0=i;}
@@ -93,7 +95,7 @@ function amenager(B,S){const {own,porte,sol}=B;
     const acces=p.c.filter(i=>D4.some(([dx,dy])=>porte[idx(i%W+dx,((i/W)|0)+dy)]));
     const dedans=set=>[...set].filter(i=>{const x=i%W,y=(i/W)|0;for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++)if(!set.has(idx(x+dx,y+dy)))return false;return true;});
     const avant=p.c.map(i=>sol[i]),annule=()=>p.c.forEach((i,k)=>sol[i]=avant[k]);
-    if(Math.random()<S.st.gou&&p.c.length>=20){
+    if(GOUFFRES_INT&&Math.random()<S.st.gou&&p.c.length>=20){
       if(Math.random()<.4){   // le gouffre prend toute la pièce : des chemins-ponts mènent des portes à un îlot central
         const mx=(x0+x1)>>1,my=(y0+y1)>>1,centre=p.c.reduce((a,i)=>Math.hypot(i%W-mx,((i/W)|0)-my)<Math.hypot(a%W-mx,((a/W)|0)-my)?i:a),garde=new Map();
         for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){const j=idx(centre%W+dx,((centre/W)|0)+dy);if(de.has(j))garde.set(j,FLOOR);}

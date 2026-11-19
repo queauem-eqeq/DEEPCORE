@@ -87,7 +87,7 @@ La carte n'est plus peuplée espèce par espèce (les cinq niveaux d'intensité 
   ↑ ↓. Mise en page demandée par l'utilisateur le 19 novembre 2026 (une grille de fiches avant). La fenêtre rappelle le
   budget de la carte en cours et ce qu'il a acheté. « Groupes par défaut » (deux clics) remet les sept groupes de départ.
 - **Plusieurs patrouilles par groupe** (19 novembre 2026) : dans la fiche, le sélecteur **ajoute** un style au groupe ; chaque
-  style choisi s'affiche en étiquette, retirable (il en reste toujours un). Quand il y en a plusieurs, **chaque groupe posé
+  style choisi s'affiche en étiquette, retirable. **Si aucun style n'est choisi, il est tiré parmi les six** (20 novembre 2026). Quand il y en a plusieurs, **chaque groupe posé
   sur la carte en tire un au hasard**. Champ `pats` (une liste) ; l'ancien champ `pat` est converti à la lecture.
 - **Bouton Enregistrer** de la fenêtre Groupes (19 novembre 2026) : écrit les groupes, leurs valeurs et le budget dans la base
   de l'artefact (`reglages/courant`, champ `groupes`), avec le reste des réglages. Claude peut alors les lire et en faire
@@ -96,7 +96,11 @@ La carte n'est plus peuplée espèce par espèce (les cinq niveaux d'intensité 
 - **LIFE** : le budget et une case à cocher par groupe.
 - **Style de patrouille** : il est porté par le **groupe**, pas par l'espèce (un crabot peut faire la ronde dans un groupe
   et garder un territoire dans un autre). Six styles depuis le 19 novembre 2026 :
-  - **Errance** : pas au hasard, sans but.
+  - **Errance** (règle du 20 novembre 2026) : **un pas tous les battements ou tous les deux** (une fois sur deux, la
+    créature marque un temps après son pas). Elle ne repart **jamais d'où elle vient, ni par les deux diagonales voisines** :
+    il lui reste tout droit, les deux diagonales de devant et les deux virages à 90°. Dans un cul-de-sac seulement, elle
+    fait demi-tour. Mesuré sur 300 battements : 0,67 pas par battement, 1 % de demi-tours. Avant : un pas au hasard
+    dans n'importe quelle direction, un battement sur quatre. Une bande de relais mise en errance ne reste plus groupée.
   - **Voyage en bande** : longs trajets vers un point éloigné, pause de 50 battements, nouveau départ.
   - **Ronde** : une boucle de 3 ou 4 points fixes, à 7-13 cases du point de départ, toujours dans le même ordre, avec une
     halte de 3 à 6 battements à chaque point. Prévisible : on peut passer derrière. Les points sont pris n'importe où sur
@@ -309,11 +313,10 @@ Version d'essai : tous les objets sont donnés au départ, non équipés sauf la
 | Accumulateur | accessoire | – | Énergie max +40 |
 | Réparobots (×2) | consommable | – | Vie +50 ; petites **croix rouges** autour de la foreuse |
 | Batterie (×2) | consommable | – | Énergie +50 ; petites **flèches bio** qui montent |
-| Purge (×2) | consommable | – | supprime poison et glu ; un **filet ovale** pulse autour de la foreuse, à un pixel de la case |
 | Fumigène (×2) | consommable | – | **un nuage de fumée** de 7 cases de large autour de la foreuse, opaque des deux côtés, qui s'étend puis se dissipe (voir ci-dessous) |
 | Charge sismique (×2) | consommable | – | **visée** : un carré de 3 × 3 à placer jusqu'à 4 cases, **30 dégâts** à tout ce qui s'y trouve ; bruyante (comme un forage) |
 
-Vingt et un objets depuis le 13 novembre 2026. Règles ajoutées ce jour-là :
+**La Purge a été supprimée le 20 novembre 2026** (plus aucun ennemi n'inflige poison ou glu), avec son bruitage et son filet ovale. Vingt et un objets depuis le 13 novembre 2026. Règles ajoutées ce jour-là :
 
 - **La foreuse est une arme** : c'est l'arme de départ, déjà équipée. Il y a **toujours une arme en main** : on ne peut ni la retirer ni la jeter, seulement la remplacer. **Toute arme fore la roche pareil** (choix de l'utilisateur) : l'arme ne change que le combat et le visuel.
 - **Le visuel de la foreuse suit l'équipement** : l'arme dessine la moitié avant (la pointe), l'armure la moitié arrière (le corps), dans les quatre orientations. Sans armure et avec la foreuse d'origine, c'est la tuile « Foreuse » du Tile editor, retouches comprises ; les autres combinaisons ne sont pas encore retouchables.
@@ -547,7 +550,7 @@ Chiffres à l'appui dans `mesures.md`, points de comparaison avec Brogue dans `b
     - **Emplacement au hasard**, sans lien avec le vaisseau : mesuré sur 40 cartes, le mur le plus proche est à 5 à 45 cases du départ, à moins de 10 cases une fois sur cinq.
     - **Accrétion** : une première pièce, puis des pièces collées contre un mur existant avec une porte à la jonction, parfois au bout d'un **couloir** (2 à 5 cases, une fois sur quatre 7 à 14). Formes : rectangle, L, croix, ronde, hall long, caverne.
     - **Boucles et longs couloirs** : depuis chaque sol on tire tout droit à travers le mur ; si l'on retombe sur le sol d'une autre pièce et que le détour à pied dépasse le seuil du style (12 à 26 pas, ou trois fois la longueur à percer), on perce — une porte si le mur fait une case, sinon **un couloir jusqu'à 19 cases** avec une porte à chaque bout, qui relie deux salles éloignées. Peu de longs couloirs : un, plus un par tranche de sept pièces.
-    - **Gouffres** : dans une pièce d'au moins 20 cases, selon le style (12 à 50 %). Quatre fois sur dix **le gouffre prend toute la pièce** : il ne reste qu'un îlot central et des **chemins-ponts**, un par porte, un peu tordus. Sinon le gouffre occupe le cœur de la pièce en laissant un pourtour, et un pont le franchit une fois sur deux. Un gouffre qui couperait la structure est annulé.
+    - **Gouffres intérieurs retirés « pour l'instant » le 20 novembre 2026**, à la demande de l'utilisateur : plus aucun gouffre ni chemin-pont dans les pièces (drapeau `GOUFFRES_INT` dans `07b-batiments.js`, le code reste). Ce qui suit décrit ce qu'ils faisaient. **Gouffres** : dans une pièce d'au moins 20 cases, selon le style (12 à 50 %). Quatre fois sur dix **le gouffre prend toute la pièce** : il ne reste qu'un îlot central et des **chemins-ponts**, un par porte, un peu tordus. Sinon le gouffre occupe le cœur de la pièce en laissant un pourtour, et un pont le franchit une fois sur deux. Un gouffre qui couperait la structure est annulé.
     - **Piliers** : dans les pièces rectangulaires, en croix ou rondes sans gouffre, tous les 2 ou 3 pas, jamais contre un mur ni devant une porte.
     - **Portes d'entrée : une à trois** selon le nombre de pièces (une, deux à partir de 7 pièces, trois à partir de 16), éloignées les unes des autres, de préférence sur un dehors déjà praticable. **Si l'entrée donne sur de la roche, un couloir est percé** jusqu'au reste de la carte. Un terrain enfermé entre des murs, que rien ne pourrait rejoindre, devient du mur plein.
     - **Le site de forage est déplacé dans la pièce la plus profonde** de la plus grande structure (la plus éloignée des entrées).

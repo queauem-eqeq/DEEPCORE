@@ -128,7 +128,7 @@ function fumTick(){const F=G.fum;if(!F)return;let ks=Object.keys(F);if(!ks.lengt
 /* ---------- Styles de patrouille (19 novembre 2026) ----------
    Le style appartient au groupe (Lab → Groupes) et ne joue que tant qu'aucun membre n'a repéré la foreuse ; dès que la
    chasse et la fouille sont finies, le groupe reprend sa patrouille là où elle en était, donc il rentre chez lui.
-   - errance    : pas au hasard, sans but (le comportement d'origine).
+   - errance    : un pas tous les battements ou tous les deux, jamais en arrière (errStep).
    - voyage     : la bande traverse la carte vers un point éloigné, s'y arrête, repart (packTick, plus bas).
    - ronde      : une boucle de 3 ou 4 points fixes autour du point de départ, toujours dans le même ordre, courte halte à chacun.
    - territoire : le groupe tourne dans un rayon de 6 cases autour de son point de départ, avec de longues haltes.
@@ -177,6 +177,15 @@ function patMove(o,fits){const P=G.patr&&G.patr[o.gi];if(!P||!P.pts||P.tx==null)
   if(h>P.sp)chaseStep(o,d,fits,P.tx,P.ty);
   else if(P.pat==='territoire'&&Math.random()<.15){const [dx,dy]=DIRS[rnd(0,7)],v=d[idx(o.x+dx,o.y+dy)];if(v>=0&&v<=P.sp+1&&fits(o.x+dx,o.y+dy)&&diagOk(o.x,o.y,dx,dy)){o.x+=dx;o.y+=dy;if(dx)o.dir=dx;}}
   o.mp=Math.min(o.mp,.99);return true;}
+/* Errance (règle du 20 novembre 2026) : un pas tous les battements ou tous les deux (une fois sur deux, la créature marque
+   un temps après son pas). Elle ne repart jamais d'où elle vient, ni par les deux diagonales voisines : il lui reste tout
+   droit, les deux diagonales de devant et les deux virages à 90°. Dans un cul-de-sac seulement, elle fait demi-tour.
+   o.lx, o.ly : son dernier pas ; o.ew : battements d'attente avant le prochain. */
+function errStep(o,fits){o.mp=Math.min(o.mp,.99);if(o.ew>0){o.ew--;return;}
+  const lx=o.lx||0,ly=o.ly||0,libres=DIRS.filter(([dx,dy])=>fits(o.x+dx,o.y+dy)&&diagOk(o.x,o.y,dx,dy));if(!libres.length)return;
+  const devant=libres.filter(([dx,dy])=>dx*lx+dy*ly>=0),c=devant.length?devant:libres,[dx,dy]=c[rnd(0,c.length-1)];
+  o.x+=dx;o.y+=dy;o.lx=dx;o.ly=dy;if(dx)o.dir=dx;o.ew=rnd(0,1);}
+const patDe=o=>{const P=G.patr&&G.patr[o.gi];return P?P.pat:null;};
 function animalsAct(){
   turnStealth();
   if(G&&!G.over)patTick();
@@ -201,6 +210,7 @@ function animalsAct(){
       else if(a.mode==='seek'){if(!seekStep(a,okA,DC,mA)){a.mode=a.search>0?'search':'';break;}}
       else if(a.mode==='search')searchStep(a,okA,DC,mA);
       else if(a.mode===''&&patMove(a,okA))break;                                          // calme : la patrouille de son groupe
+      else if(a.mode===''){errStep(a,okA);break;}                                         // calme, sans point à rejoindre : errance
       else if(Math.random()<(a.mode==='hold'?.15:.3)){const [dx,dy]=DIRS[rnd(0,7)];const nx=a.x+dx,ny=a.y+dy;
         if(okA(nx,ny)&&diagOk(a.x,a.y,dx,dy)&&(a.mode!=='hold'||cheb({x:nx,y:ny},G.px,G.py)>KEEP_MIN)){a.x=nx;a.y=ny;if(dx)a.dir=dx;}}
       else a.mp=Math.min(a.mp,.99);}
@@ -233,7 +243,8 @@ function spawnBeasts(){G.beasts=[];G.beastSeen={};G.packs={};let packId=0;
    est dépensé groupe après groupe, tirés au hasard parmi les groupes actifs encore abordables. Un groupe est posé d'un
    bloc autour d'un point, loin de la foreuse ; s'il ne trouve pas sa place (pas d'eau pour des torpilles…), il est écarté
    après trois échecs. Chaque créature garde le rang de son groupe (gr) : il servira aux styles de patrouille. */
-function poseGroupe(g,gi,id){{const l=g.pats&&g.pats.length?g.pats:[g.pat||'errance'];g=Object.assign({},g,{pat:l[rnd(0,l.length-1)]});}   // plusieurs styles cochés : ce groupe-ci en tire un
+function poseGroupe(g,gi,id){{const l=g.pats&&g.pats.length?g.pats:g.pat?[g.pat]:PATS.map(p=>p[0]);   // aucun style choisi : tous sont possibles
+  g=Object.assign({},g,{pat:l[rnd(0,l.length-1)]});}   // plusieurs styles cochés : ce groupe-ci en tire un
   const esp=k=>k==='insectoide'?-1:BEASTS.findIndex(b=>b.key===k);
   const mb=[];for(const m of g.m){const s=esp(m.k);if(m.k!=='insectoide'&&s<0)continue;for(let n=rnd(Math.min(m.min,m.max),Math.max(m.min,m.max));n>0;n--)mb.push(s);}
   if(!mb.length)return 'vide';   // tous les effectifs tirés valent 0 : rien à poser, ni échec ni dépense
@@ -361,9 +372,8 @@ function beastsAct(){
       else if(b.hunt>0&&b.search>0)searchStep(b,(x,y)=>beastFits(b,x,y),DC,mouilleOk(sp,b));                // fouille autour du dernier point connu
       else if(b.hunt>0){if(!seekStep(b,(x,y)=>beastFits(b,x,y),DC,mouilleOk(sp,b)))break;}       // vers la dernière position connue
       else if(patMove(b,(x,y)=>beastFits(b,x,y)))break;                                   // calme : la patrouille de son groupe
-      else if(b.pack>=0){packMove(b);}
-      else if(Math.random()<.25){const[dx,dy]=DIRS[rnd(0,7)];if(beastFits(b,b.x+dx,b.y+dy)&&diagOk(b.x,b.y,dx,dy)&&(b.pack<0||packOk(b,b.x+dx,b.y+dy))){b.x+=dx;b.y+=dy;if(dx)b.dir=dx;}}
-      else b.mp=Math.min(b.mp,.99);}
+      else if(b.pack>=0&&patDe(b)!=='errance'){packMove(b);}
+      else{errStep(b,(x,y)=>beastFits(b,x,y));break;}}                                     // errance
   }
   for(const b of boom)if(G.beasts.includes(b)&&!G.over)explose(b);
   if(charged){sayMore(`${LeNom(charged)} vous a repéré et charge !`,'warn');SFX.roar();}

@@ -82,13 +82,6 @@ function drawBoom(){const fl=1-(performance.now()-BOOM.t0)/180;
   if(fl>0){ctx.globalAlpha=fl*.8;ctx.fillStyle='#ffffff';ctx.beginPath();ctx.arc((G.px+.5-camX)*S,(G.py+.5-camY)*S,S*1.6,0,Math.PI*2);ctx.fill();}   // éclair de l'explosion
   ctx.globalAlpha=1;for(const q of BOOM.p){ctx.fillStyle=q.c;ctx.fillRect(Math.round((q.x-camX)*S/2)*2,Math.round((q.y-q.z-camY)*S/2)*2,q.sz,q.sz);}}
 function addFx(f){f.t0=performance.now();if(f.kind==='num')f.stack=FX.filter(o=>o.kind==='num'&&o.x===f.x&&o.y===f.y&&fxP(o)<.5).length;FX.push(f);if(!fxRaf)fxRaf=requestAnimationFrame(fxLoop);}
-/* Contour ovale d'une case, à un pixel de distance : les pixels de tuile du bord d'une ellipse de 18 × 17,
-   calculés une fois pour toutes. Décalages depuis le coin de la case, de −1 à 16. */
-const OVALE=(()=>{const R=[],rx=9,ry=8.2,dans=(x,y)=>((x+.5-9)/rx)**2+((y+.5-9)/ry)**2<=1;
-  for(let y=-1;y<17;y++)for(let x=-1;x<17;x++){const gx=x+1,gy=y+1;
-    if(!dans(gx,gy)||(dans(gx-1,gy)&&dans(gx+1,gy)&&dans(gx,gy-1)&&dans(gx,gy+1)))continue;
-    R.push([x,y]);}
-  return R;})();
 // grains d'un effet de consommable : position dans la case et instant d'apparition, tirés une fois pour toutes
 const fxGrains=n=>Array.from({length:n},()=>({x:rnd(0,13),y:rnd(3,14),d:Math.random()*.55}));
 function fxLoop(){const now=performance.now();FX=FX.filter(f=>now-f.t0<f.dur);render();fxRaf=(FX.length||animVif())?requestAnimationFrame(fxLoop):0;}   // une mine armée ou un paralyzor accroché gardent le rendu en marche
@@ -248,9 +241,7 @@ function render(){
      for(const g of f.gr){const q=(p-g.d)*2.2;if(q<0||q>1)continue;const gx=Math.round(bx+g.x),gy=Math.round(by+g.y+bas-q*mont);
        if(f.kind==='soin'){ctx.fillRect(gx*u,(gy+1)*u,3*u,u);ctx.fillRect((gx+1)*u,gy*u,u,3*u);}           // une petite croix
        else{ctx.fillRect((gx+1)*u,gy*u,u,4*u);ctx.fillRect(gx*u,(gy+1)*u,u,u);ctx.fillRect((gx+2)*u,(gy+1)*u,u,u);}}}   // une flèche vers le haut
-   for(const f of FX){if(f.kind!=='purge')continue;const p=fxP(f);if(Math.floor(p*7)%2)continue;   // le filet pulse : allumé, éteint, quatre fois
-     const bx=(f.x-camX)*16,by=(f.y-camY)*16;ctx.fillStyle=PAL['1'];
-     for(const [ox,oy] of OVALE)ctx.fillRect((bx+ox)*u,(by+oy)*u,u,u);}}
+}
   // Dessins au pixel de tuile (u = 1/16 de case), calés sur la grille, opaques : le projectile d'un tireur et l'onde du sonar
   {const u=S/16;ctx.fillStyle=PAL['1'];
    /* Laser des sentinelles : un trait rouge d'un pixel de tuile, avec quelques étincelles blanches ou accent qui sautent le

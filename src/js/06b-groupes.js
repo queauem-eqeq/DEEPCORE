@@ -5,7 +5,8 @@
    Le budget est donné pour la carte de référence (96 × 64) et rapporté à la surface de la carte jouée.
    Les groupes se créent et se règlent dans Lab → Groupes ; la fenêtre LIFE garde le budget et les cases « actif ».
    Chaque groupe porte un ou plusieurs styles de patrouille (errance, voyage, ronde, territoire, sentinelle, affût : voir
-   08-faune) ; quand il y en a plusieurs, chaque groupe posé sur la carte en tire un au hasard.
+   08-faune) ; quand il y en a plusieurs, chaque groupe posé sur la carte en tire un au hasard — et parmi tous les
+   styles quand aucun n'est choisi.
    Tout est mémorisé dans le navigateur sous np-groupes. */
 const PATS=[['errance','Errance'],['voyage','Voyage en bande'],['ronde','Ronde'],['territoire','Territoire'],['sentinelle','Sentinelle'],['affut','Affût']];
 const ESPECES=()=>[['insectoide',SPECIES[0].n],...BEASTS.map(b=>[b.key,b.n])];
@@ -22,7 +23,7 @@ const GROUPES_DEF=()=>({budget:110,liste:[
 function groupesSains(d){const ks=ESPECES().map(e=>e[0]),n=(v,mn,mx,df)=>Number.isFinite(+v)&&v!==''&&v!=null?Math.max(mn,Math.min(mx,Math.round(+v))):df;
   if(!d||!Array.isArray(d.liste))return null;
   return {budget:n(d.budget,0,2000,110),liste:d.liste.slice(0,40).map(g=>({n:String(g.n||'Groupe').slice(0,30),cout:n(g.cout,1,500,1),on:g.on?1:0,
-    pats:(l=>l.length?l:['errance'])([...new Set(Array.isArray(g.pats)?g.pats:[g.pat])].filter(v=>PATS.some(p=>p[0]===v))),   // un seul style (g.pat) avant le 19 novembre 2026 au soir
+    pats:[...new Set(Array.isArray(g.pats)?g.pats:[g.pat||'errance'])].filter(v=>PATS.some(p=>p[0]===v)),   // liste vide permise : le style est alors tiré parmi tous
     m:(Array.isArray(g.m)?g.m:[]).filter(m=>m&&ks.includes(m.k)).slice(0,6).map(m=>{const a=n(m.min,0,20,1),b=n(m.max,1,20,Math.max(1,a));return {k:m.k,min:Math.min(a,b),max:Math.max(a,b)};})}))};}
 let GROUPES=GROUPES_DEF();
 try{const g=groupesSains(JSON.parse(localStorage.getItem('np-groupes')||'null'));if(g)GROUPES=g;}catch(e){}
@@ -51,8 +52,8 @@ function buildGroupes(){const E=ESPECES(),ic=k=>ICON[k==='insectoide'?'an0r':'bz
     <label class="gl">Nom<input type="text" class="gnom" data-f="n" maxlength="30" value="${grEsc(g.n)}"></label>
     <div class="grow"><label>Valeur<input type="number" data-f="cout" min="1" max="500" step="1" value="${g.cout}"></label>
       <label class="gon"><input type="checkbox" data-f="on"${g.on?' checked':''}>Actif</label></div>
-    <h3>Patrouilles <span>${g.pats.length>1?'une au hasard par groupe posé':'toujours la même'}</span></h3>
-    <div class="gpats">${g.pats.map(v=>`<span class="gpat">${(PATS.find(p=>p[0]===v)||[,v])[1]}<button class="gx" data-a="delp" data-v="${v}"${g.pats.length>1?'':' disabled'} aria-label="Retirer la patrouille ${(PATS.find(p=>p[0]===v)||[,v])[1]}" title="Retirer">×</button></span>`).join('')}
+    <h3>Patrouilles <span>${g.pats.length>1?'une au hasard par groupe posé':g.pats.length?'toujours la même':'aucune choisie : une au hasard parmi toutes'}</span></h3>
+    <div class="gpats">${g.pats.map(v=>`<span class="gpat">${(PATS.find(p=>p[0]===v)||[,v])[1]}<button class="gx" data-a="delp" data-v="${v}" aria-label="Retirer la patrouille ${(PATS.find(p=>p[0]===v)||[,v])[1]}" title="Retirer">×</button></span>`).join('')}
       ${g.pats.length<PATS.length?`<select data-f="addp" aria-label="Ajouter une patrouille"><option value="">+ Ajouter…</option>${PATS.filter(([v])=>!g.pats.includes(v)).map(([v,l])=>`<option value="${v}">${l}</option>`).join('')}</select>`:''}</div>
     <h3>Composition <span>effectif : ${grEffectif(g)}</span></h3>
     <div class="gmb">${g.m.map((m,j)=>`<div class="gm" data-m="${j}"><img src="${ic(m.k)}" alt=""><select data-f="k" aria-label="Espèce">${E.map(([k,l])=>`<option value="${k}"${k===m.k?' selected':''}>${grEsc(l)}</option>`).join('')}</select>
@@ -81,7 +82,7 @@ $('grEdit').addEventListener('click',e=>{const t=e.target.closest('button[data-a
   else if(a==='dup'&&L.length<40){const c=JSON.parse(JSON.stringify(g));c.n=(c.n+' 2').slice(0,30);L.splice(GR_SEL+1,0,c);GR_SEL++;}
   else if(a==='addm'&&g.m.length<6)g.m.push({k:'crabos',min:1,max:1});
   else if(a==='delm')g.m.splice(+t.closest('.gm').dataset.m,1);
-  else if(a==='delp'&&g.pats.length>1)g.pats=g.pats.filter(v=>v!==t.dataset.v);
+  else if(a==='delp')g.pats=g.pats.filter(v=>v!==t.dataset.v);
   saveGroupes();buildGroupes();});
 // liste : choisir, activer, déplacer
 const grBouge=(de,vers)=>{const L=GROUPES.liste;if(de===vers||de<0||vers<0||de>=L.length||vers>=L.length)return;const cur=L[GR_SEL],[g]=L.splice(de,1);L.splice(vers,0,g);GR_SEL=L.indexOf(cur);saveGroupes();buildGroupes();};

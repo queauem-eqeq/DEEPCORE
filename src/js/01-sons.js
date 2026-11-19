@@ -53,8 +53,6 @@ const SFX={
     noiz(.3,.05,2800,'bandpass',0,1400);tone(1180,.22,'sine',.045,1560,.2);},
   battery(){tone(180,.3,'sawtooth',.05,900);tone(360,.3,'square',.025,1800,.02);
     noiz(.1,.07,3600,'highpass',.26);tone(1760,.12,'sine',.05,2640,.28);},
-  purge(){noiz(.5,.16,2200,'bandpass',0,420);tone(300,.35,'sine',.04,90);
-    noiz(.22,.09,5200,'highpass',.3);tone(660,.14,'triangle',.035,990,.34);},
   // Fumigène (16 novembre 2026) : le bidon qui tombe, l'amorce qui claque, puis le jet sous pression qui s'épuise en nappe sourde
   smoke(){tone(150,.07,'square',.09,70);
     noiz(.12,.18,5200,'highpass',.03);
