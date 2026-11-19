@@ -92,6 +92,7 @@ La carte n'est plus peuplée espèce par espèce (les cinq niveaux d'intensité 
 - **Bouton Enregistrer** de la fenêtre Groupes (19 novembre 2026) : écrit les groupes, leurs valeurs et le budget dans la base
   de l'artefact (`reglages/courant`, champ `groupes`), avec le reste des réglages. Claude peut alors les lire et en faire
   les groupes par défaut du code.
+- **Effectif à partir de 0** (19 novembre 2026) : l'effectif minimal d'une espèce peut être 0 (« 0 à 3 puces ») : elle est alors parfois absente du groupe. Si tout le groupe tire 0, rien n'est posé et rien n'est dépensé. Le maximum reste d'au moins 1.
 - **LIFE** : le budget et une case à cocher par groupe.
 - **Style de patrouille** : il est porté par le **groupe**, pas par l'espèce (un crabot peut faire la ronde dans un groupe
   et garder un territoire dans un autre). Six styles depuis le 19 novembre 2026 :

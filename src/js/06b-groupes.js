@@ -22,7 +22,7 @@ function groupesSains(d){const ks=ESPECES().map(e=>e[0]),n=(v,mn,mx,df)=>Number.
   if(!d||!Array.isArray(d.liste))return null;
   return {budget:n(d.budget,0,2000,110),liste:d.liste.slice(0,40).map(g=>({n:String(g.n||'Groupe').slice(0,30),cout:n(g.cout,1,500,1),on:g.on?1:0,
     pats:(l=>l.length?l:['errance'])([...new Set(Array.isArray(g.pats)?g.pats:[g.pat])].filter(v=>PATS.some(p=>p[0]===v))),   // un seul style (g.pat) avant le 19 novembre 2026 au soir
-    m:(Array.isArray(g.m)?g.m:[]).filter(m=>m&&ks.includes(m.k)).slice(0,6).map(m=>{const a=n(m.min,1,20,1),b=n(m.max,1,20,a);return {k:m.k,min:Math.min(a,b),max:Math.max(a,b)};})}))};}
+    m:(Array.isArray(g.m)?g.m:[]).filter(m=>m&&ks.includes(m.k)).slice(0,6).map(m=>{const a=n(m.min,0,20,1),b=n(m.max,1,20,Math.max(1,a));   // l'effectif minimal peut être 0 : l'espèce est alors parfois absente du groupereturn {k:m.k,min:Math.min(a,b),max:Math.max(a,b)};})}))};}
 let GROUPES=GROUPES_DEF();
 try{const g=groupesSains(JSON.parse(localStorage.getItem('np-groupes')||'null'));if(g)GROUPES=g;}catch(e){}
 function saveGroupes(){try{localStorage.setItem('np-groupes',JSON.stringify(GROUPES));}catch(e){}touchLocal();}
@@ -55,7 +55,7 @@ function buildGroupes(){const E=ESPECES(),ic=k=>ICON[k==='insectoide'?'an0r':'bz
       ${g.pats.length<PATS.length?`<select data-f="addp" aria-label="Ajouter une patrouille"><option value="">+ Ajouter…</option>${PATS.filter(([v])=>!g.pats.includes(v)).map(([v,l])=>`<option value="${v}">${l}</option>`).join('')}</select>`:''}</div>
     <h3>Composition <span>effectif : ${grEffectif(g)}</span></h3>
     <div class="gmb">${g.m.map((m,j)=>`<div class="gm" data-m="${j}"><img src="${ic(m.k)}" alt=""><select data-f="k" aria-label="Espèce">${E.map(([k,l])=>`<option value="${k}"${k===m.k?' selected':''}>${grEsc(l)}</option>`).join('')}</select>
-      <input type="number" data-f="min" min="1" max="20" step="1" value="${m.min}" aria-label="Effectif minimal"><span>à</span><input type="number" data-f="max" min="1" max="20" step="1" value="${m.max}" aria-label="Effectif maximal"><button class="gx" data-a="delm" aria-label="Retirer cette espèce du groupe" title="Retirer cette espèce">×</button></div>`).join('')||'<p class="mnote">Groupe vide : il ne sera pas posé.</p>'}</div>
+      <input type="number" data-f="min" min="0" max="20" step="1" value="${m.min}" aria-label="Effectif minimal"><span>à</span><input type="number" data-f="max" min="1" max="20" step="1" value="${m.max}" aria-label="Effectif maximal"><button class="gx" data-a="delm" aria-label="Retirer cette espèce du groupe" title="Retirer cette espèce">×</button></div>`).join('')||'<p class="mnote">Groupe vide : il ne sera pas posé.</p>'}</div>
     <div class="gbas"><button data-a="addm"${g.m.length>=6?' disabled':''}>+ Espèce</button><button data-a="dup"${L.length>=40?' disabled':''}>Dupliquer</button><button data-a="delg" class="gdel">Supprimer le groupe</button></div>`;}
 function buildLife(){
   $('life').innerHTML=`<div class="g2"><label for="lfBudget">Budget de menace</label><input type="number" id="lfBudget" min="0" max="2000" step="5" value="${GROUPES.budget}"></div>`
@@ -72,7 +72,7 @@ $('grBudget').addEventListener('change',e=>{GROUPES.budget=Math.max(0,Math.min(2
 $('grEdit').addEventListener('change',e=>{const t=e.target,g=GROUPES.liste[GR_SEL],f=t.dataset.f,r=t.closest('.gm');if(!g||!f)return;
   const nb=(mn,mx)=>Math.max(mn,Math.min(mx,Math.round(+t.value||mn)));
   if(r){const m=g.m[+r.dataset.m];if(!m)return;
-    if(f==='k')m.k=t.value;else if(f==='min'){m.min=nb(1,20);if(m.max<m.min)m.max=m.min;}else if(f==='max'){m.max=nb(1,20);if(m.min>m.max)m.min=m.max;}}
+    if(f==='k')m.k=t.value;else if(f==='min'){m.min=Math.max(0,Math.min(20,Math.round(+t.value||0)));if(m.max<m.min)m.max=m.min;}else if(f==='max'){m.max=nb(1,20);if(m.min>m.max)m.min=m.max;}}
   else if(f==='n')g.n=t.value.trim().slice(0,30)||'Groupe';else if(f==='cout')g.cout=nb(1,500);else if(f==='addp'){if(t.value&&!g.pats.includes(t.value))g.pats.push(t.value);}else if(f==='on')g.on=t.checked?1:0;
   saveGroupes();buildGroupes();});
 $('grEdit').addEventListener('click',e=>{const t=e.target.closest('button[data-a]');if(!t)return;const L=GROUPES.liste,g=L[GR_SEL],a=t.dataset.a;if(!g)return;

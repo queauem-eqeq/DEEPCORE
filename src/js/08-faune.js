@@ -237,7 +237,7 @@ function spawnBeasts(){G.beasts=[];G.beastSeen={};G.packs={};let packId=0;
 function poseGroupe(g,gi,id){{const l=g.pats&&g.pats.length?g.pats:[g.pat||'errance'];g=Object.assign({},g,{pat:l[rnd(0,l.length-1)]});}   // plusieurs styles cochés : ce groupe-ci en tire un
   const esp=k=>k==='insectoide'?-1:BEASTS.findIndex(b=>b.key===k);
   const mb=[];for(const m of g.m){const s=esp(m.k);if(m.k!=='insectoide'&&s<0)continue;for(let n=rnd(Math.min(m.min,m.max),Math.max(m.min,m.max));n>0;n--)mb.push(s);}
-  if(!mb.length)return false;
+  if(!mb.length)return 'vide';   // tous les effectifs tirés valent 0 : rien à poser, ni échec ni dépense
   for(let t=0;t<80;t++){const cx=rnd(3,W-4),cy=rnd(3,H-4);if(Math.hypot(cx-G.px,cy-G.py)<SZ(20,6))continue;
     const posA=[],posB=[];let ok=true;
     for(const s of mb){let put=false;
@@ -252,7 +252,8 @@ function spawnGroupes(){G.animals=[];G.fauna=[];G.pool=[0];G.beasts=[];G.beastSe
   const total=Math.round(GROUPES.budget*W*H/(96*64));let reste=total,id=0;const rate={},pose={};
   for(let t=0;t<600;t++){const ok=GROUPES.liste.map((g,i)=>[g,i]).filter(([g,i])=>g.on&&g.m.length&&Math.max(1,g.cout)<=reste&&(rate[i]||0)<3);if(!ok.length)break;
     const [g,gi]=ok[rnd(0,ok.length-1)];
-    if(poseGroupe(g,gi,id)){reste-=Math.max(1,g.cout);id++;pose[g.n]=(pose[g.n]||0)+1;}else rate[gi]=(rate[gi]||0)+1;}
+    const r=poseGroupe(g,gi,id);
+    if(r===true){reste-=Math.max(1,g.cout);id++;pose[g.n]=(pose[g.n]||0)+1;}else if(r!=='vide')rate[gi]=(rate[gi]||0)+1;}
   G.menace={total,reste,pose};}
 function robotDist(m){return distFrom(G.px,G.py,m);}
 function distFrom(tx,ty,mouille){const d=new Int16Array(W*H).fill(-1),q=[idx(tx,ty)];d[q[0]]=0;
