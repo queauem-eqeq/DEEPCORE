@@ -65,7 +65,7 @@ const SFX={
   screech(){tone(2600,.09,'sawtooth',.06,3800);tone(3400,.12,'square',.04,2200,.08);noiz(.15,.08,5000,'highpass',.02);},
   chirp(){tone(1900,.05,'square',.035,2700);tone(2300,.05,'square',.03,1600,.07);},
   // porte de bâtiment (19 novembre 2026) : loquet qui claque, panneau lourd qui glisse en grinçant, butée sourde
-  porte(){noiz(.03,.14,1800,'bandpass');tone(140,.05,'square',.05,90);noiz(.26,.09,420,'bandpass',.05,160);tone(70,.24,'sawtooth',.035,48,.05);tone(58,.08,'square',.08,40,.3);noiz(.05,.1,300,'lowpass',.3);},
+  porte(k=1){noiz(.03,.14*k,1800,'bandpass');tone(140,.05,'square',.05*k,90);noiz(.26,.09*k,420,'bandpass',.05,160);tone(70,.24,'sawtooth',.035*k,48,.05);tone(58,.08,'square',.08*k,40,.3);noiz(.05,.1*k,300,'lowpass',.3);},   // k : volume (0,6 pour une créature)
   // serrure : la clé tourne (deux crans), le pêne recule, puis la porte s'ouvre
   serrure(){tone(1500,.03,'square',.04,1100);tone(1300,.03,'square',.04,950,.09);noiz(.04,.12,900,'bandpass',.2);tone(110,.07,'square',.07,70,.22);},
   door(){noiz(.38,.16,2600,'bandpass',0,700);tone(180,.2,'square',.035,420);tone(95,.09,'square',.09,60,.3);noiz(.06,.12,500,'lowpass',.3);},   // porte automatique : souffle pneumatique, servo, choc de fin de course
