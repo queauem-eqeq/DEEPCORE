@@ -136,7 +136,7 @@ function fumTick(){const F=G.fum;if(!F)return;let ks=Object.keys(F);if(!ks.lengt
    - affut      : immobile à son point de départ ; il y revient après une chasse.
    Chaque groupe posé a son état dans G.patr[id] : pts (les points), k (le point visé), pause, age. Une créature connaît
    son groupe par o.gi. En patrouille on marche : un pas par battement au plus, quelle que soit la vitesse de l'espèce. */
-const PAT_CIBLE={ronde:1,territoire:1,sentinelle:1,affut:1};
+const PAT_CIBLE={ronde:1,territoire:1,sentinelle:1,affut:1},PAT_BLOC=4;
 let PATD={};
 function patBfs(tx,ty,eau){const d=new Int16Array(W*H).fill(-1),q=[idx(tx,ty)];d[q[0]]=0;
   for(let k=0;k<q.length;k++){const c=q[k],x=c%W,y=(c/W)|0;for(const[dx,dy]of DIRS){const a=x+dx,b=y+dy;if(a<1||b<1||a>=W-1||b>=H-1)continue;
@@ -167,10 +167,17 @@ function patTick(){PATD={};if(!G.patr||G.over)return;const mb={};
         if(P.pat==='territoire'){const n=patPoints(P,1,1,6);if(n.length)P.pts=n;}
         else if(P.pat==='affut')P.pause=9999;
         else P.k=(P.k+1)%P.pts.length;
-        P.age=0;}
+        P.age=0;P.bh=null;P.bl=0;}
       continue;}
     const d=patD(P),h=Math.min(...m.map(o=>{const v=d[idx(o.x,o.y)];return v<0?9999:v;}));
-    if(h<=P.sp||++P.age>90)P.pause=P.pat==='ronde'?rnd(3,6):P.pat==='territoire'?rnd(8,20):P.pat==='sentinelle'?rnd(40,80):9999;}}
+    if(h<=P.sp||++P.age>90){P.pause=P.pat==='ronde'?rnd(3,6):P.pat==='territoire'?rnd(8,20):P.pat==='sentinelle'?rnd(40,80):9999;P.bh=null;P.bl=0;}
+    /* Demi-tour (20 novembre 2026) : un groupe qui n'avance plus vers son point depuis PAT_BLOC battements — un autre groupe
+       lui barre un passage étroit — renonce et repart vers son point précédent (ronde, sentinelle) ou s'en choisit un
+       autre (territoire). Deux groupes face à face dans un couloir se séparent donc au lieu de se bloquer. */
+    else if(P.bh==null||h<P.bh){P.bh=h;P.bl=0;}
+    else if(++P.bl>=PAT_BLOC){P.bl=0;P.bh=null;P.age=0;
+      if(P.pat==='territoire'){const n=patPoints(P,1,1,6);if(n.length)P.pts=n;}
+      else if(P.pts.length>1)P.k=(P.k-1+P.pts.length)%P.pts.length;}}}
 // le pas de patrouille d'une créature calme ; renvoie false si son groupe n'a pas de point à rejoindre (errance, voyage)
 function patMove(o,fits){const P=G.patr&&G.patr[o.gi];if(!P||!P.pts||P.tx==null)return false;
   const d=patD(P),h=d[idx(o.x,o.y)];if(h<0)return false;
@@ -400,7 +407,9 @@ function packTick(){G.packs=G.packs||{};const groups={};
     const [cx,cy]=packCenter(m);
     if(P.pause>0){if(--P.pause===0)packTarget(P,cx,cy);continue;}
     if(!P.dist||P.tx==null){packTarget(P,cx,cy);continue;}
-    if(Math.max(Math.abs(cx-P.tx),Math.abs(cy-P.ty))<=2){P.pause=PACK_PAUSE;P.dist=null;}}}
+    if(Math.max(Math.abs(cx-P.tx),Math.abs(cy-P.ty))<=2){P.pause=PACK_PAUSE;P.dist=null;P.bh=null;P.bl=0;continue;}
+    const h=Math.min(...m.map(b=>{const v=P.dist[idx(b.x,b.y)];return v<0?9999:v;}));   // bloquée PAT_BLOC + 2 battements : la bande change de destination
+    if(P.bh==null||h<P.bh){P.bh=h;P.bl=0;}else if(++P.bl>=PAT_BLOC+2){P.bl=0;P.bh=null;packTarget(P,cx,cy);}}}
 function packMove(b){const P=G.packs&&G.packs[b.pack];
   if(packStep(b))return;                                   // trop loin des siens : il revient
   if(P&&P.dist&&!P.pause){let best=null,bv=P.dist[idx(b.x,b.y)];if(bv<0)bv=9999;   // voyage : il avance vers la destination

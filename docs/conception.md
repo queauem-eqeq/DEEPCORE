@@ -108,6 +108,10 @@ La carte n'est plus peuplée espèce par espèce (les cinq niveaux d'intensité 
   - **Territoire** : le groupe tourne dans un rayon de 6 cases autour de son point de départ, avec des haltes de 8 à 20 battements.
   - **Sentinelle** : 2 ou 3 postes ; le groupe reste **immobile** à un poste 40 à 80 battements, puis rejoint le suivant.
   - **Affût** : immobile à son point de départ.
+  **Demi-tour** (20 novembre 2026) : un groupe qui n'avance plus vers son point depuis 4 battements, parce qu'un autre lui
+  barre un passage étroit, renonce et **repart vers son point précédent** (ronde, sentinelle) ou s'en choisit un autre
+  (territoire ; une bande en voyage change de destination après 6 battements). Deux groupes face à face dans un couloir se
+  séparent au lieu de se bloquer — ils attendaient jusqu'à 90 battements avant. Choix de l'utilisateur, préféré à l'échange de places.
   La patrouille ne joue que tant qu'aucun membre n'a repéré la foreuse. Chasse et fouille finies, le groupe **reprend sa
   patrouille** : il rentre donc chez lui au lieu de rester là où la chasse l'a mené. En patrouille on marche — un pas par
   battement au plus, quelle que soit la vitesse de l'espèce. Mesuré sur 220 battements : affût 0 case parcourue, sentinelle
