@@ -4,23 +4,24 @@
    À chaque nouvelle carte, un budget achète des groupes actifs tirés au hasard jusqu'à épuisement (spawnGroupes, 08-faune).
    Le budget est donné pour la carte de référence (96 × 64) et rapporté à la surface de la carte jouée.
    Les groupes se créent et se règlent dans Lab → Groupes ; la fenêtre LIFE garde le budget et les cases « actif ».
-   Chaque groupe porte un style de patrouille (errance, voyage, ronde, territoire, sentinelle, affût : voir 08-faune).
+   Chaque groupe porte un ou plusieurs styles de patrouille (errance, voyage, ronde, territoire, sentinelle, affût : voir
+   08-faune) ; quand il y en a plusieurs, chaque groupe posé sur la carte en tire un au hasard.
    Tout est mémorisé dans le navigateur sous np-groupes. */
 const PATS=[['errance','Errance'],['voyage','Voyage en bande'],['ronde','Ronde'],['territoire','Territoire'],['sentinelle','Sentinelle'],['affut','Affût']];
 const ESPECES=()=>[['insectoide',SPECIES[0].n],...BEASTS.map(b=>[b.key,b.n])];
 const GROUPES_DEF=()=>({budget:110,liste:[
-  {n:'Essaim de puces',cout:5,on:1,pat:'errance',m:[{k:'insectoide',min:4,max:6}]},
-  {n:'Crabot solitaire',cout:3,on:1,pat:'ronde',m:[{k:'crabos',min:1,max:1}]},
-  {n:'Bande de relais',cout:6,on:1,pat:'voyage',m:[{k:'cafar',min:2,max:4}]},
-  {n:'Banc de torpilles',cout:5,on:1,pat:'ronde',m:[{k:'brochon',min:2,max:3}]},
-  {n:'Broyeur solitaire',cout:10,on:1,pat:'territoire',m:[{k:'mastok',min:1,max:1}]},
-  {n:'Mines',cout:4,on:1,pat:'affut',m:[{k:'mine',min:1,max:2}]},
-  {n:'Paralyzor',cout:4,on:1,pat:'sentinelle',m:[{k:'paralyzor',min:1,max:1}]}]});
+  {n:'Essaim de puces',cout:5,on:1,pats:['errance'],m:[{k:'insectoide',min:4,max:6}]},
+  {n:'Crabot solitaire',cout:3,on:1,pats:['ronde'],m:[{k:'crabos',min:1,max:1}]},
+  {n:'Bande de relais',cout:6,on:1,pats:['voyage'],m:[{k:'cafar',min:2,max:4}]},
+  {n:'Banc de torpilles',cout:5,on:1,pats:['ronde'],m:[{k:'brochon',min:2,max:3}]},
+  {n:'Broyeur solitaire',cout:10,on:1,pats:['territoire'],m:[{k:'mastok',min:1,max:1}]},
+  {n:'Mines',cout:4,on:1,pats:['affut'],m:[{k:'mine',min:1,max:2}]},
+  {n:'Paralyzor',cout:4,on:1,pats:['sentinelle'],m:[{k:'paralyzor',min:1,max:1}]}]});
 // remet d'aplomb des groupes lus dans le navigateur ou dans la base : bornes, espèces inconnues écartées
 function groupesSains(d){const ks=ESPECES().map(e=>e[0]),n=(v,mn,mx,df)=>Number.isFinite(+v)&&v!==''&&v!=null?Math.max(mn,Math.min(mx,Math.round(+v))):df;
   if(!d||!Array.isArray(d.liste))return null;
   return {budget:n(d.budget,0,2000,110),liste:d.liste.slice(0,40).map(g=>({n:String(g.n||'Groupe').slice(0,30),cout:n(g.cout,1,500,1),on:g.on?1:0,
-    pat:PATS.some(p=>p[0]===g.pat)?g.pat:'errance',
+    pats:(l=>l.length?l:['errance'])([...new Set(Array.isArray(g.pats)?g.pats:[g.pat])].filter(v=>PATS.some(p=>p[0]===v))),   // un seul style (g.pat) avant le 19 novembre 2026 au soir
     m:(Array.isArray(g.m)?g.m:[]).filter(m=>m&&ks.includes(m.k)).slice(0,6).map(m=>{const a=n(m.min,1,20,1),b=n(m.max,1,20,a);return {k:m.k,min:Math.min(a,b),max:Math.max(a,b)};})}))};}
 let GROUPES=GROUPES_DEF();
 try{const g=groupesSains(JSON.parse(localStorage.getItem('np-groupes')||'null'));if(g)GROUPES=g;}catch(e){}
@@ -48,8 +49,10 @@ function buildGroupes(){const E=ESPECES(),ic=k=>ICON[k==='insectoide'?'an0r':'bz
   $('grEdit').innerHTML=!g?'<p class="mnote">Créez un groupe avec « + Nouveau groupe ».</p>':`
     <label class="gl">Nom<input type="text" class="gnom" data-f="n" maxlength="30" value="${grEsc(g.n)}"></label>
     <div class="grow"><label>Valeur<input type="number" data-f="cout" min="1" max="500" step="1" value="${g.cout}"></label>
-      <label>Patrouille<select data-f="pat">${PATS.map(([v,l])=>`<option value="${v}"${v===g.pat?' selected':''}>${l}</option>`).join('')}</select></label>
       <label class="gon"><input type="checkbox" data-f="on"${g.on?' checked':''}>Actif</label></div>
+    <h3>Patrouilles <span>${g.pats.length>1?'une au hasard par groupe posé':'toujours la même'}</span></h3>
+    <div class="gpats">${g.pats.map(v=>`<span class="gpat">${(PATS.find(p=>p[0]===v)||[,v])[1]}<button class="gx" data-a="delp" data-v="${v}"${g.pats.length>1?'':' disabled'} aria-label="Retirer la patrouille ${(PATS.find(p=>p[0]===v)||[,v])[1]}" title="Retirer">×</button></span>`).join('')}
+      ${g.pats.length<PATS.length?`<select data-f="addp" aria-label="Ajouter une patrouille"><option value="">+ Ajouter…</option>${PATS.filter(([v])=>!g.pats.includes(v)).map(([v,l])=>`<option value="${v}">${l}</option>`).join('')}</select>`:''}</div>
     <h3>Composition <span>effectif : ${grEffectif(g)}</span></h3>
     <div class="gmb">${g.m.map((m,j)=>`<div class="gm" data-m="${j}"><img src="${ic(m.k)}" alt=""><select data-f="k" aria-label="Espèce">${E.map(([k,l])=>`<option value="${k}"${k===m.k?' selected':''}>${grEsc(l)}</option>`).join('')}</select>
       <input type="number" data-f="min" min="1" max="20" step="1" value="${m.min}" aria-label="Effectif minimal"><span>à</span><input type="number" data-f="max" min="1" max="20" step="1" value="${m.max}" aria-label="Effectif maximal"><button class="gx" data-a="delm" aria-label="Retirer cette espèce du groupe" title="Retirer cette espèce">×</button></div>`).join('')||'<p class="mnote">Groupe vide : il ne sera pas posé.</p>'}</div>
@@ -70,13 +73,14 @@ $('grEdit').addEventListener('change',e=>{const t=e.target,g=GROUPES.liste[GR_SE
   const nb=(mn,mx)=>Math.max(mn,Math.min(mx,Math.round(+t.value||mn)));
   if(r){const m=g.m[+r.dataset.m];if(!m)return;
     if(f==='k')m.k=t.value;else if(f==='min'){m.min=nb(1,20);if(m.max<m.min)m.max=m.min;}else if(f==='max'){m.max=nb(1,20);if(m.min>m.max)m.min=m.max;}}
-  else if(f==='n')g.n=t.value.trim().slice(0,30)||'Groupe';else if(f==='cout')g.cout=nb(1,500);else if(f==='pat')g.pat=t.value;else if(f==='on')g.on=t.checked?1:0;
+  else if(f==='n')g.n=t.value.trim().slice(0,30)||'Groupe';else if(f==='cout')g.cout=nb(1,500);else if(f==='addp'){if(t.value&&!g.pats.includes(t.value))g.pats.push(t.value);}else if(f==='on')g.on=t.checked?1:0;
   saveGroupes();buildGroupes();});
 $('grEdit').addEventListener('click',e=>{const t=e.target.closest('button[data-a]');if(!t)return;const L=GROUPES.liste,g=L[GR_SEL],a=t.dataset.a;if(!g)return;
   if(a==='delg')L.splice(GR_SEL,1);
   else if(a==='dup'&&L.length<40){const c=JSON.parse(JSON.stringify(g));c.n=(c.n+' 2').slice(0,30);L.splice(GR_SEL+1,0,c);GR_SEL++;}
   else if(a==='addm'&&g.m.length<6)g.m.push({k:'crabos',min:1,max:1});
   else if(a==='delm')g.m.splice(+t.closest('.gm').dataset.m,1);
+  else if(a==='delp'&&g.pats.length>1)g.pats=g.pats.filter(v=>v!==t.dataset.v);
   saveGroupes();buildGroupes();});
 // liste : choisir, activer, déplacer
 const grBouge=(de,vers)=>{const L=GROUPES.liste;if(de===vers||de<0||vers<0||de>=L.length||vers>=L.length)return;const cur=L[GR_SEL],[g]=L.splice(de,1);L.splice(vers,0,g);GR_SEL=L.indexOf(cur);saveGroupes();buildGroupes();};
@@ -89,7 +93,7 @@ $('grList').addEventListener('click',e=>{const t=e.target.closest('button[data-a
   L.addEventListener('dragover',e=>{const r=e.target.closest('.grl');if(de<0||!r)return;e.preventDefault();raz();r.classList.add('cible');});
   L.addEventListener('drop',e=>{const r=e.target.closest('.grl');e.preventDefault();raz();if(de>=0&&r)grBouge(de,+r.dataset.g);de=-1;});
   L.addEventListener('dragend',()=>{raz();de=-1;});}
-$('grAdd').onclick=()=>{if(GROUPES.liste.length>=40)return;GROUPES.liste.push({n:'Nouveau groupe',cout:1,on:1,pat:'errance',m:[{k:'crabos',min:1,max:1}]});GR_SEL=GROUPES.liste.length-1;saveGroupes();buildGroupes();
+$('grAdd').onclick=()=>{if(GROUPES.liste.length>=40)return;GROUPES.liste.push({n:'Nouveau groupe',cout:1,on:1,pats:['errance'],m:[{k:'crabos',min:1,max:1}]});GR_SEL=GROUPES.liste.length-1;saveGroupes();buildGroupes();
   const n=$('grEdit').querySelector('.gnom');if(n){n.focus();n.select();}};
 // « Groupes par défaut » efface les groupes créés : il faut cliquer deux fois
 {let arme=0;$('grReset').onclick=()=>{const b=$('grReset');if(!arme){arme=1;b.textContent='Tout remplacer ? Cliquer encore';setTimeout(()=>{arme=0;b.textContent='Groupes par défaut';},3000);return;}

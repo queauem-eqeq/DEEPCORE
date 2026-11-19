@@ -351,3 +351,25 @@ kbd{font-family:var(--mono);color:var(--fg);border:1px solid var(--line);padding
 .grl.inactif .grnom b{color:var(--dim);font-weight:400}
 .lfg{display:grid;grid-template-columns:auto auto minmax(0,1fr);gap:8px;align-items:baseline;color:var(--fg);cursor:pointer}
 .lfg span{font-size:11px;color:var(--dim)}
+
+/* Patrouilles multiples d'un groupe, et Bestiaire en deux colonnes (19 novembre 2026) */
+.gpats{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.gpat{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--c3);color:var(--fg);padding:1px 2px 1px 8px;font-size:12px}
+.gpat .gx{border:0;width:20px;height:20px}
+.bcols{display:grid;grid-template-columns:minmax(0,1fr) 190px;gap:16px;align-items:start}
+@media (max-width:720px){.bcols{grid-template-columns:1fr}}
+.bedit{border:1px solid var(--line);padding:10px;min-width:0;overflow-x:auto}
+.bside{display:grid;gap:4px;max-height:min(60vh,520px);overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--line) transparent;padding:1px}
+.bli{display:grid;grid-template-columns:28px minmax(0,1fr) 14px;gap:8px;align-items:center;text-align:left;padding:4px 6px;border:1px solid var(--line);background:none;color:var(--dim);font:inherit;text-transform:none;letter-spacing:0}
+.bli img,.btab thead img{width:28px;height:28px;image-rendering:pixelated;background:var(--void);outline:1px solid var(--line)}
+.bli.sel{border-color:var(--c1);color:var(--fg)}.bli b{font-weight:400;overflow:hidden;text-overflow:ellipsis}.bli.sel b{font-weight:700}
+.bli span{font-size:11px;color:var(--c1)}
+.btab{border-collapse:collapse;width:100%;table-layout:fixed;font-size:12px}
+.btab th:first-child{width:92px;text-align:left;color:var(--dim);font-weight:400}
+.btab thead th{padding:0 6px 8px;vertical-align:bottom;text-align:left}
+.btab thead th b{display:block;margin-top:4px}
+.btab thead th{position:relative}.btab thead .gx{position:absolute;top:0;right:6px}
+.btab td{padding:3px 6px}
+.btab td input{width:100%;font:inherit;color:var(--fg);background:var(--void);border:1px solid var(--line);padding:2px 4px;text-align:right}
+.btab .brole td{font-size:11px;color:var(--dim);vertical-align:top;padding-top:8px}
+.btab .brole th{vertical-align:top;padding-top:8px}

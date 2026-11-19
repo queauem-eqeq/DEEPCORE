@@ -233,7 +233,8 @@ function spawnBeasts(){G.beasts=[];G.beastSeen={};G.packs={};let packId=0;
    est dépensé groupe après groupe, tirés au hasard parmi les groupes actifs encore abordables. Un groupe est posé d'un
    bloc autour d'un point, loin de la foreuse ; s'il ne trouve pas sa place (pas d'eau pour des torpilles…), il est écarté
    après trois échecs. Chaque créature garde le rang de son groupe (gr) : il servira aux styles de patrouille. */
-function poseGroupe(g,gi,id){const esp=k=>k==='insectoide'?-1:BEASTS.findIndex(b=>b.key===k);
+function poseGroupe(g,gi,id){{const l=g.pats&&g.pats.length?g.pats:[g.pat||'errance'];g=Object.assign({},g,{pat:l[rnd(0,l.length-1)]});}   // plusieurs styles cochés : ce groupe-ci en tire un
+  const esp=k=>k==='insectoide'?-1:BEASTS.findIndex(b=>b.key===k);
   const mb=[];for(const m of g.m){const s=esp(m.k);if(m.k!=='insectoide'&&s<0)continue;for(let n=rnd(Math.min(m.min,m.max),Math.max(m.min,m.max));n>0;n--)mb.push(s);}
   if(!mb.length)return false;
   for(let t=0;t<80;t++){const cx=rnd(3,W-4),cy=rnd(3,H-4);if(Math.hypot(cx-G.px,cy-G.py)<SZ(20,6))continue;

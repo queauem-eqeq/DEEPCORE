@@ -8,7 +8,7 @@
   <div class="mcard">
     <div class="mhead"><h2 id="bestTitle">Bestiaire</h2><button id="bestClose" aria-label="Fermer le bestiaire">Fermer</button></div>
     <p class="mnote">Les modifications s’appliquent immédiatement à la partie en cours et restent mémorisées.</p>
-    <div class="beasts" id="bestList"></div>
+    <div class="bcols"><section class="bedit" id="bestList" aria-label="Espèces choisies : modification et comparaison"></section><section class="bside" id="bestSide" aria-label="Espèces"></section></div>
     <div class="mfoot"><button id="bestReset">Valeurs par défaut</button><button class="go" id="bestSave" title="Enregistrer ces valeurs dans la base du jeu, lisible par Claude, pour qu’elles deviennent les valeurs de référence">Enregistrer</button><span class="saved" id="bestMsg" role="status"></span></div>
   </div>
 </div>
@@ -60,7 +60,8 @@
     <div class="grcols">
       <section class="gredit" id="grEdit" aria-label="Réglage du groupe choisi"></section>
       <section class="grside" aria-label="Groupes existants"><div class="grliste" id="grList"></div>
-        <div class="mfoot"><button class="go" id="grAdd">+ Nouveau groupe</button><button id="grReset">Groupes par défaut</button></div></section>
+        <div class="mfoot"><button class="go" id="grAdd">+ Nouveau groupe</button><button id="grReset">Groupes par défaut</button></div>
+        <div class="mfoot"><button class="go" id="grSave" title="Enregistrer les groupes et leurs valeurs dans la base du jeu, lisible par Claude, pour qu’ils deviennent ceux du jeu publié">Enregistrer</button><span class="saved" id="grMsg" role="status"></span></div></section>
     </div>
   </div>
 </div>

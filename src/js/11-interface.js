@@ -163,6 +163,7 @@ async function saveSettings(b,m){b=b instanceof HTMLElement?b:$('saveBtn');m=m||
   b.disabled=false;b.textContent='Enregistrer';}
 $('saveBtn').onclick=()=>saveSettings();
 $('bestSave').onclick=()=>saveSettings($('bestSave'),$('bestMsg'));
+$('grSave').onclick=()=>saveSettings($('grSave'),$('grMsg'));
 $('bestClose').onclick=closeBest;
 $('discClose').onclick=closeDisc;
 $('discretion').addEventListener('click',e=>{if(e.target===$('discretion'))closeDisc();});
