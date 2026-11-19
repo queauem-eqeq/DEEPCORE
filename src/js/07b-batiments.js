@@ -127,7 +127,7 @@ function entrees(B,S,t,atteint){const {own,porte,pied,interdit}=B,cand=[];
 // Pose les structures sur la carte déjà générée (relief, vaisseau, site). Elles peuvent recouvrir la montagne et l'eau ;
 // si une entrée donne sur de la roche, un couloir est percé jusqu'à elle (connect).
 function batiments(){
-  G.batis=[];G.cles={};const pct=GEN.structure||0,N=W*H;if(pct<=0)return;
+  G.batis=[];G.cles={};G.pb={};const pct=GEN.structure||0,N=W*H;if(pct<=0)return;
   const total=Math.round(N*pct/100);if(total<45)return;
   const t0=G.t.slice();
   for(let essai=0;essai<6;essai++){
@@ -161,6 +161,7 @@ function batiments(){
       if(ok)connect(t);
       if(ok&&connectedAll(t)){
         G.batis=strs.map(S=>({style:S.st.n,pieces:S.pieces.filter(p=>p.g!=='couloir').length,cases:S.emprise,entrees:S.entrees.map(e=>[e.x,e.y])}));
+        G.pb={};for(const i of garde)if(t[i]===BRIDGE)G.pb[i]=1;   // les ponts des pièces, pour le rendu
         siteAuFond(B,strs);petites(B,strs);const sec=secrets(B,strs);verrous(B,strs,sec);return;}
     }
     for(let i=0;i<N;i++)G.t[i]=t0[i];
