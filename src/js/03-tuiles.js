@@ -200,11 +200,44 @@ const BEASTS=[
      "....1...........",
      "................",
      "................"]},
+  {n:'Mine',fem:true,key:'mine',nb:4,role:'Fonce sur la foreuse, s’arme à une case, puis explose 1 à 3 battements plus tard sur un carré de 3 × 3',v:8,pv:12,dmin:20,dmax:20,pre:100,def:0,crit:0,mine:true,rows:["................",
+     "................",
+     "................",
+     ".......11.......",
+     "...1...11...1...",
+     "....1.2222.1....",
+     ".....222222.....",
+     "....22w22222....",
+     ".11.22222r22.11.",
+     ".11.2222rr22.11.",
+     "....22222222....",
+     ".....222222.....",
+     "....1.2222.1....",
+     "...1...11...1...",
+     ".......11.......",
+     "................"]},
+  {n:'Paralyzor',key:'paralyzor',nb:3,role:'S’accroche au premier coup qui porte : la foreuse ne peut plus se déplacer tant qu’il vit, et il la blesse à chaque battement',v:7,pv:14,dmin:1,dmax:2,pre:75,def:10,crit:0,grip:true,rows:["................",
+     "................",
+     "......1111......",
+     ".....122221.....",
+     "....12222221....",
+     "....12w22w21....",
+     "....12222221....",
+     ".....122221.....",
+     "......1111......",
+     ".....1.11.1.....",
+     "....1..11..1....",
+     "....1.1..1.1....",
+     "...1..1..1..1...",
+     "...1.1....1.1...",
+     ".....1....1.....",
+     "................"]},
 ];
-/* Capacités des nouvelles espèces (13 novembre 2026), lues par 08-faune :
-   range = tire jusqu'à cette distance · poison = [dégâts par battement, durée] · slow = durée de la glu (pas deux fois plus longs)
-   drain = énergie volée par coup · ambush = embusqué, invisible avant de frapper · dig = perce la roche. nb = nombre par planète par défaut. */
+/* Capacités lues par 08-faune : pack = vit en bande et partage ce qu'elle voit · aqua = ne quitte jamais l'eau · cache = invisible en eau profonde
+   mine = s'arme à une case de la foreuse puis explose · grip = s'accroche et paralyse. nb = effectif de référence (banc de combat).
+   Les capacités des six espèces retirées le 17 novembre 2026 (tir, poison, glu, vol d'énergie, embuscade, forage) ont été supprimées le 19. */
 BEASTS.forEach((bp,i)=>{const f=bp.fn||((x,y)=>bp.rows[y][x]);PAT['bz'+i+'r']=f;PAT['bz'+i+'l']=(x,y)=>f(15-x,y);});
+const MINE_I=BEASTS.findIndex(b=>b.mine);
 // Traces de sang (deux variantes)
 PAT.blood0=["................","................","..........r.....","......rr........",".....rrrr..r....","....rrrrrr......","...r.rrrrrr.....","....rrrrrrr.r...",".....rrrrr......","..r...rrr.......","......r....r....","...........r....","................","................","................","................"];
 PAT.blood1=["................","................","...r............","............r...",".......rr.......","..r..rrrrr......","....rrrrrrr..r..","....rrr.rrrr....","...rrrrrrrr.....","....rrrrrr......","......rr...r....","..r.............","...........r....","................","................","................"];

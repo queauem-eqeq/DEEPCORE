@@ -22,34 +22,7 @@ function setGen(k,v){const others=GEN_LBL.reduce((a,[kk])=>a+(kk===k?0:GEN[kk]),
   v=Math.max(0,Math.min(mx,GEN_SUM-others,Math.round(+v||0)));GEN[k]=v;$('gr-'+k).value=v;$('gn-'+k).value=v;saveGen();}
 function setCA(k,v,mn,mx){v=Math.max(mn,Math.min(mx,Math.round(+v||mn)));GEN[k]=v;$('gn-'+k).value=v;saveGen();}
 function caState(){const off=GEN.methode==='bruit';$('gn-remplissage').disabled=off;$('gn-iterations').disabled=off;}
-/* Faune : une INTENSITÉ par espèce (13 novembre 2026), et non plus un nombre d'individus.
-   Le nombre réel (LIFE) se calcule au lancement : effectif de référence de l'espèce × coefficient du niveau × surface de la carte
-   rapportée à la taille d'origine. Une petite carte reçoit donc moins de créatures, sans rien régler. */
-// nom, coefficient, effectif minimal (pour qu'un niveau élevé se voie même sur une toute petite carte)
-const NIVEAUX=[['Aucun',0,0],['Rare',.5,1],['Normal',1,1],['Nombreux',2,2],['Infesté',4,4]];
-const LIFE_REF={insectoide:21};BEASTS.forEach(b=>{LIFE_REF[b.key]=b.nb;});
-const LIFE_LBL=[['insectoide',SPECIES[0].n],...BEASTS.map(b=>[b.key,b.n])];   // la clé reste 'insectoide' : elle porte les intensités déjà enregistrées, seul le nom affiché a changé le 17 novembre 2026
-let INTENS={};LIFE_LBL.forEach(([k])=>{INTENS[k]=2;});
-// anciens réglages en nombres : ramenés au niveau le plus proche
-const nivDe=(k,n)=>{const r=n/(LIFE_REF[k]||1);return n<=0?0:r<=.75?1:r<=1.5?2:r<=3?3:4;};
-try{const i=JSON.parse(localStorage.getItem('np-intens')||'null');
-  if(i&&typeof i==='object'){for(const k in INTENS)if(i[k]>=0&&i[k]<=4)INTENS[k]=Math.round(i[k]);}
-  else{const l=JSON.parse(localStorage.getItem('np-life')||'null');if(l&&typeof l.crabos==='number')for(const k in INTENS)if(typeof l[k]==='number')INTENS[k]=nivDe(k,l[k]);}}catch(e){}
-let LIFE={};
-function lifeCalc(){const src=INTENS,m=1,surf=W*H/(96*64);   // effectifs tirés des intensités réglées dans le menu Monde (le budget de menace par niveau est parti avec la descente, 16 novembre 2026)
-  for(const k in INTENS){const [,c,mn]=NIVEAUX[src[k]||0];LIFE[k]=c?Math.max(mn,k==='cafar'?2:1,Math.round(LIFE_REF[k]*c*surf*m)):0;}}   // les cafars vont au moins par deux
-lifeCalc();
-function intensAff(){LIFE_LBL.forEach(([k])=>{$('lr-'+k).value=INTENS[k];$('ll-'+k).textContent=NIVEAUX[INTENS[k]][0];});
-  const v=Object.values(INTENS),m=v.every(x=>x===v[0]);$('lr-tout').value=m?v[0]:2;$('ll-tout').textContent=m?NIVEAUX[v[0]][0]:'Mixte';}
-function setIntens(k,v){v=Math.max(0,Math.min(4,Math.round(+v||0)));if(k==='tout')for(const q in INTENS)INTENS[q]=v;else INTENS[k]=v;
-  intensAff();try{localStorage.setItem('np-intens',JSON.stringify(INTENS));}catch(e){}touchLocal();}
-function buildLife(){
-  const row=(k,l,cls)=>`<div class="g niv${cls||''}"><label for="lr-${k}">${l}</label><input type="range" id="lr-${k}" min="0" max="4" step="1" value="2" aria-label="Intensité : ${l}" aria-describedby="ll-${k}"><span id="ll-${k}"></span></div>`;
-  $('life').innerHTML=row('tout','Toutes',' tout')+LIFE_LBL.map(([k,l])=>row(k,l)).join('')
-    +'<div class="sum">Intensité par espèce : Aucun, Rare, Normal, Nombreux, Infesté. L’intensité donne directement le nombre de créatures, à la taille de la carte près.</div>';
-  ['tout',...LIFE_LBL.map(l=>l[0])].forEach(k=>$('lr-'+k).addEventListener('input',e=>setIntens(k,e.target.value)));
-  intensAff();
-}
+// La faune se règle par groupes : voir 06b-groupes (19 novembre 2026 ; avant, une intensité par espèce).
 // Colonne « Structures » du menu Monde (19 novembre 2026) : tout ce qui règle les bâtiments.
 const S_NUM=[['structure','Surface bâtie (%)',0,70],['sPieces','Pièces par structure',0,40],['sEntrees','Portes d’entrée',0,4],
   ['sOuvert','Ouvertures sans porte (%)',0,100],['sVerrous','Portes verrouillées',0,3],['sSecrets','Pièces secrètes',0,3]];
@@ -114,7 +87,7 @@ function mondeDel(){const v=$('mdSel').value;if(!v.startsWith('u:')){mondeMsg('C
   const n=v.slice(2);delete MONDES[n];saveMondes();mondeListe('');$('mdNom').value='';mondeMsg(`« ${n} » supprimé.`);}
 function mondeOpen(){if(TRAV)stopTravel();if(REST)stopRest();if(EXPL)stopExplore();mondeListe($('mdSel').value);mondeMsg('');$('monde').hidden=false;$('monde').querySelector('.mcard').focus();}
 // Fenêtre Life : la faune, sortie du menu Monde le 18 novembre 2026
-function lifeOpen(){if(TRAV)stopTravel();if(REST)stopRest();if(EXPL)stopExplore();$('faune').hidden=false;$('faune').querySelector('.mcard').focus();}
+function lifeOpen(){if(TRAV)stopTravel();if(REST)stopRest();if(EXPL)stopExplore();buildLife();$('faune').hidden=false;$('faune').querySelector('.mcard').focus();}
 function lifeClose(){$('faune').hidden=true;$('lifeBtn').focus();render();}
 $('lifeBtn').onclick=lifeOpen;$('lfClose').onclick=lifeClose;
 $('faune').addEventListener('pointerdown',ev=>{if(ev.target===$('faune'))lifeClose();});

@@ -315,3 +315,29 @@ kbd{font-family:var(--mono);color:var(--fg);border:1px solid var(--line);padding
 .dregles span{color:var(--dim)}.dregles b{font-weight:400;text-align:right;white-space:nowrap}
 .dregles div:last-child b{white-space:normal}
 @media (max-width:760px){.dcols{grid-template-columns:1fr}.dtop .dhint{margin-left:0}}
+
+/* Fenêtre Groupes (Lab) et cases de la fenêtre Life (19 novembre 2026) */
+#groupes .mcard{width:min(940px,100%)}
+.grtop{display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px;font-size:12px;color:var(--dim)}
+.grtop label{display:flex;align-items:center;gap:8px;color:var(--fg)}
+.groupes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;max-height:min(58vh,560px);overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--line) transparent;padding:1px;align-items:start}
+@media (max-width:860px){.groupes{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:560px){.groupes{grid-template-columns:1fr}}
+.gcard{border:1px solid var(--line);padding:10px;display:grid;gap:8px;min-width:0}
+.gcard.off{border-style:dashed}.gcard.off .gnom{color:var(--dim)}
+.gcard input,.gcard select,.grtop input{font:inherit;color:var(--fg);background:var(--void);border:1px solid var(--line);padding:2px 4px;min-width:0}
+.gcard input[type=number],.grtop input{width:56px;text-align:right}
+.gtop{display:flex;gap:6px}.gtop .gnom{flex:1;font-weight:700}
+.grow{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center}
+.grow label,.gbas{display:flex;align-items:center;gap:6px;color:var(--dim);font-size:12px}
+.grow select{max-width:132px}
+.gcard input[type=checkbox],.lfg input{accent-color:var(--c3);width:auto}
+.gmb{display:grid;gap:6px;border-top:1px solid var(--line);padding-top:8px}
+.gm{display:grid;grid-template-columns:24px minmax(0,1fr) 44px auto 44px 24px;gap:5px;align-items:center;font-size:12px;color:var(--dim)}
+.gm img{width:24px;height:24px;image-rendering:pixelated;background:var(--void);outline:1px solid var(--line)}
+.gm input[type=number]{width:100%}
+.gx{padding:0;width:24px;height:24px;line-height:1;border-color:var(--line);color:var(--dim)}
+.gx:hover{color:var(--life);border-color:var(--life)}
+.gbas{justify-content:space-between}.gbas button{padding:2px 8px;font-size:11px;border-color:var(--line)}
+.lfg{display:grid;grid-template-columns:auto auto minmax(0,1fr);gap:8px;align-items:baseline;color:var(--fg);cursor:pointer}
+.lfg span{font-size:11px;color:var(--dim)}

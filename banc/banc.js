@@ -50,18 +50,18 @@ function pas(cfg){if(G.over)return false;
     if(!versCase(s.x,s.y)){if(adj.length){frappe(adj[0]);return true;}return false;}return true;}
   if(adj.length){frappe(adj.reduce((a,b)=>(a.hp??99)<=(b.hp??99)?a:b));return true;}
   const dr=distFrom(G.px,G.py,true);let cib=null,bd=1e9;
-  for(const e of [...vivants(),...(G.amb||[])]){const d=dr[idx(e.x,e.y)];if(d>=0&&d<bd){bd=d;cib=e;}}
+  for(const e of [...vivants(),]){const d=dr[idx(e.x,e.y)];if(d>=0&&d<bd){bd=d;cib=e;}}
   if(!cib)return false;
   if(bd<=1){tryMove(Math.sign(cib.x-G.px),Math.sign(cib.y-G.py));return true;}             // embusqué au contact, mal placé : on bute dessus
   return versCase(cib.x,cib.y);}
 
 /* --- un essai, une série --- */
 const LIMITE=900;
-function fin(cfg,n0,v0){const reste=vivants().length+(G.amb||[]).length,mort=!!(G.over&&G.over.dead),E=G.eff||{};
+function fin(cfg,n0,v0){const reste=vivants().length,mort=!!(G.over&&G.over.dead),E=G.eff||{};
   const vie=mort?0:Math.max(0,G.st.vie-(E.poison>0?E.poison*(E.pdmg||0):0));
   const ok=cfg.pilote==='traversee'?!!(G.sites[0]&&G.sites[0].x===G.px&&G.sites[0].y===G.py):!reste;
   return {issue:mort?'mort':ok?'victoire':'incomplet',vie,v0,tues:n0-reste,n0,bat:(G.time||0)/100};}
-function essai(cfg){muet(true);const son=SND.on;SND.on=false;try{carte(cfg);const n0=vivants().length+G.amb.length,v0=G.st.vie;let n=0;while(n++<LIMITE&&pas(cfg)){}return fin(cfg,n0,v0);}finally{SND.on=son;muet(false);}}
+function essai(cfg){muet(true);const son=SND.on;SND.on=false;try{carte(cfg);const n0=vivants().length,v0=G.st.vie;let n=0;while(n++<LIMITE&&pas(cfg)){}return fin(cfg,n0,v0);}finally{SND.on=son;muet(false);}}
 function bilan(cfg,l){const N=l.length,v=l.filter(r=>r.issue==='victoire'),m=l.filter(r=>r.issue==='mort'),som=(a,f)=>a.reduce((t,r)=>t+f(r),0);
   const perte=som(l,r=>r.v0-r.vie),tues=som(l,r=>r.tues);
   return {n:N,vic:Math.round(100*v.length/N),mort:Math.round(100*m.length/N),inc:Math.round(100*(N-v.length-m.length)/N),
@@ -110,7 +110,7 @@ function lancer(){if(COURS)return;const cfg=lire(),N=Math.max(1,Math.min(2000,Ma
   tranche();}
 function voir(){if(COURS)return;const cfg=lire();if(!Object.keys(cfg.ennemis).length&&cfg.pilote==='chasse'){etat('Choisissez au moins un ennemi.','bad');return;}
   muet(true);carte(cfg);muet(false);fog=$b('bfog').checked;computeFOV();vrai.render();
-  const n0=vivants().length+G.amb.length,v0=G.st.vie;let n=0;COURS={tm:0};$b('bgo').disabled=true;$b('bvoir').disabled=true;$b('bstop').disabled=false;etat('Combat en cours…');
+  const n0=vivants().length,v0=G.st.vie;let n=0;COURS={tm:0};$b('bgo').disabled=true;$b('bvoir').disabled=true;$b('bstop').disabled=false;etat('Combat en cours…');
   const tic=()=>{if(!COURS)return;const suite=n++<LIMITE&&pas(cfg);
     if(suite){COURS.tm=setTimeout(tic,+$b('bvit').value);return;}
     const r=bilan(cfg,[fin(cfg,n0,v0)]);carteRes(cfg,r);etat(r.vic?'Victoire.':r.mort?'Foreuse détruite.':'Combat inachevé.',r.vic?'ok':'bad');stop();vrai.render();};

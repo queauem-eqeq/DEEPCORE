@@ -219,15 +219,14 @@ function niveau(){drilling=false;
   genPlanet();
   G.w=W;G.h=H;
   batiments();   // structures bâties (07b), avant la roche dure et les métaux
-  lifeCalc();
   durcir();   // la roche dure avant les métaux : ils n'y apparaissent jamais
   {const a=W*H/(48*32);G.eff={};G.fum={};hideOre(Math.max(1,Math.round(GISEMENTS.metal*a)),Math.max(1,Math.round(GISEMENTS.mat*a)));}
   G.sonar=1;   // sonar à émettre (voir sonarStart, 10-rendu) : il part 10 à 20 tours après l'arrivée
   G.items={};G.tracks={};G.lastDir=null;G.beasts=[];G.blood={};G.fv=2;
   G.inv=invTest();G.log=[];
   G.st.matiere=G.st.matiere||0;G.sonarAt=(G.turn||0)+10+Math.floor(Math.random()*11);
-  spawnAnimals();spawnBeasts();lastAct='move';palBiome(null);buildTiles();turnStealth();computeFOV();}
-const fauneTxt=()=>LIFE_LBL.filter(([k])=>LIFE[k]>0).map(([,l])=>l).join(', ')||'aucune';
+  spawnGroupes();lastAct='move';palBiome(null);buildTiles();turnStealth();computeFOV();}
+const fauneTxt=()=>[...new Set([...(G.animals||[]).map(a=>SPECIES[a.sp].n),...(G.beasts||[]).map(b=>BEASTS[b.sp].n)])].join(', ')||'aucune';
 function newGame(){niveau();
   say('Atterrissage confirmé. Un site de forage signalé par l’orbiteur. La foreuse est dans la soute ; la porte est à l’arrière.','info');}
 

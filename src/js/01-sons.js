@@ -68,7 +68,11 @@ const SFX={
   porte(k=1){noiz(.03,.14*k,1800,'bandpass');tone(140,.05,'square',.05*k,90);noiz(.26,.09*k,420,'bandpass',.05,160);tone(70,.24,'sawtooth',.035*k,48,.05);tone(58,.08,'square',.08*k,40,.3);noiz(.05,.1*k,300,'lowpass',.3);},   // k : volume (0,6 pour une créature)
   // serrure : la clé tourne (deux crans), le pêne recule, puis la porte s'ouvre
   serrure(){tone(1500,.03,'square',.04,1100);tone(1300,.03,'square',.04,950,.09);noiz(.04,.12,900,'bandpass',.2);tone(110,.07,'square',.07,70,.22);},
-  door(){noiz(.38,.16,2600,'bandpass',0,700);tone(180,.2,'square',.035,420);tone(95,.09,'square',.09,60,.3);noiz(.06,.12,500,'lowpass',.3);},   // porte automatique : souffle pneumatique, servo, choc de fin de course
+  /* Porte automatique, plus forte et plus métallique (19 novembre 2026) : souffle pneumatique et servo relevés, grincement de
+     rail (deux partiels aigus non harmoniques), puis un vrai choc de fin de course — coup sourd, claquement, et la tôle qui
+     sonne sur trois partiels de cloche (620, 933, 1481 Hz). */
+  door(){noiz(.38,.26,2600,'bandpass',0,700);tone(180,.22,'square',.06,420);tone(1240,.3,'square',.03,1175);tone(1873,.24,'square',.02,1790);
+    tone(95,.12,'square',.15,60,.3);noiz(.09,.26,3400,'bandpass',.3);tone(620,.42,'triangle',.09,606,.3);tone(933,.34,'triangle',.06,918,.3);tone(1481,.24,'triangle',.04,1460,.3);},
   hyper(){tone(700,1,'sawtooth',.05,55);noiz(1.1,.13,3200,'bandpass',0,180);},
   hum(){tone(55,2.2,'sine',.06);tone(110,2.2,'sine',.02);},
   approach(){tone(70,3,'sawtooth',.035,150);noiz(3,.05,300,'lowpass',0,900);},
