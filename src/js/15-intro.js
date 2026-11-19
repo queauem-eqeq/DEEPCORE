@@ -94,7 +94,7 @@ introCv.addEventListener('pointerdown',()=>{unlock();});
 function introCell(x,i,px,py){const t=G.t[i],h=hash(i%W,(i/W)|0),put2=(tl,a)=>{if(!tl)return;x.globalAlpha=a;x.drawImage(tl,px,py,S,S);};
   x.globalAlpha=1;x.fillStyle='#020605';x.fillRect(px,py,S,S);
   const pb=t===BRIDGE&&G.pb&&G.pb[i];
-  if(t!==CHASM)voile(i%W,(i/W)|0,px,py,1,x,pb);
+  if(t!==CHASM)voile(i%W,(i/W)|0,px,py,1,x,pb||t>=WALL);
   if(pb)put2(TL.floor,.5);
   if(t>=WALL)batiTuile(t,i%W,(i/W)|0,put2);else
   if(t!==BRIDGE)put2(TL.ground0,.6);
