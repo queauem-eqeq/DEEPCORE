@@ -136,7 +136,7 @@ function fumTick(){const F=G.fum;if(!F)return;let ks=Object.keys(F);if(!ks.lengt
    - affut      : immobile à son point de départ ; il y revient après une chasse.
    Chaque groupe posé a son état dans G.patr[id] : pts (les points), k (le point visé), pause, age. Une créature connaît
    son groupe par o.gi. En patrouille on marche : un pas par battement au plus, quelle que soit la vitesse de l'espèce. */
-const PAT_CIBLE={ronde:1,territoire:1,sentinelle:1,affut:1},PAT_BLOC=4;
+const PAT_CIBLE={ronde:1,territoire:1,sentinelle:1,affut:1},PAT_BLOC=8;let PAT_BT=0;
 let PATD={};
 function patBfs(tx,ty,eau){const d=new Int16Array(W*H).fill(-1),q=[idx(tx,ty)];d[q[0]]=0;
   for(let k=0;k<q.length;k++){const c=q[k],x=c%W,y=(c/W)|0;for(const[dx,dy]of DIRS){const a=x+dx,b=y+dy;if(a<1||b<1||a>=W-1||b>=H-1)continue;
@@ -158,7 +158,7 @@ function patInit(g,id,mb){const o=mb[0],P={pat:g.pat,hx:o.x,hy:o.y,k:0,pause:0,a
   if(P.pat==='sentinelle'||P.pat==='affut')P.pause=P.pat==='affut'?9999:rnd(20,60);   // déjà en poste à l'arrivée sur la carte
   G.patr[id]=P;}
 // une fois par battement : chaque groupe en patrouille regarde s'il est arrivé, fait sa halte, choisit le point suivant
-function patTick(){PATD={};if(!G.patr||G.over)return;const mb={};
+function patTick(){PATD={};PAT_BT++;if(!G.patr||G.over)return;const mb={};
   for(const o of [...(G.beasts||[]),...(G.animals||[])])if(o.gi!=null)(mb[o.gi]=mb[o.gi]||[]).push(o);
   for(const id in G.patr){const P=G.patr[id],m=mb[id];if(!m){delete G.patr[id];continue;}
     if(!P.pts||m.some(o=>o.hunt>0||o.aware))continue;
@@ -171,17 +171,30 @@ function patTick(){PATD={};if(!G.patr||G.over)return;const mb={};
       continue;}
     const d=patD(P),h=Math.min(...m.map(o=>{const v=d[idx(o.x,o.y)];return v<0?9999:v;}));
     if(h<=P.sp||++P.age>90){P.pause=P.pat==='ronde'?rnd(3,6):P.pat==='territoire'?rnd(8,20):P.pat==='sentinelle'?rnd(40,80):9999;P.bh=null;P.bl=0;}
-    /* Demi-tour (20 novembre 2026) : un groupe qui n'avance plus vers son point depuis PAT_BLOC battements — un autre groupe
-       lui barre un passage étroit — renonce et repart vers son point précédent (ronde, sentinelle) ou s'en choisit un
-       autre (territoire). Deux groupes face à face dans un couloir se séparent donc au lieu de se bloquer. */
+    /* Demi-tour, en dernier recours (20 novembre 2026) : un groupe qui n'avance plus vers son point depuis PAT_BLOC battements
+       malgré l'échange de places (patSwap) — un ennemi en chasse ou une mine armée lui barre le passage — renonce et
+       repart vers son point précédent (ronde, sentinelle) ou s'en choisit un autre (territoire). */
     else if(P.bh==null||h<P.bh){P.bh=h;P.bl=0;}
     else if(++P.bl>=PAT_BLOC){P.bl=0;P.bh=null;P.age=0;
       if(P.pat==='territoire'){const n=patPoints(P,1,1,6);if(n.length)P.pts=n;}
       else if(P.pts.length>1)P.k=(P.k-1+P.pts.length)%P.pts.length;}}}
+/* Échange de places (20 novembre 2026, la règle de Brogue) : une créature en patrouille dont le chemin est barré par une
+   créature calme d'un AUTRE groupe prend sa case, et l'autre prend la sienne. Deux groupes qui se croisent dans un passage
+   étroit se traversent donc au lieu de se bloquer. Jamais avec un ennemi qui chasse ou qui a repéré la foreuse, ni avec une
+   mine armée ; chaque créature ne change de place qu'une fois par battement ; chacune doit pouvoir tenir sur la case de
+   l'autre (une torpille ne sort pas de l'eau). En chasse, rien ne change : les ennemis se gênent et se contournent. */
+const terrOk=(o,x,y)=>{const sp=G.beasts.includes(o)?BEASTS[o.sp]:SPECIES[o.sp],v=G.t[idx(x,y)];return !(sp.aqua&&!isWater(v))&&canWalk(v,mouilleOk(sp,o));};
+function patSwap(o,d){if(o.sw===PAT_BT)return false;let best=null,bv=d[idx(o.x,o.y)];
+  for(const [dx,dy] of DIRS){const nx=o.x+dx,ny=o.y+dy;if(!diagOk(o.x,o.y,dx,dy))continue;const v=d[idx(nx,ny)];if(v<0||v>=bv)continue;
+    const c=beastAt(nx,ny)||animalAt(nx,ny);if(!c||c.gi==null||c.gi===o.gi||c.hunt>0||c.aware||c.fuse>0||c.sw===PAT_BT)continue;
+    if(!terrOk(o,nx,ny)||!terrOk(c,o.x,o.y))continue;bv=v;best=c;}
+  if(!best)return false;const x=o.x,y=o.y;if(best.x!==x){o.dir=Math.sign(best.x-x);best.dir=-o.dir;}
+  o.x=best.x;o.y=best.y;best.x=x;best.y=y;o.sw=best.sw=PAT_BT;return true;}
 // le pas de patrouille d'une créature calme ; renvoie false si son groupe n'a pas de point à rejoindre (errance, voyage)
 function patMove(o,fits){const P=G.patr&&G.patr[o.gi];if(!P||!P.pts||P.tx==null)return false;
   const d=patD(P),h=d[idx(o.x,o.y)];if(h<0)return false;
-  if(h>P.sp)chaseStep(o,d,fits,P.tx,P.ty);
+  if(h>P.sp){const libre=DIRS.some(([dx,dy])=>{const v=d[idx(o.x+dx,o.y+dy)];return v>=0&&v<h&&fits(o.x+dx,o.y+dy)&&diagOk(o.x,o.y,dx,dy);});
+    if(libre||!patSwap(o,d))chaseStep(o,d,fits,P.tx,P.ty);}   // un pas libre, sinon l'échange de places, sinon le détour
   else if(P.pat==='territoire'&&Math.random()<.15){const [dx,dy]=DIRS[rnd(0,7)],v=d[idx(o.x+dx,o.y+dy)];if(v>=0&&v<=P.sp+1&&fits(o.x+dx,o.y+dy)&&diagOk(o.x,o.y,dx,dy)){o.x+=dx;o.y+=dy;if(dx)o.dir=dx;}}
   o.mp=Math.min(o.mp,.99);return true;}
 /* Errance (règle du 20 novembre 2026) : un pas tous les battements ou tous les deux (une fois sur deux, la créature marque

@@ -108,13 +108,17 @@ La carte n'est plus peuplée espèce par espèce (les cinq niveaux d'intensité 
   - **Territoire** : le groupe tourne dans un rayon de 6 cases autour de son point de départ, avec des haltes de 8 à 20 battements.
   - **Sentinelle** : 2 ou 3 postes ; le groupe reste **immobile** à un poste 40 à 80 battements, puis rejoint le suivant.
   - **Affût** : immobile à son point de départ.
-  **Demi-tour** (20 novembre 2026) : un groupe qui n'avance plus vers son point depuis 4 battements, parce qu'un autre lui
-  barre un passage étroit, renonce et **repart vers son point précédent** (ronde, sentinelle) ou s'en choisit un autre
-  (territoire ; une bande en voyage change de destination après 6 battements). Deux groupes face à face dans un couloir se
-  séparent au lieu de se bloquer — ils attendaient jusqu'à 90 battements avant. Choix de l'utilisateur, préféré à l'échange de places.
-  Essai du 20 novembre 2026, deux groupes de cinq en ronde face à face, 400 battements : jamais plus de 4 battements figés, les
-  groupes ne se mélangent pas, mais **aucun ne traverse**, ni dans un couloir d'une case ni dans un couloir de deux. C'est la
-  limite connue du demi-tour : un passage étroit partagé par deux rondes reste infranchissable pour elles.
+  **Échange de places** (20 novembre 2026, la règle de Brogue) : une créature en patrouille dont le chemin est barré par une
+  créature calme d'un **autre groupe** prend sa case, et l'autre prend la sienne. Deux groupes qui se croisent dans un
+  passage étroit **se traversent** au lieu de se bloquer. Jamais avec un ennemi qui chasse ou qui a repéré la foreuse, ni
+  avec une mine armée ; une fois par battement et par créature ; chacune doit pouvoir tenir sur la case de l'autre. **En
+  chasse, rien ne change** : les ennemis se gênent et se contournent, le joueur garde l'avantage des goulots.
+  Essai : deux groupes de cinq en ronde face à face, 400 battements, couloir d'une case puis de deux — aucun battement
+  figé, 5 à 6 traversées par groupe (le maximum possible). Avec le seul demi-tour, essayé d'abord le même jour, il n'y
+  avait aucun blocage mais **aucune traversée** : le couloir devenait une frontière.
+  **Demi-tour, en dernier recours** : un groupe qui n'avance plus depuis 8 battements malgré l'échange (un ennemi en chasse
+  ou une mine armée barre le passage) repart vers son point précédent (ronde, sentinelle) ou s'en choisit un autre
+  (territoire ; une bande en voyage change de destination).
   La patrouille ne joue que tant qu'aucun membre n'a repéré la foreuse. Chasse et fouille finies, le groupe **reprend sa
   patrouille** : il rentre donc chez lui au lieu de rester là où la chasse l'a mené. En patrouille on marche — un pas par
   battement au plus, quelle que soit la vitesse de l'espèce. Mesuré sur 220 battements : affût 0 case parcourue, sentinelle
