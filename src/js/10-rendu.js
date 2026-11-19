@@ -140,8 +140,8 @@ function ensureSolOv(){if(!G)return;const R=SOL_REG,key=(G.seed||'')+'|'+PAL['3'
       d[((cy*16+gy)*PW+cx*16+gx)*4+3]=R.grain;}}
   x.putImageData(img,0,0);c._g=G;SOL_OV=c;SOL_KEY=key;}
 // le voile de couleur monde d'une case : l'image précalculée, ou la couleur unie tant qu'elle n'est pas prête
-function voile(x,y,px,py,a,cx2){const c=cx2||ctx;
-  if(SOL_OV&&SOL_OV._g===G){c.globalAlpha=a;c.drawImage(SOL_OV,x*16,y*16,16,16,px,py,S,S);return;}
+function voile(x,y,px,py,a,cx2,uni){const c=cx2||ctx;   // uni : couleur unie, sans la texture du sol (ponts des bâtiments)
+  if(!uni&&SOL_OV&&SOL_OV._g===G){c.globalAlpha=a;c.drawImage(SOL_OV,x*16,y*16,16,16,px,py,S,S);return;}
   c.globalAlpha=.08*a;c.fillStyle=PAL['3'];c.fillRect(px,py,S,S);}
 /* Sonar (13 novembre 2026, revu le 15) : 10 à 20 tours après l'arrivée sur un niveau, la foreuse émet une onde circulaire qui balaie toute
    la carte et détecte les gisements (éclats de métal et Matière). G.sonar : 1 = à émettre (au tour G.sonarAt), 2 = émis.
@@ -166,7 +166,9 @@ function render(){
   if(sh){const a=(1-fxP(sh))*sh.amp;ctx.translate(Math.round((Math.random()*2-1)*a),Math.round((Math.random()*2-1)*a));}
   for(let y=camY;y<Math.min(H,camY+rows+1);y++)for(let x=camX;x<Math.min(W,camX+cols+1);x++){
     const i=idx(x,y),v=fog?vis[i]:1;if(!v&&!G.seen[i])continue;const t=G.t[i],h=hash(x,y),k=v?1:.28;
-    if(t!==CHASM)voile(x,y,(x-camX)*S,(y-camY)*S,k);
+    const pb=t===BRIDGE&&G.pb&&G.pb[i];   // pont d'un bâtiment : couleur unie et tuile du sol bâti (19 novembre 2026)
+    if(t!==CHASM)voile(x,y,(x-camX)*S,(y-camY)*S,k,null,pb||t>=WALL);   // rien de bâti ne porte la texture du sol naturel
+    if(pb)put(TL.floor,x,y,.5*k);
     if(t>=WALL)batiTuile(t,x,y,(tl,a)=>put(tl,x,y,a*k));else
     if(t!==BRIDGE)put(TL.ground0,x,y,.6*k);   // sol uniforme : plus de variations près des sites (13 novembre 2026)
     if(t===ROCK)put(h%3?TL.rock:TL.rock2,x,y,.95*k);

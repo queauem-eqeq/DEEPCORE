@@ -65,11 +65,11 @@ function distBati(B,a,b,max){const d=new Map([[a,0]]),q=[a];
   return Infinity;}
 // Boucles et longs couloirs : depuis un sol, on tire tout droit à travers le mur ; si l'on retombe sur un autre sol et que le
 // détour à pied est long, on perce (une porte si le mur fait une case, sinon un couloir avec une porte à chaque bout).
-function boucles(B,S){const {own,porte,interdit,pied}=B,cand=[];
+function boucles(B,S){const {own,porte,interdit,pied}=B,cand=[],miens=new Set(S.pieces.map(p=>p.id));   // miens : jamais de couloir vers l'autre structure
   const mur=(x,y)=>{const i=idx(x,y);return x>1&&y>1&&x<W-2&&y<H-2&&!own[i]&&!porte[i]&&!interdit[i];};
   for(const p of S.pieces)for(const fi of p.c){const fx=fi%W,fy=(fi/W)|0;
     for(const [dx,dy] of D4){let m=0;while(m<20&&mur(fx+dx*(m+1),fy+dy*(m+1)))m++;
-      if(m<1||m===2||m>=20)continue;const g=idx(fx+dx*(m+1),fy+dy*(m+1));if(!own[g]||own[g]===own[fi])continue;cand.push([fi,dx,dy,m,g]);}}
+      if(m<1||m===2||m>=20)continue;const g=idx(fx+dx*(m+1),fy+dy*(m+1));if(!own[g]||own[g]===own[fi]||!miens.has(own[g]))continue;cand.push([fi,dx,dy,m,g]);}}
   cand.sort(()=>Math.random()-.5);let longs=0;const maxLongs=1+Math.floor(S.pieces.length/7);
   for(const [fi,dx,dy,m,g] of cand){const fx=fi%W,fy=(fi/W)|0;let ok=true;
     if(m>1&&longs>=maxLongs)continue;
@@ -127,7 +127,7 @@ function entrees(B,S,t,atteint){const {own,porte,pied,interdit}=B,cand=[];
 // Pose les structures sur la carte déjà générée (relief, vaisseau, site). Elles peuvent recouvrir la montagne et l'eau ;
 // si une entrée donne sur de la roche, un couloir est percé jusqu'à elle (connect).
 function batiments(){
-  G.batis=[];G.cles={};const pct=GEN.structure||0,N=W*H;if(pct<=0)return;
+  G.batis=[];G.cles={};G.pb={};const pct=GEN.structure||0,N=W*H;if(pct<=0)return;
   const total=Math.round(N*pct/100);if(total<45)return;
   const t0=G.t.slice();
   for(let essai=0;essai<6;essai++){
@@ -136,12 +136,19 @@ function batiments(){
       if(x<2||y<2||x>=W-2||y>=H-2)B.interdit[i]=1;   // les gouffres naturels ne gênent plus : une pièce posée dessus les change en sol (19 novembre 2026)
       else if(v===SHIP||v===DECK)for(let dy=-3;dy<=3;dy++)for(let dx=-2;dx<=2;dx++)B.interdit[idx(Math.max(0,Math.min(W-1,x+dx)),Math.max(0,Math.min(H-1,y+dy)))]=1;}
     for(let dy=-2;dy<=2;dy++)for(let dx=-2;dx<=2;dx++)B.interdit[idx(Math.max(0,Math.min(W-1,G.px+dx)),Math.max(0,Math.min(H-1,G.py+dy)))]=1;
-    const deux=GEN.sNb===2?total>=90:GEN.sNb===1?false:total>=260&&Math.random()<.5,part=deux?.35+Math.random()*.3:1,cibles=deux?[Math.round(total*part),total-Math.round(total*part)]:[total];
+    const deux=GEN.sNb===2?total>=90:GEN.sNb===1?false:total>=260&&Math.random()<.5,part=deux?.2+Math.random()*.6:1,cibles=deux?[Math.round(total*part),total-Math.round(total*part)]:[total];
     const cles=STYLES[GEN.sStyle]?[GEN.sStyle]:Object.keys(STYLES).sort(()=>Math.random()-.5),lots=[],strs=[];
-    for(let s=0;s<cibles.length;s++){const cible=cibles[s],aire=cible*1.7,asp=1+Math.random()*.9;
-      let lw=Math.min(W-6,Math.round(Math.sqrt(aire*asp))),lh=Math.min(H-6,Math.round(aire/lw));if(lw<10)lw=Math.min(W-6,10);if(lh<8)lh=Math.min(H-6,8);
+    // deux structures : la carte est coupée en deux zones, à proportion de leurs tailles, pour qu'elles tiennent toujours toutes les deux
+    const zones=[[3,3,W-4,H-4]];
+    if(deux){const vert=W>=H?Math.random()<.75:Math.random()<.25,inv=Math.random()<.5,pa=inv?1-part:part;
+      if(vert){const c=Math.round(3+(W-6)*Math.max(.22,Math.min(.78,pa)));zones[0]=[3,3,c-3,H-4];zones[1]=[c+3,3,W-4,H-4];}
+      else{const c=Math.round(3+(H-6)*Math.max(.25,Math.min(.75,pa)));zones[0]=[3,3,W-4,c-3];zones[1]=[3,c+3,W-4,H-4];}
+      if(inv)zones.reverse();}
+    for(let s=0;s<cibles.length;s++){const cible=cibles[s],aire=cible*1.7,asp=1+Math.random()*.9,[zx0,zy0,zx1,zy1]=zones[s],zw=zx1-zx0+1,zh=zy1-zy0+1;
+      let lw=Math.min(zw,Math.round(Math.sqrt(aire*asp))),lh=Math.min(zh,Math.round(aire/lw));if(lw<10)lw=Math.min(zw,10);if(lh<8)lh=Math.min(zh,8);
+      if(lw*lh<aire)lw=Math.min(zw,Math.ceil(aire/lh));   // zone étroite : on s'étale dans l'autre sens
       let best=null,bb=1e9;
-      for(let k=0;k<60;k++){const x0=rnd(3,W-3-lw),y0=rnd(3,H-3-lh);if(lots.some(l=>x0<=l[2]+2&&x0+lw>=l[0]-2&&y0<=l[3]+2&&y0+lh>=l[1]-2))continue;
+      for(let k=0;k<60;k++){const x0=rnd(zx0,zx1-lw+1),y0=rnd(zy0,zy1-lh+1);
         let bad=0;for(let y=y0;y<y0+lh;y+=2)for(let x=x0;x<x0+lw;x+=2)if(B.interdit[idx(x,y)])bad++;if(bad<bb){bb=bad;best=[x0,y0,x0+lw-1,y0+lh-1];}}
       if(!best)continue;lots.push(best);
       const S=accretion(B,best,cible,STYLES[cles[s%cles.length]]);if(!S||S.pieces.length<2)continue;
@@ -161,6 +168,7 @@ function batiments(){
       if(ok)connect(t);
       if(ok&&connectedAll(t)){
         G.batis=strs.map(S=>({style:S.st.n,pieces:S.pieces.filter(p=>p.g!=='couloir').length,cases:S.emprise,entrees:S.entrees.map(e=>[e.x,e.y])}));
+        G.pb={};for(const i of garde)if(t[i]===BRIDGE)G.pb[i]=1;   // les ponts des pièces, pour le rendu
         siteAuFond(B,strs);petites(B,strs);const sec=secrets(B,strs);verrous(B,strs,sec);return;}
     }
     for(let i=0;i<N;i++)G.t[i]=t0[i];
