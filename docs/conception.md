@@ -204,7 +204,7 @@ Jugée trop haute et trop étroite (640 × 835), elle est passée à 940 × 390 
 - Posé à la génération sur une zone dégagée (marge d'une case tout autour) ; à défaut sur la zone la moins encombrée, nettoyée puis reliée au reste de la carte. La connexion automatique ne perce jamais la coque.
 - La foreuse démarre au fond du couloir (case de soute du haut), mèche vers la porte. La coque bloque le passage mais pas la vue ; la foreuse peut toujours revenir dans la soute. Les ennemis peuvent aussi y entrer. Aucune règle d'exception sur les diagonales : c'est la forme du couloir qui empêche d'entrer ou de sortir ailleurs que par la porte.
 - Dessin : coque en accent avec coutures et rivets bio, sol de soute à grille bio, verrière bio avec un reflet blanc dans le nez (case du haut), porte à bandes monde, tuyères bio.
-- Passer la porte (entrer ou sortir) joue un bruitage de porte automatique (souffle pneumatique, servo, grincement de rail, choc de fin de course qui fait sonner la tôle ; rendu plus fort et plus métallique le 19 novembre 2026) et l'écrit dans le journal.
+- Passer la porte (entrer ou sortir) joue un bruitage de porte automatique (souffle pneumatique, servo, grincement de rail ; rendu plus fort et plus métallique le 19 novembre 2026, puis réduit à cette première partie, sans le choc de fin de course : **c'est désormais le bruit de toutes les portes**, celles des bâtiments comprises, à volume réduit quand une créature en pousse une) et l'écrit dans le journal.
 
 ## 5. Foreuse (robot)
 
