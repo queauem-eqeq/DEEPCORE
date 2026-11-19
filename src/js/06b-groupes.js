@@ -17,12 +17,13 @@ const GROUPES_DEF=()=>({budget:110,liste:[
   {n:'Broyeur solitaire',cout:10,on:1,pats:['territoire'],m:[{k:'mastok',min:1,max:1}]},
   {n:'Mines',cout:4,on:1,pats:['affut'],m:[{k:'mine',min:1,max:2}]},
   {n:'Paralyzor',cout:4,on:1,pats:['sentinelle'],m:[{k:'paralyzor',min:1,max:1}]}]});
-// remet d'aplomb des groupes lus dans le navigateur ou dans la base : bornes, espèces inconnues écartées
+// remet d'aplomb des groupes lus dans le navigateur ou dans la base : bornes, espèces inconnues écartées.
+// L'effectif minimal peut être 0 : l'espèce est alors parfois absente du groupe.
 function groupesSains(d){const ks=ESPECES().map(e=>e[0]),n=(v,mn,mx,df)=>Number.isFinite(+v)&&v!==''&&v!=null?Math.max(mn,Math.min(mx,Math.round(+v))):df;
   if(!d||!Array.isArray(d.liste))return null;
   return {budget:n(d.budget,0,2000,110),liste:d.liste.slice(0,40).map(g=>({n:String(g.n||'Groupe').slice(0,30),cout:n(g.cout,1,500,1),on:g.on?1:0,
     pats:(l=>l.length?l:['errance'])([...new Set(Array.isArray(g.pats)?g.pats:[g.pat])].filter(v=>PATS.some(p=>p[0]===v))),   // un seul style (g.pat) avant le 19 novembre 2026 au soir
-    m:(Array.isArray(g.m)?g.m:[]).filter(m=>m&&ks.includes(m.k)).slice(0,6).map(m=>{const a=n(m.min,0,20,1),b=n(m.max,1,20,Math.max(1,a));   // l'effectif minimal peut être 0 : l'espèce est alors parfois absente du groupereturn {k:m.k,min:Math.min(a,b),max:Math.max(a,b)};})}))};}
+    m:(Array.isArray(g.m)?g.m:[]).filter(m=>m&&ks.includes(m.k)).slice(0,6).map(m=>{const a=n(m.min,0,20,1),b=n(m.max,1,20,Math.max(1,a));return {k:m.k,min:Math.min(a,b),max:Math.max(a,b)};})}))};}
 let GROUPES=GROUPES_DEF();
 try{const g=groupesSains(JSON.parse(localStorage.getItem('np-groupes')||'null'));if(g)GROUPES=g;}catch(e){}
 function saveGroupes(){try{localStorage.setItem('np-groupes',JSON.stringify(GROUPES));}catch(e){}touchLocal();}
