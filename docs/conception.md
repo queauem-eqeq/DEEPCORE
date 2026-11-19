@@ -378,7 +378,7 @@ Les chiffres du tableau sont ceux **réglés en jeu par le joueur** et recopiés
   s'éteint. **Touché**, il reste **accroché** : il inflige ses dégâts (1 à 2) **à chaque battement, sans jet pour
   toucher**, et la foreuse ne peut plus que **s'approcher de lui, dans l'axe du trait** — de quoi venir le frapper. Tout
   autre pas est refusé, et elle ne dérive plus ; elle peut toujours frapper, briser une paroi voisine, utiliser un objet.
-  Le **trait rouge** d'un pixel, à petites étincelles, les relie tant qu'il vit. Seule sa mort la libère ; l'effet
+  Le **trait rouge** d'un pixel, à petites étincelles, les relie tant qu'il vit. Sa mort la libère, ou un **fumigène** : la fumée coupe tous les traits d'un coup, et le paralyzor, qui n'y voit plus, ne peut pas tirer de nouveau tant qu'elle le cache ; l'effet
   « Paralysée » s'affiche sous les jauges.
 
 Effets durables sur la foreuse : affichés sous les jauges (« Poison 4 · Englué 2 »), décomptés à chaque battement. La Coque isolante divise leur durée par deux, la Purge les supprime.

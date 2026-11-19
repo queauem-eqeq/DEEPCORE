@@ -110,6 +110,7 @@ function fumPose(){const F=G.fum=G.fum||{};
     const x=G.px+dx,y=G.py+dy;if(x<1||y<1||x>=W-1||y>=H-1)continue;const i=idx(x,y);if(blocks(G.t[i]))continue;
     const v=rnd(FUM_VIE[0],FUM_VIE[1]);
     F[i]={v:F[i]?Math.max(F[i].v,v):v,k:d2<=2?rnd(0,1):2+rnd(0,3)};}   // cœur : nuage plein ou texturé ; pourtour : les quatre bords
+  {const tenu=paralyse();for(const b of G.beasts||[])b.grip=0;if(tenu)sayMore('La fumée coupe le trait du paralyzor : la foreuse est libre.','good');}   // le fumigène libère la foreuse
   for(const b of G.beasts||[])if(b.hunt){b.hunt=0;forget(b);}
   for(const a of G.animals||[]){a.aware=0;a.enraged=false;forget(a);}}
 function fumTick(){const F=G.fum;if(!F)return;let ks=Object.keys(F);if(!ks.length)return;
@@ -332,7 +333,7 @@ function explose(b){const sp=BEASTS[b.sp],k=G.beasts.indexOf(b);if(k>=0)G.beasts
 /* Paralyzor (19 novembre 2026) : il tire un trait rouge jusqu'à GRIP_R cases, en ligne de vue. Raté, le trait tape à côté de
    la foreuse et s'éteint. Touché, il reste accroché : il inflige ses dégâts à chaque battement, sans jet pour toucher,
    et la foreuse ne peut plus que s'approcher de lui dans l'axe du trait (gripPas) — de quoi venir le frapper. Elle peut
-   aussi briser une paroi voisine et utiliser un objet. Seule la mort du paralyzor la libère. Rendu du trait : 10-rendu. */
+   aussi briser une paroi voisine et utiliser un objet. La mort du paralyzor la libère, ou un fumigène, qui coupe le trait. Rendu du trait : 10-rendu. */
 const GRIP_R=2;
 // un pas est permis à la foreuse accrochée s'il la rapproche d'un paralyzor qui la tient, sans l'éloigner d'aucun autre
 function gripPas(dx,dy){const L=G.beasts.filter(b=>b.grip);let mieux=false;
