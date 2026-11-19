@@ -65,11 +65,11 @@ function distBati(B,a,b,max){const d=new Map([[a,0]]),q=[a];
   return Infinity;}
 // Boucles et longs couloirs : depuis un sol, on tire tout droit à travers le mur ; si l'on retombe sur un autre sol et que le
 // détour à pied est long, on perce (une porte si le mur fait une case, sinon un couloir avec une porte à chaque bout).
-function boucles(B,S){const {own,porte,interdit,pied}=B,cand=[];
+function boucles(B,S){const {own,porte,interdit,pied}=B,cand=[],miens=new Set(S.pieces.map(p=>p.id));   // miens : jamais de couloir vers l'autre structure
   const mur=(x,y)=>{const i=idx(x,y);return x>1&&y>1&&x<W-2&&y<H-2&&!own[i]&&!porte[i]&&!interdit[i];};
   for(const p of S.pieces)for(const fi of p.c){const fx=fi%W,fy=(fi/W)|0;
     for(const [dx,dy] of D4){let m=0;while(m<20&&mur(fx+dx*(m+1),fy+dy*(m+1)))m++;
-      if(m<1||m===2||m>=20)continue;const g=idx(fx+dx*(m+1),fy+dy*(m+1));if(!own[g]||own[g]===own[fi])continue;cand.push([fi,dx,dy,m,g]);}}
+      if(m<1||m===2||m>=20)continue;const g=idx(fx+dx*(m+1),fy+dy*(m+1));if(!own[g]||own[g]===own[fi]||!miens.has(own[g]))continue;cand.push([fi,dx,dy,m,g]);}}
   cand.sort(()=>Math.random()-.5);let longs=0;const maxLongs=1+Math.floor(S.pieces.length/7);
   for(const [fi,dx,dy,m,g] of cand){const fx=fi%W,fy=(fi/W)|0;let ok=true;
     if(m>1&&longs>=maxLongs)continue;
@@ -141,8 +141,8 @@ function batiments(){
     // deux structures : la carte est coupée en deux zones, à proportion de leurs tailles, pour qu'elles tiennent toujours toutes les deux
     const zones=[[3,3,W-4,H-4]];
     if(deux){const vert=W>=H?Math.random()<.75:Math.random()<.25,inv=Math.random()<.5,pa=inv?1-part:part;
-      if(vert){const c=Math.round(3+(W-6)*Math.max(.22,Math.min(.78,pa)));zones[0]=[3,3,c-2,H-4];zones[1]=[c+2,3,W-4,H-4];}
-      else{const c=Math.round(3+(H-6)*Math.max(.25,Math.min(.75,pa)));zones[0]=[3,3,W-4,c-2];zones[1]=[3,c+2,W-4,H-4];}
+      if(vert){const c=Math.round(3+(W-6)*Math.max(.22,Math.min(.78,pa)));zones[0]=[3,3,c-3,H-4];zones[1]=[c+3,3,W-4,H-4];}
+      else{const c=Math.round(3+(H-6)*Math.max(.25,Math.min(.75,pa)));zones[0]=[3,3,W-4,c-3];zones[1]=[3,c+3,W-4,H-4];}
       if(inv)zones.reverse();}
     for(let s=0;s<cibles.length;s++){const cible=cibles[s],aire=cible*1.7,asp=1+Math.random()*.9,[zx0,zy0,zx1,zy1]=zones[s],zw=zx1-zx0+1,zh=zy1-zy0+1;
       let lw=Math.min(zw,Math.round(Math.sqrt(aire*asp))),lh=Math.min(zh,Math.round(aire/lw));if(lw<10)lw=Math.min(zw,10);if(lh<8)lh=Math.min(zh,8);
