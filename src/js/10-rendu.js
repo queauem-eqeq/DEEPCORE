@@ -245,15 +245,17 @@ function render(){
   {const u=S/16;ctx.fillStyle=PAL['1'];
    /* Paralyzor accroché : un trait rouge d'un pixel de tuile le relie à la foreuse, avec quelques étincelles blanches ou accent
       qui sautent le long du trait (tirage renouvelé 12 fois par seconde). Pixels pleins, sans transparence. */
-   if(G.beasts)for(const b of G.beasts){if(!b.grip)continue;
-     let x0=Math.round((b.x+.5-camX)*16),y0=Math.round((b.y+.5-camY)*16);const x1=Math.round((G.px+.5-camX)*16),y1=Math.round((G.py+.5-camY)*16);
-     const dx=Math.abs(x1-x0),dy=-Math.abs(y1-y0),sx=x0<x1?1:-1,sy=y0<y1?1:-1,pts=[];let e=dx+dy;
-     for(let n=0;n<600;n++){pts.push([x0,y0]);if(x0===x1&&y0===y1)break;const e2=2*e;if(e2>=dy){e+=dy;x0+=sx;}if(e2<=dx){e+=dx;y0+=sy;}}
-     ctx.fillStyle='#ff3b3b';for(const [x,y] of pts)ctx.fillRect(x*u,y*u,u,u);
-     if(!reduced){const T=Math.floor(performance.now()/85),h=n=>{const v=Math.sin(n*12.9898+T*78.233+b.x*3.1+b.y*7.7)*43758.5453;return v-Math.floor(v);};
-       for(let k=0;k<5;k++){const [x,y]=pts[Math.floor(h(k)*pts.length)],ox=Math.round(h(k+10)*4-2),oy=Math.round(h(k+20)*4-2);
-         ctx.fillStyle=h(k+30)<.5?'#fff':PAL['1'];ctx.fillRect((x+ox)*u,(y+oy)*u,u,u);if(h(k+40)<.4)ctx.fillRect((x+ox+(h(k+50)<.5?1:-1))*u,(y+oy)*u,u,u);}}
-     ctx.fillStyle=PAL['1'];}
+   {const laser=(ax,ay,bx,by,graine,etinc)=>{let x0=Math.round(ax),y0=Math.round(ay);const x1=Math.round(bx),y1=Math.round(by);
+       const dx=Math.abs(x1-x0),dy=-Math.abs(y1-y0),sx=x0<x1?1:-1,sy=y0<y1?1:-1,pts=[];let e=dx+dy;
+       for(let n=0;n<600;n++){pts.push([x0,y0]);if(x0===x1&&y0===y1)break;const e2=2*e;if(e2>=dy){e+=dy;x0+=sx;}if(e2<=dx){e+=dx;y0+=sy;}}
+       ctx.fillStyle='#ff3b3b';for(const [x,y] of pts)ctx.fillRect(x*u,y*u,u,u);
+       if(!reduced&&etinc){const T=Math.floor(performance.now()/85),h=n=>{const v=Math.sin(n*12.9898+T*78.233+graine)*43758.5453;return v-Math.floor(v);};
+         for(let k=0;k<etinc;k++){const [x,y]=pts[Math.floor(h(k)*pts.length)],ox=Math.round(h(k+10)*4-2),oy=Math.round(h(k+20)*4-2);
+           ctx.fillStyle=h(k+30)<.5?'#fff':PAL['1'];ctx.fillRect((x+ox)*u,(y+oy)*u,u,u);if(h(k+40)<.4)ctx.fillRect((x+ox+(h(k+50)<.5?1:-1))*u,(y+oy)*u,u,u);}}
+       ctx.fillStyle=PAL['1'];},cx=o=>(o.x+.5-camX)*16,cy=o=>(o.y+.5-camY)*16;
+     if(G.beasts)for(const b of G.beasts)if(b.grip)laser(cx(b),cy(b),(G.px+.5-camX)*16,(G.py+.5-camY)*16,b.x*3.1+b.y*7.7,5);
+     // tir manqué : le même trait, mais il tape à côté de la foreuse, crépite un instant, puis s'éteint d'un coup
+     for(const f of FX)if(f.kind==='laserRate'&&G.beasts.includes(f.o)&&fxP(f)<.7)laser(cx(f.o),cy(f.o),(f.x+.5-camX)*16+f.ox,(f.y+.5-camY)*16+f.oy,f.ox*5.3+f.oy,3);}
    // Explosion d'une mine : le carré de 3 × 3 en pavés de 4 pixels — blanc plein, puis damier accent, puis braises rouges éparses
    for(const f of FX)if(f.kind==='boom'){const p=fxP(f),ph=p<.25?0:p<.6?1:2;ctx.fillStyle=ph===0?'#fff':ph===1?PAL['1']:'#ff3b3b';
      for(let cy=-1;cy<=1;cy++)for(let cx=-1;cx<=1;cx++){const bx=Math.round((f.x+cx-camX)*16),by=Math.round((f.y+cy-camY)*16);

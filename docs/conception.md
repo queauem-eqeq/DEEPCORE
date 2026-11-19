@@ -373,11 +373,13 @@ Les chiffres du tableau sont ceux **réglés en jeu par le joueur** et recopiés
   elle ne bouge plus et **clignote**, puis **explose 1 à 3 battements plus tard**. L'explosion frappe un **carré de 3 × 3**
   centré sur la mine : **20 dégâts** (les dégâts min et max de sa fiche) à la foreuse et à toute créature qui s'y trouve.
   Détruite avant, elle n'explose pas. Elle n'a pas d'autre attaque.
-- **Paralyzor** : rapide (VIT 7). Son premier coup qui porte **l'accroche** à la foreuse : tant qu'il vit, **elle ne peut
-  plus se déplacer** (ni marcher, ni dériver ; elle peut frapper, briser une paroi voisine, utiliser un objet), et il lui
-  inflige ses dégâts (1 à 2) **à chaque battement, sans jet pour toucher**. Un **trait rouge** d'un pixel relie en
-  permanence le paralyzor à la foreuse, avec de petites étincelles. Seule sa mort la libère ; l'effet « Paralysée »
-  s'affiche sous les jauges.
+- **Paralyzor** : rapide (VIT 7). Il **tire un trait rouge jusqu'à 2 cases**, en ligne de vue (au contact seulement dans
+  la première version du jour). **Raté**, le trait se voit quand même : il tape à côté de la foreuse, crépite, puis
+  s'éteint. **Touché**, il reste **accroché** : il inflige ses dégâts (1 à 2) **à chaque battement, sans jet pour
+  toucher**, et la foreuse ne peut plus que **s'approcher de lui, dans l'axe du trait** — de quoi venir le frapper. Tout
+  autre pas est refusé, et elle ne dérive plus ; elle peut toujours frapper, briser une paroi voisine, utiliser un objet.
+  Le **trait rouge** d'un pixel, à petites étincelles, les relie tant qu'il vit. Seule sa mort la libère ; l'effet
+  « Paralysée » s'affiche sous les jauges.
 
 Effets durables sur la foreuse : affichés sous les jauges (« Poison 4 · Englué 2 »), décomptés à chaque battement. La Coque isolante divise leur durée par deux, la Purge les supprime.
 

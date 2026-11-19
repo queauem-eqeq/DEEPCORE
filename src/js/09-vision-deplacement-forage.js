@@ -108,7 +108,7 @@ function tryMove(dx,dy){
     if(an.hp<=0){G.animals.splice(G.animals.indexOf(an),1);bleed(an.x,an.y);say(`${tag}La foreuse écrase ${leNom(sp)}.`,'warn');SFX.squish();}
     else{if(!an.aware)alerte(an);an.aware=1;an.enraged=true;spot(an);say(`${tag}La foreuse heurte ${leNom(sp)}.`);SFX.crack();}
    pass(coupDur());computeFOV();render();if(G.over&&G.over.dead)dead();return;}
-  if(paralyse()&&v!==ROCK&&v!==MOUNT){say('Paralysée : la foreuse ne peut plus se déplacer tant que le paralyzor est en vie.','warn');SFX.blocked();render();return;}
+  if(paralyse()&&v!==ROCK&&v!==MOUNT&&!gripPas(dx,dy)){say('Paralysée : la foreuse ne peut que s’approcher du paralyzor, dans l’axe du trait rouge.','warn');SFX.blocked();render();return;}
   if(v===CHASM){say('Gouffre : passage impossible.');SFX.blocked();render();return;}
   if(v===SHIP){say('Coque du vaisseau : indestructible.');SFX.blocked();render();return;}
   if(v===HARD){say('Roche dure : la foreuse ne l’entame pas. Seule une charge sismique en vient à bout.');SFX.blocked();render();return;}

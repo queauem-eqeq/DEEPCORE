@@ -216,7 +216,7 @@ const BEASTS=[
      "...1...11...1...",
      ".......11.......",
      "................"]},
-  {n:'Paralyzor',key:'paralyzor',nb:3,role:'S’accroche au premier coup qui porte : la foreuse ne peut plus se déplacer tant qu’il vit, et il la blesse à chaque battement',v:7,pv:14,dmin:1,dmax:2,pre:75,def:10,crit:0,grip:true,rows:["................",
+  {n:'Paralyzor',key:'paralyzor',nb:3,role:'Tire à 2 cases. S’il touche, il reste accroché et blesse la foreuse à chaque battement ; elle ne peut plus que s’approcher de lui',v:7,pv:14,dmin:1,dmax:2,pre:75,def:10,crit:0,grip:true,rows:["................",
      "................",
      "......1111......",
      ".....122221.....",

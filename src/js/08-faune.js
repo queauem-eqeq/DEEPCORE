@@ -329,14 +329,22 @@ function explose(b){const sp=BEASTS[b.sp],k=G.beasts.indexOf(b);if(k>=0)G.beasts
     sayMore(`La mine explose : −${dm} vie.`,'warn');if(G.st.vie<=0)G.over={dead:true};}
   else if(vu)sayMore('La mine explose.','warn');
   else if(cheb(b,G.px,G.py)<=10)sayMore('Une explosion, tout près.','warn');}
-/* Paralyzor (19 novembre 2026) : son premier coup qui porte l'accroche à la foreuse. Tant qu'il vit, elle ne peut plus
-   se déplacer (elle peut frapper, forer une paroi voisine, utiliser un objet), et il lui inflige ses dégâts à chaque
-   battement, sans jet pour toucher. Un trait rouge à étincelles les relie (voir 10-rendu). Seule sa mort la libère. */
+/* Paralyzor (19 novembre 2026) : il tire un trait rouge jusqu'à GRIP_R cases, en ligne de vue. Raté, le trait tape à côté de
+   la foreuse et s'éteint. Touché, il reste accroché : il inflige ses dégâts à chaque battement, sans jet pour toucher,
+   et la foreuse ne peut plus que s'approcher de lui dans l'axe du trait (gripPas) — de quoi venir le frapper. Elle peut
+   aussi briser une paroi voisine et utiliser un objet. Seule la mort du paralyzor la libère. Rendu du trait : 10-rendu. */
+const GRIP_R=2;
+// un pas est permis à la foreuse accrochée s'il la rapproche d'un paralyzor qui la tient, sans l'éloigner d'aucun autre
+function gripPas(dx,dy){const L=G.beasts.filter(b=>b.grip);let mieux=false;
+  for(const b of L){const sx=Math.sign(b.x-G.px),sy=Math.sign(b.y-G.py),d0=cheb(b,G.px,G.py),d1=cheb(b,G.px+dx,G.py+dy);
+    if((dx&&dx!==sx)||(dy&&dy!==sy)||d1>d0)return false;if(d1<d0)mieux=true;}
+  return mieux;}
 const paralyse=()=>!!(G&&G.beasts&&G.beasts.some(b=>b.grip));
 const animVif=()=>!!(G&&G.beasts&&G.beasts.some(b=>b.grip||b.fuse>0));   // un effet permanent est à l'écran : le rendu doit tourner
 function gripAtk(b,sp){engage();
-  if(!b.grip){const ch=hitChance(sp.pre,robotDef());addFx({kind:'lunge',beast:b,dx:Math.sign(G.px-b.x),dy:Math.sign(G.py-b.y),dur:200});
-    if(!roll(ch)){addFx({kind:'num',x:G.px,y:G.py,txt:'0',col:'#8aa9a2',dur:750});SFX.whoosh();sayMore(`${LeNom(sp)} attaque et rate (${ch} %).`);return;}
+  if(!b.grip){const ch=hitChance(sp.pre,robotDef());if(G.px!==b.x)b.dir=Math.sign(G.px-b.x);
+    if(!roll(ch)){const an=Math.random()*Math.PI*2,r=10+Math.random()*5;addFx({kind:'laserRate',o:b,x:G.px,y:G.py,ox:Math.round(Math.cos(an)*r),oy:Math.round(Math.sin(an)*r),dur:520});
+      addFx({kind:'num',x:G.px,y:G.py,txt:'0',col:'#8aa9a2',dur:750});SFX.whoosh();sayMore(`${LeNom(sp)} tire et rate (${ch} %).`);return;}
     b.grip=1;addFx({kind:'shake',amp:5,dur:220});SFX.bite();sayMore(`${LeNom(sp)} s’accroche : la foreuse est paralysée tant qu’il vit.`,'warn');}
   const dm=dmgDe(sp);G.st.vie=Math.max(0,G.st.vie-dm);addFx({kind:'num',x:G.px,y:G.py,txt:'-'+dm,col:'#ff3b3b',dur:750});
   if(G.st.vie<=0){G.over={dead:true};sayMore(`${LeNom(sp)} achève la foreuse.`,'warn');}}
@@ -355,6 +363,7 @@ function beastsAct(){
       if(b.fuse>0){if(--b.fuse<=0)boom.push(b);continue;}
       if(b.hunt>0&&cheb(b,G.px,G.py)<=1){b.fuse=rnd(1,3);if(beastVisible(b)){sayMore('La mine s’arme !','warn');SFX.spot();}continue;}}
     if(sp.grip&&b.grip){gripAtk(b,sp);continue;}                                       // paralyzor accroché : il frappe à chaque battement, sans bouger
+    if(sp.grip&&b.hunt>0&&sees&&cheb(b,G.px,G.py)<=GRIP_R&&los(b.x,b.y,G.px,G.py)){gripAtk(b,sp);continue;}   // paralyzor : il tire dès qu'il est à portée
     if(b.hunt>0&&nearRobot(b)){if(sp.grip)gripAtk(b,sp);else hurtRobot(b);continue;}
     while(b.mp>=1&&!G.over){b.mp-=1;
       if(b.hunt>0&&sees){
