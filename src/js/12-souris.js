@@ -167,6 +167,7 @@ const TDESC={[GROUND]:['Sol rocheux','Praticable. Les points au sol se densifien
   [WALL]:['Mur bâti','Infranchissable et opaque. La foreuse ne l’entame pas : seule une charge sismique l’ouvre. Compte comme une paroi pour la discrétion.'],
   [FLOOR]:['Sol bâti','Praticable. L’intérieur d’une structure.'],
   [DOOR]:['Porte','Praticable. Fermée, elle cache la vue ; elle s’ouvre quand on s’y tient et se referme derrière soi.'],
+  [SECRET]:['Mur bâti','Infranchissable et opaque. La foreuse ne l’entame pas : seule une charge sismique l’ouvre. Compte comme une paroi pour la discrétion.'],
   [LOCK]:['Porte verrouillée','Infranchissable et opaque tant qu’elle est fermée. Une clé l’ouvre (avancer dessus) ; une charge sismique la détruit.'],
   [PILLAR]:['Pilier','Infranchissable et opaque : il coupe la ligne de vue. Compte comme une paroi pour la discrétion.'],
   [LIQ]:['Eau peu profonde','Praticable par tous. Défense −20 pour qui s’y trouve ; pas deux fois plus lent, sauf pour les crabos qui nagent.'],

@@ -13,7 +13,7 @@
 const SLOTS={arme:{n:1,nom:'Arme',g:'/'},armure:{n:1,nom:'Armure',g:'['},acc:{n:3,nom:'Accessoire',g:'='}};
 // libellé, sens favorable (+1 : plus c'est haut mieux c'est ; −1 : l'inverse), unité
 const MODS={degats:['DEG',1,''],pre:['PRE',1,''],crit:['CRIT',1,' %'],def:['DEF',1,''],vitesse:['VIT',1,''],capteur:['EYE',1,''],
-  power:['POW',1,''],vieMax:['Vie max',1,''],energieMax:['Énergie max',1,''],dis:['DIS',-1,''],coup:['Coup',-1,''],isol:['Isolation',1,'']};
+  power:['POW',1,''],vieMax:['Vie max',1,''],energieMax:['Énergie max',1,''],dis:['DIS',-1,''],detec:['DET',1,''],coup:['Coup',-1,''],isol:['Isolation',1,'']};
 const ITEMS={
   foreuse:{n:'Foreuse',f:1,slot:'arme',req:10,de:{n:1,f:6,p:5},mod:{},base:1,
     d:'L’outil d’origine de la foreuse, équilibré : c’est l’arme de référence.',
@@ -297,7 +297,7 @@ function invPickup(more){const c=idx(G.px,G.py),l=G.items&&G.items[c];if(!l||!l.
   return true;}
 
 // Stats dans la fenêtre : valeur actuelle, puis « → nouvelle valeur » en couleur si Entrée sur l'objet choisi la changeait
-const INV_STATS=[['vieMax','VIE'],['energieMax','ÉNER'],['vitesse','VIT'],['capteur','EYE'],['degats','DEG'],['pre','PRE'],['def','DEF'],['crit','CRIT'],['power','POW'],['dis','DIS'],['coup','COUP']];
+const INV_STATS=[['vieMax','VIE'],['energieMax','ÉNER'],['vitesse','VIT'],['capteur','EYE'],['degats','DEG'],['pre','PRE'],['def','DEF'],['crit','CRIT'],['power','POW'],['dis','DIS'],['coup','COUP'],['detec','DET']];
 function invDelta(o){const d=ITEMS[o.k],m={};if(d.conso)return m;const add=(mm,sg)=>{for(const k in mm||{})m[k]=(m[k]||0)+sg*mm[k];};
   if(o.eq){if(d.slot!=='arme')add(d.mod,-1);return m;}
   const sl=SLOTS[d.slot];if(invCount(d.slot)>=sl.n){if(sl.n>1)return m;add(ITEMS[G.inv.find(p=>p.eq&&ITEMS[p.k].slot===d.slot).k].mod,-1);}

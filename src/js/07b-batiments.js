@@ -5,7 +5,7 @@
 // dessin d'une case bâtie ; put(tuile, opacité) vient du rendu de la partie ou de celui de l'intro
 function batiTuile(t,x,y,put){
   if(t===LOCK){put(TL.floor,.5);put(TL.lock,1);return;}
-  if(t===WALL){put(y<H-1&&G.t[idx(x,y+1)]===WALL?TL.wall:TL.wallFace,.95);return;}
+  if(t===WALL||t===SECRET){const b=y<H-1?G.t[idx(x,y+1)]:WALL;put(b===WALL||b===SECRET?TL.wall:TL.wallFace,.95);return;}
   put(TL.floor,.5);
   if(t===PILLAR)put(TL.pillar,.95);
   else if(t===DOOR){const cote=y>0&&y<H-1&&G.t[idx(x,y-1)]===WALL&&G.t[idx(x,y+1)]===WALL;   // porte percée dans un mur vertical
@@ -161,7 +161,7 @@ function batiments(){
       if(ok)connect(t);
       if(ok&&connectedAll(t)){
         G.batis=strs.map(S=>({style:S.st.n,pieces:S.pieces.filter(p=>p.g!=='couloir').length,cases:S.emprise,entrees:S.entrees.map(e=>[e.x,e.y])}));
-        siteAuFond(B,strs);verrous(B,strs);return;}
+        siteAuFond(B,strs);petites(B,strs);const sec=secrets(B,strs);verrous(B,strs,sec);return;}
     }
     for(let i=0;i<N;i++)G.t[i]=t0[i];
   }
@@ -187,7 +187,7 @@ function siteAuFond(B,strs){const S=strs.reduce((a,b)=>b.emprise>a.emprise?b:a),
 // Portes verrouillées et clés (19 novembre 2026). Une porte ne peut être verrouillée que si elle est le seul passage vers ce
 // qu'il y a derrière ; on préfère celle qui enferme le site de forage. Les clés sont posées là où l'on arrive sans rien ouvrir :
 // on peut donc toujours toutes les ramasser avant la première serrure, aucune impasse possible.
-function verrous(B,strs){const n=GEN.sVerrous||0,t=G.t,N=W*H;if(n<=0)return;
+function verrous(B,strs,sec){const n=GEN.sVerrous||0,t=G.t,N=W*H;if(n<=0)return;
   const dehors=()=>{const vu=new Uint8Array(N),q=[idx(G.px,G.py)];vu[q[0]]=1;
     for(let k=0;k<q.length;k++){const c=q[k],x=c%W,y=(c/W)|0;for(const [dx,dy] of D4){const j=idx(x+dx,y+dy);if(!vu[j]&&!blocks(t[j])){vu[j]=1;q.push(j);}}}return vu;};
   const site=G.sites[0]?idx(G.sites[0].x,G.sites[0].y):-1,ent=new Set();for(const S of strs)for(const e of S.entrees)ent.add(e.c);
@@ -206,5 +206,38 @@ function verrous(B,strs){const n=GEN.sVerrous||0,t=G.t,N=W*H;if(n<=0)return;
   let lieux=[];for(let i=0;i<N;i++)if(vu[i]&&t[i]===FLOOR&&B.own[i]&&i!==site&&!D4.some(([dx,dy])=>{const w=t[idx(i%W+dx,((i/W)|0)+dy)];return w===DOOR||w===LOCK;}))lieux.push(i);
   if(lieux.length<poses){lieux=[];for(let i=0;i<N;i++)if(vu[i]&&(t[i]===GROUND||t[i]===FLAT)&&d[i]>8)lieux.push(i);}
   lieux.sort((a,b)=>d[b]-d[a]);lieux=lieux.slice(0,Math.max(poses,Math.ceil(lieux.length/2)));   // la moitié la plus lointaine
-  for(let k=0;k<poses&&lieux.length;k++){const i=lieux.splice(rnd(0,lieux.length-1),1)[0];G.cles[i]=1;}
+  for(let k=0;k<poses&&lieux.length;k++){
+    if(sec&&sec.length&&Math.random()<.35){const c=sec.pop();G.cles[c[rnd(0,c.length-1)]]=1;continue;}   // une clé peut dormir dans une pièce secrète
+    const i=lieux.splice(rnd(0,lieux.length-1),1)[0];G.cles[i]=1;}
   G.verrous=poses;}
+// Une petite pièce (moins de 8 cases) fermée par des portes en perd une : le passage reste ouvert (19 novembre 2026).
+function petites(B,strs){const t=G.t,ent=new Set();for(const S of strs)for(const e of S.entrees)ent.add(e.c);
+  for(const S of strs)for(const p of S.pieces){if(p.c.length>=8)continue;const pas=new Set();
+    for(const i of p.c)for(const [dx,dy] of D4){const j=idx(i%W+dx,((i/W)|0)+dy);if(B.porte[j]&&(t[j]===DOOR||t[j]===FLOOR))pas.add(j);}
+    const l=[...pas];if(!l.length||l.some(j=>t[j]===FLOOR))continue;const libres=l.filter(j=>!ent.has(j));if(libres.length)t[libres[rnd(0,libres.length-1)]]=FLOOR;}}
+// Pièces secrètes (19 novembre 2026) : une pièce à un seul passage, dont la porte a l'air d'un mur. Au besoin on en creuse une
+// dans un massif de mur plein. Renvoie, pour chacune, la liste de ses cases de sol (une clé peut y être posée).
+function secrets(B,strs){const n=GEN.sSecrets||0,t=G.t,out=[];G.secrets=0;if(n<=0)return out;
+  const site=G.sites[0]?idx(G.sites[0].x,G.sites[0].y):-1,ent=new Set();for(const S of strs)for(const e of S.entrees)ent.add(e.c);
+  const cand=[];
+  for(const S of strs)for(const p of S.pieces){if(p.g==='couloir'||p.c.includes(site))continue;const pas=new Set();
+    for(const i of p.c)for(const [dx,dy] of D4){const j=idx(i%W+dx,((i/W)|0)+dy);if(B.porte[j]&&t[j]!==WALL)pas.add(j);}
+    if(pas.size===1&&!ent.has([...pas][0]))cand.push([[...pas][0],p.c.filter(i=>t[i]===FLOOR)]);}
+  cand.sort(()=>Math.random()-.5);
+  for(const [porte,sol] of cand){if(out.length>=n)break;if(!sol.length)continue;t[porte]=SECRET;out.push(sol);}
+  // pas assez de culs-de-sac : on creuse dans le mur plein, derrière le mur d'une pièce
+  const plein=(x,y)=>x>2&&y>2&&x<W-3&&y<H-3&&t[idx(x,y)]===WALL;
+  for(let k=0;k<4000&&out.length<n;k++){const fx=rnd(3,W-4),fy=rnd(3,H-4),fi=idx(fx,fy);if(t[fi]!==FLOOR||!B.own[fi])continue;
+    const [dx,dy]=D4[rnd(0,3)],cx=fx+dx,cy=fy+dy;if(!plein(cx,cy)||!plein(cx+dy,cy+dx)||!plein(cx-dy,cy-dx))continue;
+    const w=rnd(3,5),h=rnd(3,4),dec=rnd(0,(dx?h:w)-1),x0=dx>0?cx+1:dx<0?cx-w:cx-dec,y0=dy>0?cy+1:dy<0?cy-h:cy-dec;let ok=true;
+    for(let y=y0-1;y<=y0+h&&ok;y++)for(let x=x0-1;x<=x0+w;x++)if(!plein(x,y)){ok=false;break;}
+    if(!ok)continue;const sol=[];for(let y=y0;y<y0+h;y++)for(let x=x0;x<x0+w;x++){t[idx(x,y)]=FLOOR;sol.push(idx(x,y));}
+    t[idx(cx,cy)]=SECRET;out.push(sol);}
+  G.secrets=out.length;return out;}
+// Se reposer fait chercher : chaque porte dérobée à DET cases ou moins (5 de base, un objet peut le changer) a 25 % de chance
+// par battement d'être découverte.
+const SECRET_P=.25;
+function chercheSecrets(){const r=G.st.detec||5;let n=0;
+  for(let y=Math.max(0,G.py-r);y<=Math.min(H-1,G.py+r);y++)for(let x=Math.max(0,G.px-r);x<=Math.min(W-1,G.px+r);x++){const i=idx(x,y);
+    if(G.t[i]!==SECRET||Math.hypot(x-G.px,y-G.py)>r||Math.random()>=SECRET_P)continue;G.t[i]=DOOR;G.seen[i]=1;n++;addFx({kind:'num',x,y,txt:'!',col:'#ffffff',dur:900});}
+  if(n){SFX.spot();sayMore(n>1?'Des portes dérobées apparaissent dans le mur !':'Une porte dérobée apparaît dans le mur !','good');if(typeof stopRest==='function'&&REST)stopRest('Repos interrompu : une porte dérobée.');}}

@@ -1,7 +1,7 @@
 /* ---------- Vision ---------- */
 const opaque=(x,y)=>{const i=idx(x,y);if(G.fum&&G.fum[i])return true;   // la fumée d'un fumigène cache la vue, des deux côtés (16 novembre 2026)
   const v=G.t[i];if(v===DOOR)return !porteOuverte(x,y);   // une porte cache la vue tant que personne ne se tient dedans
-  return v===MOUNT||v===HARD||v===GRASS||v===WALL||v===PILLAR||v===LOCK;};
+  return v===MOUNT||v===HARD||v===GRASS||v===WALL||v===PILLAR||v===LOCK||v===SECRET;};
 const porteOuverte=(x,y)=>(G.px===x&&G.py===y)||!!(beastAt(x,y)||animalAt(x,y));
 function line(x0,y0,x1,y1){const p=[];let dx=Math.abs(x1-x0),dy=-Math.abs(y1-y0),sx=x0<x1?1:-1,sy=y0<y1?1:-1,e=dx+dy;
   for(;;){p.push([x0,y0]);if(x0===x1&&y0===y1)break;const e2=2*e;if(e2>=dy){e+=dy;x0+=sx;}if(e2<=dx){e+=dx;y0+=sy;}}return p;}
@@ -112,7 +112,7 @@ function tryMove(dx,dy){
   if(v===LOCK){const i=idx(nx,ny);
     if(!(G.st.cles>0)){say('Porte verrouillée : il faut une clé.');SFX.blocked();render();return;}
     G.st.cles--;G.t[i]=DOOR;G.turn++;G.msg=null;SFX.door();say('La clé tourne dans la serrure : la porte est ouverte.','good');pass(DUR.wait||100);computeFOV();render();return;}
-  if(bati(v)){say((v===WALL?'Mur bâti':'Pilier')+' : la foreuse ne l’entame pas. Seule une charge sismique l’ouvre.');SFX.blocked();render();return;}
+  if(bati(v)){say((v===PILLAR?'Pilier':'Mur bâti')+' : la foreuse ne l’entame pas. Seule une charge sismique l’ouvre.');SFX.blocked();render();return;}
   if(v===ROCK||v===MOUNT){
     if(nx===0||ny===0||nx===W-1||ny===H-1){say('Bord de la carte : roche impossible à briser.');SFX.blocked();render();return;}
     if(!spend())return;
@@ -160,7 +160,7 @@ function tryMove(dx,dy){
 /* ---------- Forage ---------- */
 function waitTurn(){
   if(G.over||drilling||!$('overlay').hidden)return;lastAct='wait';lastRun=false;G.turn++;G.msg=null;if(!REST)say(`Le robot attend : recharge ${WAIT_REGEN} fois plus vite (${+(G.st.power/POW_BASE*WAIT_REGEN).toFixed(1)}/t).`);
-  pass(DUR.attente,true);computeFOV();render();if(G.over&&G.over.dead)dead();
+  pass(DUR.attente,true);chercheSecrets();computeFOV();render();if(G.over&&G.over.dead)dead();
 }
 function askDrill(){
   if(G.over||drilling||!$('overlay').hidden)return;const s=siteAt(G.px,G.py);if(!s)return;
