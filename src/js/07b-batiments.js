@@ -206,9 +206,9 @@ function verrous(B,strs,sec){const n=GEN.sVerrous||0,t=G.t,N=W*H;if(n<=0)return;
   let lieux=[];for(let i=0;i<N;i++)if(vu[i]&&t[i]===FLOOR&&B.own[i]&&i!==site&&!D4.some(([dx,dy])=>{const w=t[idx(i%W+dx,((i/W)|0)+dy)];return w===DOOR||w===LOCK;}))lieux.push(i);
   if(lieux.length<poses){lieux=[];for(let i=0;i<N;i++)if(vu[i]&&(t[i]===GROUND||t[i]===FLAT)&&d[i]>8)lieux.push(i);}
   lieux.sort((a,b)=>d[b]-d[a]);lieux=lieux.slice(0,Math.max(poses,Math.ceil(lieux.length/2)));   // la moitié la plus lointaine
-  for(let k=0;k<poses&&lieux.length;k++){
-    if(sec&&sec.length&&Math.random()<.35){const c=sec.pop();G.cles[c[rnd(0,c.length-1)]]=1;continue;}   // une clé peut dormir dans une pièce secrète
-    const i=lieux.splice(rnd(0,lieux.length-1),1)[0];G.cles[i]=1;}
+  for(let k=0;k<poses&&lieux.length;k++){const i=lieux.splice(rnd(0,lieux.length-1),1)[0];G.cles[i]=1;}
+  // les pièces secrètes ne reçoivent que des clés en surplus (une fois sur deux) : jamais une clé dont on a besoin
+  for(const c of sec||[])if(c.length&&Math.random()<.5)G.cles[c[rnd(0,c.length-1)]]=1;
   G.verrous=poses;}
 // Une petite pièce (moins de 8 cases) fermée par des portes en perd une : le passage reste ouvert (19 novembre 2026).
 function petites(B,strs){const t=G.t,ent=new Set();for(const S of strs)for(const e of S.entrees)ent.add(e.c);
