@@ -111,7 +111,7 @@ function tryMove(dx,dy){
   if(v===HARD){say('Roche dure : la foreuse ne l’entame pas. Seule une charge sismique en vient à bout.');SFX.blocked();render();return;}
   if(v===LOCK){const i=idx(nx,ny);
     if(!(G.st.cles>0)){say('Porte verrouillée : il faut une clé.');SFX.blocked();render();return;}
-    G.st.cles--;G.t[i]=DOOR;G.turn++;G.msg=null;SFX.door();say('La clé tourne dans la serrure : la porte est ouverte.','good');pass(DUR.wait||100);computeFOV();render();return;}
+    G.st.cles--;G.t[i]=DOOR;G.turn++;G.msg=null;SFX.serrure();say('La clé tourne dans la serrure : la porte est ouverte.','good');pass(DUR.wait||100);computeFOV();render();return;}
   if(bati(v)){say((v===PILLAR?'Pilier':'Mur bâti')+' : la foreuse ne l’entame pas. Seule une charge sismique l’ouvre.');SFX.blocked();render();return;}
   if(v===ROCK||v===MOUNT){
     if(nx===0||ny===0||nx===W-1||ny===H-1){say('Bord de la carte : roche impossible à briser.');SFX.blocked();render();return;}
@@ -141,6 +141,7 @@ function tryMove(dx,dy){
   if(run)SFX.motor();
   if(doorway){SFX.door();say(v===DECK?'La porte du vaisseau s’ouvre : la foreuse rentre dans la soute.':'La porte du vaisseau s’ouvre : la foreuse sort.','info');}
   pass(stepDur(v,run));
+  if(G.t[idx(G.px,G.py)]===DOOR)SFX.porte();   // la foreuse pousse une porte
   {const ci=idx(G.px,G.py);if(G.cles&&G.cles[ci]){delete G.cles[ci];G.st.cles=(G.st.cles||0)+1;SFX.spot();addFx({kind:'num',x:G.px,y:G.py,txt:'clé',col:PAL['1'],dur:900});sayMore(`Clé ramassée (${G.st.cles} en poche). Elle ouvre une porte verrouillée.`,'good');}}
   {const oi=idx(G.px,G.py);if(G.ore&&G.ore[oi]&&oreSol(G.ore[oi])){const l=oreLv(G.ore[oi]),mt=oreMat(G.ore[oi]);delete G.ore[oi];
     if(mt){G.st.matiere=(G.st.matiere||0)+ORE_PV[l];addFx({kind:'num',x:G.px,y:G.py,txt:'+'+ORE_PV[l],col:PAL['1'],dur:750});sayMore(`Matière récupérée : +${ORE_PV[l]} (réserve : ${G.st.matiere}).`,'good');SFX.spot();}
