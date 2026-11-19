@@ -13,7 +13,7 @@
 const SLOTS={arme:{n:1,nom:'Arme',g:'/'},armure:{n:1,nom:'Armure',g:'['},acc:{n:3,nom:'Accessoire',g:'='}};
 // libellé, sens favorable (+1 : plus c'est haut mieux c'est ; −1 : l'inverse), unité
 const MODS={degats:['DEG',1,''],pre:['PRE',1,''],crit:['CRIT',1,' %'],def:['DEF',1,''],vitesse:['VIT',1,''],capteur:['EYE',1,''],
-  power:['POW',1,''],vieMax:['Vie max',1,''],energieMax:['Énergie max',1,''],dis:['DIS',-1,''],detec:['DET',1,''],coup:['Coup',-1,''],isol:['Isolation',1,'']};
+  power:['POW',1,''],vieMax:['Vie max',1,''],energieMax:['Énergie max',1,''],dis:['DIS',-1,''],detec:['DET',1,''],coup:['Coup',-1,'']};
 const ITEMS={
   foreuse:{n:'Foreuse',f:1,slot:'arme',req:10,de:{n:1,f:6,p:5},mod:{},base:1,
     d:'L’outil d’origine de la foreuse, équilibré : c’est l’arme de référence.',
@@ -157,14 +157,8 @@ const INV_TEST=[['foreuse'],['usine'],['servo'],['optique'],['viseur'],['conden'
 // la Coque d'usine est l'armure de départ, déjà équipée elle aussi : sa DEF +10 est comprise dans le def:10 de départ (07-generation)
 const invTest=()=>INV_TEST.map(([k,n])=>n?{k,eq:0,n}:{k,eq:k==='foreuse'||k==='usine'?1:0});
 // partie commencée avant un ajout d'objets : on complète le sac, et il y a toujours une arme en main
-/* Armes et armures retirées du jeu le 16 novembre 2026 (il ne reste que l'équipement d'origine) : leurs modificateurs sont
-   gardés ici, et là seulement, pour défaire proprement l'effet d'un objet encore équipé dans une partie commencée avant. */
-const ITEMS_RETIRES={foret:{degats:-2,pre:15,coup:-40},pilon:{degats:15,pre:-10,coup:50},scie:{degats:3,crit:15},
-  lance:{degats:7,def:-12},chassis:{vieMax:30,vitesse:-1},furtif:{def:6,dis:-2},leger:{vitesse:1,def:12,vieMax:-15},isolante:{isol:1,vieMax:10}};
+// Les armes et armures retirées le 16 novembre 2026 n'ont plus aucune trace dans le code (19 novembre 2026) : ni dessin, ni modificateur.
 function invMigre(){for(const [k,n] of INV_TEST)if(!G.inv.some(o=>o.k===k))G.inv.push(n?{k,eq:0,n}:{k,eq:0});
-  for(const o of G.inv)if(o.eq&&!ITEMS[o.k]&&ITEMS_RETIRES[o.k]){const m=ITEMS_RETIRES[o.k],v0=G.st.vieMax;
-    for(const k in m)G.st[k]=(G.st[k]||0)-m[k];
-    if(G.st.vieMax!==v0&&G.st.vie>0)G.st.vie=Math.max(1,Math.round(G.st.vie*G.st.vieMax/v0));}
   G.inv=G.inv.filter(o=>ITEMS[o.k]);G.inv.sort((a,b)=>INV_TEST.findIndex(t=>t[0]===a.k)-INV_TEST.findIndex(t=>t[0]===b.k));
   if(!G.inv.some(o=>o.eq&&ITEMS[o.k].slot==='arme'))G.inv.find(o=>o.k==='foreuse').eq=1;
   // la Coque d'usine est portée d'origine : son DEF +10 est déjà compris dans les stats de départ, donc on la marque équipée sans appliquer son effet
@@ -179,7 +173,7 @@ function artHTML(d){return d.art.map((l,y)=>{let h='',x=0;const m=d.col[y]||'';
   return h;}).join('\n');}
 const signe=v=>(v>0?'+':'−')+Math.abs(v);
 // « DEG +4 » ; la durée du coup se lit mieux en clair : « coup rapide (75) », 100 étant le coup ordinaire
-const modLib=(k,v)=>k==='isol'?'effets durables ÷ 2':k==='coup'?`coup ${v<0?'rapide':'lent'} (${DUR.coup+v})`:`${MODS[k][0]} ${signe(v)}${MODS[k][2]}`;
+const modLib=(k,v)=>k==='coup'?`coup ${v<0?'rapide':'lent'} (${DUR.coup+v})`:`${MODS[k][0]} ${signe(v)}${MODS[k][2]}`;
 function modHTML(d){if(d.base)return 'Arme de référence : pas de modificateur';if(d.conso)return `<span style="color:var(--c1)">${d.eff}</span> · usage unique`;
   return Object.entries(d.mod||{}).map(([k,v])=>`<span style="color:${v*MODS[k][1]>0?'var(--c1)':'var(--life)'}">${modLib(k,v)}</span>`).join(' · ');}
 const modTxt=d=>Object.entries(d.mod||{}).map(([k,v])=>modLib(k,v)).join(', ');
@@ -253,10 +247,8 @@ function invBoum(r,dm){let n=0,k=0;lastAct='dig';
   if(n)engage();addFx({kind:'shake',amp:8,dur:300});SFX.explode();return `${n} ennemi${n>1?'s':''} touché${n>1?'s':''}${k?`, ${k} abattu${k>1?'s':''}`:''}`;}
 /* Visuel de la foreuse selon l'équipement : l'arme dessine la moitié avant (lignes 0 à 7, pointe en haut), l'armure la moitié arrière
    (lignes 8 à 15). Sans arme spéciale (la foreuse) ni armure, c'est la tuile « Foreuse » du Tile editor, retouches comprises. */
-const ARME_PIX={"foret": [".......ww.......", ".......ww.......", ".......22.......", "......2222......", "......2222......", "......2222......", ".....222222.....", ".....222222....."], "pilon": ["...2222222222...", "...2222222222...", "...2233333322...", "...2222222222...", "......2222......", "......2222......", "......2222......", ".....222222....."], "scie": ["......2w2w......", "....2w2222w2....", "...22222222w....", "...w22w22w22w...", "...w22w22w22w...", "....w22222222...", "....2w2222w2....", "......w2w2......"], "lance": [".......rr.......", "......r33r......", ".......33.......", ".......22.......", ".......22.......", "......2222......", "......2222......", ".....222222....."]};
-const CORPS_PIX={"chassis": ["..wwwwwwwwwwww..", ".ww1222222221ww.", ".w12.2.22.2.21w.", ".w12.2.22.2.21w.", ".ww1222222221ww.", "..wwwwwwwwwwww..", "...22......22...", "...22......22..."], "furtif": ["....11111111....", "...1333333331...", "..133333333331..", "..133333333331..", "...1333333331...", "....11111111....", "................", "....3......3...."], "leger": ["....11111111....", "....1.2222.1....", "....1.2..2.1....", "....1.2..2.1....", "....1.2222.1....", "....11111111....", ".....2....2.....", "................"], "isolante": ["...1111111111...", "..1w22222222w1..", "..12w222222w21..", "..12w222222w21..", "..1w22222222w1..", "...1111111111...", "....2......2....", "....2......2...."]};
 function robotTiles(){if(!TL.robot_u||!G||!G.inv)return;const porte=s=>{const o=G.inv.find(o=>o.eq&&ITEMS[o.k].slot===s);return o?o.k:null;};
-  const a=ARME_PIX[porte('arme')],c=CORPS_PIX[porte('armure')],base=TF('robot_u'),f=(x,y)=>y<8?(a?a[y][x]:base(x,y)):(c?c[y-8][x]:base(x,y));
+  const f=TF('robot_u');   // une seule arme et une seule armure : la foreuse garde toujours son dessin d'origine
   TL.robot_u=tileCanvas(f);TL.robot_r=tileCanvas((x,y)=>f(y,15-x));TL.robot_d=tileCanvas((x,y)=>f(15-x,15-y));TL.robot_l=tileCanvas((x,y)=>f(15-y,x));
   try{ICON.robot_r=TL.robot_r.toDataURL();}catch(e){}}
 // retire un exemplaire de la ligne i (toute la ligne s'il n'en reste plus)

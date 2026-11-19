@@ -85,9 +85,22 @@ La carte n'est plus peuplée espèce par espèce (les cinq niveaux d'intensité 
   patrouille, et jusqu'à six espèces avec leur effectif. Elle rappelle le budget de la carte en cours et ce qu'il a acheté.
   « Groupes par défaut » (deux clics) remet les sept groupes de départ, un par espèce.
 - **LIFE** : le budget et une case à cocher par groupe.
-- **Style de patrouille** : il est porté par le groupe. Deux styles pour l'instant : **errance** (pas au hasard) et
-  **voyage en bande** (longs trajets avec pauses, le comportement des relais, ouvert à toute espèce). Les autres styles
-  (ronde, territoire, sentinelle…) restent à faire ; chaque créature garde le rang de son groupe (`gr`) pour cela.
+- **Style de patrouille** : il est porté par le **groupe**, pas par l'espèce (un crabot peut faire la ronde dans un groupe
+  et garder un territoire dans un autre). Six styles depuis le 19 novembre 2026 :
+  - **Errance** : pas au hasard, sans but.
+  - **Voyage en bande** : longs trajets vers un point éloigné, pause de 50 battements, nouveau départ.
+  - **Ronde** : une boucle de 3 ou 4 points fixes, à 7-13 cases du point de départ, toujours dans le même ordre, avec une
+    halte de 3 à 6 battements à chaque point. Prévisible : on peut passer derrière. Les points sont pris n'importe où sur
+    le terrain praticable (pas spécialement sur les berges, choix de l'utilisateur) ; un groupe de torpilles fait sa ronde dans l'eau.
+  - **Territoire** : le groupe tourne dans un rayon de 6 cases autour de son point de départ, avec des haltes de 8 à 20 battements.
+  - **Sentinelle** : 2 ou 3 postes ; le groupe reste **immobile** à un poste 40 à 80 battements, puis rejoint le suivant.
+  - **Affût** : immobile à son point de départ.
+  La patrouille ne joue que tant qu'aucun membre n'a repéré la foreuse. Chasse et fouille finies, le groupe **reprend sa
+  patrouille** : il rentre donc chez lui au lieu de rester là où la chasse l'a mené. En patrouille on marche — un pas par
+  battement au plus, quelle que soit la vitesse de l'espèce. Mesuré sur 220 battements : affût 0 case parcourue, sentinelle
+  26 pas, territoire 68 pas dans 9 cases d'envergure, ronde 108 pas dans 12 cases, voyage 53 cases d'envergure.
+  Groupes de départ : puces en errance, crabot en ronde, relais en voyage, torpilles en ronde, broyeur en territoire,
+  mines à l'affût, paralyzor en sentinelle. Code : `patInit`, `patTick`, `patMove` dans `08-faune.js`, état dans `G.patr`.
 - Mémorisé dans le navigateur (`np-groupes`) et dans l'enregistrement des réglages (`groupes`).
 - Les effectifs par espèce (`LIFE`, `spawnAnimals`, `spawnBeasts`) ne servent plus qu'au banc de combat et aux mesures.
 
@@ -233,6 +246,8 @@ Le jeu ne compte plus en tours mais en **unités de temps**, comme Brogue et Cog
 - Un animal tué laisse une trace de sang.
 
 ## 6 bis. Équipement et inventaire (13 novembre 2026, séparés le 15)
+
+**Le 19 novembre 2026, leurs dernières traces ont quitté le code** (dessins de la foreuse selon l'arme et l'armure, modificateurs gardés pour les anciennes parties, stat « isolation ») : il ne reste que la base.
 
 **Le 16 novembre 2026, toutes les armes et armures ont été retirées sauf l'équipement d'origine** (Foreuse et Coque d'usine),
 à la demande de l'utilisateur : le Foret diamant, le Marteau-pilon, la Scie circulaire, la Lance thermique, le Châssis renforcé,

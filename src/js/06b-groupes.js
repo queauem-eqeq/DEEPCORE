@@ -4,18 +4,18 @@
    À chaque nouvelle carte, un budget achète des groupes actifs tirés au hasard jusqu'à épuisement (spawnGroupes, 08-faune).
    Le budget est donné pour la carte de référence (96 × 64) et rapporté à la surface de la carte jouée.
    Les groupes se créent et se règlent dans Lab → Groupes ; la fenêtre LIFE garde le budget et les cases « actif ».
-   Chaque groupe porte un style de patrouille : errance (pas au hasard) ou voyage en bande (longs trajets avec pauses,
-   comme les relais). Les autres styles viendront. Tout est mémorisé dans le navigateur sous np-groupes. */
-const PATS=[['errance','Errance'],['voyage','Voyage en bande']];
+   Chaque groupe porte un style de patrouille (errance, voyage, ronde, territoire, sentinelle, affût : voir 08-faune).
+   Tout est mémorisé dans le navigateur sous np-groupes. */
+const PATS=[['errance','Errance'],['voyage','Voyage en bande'],['ronde','Ronde'],['territoire','Territoire'],['sentinelle','Sentinelle'],['affut','Affût']];
 const ESPECES=()=>[['insectoide',SPECIES[0].n],...BEASTS.map(b=>[b.key,b.n])];
 const GROUPES_DEF=()=>({budget:110,liste:[
   {n:'Essaim de puces',cout:5,on:1,pat:'errance',m:[{k:'insectoide',min:4,max:6}]},
-  {n:'Crabot solitaire',cout:3,on:1,pat:'errance',m:[{k:'crabos',min:1,max:1}]},
+  {n:'Crabot solitaire',cout:3,on:1,pat:'ronde',m:[{k:'crabos',min:1,max:1}]},
   {n:'Bande de relais',cout:6,on:1,pat:'voyage',m:[{k:'cafar',min:2,max:4}]},
-  {n:'Banc de torpilles',cout:5,on:1,pat:'errance',m:[{k:'brochon',min:2,max:3}]},
-  {n:'Broyeur solitaire',cout:10,on:1,pat:'errance',m:[{k:'mastok',min:1,max:1}]},
-  {n:'Mines',cout:4,on:1,pat:'errance',m:[{k:'mine',min:1,max:2}]},
-  {n:'Paralyzor',cout:4,on:1,pat:'errance',m:[{k:'paralyzor',min:1,max:1}]}]});
+  {n:'Banc de torpilles',cout:5,on:1,pat:'ronde',m:[{k:'brochon',min:2,max:3}]},
+  {n:'Broyeur solitaire',cout:10,on:1,pat:'territoire',m:[{k:'mastok',min:1,max:1}]},
+  {n:'Mines',cout:4,on:1,pat:'affut',m:[{k:'mine',min:1,max:2}]},
+  {n:'Paralyzor',cout:4,on:1,pat:'sentinelle',m:[{k:'paralyzor',min:1,max:1}]}]});
 // remet d'aplomb des groupes lus dans le navigateur ou dans la base : bornes, espèces inconnues écartées
 function groupesSains(d){const ks=ESPECES().map(e=>e[0]),n=(v,mn,mx,df)=>Number.isFinite(+v)&&v!==''&&v!=null?Math.max(mn,Math.min(mx,Math.round(+v))):df;
   if(!d||!Array.isArray(d.liste))return null;

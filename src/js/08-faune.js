@@ -125,8 +125,61 @@ function fumTick(){const F=G.fum;if(!F)return;let ks=Object.keys(F);if(!ks.lengt
     if(Math.random()<.55)F[k].k=n>=8?rnd(0,1):2+rnd(0,3);}
   for(const k in F)if(--F[k].v<=0)delete F[k];
   if(!Object.keys(F).length)sayMore('La fumée se dissipe.');}
+/* ---------- Styles de patrouille (19 novembre 2026) ----------
+   Le style appartient au groupe (Lab → Groupes) et ne joue que tant qu'aucun membre n'a repéré la foreuse ; dès que la
+   chasse et la fouille sont finies, le groupe reprend sa patrouille là où elle en était, donc il rentre chez lui.
+   - errance    : pas au hasard, sans but (le comportement d'origine).
+   - voyage     : la bande traverse la carte vers un point éloigné, s'y arrête, repart (packTick, plus bas).
+   - ronde      : une boucle de 3 ou 4 points fixes autour du point de départ, toujours dans le même ordre, courte halte à chacun.
+   - territoire : le groupe tourne dans un rayon de 6 cases autour de son point de départ, avec de longues haltes.
+   - sentinelle : 2 ou 3 postes ; le groupe reste immobile à un poste 40 à 80 battements, puis rejoint le suivant.
+   - affut      : immobile à son point de départ ; il y revient après une chasse.
+   Chaque groupe posé a son état dans G.patr[id] : pts (les points), k (le point visé), pause, age. Une créature connaît
+   son groupe par o.gi. En patrouille on marche : un pas par battement au plus, quelle que soit la vitesse de l'espèce. */
+const PAT_CIBLE={ronde:1,territoire:1,sentinelle:1,affut:1};
+let PATD={};
+function patBfs(tx,ty,eau){const d=new Int16Array(W*H).fill(-1),q=[idx(tx,ty)];d[q[0]]=0;
+  for(let k=0;k<q.length;k++){const c=q[k],x=c%W,y=(c/W)|0;for(const[dx,dy]of DIRS){const a=x+dx,b=y+dy;if(a<1||b<1||a>=W-1||b>=H-1)continue;
+    const j=idx(a,b),v=G.t[j];if(d[j]>=0||!diagOk(x,y,dx,dy)||(eau?!isWater(v):!canWalk(v,false)))continue;d[j]=d[c]+1;q.push(j);}}return d;}
+const patD=P=>{const k=P.tx+','+P.ty+','+P.eau;return PATD[k]||(PATD[k]=patBfs(P.tx,P.ty,P.eau));};
+// n points accessibles depuis le point de départ, entre a et b cases de lui, écartés les uns des autres, rangés en boucle
+function patPoints(P,n,a,b){const d=patBfs(P.hx,P.hy,P.eau),pts=[];
+  for(let t=0;t<400&&pts.length<n;t++){const an=Math.random()*Math.PI*2,r=a+Math.random()*(b-a),x=Math.round(P.hx+Math.cos(an)*r),y=Math.round(P.hy+Math.sin(an)*r);
+    if(x<2||y<2||x>W-3||y>H-3)continue;const h=d[idx(x,y)];if(h<Math.min(a,2)||h>b*2.5||G.t[idx(x,y)]===DOOR)continue;
+    if(pts.some(p=>Math.hypot(p[0]-x,p[1]-y)<Math.max(3,a*.7)))continue;pts.push([x,y]);}
+  return pts.sort((p,q)=>Math.atan2(p[1]-P.hy,p[0]-P.hx)-Math.atan2(q[1]-P.hy,q[0]-P.hx));}
+function patInit(g,id,mb){const o=mb[0],P={pat:g.pat,hx:o.x,hy:o.y,k:0,pause:0,age:0,sp:mb.length<=1?0:mb.length<=4?1:2,
+    eau:mb.every(m=>G.beasts.includes(m)&&BEASTS[m.sp].aqua)?1:0};
+  if(g.pat==='ronde'){P.pts=patPoints(P,rnd(3,4),7,13);if(P.pts.length<2)P.pts=patPoints(P,3,3,7);}
+  else if(g.pat==='sentinelle')P.pts=[[P.hx,P.hy],...patPoints(P,rnd(1,2),5,10)];
+  else if(g.pat==='territoire')P.pts=patPoints(P,1,2,6);
+  else if(g.pat==='affut')P.pts=[[P.hx,P.hy]];
+  if(P.pts&&!P.pts.length)P.pts=[[P.hx,P.hy]];
+  if(P.pat==='sentinelle'||P.pat==='affut')P.pause=P.pat==='affut'?9999:rnd(20,60);   // déjà en poste à l'arrivée sur la carte
+  G.patr[id]=P;}
+// une fois par battement : chaque groupe en patrouille regarde s'il est arrivé, fait sa halte, choisit le point suivant
+function patTick(){PATD={};if(!G.patr||G.over)return;const mb={};
+  for(const o of [...(G.beasts||[]),...(G.animals||[])])if(o.gi!=null)(mb[o.gi]=mb[o.gi]||[]).push(o);
+  for(const id in G.patr){const P=G.patr[id],m=mb[id];if(!m){delete G.patr[id];continue;}
+    if(!P.pts||m.some(o=>o.hunt>0||o.aware))continue;
+    [P.tx,P.ty]=P.pts[P.k];
+    if(P.pause>0){if(--P.pause===0){
+        if(P.pat==='territoire'){const n=patPoints(P,1,1,6);if(n.length)P.pts=n;}
+        else if(P.pat==='affut')P.pause=9999;
+        else P.k=(P.k+1)%P.pts.length;
+        P.age=0;}
+      continue;}
+    const d=patD(P),h=Math.min(...m.map(o=>{const v=d[idx(o.x,o.y)];return v<0?9999:v;}));
+    if(h<=P.sp||++P.age>90)P.pause=P.pat==='ronde'?rnd(3,6):P.pat==='territoire'?rnd(8,20):P.pat==='sentinelle'?rnd(40,80):9999;}}
+// le pas de patrouille d'une créature calme ; renvoie false si son groupe n'a pas de point à rejoindre (errance, voyage)
+function patMove(o,fits){const P=G.patr&&G.patr[o.gi];if(!P||!P.pts||P.tx==null)return false;
+  const d=patD(P),h=d[idx(o.x,o.y)];if(h<0)return false;
+  if(h>P.sp)chaseStep(o,d,fits,P.tx,P.ty);
+  else if(P.pat==='territoire'&&Math.random()<.15){const [dx,dy]=DIRS[rnd(0,7)],v=d[idx(o.x+dx,o.y+dy)];if(v>=0&&v<=P.sp+1&&fits(o.x+dx,o.y+dy)&&diagOk(o.x,o.y,dx,dy)){o.x+=dx;o.y+=dy;if(dx)o.dir=dx;}}
+  o.mp=Math.min(o.mp,.99);return true;}
 function animalsAct(){
   turnStealth();
+  if(G&&!G.over)patTick();
   if(!G.animals||G.over)return;let fled=null,swarm=null;const distSec=robotDist(false),distEau=robotDist(true),DC={};
   for(const a of G.animals){if(G.over)break;const sp=SPECIES[a.sp];a.mp=Math.min(2,a.mp+sp.v/5/slowOf(G.t[idx(a.x,a.y)],sp.swim));
     const mA=mouilleOk(sp,a),okA=(x,y)=>animalOk(x,y,mA),dist=mA?distEau:distSec;
@@ -147,6 +200,7 @@ function animalsAct(){
       else if(a.mode==='follow')stepToward(a,dist,okA);
       else if(a.mode==='seek'){if(!seekStep(a,okA,DC,mA)){a.mode=a.search>0?'search':'';break;}}
       else if(a.mode==='search')searchStep(a,okA,DC,mA);
+      else if(a.mode===''&&patMove(a,okA))break;                                          // calme : la patrouille de son groupe
       else if(Math.random()<(a.mode==='hold'?.15:.3)){const [dx,dy]=DIRS[rnd(0,7)];const nx=a.x+dx,ny=a.y+dy;
         if(okA(nx,ny)&&diagOk(a.x,a.y,dx,dy)&&(a.mode!=='hold'||cheb({x:nx,y:ny},G.px,G.py)>KEEP_MIN)){a.x=nx;a.y=ny;if(dx)a.dir=dx;}}
       else a.mp=Math.min(a.mp,.99);}
@@ -186,13 +240,13 @@ function poseGroupe(g,gi,id){const esp=k=>k==='insectoide'?-1:BEASTS.findIndex(b
     const posA=[],posB=[];let ok=true;
     for(const s of mb){let put=false;
       for(let u=0;u<50&&!put;u++){const r=u<6?1:u<25?2:3,x=cx+rnd(-r,r),y=cy+rnd(-r,r);if(x<2||y<2||x>W-3||y>H-3)continue;
-        if(s<0){if(!puceSol(x,y))continue;const a=newPuce(x,y,gi);G.animals.push(a);posA.push(a);put=true;}
-        else{const sp=BEASTS[s],b=newBeast(s,x,y,(sp.pack||g.pat==='voyage')?id:-1,gi);if(!beastFits(b,x,y))continue;G.beasts.push(b);posB.push(b);put=true;}}
+        if(s<0){if(!puceSol(x,y))continue;const a=newPuce(x,y,gi);a.gi=id;G.animals.push(a);posA.push(a);put=true;}
+        else{const sp=BEASTS[s],b=newBeast(s,x,y,(sp.pack||g.pat==='voyage')?id:-1,gi);b.gi=id;if(!beastFits(b,x,y))continue;G.beasts.push(b);posB.push(b);put=true;}}
       if(!put){ok=false;break;}}
-    if(ok)return true;
+    if(ok){patInit(g,id,[...posB,...posA]);return true;}
     G.animals=G.animals.filter(a=>!posA.includes(a));G.beasts=G.beasts.filter(b=>!posB.includes(b));}
   return false;}
-function spawnGroupes(){G.animals=[];G.fauna=[];G.pool=[0];G.beasts=[];G.beastSeen={};G.packs={};
+function spawnGroupes(){G.animals=[];G.fauna=[];G.pool=[0];G.beasts=[];G.beastSeen={};G.packs={};G.patr={};
   const total=Math.round(GROUPES.budget*W*H/(96*64));let reste=total,id=0;const rate={},pose={};
   for(let t=0;t<600;t++){const ok=GROUPES.liste.map((g,i)=>[g,i]).filter(([g,i])=>g.on&&g.m.length&&Math.max(1,g.cout)<=reste&&(rate[i]||0)<3);if(!ok.length)break;
     const [g,gi]=ok[rnd(0,ok.length-1)];
@@ -307,6 +361,7 @@ function beastsAct(){
         chaseStep(b,mouilleOk(sp,b)?distEau:distSec,(x,y)=>beastFits(b,x,y));}
       else if(b.hunt>0&&b.search>0)searchStep(b,(x,y)=>beastFits(b,x,y),DC,mouilleOk(sp,b));                // fouille autour du dernier point connu
       else if(b.hunt>0){if(!seekStep(b,(x,y)=>beastFits(b,x,y),DC,mouilleOk(sp,b)))break;}       // vers la dernière position connue
+      else if(patMove(b,(x,y)=>beastFits(b,x,y)))break;                                   // calme : la patrouille de son groupe
       else if(b.pack>=0){packMove(b);}
       else if(Math.random()<.25){const[dx,dy]=DIRS[rnd(0,7)];if(beastFits(b,b.x+dx,b.y+dy)&&diagOk(b.x,b.y,dx,dy)&&(b.pack<0||packOk(b,b.x+dx,b.y+dy))){b.x+=dx;b.y+=dy;if(dx)b.dir=dx;}}
       else b.mp=Math.min(b.mp,.99);}
@@ -332,6 +387,7 @@ function packTarget(P,cx,cy){for(let t=0;t<40;t++){const x=rnd(2,W-3),y=rnd(2,H-
 function packTick(){G.packs=G.packs||{};const groups={};
   for(const b of G.beasts)if(b.pack>=0)(groups[b.pack]=groups[b.pack]||[]).push(b);
   for(const id in groups){const m=groups[id],P=G.packs[id]=G.packs[id]||{pause:rnd(0,PACK_PAUSE)};if(m.some(b=>b.hunt>0))continue;
+    {const R=G.patr&&G.patr[m[0].gi];if(R&&R.pat!=='voyage'){P.dist=null;P.pause=0;continue;}}
     const [cx,cy]=packCenter(m);
     if(P.pause>0){if(--P.pause===0)packTarget(P,cx,cy);continue;}
     if(!P.dist||P.tx==null){packTarget(P,cx,cy);continue;}
