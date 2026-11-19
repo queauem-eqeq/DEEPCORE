@@ -107,10 +107,9 @@ function engage(){for(const a of (G.animals||[]))if(a.aware)a.enraged=true;}
 const FUM_R2=10,FUM_VIE=[15,25],FUM_MAX=90;
 function fumPose(){const F=G.fum=G.fum||{};
   for(let dy=-3;dy<=3;dy++)for(let dx=-3;dx<=3;dx++){const d2=dx*dx+dy*dy;if(d2>FUM_R2)continue;
-    const x=G.px+dx,y=G.py+dy;if(x<1||y<1||x>=W-1||y>=H-1)continue;const i=idx(x,y);if(blocks(G.t[i]))continue;
+    const x=G.px+dx,y=G.py+dy;if(x<1||y<1||x>=W-1||y>=H-1)continue;const i=idx(x,y);if(blocks(G.t[i])&&G.t[i]!==CHASM)continue;   // la fumée passe au-dessus des gouffres
     const v=rnd(FUM_VIE[0],FUM_VIE[1]);
     F[i]={v:F[i]?Math.max(F[i].v,v):v,k:d2<=2?rnd(0,1):2+rnd(0,3)};}   // cœur : nuage plein ou texturé ; pourtour : les quatre bords
-  {const tenu=paralyse();for(const b of G.beasts||[])b.grip=0;if(tenu)sayMore('La fumée coupe le trait du paralyzor : la foreuse est libre.','good');}   // le fumigène libère la foreuse
   for(const b of G.beasts||[])if(b.hunt){b.hunt=0;forget(b);}
   for(const a of G.animals||[]){a.aware=0;a.enraged=false;forget(a);}}
 function fumTick(){const F=G.fum;if(!F)return;let ks=Object.keys(F);if(!ks.length)return;
@@ -118,7 +117,7 @@ function fumTick(){const F=G.fum;if(!F)return;let ks=Object.keys(F);if(!ks.lengt
     for(let t=0;t<14&&n>0;t++){const i=+ks[rnd(0,ks.length-1)],c=F[i];if(c.v<6)continue;
       const [dx,dy]=DIRS[rnd(0,7)],x=(i%W)+dx,y=((i/W)|0)+dy;
       if(x<1||y<1||x>=W-1||y>=H-1)continue;const j=idx(x,y);
-      if(F[j]||blocks(G.t[j]))continue;
+      if(F[j]||(blocks(G.t[j])&&G.t[j]!==CHASM))continue;
       F[j]={v:Math.max(4,c.v-rnd(2,5)),k:2+rnd(0,3)};n--;}}
   // les tuiles changent d'un battement à l'autre : une case bien entourée se densifie, les bords tournent — le nuage a l'air de vivre
   for(const k in F){const i=+k,x=i%W,y=(i/W)|0;let n=0;
@@ -303,14 +302,17 @@ const LeNom=sp=>{const a=leNom(sp);return a[0].toUpperCase()+a.slice(1);};
 const unNom=sp=>(sp.fem?'une ':'un ')+nomDe(sp);
 const UnNom=sp=>{const a=unNom(sp);return a[0].toUpperCase()+a.slice(1);};
 const LesNoms=sp=>{const n=nomDe(sp);return 'Les '+n+(/s$/.test(n)?'':'s');};
-function hurtRobot(b,sp,o){sp=sp||BEASTS[b.sp];o=o||{};const le=LeNom(sp),nom='',verbe='attaque';
+function hurtRobot(b,sp,o){sp=sp||BEASTS[b.sp];o=o||{};const le=LeNom(sp),nom='',verbe=o.laser?'tire':'attaque';
   const ch=hitChance(sp.pre,robotDef());engage();   // la foreuse est attaquée, que le coup porte ou non : les insectoïdes qui suivent attaquent
-  const geste=()=>addFx({kind:'lunge',beast:b,dx:Math.sign(G.px-b.x),dy:Math.sign(G.py-b.y),dur:200});
-  if(!o.sur&&!roll(ch)){geste();addFx({kind:'num',x:G.px,y:G.py,txt:'0',col:'#8aa9a2',dur:750});
-    SFX.whoosh();sayMore(`${le}${nom} ${verbe} et rate (${ch} %).`);return;}
+  // geste : le bond de l'attaquant, ou le trait du laser — droit sur la foreuse s'il touche, à côté s'il rate
+  const geste=rate=>{if(!o.laser){addFx({kind:'lunge',beast:b,dx:Math.sign(G.px-b.x),dy:Math.sign(G.py-b.y),dur:200});return;}
+    const an=Math.random()*Math.PI*2,r=rate?10+Math.random()*5:0;if(G.px!==b.x)b.dir=Math.sign(G.px-b.x);SFX.laser();
+    addFx({kind:'laser',o:b,x:G.px,y:G.py,ox:Math.round(Math.cos(an)*r),oy:Math.round(Math.sin(an)*r),dur:rate?420:300});};
+  if(!o.sur&&!roll(ch)){geste(true);addFx({kind:'num',x:G.px,y:G.py,txt:'0',col:'#8aa9a2',dur:750});
+    if(!o.laser)SFX.whoosh();sayMore(`${le}${nom} ${verbe} et rate (${ch} %).`);return;}
   geste();
   const cr=o.sur||roll(sp.crit||0),dm=dmgDe(sp)*(cr?CRIT_X:1);   // coup critique de l'ennemi : selon sa stat CRIT
-  addFx({kind:'shake',amp:cr?9:5,dur:cr?320:220});G.st.vie=Math.max(0,G.st.vie-dm);addFx({kind:'num',x:G.px,y:G.py,txt:'-'+dm+(cr?'!':''),col:'#ff3b3b',dur:cr?1000:750});SFX.bite();sayMore(`${le}${nom} ${verbe}${o.sur?' par surprise':cr?' : coup critique':''} : −${dm} vie.`,'warn');
+  addFx({kind:'shake',amp:cr?9:5,dur:cr?320:220});G.st.vie=Math.max(0,G.st.vie-dm);addFx({kind:'num',x:G.px,y:G.py,txt:'-'+dm+(cr?'!':''),col:'#ff3b3b',dur:cr?1000:750});if(!o.laser)SFX.bite();sayMore(`${le}${nom} ${verbe}${o.sur?' par surprise':cr?' : coup critique':''} : −${dm} vie.`,'warn');
   if(G.st.vie<=0){G.over={dead:true};return;}}
 // Une fois par battement : effets durables sur la foreuse
 function effTick(){const E=G.eff;if(!E||G.over)return;
@@ -331,25 +333,11 @@ function explose(b){const sp=BEASTS[b.sp],k=G.beasts.indexOf(b);if(k>=0)G.beasts
     sayMore(`La mine explose : −${dm} vie.`,'warn');if(G.st.vie<=0)G.over={dead:true};}
   else if(vu)sayMore('La mine explose.','warn');
   else if(cheb(b,G.px,G.py)<=10)sayMore('Une explosion, tout près.','warn');}
-/* Paralyzor (19 novembre 2026) : il tire un trait rouge jusqu'à GRIP_R cases, en ligne de vue. Raté, le trait tape à côté de
-   la foreuse et s'éteint. Touché, il reste accroché : il inflige ses dégâts à chaque battement, sans jet pour toucher,
-   et la foreuse ne peut plus que s'approcher de lui dans l'axe du trait (gripPas) — de quoi venir le frapper. Elle peut
-   aussi briser une paroi voisine et utiliser un objet. La mort du paralyzor la libère, ou un fumigène, qui coupe le trait. Rendu du trait : 10-rendu. */
-const GRIP_R=2;
-// un pas est permis à la foreuse accrochée s'il la rapproche d'un paralyzor qui la tient, sans l'éloigner d'aucun autre
-function gripPas(dx,dy){const L=G.beasts.filter(b=>b.grip);let mieux=false;
-  for(const b of L){const sx=Math.sign(b.x-G.px),sy=Math.sign(b.y-G.py),d0=cheb(b,G.px,G.py),d1=cheb(b,G.px+dx,G.py+dy);
-    if((dx&&dx!==sx)||(dy&&dy!==sy)||d1>d0)return false;if(d1<d0)mieux=true;}
-  return mieux;}
-const paralyse=()=>!!(G&&G.beasts&&G.beasts.some(b=>b.grip));
-const animVif=()=>!!(G&&G.beasts&&G.beasts.some(b=>b.grip||b.fuse>0));   // un effet permanent est à l'écran : le rendu doit tourner
-function gripAtk(b,sp){engage();
-  if(!b.grip){const ch=hitChance(sp.pre,robotDef());if(G.px!==b.x)b.dir=Math.sign(G.px-b.x);SFX.laser();
-    if(!roll(ch)){const an=Math.random()*Math.PI*2,r=10+Math.random()*5;addFx({kind:'laserRate',o:b,x:G.px,y:G.py,ox:Math.round(Math.cos(an)*r),oy:Math.round(Math.sin(an)*r),dur:520});
-      addFx({kind:'num',x:G.px,y:G.py,txt:'0',col:'#8aa9a2',dur:750});sayMore(`${LeNom(sp)} tire et rate (${ch} %).`);return;}
-    b.grip=1;addFx({kind:'shake',amp:5,dur:220});sayMore(`${LeNom(sp)} s’accroche : la foreuse est paralysée tant qu’il vit.`,'warn');}
-  const dm=dmgDe(sp);G.st.vie=Math.max(0,G.st.vie-dm);addFx({kind:'num',x:G.px,y:G.py,txt:'-'+dm,col:'#ff3b3b',dur:750});
-  if(G.st.vie<=0){G.over={dead:true};sayMore(`${LeNom(sp)} achève la foreuse.`,'warn');}}
+/* Sentinelle (19 novembre 2026 ; d'abord « Paralyzor », qui accrochait la foreuse et la paralysait — retiré le soir même à la
+   demande de l'utilisateur). Elle tire un laser jusqu'à sp.laser cases, en ligne de vue, une fois par battement : un jet
+   pour toucher ordinaire, et le trait rouge se voit toujours — droit sur la foreuse s'il touche, à côté s'il rate.
+   La clé interne de l'espèce reste `paralyzor`, pour que les groupes déjà réglés continuent de marcher. */
+const animVif=()=>!!(G&&G.beasts&&G.beasts.some(b=>b.fuse>0));   // une mine armée clignote : le rendu doit tourner
 function beastsAct(){
   turnStealth();
   if(!G.beasts||!G.beasts.length||G.over)return;const distSec=robotDist(false),distEau=robotDist(true),DC={};let charged=null;const alarms=[],boom=[];packTick();
@@ -364,9 +352,8 @@ function beastsAct(){
     if(sp.mine){                                                                      // mine : armée, elle attend l'explosion ; sinon elle s'arme à une case de la foreuse
       if(b.fuse>0){if(--b.fuse<=0)boom.push(b);continue;}
       if(b.hunt>0&&cheb(b,G.px,G.py)<=1){b.fuse=rnd(1,3);if(beastVisible(b)){sayMore('La mine s’arme !','warn');SFX.spot();}continue;}}
-    if(sp.grip&&b.grip){gripAtk(b,sp);continue;}                                       // paralyzor accroché : il frappe à chaque battement, sans bouger
-    if(sp.grip&&b.hunt>0&&sees&&cheb(b,G.px,G.py)<=GRIP_R&&los(b.x,b.y,G.px,G.py)){gripAtk(b,sp);continue;}   // paralyzor : il tire dès qu'il est à portée
-    if(b.hunt>0&&nearRobot(b)){if(sp.grip)gripAtk(b,sp);else hurtRobot(b);continue;}
+    if(sp.laser&&b.hunt>0&&sees&&cheb(b,G.px,G.py)<=sp.laser&&los(b.x,b.y,G.px,G.py)){hurtRobot(b,sp,{laser:1});continue;}   // sentinelle : elle tire dès qu'elle est à portée
+    if(b.hunt>0&&nearRobot(b)){hurtRobot(b);continue;}
     while(b.mp>=1&&!G.over){b.mp-=1;
       if(b.hunt>0&&sees){
         if(nearRobot(b)){b.mp=Math.min(b.mp,.99);break;}

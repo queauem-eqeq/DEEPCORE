@@ -216,7 +216,7 @@ const BEASTS=[
      "...1...11...1...",
      ".......11.......",
      "................"]},
-  {n:'Paralyzor',key:'paralyzor',nb:3,role:'Tire à 2 cases. S’il touche, il reste accroché et blesse la foreuse à chaque battement ; elle ne peut plus que s’approcher de lui',v:7,pv:14,dmin:1,dmax:2,pre:75,def:10,crit:0,grip:true,rows:["................",
+  {n:'Sentinelle',fem:true,key:'paralyzor',nb:3,role:'Tire un laser jusqu’à 2 cases, en ligne de vue',v:7,pv:14,dmin:1,dmax:2,pre:75,def:10,crit:0,laser:2,rows:["................",
      "................",
      "......1111......",
      ".....122221.....",
@@ -234,7 +234,7 @@ const BEASTS=[
      "................"]},
 ];
 /* Capacités lues par 08-faune : pack = vit en bande et partage ce qu'elle voit · aqua = ne quitte jamais l'eau · cache = invisible en eau profonde
-   mine = s'arme à une case de la foreuse puis explose · grip = s'accroche et paralyse. nb = effectif de référence (banc de combat).
+   mine = s'arme à une case de la foreuse puis explose · laser = tire à cette portée, en cases. nb = effectif de référence (banc de combat).
    Les capacités des six espèces retirées le 17 novembre 2026 (tir, poison, glu, vol d'énergie, embuscade, forage) ont été supprimées le 19. */
 BEASTS.forEach((bp,i)=>{const f=bp.fn||((x,y)=>bp.rows[y][x]);PAT['bz'+i+'r']=f;PAT['bz'+i+'l']=(x,y)=>f(15-x,y);});
 const MINE_I=BEASTS.findIndex(b=>b.mine);

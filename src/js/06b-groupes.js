@@ -16,7 +16,7 @@ const GROUPES_DEF=()=>({budget:110,liste:[
   {n:'Banc de torpilles',cout:5,on:1,pats:['ronde'],m:[{k:'brochon',min:2,max:3}]},
   {n:'Broyeur solitaire',cout:10,on:1,pats:['territoire'],m:[{k:'mastok',min:1,max:1}]},
   {n:'Mines',cout:4,on:1,pats:['affut'],m:[{k:'mine',min:1,max:2}]},
-  {n:'Paralyzor',cout:4,on:1,pats:['sentinelle'],m:[{k:'paralyzor',min:1,max:1}]}]});
+  {n:'Sentinelle',cout:4,on:1,pats:['sentinelle'],m:[{k:'paralyzor',min:1,max:1}]}]});
 // remet d'aplomb des groupes lus dans le navigateur ou dans la base : bornes, espèces inconnues écartées.
 // L'effectif minimal peut être 0 : l'espèce est alors parfois absente du groupe.
 function groupesSains(d){const ks=ESPECES().map(e=>e[0]),n=(v,mn,mx,df)=>Number.isFinite(+v)&&v!==''&&v!=null?Math.max(mn,Math.min(mx,Math.round(+v))):df;

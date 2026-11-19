@@ -77,7 +77,7 @@ function toggleSprint(){if(!G||G.over)return;
 /* ---------- Déplacement ---------- */
 const siteAt=(x,y)=>G.sites.find(s=>s.x===x&&s.y===y);
 // Dérive dans l'eau profonde : seulement quand la foreuse attend (un pas, lui, est dévié au moment même : DEEP_MISS)
-function drift(wait){if(!wait||paralyse())return;
+function drift(wait){if(!wait)return;
   if(G.t[idx(G.px,G.py)]!==DEEP)return;
   const k=rnd(0,7),[dx,dy]=DIRS[k],nx=G.px+dx,ny=G.py+dy,v=G.t[idx(nx,ny)];
   if(v===ROCK||v===MOUNT||v===CHASM||bati(v)||!diagOk(G.px,G.py,dx,dy)||beastAt(nx,ny)||animalAt(nx,ny)){SFX.thud();sayMore(`Le courant plaque le robot contre un obstacle (${DIRN[k]}).`,'warn');return;}
@@ -108,7 +108,6 @@ function tryMove(dx,dy){
     if(an.hp<=0){G.animals.splice(G.animals.indexOf(an),1);bleed(an.x,an.y);say(`${tag}La foreuse écrase ${leNom(sp)}.`,'warn');SFX.squish();}
     else{if(!an.aware)alerte(an);an.aware=1;an.enraged=true;spot(an);say(`${tag}La foreuse heurte ${leNom(sp)}.`);SFX.crack();}
    pass(coupDur());computeFOV();render();if(G.over&&G.over.dead)dead();return;}
-  if(paralyse()&&v!==ROCK&&v!==MOUNT&&!gripPas(dx,dy)){say('Paralysée : la foreuse ne peut que s’approcher du paralyzor, dans l’axe du trait rouge.','warn');SFX.blocked();render();return;}
   if(v===CHASM){say('Gouffre : passage impossible.');SFX.blocked();render();return;}
   if(v===SHIP){say('Coque du vaisseau : indestructible.');SFX.blocked();render();return;}
   if(v===HARD){say('Roche dure : la foreuse ne l’entame pas. Seule une charge sismique en vient à bout.');SFX.blocked();render();return;}

@@ -235,7 +235,7 @@ function viseeOk(){if(!VISEE||G.over)return;const {i,x,y}=VISEE,o=G.inv[i];
     if(G.ore&&G.ore[j]&&!oreSol(G.ore[j])){const l=oreLv(G.ore[j]),mt=oreMat(G.ore[j]);G.ore[j]=(mt?'m':'')+'sol'+l;
       sayMore(mt?'De la Matière tombe au sol.':'Des éclats de métal tombent au sol.','good');}}
   engage();invTake(i);sacFix();SAC_H='';
-  addFx({kind:'shake',amp:8,dur:300});SFX.explode();
+  addFx({kind:'boom',x,y,dur:420});addFx({kind:'shake',amp:8,dur:300});SFX.explode();
   say(`Charge sismique : ${n?`${n} ennemi${n>1?'s':''} touché${n>1?'s':''}${k?`, ${k} abattu${k>1?'s':''}`:''}`:'personne dans la zone'}${roches?`, ${roches} case${roches>1?'s':''} de roche pulvérisée${roches>1?'s':''}`:''}.`,n||roches?'good':'warn');
   if(consoTemps('dig'))return;
   render();}
