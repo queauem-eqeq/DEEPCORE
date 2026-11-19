@@ -81,9 +81,11 @@ La carte n'est plus peuplée espèce par espèce (les cinq niveaux d'intensité 
   à la surface de la carte jouée) achète des groupes **actifs** tirés au hasard, tant qu'il en reste un d'abordable.
   Chaque groupe est posé d'un bloc autour d'un point, à 20 cases au moins de la foreuse ; un groupe qui ne trouve pas sa
   place (pas d'eau pour des torpilles) est écarté après trois échecs.
-- **Lab → Groupes** : la fenêtre où l'on crée, règle et supprime les groupes — nom, valeur, case « actif », style de
-  patrouille, et jusqu'à six espèces avec leur effectif. Elle rappelle le budget de la carte en cours et ce qu'il a acheté.
-  « Groupes par défaut » (deux clics) remet les sept groupes de départ, un par espèce.
+- **Lab → Groupes** : la fenêtre où l'on crée, règle et supprime les groupes. **À gauche, la fiche du groupe choisi** (nom,
+  valeur, style de patrouille, case « actif », jusqu'à six espèces avec leur effectif, Dupliquer, Supprimer). **À droite, la
+  liste des groupes en colonne** : un clic choisit le groupe, la case l'active, et on le **déplace** en le glissant ou par
+  ↑ ↓. Mise en page demandée par l'utilisateur le 19 novembre 2026 (une grille de fiches avant). La fenêtre rappelle le
+  budget de la carte en cours et ce qu'il a acheté. « Groupes par défaut » (deux clics) remet les sept groupes de départ.
 - **LIFE** : le budget et une case à cocher par groupe.
 - **Style de patrouille** : il est porté par le **groupe**, pas par l'espèce (un crabot peut faire la ronde dans un groupe
   et garder un territoire dans un autre). Six styles depuis le 19 novembre 2026 :
