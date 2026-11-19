@@ -75,6 +75,14 @@ Artefact à part (https://claude.ai/artifact/9BKRaoB4hzgdWhzYFx5A6q) qui rejoue 
    Ne plus synchroniser de HTML dans le projet claude.ai « GAME » ; mettre à jour seulement
    `claude/noyau-profond-conception.md` (copie de `docs/conception.md`) quand ce document change.
 
+## Copie sur l'ordinateur de l'utilisateur
+**À chaque fois que l'utilisateur demande de pousser sur GitHub** (consigne du 16 novembre 2026), déposer en même temps
+le jeu sur son ordinateur, dans `F:\WORK\IAZONE\DEEPCORE`, **un dossier par version** nommé comme la branche de
+version : `version-AAAA-MM-JJ-n`. Y copier le contenu de `src/` tel quel (`index.html`, `style.css`, `js/*.js`), pour que
+le jeu se lance en ouvrant `index.html`. Passer par le pont vers l'ordinateur : copier les fichiers dans
+`/mnt/user-data/outputs/<version>/`, puis `device_commit_files` ; si le dossier n'est pas encore relié à la session,
+`device_request_folder_access` le demande. Inutile de recopier quand seuls des documents changent.
+
 ## Publication sur GitHub Pages
 Le jeu est en ligne sur https://queauem-eqeq.github.io/DEEPCORE/ à chaque fusion dans `main`.
 
@@ -97,7 +105,14 @@ modification, marquer la version actuelle. Dernière version à fichier unique :
 ## Règles à ne pas casser
 - Les réglages du joueur (palettes, tuiles retouchées, intro déjà vue…) vivent dans le `localStorage` du navigateur
   (`np-*`) et dans la base de l'artefact (`reglages/courant`, chargée seulement si plus récente que `np-maj`).
-  Ne pas renommer ces clés. Renommer une tuile (clé de `PAT`) abandonne les retouches faites dessus : le signaler.
+  Ne pas renommer ces clés.
+  **L'utilisateur règle ses tuiles et ses stats dans l'artefact** (décision du 16 novembre 2026), parce que c'est la
+  seule des trois versions dont la session peut relire les réglages : sur GitHub Pages et dans la copie du disque, il
+  n'y a pas de base, et le stockage du navigateur n'est pas lisible depuis la session. Quand il demande que ses
+  réglages deviennent ceux du jeu publié, les lire avec `db_get` sur `reglages/courant` (artefact
+  `acb8696b-fff0-42ad-824a-fd58fe7cdf1e`) et les recopier dans `src/` : dessins dans `rows` des `BEASTS` et dans `PAT`,
+  stats dans les `BEASTS`, couleurs dans `PRESETS`. Ne pas recopier la configuration d'essai que la base contient aussi
+  (génération, intensités, état de la partie). Le 16 novembre, l'insectoïde a été laissé tel quel à sa demande. Renommer une tuile (clé de `PAT`) abandonne les retouches faites dessus : le signaler.
 - **Une nouvelle espèce s'ajoute à la fin de `BEASTS`**, jamais au milieu : les tuiles des créatures sont numérotées
   (`bz0`…`bz9`, dans l'ordre de la liste) et les retouches du joueur sont enregistrées sous ces numéros. Insérer une
   espèce décale toutes les suivantes et colle leurs retouches sur la mauvaise bête (16 novembre 2026 : le brochon,
