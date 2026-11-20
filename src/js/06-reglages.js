@@ -11,7 +11,7 @@ function buildCursor(){const r=rowsOf('cursor');CURT=curCanvas(r);CURT_DIM=curCa
 // des couloirs partout ; gouffre : la carte devient un réseau de ponts). L'herbe ne gêne que la vue.
 const GEN_LBL=[['eau','Eau',60],['montagne','Montagne',70],['gouffre','Gouffre',30],['herbe','Herbe',80]],GEN_SUM=80;
 const METHODS=[['automate','Automate cellulaire'],['bruit','Bruit (chaînes)'],['mixte','Mixte']];
-let GEN={taille:4,eau:10,montagne:12,gouffre:4,herbe:15,methode:'automate',remplissage:55,iterations:5,structure:10,sNb:0,sStyle:'',sPieces:0,sEntrees:0,sOuvert:25,sVerrous:1,sSecrets:1,recette:'atterrissage'};   // structure : part de la carte occupée par les bâtiments (19 novembre 2026)
+let GEN={taille:4,eau:10,montagne:12,gouffre:4,herbe:15,methode:'automate',remplissage:55,iterations:5,structure:10,sNb:0,sStyle:'',sPieces:0,sEntrees:0,sOuvert:25,sVerrous:1,sSecrets:1,recette:'atterrissage',hasard:false};   // structure : part de la carte occupée par les bâtiments (19 novembre 2026)
 try{const g=JSON.parse(localStorage.getItem('np-gen')||'null');if(g&&typeof g.eau==='number')GEN=Object.assign(GEN,g);}catch(e){}
 if(!(GEN.taille>=1&&GEN.taille<=5))GEN.taille=4;
 if(!(GEN.structure>=0&&GEN.structure<=30))GEN.structure=10;
@@ -25,29 +25,44 @@ if(!(GEN.structure>=0&&GEN.structure<=30))GEN.structure=10;
    GEN.rec[recette], pour que changer de recette et revenir ne perde rien. Les réglages des zones (clés « z… ») donnent un CENTRE :
    la génération tire autour à chaque carte (voir autour()). */
 const STYLES_LBL=[['avant','Avant-poste'],['hangar','Hangar'],['forage','Complexe de forage'],['ruine','Ruine']];
-const R_STYLE=['sel','sStyle','Archétype de structure',[['','Au hasard']].concat(STYLES_LBL),''],R_PIECES=['num','sPieces','Pièces par structure',0,40,0],
-  R_OUVERT=['num','sOuvert','Ouvertures sans porte (%)',0,100,25],R_VERROUS=['num','sVerrous','Portes verrouillées',0,3,1],R_SECRETS=['num','sSecrets','Pièces secrètes',0,3,1];
+const R_STYLE=['sel','sStyle','Archétype de structure',[['','Au hasard']].concat(STYLES_LBL),'',STYLES_LBL.map(([v])=>v)],
+  R_PIECES=['num','sPieces','Pièces par structure',0,40,0],   // sans fourchette de hasard : 0 veut dire « pas de limite », et un tirage bas ferait un complexe de trois pièces
+  R_OUVERT=['num','sOuvert','Ouvertures sans porte (%)',0,100,25,[0,60]],R_VERROUS=['num','sVerrous','Portes verrouillées',0,3,1,[0,3]],R_SECRETS=['num','sSecrets','Pièces secrètes',0,3,1,[0,3]];
 const R_AIDE='Avant-poste : petites pièces, peu de boucles. Hangar : grandes salles à piliers. Complexe de forage : couloirs et gouffres. Ruine : cavernes effondrées.';
 const RECETTES={atterrissage:{n:'Niveau 1 : extérieur, montagne, complexe enfoui',zones:true,enfoui:true,titre:'Massif, tunnels, complexe',
     aide:'Chaque curseur donne un centre : la carte varie autour à chaque tirage. '+R_AIDE,
-    regl:[['sub','Massif'],['sel','zForme','Forme du massif',[['','Au hasard'],['cote','Un côté'],['coin','Un coin']],''],['num','zExt','Part d’extérieur (%)',35,80,60],['num','zComplexe','Taille du complexe (% du massif)',10,70,45],
-      ['sub','Tunnels'],['num','zTunnels','Taille du réseau (cases)',100,400,245],['num','zSalles','Salles de tunnel',0,8,4],
-      ['num','zSorties','Sorties du réseau',1,3,2],['num','zPorte','Éloignement de la porte (cases)',10,45,30],
+    regl:[['sub','Massif'],['sel','zForme','Forme du massif',[['','Au hasard'],['cote','Un côté'],['coin','Un coin']],'',['cote','coin']],
+      ['num','zExt','Part d’extérieur (%)',35,80,60,[40,75]],['num','zComplexe','Taille du complexe (% du massif)',10,70,45,[25,65]],
+      ['sub','Tunnels'],['num','zTunnels','Taille du réseau (cases)',100,400,245,[140,380]],['num','zSalles','Salles de tunnel',0,8,4,[1,7]],
+      ['num','zSorties','Sorties du réseau',1,3,2,[1,3]],['num','zPorte','Éloignement de la porte (cases)',10,45,30,[15,42]],
       ['sub','Complexe'],R_STYLE,R_PIECES,R_OUVERT,R_VERROUS,R_SECRETS]},
   classique:{n:'Classique : terrain partout, bâtiments posés dessus',titre:'Structures',aide:R_AIDE,
-    regl:[R_STYLE,['sel','sNb','Nombre de structures',[[0,'Une ou deux'],[1,'Une'],[2,'Deux']],0],['num','structure','Surface bâtie (%)',0,70,10],
+    regl:[R_STYLE,['sel','sNb','Nombre de structures',[[0,'Une ou deux'],[1,'Une'],[2,'Deux']],0,[0,1,2]],['num','structure','Surface bâtie (%)',0,70,10,[6,22]],
       R_PIECES,['num','sEntrees','Portes d’entrée',0,4,0],R_OUVERT,R_VERROUS,R_SECRETS]}};
 if(!RECETTES[GEN.recette])GEN.recette='atterrissage';
 const ENFOUI=()=>!!(RECETTES[GEN.recette]||{}).enfoui;
 const recLignes=r=>RECETTES[r].regl.filter(l=>l[0]!=='sub');
 const recBon=(l,v)=>l[0]==='num'?typeof v==='number'&&v>=l[3]&&v<=l[4]:l[3].some(([o])=>o===v);
+const recDef=l=>l[0]==='num'?l[5]:l[4];   // valeur de départ ; ce qui suit est la fourchette dans laquelle le bouton REGEN tire au hasard (rien : réglage laissé tel quel)
 // range les réglages de la recette en cours dans GEN.rec
 function recRange(){if(!GEN.rec||typeof GEN.rec!=='object')GEN.rec={};const o=GEN.rec[GEN.recette]={};for(const l of recLignes(GEN.recette))o[l[1]]=GEN[l[1]];}
 // passe à la recette r : ses valeurs gardées, sinon celles en cours (réglages communs), sinon les valeurs de départ
 function recPrend(r){if(!RECETTES[r])r='atterrissage';const s=(GEN.rec&&GEN.rec[r])||{};
-  for(const l of recLignes(r)){const k=l[1],d=l[l.length-1];GEN[k]=recBon(l,s[k])?s[k]:recBon(l,GEN[k])?GEN[k]:d;}
+  for(const l of recLignes(r)){const k=l[1],d=recDef(l);GEN[k]=recBon(l,s[k])?s[k]:recBon(l,GEN[k])?GEN[k]:d;}
   GEN.recette=r;}
 recPrend(GEN.recette);
+/* Case « Réglages au hasard » (20 novembre 2026) : cochée, le bouton REGEN tire d'abord tous les réglages du menu Monde, puis
+   génère. On ne touche ni à la taille de la carte ni aux réglages dont 0 veut dire « automatique » (pièces par structure,
+   portes d'entrée). Le relief est tiré avec un biais vers le bas : une planète noyée ou murée n'a pas d'intérêt. */
+const HASARD_REL={eau:30,montagne:30,gouffre:12,herbe:45};   // plafond de chaque terrain pour le tirage, bien en deçà des maximums du menu
+function hasardReglages(){
+  let reste=GEN_SUM;
+  for(const [k,,mx] of GEN_LBL){const v=Math.max(0,Math.min(mx,reste,Math.round(Math.pow(Math.random(),1.4)*HASARD_REL[k])));GEN[k]=v;reste-=v;}
+  GEN.methode=METHODS[rnd(0,METHODS.length-1)][0];
+  for(const l of recLignes(GEN.recette)){const k=l[1];
+    if(l[0]==='num'){const f=l[6];if(f)GEN[k]=rnd(f[0],f[1]);}
+    else{const f=l[5];if(f&&f.length)GEN[k]=f[rnd(0,f.length-1)];}}
+  saveGen();buildGen();}
 // valeur tirée autour du centre donné par un curseur : centre × (1 ± p)
 const autour=(k,p)=>GEN[k]*(1+(Math.random()*2-1)*p);
 function setTaille(v){v=Math.max(1,Math.min(5,Math.round(+v||4)));GEN.taille=v;$('gr-taille').value=v;$('gn-taille').value=v;

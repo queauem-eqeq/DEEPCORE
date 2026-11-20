@@ -188,6 +188,15 @@ Réglages de la recette `atterrissage`. Chacun donne **un centre** ; la généra
 | Sorties du réseau (`zSorties`) | 1 à 3, 2 | nombre visé ; une sortie de plus n'est creusée que si la lisière offre un point à 12 cases des autres |
 | Éloignement de la porte (`zPorte`) | 10 à 45 cases, 30 | ± 15 %, puis 80, 60 et 40 % de cette distance si le massif est petit |
 
+**Case « Réglages au hasard »** (20 novembre 2026), sous le bouton REGEN du panneau de droite. Cochée, REGEN tire d'abord tous
+les réglages du menu Monde, puis génère ; le menu se met à jour, si bien qu'on voit ce qui a été tiré et qu'on peut repartir de
+là. Chaque réglage porte sa propre fourchette de tirage (dernier élément de sa ligne dans `regl`), plus étroite que ses bornes :
+le hasard ne doit jamais rendre une carte sans intérêt. Sont laissés tels quels la **taille de la carte** et les réglages dont 0
+veut dire « automatique » (pièces par structure, portes d'entrée). Le relief est tiré avec un biais vers le bas (plafonds
+`HASARD_REL` : eau 30, montagne 30, gouffre 12, herbe 45) : une planète noyée ou murée n'a pas d'intérêt. L'état de la case est
+mémorisé avec les autres réglages (`GEN.hasard`, dans `np-gen`). Vérifié sur 40 tirages : complexe présent 40 fois sur 40, les
+huit combinaisons forme × archétype sorties, aucune erreur.
+
 S'y ajoutent, inchangés : archétype de structure, pièces par structure, ouvertures sans porte, portes verrouillées, pièces secrètes.
 « Surface bâtie », « Nombre de structures » et « Portes d'entrée » ne figurent plus dans cette recette (le complexe a toujours une
 seule porte).

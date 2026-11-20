@@ -186,4 +186,6 @@ function toggleVision(){SHOWVIS=!SHOWVIS;say(SHOWVIS?'Portée de discrétion aff
 function toggleFog(){fog=!fog;try{localStorage.setItem('np-fog',fog?'on':'off');}catch(e){}say(fog?'Brouillard de guerre activé.':'Brouillard de guerre désactivé.','info');render();}
 ['fd-sac','fd-pal','fd-lab'].forEach(id=>{const d=$(id);try{d.open=localStorage.getItem('np-'+id)==='open';}catch(e){}
   d.addEventListener('toggle',()=>{try{localStorage.setItem('np-'+id,d.open?'open':'closed');}catch(e){}});});
-$('restart').onclick=e=>{e.preventDefault();e.stopPropagation();unlock();SFX.start();newGame();started=true;$('overlay').hidden=true;render();};
+$('rndChk').checked=!!GEN.hasard;
+$('rndChk').addEventListener('change',e=>{GEN.hasard=e.target.checked;saveGen();});
+$('restart').onclick=e=>{e.preventDefault();e.stopPropagation();unlock();SFX.start();if(GEN.hasard)hasardReglages();newGame();started=true;$('overlay').hidden=true;render();};

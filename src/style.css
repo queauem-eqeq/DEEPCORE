@@ -225,6 +225,9 @@ kbd{font-family:var(--mono);color:var(--fg);border:1px solid var(--line);padding
 
 /* Inventaire (14-inventaire.js) : fenêtre plein écran, la liste à gauche, la fiche de l'objet choisi (dessin ASCII coloré) à droite */
 .btnrow{display:flex;gap:8px}
+.rndrow{display:flex;align-items:center;gap:7px;margin-top:7px;font-family:var(--display);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--dim);cursor:pointer}
+.rndrow input{accent-color:var(--c3);width:auto;cursor:pointer}
+.rndrow:hover{color:var(--fg)}
 .btnrow .pace{flex:1 1 0;min-width:0}
 #inventaire .mcard:focus{outline:none}
 .inv{display:grid;gap:10px}
