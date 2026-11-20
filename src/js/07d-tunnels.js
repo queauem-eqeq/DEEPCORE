@@ -37,7 +37,7 @@ function tunnels(t,B,strs,dE){
   const vers=(a,m)=>chemin(a,j=>j===m,j=>libre(j)&&(dE[j]>=3||ecart(j,m)<=3));
   let principal=null;
   for(const S of strs)for(const e of S.entrees){let p=null;
-    if(!principal)for(const R of [30,24,18,12]){const c=lis.filter(i=>ecart(i,e.o)>=R);
+    if(!principal)for(const R of [30,24,18,12].map(v=>Math.max(6,Math.round(v*F)))){const c=lis.filter(i=>ecart(i,e.o)>=R);
       for(let k=0;k<6&&c.length&&!p;k++){const q=vers(e.o,c[rnd(0,c.length-1)]);if(q&&q.length>=R*1.2)p=q;}
       if(p)break;}
     else p=chemin(e.o,j=>tun[j]===1,j=>libre(j)&&dE[j]>=3);   // une porte de plus rejoint le réseau, jamais l'extérieur directement
@@ -52,7 +52,7 @@ function tunnels(t,B,strs,dE){
   // Le réseau grandit jusqu'à une taille tirée entre 160 et 330 cases (jamais plus de 400). D'abord 3 à 5 salles irrégulières
   // (automate cellulaire), chacune au bout d'un boyau, là où le massif est assez épais ; puis des boyaux de 6 à 16 cases qui
   // finissent en cul-de-sac sur une petite poche. Un boyau ne longe jamais un autre tunnel à moins de 3 cases.
-  const cible=rnd(160,330),nSalles=rnd(3,5);
+  const aire=Math.min(1,N/6144),cible=Math.round(rnd(160,330)*aire),nSalles=Math.max(1,Math.round(rnd(3,5)*aire));   // tailles données pour une carte de 96 × 64, réduites en proportion sur les plus petites
   const pousse=(dmin,dmax,prof,sep)=>{const a=all[rnd(0,all.length-1)];if(pres[a]||dE[a]<4)return -1;const pr=proche(2),ps=proche(sep);
     const p=chemin(a,j=>libre(j)&&dE[j]>=prof&&!ps[j]&&ecart(j,a)>=dmin&&ecart(j,a)<=dmax,j=>libre(j)&&dE[j]>=3&&(!pr[j]||ecart(j,a)<=2.5));
     if(!p||p.length>dmax*1.6+8)return -1;creuse(p);return p[p.length-1];};
@@ -69,4 +69,4 @@ function tunnels(t,B,strs,dE){
     for(let k=0;k<q.length;k++){const c=q[k],x=c%W,y=(c/W)|0;for(const [dx,dy] of D4){const j=idx(x+dx,y+dy);if(!vu[j]&&(tun[j]||j===principal[0])){vu[j]=1;q.push(j);}}}
     for(let k=all.length-1;k>=0;k--){const i=all[k];if(!vu[i]){t[i]=MOUNT;tun[i]=0;all.splice(k,1);}}}
   G.tun={};for(const i of all)G.tun[i]=1;   // les cases de tunnel, pour la faune par lieu (étape suivante)
-  G.tunN=all.length;return all.length>=100;}   // moins de 100 cases : le massif était trop étroit, on recommence
+  G.tunN=all.length;return all.length>=100*aire;}   // moins de 100 cases : le massif était trop étroit, on recommence
