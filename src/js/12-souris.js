@@ -170,7 +170,7 @@ const TDESC={[GROUND]:['Sol rocheux','Praticable. Les points au sol se densifien
   [SECRET]:['Mur bâti','Infranchissable et opaque. La foreuse ne l’entame pas : seule une charge sismique l’ouvre. Compte comme une paroi pour la discrétion.'],
   [LOCK]:['Porte verrouillée','Infranchissable et opaque tant qu’elle est fermée. Une clé l’ouvre (avancer dessus) ; une charge sismique la détruit.'],
   [MACHINE]:['Machine hors d’usage','Infranchissable, mais on voit par-dessus. Une charge sismique la réduit en gravats.'],
-  [ANTENNA]:['Antenne','Avancer dessus l’allume : elle lève le brouillard sur un disque de 20 cases de large. Infranchissable, ne coupe pas la vue.'],
+  [ANTENNA]:['Antenne','Avancer dessus l’allume : elle reste allumée et tient en vue un disque de 30 cases de large. Infranchissable, ne coupe pas la vue.'],
   [TERMINAL]:['Terminal','Avancer dessus affiche son texte. Infranchissable, ne coupe pas la vue.'],
   [PILLAR]:['Pilier','Infranchissable et opaque : il coupe la ligne de vue. Compte comme une paroi pour la discrétion.'],
   [LIQ]:['Eau peu profonde','Praticable par tous. Défense −20 pour qui s’y trouve ; pas deux fois plus lent, sauf pour les crabos qui nagent.'],

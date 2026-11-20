@@ -1,19 +1,19 @@
 /* ---------- Artefacts (20 novembre 2026) ----------
    Des systèmes qui viennent se greffer sur chaque carte, à l'intérieur des bâtiments. Chacun s'active ou se coupe pour la
    génération, et a une fréquence sur trois crans [− = +] (Lab → Artefacts, mémorisé sous np-artefacts).
-   1. Antenne   : la foreuse l'active en avançant dessus ; elle s'allume et lève le brouillard dans un disque de 20 cases de
-                  large autour d'elle. Une seule fois.
+   1. Antenne   : la foreuse l'active en avançant dessus ; elle s'allume pour de bon et tient en vue un disque de 30 cases de
+                  large autour d'elle : le brouillard n'y revient pas (antVis).
    2. Herbe     : des pièces entièrement envahies d'herbes, hautes et basses mêlées.
    3. Machines  : dix machines hors d'usage, posées en obstacles dans certaines pièces. Elles barrent le pas mais pas la vue
                   (au contraire des piliers). Une charge sismique les réduit en gravats.
    4. Terminal  : la foreuse l'active en avançant dessus ; il affiche un texte.
    Terrains : MACHINE, ANTENNA, TERMINAL (00-base). G.art[case] : la variante d'une machine, l'état d'une antenne (1 = allumée),
    le texte d'un terminal. Posés par artefacts(), appelé à la fin de la génération des bâtiments. */
-const ART_LISTE=[['antenne','Antenne','Activée par la foreuse, elle lève le brouillard sur un disque de 20 cases de large.',[.5,1,2]],
+const ART_LISTE=[['antenne','Antenne','Activée par la foreuse, elle reste allumée et tient en vue un disque de 30 cases de large.',[.5,1,2]],
   ['herbe','Pièces envahies d’herbe','Des pièces remplies d’herbes hautes et basses mêlées.',[.08,.18,.35]],
   ['machines','Machines','Dix machines hors d’usage posées en obstacles : elles barrent le pas, pas la vue.',[.15,.35,.6]],
   ['terminal','Terminal','Activé par la foreuse, il affiche un texte.',[1,2,4]]];
-const ARTEFACTS_DEF=()=>({antenne:{on:1,f:1},herbe:{on:1,f:1},machines:{on:1,f:1},terminal:{on:1,f:1}});
+const ARTEFACTS_DEF=()=>({antenne:{on:1,f:1},herbe:{on:1,f:1},machines:{on:1,f:2},terminal:{on:1,f:1}});   // réglage du joueur, 20 novembre 2026
 function artefactsSains(d){const o=ARTEFACTS_DEF();if(d&&typeof d==='object')for(const [k] of ART_LISTE)if(d[k]){o[k].on=d[k].on?1:0;o[k].f=[0,1,2].includes(+d[k].f)?+d[k].f:1;}return o;}
 let ARTEFACTS=ARTEFACTS_DEF();
 try{ARTEFACTS=artefactsSains(JSON.parse(localStorage.getItem('np-artefacts')||'null'));}catch(e){}
@@ -58,12 +58,15 @@ function artefacts(B,strs){G.art={};const A=ARTEFACTS,t=G.t,site=G.sites&&G.site
     for(const p of pris){let n=Math.max(1,Math.min(5,Math.round(p.c.length/14)));for(let k=0;k<n;k++)if(pose(p,MACHINE,rnd(0,9),Math.random()<.7)>=0)G.artN.machines++;}}}
 
 // la foreuse avance sur une antenne : elle s'allume et lève le brouillard autour d'elle
-const ANT_R=10;
+const ANT_R=15;
+// Tant qu'une antenne est allumée, tout son disque reste en vue : le brouillard n'y revient pas (appelé par computeFOV).
+function antVis(){if(!G.art)return;for(const k in G.art){const i=+k;if(G.art[k]!==1||G.t[i]!==ANTENNA)continue;const x=i%W,y=(i/W)|0;
+  for(let dy=-ANT_R;dy<=ANT_R;dy++)for(let dx=-ANT_R;dx<=ANT_R;dx++){const a=x+dx,b=y+dy;if(a<0||b<0||a>=W||b>=H||dx*dx+dy*dy>ANT_R*ANT_R+ANT_R)continue;const j=idx(a,b);vis[j]=1;G.seen[j]=1;}}}
 function antenneUse(i){G.art=G.art||{};const x=i%W,y=(i/W)|0;
   if(G.art[i]===1){say('Antenne : déjà en service.');SFX.blocked();render();return;}
   G.art[i]=1;let n=0;for(let dy=-ANT_R;dy<=ANT_R;dy++)for(let dx=-ANT_R;dx<=ANT_R;dx++){const a=x+dx,b=y+dy;if(a<0||b<0||a>=W||b>=H||dx*dx+dy*dy>ANT_R*ANT_R+ANT_R)continue;const j=idx(a,b);if(!G.seen[j]){G.seen[j]=1;n++;}}
   G.turn++;G.msg=null;addFx({kind:'sonar',x,y,r:ANT_R+1,dur:reduced?1:700});SFX.sonar(.7);
-  say(`L’antenne s’allume : ${n?`${n} cases apparaissent sur la carte`:'rien de nouveau alentour'}.`,'good');pass(DUR.wait||100);computeFOV();render();}
+  say(`L’antenne s’allume : ${n?`${n} cases apparaissent sur la carte, et la zone restera en vue`:'la zone alentour restera en vue'}.`,'good');pass(DUR.wait||100);computeFOV();render();}
 // la foreuse avance sur un terminal : il affiche son texte (le temps ne passe pas)
 function terminalUse(i){const [titre,txt]=TERM_TXT[((G.art&&G.art[i])||0)%TERM_TXT.length];
   if(TRAV)stopTravel();if(EXPL)stopExplore();$('termTitre').textContent=titre;$('termTxt').textContent=txt;$('terminal').hidden=false;$('termClose').focus();SFX.spot();}

@@ -10,14 +10,18 @@
    Tout est mémorisé dans le navigateur sous np-groupes. */
 const PATS=[['errance','Errance'],['voyage','Voyage en bande'],['ronde','Ronde'],['territoire','Territoire'],['sentinelle','Sentinelle'],['affut','Affût']];
 const ESPECES=()=>[['insectoide',SPECIES[0].n],...BEASTS.map(b=>[b.key,b.n])];
+// Groupes du joueur, lus dans la base de l'artefact le 20 novembre 2026 (les sept groupes de départ de Claude avant).
 const GROUPES_DEF=()=>({budget:110,liste:[
-  {n:'Essaim de puces',cout:5,on:1,pats:['errance'],m:[{k:'insectoide',min:4,max:6}]},
-  {n:'Crabot solitaire',cout:3,on:1,pats:['ronde'],m:[{k:'crabos',min:1,max:1}]},
-  {n:'Bande de relais',cout:6,on:1,pats:['voyage'],m:[{k:'cafar',min:2,max:4}]},
-  {n:'Banc de torpilles',cout:5,on:1,pats:['ronde'],m:[{k:'brochon',min:2,max:3}]},
-  {n:'Broyeur solitaire',cout:10,on:1,pats:['territoire'],m:[{k:'mastok',min:1,max:1}]},
-  {n:'Mines',cout:4,on:1,pats:['affut'],m:[{k:'mine',min:1,max:2}]},
-  {n:'Sentinelle',cout:4,on:1,pats:['sentinelle'],m:[{k:'paralyzor',min:1,max:1}]}]});
+  {"cout":4,"f":1,"m":[{"k":"paralyzor","max":1,"min":1},{"k":"crabos","max":1,"min":1},{"k":"cafar","max":1,"min":1},{"k":"mine","max":1,"min":1},{"k":"insectoide","max":1,"min":1}],"n":"Family","on":1,"pats":["affut","territoire"]},
+  {"cout":5,"f":1,"m":[{"k":"insectoide","max":5,"min":3},{"k":"paralyzor","max":1,"min":1}],"n":"3-5 puces + sentinelles","on":1,"pats":[]},
+  {"cout":4,"f":1,"m":[{"k":"mine","max":2,"min":1}],"n":"1-2 Mines","on":1,"pats":["affut","errance"]},
+  {"cout":4,"f":1,"m":[{"k":"mine","max":2,"min":2},{"k":"paralyzor","max":1,"min":1}],"n":"Mines & Sentinelles","on":0,"pats":["affut","territoire"]},
+  {"cout":6,"f":1,"m":[{"k":"cafar","max":4,"min":2}],"n":"Bande de relais","on":1,"pats":["voyage","errance","ronde"]},
+  {"cout":5,"f":1,"m":[{"k":"paralyzor","max":3,"min":2}],"n":"2-3 sentinelles","on":1,"pats":["territoire","ronde"]},
+  {"cout":3,"f":1,"m":[{"k":"crabos","max":2,"min":1}],"n":"Crabots","on":1,"pats":["ronde","errance","voyage","territoire","sentinelle","affut"]},
+  {"cout":5,"f":1,"m":[{"k":"brochon","max":2,"min":1}],"n":"Banc de torpilles","on":1,"pats":["ronde","errance"]},
+  {"cout":10,"f":1,"m":[{"k":"mastok","max":1,"min":1}],"n":"Broyeur solitaire","on":0,"pats":["territoire","errance"]},
+  {"cout":15,"f":1,"m":[{"k":"insectoide","max":8,"min":6},{"k":"mine","max":1,"min":0}],"n":"Puces en groupes","on":1,"pats":["voyage"]}]});
 // remet d'aplomb des groupes lus dans le navigateur ou dans la base : bornes, espèces inconnues écartées.
 // L'effectif minimal peut être 0 : l'espèce est alors parfois absente du groupe.
 function groupesSains(d){const ks=ESPECES().map(e=>e[0]),n=(v,mn,mx,df)=>Number.isFinite(+v)&&v!==''&&v!=null?Math.max(mn,Math.min(mx,Math.round(+v))):df;

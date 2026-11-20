@@ -203,7 +203,7 @@ l'enregistrement des réglages). Code : `src/js/07c-artefacts.js`, appelé à la
 
 | Artefact | Ce qu'il fait | Fréquence − / = / + |
 |---|---|---|
-| **Antenne** | La foreuse l'active **en avançant dessus** (un battement) : elle s'allume et **lève le brouillard dans un disque de 20 cases de large** autour d'elle, murs compris. Une seule fois. | une carte sur deux / 1 / 2 par carte |
+| **Antenne** | La foreuse l'active **en avançant dessus** (un battement) : elle **reste allumée** et tient en vue un **disque de 30 cases de large** autour d'elle, murs compris — **le brouillard n'y revient pas**, où que soit la foreuse, et les créatures qui s'y trouvent se voient (20 novembre 2026 ; d'abord 20 cases et une simple révélation de la carte). | une carte sur deux / 1 / 2 par carte |
 | **Pièces envahies d'herbe** | La pièce entière est couverte d'herbes **hautes et basses mêlées** par touffes (le site et les clés gardent leur sol). | 8 % / 18 % / 35 % des pièces |
 | **Machines** | Dix machines hors d'usage (tuyaux, serveur, caisses, ordinateur, établi, cuve, générateur, console, turbine, armoire électrique), posées en **obstacles** : une à cinq par pièce choisie. **Elles barrent le pas mais pas la vue**, au contraire des piliers. Une charge sismique les réduit en gravats. | 15 % / 35 % / 60 % des pièces |
 | **Terminal** | La foreuse l'active en avançant dessus : une fenêtre affiche **un texte** (huit fragments de journal écrits par Claude, à remplacer ; le temps ne passe pas). | 1 / 2 / 4 par carte |
@@ -215,6 +215,13 @@ l'enregistrement des réglages). Code : `src/js/07c-artefacts.js`, appelé à la
   contre un mur, les machines sept fois sur dix.
 - Treize tuiles retouchables au Tile editor, groupe « Artefacts » (dessins de départ faits par Claude).
 - Mesuré sur 20 cartes aux réglages par défaut : 1 antenne, 2 terminaux, 2 pièces d'herbe et 9 machines par carte en moyenne.
+
+**Réglages du joueur adoptés le 20 novembre 2026** (base de l'artefact, `reglages/courant`, enregistré à 12 h 54) : ses
+**33 tuiles retouchées** (créatures, foreuse, portes, pilier, roche dure, éclats, site, antennes, terminal, neuf machines)
+sont les dessins par défaut — bloc `TUILES_JOUEUR` à la fin de `03-tuiles.js`, qui passe après toutes les autres
+définitions ; ses **dix groupes** remplacent les sept groupes de départ (`GROUPES_DEF`) ; la **Sentinelle** passe à 18 PV,
+2 dégâts, précision 70 ; la fréquence des machines passe à « + » ; les palettes **Néon** et **Abysse** prennent ses
+couleurs. Non recopiés, comme convenu : la génération, les archétypes de monde, l'état de la partie, la palette active.
 
 **Fréquence des groupes d'ennemis** : le même sélecteur [− = +] est dans la fiche de chaque groupe (Lab → Groupes). Au
 tirage, un groupe « − » sort deux fois moins souvent qu'un groupe « = », un groupe « + » deux fois plus.
@@ -583,6 +590,7 @@ Chiffres à l'appui dans `mesures.md`, points de comparaison avec Brogue dans `b
     - **Une ou deux structures** : deux une fois sur deux quand la surface le permet (au moins 260 cases en tout), avec un partage tiré entre **20 et 80 %** (35 à 65 % avant le 19 novembre 2026 au soir) : parfois une grande et une petite. Pour qu'elles tiennent toujours toutes les deux, la carte est d'abord **coupée en deux zones** à proportion de leurs tailles (le plus souvent côte à côte), une structure par zone. **Les deux structures ne sont jamais reliées entre elles** (19 novembre 2026) : aucun couloir ne passe de l'une à l'autre, et au moins trois cases de terrain séparent leurs murs ; on va de l'une à l'autre par le dehors. Chacune a son **lot** (un rectangle de la carte) et son **style** : avant-poste, hangar, complexe de forage ou ruine, qui règle la taille des pièces, la part de couloirs, de piliers, de gouffres, de cavernes et le seuil des boucles.
     - **Les structures recouvrent le terrain** (choix de l'utilisateur, 19 novembre 2026) : montagne, eau, herbes, **gouffres naturels compris** (19 novembre 2026 au soir : les cases de gouffre sous une pièce deviennent du sol, sous un mur du mur ; ce qui reste du gouffre dehors est nettoyé comme d'habitude). Seuls le vaisseau et le bord de carte sont évités. Comme la roche dure est posée après, un massif peut envelopper un bâtiment.
     - **Emplacement au hasard**, sans lien avec le vaisseau : mesuré sur 40 cartes, le mur le plus proche est à 5 à 45 cases du départ, à moins de 10 cases une fois sur cinq.
+    - **Pièces moins étroites** (20 novembre 2026, l'utilisateur en trouvait certaines trop étroites) : rectangles d'au moins 4 × 4, halls de 3 ou 4 cases de large (2 ou 3 avant), branches des L et barres des croix d'au moins 3. Mesuré sur 15 cartes : la part du sol bâti large de moins de 3 cases passe de 28 % à 10 % (ce qui reste : les couloirs, voulus étroits, et les cavernes).
     - **Accrétion** : une première pièce, puis des pièces collées contre un mur existant avec une porte à la jonction, parfois au bout d'un **couloir** (2 à 5 cases, une fois sur quatre 7 à 14). Formes : rectangle, L, croix, ronde, hall long, caverne.
     - **Boucles et longs couloirs** : depuis chaque sol on tire tout droit à travers le mur ; si l'on retombe sur le sol d'une autre pièce et que le détour à pied dépasse le seuil du style (12 à 26 pas, ou trois fois la longueur à percer), on perce — une porte si le mur fait une case, sinon **un couloir jusqu'à 19 cases** avec une porte à chaque bout, qui relie deux salles éloignées. Peu de longs couloirs : un, plus un par tranche de sept pièces.
     - **Gouffres intérieurs retirés « pour l'instant » le 20 novembre 2026**, à la demande de l'utilisateur : plus aucun gouffre ni chemin-pont dans les pièces (drapeau `GOUFFRES_INT` dans `07b-batiments.js`, le code reste). Ce qui suit décrit ce qu'ils faisaient. **Gouffres** : dans une pièce d'au moins 20 cases, selon le style (12 à 50 %). Quatre fois sur dix **le gouffre prend toute la pièce** : il ne reste qu'un îlot central et des **chemins-ponts**, un par porte, un peu tordus. Sinon le gouffre occupe le cœur de la pièce en laissant un pourtour, et un pont le franchit une fois sur deux. Un gouffre qui couperait la structure est annulé.
