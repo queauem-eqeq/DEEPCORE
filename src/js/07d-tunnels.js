@@ -26,7 +26,7 @@ function tunnels(t,B,strs,dE){
       const x=c%W,y=(c/W)|0;
       for(const [dx,dy] of D4){const j=idx(x+dx,y+dy);if(!but(j)&&!passe(j))continue;const nd=d+1+n(x+dx,y+dy)*10+Math.random()*3;if(nd<dist[j]){dist[j]=nd;prev[j]=c;hp.push(j,nd);}}}
     return null;};
-  const ouvre=j=>{if(t[j]===MOUNT)t[j]=GROUND;if(!tun[j]&&ZONE[j]){tun[j]=1;all.push(j);}};
+  const ouvre=j=>{if(all.length>=400)return;if(t[j]===MOUNT)t[j]=GROUND;if(!tun[j]&&ZONE[j]){tun[j]=1;all.push(j);}};
   // creuse le chemin, et l'élargit par endroits d'une case
   const creuse=p=>{for(const c of p){ouvre(c);
     if(Math.random()<.4){const [dx,dy]=D4[rnd(0,3)],j=idx(c%W+dx,((c/W)|0)+dy);if(libre(j)&&dE[j]>=2)ouvre(j);}}};
@@ -39,13 +39,24 @@ function tunnels(t,B,strs,dE){
   if(principal.length>=14){const a=principal[Math.floor(principal.length*(.35+Math.random()*.3))],m=principal[principal.length-1],pr=proche(2);
     const p=chemin(a,j=>dehors(j)&&ecart(j,m)>=12,j=>libre(j)&&(!pr[j]||ecart(j,a)<=3));
     if(p&&p.length<=principal.length*2+16)creuse(p);}
-  // culs-de-sac : un boyau de 6 à 11 cases qui finit sur une petite poche
-  let reste=1+(Math.random()<.6?1:0);
-  for(let k=0;k<40&&reste>0;k++){const a=all[rnd(0,all.length-1)];if(pres[a]||dE[a]<4)continue;const pr=proche(1),pr3=proche(3);
-    const p=chemin(a,j=>libre(j)&&dE[j]>=4&&!pr3[j]&&ecart(j,a)>=6&&ecart(j,a)<=11,j=>libre(j)&&dE[j]>=3&&(!pr[j]||ecart(j,a)<=1.5));
-    if(!p||p.length>22)continue;
-    creuse(p);const f=p[p.length-1],fx=f%W,fy=(f/W)|0;
-    for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){const j=idx(fx+dx,fy+dy);if(libre(j)&&dE[j]>=3&&Math.random()<.75)ouvre(j);}
-    reste--;}
+  // Le réseau grandit jusqu'à une taille tirée entre 160 et 330 cases (jamais plus de 400). D'abord 3 à 5 salles irrégulières
+  // (automate cellulaire), chacune au bout d'un boyau, là où le massif est assez épais ; puis des boyaux de 6 à 16 cases qui
+  // finissent en cul-de-sac sur une petite poche. Un boyau ne longe jamais un autre tunnel à moins de 3 cases.
+  const cible=rnd(160,330),nSalles=rnd(3,5);
+  const pousse=(dmin,dmax,prof,sep)=>{const a=all[rnd(0,all.length-1)];if(pres[a]||dE[a]<4)return -1;const pr=proche(2),ps=proche(sep);
+    const p=chemin(a,j=>libre(j)&&dE[j]>=prof&&!ps[j]&&ecart(j,a)>=dmin&&ecart(j,a)<=dmax,j=>libre(j)&&dE[j]>=3&&(!pr[j]||ecart(j,a)<=2.5));
+    if(!p||p.length>dmax*1.6+8)return -1;creuse(p);return p[p.length-1];};
+  for(let k=0,fait=0;k<70&&fait<nSalles&&all.length<cible;k++){const f=pousse(7,60,k<30?9:5,5);if(f<0)continue;   // d'abord au cœur du massif, puis là où il reste de la place
+    const fx=f%W,fy=(f/W)|0,w=rnd(10,16),h=rnd(7,11),cells=caBlob(w,h,.62,4);let mx=0,my=0;for(const [x,y] of cells){mx+=x;my+=y;}
+    mx=Math.round(mx/Math.max(1,cells.length));my=Math.round(my/Math.max(1,cells.length));   // la salle est centrée sur le bout du boyau
+    for(const [x,y] of cells){const cx=fx+x-mx,cy=fy+y-my;if(cx<2||cy<2||cx>=W-2||cy>=H-2)continue;const j=idx(cx,cy);if(libre(j)&&dE[j]>=3&&all.length<395)ouvre(j);}
+    for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){const j=idx(fx+dx,fy+dy);if(libre(j)&&dE[j]>=3)ouvre(j);}   // le boyau débouche toujours dans la salle
+    fait++;}
+  for(let k=0;k<120&&all.length<cible;k++){const f=pousse(6,16,4,4);if(f<0)continue;const fx=f%W,fy=(f/W)|0;
+    for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){const j=idx(fx+dx,fy+dy);if(libre(j)&&dE[j]>=3&&Math.random()<.75)ouvre(j);}}
+  // une salle creusée à part du boyau ne doit pas rester isolée : tout ce qui n'est pas relié à la porte par les tunnels est rebouché
+  {const vu=new Uint8Array(N),q=[principal[0]];vu[q[0]]=1;
+    for(let k=0;k<q.length;k++){const c=q[k],x=c%W,y=(c/W)|0;for(const [dx,dy] of D4){const j=idx(x+dx,y+dy);if(!vu[j]&&(tun[j]||j===principal[0])){vu[j]=1;q.push(j);}}}
+    for(let k=all.length-1;k>=0;k--){const i=all[k];if(!vu[i]){t[i]=MOUNT;tun[i]=0;all.splice(k,1);}}}
   G.tun={};for(const i of all)G.tun[i]=1;   // les cases de tunnel, pour la faune par lieu (étape suivante)
-  return true;}
+  G.tunN=all.length;return all.length>=100;}   // moins de 100 cases : le massif était trop étroit, on recommence

@@ -136,10 +136,10 @@ function entrees(B,S,t,atteint,dE){const {own,porte,pied,interdit}=B,cand=[];
 // si une entrée donne sur de la roche, un couloir est percé jusqu'à elle (connect).
 function batiments(){
   G.batis=[];G.cles={};G.pb={};G.art={};G.artN=null;G.tun={};const pct=GEN.structure||0,N=W*H;if(pct<=0)return;
-  // complexe enfoui (recette à zones) : il ne tient que dans le massif, à plus de 5 cases de la lisière et du bord de carte (la place d'un tunnel), et n'en prend pas plus des deux tiers
+  // complexe enfoui (recette à zones) : il ne tient que dans le massif, à plus de 5 cases de la lisière et du bord de carte (la place d'un tunnel), et n'en prend pas la moitié (le reste est pour les tunnels)
   const enf=!!(ZONE&&(RECETTES[GEN.recette]||{}).enfoui),dE=enf?distExt():null;let zb=null,mN=0;
   if(enf){zb=[W,H,0,0];for(let i=0;i<N;i++){const x=i%W,y=(i/W)|0;if(dE[i]<=5||x<5||y<5||x>W-6||y>H-6)continue;mN++;zb=[Math.min(zb[0],x),Math.min(zb[1],y),Math.max(zb[2],x),Math.max(zb[3],y)];}}
-  const total=enf?Math.min(Math.round(N*pct/100),Math.round(mN*.65)):Math.round(N*pct/100);if(total<45)return;
+  const total=enf?Math.min(Math.round(N*pct/100),Math.round(mN*.45)):Math.round(N*pct/100);if(total<45)return;
   const t0=G.t.slice();
   for(let essai=0;essai<6;essai++){
     const t=G.t,B={own:new Int16Array(N),porte:new Uint8Array(N),pied:new Uint8Array(N),interdit:new Uint8Array(N),sol:new Uint8Array(N).fill(FLOOR),pieces:[]};

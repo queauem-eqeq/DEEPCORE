@@ -163,7 +163,7 @@ l'extérieur est une « pièce » parmi d'autres, faite de terrain naturel, et l
 - `atterrissage` (par défaut) : zone extérieure de 50 à 70 % de la carte, bordure comprise ; le reste est un **massif** sur un côté
   (gauche ou droite le plus souvent, parfois haut ou bas), à la lisière sinueuse. Le vaisseau se pose dans la partie de
   l'extérieur la plus éloignée du massif. Un seul complexe, **creusé dans le massif** à plus de 5 cases de la lisière et du bord
-  de carte ; il prend au plus les deux tiers de la place disponible (et jamais plus que « Surface bâtie »). Le site de forage est
+  de carte ; il prend au plus 45 % de la place disponible (et jamais plus que « Surface bâtie »). Le site de forage est
   au fond du complexe, comme avant.
 - `classique` : la génération d'avant la refonte, inchangée (terrain partout, une ou deux structures posées dessus).
 
@@ -171,15 +171,20 @@ Les pourcentages du menu Monde (eau, montagne, gouffre, herbe) valent pour la **
 
 **Tunnels** (`07d-tunnels.js`) : depuis la porte du complexe (une seule, sauf si « Portes d'entrée » en demande plus ; elle peut
 être de n'importe quel côté), un boyau serpente jusqu'à l'extérieur — chemin le moins cher dans un bruit, élargi par endroits.
-Il ne longe jamais les murs du complexe (une case de roche au moins entre les deux). S'y ajoutent un **embranchement** vers une
-seconde sortie, à 12 cases au moins de la première, et **un ou deux culs-de-sac** de 6 à 11 cases terminés par une petite poche.
+Il ne longe jamais les murs du complexe (une case de roche au moins entre les deux). S'y ajoute un **embranchement** vers une
+seconde sortie, à 12 cases au moins de la première. Puis le réseau grandit (demande de l'utilisateur, 20 novembre 2026 : « plus
+grand, avec quelques salles de formes irrégulières ; 100 à 400 cases ») jusqu'à une taille tirée entre 160 et 330 cases :
+d'abord **3 à 5 salles irrégulières** (automate cellulaire, dans un cadre de 10-16 × 7-11), chacune au bout d'un boyau, creusées
+de préférence au cœur du massif ; ensuite des **culs-de-sac** de 6 à 16 cases terminés par une petite poche. Un boyau ne longe
+jamais un autre tunnel à moins de 3 cases. Jamais plus de 400 cases ; à moins de 100, la structure est refaite. Pour laisser
+cette place, le complexe ne prend plus que 45 % du massif disponible.
 Si aucun passage n'est trouvé, la structure est retirée ; au dernier des six essais, `connect` perce tout droit.
 Les cases de tunnel sont notées dans `G.tun` (pour la faune par lieu, à venir). La roche dure vient ensuite, comme partout : le
 cœur du massif est impénétrable, les parois des tunnels restent tendres sur deux cases.
 
 Mesuré sur 60 cartes de taille 4 (20 novembre 2026) : un complexe et un réseau de tunnels à chaque fois ; zone extérieure 50 à
-69 % (59 en moyenne) ; 12 à 191 cases de tunnel (68 en moyenne) ; 5 à 15 pièces (11 en moyenne) ; 34 à 114 pas du vaisseau à la
-porte du complexe (70 en moyenne) ; génération en 90 ms en moyenne.
+69 % (59 en moyenne) ; 114 à 328 cases de tunnel (221 en moyenne) ; 3 à 16 pièces (10 en moyenne) ; 37 à 113 pas du vaisseau à la
+porte du complexe (70 en moyenne) ; génération en 116 ms en moyenne.
 
 **Reste à faire** : la faune par lieu (dehors / dedans), la descente et l'arrivée par un puits, les recettes des niveaux 2 et 3,
 les mesures par recette. Le plan est dans le document `claude/refonte-niveaux-plan.md` du projet.
