@@ -76,8 +76,8 @@ Artefact à part (https://claude.ai/artifact/9BKRaoB4hzgdWhzYFx5A6q) qui rejoue 
 6. **Marquer une version publiée seulement quand l'utilisateur le demande** (pas à chaque changement, consigne du 10 novembre 2026) :
    pousser alors une branche `claude/version-AAAA-MM-JJ-n` qui pointe sur le commit publié
    (`git push origin HEAD:refs/heads/claude/version-AAAA-MM-JJ-n`). Ne pas utiliser de tags. Les commits vont sur la branche de travail en cours, sans en créer de nouvelle à chaque changement.
-   Ne plus synchroniser de HTML dans le projet claude.ai « GAME » ; mettre à jour seulement
-   `claude/noyau-profond-conception.md` (copie de `docs/conception.md`) quand ce document change.
+   **Rien à synchroniser dans le projet claude.ai « GAME »** (décision du 20 novembre 2026) : ni HTML, ni copie des
+   documents. `docs/` est le seul exemplaire ; le projet n'en garde qu'un renvoi. Ne pas recréer de copie.
 
 ## Copie sur l'ordinateur de l'utilisateur
 **À chaque fois que l'utilisateur demande de pousser sur GitHub** (consigne du 16 novembre 2026), déposer en même temps
