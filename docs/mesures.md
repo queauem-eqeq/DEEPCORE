@@ -467,3 +467,23 @@ la date de chaque mesure est celle à laquelle elle a été prise, avec le jeu d
   sorties, aucune erreur.
 - **Ce que ces chiffres disent** : les sorties demandées ne sont pas toutes creusées (1,4 à 1,6 pour 2 demandées),
   et demander 400 cases de tunnel n'en donne que 230 à 260 — complexe et tunnels se partagent le massif.
+
+## Recette « réseau de cavernes » (21 novembre 2026)
+
+`outils/scripts/mesure-cavernes.js` : 40 cartes par ligne, réglages de départ (`cvPart` 36, `cvNb` 6, `cvBoyaux` 2,
+`cvBati` 2, `cvSurf` 14) sauf indication. « Relié » : de l'arrivée, toutes les cases franchissables sont atteintes,
+verrous et secrets franchis, et le site de forage aussi.
+
+```
+départ, taille 4 : cavernes 31 % · bâtiments 1.9 [0:0 1:7 2:32 3:1 4:0] · surface bâtie 11 % · boyaux de porte 17 · relié 40/40 · 113 ms/carte
+taille 3 : cavernes 29 % · bâtiments 1.9 [0:0 1:8 2:30 3:2 4:0] · surface bâtie 10 % · boyaux de porte 11 · relié 40/40 · 98 ms/carte
+taille 2 : cavernes 23 % · bâtiments 1.3 [0:0 1:30 2:10 3:0 4:0] · surface bâtie 9 % · boyaux de porte 4 · relié 40/40 · 93 ms/carte
+peu de grandes : cavernes 36 % · bâtiments 2.0 [0:0 1:4 2:32 3:4 4:0] · surface bâtie 12 % · boyaux de porte 18 · relié 40/40 · 150 ms/carte
+beaucoup de petites : cavernes 29 % · bâtiments 2.0 [0:0 1:5 2:31 3:4 4:0] · surface bâtie 11 % · boyaux de porte 19 · relié 40/40 · 94 ms/carte
+4 bâtiments : cavernes 27 % · bâtiments 3.0 [0:0 1:1 2:8 3:21 4:10] · surface bâtie 15 % · boyaux de porte 28 · relié 40/40 · 110 ms/carte
+1 petit bâtiment : cavernes 38 % · bâtiments 1.0 [0:0 1:40 2:0 3:0 4:0] · surface bâtie 7 % · boyaux de porte 12 · relié 40/40 · 83 ms/carte
+grande carte 5 : cavernes 34 % · bâtiments 2.0 [0:0 1:4 2:30 3:6 4:0] · surface bâtie 12 % · boyaux de porte 25 · relié 40/40 · 190 ms/carte
+```
+
+Lecture : la part de cavernes et la surface bâtie obtenues restent sous les curseurs (les deux se partagent la carte) ;
+sur les petites cartes, la place manque pour un deuxième bâtiment.

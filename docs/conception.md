@@ -225,17 +225,20 @@ donne la distance à la caverne la plus proche et que les pourcentages de relief
 pour le sol des cavernes.
 
 - **Cavernes** (`cavernes()`) : `cvNb` blobs irréguliers (automate cellulaire, `caBlob`), posés le plus loin possible
-  des précédents, pour une surface totale `cvPart` % de la carte. Le nombre est le curseur « peu de grandes ↔ beaucoup
+  des précédents et à l'écart des places réservées, pour une surface totale `cvPart` % de la carte (visée à + 20 %, puis
+  jusqu'à huit cavernes de plus si les réserves ont trop rogné). Le nombre est le curseur « peu de grandes ↔ beaucoup
   de petites » ; chaque blob est un poids tiré entre 0,6 et 1,4.
-- **Boyaux** : arbre couvrant (Prim) entre les centres, de 1 à 2 cases de large, sinueux (marche qui penche vers
-  la cible) ; puis `cvBoyaux` boucles entre cavernes voisines non reliées, et 1 à 3 culs-de-sac de 8 à 18 cases.
+- **Boyaux** : arbre couvrant (Prim) entre les centres, de 1 à 2 cases de large ; chaque boyau est le chemin le moins
+  cher dans un bruit, qui contourne les places réservées et préfère les cases déjà creusées ; puis `cvBoyaux` boucles entre cavernes voisines non reliées, et 1 à 3 culs-de-sac de 8 à 18 cases.
 - **Arrivée par un puits** : pas de vaisseau, la foreuse débouche sur un carré de sol sec de 3 × 3 (chemin déjà là pour
   `SANS_VAISSEAU`). Le message d'arrivée est celui de la descente.
-- **Bâtiments enchâssés** (`batiments()`, mode `cav`) : `cvBati` bâtiments (± 1 au tirage, 4 au plus, au moins deux quand
-  on en demande deux) se partagent `cvSurf` % de la carte (visée : la roche disponible plafonne le résultat, 8 à 12 %
-  en pratique). Le lot est toute la carte : le bâtiment s'étale là où la roche est assez épaisse, à plus de 2 cases
-  d'une caverne et à plus de 3 cases du bord ; trois cases de roche séparent deux bâtiments. Chaque bâtiment a **une
-  porte** (deux si l'emprise dépasse 170 cases), du côté de la caverne la plus proche (`entrees(…, proche)`).
+- **Bâtiments enchâssés** : leur place est **réservée avant de creuser** (`cavernes()`, `CAVRES`). `cvBati` bâtiments
+  (± 1 au tirage, 4 au plus) se partagent `cvSurf` % de la carte ; chacun reçoit un rectangle de roche (emprise visée × 1,8)
+  posé n'importe où, le centre compris, à 7 cases au moins des autres ; si la place manque, il est réduit d'un cinquième
+  (trois fois au plus). La réserve est une ellipse carrée aux bords bruités, élargie de 2 cases : les cavernes la
+  contournent, la roche garde un air naturel. `batiments()` (mode `cav`) prend ces rectangles comme lots ; le bâtiment
+  reste à plus de 2 cases d'une caverne et à plus de 3 cases du bord. Chaque bâtiment a **une porte** (deux si l'emprise
+  dépasse 170 cases), du côté de la caverne la plus proche (`entrees(…, proche)`).
 - **Boyau de porte** (`reliePortes()`) : de chaque porte à la caverne la plus proche, chemin le moins cher dans un bruit,
   loin des autres bâtiments ; il compte dans `G.tun` (jaune sur les planches). Si une porte n'atteint aucune caverne, la
   structure est refaite (douze essais).
@@ -252,9 +255,10 @@ Réglages (centre autour duquel la carte varie à chaque tirage) :
 | Nombre de bâtiments (`cvBati`) | 1 à 4, 2 | ± 30 %, au moins 60 cases chacun |
 | Surface bâtie (`cvSurf`) | 6 à 30 %, 14 | ± 15 % |
 
-S'y ajoutent les réglages communs : archétype, pièces, ouvertures, verrous, secrets. **Limites connues** : les
-bâtiments se logent surtout en périphérie, là où la roche est épaisse ; sur les petites cartes (taille 2), un seul
-bâtiment, parfois aucun ; la faune (étape 3) n'est pas encore répartie par lieu. Mesure : `outils/scripts/mesure-cavernes.js` ;
+S'y ajoutent les réglages communs : archétype, pièces, ouvertures, verrous, secrets. **Limites connues** : la surface
+bâtie obtenue est d'environ 11 % pour 14 % demandés, et la part de cavernes d'environ 31 % pour 36 % (les deux se
+partagent la carte : avec 4 bâtiments et 24 %, il reste 27 % de cavernes) ; sur les petites cartes (taille 2), un seul
+bâtiment le plus souvent ; la faune (étape 3) n'est pas encore répartie par lieu. Mesure : `outils/scripts/mesure-cavernes.js` ;
 vue d'ensemble : `outils/scripts/cavernes.js`.
 
 ### Forme du massif
