@@ -30,7 +30,7 @@ const R_STYLE=['sel','sStyle','Archétype de structure',[['','Au hasard']].conca
 const R_AIDE='Avant-poste : petites pièces, peu de boucles. Hangar : grandes salles à piliers. Complexe de forage : couloirs et gouffres. Ruine : cavernes effondrées.';
 const RECETTES={atterrissage:{n:'Niveau 1 : extérieur, montagne, complexe enfoui',zones:true,enfoui:true,titre:'Massif, tunnels, complexe',
     aide:'Chaque curseur donne un centre : la carte varie autour à chaque tirage. '+R_AIDE,
-    regl:[['sub','Massif'],['num','zExt','Part d’extérieur (%)',35,80,60],['num','zComplexe','Taille du complexe (% du massif)',10,70,45],
+    regl:[['sub','Massif'],['sel','zForme','Forme du massif',[['','Au hasard'],['cote','Un côté'],['coin','Un coin']],''],['num','zExt','Part d’extérieur (%)',35,80,60],['num','zComplexe','Taille du complexe (% du massif)',10,70,45],
       ['sub','Tunnels'],['num','zTunnels','Taille du réseau (cases)',100,400,245],['num','zSalles','Salles de tunnel',0,8,4],
       ['num','zSorties','Sorties du réseau',1,3,2],['num','zPorte','Éloignement de la porte (cases)',10,45,30],
       ['sub','Complexe'],R_STYLE,R_PIECES,R_OUVERT,R_VERROUS,R_SECRETS]},

@@ -1,7 +1,7 @@
 (() => {
   const d={recette:'atterrissage',taille:4,zExt:60,zComplexe:45,zTunnels:245,zSalles:4,zSorties:2,zPorte:30};
-  const cas=[['Réglages de départ',{}],['Réglages de départ (autre tirage)',{}],['Extérieur 80 % · complexe 15 %',{zExt:80,zComplexe:15}],
-    ['Extérieur 40 % · complexe 65 %',{zExt:40,zComplexe:65}],['Tunnels 400 · 8 salles · 3 sorties',{zTunnels:400,zSalles:8,zSorties:3}],['Tunnels 100 · 0 salle · 1 sortie · porte à 10',{zTunnels:100,zSalles:0,zSorties:1,zPorte:10}]];
+  const cas=[['Un côté',{zForme:'cote'}],['Un côté',{zForme:'cote'}],['Un côté',{zForme:'cote'}],
+    ['Un coin',{zForme:'coin'}],['Un coin',{zForme:'coin'}],['Un coin',{zForme:'coin'}]];
   const S=4,c=document.createElement('canvas');c.width=1280;c.height=800;c.style.cssText='position:fixed;left:0;top:0;z-index:99999;background:#0b0f10';document.body.appendChild(c);
   const x=c.getContext('2d');x.font='12px monospace';const res=[];
   cas.forEach(([nom,r],n)=>{Object.assign(GEN,d,r);newGame();const ox=20+(n%3)*420,oy=40+((n/3)|0)*385;

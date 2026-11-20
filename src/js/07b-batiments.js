@@ -138,7 +138,16 @@ function batiments(){
   G.batis=[];G.cles={};G.pb={};G.art={};G.artN=null;G.tun={};const pct=ENFOUI()?100:GEN.structure||0,N=W*H;if(pct<=0)return;
   // complexe enfoui (recette à zones) : il ne tient que dans le massif, à plus de 5 cases de la lisière et du bord de carte (la place d'un tunnel), et n'en prend pas la moitié (le reste est pour les tunnels)
   const enf=!!(ZONE&&ENFOUI()),dE=enf?distExt():null,mg=W>=72?5:W>=48?4:3;let zb=null,mN=0;   // mg : marge à la lisière et au bord, plus mince sur les petites cartes
-  if(enf){zb=[W,H,0,0];for(let i=0;i<N;i++){const x=i%W,y=(i/W)|0;if(dE[i]<=mg||x<mg||y<mg||x>W-mg-1||y>H-mg-1)continue;mN++;zb=[Math.min(zb[0],x),Math.min(zb[1],y),Math.max(zb[2],x),Math.max(zb[3],y)];}}
+  // Où le complexe peut tenir : dans le massif, à plus de mg cases de la lisière et du bord de carte. Le massif peut être en
+  // plusieurs morceaux (forme « deux côtés ») : on ne garde que le plus grand, sinon le cadre de pose enjamberait l'extérieur.
+  if(enf){const ok=new Uint8Array(N),vu=new Uint8Array(N);
+    for(let i=0;i<N;i++){const x=i%W,y=(i/W)|0;if(dE[i]>mg&&x>=mg&&y>=mg&&x<=W-mg-1&&y<=H-mg-1)ok[i]=1;}
+    for(let i=0;i<N;i++){if(!ok[i]||vu[i])continue;const q=[i];vu[i]=1;const b=[W,H,0,0];
+      for(let k=0;k<q.length;k++){const c=q[k],x=c%W,y=(c/W)|0;
+        b[0]=Math.min(b[0],x);b[1]=Math.min(b[1],y);b[2]=Math.max(b[2],x);b[3]=Math.max(b[3],y);
+        for(const [dx,dy] of D4){const a=x+dx,e=y+dy;if(a<0||e<0||a>=W||e>=H)continue;const j=idx(a,e);if(ok[j]&&!vu[j]){vu[j]=1;q.push(j);}}}
+      if(q.length>mN){mN=q.length;zb=b;}}
+    if(!zb)return;}
   const total=enf?Math.max(50,Math.round(mN*Math.min(.8,autour('zComplexe',.15)/100*(W>=72?1:4/3)))):Math.round(N*pct/100);   // complexe enfoui : part du massif, réglée par le curseur (un tiers de plus sur les petites cartes)if(total<45)return;
   const t0=G.t.slice();
   const nEssais=enf?12:6;   // complexe enfoui : plus d'essais, il n'est jamais posé en terrain ouvert (20 novembre 2026)

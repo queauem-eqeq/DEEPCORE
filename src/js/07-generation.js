@@ -155,17 +155,25 @@ function roughBorderOnce(t){const n1=noise(SZ(7,3)),n2=noise(SZ(3,2)),band=new U
       nt[i]=t[i]===MOUNT?(c>=4?MOUNT:GROUND):(c>=5?MOUNT:GROUND);}
     for(let i=0;i<W*H;i++)if(band[i])t[i]=nt[i];}
   for(let y=0;y<H;y++)for(let x=0;x<W;x++)if(x===0||y===0||x===W-1||y===H-1)t[idx(x,y)]=MOUNT;}
-/* Plan de zones (20 novembre 2026). Le massif occupe un côté de la carte ; sa lisière serpente (bruit le long du bord, plus un
-   grain fin). On classe les cases par « profondeur » depuis ce côté et l'on garde en extérieur la part demandée par la recette :
-   la part est comptée sur les cases libres, bord de carte déduit, pour que la zone extérieure, sa bordure comprise, tienne dans la fourchette. */
+/* Plan de zones (20 novembre 2026, formes ajoutées le même jour). Le massif prend UN CÔTÉ de la carte ou UN COIN ; sa lisière serpente (bruit à grande échelle, plus un grain fin). On classe les cases par
+   « profondeur » depuis le massif et l'on garde en extérieur la part demandée par la recette : la part est comptée sur les cases
+   libres, bord de carte déduit, pour que la zone extérieure, sa bordure comprise, tienne dans la fourchette.
+   f(x,y) donne cette profondeur sans le bruit, de 0 au cœur du massif à 1 au plus loin : ZINFO la garde pour poser le vaisseau
+   dans la partie de l'extérieur la plus éloignée du massif, quelle que soit la forme. */
 let ZONE=null,ZINFO=null,ZESSAI=0;
-function massif(t,ext){const N=W*H,hor=Math.random()<(W>=H?.8:.2),inv=Math.random()<.5,L=hor?W:H,n1=noise(SZ(9,4)),n2=noise(SZ(3,2)),val=new Float32Array(N),sol=[];
-  for(let y=0;y<H;y++)for(let x=0;x<W;x++){const i=idx(x,y),u=hor?y:x,d0=hor?x:y,d=inv?L-1-d0:d0;
-    val[i]=d/L+(n1(u,2)-.5)*.3+(n2(x,y)-.5)*3/L;if(t[i]===GROUND)sol.push(i);}
+const FORMES=['cote','coin'];
+function massif(t,ext,forme){const N=W*H,n1=noise(SZ(9,4)),n2=noise(SZ(3,2)),val=new Float32Array(N),sol=[];
+  if(!FORMES.includes(forme))forme=FORMES[rnd(0,FORMES.length-1)];
+  let f,g,L;
+  if(forme==='coin'){const cx=Math.random()<.5?0:W-1,cy=Math.random()<.5?0:H-1,a=.75+Math.random()*.5;   // a : coin étiré en largeur ou en hauteur
+    L=Math.max(W,H);f=(x,y)=>Math.min(1,Math.hypot((x-cx)/W*a,(y-cy)/H/a)/1.414);g=(x,y)=>(n1(x,y)-.5)*.3;}
+  else{const hor=Math.random()<(W>=H?.8:.2),inv=Math.random()<.5;L=hor?W:H;
+    f=(x,y)=>{const d=hor?x:y;return (inv?L-1-d:d)/L;};g=(x,y)=>(n1(hor?y:x,2)-.5)*.3;}
+  for(let y=0;y<H;y++)for(let x=0;x<W;x++){const i=idx(x,y);val[i]=f(x,y)+g(x,y)+(n2(x,y)-.5)*3/L;if(t[i]===GROUND)sol.push(i);}
   sol.sort((a,b)=>val[b]-val[a]);
   const garde=Math.min(sol.length-Math.round(N*.22),Math.round(sol.length*(ext[0]+Math.random()*(ext[1]-ext[0])))),cut=val[sol[Math.max(0,garde-1)]],z=new Uint8Array(N);
   for(let i=0;i<N;i++)if(val[i]<cut){z[i]=1;t[i]=MOUNT;}
-  ZINFO={hor,inv,cut,L};return z;}
+  ZINFO={f,cut,forme};return z;}
 function genPlanet(){
   setSize(GEN.taille);vis=new Uint8Array(W*H);
   const N=W*H,rec=RECETTES[GEN.recette]||RECETTES.classique;let Nt=N;const P=k=>Math.round(Nt*GEN[k]/100),fill=GEN.remplissage/100,it=GEN.iterations;
@@ -173,7 +181,7 @@ function genPlanet(){
     const relax=attempt>=15,last=attempt===29;
     const t=new Array(N).fill(GROUND);
     roughBorder(t);   // bord de carte irrégulier, en roche
-    {const c=GEN.zExt/100-Math.max(0,ZESSAI-2)*.06;ZONE=rec.zones?massif(t,[Math.max(.25,c-.1),Math.min(.9,c+.1)]):null;}   // curseur « Part d'extérieur » : le centre, ± 10 points ; le massif s'épaissit si le complexe n'a pas tenu (ZESSAI)Nt=N;
+    {const c=GEN.zExt/100-Math.max(0,ZESSAI-2)*.06;ZONE=rec.zones?massif(t,[Math.max(.25,c-.1),Math.min(.9,c+.1)],GEN.zForme):null;}   // curseur « Part d'extérieur » : le centre, ± 10 points ; le massif s'épaissit si le complexe n'a pas tenu (ZESSAI)Nt=N;
     if(ZONE){Nt=0;for(let i=0;i<N;i++)if(t[i]===GROUND)Nt++;}   // les pourcentages du relief valent pour la zone extérieure
     const mode=GEN.methode,mt=P('montagne'),ct=P('gouffre');
     const mSize=p=>[rnd(SZ(14,4),SZ(30,6))-Math.round(p*8*F),rnd(SZ(9,3),SZ(18,5))-Math.round(p*4*F)],cSize=()=>[rnd(SZ(8,3),SZ(18,5)),rnd(SZ(5,3),SZ(10,4))];
@@ -193,7 +201,7 @@ function genPlanet(){
       gc.sort((a,b)=>gn[a]-gn[b]);for(const i of gc.slice(0,Math.round(gc.length*(.35+Math.random()*.3))))t[i]=FLAT;}
     for(let i=0;i<N;i++)if(t[i]===GROUND&&Math.random()<.035)t[i]=ROCK;
     tidyChasms(t);connect(t);tidyChasms(t);separateWater(t);
-    const ship=SANS_VAISSEAU?null:placeShip(t,ZONE&&((x,y)=>{const d0=ZINFO.hor?x:y,d=(ZINFO.inv?ZINFO.L-1-d0:d0)/ZINFO.L;return d>ZINFO.cut+(1-ZINFO.cut)*.4;}));   // on atterrit loin du massiflet sx,sy;
+    const ship=SANS_VAISSEAU?null:placeShip(t,ZONE&&((x,y)=>ZINFO.f(x,y)>ZINFO.cut+(1-ZINFO.cut)*.4));   // on atterrit loin du massiflet sx,sy;
     if(ship){sx=ship.x+2;sy=ship.y+2;}
     else{let ok=false;                                             // niveaux suivants : arrivée par le puits, sur un carré de sol dégagé
       for(let k=0;k<4000&&!ok;k++){sx=rnd(4,W-5);sy=rnd(4,H-5);ok=true;for(let dy=-1;dy<=1&&ok;dy++)for(let dx=-1;dx<=1;dx++){const v=t[idx(sx+dx,sy+dy)];if(!canWalk(v,true)||isWater(v)){ok=false;break;}}}   // le puits débouche toujours au sec

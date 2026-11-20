@@ -161,7 +161,7 @@ l'extérieur est une « pièce » parmi d'autres, faite de terrain naturel, et l
 
 **Recettes** (`RECETTES`, dans `06-reglages.js` ; choix en haut du menu Monde, réglage `GEN.recette`) :
 - `atterrissage` (par défaut) : zone extérieure de 50 à 70 % de la carte, bordure comprise ; le reste est un **massif** sur un côté
-  (gauche ou droite le plus souvent, parfois haut ou bas), à la lisière sinueuse. Le vaisseau se pose dans la partie de
+  ou dans un coin (réglage « Forme du massif »), à la lisière sinueuse. Le vaisseau se pose dans la partie de
   l'extérieur la plus éloignée du massif. Un seul complexe, **creusé dans le massif** à plus de 5 cases de la lisière et du bord
   de carte ; il prend au plus 45 % de la place disponible (et jamais plus que « Surface bâtie »). Le site de forage est
   au fond du complexe, comme avant.
@@ -180,6 +180,7 @@ Réglages de la recette `atterrissage`. Chacun donne **un centre** ; la généra
 
 | Réglage (clé) | Bornes, départ | Tirage |
 |---|---|---|
+| Forme du massif (`zForme`) | un côté, un coin, au hasard (départ) | « au hasard » tire l'une des deux à chaque carte |
 | Part d'extérieur (`zExt`) | 35 à 80 %, 60 | centre ± 10 points ; au moins 22 % de la carte reste au massif |
 | Taille du complexe (`zComplexe`) | 10 à 70 % du massif, 45 | ± 15 % ; un tiers de plus sous la taille 3 ; jamais moins de 50 cases |
 | Taille du réseau (`zTunnels`) | 100 à 400 cases, 245 | ± 30 %, borné à 100-400, réduit en proportion sur les petites cartes |
@@ -189,14 +190,28 @@ Réglages de la recette `atterrissage`. Chacun donne **un centre** ; la généra
 
 S'y ajoutent, inchangés : archétype de structure, pièces par structure, ouvertures sans porte, portes verrouillées, pièces secrètes.
 « Surface bâtie », « Nombre de structures » et « Portes d'entrée » ne figurent plus dans cette recette (le complexe a toujours une
-seule porte). La forme du massif (un côté, un coin, deux côtés) est la partie b, pas encore faite.
+seule porte).
+
+**Forme du massif** (`massif()`, `07-generation.js`, 20 novembre 2026, partie b). Chaque case reçoit une **profondeur** `f(x,y)`,
+de 0 au cœur du massif à 1 au point le plus éloigné ; on y ajoute un bruit à grande échelle (lisière sinueuse) et un grain fin,
+puis on garde en extérieur la part demandée. Seule `f` change d'une forme à l'autre :
+- **un côté** : profondeur mesurée depuis un bord (le côté long quatre fois sur cinq) — la forme d'avant, inchangée ;
+- **un coin** : distance au coin, en ellipse (`hypot`), le coin étant étiré au hasard en largeur ou en hauteur.
+« Deux côtés opposés » a été essayé puis **abandonné** le 20 novembre 2026 (l'utilisateur : inutile) : les deux massifs étant plus
+minces, le complexe s'y étalait en ruban et le second massif ne servait à rien.
+`ZINFO` garde `f` et le seuil : le vaisseau se pose là où `f` est la plus grande, donc toujours dans la partie de l'extérieur la
+plus éloignée du massif, quelle que soit la forme (vérifié : 40 cartes sur 40, toutes tailles et toutes formes).
+Le cadre où le complexe est posé est la boîte du **plus grand morceau** de massif éligible (parcours en largeur sur les cases à
+plus de 5 cases de la lisière et du bord), et non plus la boîte de tout le massif : une échancrure profonde ne peut plus faire
+poser le complexe à cheval sur l'extérieur.
 Si le complexe ne tient pas dans le massif, la carte est retirée et le massif s'épaissit de 6 points par essai à partir du
 quatrième (`ZESSAI`) : avec 80 % d'extérieur sur une petite carte, on obtient donc moins d'extérieur que demandé, mais toujours un complexe.
 Limite constatée : complexe et tunnels se partagent le massif. Avec un complexe à 45 %, demander 400 cases de tunnel n'en donne
 souvent que 200 à 250 ; il faut baisser le complexe ou l'extérieur pour que le réseau ait la place.
 Mesure du 20 novembre 2026 (40 cartes par ligne, `outils/scripts/mesure-recettes.js`) : complexe présent 40 fois sur 40 aux tailles
-2, 3 et 4, aux réglages de départ comme aux deux extrêmes ; tunnels 69, 159 et 240 cases en moyenne aux réglages de départ ;
-« Classique » : 40 sur 40, aucune zone ni tunnel. `outils/scripts/six-cartes.js` dessine six cartes côte à côte (tunnels en jaune).
+2, 3 et 4, aux réglages de départ, aux deux extrêmes et pour chacune des deux formes ; tunnels 69, 150 et 230 cases en moyenne aux
+réglages de départ ; vaisseau hors du massif 40 fois sur 40 ; « Classique » : 40 sur 40, aucune zone ni tunnel.
+`outils/scripts/six-cartes.js` dessine six cartes côte à côte (tunnels en jaune).
 
 **Tunnels** (`07d-tunnels.js`) : la porte du complexe (une seule, sauf si « Portes d'entrée » en demande plus) est prise du côté le
 plus enfoncé dans le massif, et la **sortie du boyau est choisie loin d'elle** (20 novembre 2026, demande de l'utilisateur : le
