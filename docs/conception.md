@@ -26,6 +26,7 @@ revient sur **3 niveaux** ; elle n'est pas encore codée, et forer termine la pa
   montagnes), **#2 Bio** (bleu `#4fb8ff`), **#3 Accent** (turquoise `#8fe6cf`). Dans le code les clés sont `3`
   monde, `2` bio, `1` accent.
 - 8 palettes prédéfinies, toutes modifiables (Origine, Phosphore, Mars, Glace, Néon, Rouille, Abysse, Ambre) ;
+  Le sélecteur à 64 couleurs **reste ouvert après un choix** (21 novembre 2026), pour essayer plusieurs couleurs de suite ; on le ferme en recliquant sur la pastille ou avec Échap.
   sélecteur de 64 teintes (8 familles × 8 nuances) ; bouton « Rétablir ».
 - Polices : Chakra Petch (titres), JetBrains Mono (interface).
 - **Les dessins par défaut sont ceux de l'utilisateur**, retouchés au Tile editor et recopiés dans le code (bloc

@@ -241,7 +241,8 @@ function openPick(k){const grid=$('cgrid');if(pickKey===k){closePick();return;}p
 function closePick(){pickKey=null;$('cgrid').hidden=true;['1','2','3'].forEach(x=>$('pc'+x).setAttribute('aria-expanded','false'));}
 function applyColor(k,c){const j=+k-1;PRESETS[PRESET_ACTIVE].c[j]=c;savePresets();drawPresets();setPal(Object.assign({},PAL_U,{[k]:c}));}
 ['1','2','3'].forEach(k=>$('pc'+k).addEventListener('click',e=>{e.preventDefault();openPick(k);}));
-$('cgrid').addEventListener('click',e=>{const b=e.target.closest('button[data-c]');if(!b||!pickKey)return;const k=pickKey;applyColor(k,b.dataset.c);closePick();$('pc'+k).focus();});
+$('cgrid').addEventListener('click',e=>{const b=e.target.closest('button[data-c]');if(!b||!pickKey)return;const k=pickKey;applyColor(k,b.dataset.c);   // la palette reste ouverte pour essayer d'autres couleurs (21 novembre 2026) ; on la ferme en recliquant sur la pastille ou avec Échap
+  $('cgrid').querySelectorAll('button[data-c]').forEach(x=>x.setAttribute('aria-selected',x===b));});
 addEventListener('keydown',e=>{if(e.key==='Escape'&&pickKey)closePick();});
 $('presets').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;usePreset(+b.dataset.p);});
 $('palReset').onclick=()=>{PRESETS[PRESET_ACTIVE].c=PRESETS_DEF[PRESET_ACTIVE].c.slice();usePreset(PRESET_ACTIVE);};
