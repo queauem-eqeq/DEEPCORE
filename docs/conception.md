@@ -148,6 +148,114 @@ leurs teintes, le **tirage des mondes** d'une descente, le **budget de menace pa
 l'utilisateur restent** : ce sont eux qui règlent la carte. Les six reliefs ont été recopiés dans le **banc de combat**
 (`banc/banc.js`, `RELIEFS`) comme terrains de mesure, pour que les séries déjà archivées restent comparables.
 
+### Refonte : zones, complexe enfoui et tunnels (20 novembre 2026, branche `claude/refonte-niveaux`)
+
+Idée de l'utilisateur : l'essentiel du jeu se passera en intérieur, donc la logique s'inverse. La carte est un **plan de zones** ;
+l'extérieur est une « pièce » parmi d'autres, faite de terrain naturel, et le reste est de la roche où les bâtiments sont creusés.
+
+**Décisions du 20 novembre 2026** (réponses de l'utilisateur) :
+- la **descente revient**, sur **3 niveaux** pour commencer (pas encore codée : forer finit toujours la partie) ;
+- la roche garde la règle des massifs : **écorce tendre, cœur dur** — on grignote les bords, on ne coupe pas tout droit ;
+- les tunnels sont un **petit réseau** : un ou deux embranchements, des culs-de-sac, pas d'ennemis propres ;
+- on commence par le **niveau 1 complet**.
+
+**Recettes** (`RECETTES`, dans `06-reglages.js` ; choix en haut du menu Monde, réglage `GEN.recette`) :
+- `atterrissage` (par défaut) : zone extérieure de 50 à 70 % de la carte, bordure comprise ; le reste est un **massif** sur un côté
+  ou dans un coin (réglage « Forme du massif »), à la lisière sinueuse. Le vaisseau se pose dans la partie de
+  l'extérieur la plus éloignée du massif. Un seul complexe, **creusé dans le massif** à plus de 5 cases de la lisière et du bord
+  de carte ; il prend au plus 45 % de la place disponible (et jamais plus que « Surface bâtie »). Le site de forage est
+  au fond du complexe, comme avant.
+- `classique` : la génération d'avant la refonte, inchangée (terrain partout, une ou deux structures posées dessus).
+
+Les pourcentages du menu Monde (eau, montagne, gouffre, herbe) valent pour la **zone extérieure** seule.
+
+**Menu Monde par recette** (20 novembre 2026, étape 2 bis, partie a). « Recette de niveau » est le premier choix du menu Monde, en
+haut, sur toute la largeur. Chaque recette **déclare ses réglages** dans `RECETTES[…].regl` (`06-reglages.js`) : la colonne de droite
+se reconstruit au changement de recette et n'affiche que ceux-là. Ajouter une recette, c'est ajouter une entrée à `RECETTES` ; le
+menu n'est pas à retoucher. La valeur en cours est dans `GEN[clé]` ; celles des autres recettes attendent dans `GEN.rec[recette]`
+(enregistré avec `np-gen`), si bien que changer de recette et revenir ne perd rien. Aucune clé existante n'a été renommée.
+« Classique » garde ses huit réglages d'avant et la même génération.
+
+Réglages de la recette `atterrissage`. Chacun donne **un centre** ; la génération tire autour à chaque carte (`autour()`).
+
+| Réglage (clé) | Bornes, départ | Tirage |
+|---|---|---|
+| Forme du massif (`zForme`) | un côté, un coin, au hasard (départ) | « au hasard » tire l'une des deux à chaque carte |
+| Part d'extérieur (`zExt`) | 35 à 80 %, 60 | centre ± 10 points ; au moins 22 % de la carte reste au massif |
+| Taille du complexe (`zComplexe`) | 10 à 70 % du massif, 45 | ± 15 % ; un tiers de plus sous la taille 3 ; jamais moins de 50 cases |
+| Taille du réseau (`zTunnels`) | 100 à 400 cases, 245 | ± 30 %, borné à 100-400, réduit en proportion sur les petites cartes |
+| Salles de tunnel (`zSalles`) | 0 à 8, 4 | ± 1 (0 : aucune salle) |
+| Sorties du réseau (`zSorties`) | 1 à 3, 2 | nombre visé ; une sortie de plus n'est creusée que si la lisière offre un point à 12 cases des autres |
+| Éloignement de la porte (`zPorte`) | 10 à 45 cases, 30 | ± 15 %, puis 80, 60 et 40 % de cette distance si le massif est petit |
+
+**Case « Réglages au hasard »** (20 novembre 2026), sous le bouton REGEN du panneau de droite. Cochée, REGEN tire d'abord tous
+les réglages du menu Monde, puis génère ; le menu se met à jour, si bien qu'on voit ce qui a été tiré et qu'on peut repartir de
+là. Chaque réglage porte sa propre fourchette de tirage (dernier élément de sa ligne dans `regl`), plus étroite que ses bornes :
+le hasard ne doit jamais rendre une carte sans intérêt. Sont laissés tels quels la **taille de la carte** et les réglages dont 0
+veut dire « automatique » (pièces par structure, portes d'entrée). Le relief est tiré avec un biais vers le bas (plafonds
+`HASARD_REL` : eau 30, montagne 30, gouffre 12, herbe 45) : une planète noyée ou murée n'a pas d'intérêt. L'état de la case est
+mémorisé avec les autres réglages (`GEN.hasard`, dans `np-gen`). Vérifié sur 40 tirages : complexe présent 40 fois sur 40, les
+huit combinaisons forme × archétype sorties, aucune erreur.
+
+S'y ajoutent, inchangés : archétype de structure, pièces par structure, ouvertures sans porte, portes verrouillées, pièces secrètes.
+« Surface bâtie », « Nombre de structures » et « Portes d'entrée » ne figurent plus dans cette recette (le complexe a toujours une
+seule porte).
+
+**Forme du massif** (`massif()`, `07-generation.js`, 20 novembre 2026, partie b). Chaque case reçoit une **profondeur** `f(x,y)`,
+de 0 au cœur du massif à 1 au point le plus éloigné ; on y ajoute un bruit à grande échelle (lisière sinueuse) et un grain fin,
+puis on garde en extérieur la part demandée. Seule `f` change d'une forme à l'autre :
+- **un côté** : profondeur mesurée depuis un bord (le côté long quatre fois sur cinq) — la forme d'avant, inchangée ;
+- **un coin** : distance au coin, en ellipse (`hypot`), le coin étant étiré au hasard en largeur ou en hauteur.
+« Deux côtés opposés » a été essayé puis **abandonné** le 20 novembre 2026 (l'utilisateur : inutile) : les deux massifs étant plus
+minces, le complexe s'y étalait en ruban et le second massif ne servait à rien.
+`ZINFO` garde `f` et le seuil : le vaisseau se pose là où `f` est la plus grande, donc toujours dans la partie de l'extérieur la
+plus éloignée du massif, quelle que soit la forme (vérifié : 40 cartes sur 40, toutes tailles et toutes formes).
+Le cadre où le complexe est posé est la boîte du **plus grand morceau** de massif éligible (parcours en largeur sur les cases à
+plus de 5 cases de la lisière et du bord), et non plus la boîte de tout le massif : une échancrure profonde ne peut plus faire
+poser le complexe à cheval sur l'extérieur.
+Si le complexe ne tient pas dans le massif, la carte est retirée et le massif s'épaissit de 6 points par essai à partir du
+quatrième (`ZESSAI`) : avec 80 % d'extérieur sur une petite carte, on obtient donc moins d'extérieur que demandé, mais toujours un complexe.
+Limite constatée : complexe et tunnels se partagent le massif. Avec un complexe à 45 %, demander 400 cases de tunnel n'en donne
+souvent que 200 à 250 ; il faut baisser le complexe ou l'extérieur pour que le réseau ait la place.
+Mesure du 20 novembre 2026 (40 cartes par ligne, `outils/scripts/mesure-recettes.js`) : complexe présent 40 fois sur 40 aux tailles
+2, 3 et 4, aux réglages de départ, aux deux extrêmes et pour chacune des deux formes ; tunnels 69, 150 et 230 cases en moyenne aux
+réglages de départ ; vaisseau hors du massif 40 fois sur 40 ; « Classique » : 40 sur 40, aucune zone ni tunnel.
+`outils/scripts/six-cartes.js` dessine six cartes côte à côte (tunnels en jaune).
+
+**Tunnels** (`07d-tunnels.js`) : la porte du complexe (une seule, sauf si « Portes d'entrée » en demande plus) est prise du côté le
+plus enfoncé dans le massif, et la **sortie du boyau est choisie loin d'elle** (20 novembre 2026, demande de l'utilisateur : le
+complexe était trop facile d'accès) : une case de la lisière à 30 cases au moins de la porte (24, 18 puis 12 si le massif est
+petit). Le boyau serpente — chemin le moins cher dans un bruit, élargi par endroits — en restant à 3 cases au moins de
+l'extérieur jusqu'à ses dernières cases, et à une case au moins des murs du complexe : il le contourne souvent. Une porte
+supplémentaire rejoint le réseau, jamais l'extérieur directement. S'y ajoute un **embranchement** vers une
+seconde sortie, à 12 cases au moins de la première et 20 de la porte, prise dans la moitié du boyau la plus éloignée de la porte. Puis le réseau grandit (demande de l'utilisateur, 20 novembre 2026 : « plus
+grand, avec quelques salles de formes irrégulières ; 100 à 400 cases ») jusqu'à une taille tirée entre 160 et 330 cases :
+d'abord **3 à 5 salles irrégulières** (automate cellulaire, dans un cadre de 10-16 × 7-11), chacune au bout d'un boyau, creusées
+de préférence au cœur du massif ; ensuite des **culs-de-sac** de 6 à 16 cases terminés par une petite poche. Un boyau ne longe
+jamais un autre tunnel à moins de 3 cases. Jamais plus de 400 cases ; à moins de 100, la structure est refaite. Pour laisser
+cette place, le complexe ne prend plus que 45 % du massif disponible.
+Si aucun passage n'est trouvé, la structure est retirée ; au dernier des six essais, `connect` perce tout droit.
+Les cases de tunnel sont notées dans `G.tun` (pour la faune par lieu, à venir). La roche dure vient ensuite, comme partout : le
+cœur du massif est impénétrable, les parois des tunnels restent tendres sur deux cases.
+
+Mesuré sur 60 cartes de taille 4 (20 novembre 2026) : un complexe et un réseau de tunnels à chaque fois ; zone extérieure 50 à
+69 % (59 en moyenne) ; 152 à 348 cases de tunnel (254 en moyenne) ; 3 à 16 pièces (10 en moyenne) ; de la sortie de tunnel la plus proche à la
+porte du complexe, 40 à 97 pas (63 en moyenne) ; du vaisseau à la porte, 68 à 162 pas (109 en moyenne) ; génération en 116 ms en moyenne.
+
+**Petites cartes, jamais de complexe en terrain ouvert** (20 novembre 2026). L'utilisateur obtenait parfois des cartes sans
+complexe, puis — après un premier correctif qui posait alors la structure dehors — un complexe en terrain ouvert, ce qu'il
+refuse. Règle retenue : **le complexe est toujours dans la montagne**. La marge à la lisière et au bord est de 5 cases (4 en
+taille 2, 3 en taille 1) ; sous la taille 3 le complexe peut prendre 60 % du massif ; les tailles du réseau (cible, minimum de
+100 cases, nombre de salles, éloignement de la sortie) sont réduites en proportion de la surface ; la structure a douze essais
+au lieu de six ; si la sortie éloignée est introuvable, le boyau prend la sortie la plus proche ; et si rien ne tient, **la
+carte entière est retirée** (dix fois au plus). Mesuré avec les réglages de l'utilisateur (eau 60, avant-poste, 3 pièces,
+surface bâtie 6 %) : 40 complexes enfouis sur 40 en tailles 2, 3 et 4. En taille 1 (32 × 22) il n'y a pas la place : la carte
+n'a alors aucune structure.
+
+**Reste à faire** : la faune par lieu (dehors / dedans), la descente et l'arrivée par un puits, les recettes des niveaux 2 et 3,
+les mesures par recette. Le plan est dans le document `claude/refonte-niveaux-plan.md` du projet.
+
+
 ### Banc de combat (15 novembre 2026)
 
 Artefact à part (https://claude.ai/artifact/9BKRaoB4hzgdWhzYFx5A6q) : la page du jeu, plus un panneau qui remplace la colonne. On y choisit une carte de taille 1 (arène nue ou l'un des six reliefs d'essai, voir § 3 bis), des ennemis, un équipement, une consigne de pilote automatique (chasse ou traversée), et l'on lance une **série** sans affichage (moyennes : victoires, vie restante, points perdus, points perdus par ennemi tué, durée) ou **un combat à l'écran**. Options : ennemis en alerte, vie d'essai. Onglets « Mes résultats » (gardés dans le navigateur) et « Archives » (les séries de Claude ; un clic sur une ligne reprend la configuration). Il sert à régler les coûts de menace ; à relancer après tout changement de stats.

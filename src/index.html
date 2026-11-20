@@ -42,13 +42,14 @@
 <div class="modal" id="monde" role="dialog" aria-modal="true" aria-labelledby="mdTitle" hidden>
   <div class="mcard wide" tabindex="-1">
     <div class="mhead"><h2 id="mdTitle">Monde</h2><button id="mdClose" aria-label="Fermer le menu Monde">Fermer</button></div>
+    <div class="mdrec" id="genR"></div>
     <div class="mdarch">
       <label for="mdSel">Archétype</label><select id="mdSel"></select>
       <label for="mdNom">Nom</label><input type="text" id="mdNom" maxlength="30" placeholder="Nom du monde" autocomplete="off">
       <button class="go" id="mdSave">Enregistrer</button><button id="mdDel">Supprimer</button>
       <span class="saved" id="mdMsg" role="status"></span>
     </div>
-    <div class="mdcols"><section><h3>Monde</h3><div class="gen" id="gen"></div></section><section><h3>Structures</h3><div class="gen" id="genS"></div></section></div>
+    <div class="mdcols"><section><h3>Monde</h3><div class="gen" id="gen"></div></section><section><h3 id="genSTitre">Structures</h3><div class="gen" id="genS"></div></section></div>
   </div>
 </div>
 <!-- Fenêtre Artefacts (Lab, 20 novembre 2026) : les systèmes greffés sur chaque carte, avec leur fréquence. -->
@@ -141,6 +142,7 @@
     <canvas id="mini" aria-label="Mini-carte des zones explorées"></canvas>
     <div class="seenwrap"><div class="seen" id="msg" role="region" aria-label="En vue"></div></div>
     <div class="btnrow"><button class="go" id="restart" title="Générer une nouvelle carte avec les réglages en cours">REGEN</button><button id="mondeBtn" aria-haspopup="dialog" title="Relief, taille et archétypes de monde">MONDE</button><button id="lifeBtn" aria-haspopup="dialog" title="Faune : budget de menace et groupes d’ennemis">LIFE</button></div>
+    <label class="rndrow" for="rndChk" title="REGEN tire d’abord au hasard le relief, la forme du massif, l’archétype et les autres réglages du menu Monde (sauf la taille de la carte)"><input type="checkbox" id="rndChk">Réglages au hasard</label>
     <details class="fold" id="fd-pal">
       <summary><h2>Palette</h2></summary>
       <div class="pal">
@@ -180,6 +182,7 @@
 <script src="js/07-generation.js"></script>
 <script src="js/07b-batiments.js"></script>
 <script src="js/07c-artefacts.js"></script>
+<script src="js/07d-tunnels.js"></script>
 <script src="js/08-faune.js"></script>
 <script src="js/09-vision-deplacement-forage.js"></script>
 <script src="js/10-rendu.js"></script>
