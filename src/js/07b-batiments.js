@@ -164,24 +164,28 @@ function batiments(){
       else if(enf&&(dE[i]<=mg||x<mE||y<mE||x>W-mE-1||y>H-mE-1))B.interdit[i]=1;
       else if(v===SHIP||v===DECK)for(let dy=-3;dy<=3;dy++)for(let dx=-2;dx<=2;dx++)B.interdit[idx(Math.max(0,Math.min(W-1,x+dx)),Math.max(0,Math.min(H-1,y+dy)))]=1;}
     for(let dy=-2;dy<=2;dy++)for(let dx=-2;dx<=2;dx++)B.interdit[idx(Math.max(0,Math.min(W-1,G.px+dx)),Math.max(0,Math.min(H-1,G.py+dy)))]=1;
-    const deux=enf?false:GEN.sNb===2?total>=90:GEN.sNb===1?false:total>=260&&Math.random()<.5,part=deux?.2+Math.random()*.6:1,cibles=cav?CAVRES.cibles:deux?[Math.round(total*part),total-Math.round(total*part)]:[total];
+    const deux=enf?false:GEN.sNb===2?total>=90:GEN.sNb===1?false:total>=260&&Math.random()<.5,part=deux?.2+Math.random()*.6:1,cibles=cav?cibles_cav(total):deux?[Math.round(total*part),total-Math.round(total*part)]:[total];
     const cles=STYLES[GEN.sStyle]?[GEN.sStyle]:Object.keys(STYLES).sort(()=>Math.random()-.5),lots=[],strs=[];
     // deux structures : la carte est coupée en deux zones, à proportion de leurs tailles, pour qu'elles tiennent toujours toutes les deux
-    const zones=cav?CAVRES.rects.map(r=>r.slice()):[enf?zb:[3,3,W-4,H-4]];   // cav : chaque bâtiment a sa place réservée (07e)
+    const zones=cav?cibles.map(()=>[3,3,W-4,H-4]):[enf?zb:[3,3,W-4,H-4]];
+    const ind0=B.interdit.slice(),sepa=new Uint8Array(N);   // cav : entre deux bâtiments, trois cases de roche (interdit seulement pendant la pose)
     if(deux){const vert=W>=H?Math.random()<.75:Math.random()<.25,inv=Math.random()<.5,pa=inv?1-part:part;
       if(vert){const c=Math.round(3+(W-6)*Math.max(.22,Math.min(.78,pa)));zones[0]=[3,3,c-3,H-4];zones[1]=[c+3,3,W-4,H-4];}
       else{const c=Math.round(3+(H-6)*Math.max(.25,Math.min(.75,pa)));zones[0]=[3,3,W-4,c-3];zones[1]=[3,c+3,W-4,H-4];}
       if(inv)zones.reverse();}
-    for(let s=0;s<cibles.length;s++){const cible=cibles[s],aire=cible*1.7,asp=1+Math.random()*.9,[zx0,zy0,zx1,zy1]=zones[s],zw=zx1-zx0+1,zh=zy1-zy0+1;
+    for(let s=0;s<cibles.length;s++){if(cav)for(let i=0;i<N;i++)if(sepa[i])B.interdit[i]=1;
+      const cible=cibles[s],aire=cible*1.7,asp=1+Math.random()*.9,[zx0,zy0,zx1,zy1]=zones[s],zw=zx1-zx0+1,zh=zy1-zy0+1;
       let lw=Math.min(zw,Math.round(Math.sqrt(aire*asp))),lh=Math.min(zh,Math.round(aire/lw));if(lw<10)lw=Math.min(zw,10);if(lh<8)lh=Math.min(zh,8);
       if(lw*lh<aire)lw=Math.min(zw,Math.ceil(aire/lh));   // zone étroite : on s'étale dans l'autre sens
       let best=null,bb=1e9;
       for(let k=0;k<60;k++){const x0=rnd(zx0,zx1-lw+1),y0=rnd(zy0,zy1-lh+1);
         let bad=0;for(let y=y0;y<y0+lh;y+=2)for(let x=x0;x<x0+lw;x+=2)if(B.interdit[idx(x,y)])bad++;if(bad<bb){bb=bad;best=[x0,y0,x0+lw-1,y0+lh-1];}}
-      if(cav)best=[zx0,zy0,zx1,zy1];   // cavernes : le lot est la place réservée
+      if(cav)best=[zx0,zy0,zx1,zy1];   // cavernes : le lot est toute la carte, le bâtiment se glisse là où la roche est assez épaisse
       if(!best)continue;lots.push(best);
       const S=accretion(B,best,cible,STYLES[cles[s%cles.length]]);if(!S||S.pieces.length<2)continue;
-      boucles(B,S);amenager(B,S);S.cle=cles[s%cles.length];strs.push(S);}
+      boucles(B,S);amenager(B,S);S.cle=cles[s%cles.length];strs.push(S);
+      if(cav)for(const p of S.pieces)for(const i of p.c){const x=i%W,y=(i/W)|0;for(let dy=-3;dy<=3;dy++)for(let dx=-3;dx<=3;dx++)sepa[idx(Math.max(0,Math.min(W-1,x+dx)),Math.max(0,Math.min(H-1,y+dy)))]=1;}}
+    if(cav)B.interdit.set(ind0);
     if(cav&&strs.length<Math.min(cibles.length,2)&&essai<nEssais-3)continue;   // cavernes : au moins deux bâtiments quand on en demande deux ou plus (rien n'a encore été modifié sur la carte)
     if(strs.length){
       const garde=new Set();for(const S of strs)for(const p of S.pieces)for(const i of p.c)garde.add(i);

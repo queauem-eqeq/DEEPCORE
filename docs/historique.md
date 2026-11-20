@@ -204,10 +204,9 @@ Les chiffres mesurés sont dans `mesures.md`.
 - Premier essai : `Float32Array` pour les distances du chemin de porte, alors que la priorité du tas est un double :
   les cases étaient prises pour périmées et un tiers des portes ne trouvait pas de caverne. Distances en `Float64Array`.
 - Les bâtiments posés dans un lot rectangulaire (meilleur de 60 tirages) ne remplissaient que 8 % de la carte ; avec un
-  lot égal à la carte entière, un peu plus (9 à 12 %), mais ils restaient en périphérie, là où la roche était épaisse.
-- **Réservation avant de creuser** (même soir, à la demande de l'utilisateur) : les bâtiments ont leur place avant les
-  cavernes et peuvent être au centre. Premier jet : des rectangles nets, dont les cavernes longeaient les bords en ligne
-  droite — trop artificiel, remplacé par une ellipse carrée aux bords bruités. Les réserves rognaient les cavernes
-  (23 % au lieu de 36 %) : surface visée majorée de 20 % et cavernes ajoutées jusqu'à l'atteindre (31 %). Les boyaux,
-  d'abord une marche au hasard qui traversait les réserves sans les creuser, sont devenus des plus courts chemins qui
-  les contournent.
+  lot égal à la carte entière, un peu plus (9 à 12 %). Piste non retenue pour l'instant : réserver la place des bâtiments
+  avant de creuser les cavernes, pour qu'ils puissent aussi se trouver au centre de la carte.
+- **Réservation de la place des bâtiments avant de creuser les cavernes : essayée, jugée moins bien par l'utilisateur,
+  retirée le soir même** (PR n° 24). Elle donnait environ 2 bâtiments et 11 % de surface bâtie, au centre comme en
+  périphérie, mais les cavernes, contournant les réserves, perdaient leur forme. On est revenu au premier état : cavernes
+  creusées d'abord, bâtiments glissés ensuite dans la roche qui reste (surtout en périphérie).
