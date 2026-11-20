@@ -29,16 +29,26 @@ function tunnels(t,B,strs,dE){
   const ouvre=j=>{if(all.length>=400)return;if(t[j]===MOUNT)t[j]=GROUND;if(!tun[j]&&ZONE[j]){tun[j]=1;all.push(j);}};
   // creuse le chemin, et l'élargit par endroits d'une case
   const creuse=p=>{for(const c of p){ouvre(c);
-    if(Math.random()<.4){const [dx,dy]=D4[rnd(0,3)],j=idx(c%W+dx,((c/W)|0)+dy);if(libre(j)&&dE[j]>=2)ouvre(j);}}};
+    if(Math.random()<.4){const [dx,dy]=D4[rnd(0,3)],j=idx(c%W+dx,((c/W)|0)+dy);if(libre(j)&&dE[j]>=3)ouvre(j);}}};
+  // Le boyau principal : la sortie est choisie LOIN de la porte (20 novembre 2026, demande de l'utilisateur : le complexe ne doit pas
+  // être facile d'accès). On tire une case de la lisière à 30 cases au moins de la porte (puis 24, 18, 12 si le massif est petit),
+  // et le boyau reste à 3 cases au moins de l'extérieur jusqu'à ses dernières cases : il ne peut pas déboucher plus tôt.
+  const lis=[];for(let i=0;i<N;i++){if(!dehors(i))continue;const x=i%W,y=(i/W)|0;if(D4.some(([dx,dy])=>{const j=idx(x+dx,y+dy);return ZONE[j]&&libre(j);}))lis.push(i);}
+  const vers=(a,m)=>chemin(a,j=>j===m,j=>libre(j)&&(dE[j]>=3||ecart(j,m)<=3));
   let principal=null;
-  for(const S of strs)for(const e of S.entrees){
-    const p=chemin(e.o,j=>dehors(j)||tun[j]===1,libre);if(!p)continue;
+  for(const S of strs)for(const e of S.entrees){let p=null;
+    if(!principal)for(const R of [30,24,18,12]){const c=lis.filter(i=>ecart(i,e.o)>=R);
+      for(let k=0;k<6&&c.length&&!p;k++){const q=vers(e.o,c[rnd(0,c.length-1)]);if(q&&q.length>=R*1.2)p=q;}
+      if(p)break;}
+    else p=chemin(e.o,j=>tun[j]===1,j=>libre(j)&&dE[j]>=3);   // une porte de plus rejoint le réseau, jamais l'extérieur directement
+    if(!p)continue;
     creuse(p);if(!principal)principal=p;}
   if(!principal){G.tun={};return false;}
-  // embranchement : une seconde sortie, loin de la première
-  if(principal.length>=14){const a=principal[Math.floor(principal.length*(.35+Math.random()*.3))],m=principal[principal.length-1],pr=proche(2);
-    const p=chemin(a,j=>dehors(j)&&ecart(j,m)>=12,j=>libre(j)&&(!pr[j]||ecart(j,a)<=3));
-    if(p&&p.length<=principal.length*2+16)creuse(p);}
+  // embranchement : une seconde sortie, loin de la première et prise dans la moitié du boyau la plus éloignée de la porte
+  if(principal.length>=14){const a=principal[Math.floor(principal.length*(.55+Math.random()*.3))],m=principal[principal.length-1],d0=principal[0],pr=proche(2);
+    const c=lis.filter(i=>ecart(i,m)>=12&&ecart(i,d0)>=20);
+    for(let k=0;k<6&&c.length;k++){const m2=c[rnd(0,c.length-1)],p=chemin(a,j=>j===m2,j=>libre(j)&&(dE[j]>=3||ecart(j,m2)<=3)&&(!pr[j]||ecart(j,a)<=3));
+      if(p&&p.length<=principal.length*2+16){creuse(p);break;}}}
   // Le réseau grandit jusqu'à une taille tirée entre 160 et 330 cases (jamais plus de 400). D'abord 3 à 5 salles irrégulières
   // (automate cellulaire), chacune au bout d'un boyau, là où le massif est assez épais ; puis des boyaux de 6 à 16 cases qui
   // finissent en cul-de-sac sur une petite poche. Un boyau ne longe jamais un autre tunnel à moins de 3 cases.

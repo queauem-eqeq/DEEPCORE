@@ -169,10 +169,13 @@ l'extérieur est une « pièce » parmi d'autres, faite de terrain naturel, et l
 
 Les pourcentages du menu Monde (eau, montagne, gouffre, herbe) valent pour la **zone extérieure** seule.
 
-**Tunnels** (`07d-tunnels.js`) : depuis la porte du complexe (une seule, sauf si « Portes d'entrée » en demande plus ; elle peut
-être de n'importe quel côté), un boyau serpente jusqu'à l'extérieur — chemin le moins cher dans un bruit, élargi par endroits.
-Il ne longe jamais les murs du complexe (une case de roche au moins entre les deux). S'y ajoute un **embranchement** vers une
-seconde sortie, à 12 cases au moins de la première. Puis le réseau grandit (demande de l'utilisateur, 20 novembre 2026 : « plus
+**Tunnels** (`07d-tunnels.js`) : la porte du complexe (une seule, sauf si « Portes d'entrée » en demande plus) est prise du côté le
+plus enfoncé dans le massif, et la **sortie du boyau est choisie loin d'elle** (20 novembre 2026, demande de l'utilisateur : le
+complexe était trop facile d'accès) : une case de la lisière à 30 cases au moins de la porte (24, 18 puis 12 si le massif est
+petit). Le boyau serpente — chemin le moins cher dans un bruit, élargi par endroits — en restant à 3 cases au moins de
+l'extérieur jusqu'à ses dernières cases, et à une case au moins des murs du complexe : il le contourne souvent. Une porte
+supplémentaire rejoint le réseau, jamais l'extérieur directement. S'y ajoute un **embranchement** vers une
+seconde sortie, à 12 cases au moins de la première et 20 de la porte, prise dans la moitié du boyau la plus éloignée de la porte. Puis le réseau grandit (demande de l'utilisateur, 20 novembre 2026 : « plus
 grand, avec quelques salles de formes irrégulières ; 100 à 400 cases ») jusqu'à une taille tirée entre 160 et 330 cases :
 d'abord **3 à 5 salles irrégulières** (automate cellulaire, dans un cadre de 10-16 × 7-11), chacune au bout d'un boyau, creusées
 de préférence au cœur du massif ; ensuite des **culs-de-sac** de 6 à 16 cases terminés par une petite poche. Un boyau ne longe
@@ -183,8 +186,8 @@ Les cases de tunnel sont notées dans `G.tun` (pour la faune par lieu, à venir)
 cœur du massif est impénétrable, les parois des tunnels restent tendres sur deux cases.
 
 Mesuré sur 60 cartes de taille 4 (20 novembre 2026) : un complexe et un réseau de tunnels à chaque fois ; zone extérieure 50 à
-69 % (59 en moyenne) ; 114 à 328 cases de tunnel (221 en moyenne) ; 3 à 16 pièces (10 en moyenne) ; 37 à 113 pas du vaisseau à la
-porte du complexe (70 en moyenne) ; génération en 116 ms en moyenne.
+69 % (59 en moyenne) ; 152 à 348 cases de tunnel (254 en moyenne) ; 3 à 16 pièces (10 en moyenne) ; de la sortie de tunnel la plus proche à la
+porte du complexe, 40 à 97 pas (63 en moyenne) ; du vaisseau à la porte, 68 à 162 pas (109 en moyenne) ; génération en 116 ms en moyenne.
 
 **Reste à faire** : la faune par lieu (dehors / dedans), la descente et l'arrivée par un puits, les recettes des niveaux 2 et 3,
 les mesures par recette. Le plan est dans le document `claude/refonte-niveaux-plan.md` du projet.

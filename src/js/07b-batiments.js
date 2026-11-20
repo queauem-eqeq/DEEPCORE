@@ -126,7 +126,7 @@ function entrees(B,S,t,atteint,dE){const {own,porte,pied,interdit}=B,cand=[];
       if(own[c]||porte[c]||interdit[c]||interdit[o]||pied[o]||!atteint[o]||own[idx(cx+dy,cy+dx)]||own[idx(cx-dy,cy-dx)]||porte[idx(cx+dy,cy+dx)]||porte[idx(cx-dy,cy-dx)])continue;
       cand.push({c,o,x:cx,y:cy,libre:!blocks(t[o])&&!isWater(t[o])});}}}
   if(!cand.length)return [];
-  if(dE){const r=new Map(cand.map(e=>[e,Math.random()]));cand.sort((a,b)=>r.get(a)-r.get(b));}   // complexe enfoui : la porte peut être de n'importe quel côté, le tunnel contourne
+  if(dE){const r=new Map(cand.map(e=>[e,Math.random()*6-dE[e.o]]));cand.sort((a,b)=>r.get(a)-r.get(b));}   // complexe enfoui : la porte est plutôt du côté le plus enfoncé dans le massif, le tunnel contourne
   else cand.sort((a,b)=>(b.libre-a.libre)||Math.random()-.5);
   const n=GEN.sEntrees>0?GEN.sEntrees:dE?1:1+(S.pieces.length>=7?1:0)+(S.pieces.length>=16?1:0),pris=[],ecart=Math.max(GEN.sEntrees>0?4:8,Math.sqrt(S.emprise)*(GEN.sEntrees>0?.35:.7));
   for(const e of cand){if(pris.length>=n)break;if(pris.some(q=>Math.hypot(q.x-e.x,q.y-e.y)<ecart))continue;pris.push(e);}
