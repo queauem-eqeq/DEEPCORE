@@ -65,8 +65,8 @@ revient sur **3 niveaux** ; elle n'est pas encore codée, et forer termine la pa
   la distance au rivage, diagonales comprises. Deux lacs qui se touchent n'en font qu'un.
   **L'eau profonde peut toucher la terre** : on peut y tomber d'un pas, sans bande d'eau peu profonde pour prévenir.
   **Couleur de l'eau (21 novembre 2026)** : l'eau n'est plus de la couleur bio mais **dérivée de la couleur monde** du biome,
-  décalée d'une petite variation [teinte en degrés, clarté, saturation] (`EAU` dans `02-palette.js`, couleur `PAL['e']`). Six variantes
-  d'essai au choix dans Palette → Eau (`EAU_VARIANTES`), mémorisée dans `np-eau` ; la variante 2 (teinte +12°) est celle par défaut en attendant le choix.
+  décalée de [teinte −12°, clarté −8, saturation 0] (`EAU` dans `02-palette.js`, couleur `PAL['e']`) : un vert-bleu sombre. Choisie par
+  l'utilisateur parmi six variantes d'essai ; les tuiles d'eau gardent le code `2` dans leurs dessins, lu comme `e` (`EAU_TUILES`).
 - **Roche dure au cœur des massifs** : chaque case de montagne est durcie avec une chance qui monte avec sa
   **profondeur** dans le massif (distance au premier terrain qui n'est pas de la montagne, en 4 directions) : rien
   à une ou deux cases, puis 30 %, 65 %, 90 %, 100 %. Écorce tendre, cœur impénétrable. Posée **avant** les métaux,

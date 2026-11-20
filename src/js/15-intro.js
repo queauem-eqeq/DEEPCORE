@@ -241,8 +241,6 @@ function openPick(k){const grid=$('cgrid');if(pickKey===k){closePick();return;}p
 function closePick(){pickKey=null;$('cgrid').hidden=true;['1','2','3'].forEach(x=>$('pc'+x).setAttribute('aria-expanded','false'));}
 function applyColor(k,c){const j=+k-1;PRESETS[PRESET_ACTIVE].c[j]=c;savePresets();drawPresets();setPal(Object.assign({},PAL_U,{[k]:c}));}
 ['1','2','3'].forEach(k=>$('pc'+k).addEventListener('click',e=>{e.preventDefault();openPick(k);}));
-{const sel=$('eauSel');sel.innerHTML=EAU_VARIANTES.map((v,i)=>`<option value="${i}">${i+1} · ${v[0]}</option>`).join('');sel.value=EAU_I;
-  sel.onchange=()=>{EAU_I=+sel.value;EAU=EAU_VARIANTES[EAU_I][1].slice();try{localStorage.setItem('np-eau',EAU_I);}catch(e){}palBiome(TEINTE);buildTiles();render();};}
 $('cgrid').addEventListener('click',e=>{const b=e.target.closest('button[data-c]');if(!b||!pickKey)return;const k=pickKey;applyColor(k,b.dataset.c);closePick();$('pc'+k).focus();});
 addEventListener('keydown',e=>{if(e.key==='Escape'&&pickKey)closePick();});
 $('presets').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;usePreset(+b.dataset.p);});
