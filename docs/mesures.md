@@ -403,3 +403,67 @@ Une mesure à longue distance exige de **dégager toute la carte**. Un relief la
 ligne de vue et fausse le résultat sans rien signaler : c'est arrivé le 13 novembre 2026, où un test
 ne dégageait que 12 cases autour de la foreuse et laissait croire à une perte de contact à 15 cases.
 Prévoir aussi assez d'essais : un seul tirage ne dit rien d'une règle à 3 %.
+
+## Génération, bâtiments et faune (chiffres déplacés de `conception.md`, 20 novembre 2026)
+
+Jusqu'au 20 novembre 2026, ces mesures vivaient dans `conception.md`, mêlées aux règles. Elles sont regroupées ici ;
+la date de chaque mesure est celle à laquelle elle a été prise, avec le jeu de ce jour-là.
+
+### Terrain
+
+- **Lacs** (15 novembre, 12 cartes) : 94 étendues d'eau — 23 % sans eau profonde, 7 % entièrement profondes,
+  70 % mêlées.
+- **Bord de carte irrégulier** : environ 17 % de la surface, jamais plus de 19 % (le tirage est refait sinon).
+- **Texture du sol** (16 novembre) : 70 à 100 ms à la génération, rien de plus à l'affichage.
+
+### Patrouilles et fouille
+
+- **Styles de patrouille** (19 novembre, 220 battements) : affût 0 case parcourue ; sentinelle 26 pas ; territoire
+  68 pas dans 9 cases d'envergure ; ronde 108 pas dans 12 cases ; voyage 53 cases d'envergure.
+- **Errance** (20 novembre, 300 battements) : 0,67 pas par battement, 1 % de demi-tours.
+- **Échange de places** (20 novembre) : deux groupes de cinq en ronde face à face, 400 battements, couloir d'une
+  case puis de deux — aucun battement figé, 5 à 6 traversées par groupe (le maximum possible). Avec le seul
+  demi-tour : aucun blocage, mais aucune traversée.
+- **Fouille** (18 novembre) : 6,6 ms par battement avec 20 ennemis en fouille sur une grande carte dégagée — cas
+  extrême, ils sont d'ordinaire une poignée.
+
+### Bâtiments
+
+- **Surface bâtie** (19 novembre) : 10 % demandés donnent 10-11 %, 20 % donnent 18 %, 30 % donnent 26 %. Le soir,
+  après l'élargissement à 70 % : 30 % donnent 25 %, 50 % donnent 40 %, 70 % donnent 67 % (le terrain enfermé entre
+  les murs, changé en mur plein, compte).
+- **Emplacement** (19 novembre, 40 cartes) : le mur le plus proche est à 5 à 45 cases du départ, à moins de
+  10 cases une fois sur cinq.
+- **Pièces étroites** (20 novembre, 15 cartes) : la part du sol bâti large de moins de 3 cases passe de 28 % à
+  10 % après l'élargissement des formes. Ce qui reste : les couloirs, voulus étroits, et les cavernes.
+- **Pièces secrètes** (19 novembre) : 1,4 en moyenne pour 2 demandées, faute de culs-de-sac et de massifs de mur.
+- **Clés** (19 novembre, 25 cartes) : 17 serrures, 17 clés. Une porte enferme le site de forage sur environ une
+  carte sur deux.
+- **Artefacts** (20 novembre, 20 cartes aux réglages par défaut) : 1 antenne, 2 terminaux, 2 pièces d'herbe et
+  9 machines par carte en moyenne. Sur 40 cartes : aucune case rendue inaccessible par un obstacle.
+
+### Refonte du niveau 1 (20 novembre 2026)
+
+- **60 cartes de taille 4** : un complexe et un réseau de tunnels à chaque fois ; zone extérieure 50 à 69 % (59 en
+  moyenne) ; 152 à 348 cases de tunnel (254 en moyenne) ; 3 à 16 pièces (10 en moyenne) ; de la sortie de tunnel la
+  plus proche à la porte, 40 à 97 pas (63 en moyenne) ; du vaisseau à la porte, 68 à 162 pas (109 en moyenne) ;
+  génération en 116 ms en moyenne.
+- **Petites cartes**, avec les réglages de l'utilisateur (eau 60, avant-poste, 3 pièces, surface bâtie 6 %) :
+  40 complexes enfouis sur 40 en tailles 2, 3 et 4. En taille 1 (32 × 22) il n'y a pas la place : aucune structure.
+- **Menu par recette**, 40 cartes par ligne (`outils/scripts/mesure-recettes.js`) :
+
+| Série | Complexes | Tunnels (moyenne) | Sorties | Extérieur | Vaisseau dehors |
+|---|---|---|---|---|---|
+| défaut, taille 2 | 40/40 | 69 | 1,1 | 59 % | 40/40 |
+| défaut, taille 3 | 40/40 | 150 | 1,6 | 60 % | 40/40 |
+| défaut, taille 4 | 40/40 | 230 | 1,6 | 59 % | 40/40 |
+| curseurs au minimum, taille 2 | 40/40 | 34 | 1,0 | 64 % | 40/40 |
+| curseurs au maximum, taille 4 | 40/40 | 264 | 1,3 | 36 % | 40/40 |
+| un côté, taille 4 | 40/40 | 241 | 1,4 | 59 % | 40/40 |
+| un coin, taille 4 | 40/40 | 243 | 1,6 | 59 % | 40/40 |
+| classique, tailles 2 et 4 | 40/40 | 0 | — | — | 40/40 |
+
+- **Réglages au hasard** (40 tirages) : complexe présent 40 fois sur 40, les huit combinaisons forme × archétype
+  sorties, aucune erreur.
+- **Ce que ces chiffres disent** : les sorties demandées ne sont pas toutes creusées (1,4 à 1,6 pour 2 demandées),
+  et demander 400 cases de tunnel n'en donne que 230 à 260 — complexe et tunnels se partagent le massif.
