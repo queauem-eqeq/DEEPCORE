@@ -158,7 +158,7 @@ function roughBorderOnce(t){const n1=noise(SZ(7,3)),n2=noise(SZ(3,2)),band=new U
 /* Plan de zones (20 novembre 2026). Le massif occupe un côté de la carte ; sa lisière serpente (bruit le long du bord, plus un
    grain fin). On classe les cases par « profondeur » depuis ce côté et l'on garde en extérieur la part demandée par la recette :
    la part est comptée sur les cases libres, bord de carte déduit, pour que la zone extérieure, sa bordure comprise, tienne dans la fourchette. */
-let ZONE=null,ZINFO=null;
+let ZONE=null,ZINFO=null,ZESSAI=0;
 function massif(t,ext){const N=W*H,hor=Math.random()<(W>=H?.8:.2),inv=Math.random()<.5,L=hor?W:H,n1=noise(SZ(9,4)),n2=noise(SZ(3,2)),val=new Float32Array(N),sol=[];
   for(let y=0;y<H;y++)for(let x=0;x<W;x++){const i=idx(x,y),u=hor?y:x,d0=hor?x:y,d=inv?L-1-d0:d0;
     val[i]=d/L+(n1(u,2)-.5)*.3+(n2(x,y)-.5)*3/L;if(t[i]===GROUND)sol.push(i);}
@@ -173,7 +173,7 @@ function genPlanet(){
     const relax=attempt>=15,last=attempt===29;
     const t=new Array(N).fill(GROUND);
     roughBorder(t);   // bord de carte irrégulier, en roche
-    ZONE=rec.ext?massif(t,rec.ext):null;Nt=N;
+    {const c=GEN.zExt/100-Math.max(0,ZESSAI-2)*.06;ZONE=rec.zones?massif(t,[Math.max(.25,c-.1),Math.min(.9,c+.1)]):null;}   // curseur « Part d'extérieur » : le centre, ± 10 points ; le massif s'épaissit si le complexe n'a pas tenu (ZESSAI)Nt=N;
     if(ZONE){Nt=0;for(let i=0;i<N;i++)if(t[i]===GROUND)Nt++;}   // les pourcentages du relief valent pour la zone extérieure
     const mode=GEN.methode,mt=P('montagne'),ct=P('gouffre');
     const mSize=p=>[rnd(SZ(14,4),SZ(30,6))-Math.round(p*8*F),rnd(SZ(9,3),SZ(18,5))-Math.round(p*4*F)],cSize=()=>[rnd(SZ(8,3),SZ(18,5)),rnd(SZ(5,3),SZ(10,4))];
@@ -231,7 +231,7 @@ let SANS_VAISSEAU=false;
 function niveau(){drilling=false;
   // structures bâties (07b), avant la roche dure et les métaux. Recette à complexe enfoui : si le complexe n'a pas tenu dans le
   // massif, on retire une carte entière (dix fois au plus) plutôt que de le poser en terrain ouvert.
-  for(let k=0;k<10;k++){genPlanet();G.w=W;G.h=H;batiments();if(G.batis.length||!ZONE||!(GEN.structure>0))break;}
+  for(let k=0;k<10;k++){ZESSAI=k;genPlanet();G.w=W;G.h=H;batiments();if(G.batis.length||!ZONE||!(ENFOUI()||GEN.structure>0))break;}
   durcir();   // la roche dure avant les métaux : ils n'y apparaissent jamais
   {const a=W*H/(48*32);G.eff={};G.fum={};hideOre(Math.max(1,Math.round(GISEMENTS.metal*a)),Math.max(1,Math.round(GISEMENTS.mat*a)));}
   G.sonar=1;   // sonar à émettre (voir sonarStart, 10-rendu) : il part 10 à 20 tours après l'arrivée

@@ -37,7 +37,7 @@ function tunnels(t,B,strs,dE){
   const vers=(a,m)=>chemin(a,j=>j===m,j=>libre(j)&&(dE[j]>=3||ecart(j,m)<=3));
   let principal=null;
   for(const S of strs)for(const e of S.entrees){let p=null;
-    if(!principal){for(const R of [30,24,18,12].map(v=>Math.max(6,Math.round(v*F)))){const c=lis.filter(i=>ecart(i,e.o)>=R);
+    if(!principal){const R0=autour('zPorte',.15);for(const R of [1,.8,.6,.4].map(v=>Math.max(6,Math.round(R0*v*F)))){const c=lis.filter(i=>ecart(i,e.o)>=R);
       for(let k=0;k<6&&c.length&&!p;k++){const q=vers(e.o,c[rnd(0,c.length-1)]);if(q&&q.length>=R*1.2)p=q;}
       if(p)break;}
       if(!p)p=chemin(e.o,dehors,libre);}   // à défaut : la sortie la plus proche
@@ -45,15 +45,18 @@ function tunnels(t,B,strs,dE){
     if(!p)continue;
     creuse(p);if(!principal)principal=p;}
   if(!principal){G.tun={};return false;}
-  // embranchement : une seconde sortie, loin de la première et prise dans la moitié du boyau la plus éloignée de la porte
-  if(principal.length>=14){const a=principal[Math.floor(principal.length*(.55+Math.random()*.3))],m=principal[principal.length-1],d0=principal[0],pr=proche(2);
-    const c=lis.filter(i=>ecart(i,m)>=12&&ecart(i,d0)>=20);
+  // embranchements : une ou deux sorties de plus (curseur « Sorties du réseau »), loin des autres. La deuxième part de la moitié du
+  // boyau la plus éloignée de la porte, la troisième de la moitié la plus proche.
+  const sorties=[principal[principal.length-1]],nSort=Math.max(1,Math.min(3,GEN.zSorties||2));
+  if(principal.length>=14)for(let s=1;s<nSort;s++){const a=principal[Math.floor(principal.length*(s===1?.55+Math.random()*.3:.2+Math.random()*.3))],d0=principal[0],pr=proche(2);
+    const c=lis.filter(i=>sorties.every(m=>ecart(i,m)>=12)&&ecart(i,d0)>=20);
     for(let k=0;k<6&&c.length;k++){const m2=c[rnd(0,c.length-1)],p=chemin(a,j=>j===m2,j=>libre(j)&&(dE[j]>=3||ecart(j,m2)<=3)&&(!pr[j]||ecart(j,a)<=3));
-      if(p&&p.length<=principal.length*2+16){creuse(p);break;}}}
-  // Le réseau grandit jusqu'à une taille tirée entre 160 et 330 cases (jamais plus de 400). D'abord 3 à 5 salles irrégulières
+      if(p&&p.length<=principal.length*2+16){creuse(p);sorties.push(m2);break;}}}
+  // Le réseau grandit jusqu'à une taille tirée autour du curseur « Taille du réseau » (± 30 %, jamais moins de 100 ni plus de 400 cases ;
+  // 245 donne 170 à 320). D'abord les salles irrégulières (curseur « Salles de tunnel », ± 1)
   // (automate cellulaire), chacune au bout d'un boyau, là où le massif est assez épais ; puis des boyaux de 6 à 16 cases qui
   // finissent en cul-de-sac sur une petite poche. Un boyau ne longe jamais un autre tunnel à moins de 3 cases.
-  const aire=Math.min(1,N/6144),cible=Math.round(rnd(160,330)*aire),nSalles=Math.max(1,Math.round(rnd(3,5)*aire));   // tailles données pour une carte de 96 × 64, réduites en proportion sur les plus petites
+  const aire=Math.min(1,N/6144),cible=Math.round(Math.max(100,Math.min(400,autour('zTunnels',.3)))*aire),nSalles=GEN.zSalles>0?Math.max(1,Math.round((GEN.zSalles+rnd(-1,1))*aire)):0;   // tailles données pour une carte de 96 × 64, réduites en proportion sur les plus petites
   const pousse=(dmin,dmax,prof,sep)=>{const a=all[rnd(0,all.length-1)];if(pres[a]||dE[a]<4)return -1;const pr=proche(2),ps=proche(sep);
     const p=chemin(a,j=>libre(j)&&dE[j]>=prof&&!ps[j]&&ecart(j,a)>=dmin&&ecart(j,a)<=dmax,j=>libre(j)&&dE[j]>=3&&(!pr[j]||ecart(j,a)<=2.5));
     if(!p||p.length>dmax*1.6+8)return -1;creuse(p);return p[p.length-1];};
@@ -70,4 +73,4 @@ function tunnels(t,B,strs,dE){
     for(let k=0;k<q.length;k++){const c=q[k],x=c%W,y=(c/W)|0;for(const [dx,dy] of D4){const j=idx(x+dx,y+dy);if(!vu[j]&&(tun[j]||j===principal[0])){vu[j]=1;q.push(j);}}}
     for(let k=all.length-1;k>=0;k--){const i=all[k];if(!vu[i]){t[i]=MOUNT;tun[i]=0;all.splice(k,1);}}}
   G.tun={};for(const i of all)G.tun[i]=1;   // les cases de tunnel, pour la faune par lieu (étape suivante)
-  G.tunN=all.length;return all.length>=100*aire;}   // moins de 100 cases : le massif était trop étroit, on recommence
+  G.tunN=all.length;G.tunS=sorties.length;return all.length>=100*aire;}   // moins de 100 cases : le massif était trop étroit, on recommence

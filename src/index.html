@@ -42,13 +42,14 @@
 <div class="modal" id="monde" role="dialog" aria-modal="true" aria-labelledby="mdTitle" hidden>
   <div class="mcard wide" tabindex="-1">
     <div class="mhead"><h2 id="mdTitle">Monde</h2><button id="mdClose" aria-label="Fermer le menu Monde">Fermer</button></div>
+    <div class="mdrec" id="genR"></div>
     <div class="mdarch">
       <label for="mdSel">Archétype</label><select id="mdSel"></select>
       <label for="mdNom">Nom</label><input type="text" id="mdNom" maxlength="30" placeholder="Nom du monde" autocomplete="off">
       <button class="go" id="mdSave">Enregistrer</button><button id="mdDel">Supprimer</button>
       <span class="saved" id="mdMsg" role="status"></span>
     </div>
-    <div class="mdcols"><section><h3>Monde</h3><div class="gen" id="gen"></div></section><section><h3>Structures</h3><div class="gen" id="genS"></div></section></div>
+    <div class="mdcols"><section><h3>Monde</h3><div class="gen" id="gen"></div></section><section><h3 id="genSTitre">Structures</h3><div class="gen" id="genS"></div></section></div>
   </div>
 </div>
 <!-- Fenêtre Artefacts (Lab, 20 novembre 2026) : les systèmes greffés sur chaque carte, avec leur fréquence. -->

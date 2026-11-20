@@ -128,18 +128,18 @@ function entrees(B,S,t,atteint,dE){const {own,porte,pied,interdit}=B,cand=[];
   if(!cand.length)return [];
   if(dE){const r=new Map(cand.map(e=>[e,Math.random()*6-dE[e.o]]));cand.sort((a,b)=>r.get(a)-r.get(b));}   // complexe enfoui : la porte est plutôt du côté le plus enfoncé dans le massif, le tunnel contourne
   else cand.sort((a,b)=>(b.libre-a.libre)||Math.random()-.5);
-  const n=GEN.sEntrees>0?GEN.sEntrees:dE?1:1+(S.pieces.length>=7?1:0)+(S.pieces.length>=16?1:0),pris=[],ecart=Math.max(GEN.sEntrees>0?4:8,Math.sqrt(S.emprise)*(GEN.sEntrees>0?.35:.7));
+  const n=dE?1:GEN.sEntrees>0?GEN.sEntrees:1+(S.pieces.length>=7?1:0)+(S.pieces.length>=16?1:0),pris=[],ecart=Math.max(GEN.sEntrees>0?4:8,Math.sqrt(S.emprise)*(GEN.sEntrees>0?.35:.7));
   for(const e of cand){if(pris.length>=n)break;if(pris.some(q=>Math.hypot(q.x-e.x,q.y-e.y)<ecart))continue;pris.push(e);}
   for(const e of pris){porte[e.c]=1;pied[e.c]=1;}
   return pris;}
 // Pose les structures sur la carte déjà générée (relief, vaisseau, site). Elles peuvent recouvrir la montagne et l'eau ;
 // si une entrée donne sur de la roche, un couloir est percé jusqu'à elle (connect).
 function batiments(){
-  G.batis=[];G.cles={};G.pb={};G.art={};G.artN=null;G.tun={};const pct=GEN.structure||0,N=W*H;if(pct<=0)return;
+  G.batis=[];G.cles={};G.pb={};G.art={};G.artN=null;G.tun={};const pct=ENFOUI()?100:GEN.structure||0,N=W*H;if(pct<=0)return;
   // complexe enfoui (recette à zones) : il ne tient que dans le massif, à plus de 5 cases de la lisière et du bord de carte (la place d'un tunnel), et n'en prend pas la moitié (le reste est pour les tunnels)
-  const enf=!!(ZONE&&(RECETTES[GEN.recette]||{}).enfoui),dE=enf?distExt():null,mg=W>=72?5:W>=48?4:3;let zb=null,mN=0;   // mg : marge à la lisière et au bord, plus mince sur les petites cartes
+  const enf=!!(ZONE&&ENFOUI()),dE=enf?distExt():null,mg=W>=72?5:W>=48?4:3;let zb=null,mN=0;   // mg : marge à la lisière et au bord, plus mince sur les petites cartes
   if(enf){zb=[W,H,0,0];for(let i=0;i<N;i++){const x=i%W,y=(i/W)|0;if(dE[i]<=mg||x<mg||y<mg||x>W-mg-1||y>H-mg-1)continue;mN++;zb=[Math.min(zb[0],x),Math.min(zb[1],y),Math.max(zb[2],x),Math.max(zb[3],y)];}}
-  const total=enf?Math.min(Math.round(N*pct/100),Math.round(mN*(W>=72?.45:.6))):Math.round(N*pct/100);if(total<45)return;
+  const total=enf?Math.max(50,Math.round(mN*Math.min(.8,autour('zComplexe',.15)/100*(W>=72?1:4/3)))):Math.round(N*pct/100);   // complexe enfoui : part du massif, réglée par le curseur (un tiers de plus sur les petites cartes)if(total<45)return;
   const t0=G.t.slice();
   const nEssais=enf?12:6;   // complexe enfoui : plus d'essais, il n'est jamais posé en terrain ouvert (20 novembre 2026)
   for(let essai=0;essai<nEssais;essai++){

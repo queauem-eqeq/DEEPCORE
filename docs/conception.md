@@ -159,7 +159,7 @@ l'extérieur est une « pièce » parmi d'autres, faite de terrain naturel, et l
 - les tunnels sont un **petit réseau** : un ou deux embranchements, des culs-de-sac, pas d'ennemis propres ;
 - on commence par le **niveau 1 complet**.
 
-**Recettes** (`RECETTES`, dans `06-reglages.js` ; choix dans Monde → Structures → « Recette de niveau », réglage `GEN.recette`) :
+**Recettes** (`RECETTES`, dans `06-reglages.js` ; choix en haut du menu Monde, réglage `GEN.recette`) :
 - `atterrissage` (par défaut) : zone extérieure de 50 à 70 % de la carte, bordure comprise ; le reste est un **massif** sur un côté
   (gauche ou droite le plus souvent, parfois haut ou bas), à la lisière sinueuse. Le vaisseau se pose dans la partie de
   l'extérieur la plus éloignée du massif. Un seul complexe, **creusé dans le massif** à plus de 5 cases de la lisière et du bord
@@ -168,6 +168,35 @@ l'extérieur est une « pièce » parmi d'autres, faite de terrain naturel, et l
 - `classique` : la génération d'avant la refonte, inchangée (terrain partout, une ou deux structures posées dessus).
 
 Les pourcentages du menu Monde (eau, montagne, gouffre, herbe) valent pour la **zone extérieure** seule.
+
+**Menu Monde par recette** (20 novembre 2026, étape 2 bis, partie a). « Recette de niveau » est le premier choix du menu Monde, en
+haut, sur toute la largeur. Chaque recette **déclare ses réglages** dans `RECETTES[…].regl` (`06-reglages.js`) : la colonne de droite
+se reconstruit au changement de recette et n'affiche que ceux-là. Ajouter une recette, c'est ajouter une entrée à `RECETTES` ; le
+menu n'est pas à retoucher. La valeur en cours est dans `GEN[clé]` ; celles des autres recettes attendent dans `GEN.rec[recette]`
+(enregistré avec `np-gen`), si bien que changer de recette et revenir ne perd rien. Aucune clé existante n'a été renommée.
+« Classique » garde ses huit réglages d'avant et la même génération.
+
+Réglages de la recette `atterrissage`. Chacun donne **un centre** ; la génération tire autour à chaque carte (`autour()`).
+
+| Réglage (clé) | Bornes, départ | Tirage |
+|---|---|---|
+| Part d'extérieur (`zExt`) | 35 à 80 %, 60 | centre ± 10 points ; au moins 22 % de la carte reste au massif |
+| Taille du complexe (`zComplexe`) | 10 à 70 % du massif, 45 | ± 15 % ; un tiers de plus sous la taille 3 ; jamais moins de 50 cases |
+| Taille du réseau (`zTunnels`) | 100 à 400 cases, 245 | ± 30 %, borné à 100-400, réduit en proportion sur les petites cartes |
+| Salles de tunnel (`zSalles`) | 0 à 8, 4 | ± 1 (0 : aucune salle) |
+| Sorties du réseau (`zSorties`) | 1 à 3, 2 | nombre visé ; une sortie de plus n'est creusée que si la lisière offre un point à 12 cases des autres |
+| Éloignement de la porte (`zPorte`) | 10 à 45 cases, 30 | ± 15 %, puis 80, 60 et 40 % de cette distance si le massif est petit |
+
+S'y ajoutent, inchangés : archétype de structure, pièces par structure, ouvertures sans porte, portes verrouillées, pièces secrètes.
+« Surface bâtie », « Nombre de structures » et « Portes d'entrée » ne figurent plus dans cette recette (le complexe a toujours une
+seule porte). La forme du massif (un côté, un coin, deux côtés) est la partie b, pas encore faite.
+Si le complexe ne tient pas dans le massif, la carte est retirée et le massif s'épaissit de 6 points par essai à partir du
+quatrième (`ZESSAI`) : avec 80 % d'extérieur sur une petite carte, on obtient donc moins d'extérieur que demandé, mais toujours un complexe.
+Limite constatée : complexe et tunnels se partagent le massif. Avec un complexe à 45 %, demander 400 cases de tunnel n'en donne
+souvent que 200 à 250 ; il faut baisser le complexe ou l'extérieur pour que le réseau ait la place.
+Mesure du 20 novembre 2026 (40 cartes par ligne, `outils/scripts/mesure-recettes.js`) : complexe présent 40 fois sur 40 aux tailles
+2, 3 et 4, aux réglages de départ comme aux deux extrêmes ; tunnels 69, 159 et 240 cases en moyenne aux réglages de départ ;
+« Classique » : 40 sur 40, aucune zone ni tunnel. `outils/scripts/six-cartes.js` dessine six cartes côte à côte (tunnels en jaune).
 
 **Tunnels** (`07d-tunnels.js`) : la porte du complexe (une seule, sauf si « Portes d'entrée » en demande plus) est prise du côté le
 plus enfoncé dans le massif, et la **sortie du boyau est choisie loin d'elle** (20 novembre 2026, demande de l'utilisateur : le

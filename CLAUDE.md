@@ -30,6 +30,8 @@ Le jeu est une page web en plusieurs fichiers (`src/`), **sans étape d'assembla
   scène dans la page et renvoie ce qu'on veut lire.
 - `python3 outils/simul.py [detection|fuite|tout]` : rejoue des situations dans le moteur et mesure.
 - `python3 outils/perf.py` : fluidité.
+- `outils/scripts/` : scripts à passer à `jeu.py` — `six-cartes.js` (six cartes côte à côte, tunnels en jaune),
+  `mesure-recettes.js` (40 cartes par taille et par recette : complexes, tunnels, sorties).
 
 ## Banc de combat
 Artefact à part (https://claude.ai/artifact/9BKRaoB4hzgdWhzYFx5A6q) qui rejoue des combats dans le vrai moteur, sur carte de taille 1.

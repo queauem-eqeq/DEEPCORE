@@ -16,39 +16,65 @@ try{const g=JSON.parse(localStorage.getItem('np-gen')||'null');if(g&&typeof g.ea
 if(!(GEN.taille>=1&&GEN.taille<=5))GEN.taille=4;
 if(!(GEN.structure>=0&&GEN.structure<=30))GEN.structure=10;
 /* Recettes de niveau (20 novembre 2026) : la carte est un plan de zones, décrit ici. « classique » est la génération d'avant la
-   refonte (terrain partout, bâtiments posés dessus), gardée telle quelle. ext : part de la carte laissée à la zone extérieure
-   (minimum, maximum) ; enfoui : le complexe est creusé dans le massif et relié au dehors par des tunnels. */
-const RECETTES={atterrissage:{n:'Niveau 1 : extérieur, montagne, complexe enfoui',ext:[.5,.7],enfoui:true},
-  classique:{n:'Classique : terrain partout, bâtiments posés dessus'}};
+   refonte (terrain partout, bâtiments posés dessus), gardée telle quelle. zones : la carte a une zone extérieure et un massif ;
+   enfoui : le complexe est creusé dans le massif et relié au dehors par des tunnels.
+   Chaque recette DÉCLARE SES RÉGLAGES dans « regl » : le menu Monde se construit à partir de cette liste et n'affiche rien d'autre.
+   Une ligne vaut ['sub',titre], ['num',clé,libellé,minimum,maximum,valeur de départ] ou ['sel',clé,libellé,choix,valeur de départ].
+   Ajouter une recette, c'est ajouter une entrée ici : le menu n'est pas à retoucher.
+   La valeur en cours d'un réglage est dans GEN[clé] (c'est là que la génération la lit) ; celles des autres recettes attendent dans
+   GEN.rec[recette], pour que changer de recette et revenir ne perde rien. Les réglages des zones (clés « z… ») donnent un CENTRE :
+   la génération tire autour à chaque carte (voir autour()). */
+const STYLES_LBL=[['avant','Avant-poste'],['hangar','Hangar'],['forage','Complexe de forage'],['ruine','Ruine']];
+const R_STYLE=['sel','sStyle','Archétype de structure',[['','Au hasard']].concat(STYLES_LBL),''],R_PIECES=['num','sPieces','Pièces par structure',0,40,0],
+  R_OUVERT=['num','sOuvert','Ouvertures sans porte (%)',0,100,25],R_VERROUS=['num','sVerrous','Portes verrouillées',0,3,1],R_SECRETS=['num','sSecrets','Pièces secrètes',0,3,1];
+const R_AIDE='Avant-poste : petites pièces, peu de boucles. Hangar : grandes salles à piliers. Complexe de forage : couloirs et gouffres. Ruine : cavernes effondrées.';
+const RECETTES={atterrissage:{n:'Niveau 1 : extérieur, montagne, complexe enfoui',zones:true,enfoui:true,titre:'Massif, tunnels, complexe',
+    aide:'Chaque curseur donne un centre : la carte varie autour à chaque tirage. '+R_AIDE,
+    regl:[['sub','Massif'],['num','zExt','Part d’extérieur (%)',35,80,60],['num','zComplexe','Taille du complexe (% du massif)',10,70,45],
+      ['sub','Tunnels'],['num','zTunnels','Taille du réseau (cases)',100,400,245],['num','zSalles','Salles de tunnel',0,8,4],
+      ['num','zSorties','Sorties du réseau',1,3,2],['num','zPorte','Éloignement de la porte (cases)',10,45,30],
+      ['sub','Complexe'],R_STYLE,R_PIECES,R_OUVERT,R_VERROUS,R_SECRETS]},
+  classique:{n:'Classique : terrain partout, bâtiments posés dessus',titre:'Structures',aide:R_AIDE,
+    regl:[R_STYLE,['sel','sNb','Nombre de structures',[[0,'Une ou deux'],[1,'Une'],[2,'Deux']],0],['num','structure','Surface bâtie (%)',0,70,10],
+      R_PIECES,['num','sEntrees','Portes d’entrée',0,4,0],R_OUVERT,R_VERROUS,R_SECRETS]}};
 if(!RECETTES[GEN.recette])GEN.recette='atterrissage';
+const ENFOUI=()=>!!(RECETTES[GEN.recette]||{}).enfoui;
+const recLignes=r=>RECETTES[r].regl.filter(l=>l[0]!=='sub');
+const recBon=(l,v)=>l[0]==='num'?typeof v==='number'&&v>=l[3]&&v<=l[4]:l[3].some(([o])=>o===v);
+// range les réglages de la recette en cours dans GEN.rec
+function recRange(){if(!GEN.rec||typeof GEN.rec!=='object')GEN.rec={};const o=GEN.rec[GEN.recette]={};for(const l of recLignes(GEN.recette))o[l[1]]=GEN[l[1]];}
+// passe à la recette r : ses valeurs gardées, sinon celles en cours (réglages communs), sinon les valeurs de départ
+function recPrend(r){if(!RECETTES[r])r='atterrissage';const s=(GEN.rec&&GEN.rec[r])||{};
+  for(const l of recLignes(r)){const k=l[1],d=l[l.length-1];GEN[k]=recBon(l,s[k])?s[k]:recBon(l,GEN[k])?GEN[k]:d;}
+  GEN.recette=r;}
+recPrend(GEN.recette);
+// valeur tirée autour du centre donné par un curseur : centre × (1 ± p)
+const autour=(k,p)=>GEN[k]*(1+(Math.random()*2-1)*p);
 function setTaille(v){v=Math.max(1,Math.min(5,Math.round(+v||4)));GEN.taille=v;$('gr-taille').value=v;$('gn-taille').value=v;
   $('genTaille').textContent=`${SIZES[v][0]} × ${SIZES[v][1]} cases${v===4?' (taille d’origine)':''}. Appliqué au prochain lancement.`;saveGen();}
-const saveGen=()=>{try{localStorage.setItem('np-gen',JSON.stringify(GEN));}catch(e){}touchLocal();};
+const saveGen=()=>{recRange();try{localStorage.setItem('np-gen',JSON.stringify(GEN));}catch(e){}touchLocal();};
 function setGen(k,v){const others=GEN_LBL.reduce((a,[kk])=>a+(kk===k?0:GEN[kk]),0),mx=GEN_LBL.find(l=>l[0]===k)[2];
   v=Math.max(0,Math.min(mx,GEN_SUM-others,Math.round(+v||0)));GEN[k]=v;$('gr-'+k).value=v;$('gn-'+k).value=v;saveGen();}
 function setCA(k,v,mn,mx){v=Math.max(mn,Math.min(mx,Math.round(+v||mn)));GEN[k]=v;$('gn-'+k).value=v;saveGen();}
 function caState(){const off=GEN.methode==='bruit';$('gn-remplissage').disabled=off;$('gn-iterations').disabled=off;}
 // La faune se règle par groupes : voir 06b-groupes (19 novembre 2026 ; avant, une intensité par espèce).
-// Colonne « Structures » du menu Monde (19 novembre 2026) : tout ce qui règle les bâtiments.
-const S_NUM=[['structure','Surface bâtie (%)',0,70],['sPieces','Pièces par structure',0,40],['sEntrees','Portes d’entrée',0,4],
-  ['sOuvert','Ouvertures sans porte (%)',0,100],['sVerrous','Portes verrouillées',0,3],['sSecrets','Pièces secrètes',0,3]];
-function setS(k,v){const [, ,mn,mx]=S_NUM.find(l=>l[0]===k);v=Math.max(mn,Math.min(mx,Math.round(+v||0)));GEN[k]=v;$('gr-'+k).value=v;$('gn-'+k).value=v;saveGen();}
+// Colonne de droite du menu Monde : les réglages que déclare la recette en cours (20 novembre 2026 ; avant, une liste fixe de « Structures »).
+function setS(k,v){const l=recLignes(GEN.recette).find(l=>l[1]===k);if(!l)return;v=Math.max(l[3],Math.min(l[4],Math.round(+v||0)));GEN[k]=v;$('gr-'+k).value=v;$('gn-'+k).value=v;saveGen();}
 function setStruct(v){setS('structure',v);}
 function buildStruct(){
-  for(const [k,,mn,mx] of S_NUM)if(!(GEN[k]>=mn&&GEN[k]<=mx))GEN[k]={structure:10,sOuvert:25,sVerrous:1,sSecrets:1}[k]||0;
-  if(![0,1,2].includes(GEN.sNb))GEN.sNb=0;if(GEN.sStyle&&!STYLES_LBL.some(([v])=>v===GEN.sStyle))GEN.sStyle='';
-  if(!RECETTES[GEN.recette])GEN.recette='atterrissage';
-  $('genS').innerHTML=`<div class="g2"><label for="gs-recette">Recette de niveau</label><select id="gs-recette">${Object.keys(RECETTES).map(k=>`<option value="${k}"${GEN.recette===k?' selected':''}>${RECETTES[k].n}</option>`).join('')}</select></div>`
-   +`<div class="g2"><label for="gs-style">Archétype de structure</label><select id="gs-style"><option value="">Au hasard</option>${STYLES_LBL.map(([v,l])=>`<option value="${v}"${GEN.sStyle===v?' selected':''}>${l}</option>`).join('')}</select></div>`
-   +`<div class="g2"><label for="gs-nb">Nombre de structures</label><select id="gs-nb">${[[0,'Une ou deux'],[1,'Une'],[2,'Deux']].map(([v,l])=>`<option value="${v}"${GEN.sNb===v?' selected':''}>${l}</option>`).join('')}</select></div>`
-   +S_NUM.map(([k,l,mn,mx])=>`<div class="g"><label for="gn-${k}">${l}</label><input type="range" id="gr-${k}" min="${mn}" max="${mx}" step="1" value="${GEN[k]}" aria-label="${l}"><input type="number" id="gn-${k}" min="${mn}" max="${mx}" step="1" value="${GEN[k]}"></div>`).join('')
-   +'<div class="sum">Avant-poste : petites pièces, peu de boucles. Hangar : grandes salles à piliers. Complexe de forage : couloirs et gouffres. Ruine : cavernes effondrées.</div>';
-  $('gs-recette').addEventListener('change',e=>{GEN.recette=e.target.value;saveGen();});
-  $('gs-style').addEventListener('change',e=>{GEN.sStyle=e.target.value;saveGen();});
-  $('gs-nb').addEventListener('change',e=>{GEN.sNb=+e.target.value;saveGen();});
-  S_NUM.forEach(([k])=>{$('gr-'+k).addEventListener('input',e=>setS(k,e.target.value));$('gn-'+k).addEventListener('change',e=>setS(k,e.target.value));});
+  recPrend(GEN.recette);const rec=RECETTES[GEN.recette];
+  $('genR').innerHTML=`<label for="gs-recette">Recette de niveau</label><select id="gs-recette">${Object.keys(RECETTES).map(k=>`<option value="${k}"${GEN.recette===k?' selected':''}>${RECETTES[k].n}</option>`).join('')}</select>`;
+  $('genSTitre').textContent=rec.titre||'Structures';
+  $('genS').innerHTML=rec.regl.map(l=>{const [ty,k,lb]=l;
+    if(ty==='sub')return `<div class="sub">${k}</div>`;
+    if(ty==='sel')return `<div class="g2"><label for="gs-${k}">${lb}</label><select id="gs-${k}">${l[3].map(([v,t])=>`<option value="${v}"${GEN[k]===v?' selected':''}>${t}</option>`).join('')}</select></div>`;
+    return `<div class="g"><label for="gn-${k}">${lb}</label><input type="range" id="gr-${k}" min="${l[3]}" max="${l[4]}" step="1" value="${GEN[k]}" aria-label="${lb}"><input type="number" id="gn-${k}" min="${l[3]}" max="${l[4]}" step="1" value="${GEN[k]}"></div>`;}).join('')
+   +`<div class="sum">${rec.aide||''}</div>`;
+  $('gs-recette').addEventListener('change',e=>{recRange();recPrend(e.target.value);saveGen();buildStruct();$('gs-recette').focus();});
+  for(const l of recLignes(GEN.recette)){const k=l[1];
+    if(l[0]==='sel')$('gs-'+k).addEventListener('change',e=>{const v=e.target.value;GEN[k]=typeof l[4]==='number'?+v:v;saveGen();});
+    else{$('gr-'+k).addEventListener('input',e=>setS(k,e.target.value));$('gn-'+k).addEventListener('change',e=>setS(k,e.target.value));}}
 }
-const STYLES_LBL=[['avant','Avant-poste'],['hangar','Hangar'],['forage','Complexe de forage'],['ruine','Ruine']];
 function buildGen(){
   $('gen').innerHTML=`<div class="g"><label for="gn-taille">Taille de la carte</label><input type="range" id="gr-taille" min="1" max="5" step="1" value="${GEN.taille}" aria-label="Taille de la carte, de 1 à 5"><input type="number" id="gn-taille" min="1" max="5" step="1" value="${GEN.taille}"></div><div class="sum" id="genTaille"></div>`
    +GEN_LBL.map(([k,l,mx])=>`<div class="g"><label for="gn-${k}">${l} (%)</label><input type="range" id="gr-${k}" min="0" max="${mx}" step="1" value="${GEN[k]}" aria-label="${l} en pourcentage"><input type="number" id="gn-${k}" min="0" max="${mx}" step="1" value="${GEN[k]}"></div>`).join('')
