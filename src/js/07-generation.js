@@ -229,9 +229,9 @@ const GISEMENTS={metal:3,mat:1};
 let SANS_VAISSEAU=false;
 // Génère la carte à partir des réglages en cours du menu Monde (relief, taille, faune), avec le vaisseau.
 function niveau(){drilling=false;
-  genPlanet();
-  G.w=W;G.h=H;
-  batiments();   // structures bâties (07b), avant la roche dure et les métaux
+  // structures bâties (07b), avant la roche dure et les métaux. Recette à complexe enfoui : si le complexe n'a pas tenu dans le
+  // massif, on retire une carte entière (dix fois au plus) plutôt que de le poser en terrain ouvert.
+  for(let k=0;k<10;k++){genPlanet();G.w=W;G.h=H;batiments();if(G.batis.length||!ZONE||!(GEN.structure>0))break;}
   durcir();   // la roche dure avant les métaux : ils n'y apparaissent jamais
   {const a=W*H/(48*32);G.eff={};G.fum={};hideOre(Math.max(1,Math.round(GISEMENTS.metal*a)),Math.max(1,Math.round(GISEMENTS.mat*a)));}
   G.sonar=1;   // sonar à émettre (voir sonarStart, 10-rendu) : il part 10 à 20 tours après l'arrivée

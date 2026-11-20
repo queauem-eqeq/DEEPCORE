@@ -134,14 +134,15 @@ function entrees(B,S,t,atteint,dE){const {own,porte,pied,interdit}=B,cand=[];
   return pris;}
 // Pose les structures sur la carte déjà générée (relief, vaisseau, site). Elles peuvent recouvrir la montagne et l'eau ;
 // si une entrée donne sur de la roche, un couloir est percé jusqu'à elle (connect).
-function batiments(pose){   // pose : repli, le complexe n'a pas tenu dans le massif et la structure est posée comme dans la recette classique
+function batiments(){
   G.batis=[];G.cles={};G.pb={};G.art={};G.artN=null;G.tun={};const pct=GEN.structure||0,N=W*H;if(pct<=0)return;
   // complexe enfoui (recette à zones) : il ne tient que dans le massif, à plus de 5 cases de la lisière et du bord de carte (la place d'un tunnel), et n'en prend pas la moitié (le reste est pour les tunnels)
-  const enf=!pose&&!!(ZONE&&(RECETTES[GEN.recette]||{}).enfoui),dE=enf?distExt():null,mg=W>=72?5:W>=48?4:3;let zb=null,mN=0;   // mg : marge à la lisière et au bord, plus mince sur les petites cartes
+  const enf=!!(ZONE&&(RECETTES[GEN.recette]||{}).enfoui),dE=enf?distExt():null,mg=W>=72?5:W>=48?4:3;let zb=null,mN=0;   // mg : marge à la lisière et au bord, plus mince sur les petites cartes
   if(enf){zb=[W,H,0,0];for(let i=0;i<N;i++){const x=i%W,y=(i/W)|0;if(dE[i]<=mg||x<mg||y<mg||x>W-mg-1||y>H-mg-1)continue;mN++;zb=[Math.min(zb[0],x),Math.min(zb[1],y),Math.max(zb[2],x),Math.max(zb[3],y)];}}
-  const total=enf?Math.min(Math.round(N*pct/100),Math.round(mN*(W>=72?.45:.6))):Math.round(N*pct/100);if(total<45){if(enf)batiments(true);return;}
+  const total=enf?Math.min(Math.round(N*pct/100),Math.round(mN*(W>=72?.45:.6))):Math.round(N*pct/100);if(total<45)return;
   const t0=G.t.slice();
-  for(let essai=0;essai<6;essai++){
+  const nEssais=enf?12:6;   // complexe enfoui : plus d'essais, il n'est jamais posé en terrain ouvert (20 novembre 2026)
+  for(let essai=0;essai<nEssais;essai++){
     const t=G.t,B={own:new Int16Array(N),porte:new Uint8Array(N),pied:new Uint8Array(N),interdit:new Uint8Array(N),sol:new Uint8Array(N).fill(FLOOR),pieces:[]};
     for(let i=0;i<N;i++){const x=i%W,y=(i/W)|0,v=t[i];
       if(x<2||y<2||x>=W-2||y>=H-2)B.interdit[i]=1;   // les gouffres naturels ne gênent plus : une pièce posée dessus les change en sol (19 novembre 2026)
@@ -177,7 +178,7 @@ function batiments(pose){   // pose : repli, le complexe n'a pas tenu dans le ma
       const atteint=boucher(t,garde);let ok=true;
       for(const S of strs){S.entrees=entrees(B,S,t,atteint,enf?dE:null);if(!S.entrees.length)ok=false;
         for(const e of S.entrees){t[e.c]=DOOR;if(blocks(t[e.o]))t[e.o]=GROUND;}}   // la porte, et l'amorce du couloir d'entrée
-      if(ok&&enf&&!tunnels(t,B,strs,dE)&&essai<5)ok=false;   // le réseau de tunnels d'abord ; s'il n'a pas trouvé de passage, on recommence (au dernier essai, connect perce tout droit)
+      if(ok&&enf&&!tunnels(t,B,strs,dE)&&essai<nEssais-1)ok=false;   // le réseau de tunnels d'abord ; s'il n'a pas trouvé de passage, on recommence (au dernier essai, connect perce tout droit)
       if(ok)connect(t);
       if(ok&&connectedAll(t)){
         G.batis=strs.map(S=>({style:S.st.n,pieces:S.pieces.filter(p=>p.g!=='couloir').length,cases:S.emprise,entrees:S.entrees.map(e=>[e.x,e.y])}));
@@ -186,7 +187,6 @@ function batiments(pose){   // pose : repli, le complexe n'a pas tenu dans le ma
     }
     for(let i=0;i<N;i++)G.t[i]=t0[i];
   }
-  if(enf)batiments(true);   // jamais de carte sans structure : à défaut de complexe enfoui, une structure posée
 }
 // Tout ce qu'un couloir percé depuis le départ ne pourra jamais atteindre (terrain enfermé entre des murs) devient du mur plein.
 // Renvoie les cases atteignables par le dehors : une porte d'entrée doit donner sur l'une d'elles.

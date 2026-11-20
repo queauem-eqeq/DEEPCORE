@@ -37,9 +37,10 @@ function tunnels(t,B,strs,dE){
   const vers=(a,m)=>chemin(a,j=>j===m,j=>libre(j)&&(dE[j]>=3||ecart(j,m)<=3));
   let principal=null;
   for(const S of strs)for(const e of S.entrees){let p=null;
-    if(!principal)for(const R of [30,24,18,12].map(v=>Math.max(6,Math.round(v*F)))){const c=lis.filter(i=>ecart(i,e.o)>=R);
+    if(!principal){for(const R of [30,24,18,12].map(v=>Math.max(6,Math.round(v*F)))){const c=lis.filter(i=>ecart(i,e.o)>=R);
       for(let k=0;k<6&&c.length&&!p;k++){const q=vers(e.o,c[rnd(0,c.length-1)]);if(q&&q.length>=R*1.2)p=q;}
       if(p)break;}
+      if(!p)p=chemin(e.o,dehors,libre);}   // à défaut : la sortie la plus proche
     else p=chemin(e.o,j=>tun[j]===1,j=>libre(j)&&dE[j]>=3);   // une porte de plus rejoint le réseau, jamais l'extérieur directement
     if(!p)continue;
     creuse(p);if(!principal)principal=p;}

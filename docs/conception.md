@@ -189,12 +189,15 @@ Mesuré sur 60 cartes de taille 4 (20 novembre 2026) : un complexe et un réseau
 69 % (59 en moyenne) ; 152 à 348 cases de tunnel (254 en moyenne) ; 3 à 16 pièces (10 en moyenne) ; de la sortie de tunnel la plus proche à la
 porte du complexe, 40 à 97 pas (63 en moyenne) ; du vaisseau à la porte, 68 à 162 pas (109 en moyenne) ; génération en 116 ms en moyenne.
 
-**Petites cartes et repli** (20 novembre 2026, l'utilisateur obtenait parfois des cartes sans complexe) : sur 40 cartes par taille,
-le complexe manquait une fois sur deux en taille 2 et toujours en taille 1, faute de place dans le massif. Depuis : la marge à la
-lisière et au bord passe à 4 cases (taille 2) ou 3 (taille 1), le complexe peut prendre 60 % du massif sous la taille 3, et les
-tailles du réseau (cible, minimum de 100 cases, nombre de salles, éloignement de la sortie) sont réduites en proportion de la
-surface. Si le complexe enfoui ne tient toujours pas, la structure est **posée comme dans la recette classique** : jamais de
-carte sans structure à cause du massif. Mesuré ensuite : 40 sur 40 en tailles 2 à 5, 38 sur 40 en taille 1.
+**Petites cartes, jamais de complexe en terrain ouvert** (20 novembre 2026). L'utilisateur obtenait parfois des cartes sans
+complexe, puis — après un premier correctif qui posait alors la structure dehors — un complexe en terrain ouvert, ce qu'il
+refuse. Règle retenue : **le complexe est toujours dans la montagne**. La marge à la lisière et au bord est de 5 cases (4 en
+taille 2, 3 en taille 1) ; sous la taille 3 le complexe peut prendre 60 % du massif ; les tailles du réseau (cible, minimum de
+100 cases, nombre de salles, éloignement de la sortie) sont réduites en proportion de la surface ; la structure a douze essais
+au lieu de six ; si la sortie éloignée est introuvable, le boyau prend la sortie la plus proche ; et si rien ne tient, **la
+carte entière est retirée** (dix fois au plus). Mesuré avec les réglages de l'utilisateur (eau 60, avant-poste, 3 pièces,
+surface bâtie 6 %) : 40 complexes enfouis sur 40 en tailles 2, 3 et 4. En taille 1 (32 × 22) il n'y a pas la place : la carte
+n'a alors aucune structure.
 
 **Reste à faire** : la faune par lieu (dehors / dedans), la descente et l'arrivée par un puits, les recettes des niveaux 2 et 3,
 les mesures par recette. Le plan est dans le document `claude/refonte-niveaux-plan.md` du projet.
