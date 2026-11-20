@@ -120,27 +120,33 @@ function amenager(B,S){const {own,porte,sol}=B;
   }
 }
 // Portes d'entrée : peu nombreuses, éloignées les unes des autres, de préférence là où le dehors est déjà praticable.
-function entrees(B,S,t,atteint,dE){const {own,porte,pied,interdit}=B,cand=[];
+function entrees(B,S,t,atteint,dE,proche){const {own,porte,pied,interdit}=B,cand=[];
   for(const p of S.pieces){if(p.g==='couloir')continue;for(const fi of p.c){if(B.sol[fi]!==FLOOR)continue;const fx=fi%W,fy=(fi/W)|0;
     for(const [dx,dy] of D4){const cx=fx+dx,cy=fy+dy,ox=cx+dx,oy=cy+dy;if(ox<2||oy<2||ox>=W-2||oy>=H-2)continue;const c=idx(cx,cy),o=idx(ox,oy);
       if(own[c]||porte[c]||interdit[c]||interdit[o]||pied[o]||!atteint[o]||own[idx(cx+dy,cy+dx)]||own[idx(cx-dy,cy-dx)]||porte[idx(cx+dy,cy+dx)]||porte[idx(cx-dy,cy-dx)])continue;
       cand.push({c,o,x:cx,y:cy,libre:!blocks(t[o])&&!isWater(t[o])});}}}
   if(!cand.length)return [];
-  if(dE){const r=new Map(cand.map(e=>[e,Math.random()*6-dE[e.o]]));cand.sort((a,b)=>r.get(a)-r.get(b));}   // complexe enfoui : la porte est plutôt du côté le plus enfoncé dans le massif, le tunnel contourne
+  if(dE){const r=new Map(cand.map(e=>[e,proche?Math.random()*3+dE[e.o]:Math.random()*6-dE[e.o]]));cand.sort((a,b)=>r.get(a)-r.get(b));}   // proche (cavernes) : la porte regarde plutôt la caverne la plus proche   // complexe enfoui : la porte est plutôt du côté le plus enfoncé dans le massif, le tunnel contourne
   else cand.sort((a,b)=>(b.libre-a.libre)||Math.random()-.5);
-  const n=dE?1:GEN.sEntrees>0?GEN.sEntrees:1+(S.pieces.length>=7?1:0)+(S.pieces.length>=16?1:0),pris=[],ecart=Math.max(GEN.sEntrees>0?4:8,Math.sqrt(S.emprise)*(GEN.sEntrees>0?.35:.7));
+  const n=dE?(proche&&S.emprise>=170?2:1):GEN.sEntrees>0?GEN.sEntrees:1+(S.pieces.length>=7?1:0)+(S.pieces.length>=16?1:0),pris=[],ecart=Math.max(GEN.sEntrees>0?4:8,Math.sqrt(S.emprise)*(GEN.sEntrees>0?.35:.7));
   for(const e of cand){if(pris.length>=n)break;if(pris.some(q=>Math.hypot(q.x-e.x,q.y-e.y)<ecart))continue;pris.push(e);}
   for(const e of pris){porte[e.c]=1;pied[e.c]=1;}
   return pris;}
 // Pose les structures sur la carte déjà générée (relief, vaisseau, site). Elles peuvent recouvrir la montagne et l'eau ;
 // si une entrée donne sur de la roche, un couloir est percé jusqu'à elle (connect).
+// Cavernes : nombre de bâtiments (curseur, ± 1 au tirage) et part de la surface bâtie qui revient à chacun
+function cibles_cav(total){
+  let k=Math.max(1,Math.min(4,Math.round(autour('cvBati',.3))));k=Math.max(1,Math.min(k,Math.floor(total/60)));
+  const w=Array.from({length:k},()=>.65+Math.random()*.7),sw=w.reduce((a,b)=>a+b,0);
+  return w.map(v=>Math.max(55,Math.round(total*v/sw)));}
 function batiments(){
   G.batis=[];G.cles={};G.pb={};G.art={};G.artN=null;G.tun={};const pct=ENFOUI()?100:GEN.structure||0,N=W*H;if(pct<=0)return;
   // complexe enfoui (recette à zones) : il ne tient que dans le massif, à plus de 5 cases de la lisière et du bord de carte (la place d'un tunnel), et n'en prend pas la moitié (le reste est pour les tunnels)
-  const enf=!!(ZONE&&ENFOUI()),dE=enf?distExt():null,mg=W>=72?5:W>=48?4:3;let zb=null,mN=0;   // mg : marge à la lisière et au bord, plus mince sur les petites cartes
+  const enf=!!(ZONE&&ENFOUI()),cav=enf&&!!(RECETTES[GEN.recette]||{}).cavernes,dE=enf?distExt():null,mg=cav?2:W>=72?5:W>=48?4:3,mE=cav?3:mg;let zb=null,mN=0;   // cav : recette cavernes, bâtiments enchâssés entre les cavernes (21 novembre 2026)
+     // mg : marge à la lisière et au bord, plus mince sur les petites cartes
   // Où le complexe peut tenir : dans le massif, à plus de mg cases de la lisière et du bord de carte. Le massif peut être en
   // plusieurs morceaux (forme « deux côtés ») : on ne garde que le plus grand, sinon le cadre de pose enjamberait l'extérieur.
-  if(enf){const ok=new Uint8Array(N),vu=new Uint8Array(N);
+  if(enf&&!cav){const ok=new Uint8Array(N),vu=new Uint8Array(N);
     for(let i=0;i<N;i++){const x=i%W,y=(i/W)|0;if(dE[i]>mg&&x>=mg&&y>=mg&&x<=W-mg-1&&y<=H-mg-1)ok[i]=1;}
     for(let i=0;i<N;i++){if(!ok[i]||vu[i])continue;const q=[i];vu[i]=1;const b=[W,H,0,0];
       for(let k=0;k<q.length;k++){const c=q[k],x=c%W,y=(c/W)|0;
@@ -148,33 +154,39 @@ function batiments(){
         for(const [dx,dy] of D4){const a=x+dx,e=y+dy;if(a<0||e<0||a>=W||e>=H)continue;const j=idx(a,e);if(ok[j]&&!vu[j]){vu[j]=1;q.push(j);}}}
       if(q.length>mN){mN=q.length;zb=b;}}
     if(!zb)return;}
-  const total=enf?Math.max(50,Math.round(mN*Math.min(.8,autour('zComplexe',.15)/100*(W>=72?1:4/3)))):Math.round(N*pct/100);   // complexe enfoui : part du massif, réglée par le curseur (un tiers de plus sur les petites cartes)if(total<45)return;
+  const total=cav?Math.max(60,Math.round(N*autour('cvSurf',.15)/100)):enf?Math.max(50,Math.round(mN*Math.min(.8,autour('zComplexe',.15)/100*(W>=72?1:4/3)))):Math.round(N*pct/100);   // complexe enfoui : part du massif, réglée par le curseur (un tiers de plus sur les petites cartes)if(total<45)return;
   const t0=G.t.slice();
   const nEssais=enf?12:6;   // complexe enfoui : plus d'essais, il n'est jamais posé en terrain ouvert (20 novembre 2026)
   for(let essai=0;essai<nEssais;essai++){
     const t=G.t,B={own:new Int16Array(N),porte:new Uint8Array(N),pied:new Uint8Array(N),interdit:new Uint8Array(N),sol:new Uint8Array(N).fill(FLOOR),pieces:[]};
     for(let i=0;i<N;i++){const x=i%W,y=(i/W)|0,v=t[i];
       if(x<2||y<2||x>=W-2||y>=H-2)B.interdit[i]=1;   // les gouffres naturels ne gênent plus : une pièce posée dessus les change en sol (19 novembre 2026)
-      else if(enf&&(dE[i]<=mg||x<mg||y<mg||x>W-mg-1||y>H-mg-1))B.interdit[i]=1;
+      else if(enf&&(dE[i]<=mg||x<mE||y<mE||x>W-mE-1||y>H-mE-1))B.interdit[i]=1;
       else if(v===SHIP||v===DECK)for(let dy=-3;dy<=3;dy++)for(let dx=-2;dx<=2;dx++)B.interdit[idx(Math.max(0,Math.min(W-1,x+dx)),Math.max(0,Math.min(H-1,y+dy)))]=1;}
     for(let dy=-2;dy<=2;dy++)for(let dx=-2;dx<=2;dx++)B.interdit[idx(Math.max(0,Math.min(W-1,G.px+dx)),Math.max(0,Math.min(H-1,G.py+dy)))]=1;
-    const deux=enf?false:GEN.sNb===2?total>=90:GEN.sNb===1?false:total>=260&&Math.random()<.5,part=deux?.2+Math.random()*.6:1,cibles=deux?[Math.round(total*part),total-Math.round(total*part)]:[total];
+    const deux=enf?false:GEN.sNb===2?total>=90:GEN.sNb===1?false:total>=260&&Math.random()<.5,part=deux?.2+Math.random()*.6:1,cibles=cav?cibles_cav(total):deux?[Math.round(total*part),total-Math.round(total*part)]:[total];
     const cles=STYLES[GEN.sStyle]?[GEN.sStyle]:Object.keys(STYLES).sort(()=>Math.random()-.5),lots=[],strs=[];
     // deux structures : la carte est coupée en deux zones, à proportion de leurs tailles, pour qu'elles tiennent toujours toutes les deux
-    const zones=[enf?zb:[3,3,W-4,H-4]];
+    const zones=cav?cibles.map(()=>[3,3,W-4,H-4]):[enf?zb:[3,3,W-4,H-4]];
+    const ind0=B.interdit.slice(),sepa=new Uint8Array(N);   // cav : entre deux bâtiments, trois cases de roche (interdit seulement pendant la pose)
     if(deux){const vert=W>=H?Math.random()<.75:Math.random()<.25,inv=Math.random()<.5,pa=inv?1-part:part;
       if(vert){const c=Math.round(3+(W-6)*Math.max(.22,Math.min(.78,pa)));zones[0]=[3,3,c-3,H-4];zones[1]=[c+3,3,W-4,H-4];}
       else{const c=Math.round(3+(H-6)*Math.max(.25,Math.min(.75,pa)));zones[0]=[3,3,W-4,c-3];zones[1]=[3,c+3,W-4,H-4];}
       if(inv)zones.reverse();}
-    for(let s=0;s<cibles.length;s++){const cible=cibles[s],aire=cible*1.7,asp=1+Math.random()*.9,[zx0,zy0,zx1,zy1]=zones[s],zw=zx1-zx0+1,zh=zy1-zy0+1;
+    for(let s=0;s<cibles.length;s++){if(cav)for(let i=0;i<N;i++)if(sepa[i])B.interdit[i]=1;
+      const cible=cibles[s],aire=cible*1.7,asp=1+Math.random()*.9,[zx0,zy0,zx1,zy1]=zones[s],zw=zx1-zx0+1,zh=zy1-zy0+1;
       let lw=Math.min(zw,Math.round(Math.sqrt(aire*asp))),lh=Math.min(zh,Math.round(aire/lw));if(lw<10)lw=Math.min(zw,10);if(lh<8)lh=Math.min(zh,8);
       if(lw*lh<aire)lw=Math.min(zw,Math.ceil(aire/lh));   // zone étroite : on s'étale dans l'autre sens
       let best=null,bb=1e9;
       for(let k=0;k<60;k++){const x0=rnd(zx0,zx1-lw+1),y0=rnd(zy0,zy1-lh+1);
         let bad=0;for(let y=y0;y<y0+lh;y+=2)for(let x=x0;x<x0+lw;x+=2)if(B.interdit[idx(x,y)])bad++;if(bad<bb){bb=bad;best=[x0,y0,x0+lw-1,y0+lh-1];}}
+      if(cav)best=[zx0,zy0,zx1,zy1];   // cavernes : le lot est toute la carte, le bâtiment se glisse là où la roche est assez épaisse
       if(!best)continue;lots.push(best);
       const S=accretion(B,best,cible,STYLES[cles[s%cles.length]]);if(!S||S.pieces.length<2)continue;
-      boucles(B,S);amenager(B,S);S.cle=cles[s%cles.length];strs.push(S);}
+      boucles(B,S);amenager(B,S);S.cle=cles[s%cles.length];strs.push(S);
+      if(cav)for(const p of S.pieces)for(const i of p.c){const x=i%W,y=(i/W)|0;for(let dy=-3;dy<=3;dy++)for(let dx=-3;dx<=3;dx++)sepa[idx(Math.max(0,Math.min(W-1,x+dx)),Math.max(0,Math.min(H-1,y+dy)))]=1;}}
+    if(cav)B.interdit.set(ind0);
+    if(cav&&strs.length<Math.min(cibles.length,2)&&essai<nEssais-3)continue;   // cavernes : au moins deux bâtiments quand on en demande deux ou plus (rien n'a encore été modifié sur la carte)
     if(strs.length){
       const garde=new Set();for(const S of strs)for(const p of S.pieces)for(const i of p.c)garde.add(i);
       for(let i=0;i<N;i++){if(B.own[i]&&garde.has(i))t[i]=FLOOR;}
@@ -185,9 +197,10 @@ function batiments(){
       tidyChasms(t);   // ce qui reste d'un gouffre naturel entamé : pas de petit trou, pas de pont qui ne franchit plus rien
       for(let i=0;i<N;i++){if(B.own[i]&&garde.has(i))t[i]=B.sol[i];}   // puis les gouffres, ponts et piliers des pièces
       const atteint=boucher(t,garde);let ok=true;
-      for(const S of strs){S.entrees=entrees(B,S,t,atteint,enf?dE:null);if(!S.entrees.length)ok=false;
+      for(const S of strs){S.entrees=entrees(B,S,t,atteint,enf?dE:null,cav);if(!S.entrees.length)ok=false;
         for(const e of S.entrees){t[e.c]=DOOR;if(blocks(t[e.o]))t[e.o]=GROUND;}}   // la porte, et l'amorce du couloir d'entrée
-      if(ok&&enf&&!tunnels(t,B,strs,dE)&&essai<nEssais-1)ok=false;   // le réseau de tunnels d'abord ; s'il n'a pas trouvé de passage, on recommence (au dernier essai, connect perce tout droit)
+      if(ok&&cav&&!reliePortes(t,B,strs)&&essai<nEssais-1)ok=false;   // cavernes : un petit boyau de chaque porte à la caverne la plus proche
+      else if(ok&&enf&&!cav&&!tunnels(t,B,strs,dE)&&essai<nEssais-1)ok=false;   // le réseau de tunnels d'abord ; s'il n'a pas trouvé de passage, on recommence (au dernier essai, connect perce tout droit)
       if(ok)connect(t);
       if(ok&&connectedAll(t)){
         G.batis=strs.map(S=>({style:S.st.n,pieces:S.pieces.filter(p=>p.g!=='couloir').length,cases:S.emprise,entrees:S.entrees.map(e=>[e.x,e.y])}));

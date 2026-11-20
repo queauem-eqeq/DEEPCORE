@@ -176,6 +176,7 @@ et le seuil ; `ZESSAI` compte les cartes retirées. Ces trois variables sont de 
   Le vaisseau se pose dans la partie de l'extérieur la plus éloignée du massif. Un seul complexe, **creusé dans le
   massif** à plus de 5 cases de la lisière et du bord de carte (4 en taille 2, 3 en taille 1), atteint par un
   réseau de tunnels. Le site de forage est au fond du complexe.
+- `cavernes` (21 novembre 2026, niveau 2) : **tout est sous roche**. Voir « Réseau de cavernes » plus bas.
 - `classique` : la génération d'avant la refonte (terrain partout, une ou deux structures posées dessus).
 
 `ENFOUI()` dit si la recette en cours a un complexe enfoui ; dans ce cas `GEN.structure` (« Surface bâtie ») ne compte pas.
@@ -215,6 +216,46 @@ fourchette de tirage, plus étroite que ses bornes : le hasard ne doit jamais re
 laissés tels quels la **taille de la carte** et les réglages dont 0 veut dire « automatique » (pièces par
 structure, portes d'entrée). Le relief est tiré avec un biais vers le bas (plafonds `HASARD_REL` : eau 30,
 montagne 30, gouffre 12, herbe 45). État mémorisé dans `GEN.hasard`. Code : `hasardReglages()`, `06-reglages.js`.
+
+### Réseau de cavernes (`07e-cavernes.js`)
+
+Recette `cavernes` (`zones`, `enfoui`, `cavernes`, `sansVaisseau`). Pas d'extérieur à ciel ouvert : la carte est une roche
+pleine où l'on creuse. Ici `ZONE` vaut **0 dans les cavernes et les boyaux** et 1 dans la roche, si bien que `distExt()`
+donne la distance à la caverne la plus proche et que les pourcentages de relief (eau, montagne, gouffre, herbe) valent
+pour le sol des cavernes.
+
+- **Cavernes** (`cavernes()`) : `cvNb` blobs irréguliers (automate cellulaire, `caBlob`), posés le plus loin possible
+  des précédents, pour une surface totale `cvPart` % de la carte. Le nombre est le curseur « peu de grandes ↔ beaucoup
+  de petites » ; chaque blob est un poids tiré entre 0,6 et 1,4.
+- **Boyaux** : arbre couvrant (Prim) entre les centres, de 1 à 2 cases de large, sinueux (marche qui penche vers
+  la cible) ; puis `cvBoyaux` boucles entre cavernes voisines non reliées, et 1 à 3 culs-de-sac de 8 à 18 cases.
+- **Arrivée par un puits** : pas de vaisseau, la foreuse débouche sur un carré de sol sec de 3 × 3 (chemin déjà là pour
+  `SANS_VAISSEAU`). Le message d'arrivée est celui de la descente.
+- **Bâtiments enchâssés** (`batiments()`, mode `cav`) : `cvBati` bâtiments (± 1 au tirage, 4 au plus, au moins deux quand
+  on en demande deux) se partagent `cvSurf` % de la carte (visée : la roche disponible plafonne le résultat, 8 à 12 %
+  en pratique). Le lot est toute la carte : le bâtiment s'étale là où la roche est assez épaisse, à plus de 2 cases
+  d'une caverne et à plus de 3 cases du bord ; trois cases de roche séparent deux bâtiments. Chaque bâtiment a **une
+  porte** (deux si l'emprise dépasse 170 cases), du côté de la caverne la plus proche (`entrees(…, proche)`).
+- **Boyau de porte** (`reliePortes()`) : de chaque porte à la caverne la plus proche, chemin le moins cher dans un bruit,
+  loin des autres bâtiments ; il compte dans `G.tun` (jaune sur les planches). Si une porte n'atteint aucune caverne, la
+  structure est refaite (douze essais).
+- Le site de forage est dans la pièce la plus profonde du plus grand bâtiment (`siteAuFond`). Verrous, secrets, pièces
+  secrètes et artefacts passent par le même code que le niveau 1.
+
+Réglages (centre autour duquel la carte varie à chaque tirage) :
+
+| Réglage (clé) | Bornes, départ | Tirage |
+|---|---|---|
+| Part de cavernes (`cvPart`) | 20 à 55 %, 36 | ± 12 % de la valeur ; 18 à 60 % au final |
+| Nombre de cavernes (`cvNb`) | 1 à 12, 6 | ± 25 % |
+| Boucles entre cavernes (`cvBoyaux`) | 0 à 4, 2 | ± 20 % |
+| Nombre de bâtiments (`cvBati`) | 1 à 4, 2 | ± 30 %, au moins 60 cases chacun |
+| Surface bâtie (`cvSurf`) | 6 à 30 %, 14 | ± 15 % |
+
+S'y ajoutent les réglages communs : archétype, pièces, ouvertures, verrous, secrets. **Limites connues** : les
+bâtiments se logent surtout en périphérie, là où la roche est épaisse ; sur les petites cartes (taille 2), un seul
+bâtiment, parfois aucun ; la faune (étape 3) n'est pas encore répartie par lieu. Mesure : `outils/scripts/mesure-cavernes.js` ;
+vue d'ensemble : `outils/scripts/cavernes.js`.
 
 ### Forme du massif
 

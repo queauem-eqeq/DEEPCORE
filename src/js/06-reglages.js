@@ -36,6 +36,12 @@ const RECETTES={atterrissage:{n:'Niveau 1 : extérieur, montagne, complexe enfou
       ['sub','Tunnels'],['num','zTunnels','Taille du réseau (cases)',100,400,245,[140,380]],['num','zSalles','Salles de tunnel',0,8,4,[1,7]],
       ['num','zSorties','Sorties du réseau',1,3,2,[1,3]],['num','zPorte','Éloignement de la porte (cases)',10,45,30,[15,42]],
       ['sub','Complexe'],R_STYLE,R_PIECES,R_OUVERT,R_VERROUS,R_SECRETS]},
+  cavernes:{n:'Niveau 2 : réseau de cavernes, bâtiments enchâssés',zones:true,enfoui:true,cavernes:true,sansVaisseau:true,titre:'Cavernes, boyaux, bâtiments',
+    aide:'Tout est sous roche : la foreuse arrive par un puits. Chaque curseur donne un centre : la carte varie autour à chaque tirage. Les pourcentages de relief (eau, gouffre, herbe) valent pour le sol des cavernes. '+R_AIDE,
+    regl:[['sub','Cavernes'],['num','cvPart','Part de cavernes (% de la carte)',20,55,36,[28,48]],['num','cvNb','Nombre de cavernes (peu de grandes ↔ beaucoup de petites)',1,12,6,[3,9]],
+      ['num','cvBoyaux','Boucles entre cavernes',0,4,2,[0,3]],
+      ['sub','Bâtiments'],['num','cvBati','Nombre de bâtiments',1,4,2,[1,3]],['num','cvSurf','Surface bâtie (% de la carte)',6,30,14,[8,22]],
+      R_STYLE,R_PIECES,R_OUVERT,R_VERROUS,R_SECRETS]},
   classique:{n:'Classique : terrain partout, bâtiments posés dessus',titre:'Structures',aide:R_AIDE,
     regl:[R_STYLE,['sel','sNb','Nombre de structures',[[0,'Une ou deux'],[1,'Une'],[2,'Deux']],0,[0,1,2]],['num','structure','Surface bâtie (%)',0,70,10,[6,22]],
       R_PIECES,['num','sEntrees','Portes d’entrée',0,4,0],R_OUVERT,R_VERROUS,R_SECRETS]}};

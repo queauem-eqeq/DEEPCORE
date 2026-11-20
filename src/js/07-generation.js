@@ -181,7 +181,7 @@ function genPlanet(){
     const relax=attempt>=15,last=attempt===29;
     const t=new Array(N).fill(GROUND);
     roughBorder(t);   // bord de carte irrégulier, en roche
-    {const c=GEN.zExt/100-Math.max(0,ZESSAI-2)*.06;ZONE=rec.zones?massif(t,[Math.max(.25,c-.1),Math.min(.9,c+.1)],GEN.zForme):null;}   // curseur « Part d'extérieur » : le centre, ± 10 points ; le massif s'épaissit si le complexe n'a pas tenu (ZESSAI)Nt=N;
+    {const c=GEN.zExt/100-Math.max(0,ZESSAI-2)*.06;ZONE=rec.cavernes?cavernes(t):rec.zones?massif(t,[Math.max(.25,c-.1),Math.min(.9,c+.1)],GEN.zForme):null;}   // curseur « Part d'extérieur » : le centre, ± 10 points ; le massif s'épaissit si le complexe n'a pas tenu (ZESSAI)Nt=N;
     if(ZONE){Nt=0;for(let i=0;i<N;i++)if(t[i]===GROUND)Nt++;}   // les pourcentages du relief valent pour la zone extérieure
     const mode=GEN.methode,mt=P('montagne'),ct=P('gouffre');
     const mSize=p=>[rnd(SZ(14,4),SZ(30,6))-Math.round(p*8*F),rnd(SZ(9,3),SZ(18,5))-Math.round(p*4*F)],cSize=()=>[rnd(SZ(8,3),SZ(18,5)),rnd(SZ(5,3),SZ(10,4))];
@@ -201,7 +201,7 @@ function genPlanet(){
       gc.sort((a,b)=>gn[a]-gn[b]);for(const i of gc.slice(0,Math.round(gc.length*(.35+Math.random()*.3))))t[i]=FLAT;}
     for(let i=0;i<N;i++)if(t[i]===GROUND&&Math.random()<.035)t[i]=ROCK;
     tidyChasms(t);connect(t);tidyChasms(t);separateWater(t);
-    const ship=SANS_VAISSEAU?null:placeShip(t,ZONE&&((x,y)=>ZINFO.f(x,y)>ZINFO.cut+(1-ZINFO.cut)*.4));   // on atterrit loin du massiflet sx,sy;
+    const ship=(SANS_VAISSEAU||rec.sansVaisseau)?null:placeShip(t,ZONE&&((x,y)=>ZINFO.f(x,y)>ZINFO.cut+(1-ZINFO.cut)*.4));   // on atterrit loin du massiflet sx,sy;
     if(ship){sx=ship.x+2;sy=ship.y+2;}
     else{let ok=false;                                             // niveaux suivants : arrivée par le puits, sur un carré de sol dégagé
       for(let k=0;k<4000&&!ok;k++){sx=rnd(4,W-5);sy=rnd(4,H-5);ok=true;for(let dy=-1;dy<=1&&ok;dy++)for(let dx=-1;dx<=1;dx++){const v=t[idx(sx+dx,sy+dy)];if(!canWalk(v,true)||isWater(v)){ok=false;break;}}}   // le puits débouche toujours au sec
@@ -249,7 +249,8 @@ function niveau(){drilling=false;
   spawnGroupes();lastAct='move';palBiome(null);buildTiles();turnStealth();computeFOV();}
 const fauneTxt=()=>[...new Set([...(G.animals||[]).map(a=>SPECIES[a.sp].n),...(G.beasts||[]).map(b=>BEASTS[b.sp].n)])].join(', ')||'aucune';
 function newGame(){niveau();
-  say('Atterrissage confirmé. Un site de forage signalé par l’orbiteur. La foreuse est dans la soute ; la porte est à l’arrière.','info');}
+  if(G.ship)say('Atterrissage confirmé. Un site de forage signalé par l’orbiteur. La foreuse est dans la soute ; la porte est à l’arrière.','info');
+  else say('Descente terminée : la foreuse a débouché dans un réseau de cavernes. Un site de forage plus bas est signalé.','info');}   // arrivée par un puits (recette cavernes)
 
 /* ---------- Bestiaire : édition des statistiques ---------- */
 const BFIELDS=[['v','Vitesse',1,10],['pv','PV',1,200],['dmin','Dégâts min',0,100],['dmax','Dégâts max',0,100],['pre','Précision',0,250],['def','Défense',0,150],['crit','Crit %',0,100]];
