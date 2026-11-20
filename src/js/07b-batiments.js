@@ -120,33 +120,38 @@ function amenager(B,S){const {own,porte,sol}=B;
   }
 }
 // Portes d'entrée : peu nombreuses, éloignées les unes des autres, de préférence là où le dehors est déjà praticable.
-function entrees(B,S,t,atteint){const {own,porte,pied,interdit}=B,cand=[];
+function entrees(B,S,t,atteint,dE){const {own,porte,pied,interdit}=B,cand=[];
   for(const p of S.pieces){if(p.g==='couloir')continue;for(const fi of p.c){if(B.sol[fi]!==FLOOR)continue;const fx=fi%W,fy=(fi/W)|0;
     for(const [dx,dy] of D4){const cx=fx+dx,cy=fy+dy,ox=cx+dx,oy=cy+dy;if(ox<2||oy<2||ox>=W-2||oy>=H-2)continue;const c=idx(cx,cy),o=idx(ox,oy);
       if(own[c]||porte[c]||interdit[c]||interdit[o]||pied[o]||!atteint[o]||own[idx(cx+dy,cy+dx)]||own[idx(cx-dy,cy-dx)]||porte[idx(cx+dy,cy+dx)]||porte[idx(cx-dy,cy-dx)])continue;
       cand.push({c,o,x:cx,y:cy,libre:!blocks(t[o])&&!isWater(t[o])});}}}
   if(!cand.length)return [];
-  cand.sort((a,b)=>(b.libre-a.libre)||Math.random()-.5);
-  const n=GEN.sEntrees>0?GEN.sEntrees:1+(S.pieces.length>=7?1:0)+(S.pieces.length>=16?1:0),pris=[],ecart=Math.max(GEN.sEntrees>0?4:8,Math.sqrt(S.emprise)*(GEN.sEntrees>0?.35:.7));
+  if(dE){const r=new Map(cand.map(e=>[e,Math.random()]));cand.sort((a,b)=>r.get(a)-r.get(b));}   // complexe enfoui : la porte peut être de n'importe quel côté, le tunnel contourne
+  else cand.sort((a,b)=>(b.libre-a.libre)||Math.random()-.5);
+  const n=GEN.sEntrees>0?GEN.sEntrees:dE?1:1+(S.pieces.length>=7?1:0)+(S.pieces.length>=16?1:0),pris=[],ecart=Math.max(GEN.sEntrees>0?4:8,Math.sqrt(S.emprise)*(GEN.sEntrees>0?.35:.7));
   for(const e of cand){if(pris.length>=n)break;if(pris.some(q=>Math.hypot(q.x-e.x,q.y-e.y)<ecart))continue;pris.push(e);}
   for(const e of pris){porte[e.c]=1;pied[e.c]=1;}
   return pris;}
 // Pose les structures sur la carte déjà générée (relief, vaisseau, site). Elles peuvent recouvrir la montagne et l'eau ;
 // si une entrée donne sur de la roche, un couloir est percé jusqu'à elle (connect).
 function batiments(){
-  G.batis=[];G.cles={};G.pb={};G.art={};G.artN=null;const pct=GEN.structure||0,N=W*H;if(pct<=0)return;
-  const total=Math.round(N*pct/100);if(total<45)return;
+  G.batis=[];G.cles={};G.pb={};G.art={};G.artN=null;G.tun={};const pct=GEN.structure||0,N=W*H;if(pct<=0)return;
+  // complexe enfoui (recette à zones) : il ne tient que dans le massif, à plus de 5 cases de la lisière et du bord de carte (la place d'un tunnel), et n'en prend pas plus des deux tiers
+  const enf=!!(ZONE&&(RECETTES[GEN.recette]||{}).enfoui),dE=enf?distExt():null;let zb=null,mN=0;
+  if(enf){zb=[W,H,0,0];for(let i=0;i<N;i++){const x=i%W,y=(i/W)|0;if(dE[i]<=5||x<5||y<5||x>W-6||y>H-6)continue;mN++;zb=[Math.min(zb[0],x),Math.min(zb[1],y),Math.max(zb[2],x),Math.max(zb[3],y)];}}
+  const total=enf?Math.min(Math.round(N*pct/100),Math.round(mN*.65)):Math.round(N*pct/100);if(total<45)return;
   const t0=G.t.slice();
   for(let essai=0;essai<6;essai++){
     const t=G.t,B={own:new Int16Array(N),porte:new Uint8Array(N),pied:new Uint8Array(N),interdit:new Uint8Array(N),sol:new Uint8Array(N).fill(FLOOR),pieces:[]};
     for(let i=0;i<N;i++){const x=i%W,y=(i/W)|0,v=t[i];
       if(x<2||y<2||x>=W-2||y>=H-2)B.interdit[i]=1;   // les gouffres naturels ne gênent plus : une pièce posée dessus les change en sol (19 novembre 2026)
+      else if(enf&&(dE[i]<=5||x<5||y<5||x>W-6||y>H-6))B.interdit[i]=1;
       else if(v===SHIP||v===DECK)for(let dy=-3;dy<=3;dy++)for(let dx=-2;dx<=2;dx++)B.interdit[idx(Math.max(0,Math.min(W-1,x+dx)),Math.max(0,Math.min(H-1,y+dy)))]=1;}
     for(let dy=-2;dy<=2;dy++)for(let dx=-2;dx<=2;dx++)B.interdit[idx(Math.max(0,Math.min(W-1,G.px+dx)),Math.max(0,Math.min(H-1,G.py+dy)))]=1;
-    const deux=GEN.sNb===2?total>=90:GEN.sNb===1?false:total>=260&&Math.random()<.5,part=deux?.2+Math.random()*.6:1,cibles=deux?[Math.round(total*part),total-Math.round(total*part)]:[total];
+    const deux=enf?false:GEN.sNb===2?total>=90:GEN.sNb===1?false:total>=260&&Math.random()<.5,part=deux?.2+Math.random()*.6:1,cibles=deux?[Math.round(total*part),total-Math.round(total*part)]:[total];
     const cles=STYLES[GEN.sStyle]?[GEN.sStyle]:Object.keys(STYLES).sort(()=>Math.random()-.5),lots=[],strs=[];
     // deux structures : la carte est coupée en deux zones, à proportion de leurs tailles, pour qu'elles tiennent toujours toutes les deux
-    const zones=[[3,3,W-4,H-4]];
+    const zones=[enf?zb:[3,3,W-4,H-4]];
     if(deux){const vert=W>=H?Math.random()<.75:Math.random()<.25,inv=Math.random()<.5,pa=inv?1-part:part;
       if(vert){const c=Math.round(3+(W-6)*Math.max(.22,Math.min(.78,pa)));zones[0]=[3,3,c-3,H-4];zones[1]=[c+3,3,W-4,H-4];}
       else{const c=Math.round(3+(H-6)*Math.max(.25,Math.min(.75,pa)));zones[0]=[3,3,W-4,c-3];zones[1]=[3,c+3,W-4,H-4];}
@@ -170,8 +175,9 @@ function batiments(){
       tidyChasms(t);   // ce qui reste d'un gouffre naturel entamé : pas de petit trou, pas de pont qui ne franchit plus rien
       for(let i=0;i<N;i++){if(B.own[i]&&garde.has(i))t[i]=B.sol[i];}   // puis les gouffres, ponts et piliers des pièces
       const atteint=boucher(t,garde);let ok=true;
-      for(const S of strs){S.entrees=entrees(B,S,t,atteint);if(!S.entrees.length)ok=false;
+      for(const S of strs){S.entrees=entrees(B,S,t,atteint,enf?dE:null);if(!S.entrees.length)ok=false;
         for(const e of S.entrees){t[e.c]=DOOR;if(blocks(t[e.o]))t[e.o]=GROUND;}}   // la porte, et l'amorce du couloir d'entrée
+      if(ok&&enf&&!tunnels(t,B,strs,dE)&&essai<5)ok=false;   // le réseau de tunnels d'abord ; s'il n'a pas trouvé de passage, on recommence (au dernier essai, connect perce tout droit)
       if(ok)connect(t);
       if(ok&&connectedAll(t)){
         G.batis=strs.map(S=>({style:S.st.n,pieces:S.pieces.filter(p=>p.g!=='couloir').length,cases:S.emprise,entrees:S.entrees.map(e=>[e.x,e.y])}));

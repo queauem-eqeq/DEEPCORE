@@ -11,10 +11,16 @@ function buildCursor(){const r=rowsOf('cursor');CURT=curCanvas(r);CURT_DIM=curCa
 // des couloirs partout ; gouffre : la carte devient un réseau de ponts). L'herbe ne gêne que la vue.
 const GEN_LBL=[['eau','Eau',60],['montagne','Montagne',70],['gouffre','Gouffre',30],['herbe','Herbe',80]],GEN_SUM=80;
 const METHODS=[['automate','Automate cellulaire'],['bruit','Bruit (chaînes)'],['mixte','Mixte']];
-let GEN={taille:4,eau:10,montagne:12,gouffre:4,herbe:15,methode:'automate',remplissage:55,iterations:5,structure:10,sNb:0,sStyle:'',sPieces:0,sEntrees:0,sOuvert:25,sVerrous:1,sSecrets:1};   // structure : part de la carte occupée par les bâtiments (19 novembre 2026)
+let GEN={taille:4,eau:10,montagne:12,gouffre:4,herbe:15,methode:'automate',remplissage:55,iterations:5,structure:10,sNb:0,sStyle:'',sPieces:0,sEntrees:0,sOuvert:25,sVerrous:1,sSecrets:1,recette:'atterrissage'};   // structure : part de la carte occupée par les bâtiments (19 novembre 2026)
 try{const g=JSON.parse(localStorage.getItem('np-gen')||'null');if(g&&typeof g.eau==='number')GEN=Object.assign(GEN,g);}catch(e){}
 if(!(GEN.taille>=1&&GEN.taille<=5))GEN.taille=4;
 if(!(GEN.structure>=0&&GEN.structure<=30))GEN.structure=10;
+/* Recettes de niveau (20 novembre 2026) : la carte est un plan de zones, décrit ici. « classique » est la génération d'avant la
+   refonte (terrain partout, bâtiments posés dessus), gardée telle quelle. ext : part de la carte laissée à la zone extérieure
+   (minimum, maximum) ; enfoui : le complexe est creusé dans le massif et relié au dehors par des tunnels. */
+const RECETTES={atterrissage:{n:'Niveau 1 : extérieur, montagne, complexe enfoui',ext:[.5,.7],enfoui:true},
+  classique:{n:'Classique : terrain partout, bâtiments posés dessus'}};
+if(!RECETTES[GEN.recette])GEN.recette='atterrissage';
 function setTaille(v){v=Math.max(1,Math.min(5,Math.round(+v||4)));GEN.taille=v;$('gr-taille').value=v;$('gn-taille').value=v;
   $('genTaille').textContent=`${SIZES[v][0]} × ${SIZES[v][1]} cases${v===4?' (taille d’origine)':''}. Appliqué au prochain lancement.`;saveGen();}
 const saveGen=()=>{try{localStorage.setItem('np-gen',JSON.stringify(GEN));}catch(e){}touchLocal();};
@@ -31,10 +37,13 @@ function setStruct(v){setS('structure',v);}
 function buildStruct(){
   for(const [k,,mn,mx] of S_NUM)if(!(GEN[k]>=mn&&GEN[k]<=mx))GEN[k]={structure:10,sOuvert:25,sVerrous:1,sSecrets:1}[k]||0;
   if(![0,1,2].includes(GEN.sNb))GEN.sNb=0;if(GEN.sStyle&&!STYLES_LBL.some(([v])=>v===GEN.sStyle))GEN.sStyle='';
-  $('genS').innerHTML=`<div class="g2"><label for="gs-style">Archétype de structure</label><select id="gs-style"><option value="">Au hasard</option>${STYLES_LBL.map(([v,l])=>`<option value="${v}"${GEN.sStyle===v?' selected':''}>${l}</option>`).join('')}</select></div>`
+  if(!RECETTES[GEN.recette])GEN.recette='atterrissage';
+  $('genS').innerHTML=`<div class="g2"><label for="gs-recette">Recette de niveau</label><select id="gs-recette">${Object.keys(RECETTES).map(k=>`<option value="${k}"${GEN.recette===k?' selected':''}>${RECETTES[k].n}</option>`).join('')}</select></div>`
+   +`<div class="g2"><label for="gs-style">Archétype de structure</label><select id="gs-style"><option value="">Au hasard</option>${STYLES_LBL.map(([v,l])=>`<option value="${v}"${GEN.sStyle===v?' selected':''}>${l}</option>`).join('')}</select></div>`
    +`<div class="g2"><label for="gs-nb">Nombre de structures</label><select id="gs-nb">${[[0,'Une ou deux'],[1,'Une'],[2,'Deux']].map(([v,l])=>`<option value="${v}"${GEN.sNb===v?' selected':''}>${l}</option>`).join('')}</select></div>`
    +S_NUM.map(([k,l,mn,mx])=>`<div class="g"><label for="gn-${k}">${l}</label><input type="range" id="gr-${k}" min="${mn}" max="${mx}" step="1" value="${GEN[k]}" aria-label="${l}"><input type="number" id="gn-${k}" min="${mn}" max="${mx}" step="1" value="${GEN[k]}"></div>`).join('')
    +'<div class="sum">Avant-poste : petites pièces, peu de boucles. Hangar : grandes salles à piliers. Complexe de forage : couloirs et gouffres. Ruine : cavernes effondrées.</div>';
+  $('gs-recette').addEventListener('change',e=>{GEN.recette=e.target.value;saveGen();});
   $('gs-style').addEventListener('change',e=>{GEN.sStyle=e.target.value;saveGen();});
   $('gs-nb').addEventListener('change',e=>{GEN.sNb=+e.target.value;saveGen();});
   S_NUM.forEach(([k])=>{$('gr-'+k).addEventListener('input',e=>setS(k,e.target.value));$('gn-'+k).addEventListener('change',e=>setS(k,e.target.value));});

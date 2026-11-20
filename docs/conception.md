@@ -148,6 +148,43 @@ leurs teintes, le **tirage des mondes** d'une descente, le **budget de menace pa
 l'utilisateur restent** : ce sont eux qui règlent la carte. Les six reliefs ont été recopiés dans le **banc de combat**
 (`banc/banc.js`, `RELIEFS`) comme terrains de mesure, pour que les séries déjà archivées restent comparables.
 
+### Refonte : zones, complexe enfoui et tunnels (20 novembre 2026, branche `claude/refonte-niveaux`)
+
+Idée de l'utilisateur : l'essentiel du jeu se passera en intérieur, donc la logique s'inverse. La carte est un **plan de zones** ;
+l'extérieur est une « pièce » parmi d'autres, faite de terrain naturel, et le reste est de la roche où les bâtiments sont creusés.
+
+**Décisions du 20 novembre 2026** (réponses de l'utilisateur) :
+- la **descente revient**, sur **3 niveaux** pour commencer (pas encore codée : forer finit toujours la partie) ;
+- la roche garde la règle des massifs : **écorce tendre, cœur dur** — on grignote les bords, on ne coupe pas tout droit ;
+- les tunnels sont un **petit réseau** : un ou deux embranchements, des culs-de-sac, pas d'ennemis propres ;
+- on commence par le **niveau 1 complet**.
+
+**Recettes** (`RECETTES`, dans `06-reglages.js` ; choix dans Monde → Structures → « Recette de niveau », réglage `GEN.recette`) :
+- `atterrissage` (par défaut) : zone extérieure de 50 à 70 % de la carte, bordure comprise ; le reste est un **massif** sur un côté
+  (gauche ou droite le plus souvent, parfois haut ou bas), à la lisière sinueuse. Le vaisseau se pose dans la partie de
+  l'extérieur la plus éloignée du massif. Un seul complexe, **creusé dans le massif** à plus de 5 cases de la lisière et du bord
+  de carte ; il prend au plus les deux tiers de la place disponible (et jamais plus que « Surface bâtie »). Le site de forage est
+  au fond du complexe, comme avant.
+- `classique` : la génération d'avant la refonte, inchangée (terrain partout, une ou deux structures posées dessus).
+
+Les pourcentages du menu Monde (eau, montagne, gouffre, herbe) valent pour la **zone extérieure** seule.
+
+**Tunnels** (`07d-tunnels.js`) : depuis la porte du complexe (une seule, sauf si « Portes d'entrée » en demande plus ; elle peut
+être de n'importe quel côté), un boyau serpente jusqu'à l'extérieur — chemin le moins cher dans un bruit, élargi par endroits.
+Il ne longe jamais les murs du complexe (une case de roche au moins entre les deux). S'y ajoutent un **embranchement** vers une
+seconde sortie, à 12 cases au moins de la première, et **un ou deux culs-de-sac** de 6 à 11 cases terminés par une petite poche.
+Si aucun passage n'est trouvé, la structure est retirée ; au dernier des six essais, `connect` perce tout droit.
+Les cases de tunnel sont notées dans `G.tun` (pour la faune par lieu, à venir). La roche dure vient ensuite, comme partout : le
+cœur du massif est impénétrable, les parois des tunnels restent tendres sur deux cases.
+
+Mesuré sur 60 cartes de taille 4 (20 novembre 2026) : un complexe et un réseau de tunnels à chaque fois ; zone extérieure 50 à
+69 % (59 en moyenne) ; 12 à 191 cases de tunnel (68 en moyenne) ; 5 à 15 pièces (11 en moyenne) ; 34 à 114 pas du vaisseau à la
+porte du complexe (70 en moyenne) ; génération en 90 ms en moyenne.
+
+**Reste à faire** : la faune par lieu (dehors / dedans), la descente et l'arrivée par un puits, les recettes des niveaux 2 et 3,
+les mesures par recette. Le plan est dans le document `claude/refonte-niveaux-plan.md` du projet.
+
+
 ### Banc de combat (15 novembre 2026)
 
 Artefact à part (https://claude.ai/artifact/9BKRaoB4hzgdWhzYFx5A6q) : la page du jeu, plus un panneau qui remplace la colonne. On y choisit une carte de taille 1 (arène nue ou l'un des six reliefs d'essai, voir § 3 bis), des ennemis, un équipement, une consigne de pilote automatique (chasse ou traversée), et l'on lance une **série** sans affichage (moyennes : victoires, vie restante, points perdus, points perdus par ennemi tué, durée) ou **un combat à l'écran**. Options : ennemis en alerte, vie d'essai. Onglets « Mes résultats » (gardés dans le navigateur) et « Archives » (les séries de Claude ; un clic sur une ligne reprend la configuration). Il sert à régler les coûts de menace ; à relancer après tout changement de stats.
