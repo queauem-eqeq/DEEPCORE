@@ -1,0 +1,197 @@
+# Noyau Profond — historique des décisions
+
+**Pourquoi ce document.** `conception.md` dit ce que le jeu est aujourd'hui ; celui-ci dit **ce qui a été essayé,
+retiré, et pourquoi**. À consulter avant de reproposer une idée : beaucoup ont déjà été écartées, souvent après
+avoir été codées. Chaque ligne est datée ; « demande de l'utilisateur » signifie que le choix est le sien et ne se
+rediscute pas sans lui.
+
+Les chiffres mesurés sont dans `mesures.md`.
+
+## Refus de fond, à ne pas reproposer
+
+- **Gerbe d'éclats à l'impact** et **tremblement d'écran quand la roche cède** : essayés, retirés (trop bruyants).
+- **Police pixel pour les chiffres de dégâts** : essayée, abandonnée (illisible).
+- **Roches incassables à la place des gouffres** : essayées, annulées.
+- **Gros prédateurs 2 × 2** : supprimés.
+- **Pas de blindage, pas de réparation automatique** : règle tenue depuis le début, confirmée au passage au modèle
+  Brogue (16 novembre 2026).
+- **Export / import texte des tuiles** : essayé puis retiré le 6 novembre 2026 (« on verra plus tard »).
+- **Panneau d'équipement dans la colonne** : essayé le 13 novembre 2026, abandonné le jour même pour une fenêtre
+  plein écran.
+- **Workflow GitHub Actions pour Pages** : supprimé le 13 novembre 2026, il faisait doublon avec la publication
+  automatique par la branche et les deux s'écrasaient (le README s'affichait à la place du jeu). Ne pas le
+  réintroduire sans basculer la source sur Actions en même temps.
+
+## 5-6 novembre 2026 — les bases
+
+- Carte portée de 72 × 48 à **96 × 64** ; lacs, massifs et distances recalibrés (facteur d'échelle F).
+- Le jeu cesse d'être **un fichier unique** : `src/` en fichiers numérotés, projet sous git, chaque version publiée
+  marquée par une branche `claude/version-…` (la session ne peut pas pousser de tags). Dernière version à fichier
+  unique : branche `claude/version-avant-fichiers-separes`.
+- **Aperçu derrière les obstacles** ajouté (une seule case, en mode souvenir).
+- **Gouffres** : variante D′ validée sur planche (lèvre irrégulière, paroi en dégradé sous les bords nord).
+- Sprites validés : foreuse modèle D, puce et relais retouchés par l'utilisateur adoptés comme dessins par défaut.
+- **Sauvegarde** : jusque-là, la base de l'artefact écrasait les retouches locales à chaque rechargement — des
+  palettes et des tuiles ont été perdues. Depuis, la base n'est relue que si elle est plus récente que `np-maj`.
+- Le bouton « Enregistrer » est retiré du Lab, puis rétabli le 9 novembre.
+
+## 9-10 novembre 2026
+
+- **Éclats de métal** dans 10 % des cases de montagne ; densités petits / moyens / gros.
+- **Mort de la foreuse** : explosion, ~520 éclats qui rebondissent, écran « FOREUSE DÉTRUITE ». Pas de menu
+  principal (choix du 9 novembre).
+- **Foreuse endommagée** : fumée sous 50 PV, flammèches sous 20 PV.
+- **Clic dans le brouillard** : une case inexplorée devient une destination valide, le trajet se recalcule à chaque pas.
+- **EYE passe de 5 à 10** (10 novembre).
+- **Mémoire des ennemis** (10 novembre) : ils ne connaissent la position de la foreuse que s'ils la voient, et
+  retiennent la dernière position connue. Remplace une poursuite « à l'aveugle » de 8 tours qui connaissait la
+  position réelle.
+- **Diagonales comme dans Brogue** : on ne coupe pas les coins.
+- **Intro** : éclairs refaits en pixel art, tonnerre synthétisé, variations à chaque lancement.
+- **POW** : 6 puis 3 le 9 novembre, 5 le 13, 1 le 16, 10 le 16 au soir (échelle de la force de Brogue).
+
+## 13 novembre 2026 — l'horloge, la discrétion, l'équipement
+
+- **Temps continu** : le jeu compte en unités de temps, plus en tours. Chaque action a une durée ; le monde bat
+  toutes les 100 unités. **La détection se tire au temps, pas à l'action.**
+- **VIT** devient la vitesse de déplacement ; **se déplacer ne coûte plus d'énergie** (2 par pas avant, constante
+  `MOVE_COST`) ; **frapper un animal non plus**.
+- **Course** (R) et **repos** (P) ajoutés. La course ajoute +2 cases de portée de discrétion.
+- **Portée de discrétion** inspirée de Brogue : la détection appartient à la foreuse. **La stat DÉT par espèce est
+  supprimée** ; toutes les espèces partagent le même rayon, avec 25 % de chance plate par battement.
+- **Taille de carte réglable** de 1 à 5.
+- **Un seul site de forage** par carte (5 auparavant), profondeur sans effet de jeu.
+- **Équipement et inventaire** : première version. Fenêtre plein écran après l'échec du panneau en colonne.
+- **Exploration automatique** (O).
+- **Cri d'alerte des relais retiré** (le code reste, `alarm:false`) : seule la mémoire partagée de la bande subsiste.
+- **Herbes basses et herbes basses fusionnées** en un seul terrain ; la variante « moitié inférieure des brins »
+  disparaît.
+- Éclats de métal et sites **retirés de la liste « En vue »** : on les lit à la fiche de survol.
+
+## 15 novembre 2026
+
+- **Lacs refaits** : chaque lac a sa rive (étang, à-pic, ou rive ondulée). **L'eau profonde peut désormais toucher
+  la terre** — on peut y tomber d'un pas. Avant, tout lac avait un cœur profond entouré de deux cases peu profondes.
+- **Herbes hautes et basses mêlées** par trois échelles de bruit ; avant, deux moitiés coupées net en grandes zones.
+- **Herbes hautes assombries de moitié** : elles ressortaient trop.
+- **Sonar décalé** : 10 à 20 tours après l'arrivée, au lieu de l'arrivée même.
+- **Menus Monde et Life** créés (deux boutons sous la mini-carte).
+- **Inventaire à dix places**, une par sorte ; `[X]` détruit la pile ; un consommable ne peut plus être jeté au sol.
+- Ouverture de l'équipement : **I**, puis **E**, puis **T** (le jour même).
+- **Sous-menu Statistiques supprimé** : les stats passent dans la fenêtre Équipement.
+- **Fenêtre Discrétion** remise en page (940 × 390 au lieu de 640 × 835).
+- **Banc de combat** créé, artefact à part.
+- **Puce** : règle d'attaque revue — elle suit sans attaquer, et passe à l'attaque dès qu'un coup est échangé.
+  Règles retirées le même jour : « attaque dès qu'un ennemi chasse la foreuse à 4 cases » et « au contact elle
+  attaque toujours ».
+- **Repérage : un « ! »** au-dessus de l'ennemi.
+- **Forage sans confirmation** : la barre part tout de suite.
+- Tuile « Sol » vidée (quatre petits points avant).
+
+## 16 novembre 2026 — la grande simplification
+
+- **Modèle de combat Brogue** : « précision × 0,987^défense » remplace « précision − esquive » ; **DEF remplace
+  ESQ** ; dégâts en fourchette ; POW requis par arme et armure. Conversion faite à puissance égale (esquive 5 → 5,
+  25 → 30, 35 → 45).
+- **POW de base passe à 10** (le soir), PRE de 80 à 100.
+- **Roche dure au cœur des massifs** ajoutée.
+- **Texture du sol** (« plaques rugueuses », variante 5 sur six proposées).
+- **La descente en 5 niveaux est retirée**, avec les **six biomes** (Plateau, Marécage, Hautes herbes, Galeries,
+  Pierrier, Failles), leurs reliefs, leurs faunes, leurs teintes, le tirage des mondes et le budget de menace par
+  niveau (`COURBE`, `lifeMenace`, `menaceDe`, `MENACE_ESP`). Les cartes d'essai deviennent le mode normal. Les six
+  reliefs sont recopiés dans le **banc de combat** (`RELIEFS`) pour que les séries archivées restent comparables.
+- **Le joyau est retiré**, avec le **menu des trois améliorations** qu'il ouvrait : plus aucune progression
+  permanente dans le jeu.
+- **Toutes les armes et armures sont retirées sauf l'équipement d'origine** (Foreuse, Coque d'usine) : Foret
+  diamant, Marteau-pilon, Scie circulaire, Lance thermique, Châssis renforcé, Coque furtive, Châssis allégé, Coque
+  isolante. Accessoires et consommables restent.
+- **Fumigène : un vrai nuage** qui s'étend et cache la vue des deux côtés (avant : un simple effet de 5 battements).
+- **Charge sismique : une visée** déplaçable, au lieu d'un effet immédiat.
+- **Trois rapports à l'eau** (nageurs, au sec, les autres) ; la veille, tout le monde y entrait sans distinction.
+- **Barres de vie et d'énergie corrigées** : elles comptaient 20 caractères là où la colonne en montrait 14.
+- **Consommables : un battement** (gratuits et instantanés avant).
+- **Éclats de métal** : rendent autant d'énergie que de vie.
+- **Tuiles et stats réglées par l'utilisateur adoptées** comme valeurs du code (l'insectoïde laissé tel quel à sa
+  demande). Décision du même jour : **il règle ses tuiles et ses stats dans l'artefact**, seule version dont la
+  session peut relire les réglages.
+
+## 17 novembre 2026 — les machines
+
+- **Six espèces retirées** : Crachin, Vipérin, Gluar, Siphon, Tapi, Taupar. Restent la Puce et quatre bêtes.
+- **Les créatures deviennent des machines** : Insectoïde → **Puce**, Crabos → **Crabot**, Cafar → **Relais**,
+  Mastok → **Broyeur**, Brochon → **Torpille**. Seuls les noms affichés changent ; les clés internes restent.
+  Les retouches faites sur les anciens dessins sont jetées une fois (`np-robo17`).
+- Les tuiles étant numérotées par rang, le Broyeur passe de `bz8` à `bz2` et la Torpille de `bz9` à `bz3`
+  (`migreBz`, marqué par `np-bz17`).
+- **Dés de dégâts** : la foreuse passe à **1d6+5**, DEG devient un bonus fixe (il valait 10, avec un tirage à ±30 %).
+- **Articles accordés au genre de l'espèce** : « l'puce » et « le torpille » disparaissent.
+- Le soir : stats et dessins revus par l'utilisateur adoptés ; la palette **Rouille** qu'il a réglée remplace celle
+  du code.
+
+## 18 novembre 2026
+
+- **La faune sort du menu Monde** : un archétype de monde ne décrit que la génération. Les archétypes enregistrés
+  avant portaient une faune : elle est effacée une fois, au chargement.
+- **Fouille** : l'ennemi ratisse la zone autour du dernier point connu (30 battements, ramenés à 20 le soir).
+  Avant, il faisait 4 battements de pas au hasard et dérivait.
+- **Parois adjacentes plafonnées à −2** (`WALL_MAX`), au lieu de −4.
+- **Bâtiments décidés** : accrétion façon Brogue, boucles par détour borné, salles isolées, styles, murs que la
+  foreuse ne perce pas. Étape 1 faite le jour même (mur, sol bâti, porte, pilier) ; la pièce d'essai posée près du
+  vaisseau est retirée le 19 avec l'arrivée du générateur.
+
+## 19 novembre 2026 — générateur de bâtiments, groupes
+
+- **Le générateur de bâtiments entre en jeu** : accrétion, boucles et longs couloirs, piliers, portes d'entrée,
+  styles, une ou deux structures par carte jamais reliées entre elles. Les structures recouvrent le terrain,
+  gouffres naturels compris.
+- **Portes verrouillées et clés**, **pièces secrètes** et stat **DET**.
+- **Surface bâtie** portée de 30 à 70 % ; partage entre deux structures élargi à 20-80 % (35-65 avant).
+- **Textes d'aide retirés du menu Monde**, à la demande de l'utilisateur.
+- **Aucune clé dans les pièces secrètes** : il n'y a jamais plus de clés que de serrures.
+- **Life passe aux groupes** : un budget de menace achète des groupes d'espèces. Les cinq niveaux d'intensité par
+  espèce (13 novembre) disparaissent ; les effectifs par espèce ne servent plus qu'au banc et aux mesures.
+- **Styles de patrouille** (six) portés par le groupe, pas par l'espèce ; plusieurs styles possibles par groupe.
+- **Deux espèces ajoutées** : la **Mine** et la **Sentinelle** (d'abord appelée Paralyzor). La paralysie de celle-ci
+  — la foreuse ne pouvait plus se déplacer tant qu'elle vivait — est **retirée le soir même**, avec le nom.
+- **Les capacités des espèces disparues sont supprimées du moteur** (`range`, `poison`, `slow`, `drain`, `ambush`,
+  `dig`) : plus rien n'inflige poison ni glu.
+- **Plus de sang** : les ennemis étant des machines, étincelles et débris de carcasse. L'éclat blanc en croix du
+  premier essai est retiré le soir. Les tuiles « Sang A » et « Sang B » quittent le Tile editor.
+- **Fenêtres Bestiaire et Groupes refaites** : liste en colonne à droite, fiches à gauche (grille de fiches avant).
+- **Bruit de porte** unifié pour toutes les portes.
+- **Le pilier bloque le pas** : confirmé par l'utilisateur.
+
+## 20 novembre 2026 — artefacts, puis refonte des niveaux
+
+- **Artefacts** : antennes, pièces d'herbe, machines, terminaux, avec leur fréquence (Lab → Artefacts).
+  L'**antenne** passe de 20 à 30 cases et **reste allumée** au lieu de révéler la carte une fois.
+- **Purge supprimée** : plus aucun ennemi n'inflige poison ou glu, l'objet n'avait plus d'usage.
+- **Gouffres intérieurs retirés « pour l'instant »** : plus de gouffre ni de chemin-pont dans les pièces (drapeau
+  `GOUFFRES_INT`, le code reste). Ils pouvaient occuper toute une pièce, avec un chemin-pont par porte.
+- **Pièces moins étroites** : rectangles d'au moins 4 × 4, halls de 3-4 cases (2-3 avant).
+- **Échange de places** entre groupes qui se croisent (règle de Brogue). Essayé d'abord avec le seul demi-tour :
+  aucun blocage, mais **aucune traversée** non plus — le couloir devenait une frontière.
+- **Errance revue** : un pas tous les battements ou tous les deux, sans jamais repartir d'où l'on vient. Avant : un
+  pas au hasard un battement sur quatre, et une bande de relais ne restait pas groupée.
+- **Si aucun style de patrouille n'est choisi, il est tiré** parmi les six.
+- **Seuls les relais partagent** leur mémoire : précision demandée par l'utilisateur.
+- **Réglages du joueur adoptés** : 33 tuiles retouchées, dix groupes, Sentinelle à 18 PV, machines en « + »,
+  palettes Néon et Abysse.
+
+### Refonte des niveaux (même jour)
+
+- **Décisions** : la descente revient **sur 3 niveaux** ; roche à écorce tendre et cœur dur ; tunnels de 100 à 400
+  cases avec des salles irrégulières, sans ennemis propres ; **la porte du complexe doit être loin de l'entrée des
+  tunnels** ; **jamais de complexe en terrain ouvert**.
+- **Le complexe sans massif** : un premier correctif posait la structure dehors quand elle ne tenait pas dans la
+  montagne — refusé. Règle retenue : si rien ne tient, **la carte entière est retirée** (dix fois au plus).
+- **Menu Monde par recette** : chaque recette déclare ses réglages, le menu se reconstruit tout seul. « Surface
+  bâtie » n'avait presque aucun effet dans la recette du niveau 1 (le complexe était plafonné à 45 % du massif) :
+  elle est remplacée par « Taille du complexe ».
+- **Forme du massif** : un côté ou un coin. **« Deux côtés opposés » a été codé, essayé, puis retiré** le jour même
+  à la demande de l'utilisateur : les deux massifs étant plus minces, le complexe s'y étalait en ruban et le second
+  massif ne servait à rien.
+- **Case « Réglages au hasard »** sous REGEN.
+- **Fusion dans `main`** (PR n° 22) ; version `claude/version-2026-11-20-7`.
+- **Ce document est créé** le même jour : `conception.md` passe de 118 à 65 Ko en perdant son historique, qui
+  atterrit ici, et ses mesures, qui vont dans `mesures.md`.
