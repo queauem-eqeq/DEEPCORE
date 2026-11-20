@@ -26,4 +26,10 @@ function teinter(hex,dh,dl,ds){if(!dh&&!dl&&!ds)return hex;const n=parseInt(hex.
   h=((h+dh)%360+360)%360;l=Math.max(.08,Math.min(.92,l+(dl||0)/100));s=Math.max(0,Math.min(1,s+(ds||0)/100));
   const c=(1-Math.abs(2*l-1))*s,x=c*(1-Math.abs(h/60%2-1)),m=l-c/2,q=h<60?[c,x,0]:h<120?[x,c,0]:h<180?[0,c,x]:h<240?[0,x,c]:h<300?[x,0,c]:[c,0,x];
   return '#'+q.map(v=>Math.round((v+m)*255).toString(16).padStart(2,'0')).join('');}
-function palBiome(t){TEINTE=t||[0,0,0,0,0];PAL={'1':teinter(PAL_U['1'],TEINTE[0]),'2':teinter(PAL_U['2'],TEINTE[1]),'3':teinter(PAL_U['3'],TEINTE[2],TEINTE[3],TEINTE[4])};}
+/* L'eau est une couleur dérivée du monde (21 novembre 2026) : PAL['e'] = couleur monde du biome + décalage EAU = [teinte (degrés), clarté, saturation (points)].
+   Les tuiles d'eau gardent le code '2' dans leurs dessins ; buildTiles() le lit comme 'e' pour elles seules (EAU_TUILES). */
+const EAU_VARIANTES=[['Monde pur',[0,0,0]],['Teinte +12°',[12,0,0]],['Teinte +25°, clair +4',[25,4,0]],['Teinte −12°',[-12,0,0]],['Clair +10, sat. −5',[0,10,-5]],['Teinte +12°, sombre −8',[12,-8,0]]];   // variantes d'essai (21 novembre 2026)
+let EAU_I=1;try{const e=+localStorage.getItem('np-eau');if(EAU_VARIANTES[e])EAU_I=e;}catch(e){}
+let EAU=EAU_VARIANTES[EAU_I][1].slice();
+const EAU_TUILES=['liq0','liq1','deep0','deep1','wade','wadeDeep'];
+function palBiome(t){TEINTE=t||[0,0,0,0,0];PAL={'1':teinter(PAL_U['1'],TEINTE[0]),'2':teinter(PAL_U['2'],TEINTE[1]),'3':teinter(PAL_U['3'],TEINTE[2],TEINTE[3],TEINTE[4])};PAL['e']=teinter(PAL['3'],EAU[0],EAU[1],EAU[2]);}

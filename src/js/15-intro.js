@@ -101,8 +101,8 @@ function introCell(x,i,px,py){const t=G.t[i],h=hash(i%W,(i/W)|0),put2=(tl,a)=>{i
   if(t===ROCK)put2(h%3?TL.rock:TL.rock2,.95);
   else if(t===MOUNT){const up=i>=W&&G.t[i-W]===MOUNT;put2(up?TL.mtBody:TL.mtTop,.9);}
   else if(t===HARD)put2(TL.hard,.95);
-  else if(t===LIQ){x.globalAlpha=.24;x.fillStyle=PAL['2'];x.fillRect(px,py,S,S);put2(h%2?TL.liq1:TL.liq0,.9);}
-  else if(t===DEEP){x.globalAlpha=1;x.fillStyle='#01060c';x.fillRect(px,py,S,S);x.globalAlpha=.08;x.fillStyle=PAL['2'];x.fillRect(px,py,S,S);put2(h%2?TL.deep1:TL.deep0,.4);}
+  else if(t===LIQ){x.globalAlpha=.24;x.fillStyle=PAL['e'];x.fillRect(px,py,S,S);put2(h%2?TL.liq1:TL.liq0,.9);}
+  else if(t===DEEP){x.globalAlpha=1;x.fillStyle='#01060c';x.fillRect(px,py,S,S);x.globalAlpha=.08;x.fillStyle=PAL['e'];x.fillRect(px,py,S,S);put2(h%2?TL.deep1:TL.deep0,.4);}
   else if(t===CHASM){x.globalAlpha=1;x.fillStyle='#000';x.fillRect(px,py,S,S);if(CHASM_OV)x.drawImage(CHASM_OV,(i%W)*16,((i/W)|0)*16,16,16,px,py,S,S);}
   else if(t===RUBBLE)put2(TL.rubble,.65);else if(t===GRASS)put2(TL.grass0,.9);else if(t===FLAT)put2(TL.flat0,.75);
   x.globalAlpha=1;}
@@ -241,6 +241,8 @@ function openPick(k){const grid=$('cgrid');if(pickKey===k){closePick();return;}p
 function closePick(){pickKey=null;$('cgrid').hidden=true;['1','2','3'].forEach(x=>$('pc'+x).setAttribute('aria-expanded','false'));}
 function applyColor(k,c){const j=+k-1;PRESETS[PRESET_ACTIVE].c[j]=c;savePresets();drawPresets();setPal(Object.assign({},PAL_U,{[k]:c}));}
 ['1','2','3'].forEach(k=>$('pc'+k).addEventListener('click',e=>{e.preventDefault();openPick(k);}));
+{const sel=$('eauSel');sel.innerHTML=EAU_VARIANTES.map((v,i)=>`<option value="${i}">${i+1} · ${v[0]}</option>`).join('');sel.value=EAU_I;
+  sel.onchange=()=>{EAU_I=+sel.value;EAU=EAU_VARIANTES[EAU_I][1].slice();try{localStorage.setItem('np-eau',EAU_I);}catch(e){}palBiome(TEINTE);buildTiles();render();};}
 $('cgrid').addEventListener('click',e=>{const b=e.target.closest('button[data-c]');if(!b||!pickKey)return;const k=pickKey;applyColor(k,b.dataset.c);closePick();$('pc'+k).focus();});
 addEventListener('keydown',e=>{if(e.key==='Escape'&&pickKey)closePick();});
 $('presets').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;usePreset(+b.dataset.p);});
