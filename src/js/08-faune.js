@@ -107,7 +107,7 @@ function engage(){for(const a of (G.animals||[]))if(a.aware)a.enraged=true;}
 const FUM_R2=10,FUM_VIE=[15,25],FUM_MAX=90;
 function fumPose(){const F=G.fum=G.fum||{};
   for(let dy=-3;dy<=3;dy++)for(let dx=-3;dx<=3;dx++){const d2=dx*dx+dy*dy;if(d2>FUM_R2)continue;
-    const x=G.px+dx,y=G.py+dy;if(x<1||y<1||x>=W-1||y>=H-1)continue;const i=idx(x,y);if(blocks(G.t[i]))continue;
+    const x=G.px+dx,y=G.py+dy;if(x<1||y<1||x>=W-1||y>=H-1)continue;const i=idx(x,y);if(blocks(G.t[i])&&G.t[i]!==CHASM)continue;   // la fumée passe au-dessus des gouffres
     const v=rnd(FUM_VIE[0],FUM_VIE[1]);
     F[i]={v:F[i]?Math.max(F[i].v,v):v,k:d2<=2?rnd(0,1):2+rnd(0,3)};}   // cœur : nuage plein ou texturé ; pourtour : les quatre bords
   for(const b of G.beasts||[])if(b.hunt){b.hunt=0;forget(b);}
@@ -117,7 +117,7 @@ function fumTick(){const F=G.fum;if(!F)return;let ks=Object.keys(F);if(!ks.lengt
     for(let t=0;t<14&&n>0;t++){const i=+ks[rnd(0,ks.length-1)],c=F[i];if(c.v<6)continue;
       const [dx,dy]=DIRS[rnd(0,7)],x=(i%W)+dx,y=((i/W)|0)+dy;
       if(x<1||y<1||x>=W-1||y>=H-1)continue;const j=idx(x,y);
-      if(F[j]||blocks(G.t[j]))continue;
+      if(F[j]||(blocks(G.t[j])&&G.t[j]!==CHASM))continue;
       F[j]={v:Math.max(4,c.v-rnd(2,5)),k:2+rnd(0,3)};n--;}}
   // les tuiles changent d'un battement à l'autre : une case bien entourée se densifie, les bords tournent — le nuage a l'air de vivre
   for(const k in F){const i=+k,x=i%W,y=(i/W)|0;let n=0;
@@ -128,7 +128,7 @@ function fumTick(){const F=G.fum;if(!F)return;let ks=Object.keys(F);if(!ks.lengt
 /* ---------- Styles de patrouille (19 novembre 2026) ----------
    Le style appartient au groupe (Lab → Groupes) et ne joue que tant qu'aucun membre n'a repéré la foreuse ; dès que la
    chasse et la fouille sont finies, le groupe reprend sa patrouille là où elle en était, donc il rentre chez lui.
-   - errance    : pas au hasard, sans but (le comportement d'origine).
+   - errance    : un pas tous les battements ou tous les deux, jamais en arrière (errStep).
    - voyage     : la bande traverse la carte vers un point éloigné, s'y arrête, repart (packTick, plus bas).
    - ronde      : une boucle de 3 ou 4 points fixes autour du point de départ, toujours dans le même ordre, courte halte à chacun.
    - territoire : le groupe tourne dans un rayon de 6 cases autour de son point de départ, avec de longues haltes.
@@ -136,7 +136,7 @@ function fumTick(){const F=G.fum;if(!F)return;let ks=Object.keys(F);if(!ks.lengt
    - affut      : immobile à son point de départ ; il y revient après une chasse.
    Chaque groupe posé a son état dans G.patr[id] : pts (les points), k (le point visé), pause, age. Une créature connaît
    son groupe par o.gi. En patrouille on marche : un pas par battement au plus, quelle que soit la vitesse de l'espèce. */
-const PAT_CIBLE={ronde:1,territoire:1,sentinelle:1,affut:1};
+const PAT_CIBLE={ronde:1,territoire:1,sentinelle:1,affut:1},PAT_BLOC=8;let PAT_BT=0;
 let PATD={};
 function patBfs(tx,ty,eau){const d=new Int16Array(W*H).fill(-1),q=[idx(tx,ty)];d[q[0]]=0;
   for(let k=0;k<q.length;k++){const c=q[k],x=c%W,y=(c/W)|0;for(const[dx,dy]of DIRS){const a=x+dx,b=y+dy;if(a<1||b<1||a>=W-1||b>=H-1)continue;
@@ -158,7 +158,7 @@ function patInit(g,id,mb){const o=mb[0],P={pat:g.pat,hx:o.x,hy:o.y,k:0,pause:0,a
   if(P.pat==='sentinelle'||P.pat==='affut')P.pause=P.pat==='affut'?9999:rnd(20,60);   // déjà en poste à l'arrivée sur la carte
   G.patr[id]=P;}
 // une fois par battement : chaque groupe en patrouille regarde s'il est arrivé, fait sa halte, choisit le point suivant
-function patTick(){PATD={};if(!G.patr||G.over)return;const mb={};
+function patTick(){PATD={};PAT_BT++;if(!G.patr||G.over)return;const mb={};
   for(const o of [...(G.beasts||[]),...(G.animals||[])])if(o.gi!=null)(mb[o.gi]=mb[o.gi]||[]).push(o);
   for(const id in G.patr){const P=G.patr[id],m=mb[id];if(!m){delete G.patr[id];continue;}
     if(!P.pts||m.some(o=>o.hunt>0||o.aware))continue;
@@ -167,16 +167,45 @@ function patTick(){PATD={};if(!G.patr||G.over)return;const mb={};
         if(P.pat==='territoire'){const n=patPoints(P,1,1,6);if(n.length)P.pts=n;}
         else if(P.pat==='affut')P.pause=9999;
         else P.k=(P.k+1)%P.pts.length;
-        P.age=0;}
+        P.age=0;P.bh=null;P.bl=0;}
       continue;}
     const d=patD(P),h=Math.min(...m.map(o=>{const v=d[idx(o.x,o.y)];return v<0?9999:v;}));
-    if(h<=P.sp||++P.age>90)P.pause=P.pat==='ronde'?rnd(3,6):P.pat==='territoire'?rnd(8,20):P.pat==='sentinelle'?rnd(40,80):9999;}}
+    if(h<=P.sp||++P.age>90){P.pause=P.pat==='ronde'?rnd(3,6):P.pat==='territoire'?rnd(8,20):P.pat==='sentinelle'?rnd(40,80):9999;P.bh=null;P.bl=0;}
+    /* Demi-tour, en dernier recours (20 novembre 2026) : un groupe qui n'avance plus vers son point depuis PAT_BLOC battements
+       malgré l'échange de places (patSwap) — un ennemi en chasse ou une mine armée lui barre le passage — renonce et
+       repart vers son point précédent (ronde, sentinelle) ou s'en choisit un autre (territoire). */
+    else if(P.bh==null||h<P.bh){P.bh=h;P.bl=0;}
+    else if(++P.bl>=PAT_BLOC){P.bl=0;P.bh=null;P.age=0;
+      if(P.pat==='territoire'){const n=patPoints(P,1,1,6);if(n.length)P.pts=n;}
+      else if(P.pts.length>1)P.k=(P.k-1+P.pts.length)%P.pts.length;}}}
+/* Échange de places (20 novembre 2026, la règle de Brogue) : une créature en patrouille dont le chemin est barré par une
+   créature calme d'un AUTRE groupe prend sa case, et l'autre prend la sienne. Deux groupes qui se croisent dans un passage
+   étroit se traversent donc au lieu de se bloquer. Jamais avec un ennemi qui chasse ou qui a repéré la foreuse, ni avec une
+   mine armée ; chaque créature ne change de place qu'une fois par battement ; chacune doit pouvoir tenir sur la case de
+   l'autre (une torpille ne sort pas de l'eau). En chasse, rien ne change : les ennemis se gênent et se contournent. */
+const terrOk=(o,x,y)=>{const sp=G.beasts.includes(o)?BEASTS[o.sp]:SPECIES[o.sp],v=G.t[idx(x,y)];return !(sp.aqua&&!isWater(v))&&canWalk(v,mouilleOk(sp,o));};
+function patSwap(o,d){if(o.sw===PAT_BT)return false;let best=null,bv=d[idx(o.x,o.y)];
+  for(const [dx,dy] of DIRS){const nx=o.x+dx,ny=o.y+dy;if(!diagOk(o.x,o.y,dx,dy))continue;const v=d[idx(nx,ny)];if(v<0||v>=bv)continue;
+    const c=beastAt(nx,ny)||animalAt(nx,ny);if(!c||c.gi==null||c.gi===o.gi||c.hunt>0||c.aware||c.fuse>0||c.sw===PAT_BT)continue;
+    if(!terrOk(o,nx,ny)||!terrOk(c,o.x,o.y))continue;bv=v;best=c;}
+  if(!best)return false;const x=o.x,y=o.y;if(best.x!==x){o.dir=Math.sign(best.x-x);best.dir=-o.dir;}
+  o.x=best.x;o.y=best.y;best.x=x;best.y=y;o.sw=best.sw=PAT_BT;return true;}
 // le pas de patrouille d'une créature calme ; renvoie false si son groupe n'a pas de point à rejoindre (errance, voyage)
 function patMove(o,fits){const P=G.patr&&G.patr[o.gi];if(!P||!P.pts||P.tx==null)return false;
   const d=patD(P),h=d[idx(o.x,o.y)];if(h<0)return false;
-  if(h>P.sp)chaseStep(o,d,fits,P.tx,P.ty);
+  if(h>P.sp){const libre=DIRS.some(([dx,dy])=>{const v=d[idx(o.x+dx,o.y+dy)];return v>=0&&v<h&&fits(o.x+dx,o.y+dy)&&diagOk(o.x,o.y,dx,dy);});
+    if(libre||!patSwap(o,d))chaseStep(o,d,fits,P.tx,P.ty);}   // un pas libre, sinon l'échange de places, sinon le détour
   else if(P.pat==='territoire'&&Math.random()<.15){const [dx,dy]=DIRS[rnd(0,7)],v=d[idx(o.x+dx,o.y+dy)];if(v>=0&&v<=P.sp+1&&fits(o.x+dx,o.y+dy)&&diagOk(o.x,o.y,dx,dy)){o.x+=dx;o.y+=dy;if(dx)o.dir=dx;}}
   o.mp=Math.min(o.mp,.99);return true;}
+/* Errance (règle du 20 novembre 2026) : un pas tous les battements ou tous les deux (une fois sur deux, la créature marque
+   un temps après son pas). Elle ne repart jamais d'où elle vient, ni par les deux diagonales voisines : il lui reste tout
+   droit, les deux diagonales de devant et les deux virages à 90°. Dans un cul-de-sac seulement, elle fait demi-tour.
+   o.lx, o.ly : son dernier pas ; o.ew : battements d'attente avant le prochain. */
+function errStep(o,fits){o.mp=Math.min(o.mp,.99);if(o.ew>0){o.ew--;return;}
+  const lx=o.lx||0,ly=o.ly||0,libres=DIRS.filter(([dx,dy])=>fits(o.x+dx,o.y+dy)&&diagOk(o.x,o.y,dx,dy));if(!libres.length)return;
+  const devant=libres.filter(([dx,dy])=>dx*lx+dy*ly>=0),c=devant.length?devant:libres,[dx,dy]=c[rnd(0,c.length-1)];
+  o.x+=dx;o.y+=dy;o.lx=dx;o.ly=dy;if(dx)o.dir=dx;o.ew=rnd(0,1);}
+const patDe=o=>{const P=G.patr&&G.patr[o.gi];return P?P.pat:null;};
 function animalsAct(){
   turnStealth();
   if(G&&!G.over)patTick();
@@ -201,6 +230,7 @@ function animalsAct(){
       else if(a.mode==='seek'){if(!seekStep(a,okA,DC,mA)){a.mode=a.search>0?'search':'';break;}}
       else if(a.mode==='search')searchStep(a,okA,DC,mA);
       else if(a.mode===''&&patMove(a,okA))break;                                          // calme : la patrouille de son groupe
+      else if(a.mode===''){errStep(a,okA);break;}                                         // calme, sans point à rejoindre : errance
       else if(Math.random()<(a.mode==='hold'?.15:.3)){const [dx,dy]=DIRS[rnd(0,7)];const nx=a.x+dx,ny=a.y+dy;
         if(okA(nx,ny)&&diagOk(a.x,a.y,dx,dy)&&(a.mode!=='hold'||cheb({x:nx,y:ny},G.px,G.py)>KEEP_MIN)){a.x=nx;a.y=ny;if(dx)a.dir=dx;}}
       else a.mp=Math.min(a.mp,.99);}
@@ -233,10 +263,11 @@ function spawnBeasts(){G.beasts=[];G.beastSeen={};G.packs={};let packId=0;
    est dépensé groupe après groupe, tirés au hasard parmi les groupes actifs encore abordables. Un groupe est posé d'un
    bloc autour d'un point, loin de la foreuse ; s'il ne trouve pas sa place (pas d'eau pour des torpilles…), il est écarté
    après trois échecs. Chaque créature garde le rang de son groupe (gr) : il servira aux styles de patrouille. */
-function poseGroupe(g,gi,id){{const l=g.pats&&g.pats.length?g.pats:[g.pat||'errance'];g=Object.assign({},g,{pat:l[rnd(0,l.length-1)]});}   // plusieurs styles cochés : ce groupe-ci en tire un
+function poseGroupe(g,gi,id){{const l=g.pats&&g.pats.length?g.pats:g.pat?[g.pat]:PATS.map(p=>p[0]);   // aucun style choisi : tous sont possibles
+  g=Object.assign({},g,{pat:l[rnd(0,l.length-1)]});}   // plusieurs styles cochés : ce groupe-ci en tire un
   const esp=k=>k==='insectoide'?-1:BEASTS.findIndex(b=>b.key===k);
   const mb=[];for(const m of g.m){const s=esp(m.k);if(m.k!=='insectoide'&&s<0)continue;for(let n=rnd(Math.min(m.min,m.max),Math.max(m.min,m.max));n>0;n--)mb.push(s);}
-  if(!mb.length)return false;
+  if(!mb.length)return 'vide';   // tous les effectifs tirés valent 0 : rien à poser, ni échec ni dépense
   for(let t=0;t<80;t++){const cx=rnd(3,W-4),cy=rnd(3,H-4);if(Math.hypot(cx-G.px,cy-G.py)<SZ(20,6))continue;
     const posA=[],posB=[];let ok=true;
     for(const s of mb){let put=false;
@@ -250,8 +281,11 @@ function poseGroupe(g,gi,id){{const l=g.pats&&g.pats.length?g.pats:[g.pat||'erra
 function spawnGroupes(){G.animals=[];G.fauna=[];G.pool=[0];G.beasts=[];G.beastSeen={};G.packs={};G.patr={};
   const total=Math.round(GROUPES.budget*W*H/(96*64));let reste=total,id=0;const rate={},pose={};
   for(let t=0;t<600;t++){const ok=GROUPES.liste.map((g,i)=>[g,i]).filter(([g,i])=>g.on&&g.m.length&&Math.max(1,g.cout)<=reste&&(rate[i]||0)<3);if(!ok.length)break;
-    const [g,gi]=ok[rnd(0,ok.length-1)];
-    if(poseGroupe(g,gi,id)){reste-=Math.max(1,g.cout);id++;pose[g.n]=(pose[g.n]||0)+1;}else rate[gi]=(rate[gi]||0)+1;}
+    // tirage pondéré par la fréquence du groupe : − deux fois moins souvent, + deux fois plus
+    const pds=ok.map(([g])=>[.5,1,2][g.f??1]);let tir=Math.random()*pds.reduce((a,b)=>a+b,0),ki=0;while(ki<ok.length-1&&(tir-=pds[ki])>0)ki++;
+    const [g,gi]=ok[ki];
+    const r=poseGroupe(g,gi,id);
+    if(r===true){reste-=Math.max(1,g.cout);id++;pose[g.n]=(pose[g.n]||0)+1;}else if(r!=='vide')rate[gi]=(rate[gi]||0)+1;}
   G.menace={total,reste,pose};}
 function robotDist(m){return distFrom(G.px,G.py,m);}
 function distFrom(tx,ty,mouille){const d=new Int16Array(W*H).fill(-1),q=[idx(tx,ty)];d[q[0]]=0;
@@ -301,14 +335,17 @@ const LeNom=sp=>{const a=leNom(sp);return a[0].toUpperCase()+a.slice(1);};
 const unNom=sp=>(sp.fem?'une ':'un ')+nomDe(sp);
 const UnNom=sp=>{const a=unNom(sp);return a[0].toUpperCase()+a.slice(1);};
 const LesNoms=sp=>{const n=nomDe(sp);return 'Les '+n+(/s$/.test(n)?'':'s');};
-function hurtRobot(b,sp,o){sp=sp||BEASTS[b.sp];o=o||{};const le=LeNom(sp),nom='',verbe='attaque';
+function hurtRobot(b,sp,o){sp=sp||BEASTS[b.sp];o=o||{};const le=LeNom(sp),nom='',verbe=o.laser?'tire':'attaque';
   const ch=hitChance(sp.pre,robotDef());engage();   // la foreuse est attaquée, que le coup porte ou non : les insectoïdes qui suivent attaquent
-  const geste=()=>addFx({kind:'lunge',beast:b,dx:Math.sign(G.px-b.x),dy:Math.sign(G.py-b.y),dur:200});
-  if(!o.sur&&!roll(ch)){geste();addFx({kind:'num',x:G.px,y:G.py,txt:'0',col:'#8aa9a2',dur:750});
-    SFX.whoosh();sayMore(`${le}${nom} ${verbe} et rate (${ch} %).`);return;}
+  // geste : le bond de l'attaquant, ou le trait du laser — droit sur la foreuse s'il touche, à côté s'il rate
+  const geste=rate=>{if(!o.laser){addFx({kind:'lunge',beast:b,dx:Math.sign(G.px-b.x),dy:Math.sign(G.py-b.y),dur:200});return;}
+    const an=Math.random()*Math.PI*2,r=rate?10+Math.random()*5:0;if(G.px!==b.x)b.dir=Math.sign(G.px-b.x);SFX.laser();
+    addFx({kind:'laser',o:b,x:G.px,y:G.py,ox:Math.round(Math.cos(an)*r),oy:Math.round(Math.sin(an)*r),dur:rate?420:300});};
+  if(!o.sur&&!roll(ch)){geste(true);addFx({kind:'num',x:G.px,y:G.py,txt:'0',col:'#8aa9a2',dur:750});
+    if(!o.laser)SFX.whoosh();sayMore(`${le}${nom} ${verbe} et rate (${ch} %).`);return;}
   geste();
   const cr=o.sur||roll(sp.crit||0),dm=dmgDe(sp)*(cr?CRIT_X:1);   // coup critique de l'ennemi : selon sa stat CRIT
-  addFx({kind:'shake',amp:cr?9:5,dur:cr?320:220});G.st.vie=Math.max(0,G.st.vie-dm);addFx({kind:'num',x:G.px,y:G.py,txt:'-'+dm+(cr?'!':''),col:'#ff3b3b',dur:cr?1000:750});SFX.bite();sayMore(`${le}${nom} ${verbe}${o.sur?' par surprise':cr?' : coup critique':''} : −${dm} vie.`,'warn');
+  addFx({kind:'shake',amp:cr?9:5,dur:cr?320:220});G.st.vie=Math.max(0,G.st.vie-dm);addFx({kind:'num',x:G.px,y:G.py,txt:'-'+dm+(cr?'!':''),col:'#ff3b3b',dur:cr?1000:750});if(!o.laser)SFX.bite();sayMore(`${le}${nom} ${verbe}${o.sur?' par surprise':cr?' : coup critique':''} : −${dm} vie.`,'warn');
   if(G.st.vie<=0){G.over={dead:true};return;}}
 // Une fois par battement : effets durables sur la foreuse
 function effTick(){const E=G.eff;if(!E||G.over)return;
@@ -329,24 +366,18 @@ function explose(b){const sp=BEASTS[b.sp],k=G.beasts.indexOf(b);if(k>=0)G.beasts
     sayMore(`La mine explose : −${dm} vie.`,'warn');if(G.st.vie<=0)G.over={dead:true};}
   else if(vu)sayMore('La mine explose.','warn');
   else if(cheb(b,G.px,G.py)<=10)sayMore('Une explosion, tout près.','warn');}
-/* Paralyzor (19 novembre 2026) : son premier coup qui porte l'accroche à la foreuse. Tant qu'il vit, elle ne peut plus
-   se déplacer (elle peut frapper, forer une paroi voisine, utiliser un objet), et il lui inflige ses dégâts à chaque
-   battement, sans jet pour toucher. Un trait rouge à étincelles les relie (voir 10-rendu). Seule sa mort la libère. */
-const paralyse=()=>!!(G&&G.beasts&&G.beasts.some(b=>b.grip));
-const animVif=()=>!!(G&&G.beasts&&G.beasts.some(b=>b.grip||b.fuse>0));   // un effet permanent est à l'écran : le rendu doit tourner
-function gripAtk(b,sp){engage();
-  if(!b.grip){const ch=hitChance(sp.pre,robotDef());addFx({kind:'lunge',beast:b,dx:Math.sign(G.px-b.x),dy:Math.sign(G.py-b.y),dur:200});
-    if(!roll(ch)){addFx({kind:'num',x:G.px,y:G.py,txt:'0',col:'#8aa9a2',dur:750});SFX.whoosh();sayMore(`${LeNom(sp)} attaque et rate (${ch} %).`);return;}
-    b.grip=1;addFx({kind:'shake',amp:5,dur:220});SFX.bite();sayMore(`${LeNom(sp)} s’accroche : la foreuse est paralysée tant qu’il vit.`,'warn');}
-  const dm=dmgDe(sp);G.st.vie=Math.max(0,G.st.vie-dm);addFx({kind:'num',x:G.px,y:G.py,txt:'-'+dm,col:'#ff3b3b',dur:750});
-  if(G.st.vie<=0){G.over={dead:true};sayMore(`${LeNom(sp)} achève la foreuse.`,'warn');}}
+/* Sentinelle (19 novembre 2026 ; d'abord « Paralyzor », qui accrochait la foreuse et la paralysait — retiré le soir même à la
+   demande de l'utilisateur). Elle tire un laser jusqu'à sp.laser cases, en ligne de vue, une fois par battement : un jet
+   pour toucher ordinaire, et le trait rouge se voit toujours — droit sur la foreuse s'il touche, à côté s'il rate.
+   La clé interne de l'espèce reste `paralyzor`, pour que les groupes déjà réglés continuent de marcher. */
+const animVif=()=>!!(G&&G.beasts&&G.beasts.some(b=>b.fuse>0));   // une mine armée clignote : le rendu doit tourner
 function beastsAct(){
   turnStealth();
   if(!G.beasts||!G.beasts.length||G.over)return;const distSec=robotDist(false),distEau=robotDist(true),DC={};let charged=null;const alarms=[],boom=[];packTick();
   for(const b of G.beasts){if(G.over)break;if(b.skip){b.skip=0;continue;}const sp=BEASTS[b.sp];b.mp=Math.min(2,b.mp+sp.v/5/slowOf(G.t[idx(b.x,b.y)],sp.swim));
     const d=Math.hypot(b.x-G.px,b.y-G.py),sees=voitForeuse(b,b.hunt>0);
     if(sees){if(!b.hunt&&sp.alarm)alarms.push(b);if(!b.hunt&&beastVisible(b))charged=charged||sp;if(!b.hunt)alerte(b);b.hunt=1;spot(b);if(G.px!==b.x)b.dir=Math.sign(G.px-b.x);
-      if(sp.pack)for(const o of mates(b)){if(!o.hunt)alerte(o);o.hunt=1;spot(o);}}                        // la bande partage ce qu'un membre voit
+      if(sp.pack)for(const o of mates(b))if(BEASTS[o.sp].pack){if(!o.hunt)alerte(o);o.hunt=1;spot(o);}}   // seuls les relais partagent ce qu'un des leurs voit — pas les autres espèces de leur groupe (20 novembre 2026)
     else if(b.hunt&&b.search>0&&--b.search===0){b.hunt=0;forget(b);}                // fouille terminée : il oublie
     else if(b.hunt&&!b.mem)b.hunt=0;
     b.sees=sees;
@@ -354,8 +385,8 @@ function beastsAct(){
     if(sp.mine){                                                                      // mine : armée, elle attend l'explosion ; sinon elle s'arme à une case de la foreuse
       if(b.fuse>0){if(--b.fuse<=0)boom.push(b);continue;}
       if(b.hunt>0&&cheb(b,G.px,G.py)<=1){b.fuse=rnd(1,3);if(beastVisible(b)){sayMore('La mine s’arme !','warn');SFX.spot();}continue;}}
-    if(sp.grip&&b.grip){gripAtk(b,sp);continue;}                                       // paralyzor accroché : il frappe à chaque battement, sans bouger
-    if(b.hunt>0&&nearRobot(b)){if(sp.grip)gripAtk(b,sp);else hurtRobot(b);continue;}
+    if(sp.laser&&b.hunt>0&&sees&&cheb(b,G.px,G.py)<=sp.laser&&los(b.x,b.y,G.px,G.py)){hurtRobot(b,sp,{laser:1});continue;}   // sentinelle : elle tire dès qu'elle est à portée
+    if(b.hunt>0&&nearRobot(b)){hurtRobot(b);continue;}
     while(b.mp>=1&&!G.over){b.mp-=1;
       if(b.hunt>0&&sees){
         if(nearRobot(b)){b.mp=Math.min(b.mp,.99);break;}
@@ -363,9 +394,8 @@ function beastsAct(){
       else if(b.hunt>0&&b.search>0)searchStep(b,(x,y)=>beastFits(b,x,y),DC,mouilleOk(sp,b));                // fouille autour du dernier point connu
       else if(b.hunt>0){if(!seekStep(b,(x,y)=>beastFits(b,x,y),DC,mouilleOk(sp,b)))break;}       // vers la dernière position connue
       else if(patMove(b,(x,y)=>beastFits(b,x,y)))break;                                   // calme : la patrouille de son groupe
-      else if(b.pack>=0){packMove(b);}
-      else if(Math.random()<.25){const[dx,dy]=DIRS[rnd(0,7)];if(beastFits(b,b.x+dx,b.y+dy)&&diagOk(b.x,b.y,dx,dy)&&(b.pack<0||packOk(b,b.x+dx,b.y+dy))){b.x+=dx;b.y+=dy;if(dx)b.dir=dx;}}
-      else b.mp=Math.min(b.mp,.99);}
+      else if(b.pack>=0&&patDe(b)!=='errance'){packMove(b);}
+      else{errStep(b,(x,y)=>beastFits(b,x,y));break;}}                                     // errance
   }
   for(const b of boom)if(G.beasts.includes(b)&&!G.over)explose(b);
   if(charged){sayMore(`${LeNom(charged)} vous a repéré et charge !`,'warn');SFX.roar();}
@@ -392,7 +422,9 @@ function packTick(){G.packs=G.packs||{};const groups={};
     const [cx,cy]=packCenter(m);
     if(P.pause>0){if(--P.pause===0)packTarget(P,cx,cy);continue;}
     if(!P.dist||P.tx==null){packTarget(P,cx,cy);continue;}
-    if(Math.max(Math.abs(cx-P.tx),Math.abs(cy-P.ty))<=2){P.pause=PACK_PAUSE;P.dist=null;}}}
+    if(Math.max(Math.abs(cx-P.tx),Math.abs(cy-P.ty))<=2){P.pause=PACK_PAUSE;P.dist=null;P.bh=null;P.bl=0;continue;}
+    const h=Math.min(...m.map(b=>{const v=P.dist[idx(b.x,b.y)];return v<0?9999:v;}));   // bloquée PAT_BLOC + 2 battements : la bande change de destination
+    if(P.bh==null||h<P.bh){P.bh=h;P.bl=0;}else if(++P.bl>=PAT_BLOC+2){P.bl=0;P.bh=null;packTarget(P,cx,cy);}}}
 function packMove(b){const P=G.packs&&G.packs[b.pack];
   if(packStep(b))return;                                   // trop loin des siens : il revient
   if(P&&P.dist&&!P.pause){let best=null,bv=P.dist[idx(b.x,b.y)];if(bv<0)bv=9999;   // voyage : il avance vers la destination
@@ -414,5 +446,5 @@ function raiseAlarm(b){const sp=BEASTS[b.sp];let n=0;
   for(const a of (G.animals||[]))if(Math.max(Math.abs(a.x-b.x),Math.abs(a.y-b.y))<=ALARM_R){if(!a.aware){n++;alerte(a);}a.aware=1;spot(a);}
   if(beastVisible(b)||n){addFx({kind:'num',x:b.x,y:b.y,txt:'!',col:PAL['3'],dur:900});SFX.screech();
     sayMore(`Un cafar pousse un cri d’alerte${n?` : ${n} ennemi${n>1?'s':''} alerté${n>1?'s':''}`:''} !`,'warn');}}
-function bleed(x,y){G.blood=G.blood||{};G.blood[idx(x,y)]=rnd(0,1);gore(x,y);}
+function bleed(x,y){gore(x,y);}   // plus de tache de sang : étincelles et débris (10-rendu)
 

@@ -16,13 +16,19 @@ function drawVisCells(cells,col){ctx.globalAlpha=1;ctx.fillStyle=col||'#ffffff';
    Particules en pixels de carte (case × S) : la fumée qui s'élève reste sur place quand la foreuse avance (traînée).
    Pixel art strict : grains opaques de 1 ou 2 pixels de tuile, sans fondu ni agrandissement ; chacun disparaît d'un coup. */
 const SMOKE={p:[],raf:0,last:0,acc:0,accF:0};
-// Giclée de sang à la mort d'un ennemi : une trentaine de gouttes (pixels de tuile, opaques) projetées en l'air ;
-// en retombant elles restent collées au sol (G.splat, pixels de carte), sauf dans l'eau ou un gouffre. Au plus SPLAT_MAX gouttes gardées.
-const SPLAT_MAX=1500,BLOOD_COLS=['#b8242a','#b8242a','#8a1a20','#d8333a'];
-function gore(x,y){const cx=(x+.5)*S,cy=(y+.5)*S,n=24+((Math.random()*12)|0);
-  for(let j=0;j<n;j++){const an=Math.random()*Math.PI*2,v=70+Math.random()*110,r0=3+Math.random()*6;   // giclée vive : départ rapide, déjà écartée du centre
-    SMOKE.p.push({x:cx+Math.cos(an)*r0,y:cy+Math.sin(an)*r0*.8,z:4+Math.random()*8,vx:Math.cos(an)*v,vy:Math.sin(an)*v*.8,vz:90+Math.random()*170,a:0,l:9,sz:Math.random()<.2?4:2,
-      c:BLOOD_COLS[(Math.random()*BLOOD_COLS.length)|0],blood:true});}
+/* Destruction d'un ennemi (19 novembre 2026 ; avant : une giclée de sang et une tache). Les ennemis sont des machines :
+   - une gerbe d'étincelles (accent et monde) qui filent droit, très vite, avec une courte traîne, et s'éteignent en
+     un quart de seconde ;
+   - des débris de carcasse, monde et accent eux aussi, projetés en l'air : ils retombent, rebondissent une ou deux fois,
+     puis restent au sol (G.splat, pixels de carte), sauf dans l'eau ou un gouffre. Au plus SPLAT_MAX débris gardés.
+   Pixel art strict : grains opaques de 1 ou 2 pixels de tuile, calés sur la grille, qui disparaissent d'un coup. */
+const SPLAT_MAX=1500;
+function gore(x,y){const cx=(x+.5)*S,cy=(y+.5)*S,deb=[PAL['3'],PAL['3'],PAL['1']],ETINC_COLS=[PAL['1'],PAL['1'],PAL['3']];   // deux couleurs seulement : monde et accent
+  for(let j=0,n=34+((Math.random()*14)|0);j<n;j++){const an=Math.random()*Math.PI*2,v=150+Math.random()*330;
+    SMOKE.p.push({x:cx+Math.cos(an)*4,y:cy+Math.sin(an)*4,vx:Math.cos(an)*v,vy:Math.sin(an)*v-40,a:0,l:.1+Math.random()*.3,sz:2,c:ETINC_COLS[(Math.random()*ETINC_COLS.length)|0],spark:true});}
+  for(let j=0,n=14+((Math.random()*8)|0);j<n;j++){const an=Math.random()*Math.PI*2,v=50+Math.random()*150,r0=2+Math.random()*5;
+    SMOKE.p.push({x:cx+Math.cos(an)*r0,y:cy+Math.sin(an)*r0*.8,z:4+Math.random()*8,vx:Math.cos(an)*v,vy:Math.sin(an)*v*.8,vz:120+Math.random()*220,a:0,l:9,sz:Math.random()<.3?4:2,
+      c:deb[(Math.random()*deb.length)|0],blood:true,reb:1+((Math.random()*2)|0)});}
   smokeKick();}
 function smokeOn(){return G&&!G.over&&G.st&&G.st.vie<50&&$('introCv').hidden;}
 function smokeKick(){if(!SMOKE.raf&&(smokeOn()||SMOKE.p.length)){SMOKE.last=performance.now();SMOKE.raf=requestAnimationFrame(smokeStep);}}
@@ -37,10 +43,14 @@ function smokeStep(now){const dt=Math.min(.05,(now-SMOKE.last)/1000);SMOKE.last=
   fctx.clearRect(0,0,vw,vh);let n=0,landed=false;
   for(const q of SMOKE.p){q.a+=dt;if(q.a>=q.l)continue;
     if(q.blood){const dr=Math.exp(-5*dt);q.vx*=dr;q.vy*=dr;q.x+=q.vx*dt;q.y+=q.vy*dt;q.vz-=1100*dt;q.z+=q.vz*dt;
+      if(q.z<=0&&q.reb>0&&q.vz<-80){q.z=0;q.vz=-q.vz*.42;q.vx*=.6;q.vy*=.6;q.reb--;}   // un débris rebondit avant de s'immobiliser
       if(q.z<=0){const mx=Math.floor(q.x/S),my=Math.floor(q.y/S),t=mx>=0&&my>=0&&mx<W&&my<H?G.t[idx(mx,my)]:ROCK;
         if(t!==LIQ&&t!==DEEP&&t!==CHASM&&!blocks(t)){G.splat=G.splat||[];G.splat.push([Math.round(q.x/2)*2,Math.round(q.y/2)*2,q.c,q.sz]);
           if(G.splat.length>SPLAT_MAX)G.splat.splice(0,G.splat.length-SPLAT_MAX);landed=true;}continue;}
-      SMOKE.p[n++]=q;fctx.fillStyle=q.c;fctx.fillRect(Math.round((q.x-camX*S)/2)*2,Math.round((q.y-q.z-camY*S)/2)*2,q.sz,q.sz);continue;}q.x+=(q.vx+Math.sin(now/600+q.l*9)*4)*dt;q.y+=q.vy*dt;if(q.smoke)q.vy*=Math.exp(-.6*dt);
+      SMOKE.p[n++]=q;fctx.fillStyle=q.c;fctx.fillRect(Math.round((q.x-camX*S)/2)*2,Math.round((q.y-q.z-camY*S)/2)*2,q.sz,q.sz);continue;}
+    if(q.spark){const dr=Math.exp(-7*dt);q.vx*=dr;q.vy*=dr;q.x+=q.vx*dt;q.y+=q.vy*dt;SMOKE.p[n++]=q;fctx.fillStyle=q.c;   // étincelle : le grain et sa traîne, un cran derrière
+      fctx.fillRect(Math.round((q.x-camX*S)/2)*2,Math.round((q.y-camY*S)/2)*2,2,2);fctx.fillRect(Math.round((q.x-q.vx*.018-camX*S)/2)*2,Math.round((q.y-q.vy*.018-camY*S)/2)*2,2,2);continue;}
+    q.x+=(q.vx+Math.sin(now/600+q.l*9)*4)*dt;q.y+=q.vy*dt;if(q.smoke)q.vy*=Math.exp(-.6*dt);
     SMOKE.p[n++]=q;   // pixel art strict : taille fixe, opaque, calé sur la grille des pixels de tuile (2 px), disparaît d'un coup
     fctx.fillStyle=q.c;fctx.fillRect(Math.round((q.x-camX*S)/2)*2,Math.round((q.y-camY*S)/2)*2,q.sz,q.sz);}
   SMOKE.p.length=n;fctx.globalAlpha=1;if(landed)render();
@@ -72,13 +82,6 @@ function drawBoom(){const fl=1-(performance.now()-BOOM.t0)/180;
   if(fl>0){ctx.globalAlpha=fl*.8;ctx.fillStyle='#ffffff';ctx.beginPath();ctx.arc((G.px+.5-camX)*S,(G.py+.5-camY)*S,S*1.6,0,Math.PI*2);ctx.fill();}   // éclair de l'explosion
   ctx.globalAlpha=1;for(const q of BOOM.p){ctx.fillStyle=q.c;ctx.fillRect(Math.round((q.x-camX)*S/2)*2,Math.round((q.y-q.z-camY)*S/2)*2,q.sz,q.sz);}}
 function addFx(f){f.t0=performance.now();if(f.kind==='num')f.stack=FX.filter(o=>o.kind==='num'&&o.x===f.x&&o.y===f.y&&fxP(o)<.5).length;FX.push(f);if(!fxRaf)fxRaf=requestAnimationFrame(fxLoop);}
-/* Contour ovale d'une case, à un pixel de distance : les pixels de tuile du bord d'une ellipse de 18 × 17,
-   calculés une fois pour toutes. Décalages depuis le coin de la case, de −1 à 16. */
-const OVALE=(()=>{const R=[],rx=9,ry=8.2,dans=(x,y)=>((x+.5-9)/rx)**2+((y+.5-9)/ry)**2<=1;
-  for(let y=-1;y<17;y++)for(let x=-1;x<17;x++){const gx=x+1,gy=y+1;
-    if(!dans(gx,gy)||(dans(gx-1,gy)&&dans(gx+1,gy)&&dans(gx,gy-1)&&dans(gx,gy+1)))continue;
-    R.push([x,y]);}
-  return R;})();
 // grains d'un effet de consommable : position dans la case et instant d'apparition, tirés une fois pour toutes
 const fxGrains=n=>Array.from({length:n},()=>({x:rnd(0,13),y:rnd(3,14),d:Math.random()*.55}));
 function fxLoop(){const now=performance.now();FX=FX.filter(f=>now-f.t0<f.dur);render();fxRaf=(FX.length||animVif())?requestAnimationFrame(fxLoop):0;}   // une mine armée ou un paralyzor accroché gardent le rendu en marche
@@ -192,10 +195,10 @@ function render(){
   {const sr=sonarR();if(sr>0&&G.ore&&fog)for(const k in G.ore){const i=+k;if(G.seen[i]||!sonarVu(i,sr))continue;put(oreTile(G.ore[k],oreSol(G.ore[k])),i%W,(i/W)|0,1);}}   // gisements détectés par le sonar, même hors de vue
   if(G.cles)for(const k in G.cles){const i=+k;if(fog&&!G.seen[i])continue;put(TL.cle,i%W,(i/W)|0,fog&&!vis[i]?.35:1);}   // clés au sol
   if(G.items)for(const k in G.items){const i=+k;if(fog&&!G.seen[i])continue;put(TL.objet,i%W,(i/W)|0,fog&&!vis[i]?.35:1);}   // objets posés au sol
-  if(G.splat)for(const [px,py,c,sz] of G.splat){const i=idx(Math.floor(px/S),Math.floor(py/S));if(fog&&!G.seen[i])continue;   // gouttes de sang au sol
+  if(G.splat)for(const [px,py,c,sz] of G.splat){const i=idx(Math.floor(px/S),Math.floor(py/S));if(fog&&!G.seen[i])continue;   // débris au sol
     ctx.globalAlpha=fog&&!vis[i]?.3:1;ctx.fillStyle=c;ctx.fillRect(px-camX*S,py-camY*S,sz,sz);}
   ctx.globalAlpha=1;
-  if(G.blood)for(const k in G.blood){const i=+k,bx=i%W,by=(i/W)|0;if(fog&&!G.seen[i])continue;put(TL['blood'+G.blood[k]],bx,by,fog&&!vis[i]?.3:.9);}
+  // (les taches de sang ne sont plus dessinées depuis le 19 novembre 2026 : les ennemis laissent des débris)
   for(const s of G.sites){if(fog&&!G.seen[idx(s.x,s.y)])continue;put(s.known?(TL['site'+s.depth]||TL.site10):TL.siteUnknown,s.x,s.y,!fog||vis[idx(s.x,s.y)]?1:.35);}
   // touche V : portée de discrétion de la foreuse — les cases d'où un ennemi peut vous remarquer, entourées d'un pointillé
   if(SHOWVIS&&!G.over){
@@ -238,29 +241,28 @@ function render(){
      for(const g of f.gr){const q=(p-g.d)*2.2;if(q<0||q>1)continue;const gx=Math.round(bx+g.x),gy=Math.round(by+g.y+bas-q*mont);
        if(f.kind==='soin'){ctx.fillRect(gx*u,(gy+1)*u,3*u,u);ctx.fillRect((gx+1)*u,gy*u,u,3*u);}           // une petite croix
        else{ctx.fillRect((gx+1)*u,gy*u,u,4*u);ctx.fillRect(gx*u,(gy+1)*u,u,u);ctx.fillRect((gx+2)*u,(gy+1)*u,u,u);}}}   // une flèche vers le haut
-   for(const f of FX){if(f.kind!=='purge')continue;const p=fxP(f);if(Math.floor(p*7)%2)continue;   // le filet pulse : allumé, éteint, quatre fois
-     const bx=(f.x-camX)*16,by=(f.y-camY)*16;ctx.fillStyle=PAL['1'];
-     for(const [ox,oy] of OVALE)ctx.fillRect((bx+ox)*u,(by+oy)*u,u,u);}}
+}
   // Dessins au pixel de tuile (u = 1/16 de case), calés sur la grille, opaques : le projectile d'un tireur et l'onde du sonar
   {const u=S/16;ctx.fillStyle=PAL['1'];
-   /* Paralyzor accroché : un trait rouge d'un pixel de tuile le relie à la foreuse, avec quelques étincelles blanches ou accent
-      qui sautent le long du trait (tirage renouvelé 12 fois par seconde). Pixels pleins, sans transparence. */
-   if(G.beasts)for(const b of G.beasts){if(!b.grip)continue;
-     let x0=Math.round((b.x+.5-camX)*16),y0=Math.round((b.y+.5-camY)*16);const x1=Math.round((G.px+.5-camX)*16),y1=Math.round((G.py+.5-camY)*16);
-     const dx=Math.abs(x1-x0),dy=-Math.abs(y1-y0),sx=x0<x1?1:-1,sy=y0<y1?1:-1,pts=[];let e=dx+dy;
-     for(let n=0;n<600;n++){pts.push([x0,y0]);if(x0===x1&&y0===y1)break;const e2=2*e;if(e2>=dy){e+=dy;x0+=sx;}if(e2<=dx){e+=dx;y0+=sy;}}
-     ctx.fillStyle='#ff3b3b';for(const [x,y] of pts)ctx.fillRect(x*u,y*u,u,u);
-     if(!reduced){const T=Math.floor(performance.now()/85),h=n=>{const v=Math.sin(n*12.9898+T*78.233+b.x*3.1+b.y*7.7)*43758.5453;return v-Math.floor(v);};
-       for(let k=0;k<5;k++){const [x,y]=pts[Math.floor(h(k)*pts.length)],ox=Math.round(h(k+10)*4-2),oy=Math.round(h(k+20)*4-2);
-         ctx.fillStyle=h(k+30)<.5?'#fff':PAL['1'];ctx.fillRect((x+ox)*u,(y+oy)*u,u,u);if(h(k+40)<.4)ctx.fillRect((x+ox+(h(k+50)<.5?1:-1))*u,(y+oy)*u,u,u);}}
-     ctx.fillStyle=PAL['1'];}
-   // Explosion d'une mine : le carré de 3 × 3 en pavés de 4 pixels — blanc plein, puis damier accent, puis braises rouges éparses
-   for(const f of FX)if(f.kind==='boom'){const p=fxP(f),ph=p<.25?0:p<.6?1:2;ctx.fillStyle=ph===0?'#fff':ph===1?PAL['1']:'#ff3b3b';
+   /* Laser des sentinelles : un trait rouge d'un pixel de tuile, avec quelques étincelles blanches ou accent qui sautent le
+      long du trait (tirage renouvelé 12 fois par seconde). Pixels pleins, sans transparence. */
+   {const laser=(ax,ay,bx,by,graine,etinc)=>{let x0=Math.round(ax),y0=Math.round(ay);const x1=Math.round(bx),y1=Math.round(by);
+       const dx=Math.abs(x1-x0),dy=-Math.abs(y1-y0),sx=x0<x1?1:-1,sy=y0<y1?1:-1,pts=[];let e=dx+dy;
+       for(let n=0;n<600;n++){pts.push([x0,y0]);if(x0===x1&&y0===y1)break;const e2=2*e;if(e2>=dy){e+=dy;x0+=sx;}if(e2<=dx){e+=dx;y0+=sy;}}
+       ctx.fillStyle='#ff3b3b';for(const [x,y] of pts)ctx.fillRect(x*u,y*u,u,u);
+       if(!reduced&&etinc){const T=Math.floor(performance.now()/85),h=n=>{const v=Math.sin(n*12.9898+T*78.233+graine)*43758.5453;return v-Math.floor(v);};
+         for(let k=0;k<etinc;k++){const [x,y]=pts[Math.floor(h(k)*pts.length)],ox=Math.round(h(k+10)*4-2),oy=Math.round(h(k+20)*4-2);
+           ctx.fillStyle=h(k+30)<.5?'#fff':PAL['1'];ctx.fillRect((x+ox)*u,(y+oy)*u,u,u);if(h(k+40)<.4)ctx.fillRect((x+ox+(h(k+50)<.5?1:-1))*u,(y+oy)*u,u,u);}}
+       ctx.fillStyle=PAL['1'];},cx=o=>(o.x+.5-camX)*16,cy=o=>(o.y+.5-camY)*16;
+     // laser d'une sentinelle : le trait part d'elle ; touché, il finit sur la foreuse, raté, à côté. Il crépite puis s'éteint d'un coup.
+     for(const f of FX)if(f.kind==='laser'&&G.beasts.includes(f.o)&&fxP(f)<.75)laser(cx(f.o),cy(f.o),(f.x+.5-camX)*16+f.ox,(f.y+.5-camY)*16+f.oy,f.ox*5.3+f.oy+f.t0,4);}
+   // Explosion (mine, charge sismique) : le carré de 3 × 3 en pavés fins de 2 pixels de tuile — blanc plein, puis damier accent, puis braises monde éparses
+   for(const f of FX)if(f.kind==='boom'){const p=fxP(f),ph=p<.2?0:p<.6?1:2,t=Math.floor(p*16);ctx.fillStyle=ph===0?'#fff':ph===1?PAL['1']:PAL['3'];
      for(let cy=-1;cy<=1;cy++)for(let cx=-1;cx<=1;cx++){const bx=Math.round((f.x+cx-camX)*16),by=Math.round((f.y+cy-camY)*16);
-       for(let gy=0;gy<4;gy++)for(let gx=0;gx<4;gx++){
-         if(ph===1&&((gx+gy+cx+cy+Math.floor(p*14))&1))continue;
-         if(ph===2&&((gx*7+gy*13+cx*5+cy*3+Math.floor(p*10)*3)%5)>(p<.8?1:0))continue;
-         ctx.fillRect((bx+gx*4)*u,(by+gy*4)*u,4*u,4*u);}}
+       for(let gy=0;gy<8;gy++)for(let gx=0;gx<8;gx++){
+         if(ph===1&&((gx+gy+t)&1))continue;
+         if(ph===2&&((gx*7+gy*13+cx*5+cy*3+t*3)%7)>(p<.8?1:0))continue;
+         ctx.fillRect((bx+gx*2)*u,(by+gy*2)*u,2*u,2*u);}}
      ctx.fillStyle=PAL['1'];}
    // « ! » d'un ennemi qui repère la foreuse : un trait d'un pixel de tuile, blanc cerné de noir, au-dessus de lui ; il monte de 2 pixels puis s'éteint d'un coup (affiné le 16 novembre 2026)
    for(const f of FX)if(f.kind==='alerte'&&(G.beasts.includes(f.o)||G.animals.includes(f.o))&&vis[idx(f.o.x,f.o.y)]){const p=fxP(f),px=Math.round((f.o.x-camX)*16)+7,py=Math.round((f.o.y-camY)*16)-10-(reduced?2:Math.min(2,Math.floor(p*12)));

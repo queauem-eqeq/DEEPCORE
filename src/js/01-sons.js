@@ -53,8 +53,6 @@ const SFX={
     noiz(.3,.05,2800,'bandpass',0,1400);tone(1180,.22,'sine',.045,1560,.2);},
   battery(){tone(180,.3,'sawtooth',.05,900);tone(360,.3,'square',.025,1800,.02);
     noiz(.1,.07,3600,'highpass',.26);tone(1760,.12,'sine',.05,2640,.28);},
-  purge(){noiz(.5,.16,2200,'bandpass',0,420);tone(300,.35,'sine',.04,90);
-    noiz(.22,.09,5200,'highpass',.3);tone(660,.14,'triangle',.035,990,.34);},
   // Fumigène (16 novembre 2026) : le bidon qui tombe, l'amorce qui claque, puis le jet sous pression qui s'épuise en nappe sourde
   smoke(){tone(150,.07,'square',.09,70);
     noiz(.12,.18,5200,'highpass',.03);
@@ -71,6 +69,8 @@ const SFX={
   /* Porte automatique, forte et métallique : souffle pneumatique, servo, grincement de rail (deux partiels aigus non
      harmoniques). Le choc de fin de course a été retiré le 19 novembre 2026 : il ne reste que cette première partie,
      et c'est le bruit de toutes les portes — vaisseau, bâtiments, créatures (à volume réduit). */
+  // tir de la sentinelle : un « piou » de laser — deux balayages qui chutent très vite de l'aigu au grave, sur un filet de souffle
+  laser(){tone(2300,.2,'sawtooth',.075,170);tone(3100,.13,'square',.035,420);noiz(.1,.05,5200,'bandpass',0,1400);},
   door(k=1){noiz(.38,.26*k,2600,'bandpass',0,700);tone(180,.22,'square',.06*k,420);tone(1240,.3,'square',.03*k,1175);tone(1873,.24,'square',.02*k,1790);},
   hyper(){tone(700,1,'sawtooth',.05,55);noiz(1.1,.13,3200,'bandpass',0,180);},
   hum(){tone(55,2.2,'sine',.06);tone(110,2.2,'sine',.02);},

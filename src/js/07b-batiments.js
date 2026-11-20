@@ -8,13 +8,18 @@ function batiTuile(t,x,y,put){
   if(t===WALL||t===SECRET){const b=y<H-1?G.t[idx(x,y+1)]:WALL;put(b===WALL||b===SECRET?TL.wall:TL.wallFace,.95);return;}
   put(TL.floor,.5);
   if(t===PILLAR)put(TL.pillar,.95);
+  else if(t===MACHINE)put(TL['mach'+((G.art&&G.art[idx(x,y)])||0)],1);
+  else if(t===ANTENNA)put(G.art&&G.art[idx(x,y)]===1?TL.antenneOn:TL.antenne,1);
+  else if(t===TERMINAL)put(TL.terminal,1);
   else if(t===DOOR){const cote=y>0&&y<H-1&&G.t[idx(x,y-1)]===WALL&&G.t[idx(x,y+1)]===WALL;   // porte percée dans un mur vertical
     put(porteOuverte(x,y)?(cote?TL.doorOpenV:TL.doorOpen):TL.door,1);}
 }
+// 20 novembre 2026 : plus de pièce de moins de 3 cases de large (rectangles d'au moins 4 × 4, halls de 3 ou 4 de large,
+// branches des L et des croix d'au moins 3) — l'utilisateur trouvait certaines pièces trop étroites. Les cavernes restent irrégulières.
 const STYLES={
-  avant:{n:'avant-poste',rw:[3,6],rh:[3,5],cor:.25,pil:.1,gou:.12,cav:0,bou:26},
+  avant:{n:'avant-poste',rw:[4,6],rh:[4,5],cor:.25,pil:.1,gou:.12,cav:0,bou:26},
   hangar:{n:'hangar',rw:[6,12],rh:[5,9],cor:.15,pil:.7,gou:.25,cav:0,bou:18},
-  forage:{n:'complexe de forage',rw:[4,9],rh:[3,7],cor:.45,pil:.25,gou:.5,cav:.05,bou:12},
+  forage:{n:'complexe de forage',rw:[4,9],rh:[4,7],cor:.45,pil:.25,gou:.5,cav:.05,bou:12},
   ruine:{n:'ruine',rw:[4,10],rh:[4,8],cor:.2,pil:.15,gou:.35,cav:.6,bou:16}};
 const D4=[[1,0],[-1,0],[0,1],[0,-1]];
 // une forme de pièce : liste de cases [x,y] (origine quelconque) et son genre
@@ -22,11 +27,11 @@ function formePiece(st){
   const w=rnd(st.rw[0],st.rw[1]),h=rnd(st.rh[0],st.rh[1]),r=Math.random(),c=[];
   const rect=(x0,y0,a,b)=>{for(let y=y0;y<y0+b;y++)for(let x=x0;x<x0+a;x++)if(!c.some(q=>q[0]===x&&q[1]===y))c.push([x,y]);};
   if(r<st.cav&&w>=5&&h>=4){const b=caBlob(w+2,h+2,.58,4);if(b.length>=12)return {c:b,g:'caverne'};}
-  if(r<st.cav+.14&&w>=5&&h>=4){const cw=rnd(2,w-2),ch=rnd(2,h-2),coin=rnd(0,3);rect(0,0,w,h);   // L : un rectangle amputé d'un coin
+  if(r<st.cav+.14&&w>=6&&h>=6){const cw=rnd(2,w-3),ch=rnd(2,h-3),coin=rnd(0,3);rect(0,0,w,h);   // L : un rectangle amputé d'un coin
     return {c:c.filter(([x,y])=>!((coin&1?x>=w-cw:x<cw)&&(coin&2?y>=h-ch:y<ch))),g:'L'};}
-  if(r<st.cav+.26&&w>=5&&h>=5){const a=rnd(1,Math.max(1,Math.floor((h-1)/2))),b=rnd(1,Math.max(1,Math.floor((w-1)/2)));rect(0,a,w,h-2*a);rect(b,0,w-2*b,h);return {c,g:'croix'};}
+  if(r<st.cav+.26&&w>=5&&h>=5){const a=rnd(1,Math.max(1,Math.floor((h-3)/2))),b=rnd(1,Math.max(1,Math.floor((w-3)/2)));rect(0,a,w,h-2*a);rect(b,0,w-2*b,h);return {c,g:'croix'};}
   if(r<st.cav+.38&&w>=5&&h>=5){const cx=(w-1)/2,cy=(h-1)/2;for(let y=0;y<h;y++)for(let x=0;x<w;x++)if(((x-cx)/(w/2))**2+((y-cy)/(h/2))**2<=1.05)c.push([x,y]);return {c,g:'ronde'};}
-  if(r<st.cav+.48){const l=rnd(8,14),e=rnd(2,3);Math.random()<.5?rect(0,0,l,e):rect(0,0,e,l);return {c,g:'hall'};}
+  if(r<st.cav+.48){const l=rnd(8,14),e=rnd(3,4);Math.random()<.5?rect(0,0,l,e):rect(0,0,e,l);return {c,g:'hall'};}
   rect(0,0,w,h);return {c,g:'rect'};
 }
 // Une structure dans le lot [lx0..lx1] × [ly0..ly1] ; écrit dans own (numéro de pièce + 1), porte, pied (emprise : sols et murs).
@@ -81,6 +86,8 @@ function boucles(B,S){const {own,porte,interdit,pied}=B,cand=[],miens=new Set(S.
       for(let j=1;j<=m;j++)for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++)pied[idx(fx+dx*j+a,fy+dy*j+b)]=1;
       B.pieces.push(p);S.pieces.push(p);longs++;}}
 }
+// Gouffres intérieurs retirés « pour l'instant » le 20 novembre 2026, à la demande de l'utilisateur : le code reste, coupé par ce drapeau.
+const GOUFFRES_INT=false;
 // Gouffres et piliers d'une structure, écrits dans B.sol (FLOOR par défaut) ; chaque ajout est annulé s'il coupe la structure.
 function amenager(B,S){const {own,porte,sol}=B;
   const relie=()=>{let s0=-1,tot=0;for(const p of S.pieces)for(const i of p.c)if(sol[i]!==CHASM&&sol[i]!==PILLAR){tot++;if(s0<0)s0=i;}
@@ -93,7 +100,7 @@ function amenager(B,S){const {own,porte,sol}=B;
     const acces=p.c.filter(i=>D4.some(([dx,dy])=>porte[idx(i%W+dx,((i/W)|0)+dy)]));
     const dedans=set=>[...set].filter(i=>{const x=i%W,y=(i/W)|0;for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++)if(!set.has(idx(x+dx,y+dy)))return false;return true;});
     const avant=p.c.map(i=>sol[i]),annule=()=>p.c.forEach((i,k)=>sol[i]=avant[k]);
-    if(Math.random()<S.st.gou&&p.c.length>=20){
+    if(GOUFFRES_INT&&Math.random()<S.st.gou&&p.c.length>=20){
       if(Math.random()<.4){   // le gouffre prend toute la pièce : des chemins-ponts mènent des portes à un îlot central
         const mx=(x0+x1)>>1,my=(y0+y1)>>1,centre=p.c.reduce((a,i)=>Math.hypot(i%W-mx,((i/W)|0)-my)<Math.hypot(a%W-mx,((a/W)|0)-my)?i:a),garde=new Map();
         for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){const j=idx(centre%W+dx,((centre/W)|0)+dy);if(de.has(j))garde.set(j,FLOOR);}
@@ -127,7 +134,7 @@ function entrees(B,S,t,atteint){const {own,porte,pied,interdit}=B,cand=[];
 // Pose les structures sur la carte déjà générée (relief, vaisseau, site). Elles peuvent recouvrir la montagne et l'eau ;
 // si une entrée donne sur de la roche, un couloir est percé jusqu'à elle (connect).
 function batiments(){
-  G.batis=[];G.cles={};G.pb={};const pct=GEN.structure||0,N=W*H;if(pct<=0)return;
+  G.batis=[];G.cles={};G.pb={};G.art={};G.artN=null;const pct=GEN.structure||0,N=W*H;if(pct<=0)return;
   const total=Math.round(N*pct/100);if(total<45)return;
   const t0=G.t.slice();
   for(let essai=0;essai<6;essai++){
@@ -169,7 +176,7 @@ function batiments(){
       if(ok&&connectedAll(t)){
         G.batis=strs.map(S=>({style:S.st.n,pieces:S.pieces.filter(p=>p.g!=='couloir').length,cases:S.emprise,entrees:S.entrees.map(e=>[e.x,e.y])}));
         G.pb={};for(const i of garde)if(t[i]===BRIDGE)G.pb[i]=1;   // les ponts des pièces, pour le rendu
-        siteAuFond(B,strs);petites(B,strs);const sec=secrets(B,strs);verrous(B,strs,sec);return;}
+        siteAuFond(B,strs);petites(B,strs);const sec=secrets(B,strs);verrous(B,strs,sec);artefacts(B,strs);return;}
     }
     for(let i=0;i<N;i++)G.t[i]=t0[i];
   }
@@ -215,8 +222,7 @@ function verrous(B,strs,sec){const n=GEN.sVerrous||0,t=G.t,N=W*H;if(n<=0)return;
   if(lieux.length<poses){lieux=[];for(let i=0;i<N;i++)if(vu[i]&&(t[i]===GROUND||t[i]===FLAT)&&d[i]>8)lieux.push(i);}
   lieux.sort((a,b)=>d[b]-d[a]);lieux=lieux.slice(0,Math.max(poses,Math.ceil(lieux.length/2)));   // la moitié la plus lointaine
   for(let k=0;k<poses&&lieux.length;k++){const i=lieux.splice(rnd(0,lieux.length-1),1)[0];G.cles[i]=1;}
-  // les pièces secrètes ne reçoivent que des clés en surplus (une fois sur deux) : jamais une clé dont on a besoin
-  for(const c of sec||[])if(c.length&&Math.random()<.5)G.cles[c[rnd(0,c.length-1)]]=1;
+  // jamais plus de clés que de serrures (19 novembre 2026) : les pièces secrètes ne reçoivent plus de clé en surplus
   G.verrous=poses;}
 // Une petite pièce (moins de 8 cases) fermée par des portes en perd une : le passage reste ouvert (19 novembre 2026).
 function petites(B,strs){const t=G.t,ent=new Set();for(const S of strs)for(const e of S.entrees)ent.add(e.c);

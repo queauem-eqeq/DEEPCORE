@@ -85,7 +85,7 @@ function exploreEvent(E){
   if(nv)return `${(G.beasts.includes(nv)?BEASTS:SPECIES)[nv.sp].n.toLowerCase()} en vue`;
   if((G.beasts||[]).some(b=>b.hunt>0&&vis[idx(b.x,b.y)]))return 'un ennemi vous chasse';
   if(G.sites.filter(s=>s.seen).length>E.sites)return 'site de forage repéré';
-  const ef=G.eff||{};if(ef.poison>0||ef.glu>0||paralyse())return 'la foreuse subit un effet';
+  const ef=G.eff||{};if(ef.poison>0||ef.glu>0)return 'la foreuse subit un effet';
   if(G.msg&&G.msg.c==='warn')return 'alerte';
   return null;}
 function stopExplore(m,c){if(!EXPL)return;clearTimeout(EXPL.tm);EXPL=null;$('explBtn').classList.remove('on');if(m)sayMore(m,c||'warn');render();}
@@ -169,6 +169,9 @@ const TDESC={[GROUND]:['Sol rocheux','Praticable. Les points au sol se densifien
   [DOOR]:['Porte','Praticable. Fermée, elle cache la vue ; elle s’ouvre quand on s’y tient et se referme derrière soi.'],
   [SECRET]:['Mur bâti','Infranchissable et opaque. La foreuse ne l’entame pas : seule une charge sismique l’ouvre. Compte comme une paroi pour la discrétion.'],
   [LOCK]:['Porte verrouillée','Infranchissable et opaque tant qu’elle est fermée. Une clé l’ouvre (avancer dessus) ; une charge sismique la détruit.'],
+  [MACHINE]:['Machine hors d’usage','Infranchissable, mais on voit par-dessus. Une charge sismique la réduit en gravats.'],
+  [ANTENNA]:['Antenne','Avancer dessus l’allume : elle reste allumée et tient en vue un disque de 30 cases de large. Infranchissable, ne coupe pas la vue.'],
+  [TERMINAL]:['Terminal','Avancer dessus affiche son texte. Infranchissable, ne coupe pas la vue.'],
   [PILLAR]:['Pilier','Infranchissable et opaque : il coupe la ligne de vue. Compte comme une paroi pour la discrétion.'],
   [LIQ]:['Eau peu profonde','Praticable par tous. Défense −20 pour qui s’y trouve ; pas deux fois plus lent, sauf pour les crabos qui nagent.'],
   [DEEP]:['Eau profonde','Praticable par tous. Défense −20, pas deux fois plus lent (sauf crabos), et le courant fait dévier la foreuse. Les créatures, elles, nagent droit.'],
@@ -210,7 +213,6 @@ function inspectHTML(){const {x,y}=HOV;if(x<0||y<0||x>=W||y>=H)return '';
   if(G.cles&&G.cles[i])out.push('<p>Une clé : passer dessus pour la ramasser.</p>');
   const sol=G.items&&G.items[i];
   if(sol&&sol.length)out.push(`<p><b>${sol.length>1?'Objets au sol':'Objet au sol'}</b> · ${sol.map(k=>ITEMS[k].n).join(', ')} · placez la foreuse dessus pour ramasser.</p>`);
-  if(G.blood&&G.blood[i]!=null)out.push('<p>Traces de sang.</p>');
   if(d!==0&&occ||d===0)out.push(`<p><b>${tn}</b> · ${td}</p>`);else out.push(`<p>${td}</p>`);
   const dm=G.dmg&&G.dmg[i];if(dm&&(t===ROCK||t===MOUNT))out.push('<p>Fissurée : encore 1 coup pour la briser.</p>');
   if(border&&(t===ROCK||t===MOUNT))out.push('<p>Bord de la carte : indestructible.</p>');

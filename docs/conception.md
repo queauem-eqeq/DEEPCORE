@@ -87,15 +87,20 @@ La carte n'est plus peuplée espèce par espèce (les cinq niveaux d'intensité 
   ↑ ↓. Mise en page demandée par l'utilisateur le 19 novembre 2026 (une grille de fiches avant). La fenêtre rappelle le
   budget de la carte en cours et ce qu'il a acheté. « Groupes par défaut » (deux clics) remet les sept groupes de départ.
 - **Plusieurs patrouilles par groupe** (19 novembre 2026) : dans la fiche, le sélecteur **ajoute** un style au groupe ; chaque
-  style choisi s'affiche en étiquette, retirable (il en reste toujours un). Quand il y en a plusieurs, **chaque groupe posé
+  style choisi s'affiche en étiquette, retirable. **Si aucun style n'est choisi, il est tiré parmi les six** (20 novembre 2026). Quand il y en a plusieurs, **chaque groupe posé
   sur la carte en tire un au hasard**. Champ `pats` (une liste) ; l'ancien champ `pat` est converti à la lecture.
 - **Bouton Enregistrer** de la fenêtre Groupes (19 novembre 2026) : écrit les groupes, leurs valeurs et le budget dans la base
   de l'artefact (`reglages/courant`, champ `groupes`), avec le reste des réglages. Claude peut alors les lire et en faire
   les groupes par défaut du code.
+- **Effectif à partir de 0** (19 novembre 2026) : l'effectif minimal d'une espèce peut être 0 (« 0 à 3 puces ») : elle est alors parfois absente du groupe. Si tout le groupe tire 0, rien n'est posé et rien n'est dépensé. Le maximum reste d'au moins 1.
 - **LIFE** : le budget et une case à cocher par groupe.
 - **Style de patrouille** : il est porté par le **groupe**, pas par l'espèce (un crabot peut faire la ronde dans un groupe
   et garder un territoire dans un autre). Six styles depuis le 19 novembre 2026 :
-  - **Errance** : pas au hasard, sans but.
+  - **Errance** (règle du 20 novembre 2026) : **un pas tous les battements ou tous les deux** (une fois sur deux, la
+    créature marque un temps après son pas). Elle ne repart **jamais d'où elle vient, ni par les deux diagonales voisines** :
+    il lui reste tout droit, les deux diagonales de devant et les deux virages à 90°. Dans un cul-de-sac seulement, elle
+    fait demi-tour. Mesuré sur 300 battements : 0,67 pas par battement, 1 % de demi-tours. Avant : un pas au hasard
+    dans n'importe quelle direction, un battement sur quatre. Une bande de relais mise en errance ne reste plus groupée.
   - **Voyage en bande** : longs trajets vers un point éloigné, pause de 50 battements, nouveau départ.
   - **Ronde** : une boucle de 3 ou 4 points fixes, à 7-13 cases du point de départ, toujours dans le même ordre, avec une
     halte de 3 à 6 battements à chaque point. Prévisible : on peut passer derrière. Les points sont pris n'importe où sur
@@ -103,12 +108,23 @@ La carte n'est plus peuplée espèce par espèce (les cinq niveaux d'intensité 
   - **Territoire** : le groupe tourne dans un rayon de 6 cases autour de son point de départ, avec des haltes de 8 à 20 battements.
   - **Sentinelle** : 2 ou 3 postes ; le groupe reste **immobile** à un poste 40 à 80 battements, puis rejoint le suivant.
   - **Affût** : immobile à son point de départ.
+  **Échange de places** (20 novembre 2026, la règle de Brogue) : une créature en patrouille dont le chemin est barré par une
+  créature calme d'un **autre groupe** prend sa case, et l'autre prend la sienne. Deux groupes qui se croisent dans un
+  passage étroit **se traversent** au lieu de se bloquer. Jamais avec un ennemi qui chasse ou qui a repéré la foreuse, ni
+  avec une mine armée ; une fois par battement et par créature ; chacune doit pouvoir tenir sur la case de l'autre. **En
+  chasse, rien ne change** : les ennemis se gênent et se contournent, le joueur garde l'avantage des goulots.
+  Essai : deux groupes de cinq en ronde face à face, 400 battements, couloir d'une case puis de deux — aucun battement
+  figé, 5 à 6 traversées par groupe (le maximum possible). Avec le seul demi-tour, essayé d'abord le même jour, il n'y
+  avait aucun blocage mais **aucune traversée** : le couloir devenait une frontière.
+  **Demi-tour, en dernier recours** : un groupe qui n'avance plus depuis 8 battements malgré l'échange (un ennemi en chasse
+  ou une mine armée barre le passage) repart vers son point précédent (ronde, sentinelle) ou s'en choisit un autre
+  (territoire ; une bande en voyage change de destination).
   La patrouille ne joue que tant qu'aucun membre n'a repéré la foreuse. Chasse et fouille finies, le groupe **reprend sa
   patrouille** : il rentre donc chez lui au lieu de rester là où la chasse l'a mené. En patrouille on marche — un pas par
   battement au plus, quelle que soit la vitesse de l'espèce. Mesuré sur 220 battements : affût 0 case parcourue, sentinelle
   26 pas, territoire 68 pas dans 9 cases d'envergure, ronde 108 pas dans 12 cases, voyage 53 cases d'envergure.
   Groupes de départ : puces en errance, crabot en ronde, relais en voyage, torpilles en ronde, broyeur en territoire,
-  mines à l'affût, paralyzor en sentinelle. Code : `patInit`, `patTick`, `patMove` dans `08-faune.js`, état dans `G.patr`.
+  mines à l'affût, sentinelle en sentinelle. Code : `patInit`, `patTick`, `patMove` dans `08-faune.js`, état dans `G.patr`.
 - Mémorisé dans le navigateur (`np-groupes`) et dans l'enregistrement des réglages (`groupes`).
 - Les effectifs par espèce (`LIFE`, `spawnAnimals`, `spawnBeasts`) ne servent plus qu'au banc de combat et aux mesures.
 
@@ -178,6 +194,37 @@ Touche **O** ou bouton **EXPLORER** (sous MARCHE / ÉQUIPEMENT, à côté d'un b
 ### Fenêtre Discrétion (mise en page du 15 novembre 2026)
 
 Jugée trop haute et trop étroite (640 × 835), elle est passée à 940 × 390 environ : la base et la portée du moment sur une ligne, les six modificateurs en tableau à gauche (situation, effet, portée), les règles à droite (chance d'être remarqué, portée en chasse, perte de trace, plancher, arrondis, ordre). « Valeur par défaut » est monté dans l'en-tête, à côté de « Fermer ». Les règles elles-mêmes n'ont pas changé.
+
+## 3 quater. Artefacts (20 novembre 2026)
+
+Des **systèmes qui se greffent sur chaque carte**, à l'intérieur des bâtiments. Chacun s'active ou se coupe pour la
+génération et a une **fréquence sur trois crans [− = +]**, dans **Lab → Artefacts** (mémorisé sous `np-artefacts`, joint à
+l'enregistrement des réglages). Code : `src/js/07c-artefacts.js`, appelé à la fin de la génération des bâtiments.
+
+| Artefact | Ce qu'il fait | Fréquence − / = / + |
+|---|---|---|
+| **Antenne** | La foreuse l'active **en avançant dessus** (un battement) : elle **reste allumée** et tient en vue un **disque de 30 cases de large** autour d'elle, murs compris — **le brouillard n'y revient pas**, où que soit la foreuse, et les créatures qui s'y trouvent se voient (20 novembre 2026 ; d'abord 20 cases et une simple révélation de la carte). | une carte sur deux / 1 / 2 par carte |
+| **Pièces envahies d'herbe** | La pièce entière est couverte d'herbes **hautes et basses mêlées** par touffes (le site et les clés gardent leur sol). | 8 % / 18 % / 35 % des pièces |
+| **Machines** | Dix machines hors d'usage (tuyaux, serveur, caisses, ordinateur, établi, cuve, générateur, console, turbine, armoire électrique), posées en **obstacles** : une à cinq par pièce choisie. **Elles barrent le pas mais pas la vue**, au contraire des piliers. Une charge sismique les réduit en gravats. | 15 % / 35 % / 60 % des pièces |
+| **Terminal** | La foreuse l'active en avançant dessus : une fenêtre affiche **un texte** (huit fragments de journal écrits par Claude, à remplacer ; le temps ne passe pas). | 1 / 2 / 4 par carte |
+
+- Trois terrains : `MACHINE`, `ANTENNA`, `TERMINAL`. Infranchissables pour tous, transparents à la vue, sans effet sur la
+  discrétion. `G.art[case]` : la variante d'une machine, l'état d'une antenne, le texte d'un terminal.
+- **Un obstacle ne coupe jamais un passage** : il n'est posé ni devant une porte ou une ouverture, ni là où il séparerait
+  la pièce en deux. Vérifié sur 40 cartes : aucune case rendue inaccessible. Antennes et terminaux vont de préférence
+  contre un mur, les machines sept fois sur dix.
+- Treize tuiles retouchables au Tile editor, groupe « Artefacts » (dessins de départ faits par Claude).
+- Mesuré sur 20 cartes aux réglages par défaut : 1 antenne, 2 terminaux, 2 pièces d'herbe et 9 machines par carte en moyenne.
+
+**Réglages du joueur adoptés le 20 novembre 2026** (base de l'artefact, `reglages/courant`, enregistré à 12 h 54) : ses
+**33 tuiles retouchées** (créatures, foreuse, portes, pilier, roche dure, éclats, site, antennes, terminal, neuf machines)
+sont les dessins par défaut — bloc `TUILES_JOUEUR` à la fin de `03-tuiles.js`, qui passe après toutes les autres
+définitions ; ses **dix groupes** remplacent les sept groupes de départ (`GROUPES_DEF`) ; la **Sentinelle** passe à 18 PV,
+2 dégâts, précision 70 ; la fréquence des machines passe à « + » ; les palettes **Néon** et **Abysse** prennent ses
+couleurs. Non recopiés, comme convenu : la génération, les archétypes de monde, l'état de la partie, la palette active.
+
+**Fréquence des groupes d'ennemis** : le même sélecteur [− = +] est dans la fiche de chaque groupe (Lab → Groupes). Au
+tirage, un groupe « − » sort deux fois moins souvent qu'un groupe « = », un groupe « + » deux fois plus.
 
 ## 4. Terrains
 
@@ -251,7 +298,7 @@ Le jeu ne compte plus en tours mais en **unités de temps**, comme Brogue et Cog
 - Les animaux attaquent **une fois par battement au contact** ; leur vitesse ne règle que les déplacements (vitesse 5 = 1 case par battement), et l'eau les ralentit comme la foreuse, sauf les nageurs.
 - **Barre de vie au-dessus des créatures blessées** : petite barre rouge sur fond noir, dès que la créature n'est plus intacte. Les puces en étaient privés jusqu'au 16 novembre 2026 (seuls les prédateurs en avaient une) ; tout le monde en a une maintenant.
 - Animation : bond de l'attaquant, flash, chiffres de dégâts flottants (« -10 », « 0 » pour un coup raté, de part et d'autre), « +10 / +15 / +20 » en couleur bio au ramassage d'éclats de métal, tremblement d'écran quand le robot est touché ou qu'un ennemi meurt.
-- Un animal tué laisse une trace de sang.
+- Un ennemi détruit laisse des débris au sol (plus de sang depuis le 19 novembre 2026, § 8).
 
 ## 6 bis. Équipement et inventaire (13 novembre 2026, séparés le 15)
 
@@ -278,6 +325,7 @@ Version d'essai : tous les objets sont donnés au départ, non équipés sauf la
 - **Équiper** est gratuit et instantané. Une arme ou une armure remplace celle qui est portée ; un 4ᵉ accessoire est refusé tant qu'un emplacement n'est pas libéré.
 - **Effets** : l'objet ajoute ses modificateurs aux stats tant qu'il est porté ; les stats modifiées s'affichent en couleur dans les statistiques de la fenêtre. 
 - **Fumigène : un vrai nuage** (16 novembre 2026 ; avant, un simple effet de 5 battements). À la pose, une **galette ovale** autour de la foreuse : **7 cases de large et de haut, 5 en diagonale** (37 cases). Chaque case tire sa durée entre **15 et 25 battements**. À chaque battement le nuage **gagne une à trois cases voisines** au hasard, avec une durée plus courte : il s'étend de travers, plafonné à 90 cases, puis s'efface case par case ; « La fumée se dissipe » quand la dernière s'en va. Les ennemis qui chassaient **perdent aussitôt la trace**.
+  - **La fumée passe au-dessus des gouffres** (19 novembre 2026) : elle s'y pose et s'y étend comme sur le sol ; seuls les obstacles pleins (roche, murs, coque) l'arrêtent.
   - **Une case de fumée cache la vue**, exactement comme une montagne ou des herbes hautes, **dans les deux sens** : les ennemis ne vous voient plus, et vous ne voyez plus qu'à une case autour de vous. Le nuage, lui, reste dessiné en entier (en plus pâle là où il coupe la vue), sinon on ne verrait que son cœur.
   - Dessiné avec les **six tuiles de nuage** de l'intro (Tile editor, groupe « Intro ») : cœur en Nuage plein ou texturé, pourtour avec les quatre bords. Les tuiles pâlissent dans leurs quatre derniers battements.
   - **Les tuiles changent d'un battement à l'autre** (16 novembre 2026) : une case entourée de fumée sur ses huit voisines prend une tuile de cœur, les autres une tuile de bord, et une case sur deux retire sa tuile au hasard dans sa famille. Le cœur se déplace, les bords tournent : le nuage a l'air de vivre au lieu d'être une forme figée qui rétrécit.
@@ -307,11 +355,10 @@ Version d'essai : tous les objets sont donnés au départ, non équipés sauf la
 | Accumulateur | accessoire | – | Énergie max +40 |
 | Réparobots (×2) | consommable | – | Vie +50 ; petites **croix rouges** autour de la foreuse |
 | Batterie (×2) | consommable | – | Énergie +50 ; petites **flèches bio** qui montent |
-| Purge (×2) | consommable | – | supprime poison et glu ; un **filet ovale** pulse autour de la foreuse, à un pixel de la case |
 | Fumigène (×2) | consommable | – | **un nuage de fumée** de 7 cases de large autour de la foreuse, opaque des deux côtés, qui s'étend puis se dissipe (voir ci-dessous) |
 | Charge sismique (×2) | consommable | – | **visée** : un carré de 3 × 3 à placer jusqu'à 4 cases, **30 dégâts** à tout ce qui s'y trouve ; bruyante (comme un forage) |
 
-Vingt et un objets depuis le 13 novembre 2026. Règles ajoutées ce jour-là :
+**La Purge a été supprimée le 20 novembre 2026** (plus aucun ennemi n'inflige poison ou glu), avec son bruitage et son filet ovale. Vingt et un objets depuis le 13 novembre 2026. Règles ajoutées ce jour-là :
 
 - **La foreuse est une arme** : c'est l'arme de départ, déjà équipée. Il y a **toujours une arme en main** : on ne peut ni la retirer ni la jeter, seulement la remplacer. **Toute arme fore la roche pareil** (choix de l'utilisateur) : l'arme ne change que le combat et le visuel.
 - **Le visuel de la foreuse suit l'équipement** : l'arme dessine la moitié avant (la pointe), l'armure la moitié arrière (le corps), dans les quatre orientations. Sans armure et avec la foreuse d'origine, c'est la tuile « Foreuse » du Tile editor, retouches comprises ; les autres combinaisons ne sont pas encore retouchables.
@@ -334,7 +381,7 @@ Reste à faire : faire **trouver** les objets (au sol, lâchés par les ennemis,
 | Torpille | 7 | 14 | 4-5 | 80 | 20 | 2 % | 5 |
 | Broyeur | 4 | 60 | 10-18 | 60 | 0 | 0 % | 1 |
 | Mine (19 novembre 2026) | 8 | 12 | 20 (explosion) | — | 0 | 0 % | 4 |
-| Paralyzor (19 novembre 2026) | 7 | 14 | 1-2 | 75 | 10 | 0 % | 3 |
+| Sentinelle (19 novembre 2026, ex-Paralyzor) | 7 | 14 | 1-2 (laser, 2 cases) | 75 | 10 | 0 % | 3 |
 
 **Le 17 novembre 2026, six espèces ont été retirées** à la demande de l'utilisateur : Crachin, Vipérin, Gluar, Siphon,
 Tapi et Taupar. Il reste l'Puce (petit animal) et quatre bêtes : Crabot, Relais, Broyeur, Torpille. Les **capacités**
@@ -372,12 +419,15 @@ Les chiffres du tableau sont ceux **réglés en jeu par le joueur** et recopiés
 - **Mine** : rapide (VIT 8), elle fonce sur la foreuse dès qu'elle l'a repérée. Arrivée **à une case**, elle **s'arme** :
   elle ne bouge plus et **clignote**, puis **explose 1 à 3 battements plus tard**. L'explosion frappe un **carré de 3 × 3**
   centré sur la mine : **20 dégâts** (les dégâts min et max de sa fiche) à la foreuse et à toute créature qui s'y trouve.
+  L'animation de l'explosion est un carré de 3 × 3 en **pavés fins de 2 pixels** : blanc plein, damier accent, braises
+  couleur monde. **La charge sismique montre la même explosion** sur sa zone (19 novembre 2026).
   Détruite avant, elle n'explose pas. Elle n'a pas d'autre attaque.
-- **Paralyzor** : rapide (VIT 7). Son premier coup qui porte **l'accroche** à la foreuse : tant qu'il vit, **elle ne peut
-  plus se déplacer** (ni marcher, ni dériver ; elle peut frapper, briser une paroi voisine, utiliser un objet), et il lui
-  inflige ses dégâts (1 à 2) **à chaque battement, sans jet pour toucher**. Un **trait rouge** d'un pixel relie en
-  permanence le paralyzor à la foreuse, avec de petites étincelles. Seule sa mort la libère ; l'effet « Paralysée »
-  s'affiche sous les jauges.
+- **Sentinelle** (clé interne `paralyzor`) : rapide (VIT 7), 14 PV, 1 à 2 dégâts. Elle **tire un laser jusqu'à 2 cases**,
+  en ligne de vue, une fois par battement, avec un jet pour toucher ordinaire (précision 75) et un **bruit de laser**.
+  **Le trait rouge se voit toujours** : droit sur la foreuse s'il touche, à côté s'il rate ; il crépite puis s'éteint.
+  Elle s'appelait d'abord **Paralyzor** et accrochait la foreuse, qui ne pouvait plus se déplacer tant qu'il vivait
+  (puis seulement s'approcher de lui, et s'en libérer au fumigène) : **la paralysie a été retirée le 19 novembre 2026 au
+  soir**, à la demande de l'utilisateur, avec le nom. Attention : « Sentinelle » est aussi le nom d'un style de patrouille.
 
 Effets durables sur la foreuse : affichés sous les jauges (« Poison 4 · Englué 2 »), décomptés à chaque battement. La Coque isolante divise leur durée par deux, la Purge les supprime.
 
@@ -395,7 +445,7 @@ La statistique **DÉT (détection)** par espèce a été supprimée le 13 novemb
 - **Diagonales comme dans Brogue** (10 novembre 2026) : un pas ou un coup en diagonale est **impossible si l'une des deux cases voisines orthogonales est une paroi** (rocher, montagne, coque du vaisseau) — on ne coupe pas les coins. Vaut pour la foreuse (message « Coin de paroi »), tous les ennemis (déplacements et attaques), le courant de l'eau profonde, les trajets automatiques et la génération (connexion des zones et accès aux sites calculés avec la même règle). L'eau et les gouffres ne bloquent pas les diagonales. Dans le brouillard, le trajet ne tient compte que des coins déjà vus.
 - **Coup par surprise** : frapper un ennemi qui **ne vous a pas repéré** (ni en chasse, ni alerté, ni en train de vous chercher) **touche toujours** et est **toujours critique**. Message « Coup par surprise ! ».
 - **Coups critiques** : un critique fait **×3 dégâts**. Foreuse : stat **CRIT 5 %** au départ. Ennemis : chacun a sa stat CRIT (5 % par défaut, réglable dans le Bestiaire, colonne « Critique % »). Chiffre flottant suivi de « ! » (couleur accent pour la foreuse), secousse et son sec.
-- **Mémoire, dernière position connue (tous les ennemis, 10 novembre 2026)** : un ennemi ne connaît la position de la foreuse que s'il la voit. Il retient l'endroit où il l'a vue ; quand il ne la voit plus, il s'y rend par le plus court chemin. Pour une **bande de relaiss**, cette position est **partagée** : ce qu'un membre voit, toute la bande le sait . Crabot et puces ont chacun leur propre mémoire. Arrivé (ou bloqué 3 tours), il **fouille 20 battements** (voir ci-dessous), puis **oublie** et reprend son comportement de départ (errance, voyage de la bande). Un coup de foreuse le met aussi au courant. État affiché : « en chasse », « cherche » (vers la dernière position), « fouille ». Remplace l'ancienne poursuite « à l'aveugle » de 8 tours (qui connaissait la position réelle).
+- **Mémoire, dernière position connue (tous les ennemis, 10 novembre 2026)** : un ennemi ne connaît la position de la foreuse que s'il la voit. Il retient l'endroit où il l'a vue ; quand il ne la voit plus, il s'y rend par le plus court chemin. Pour une **bande de relais**, cette position est **partagée** : ce qu'un relais voit, tous les relais de sa bande le savent. **Seuls les relais partagent** (précisé le 20 novembre 2026) : les autres espèces de leur groupe ne sont pas alertées, et aucune autre espèce ne partage. Crabot et puces ont chacun leur propre mémoire. Arrivé (ou bloqué 3 tours), il **fouille 20 battements** (voir ci-dessous), puis **oublie** et reprend son comportement de départ (errance, voyage de la bande). Un coup de foreuse le met aussi au courant. État affiché : « en chasse », « cherche » (vers la dernière position), « fouille ». Remplace l'ancienne poursuite « à l'aveugle » de 8 tours (qui connaissait la position réelle).
 - **Fouille (18 novembre 2026)** : arrivé au dernier endroit où il a vu la foreuse, l'ennemi **ratisse la zone pendant 20 battements** (30 jusqu'au 18 novembre 2026 au soir). Il se choisit un point accessible **à une dizaine de cases** (7 à 13) de ce dernier point connu, s'y rend par le plus court chemin, puis en choisit un autre, jusqu'à la fin des 30 battements. Les points sont toujours tirés **autour du dernier point connu**, jamais autour de lui : il tourne donc dans la zone, sans jamais s'en éloigner de plus d'une douzaine de cases, au lieu de dériver. Bloqué 3 battements de suite, il change de point ; s'il n'en trouve aucun d'accessible, il fait un pas au hasard. Pendant toute la fouille il peut vous **remarquer de nouveau** aux conditions ordinaires (dans le rayon, en vue, 25 % par battement), et la fuite par l'eau garde tout son intérêt puisqu'il cherche à terre. Constantes `SEARCH_T`, `SEARCH_R`, `SEARCH_VAR` dans `08-faune.js`. Avant cette date il faisait 4 battements de pas au hasard, sans rien pour le retenir près du point : il dérivait. Coût mesuré : 6,6 ms par battement avec 20 ennemis en fouille sur une grande carte dégagée, cas extrême (ils sont d'ordinaire une poignée).
 - **Portée de discrétion (13 novembre 2026, inspirée de Brogue)** : la détection appartient à la foreuse, pas aux ennemis. **Un seul rayon, le même pour toutes les espèces** : un ennemi qui ne vous a pas repéré, situé dans ce rayon **et en ligne de vue**, a **25 % de chance par tour** de vous remarquer (chance plate, sans effet de la distance : c'est le choix de Brogue depuis sa version 1.7.3, pour la lisibilité). Calcul, dans cet ordre : **base 10**, **×1,5 en brisant un rocher ou une montagne** (le bruit s'entend **à travers les parois** : ce tour-là, un ennemi calme dans le rayon peut vous remarquer **même hors de vue**, toujours 25 %), **÷2 en attendant sur place**, **÷2 sur des herbes basses** (arrondi au supérieur à chaque division), **−1 par 2 parois adjacentes, arrondi au supérieur** (rocher ou montagne, les 8 voisines : 1-2 parois −1, 3 et plus −2 ; **retrait limité à −2**, constante `WALL_MAX` — c'était −4 jusqu'au 18 novembre 2026), **plancher 2**, puis **+ 2 en courant** (13 novembre 2026 ; ajouté après le plancher, donc toujours exactement + 2 cases). Exemples : 10 en terrain dégagé, 8 le long d'une falaise (3 parois), 5 sur des herbes basses, 5 en attendant, 3 en attendant sur des herbes basses, 3 en attendant dans un recoin, 15 en brisant une paroi. Un ennemi **déjà en chasse** vous garde en vue jusqu'à **2 fois** ce rayon (13 novembre 2026 ; Brogue en met trois) ; **dès qu'il perd le contact visuel** — ligne de vue coupée, ou au-delà de ce double rayon — il rejoint votre **dernière position connue**, y fouille, puis oublie. **Perte de trace** (13 novembre 2026, les 3 % de Brogue) : tant qu'il vous suit **hors du rayon** mais dans cette bande de chasse, il a **3 % par tour** de perdre votre trace — une trentaine de tours en moyenne. Il garde alors sa dernière position connue et s'y rend, mais ne vous suit plus de loin : il lui faut **vous remarquer de nouveau** (25 % par tour) à l'intérieur du rayon. Dans le rayon, il ne vous perd jamais. Mesuré : jamais de perte à 5 ou 10 cases, 32 tours en moyenne à 13 et 19 cases, contact rompu aussitôt au-delà de 20 ; après une perte, repérage de nouveau en 3,8 tours à 4 cases. Valeur de base réglable dans **Lab → Discrétion** (fenêtre dédiée, voir ci-dessous ; plus dans le Bestiaire depuis le 13 novembre 2026), affichée dans la colonne de droite sous **DIS** (ambre quand elle est sous la base, rouge au-dessus). Le forage d'un site ne compte pas : il termine le niveau, les ennemis ne jouent plus.
 - **Fenêtre Bestiaire** (refaite le 19 novembre 2026, même organisation que la fenêtre Groupes) : **à droite, la liste des espèces en colonne** ; **à gauche, jusqu'à quatre espèces choisies**, côte à côte dans un tableau, une ligne par statistique, pour les modifier et les comparer. Un clic dans la liste ajoute ou retire une espèce ; la cinquième choisie remplace la plus ancienne. Avant : trois fiches par ligne.
@@ -422,7 +472,7 @@ La statistique **DÉT (détection)** par espèce a été supprimée le 13 novemb
   (Vie max, Énergie max, EYE, DEG, PRE, DEF, CRIT, POW, VIT) qu'il ouvrait quand on le ramassait. La foreuse n'a donc plus
   aucune source de progression permanente : c'est à reconstruire (§ 12). Une partie commencée avant perd simplement sa pierre.
 - **Éclats de métal** (9 novembre 2026) : **10 % des cases de montagne** (hors rangée extérieure indestructible ; réglage `ORE_PCT` dans la génération) montrent des éclats de métal couleur bio — ceux pris au cœur d'un massif ne se voient qu'en creusant jusqu'à eux. Briser la paroi les fait **tomber au sol** ; la foreuse qui passe dessus les ramasse et regagne **autant de vie que d'énergie** (16 novembre 2026 ; la vie seule avant) selon la **densité** : **petits +10** (50 % des éclats), **moyens +15** (30 %), **gros +20** (20 %), sans dépasser les maximums. Deux chiffres flottants s'affichent, et les deux effets visuels des consommables partent en même temps (croix rouges et flèches bio) (réglages `ORE_PV`, `ORE_MIX`). Chaque densité a sa tuile, dans la paroi et au sol. Signalés dans la fiche de survol (plus de liste dans « En vue » depuis le 13 novembre 2026). Tuiles éditables : Éclats petits / moyens / gros, en montagne et au sol (dessins retouchés au Tile editor et adoptés comme norme le 9 novembre 2026).
-- **Mort d'un ennemi** (9 novembre 2026) : en plus de la tache de sang, une **petite giclée** de 24 à 35 gouttes (pixels de tuile opaques, rouges, 1 ou 2 pixels) projetées en l'air dès l'impact, vite (70 à 180 px/s, freinées par l'air, retombées en moins d'une demi-seconde, à une ou deux cases au plus) ; en retombant elles **restent collées au sol** (sauf dans l'eau, un gouffre ou un obstacle). Au plus 1 500 gouttes gardées sur la carte (les plus anciennes s'effacent) ; comme le sang, elles restent en souvenir (atténuées) hors de vue.
+- **Destruction d'un ennemi** (19 novembre 2026 ; une tache de sang et une giclée de gouttes rouges avant, depuis le 9) : les ennemis étant des machines, plus de sang. À la place, une **gerbe d'étincelles** (35 à 50) qui filent droit, très vite, avec une courte traîne, et s'éteignent en un quart de seconde, et **14 à 22 débris de carcasse** projetés en l'air : ils retombent, **rebondissent une ou deux fois**, puis **restent au sol** (sauf dans l'eau, un gouffre ou un obstacle). **Deux couleurs seulement, monde et accent**, pour les étincelles comme pour les débris ; l'éclat blanc en croix du premier essai a été retiré (choix de l'utilisateur, 19 novembre 2026 au soir). Au plus 1 500 débris gardés sur la carte ; ils restent en souvenir (atténués) hors de vue. Pixel art strict, sans opacité. Les tuiles « Sang A » et « Sang B » ont quitté le Tile editor, et la fiche de survol ne signale plus de traces de sang.
 - **Foreuse endommagée** (9 novembre 2026) : sous **50 PV** elle **fume** (grains gris opaques de 1 ou 2 pixels de tuile, calés sur la grille des pixels, qui montent en ondulant et disparaissent d'un coup — **pixel perfect, sans opacité ni changement de taille** ; la fumée reste sur place quand elle avance, comme une traînée) ; sous **20 PV** la fumée double et de **petites flammèches** (jaune, orange, rouge) s'échappent de la coque. Dessiné sur un calque transparent au-dessus de la vue, animé en continu sans redessiner la carte.
 - **Mort de la foreuse** (9 novembre 2026) : à 0 PV, la foreuse **explose** — éclair blanc, secousse, détonation, et ~520 éclats (couleurs accent et bio, quelques blancs, 2 à 5 px) projetés en l'air qui retombent, **rebondissent** au sol, ricochent sur rochers, montagnes et vaisseau, tombent dans les gouffres et disparaissent d'un coup chacun à son heure (comme la poussière d'atterrissage). Ils **restent dans la zone visible** (le bord de la vue les arrête comme un mur). La foreuse n'est plus dessinée. Quand tout est retombé : **« FOREUSE DÉTRUITE »** en très gros, puis deux boutons au style du menu d'amélioration : **Nouvelle exploration** et **Quitter**. Pas de menu principal pour l'instant (choix du 9 novembre 2026).
 - **Quitter** : une page web ne peut pas fermer son onglet ; l'écran devient noir avec « SIGNAL COUPÉ », le son est coupé, et un bouton discret « Rallumer » relance une nouvelle exploration.
@@ -540,9 +590,10 @@ Chiffres à l'appui dans `mesures.md`, points de comparaison avec Brogue dans `b
     - **Une ou deux structures** : deux une fois sur deux quand la surface le permet (au moins 260 cases en tout), avec un partage tiré entre **20 et 80 %** (35 à 65 % avant le 19 novembre 2026 au soir) : parfois une grande et une petite. Pour qu'elles tiennent toujours toutes les deux, la carte est d'abord **coupée en deux zones** à proportion de leurs tailles (le plus souvent côte à côte), une structure par zone. **Les deux structures ne sont jamais reliées entre elles** (19 novembre 2026) : aucun couloir ne passe de l'une à l'autre, et au moins trois cases de terrain séparent leurs murs ; on va de l'une à l'autre par le dehors. Chacune a son **lot** (un rectangle de la carte) et son **style** : avant-poste, hangar, complexe de forage ou ruine, qui règle la taille des pièces, la part de couloirs, de piliers, de gouffres, de cavernes et le seuil des boucles.
     - **Les structures recouvrent le terrain** (choix de l'utilisateur, 19 novembre 2026) : montagne, eau, herbes, **gouffres naturels compris** (19 novembre 2026 au soir : les cases de gouffre sous une pièce deviennent du sol, sous un mur du mur ; ce qui reste du gouffre dehors est nettoyé comme d'habitude). Seuls le vaisseau et le bord de carte sont évités. Comme la roche dure est posée après, un massif peut envelopper un bâtiment.
     - **Emplacement au hasard**, sans lien avec le vaisseau : mesuré sur 40 cartes, le mur le plus proche est à 5 à 45 cases du départ, à moins de 10 cases une fois sur cinq.
+    - **Pièces moins étroites** (20 novembre 2026, l'utilisateur en trouvait certaines trop étroites) : rectangles d'au moins 4 × 4, halls de 3 ou 4 cases de large (2 ou 3 avant), branches des L et barres des croix d'au moins 3. Mesuré sur 15 cartes : la part du sol bâti large de moins de 3 cases passe de 28 % à 10 % (ce qui reste : les couloirs, voulus étroits, et les cavernes).
     - **Accrétion** : une première pièce, puis des pièces collées contre un mur existant avec une porte à la jonction, parfois au bout d'un **couloir** (2 à 5 cases, une fois sur quatre 7 à 14). Formes : rectangle, L, croix, ronde, hall long, caverne.
     - **Boucles et longs couloirs** : depuis chaque sol on tire tout droit à travers le mur ; si l'on retombe sur le sol d'une autre pièce et que le détour à pied dépasse le seuil du style (12 à 26 pas, ou trois fois la longueur à percer), on perce — une porte si le mur fait une case, sinon **un couloir jusqu'à 19 cases** avec une porte à chaque bout, qui relie deux salles éloignées. Peu de longs couloirs : un, plus un par tranche de sept pièces.
-    - **Gouffres** : dans une pièce d'au moins 20 cases, selon le style (12 à 50 %). Quatre fois sur dix **le gouffre prend toute la pièce** : il ne reste qu'un îlot central et des **chemins-ponts**, un par porte, un peu tordus. Sinon le gouffre occupe le cœur de la pièce en laissant un pourtour, et un pont le franchit une fois sur deux. Un gouffre qui couperait la structure est annulé.
+    - **Gouffres intérieurs retirés « pour l'instant » le 20 novembre 2026**, à la demande de l'utilisateur : plus aucun gouffre ni chemin-pont dans les pièces (drapeau `GOUFFRES_INT` dans `07b-batiments.js`, le code reste). Ce qui suit décrit ce qu'ils faisaient. **Gouffres** : dans une pièce d'au moins 20 cases, selon le style (12 à 50 %). Quatre fois sur dix **le gouffre prend toute la pièce** : il ne reste qu'un îlot central et des **chemins-ponts**, un par porte, un peu tordus. Sinon le gouffre occupe le cœur de la pièce en laissant un pourtour, et un pont le franchit une fois sur deux. Un gouffre qui couperait la structure est annulé.
     - **Piliers** : dans les pièces rectangulaires, en croix ou rondes sans gouffre, tous les 2 ou 3 pas, jamais contre un mur ni devant une porte.
     - **Portes d'entrée : une à trois** selon le nombre de pièces (une, deux à partir de 7 pièces, trois à partir de 16), éloignées les unes des autres, de préférence sur un dehors déjà praticable. **Si l'entrée donne sur de la roche, un couloir est percé** jusqu'au reste de la carte. Un terrain enfermé entre des murs, que rien ne pourrait rejoindre, devient du mur plein.
     - **Le site de forage est déplacé dans la pièce la plus profonde** de la plus grande structure (la plus éloignée des entrées).
@@ -562,7 +613,7 @@ Chiffres à l'appui dans `mesures.md`, points de comparaison avec Brogue dans `b
     - **Petites pièces** : une pièce de moins de 8 cases dont tous les passages sont des portes en perd une, remplacée par une ouverture (jamais une porte d'entrée).
     - **Pièces secrètes (19 novembre 2026)** : réglage « Pièces secrètes », 0 à 3, **1 par défaut** (`GEN.sSecrets`). Une pièce à **un seul passage** dont la porte est **dérobée** : elle a en tout point l'air d'un mur (dessin, fiche de survol, mini-carte) et se comporte comme tel. Jamais la pièce du site, jamais une entrée. S'il manque de culs-de-sac, une pièce de 3 × 3 à 5 × 4 est **creusée dans un massif de mur plein**, derrière le mur d'une pièce ; s'il n'y a pas de massif non plus, la carte en a moins que demandé (mesuré : 1,4 en moyenne pour 2 demandées).
       - **Découverte en se reposant** (attente ou REPOS) : chaque porte dérobée à **DET cases ou moins** a **25 % de chance par battement** d'apparaître ; elle devient alors une porte ordinaire, un « ! » la signale et le repos s'interrompt. **DET** est une nouvelle stat de la foreuse, **5 de base** (`G.st.detec`), affichée dans la fenêtre Équipement ; un objet peut la modifier (champ `detec`), aucun ne le fait encore. Une charge sismique ouvre aussi le mur.
-      - **Clés en surplus seulement** (décision de l'utilisateur, 19 novembre 2026) : une pièce secrète contient une fois sur deux une clé **en plus** de celles des serrures (dès qu'il y a une serrure sur la carte). Les clés nécessaires restent toutes accessibles sans rien ouvrir ni chercher : aucune impasse.
+      - **Aucune clé dans les pièces secrètes** (19 novembre 2026 au soir) : il n'y a **jamais plus de clés que de serrures** sur une carte. Les pièces secrètes recevaient une fois sur deux une clé en surplus : retiré à la demande de l'utilisateur. Mesuré sur 25 cartes : 17 serrures, 17 clés. Les clés nécessaires restent toutes accessibles sans rien ouvrir ni chercher.
     - **Bruitages** (19 novembre 2026) : une porte que la foreuse pousse fait son bruit (loquet, panneau lourd qui glisse, butée : `SFX.porte`) ; ouvrir une serrure fait tourner la clé (`SFX.serrure`). Une créature qui pousse une porte **en vue** s'entend aussi, moins fort (un seul bruit par battement) ; hors de vue, rien.
     - **Ponts des bâtiments** (19 novembre 2026) : dessinés avec la tuile « Sol bâti » sur une couleur unie, sans la texture du sol naturel. Les ponts naturels ne changent pas. **Aucune case bâtie ne porte la texture du sol naturel** (sols, portes, piliers, murs) : fond uni partout à l'intérieur.
     - **Pas encore fait** : pièces murées, densité de créatures à l'intérieur, mesures sur cent cartes dans `simul.py`.

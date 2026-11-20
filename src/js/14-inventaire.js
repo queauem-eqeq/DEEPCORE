@@ -130,12 +130,6 @@ const ITEMS={
          '..deeeeeeeeeww.',
          '..deeeeeeeeeww.',
          '..ddddddddddd..']},
-  purge:{n:'Purge',f:1,conso:1,son:'purge',fx:'purge',eff:'Élimine poison et glu',
-    d:'Solvant injecté dans les circuits : chasse le poison et dissout la glu.',
-    plein:st=>!(G.eff&&(G.eff.poison>0||G.eff.glu>0)),non:'Ni poison ni glu : purge inutile.',
-    use:st=>{G.eff.poison=0;G.eff.glu=0;return 'poison et glu éliminés';},
-    art:["     ┌───┐     ", "     └┬─┬┘     ", "     ┌┘ └┐     ", "     │▒▒▒│     ", "     │███│     ", "     └───┘     "],
-    col:[".....ddddd.....", ".....ddddd.....", ".....dd.dd.....", ".....d222d.....", ".....d222d.....", ".....ddddd....."]},
   fumigene:{n:'Fumigène',conso:1,son:'smoke',eff:'Nuage opaque de 7 cases',
     d:'Un nuage se répand autour de la foreuse, 7 cases de large et 5 en diagonale. Il cache la vue des deux côtés, s’étend de travers, puis se dissipe en une vingtaine de battements. Les ennemis perdent aussitôt votre trace.',
     plein:st=>false,non:'',
@@ -152,7 +146,7 @@ const ITEMS={
 // Objets donnés au départ, non équipés (phase d'essai : plus tard ils se trouveront au sol ou sur les ennemis).
 // Le second terme est le nombre d'exemplaires d'un consommable : ils s'empilent sur une seule ligne (« ×2 »).
 const INV_TEST=[['foreuse'],['usine'],['servo'],['optique'],['viseur'],['conden'],['gyro'],['stabil'],['accu'],
-  ['repar',2],['batterie',2],['purge',2],['fumigene',2],['charge',2]];
+  ['repar',2],['batterie',2],['fumigene',2],['charge',2]];
 // la foreuse est l'arme de départ, déjà équipée (ses modificateurs sont nuls : ce sont les stats de base) ;
 // la Coque d'usine est l'armure de départ, déjà équipée elle aussi : sa DEF +10 est comprise dans le def:10 de départ (07-generation)
 const invTest=()=>INV_TEST.map(([k,n])=>n?{k,eq:0,n}:{k,eq:k==='foreuse'||k==='usine'?1:0});
@@ -230,12 +224,12 @@ function viseeOk(){if(!VISEE||G.over)return;const {i,x,y}=VISEE,o=G.inv[i];
   let roches=0;
   for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){const zx=x+dx,zy=y+dy;
     if(zx<1||zy<1||zx>=W-1||zy>=H-1)continue;const j=idx(zx,zy),v=G.t[j];
-    if(v!==ROCK&&v!==MOUNT&&v!==HARD&&!bati(v))continue;
+    if(v!==ROCK&&v!==MOUNT&&v!==HARD&&v!==MACHINE&&!bati(v))continue;
     G.t[j]=RUBBLE;if(G.dmg)delete G.dmg[j];roches++;
     if(G.ore&&G.ore[j]&&!oreSol(G.ore[j])){const l=oreLv(G.ore[j]),mt=oreMat(G.ore[j]);G.ore[j]=(mt?'m':'')+'sol'+l;
       sayMore(mt?'De la Matière tombe au sol.':'Des éclats de métal tombent au sol.','good');}}
   engage();invTake(i);sacFix();SAC_H='';
-  addFx({kind:'shake',amp:8,dur:300});SFX.explode();
+  addFx({kind:'boom',x,y,dur:420});addFx({kind:'shake',amp:8,dur:300});SFX.explode();
   say(`Charge sismique : ${n?`${n} ennemi${n>1?'s':''} touché${n>1?'s':''}${k?`, ${k} abattu${k>1?'s':''}`:''}`:'personne dans la zone'}${roches?`, ${roches} case${roches>1?'s':''} de roche pulvérisée${roches>1?'s':''}`:''}.`,n||roches?'good':'warn');
   if(consoTemps('dig'))return;
   render();}
@@ -259,7 +253,7 @@ function invEquip(i){const o=G.inv[i];if(!o||G.over)return;const d=ITEMS[o.k],e=
   if(d.conso){
     if(d.plein(G.st)){invSay(d.non,'warn');SFX.blocked();render();return;}
     const r=d.use(G.st);invTake(i);invSay(`${d.n} utilisé${e} : ${r}.`,'good');(d.son&&SFX[d.son]?SFX[d.son]:SFX.spot)();   // un objet peut avoir son propre bruit et son propre effet
-    if(d.fx)addFx(d.fx==='purge'?{kind:'purge',x:G.px,y:G.py,dur:1000}:{kind:d.fx,x:G.px,y:G.py,dur:1000,gr:fxGrains(12)});
+    if(d.fx)addFx({kind:d.fx,x:G.px,y:G.py,dur:1000,gr:fxGrains(12)});
     consoTemps();invChanged();return;}   // un consommable coûte un battement (16 novembre 2026)
   if(o.eq){if(d.slot==='arme'){invSay(ARME_FIXE,'warn');SFX.blocked();render();return;}
     invApply(o,-1);o.eq=0;invSay(`${d.n} retiré${e}.`);SFX.door();invChanged();return;}
