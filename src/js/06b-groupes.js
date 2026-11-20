@@ -22,7 +22,7 @@ const GROUPES_DEF=()=>({budget:110,liste:[
 // L'effectif minimal peut être 0 : l'espèce est alors parfois absente du groupe.
 function groupesSains(d){const ks=ESPECES().map(e=>e[0]),n=(v,mn,mx,df)=>Number.isFinite(+v)&&v!==''&&v!=null?Math.max(mn,Math.min(mx,Math.round(+v))):df;
   if(!d||!Array.isArray(d.liste))return null;
-  return {budget:n(d.budget,0,2000,110),liste:d.liste.slice(0,40).map(g=>({n:String(g.n||'Groupe').slice(0,30),cout:n(g.cout,1,500,1),on:g.on?1:0,
+  return {budget:n(d.budget,0,2000,110),liste:d.liste.slice(0,40).map(g=>({n:String(g.n||'Groupe').slice(0,30),cout:n(g.cout,1,500,1),on:g.on?1:0,f:[0,1,2].includes(+g.f)?+g.f:1,
     pats:[...new Set(Array.isArray(g.pats)?g.pats:[g.pat||'errance'])].filter(v=>PATS.some(p=>p[0]===v)),   // liste vide permise : le style est alors tiré parmi tous
     m:(Array.isArray(g.m)?g.m:[]).filter(m=>m&&ks.includes(m.k)).slice(0,6).map(m=>{const a=n(m.min,0,20,1),b=n(m.max,1,20,Math.max(1,a));return {k:m.k,min:Math.min(a,b),max:Math.max(a,b)};})}))};}
 let GROUPES=GROUPES_DEF();
@@ -44,13 +44,13 @@ function buildGroupes(){const E=ESPECES(),ic=k=>ICON[k==='insectoide'?'an0r':'bz
   GR_SEL=Math.max(0,Math.min(L.length-1,GR_SEL));$('grBudget').value=GROUPES.budget;grInfo();
   $('grList').innerHTML=L.map((g,i)=>`<div class="grl${i===GR_SEL?' sel':''}${g.on?'':' inactif'}" data-g="${i}" draggable="true">
       <span class="grip" aria-hidden="true">⠿</span><input type="checkbox" data-f="on"${g.on?' checked':''} aria-label="Activer le groupe ${grEsc(g.n)}" title="Actif">
-      <button class="grnom" data-a="sel" aria-pressed="${i===GR_SEL}"><b>${grEsc(g.n)}</b><span>valeur ${g.cout} · ${grEsc(grCompo(g))}</span></button>
+      <button class="grnom" data-a="sel" aria-pressed="${i===GR_SEL}"><b>${grEsc(g.n)}</b><span>${['− ','','+ '][g.f??1]}valeur ${g.cout} · ${grEsc(grCompo(g))}</span></button>
       <button class="gx" data-a="up"${i?'':' disabled'} aria-label="Monter le groupe ${grEsc(g.n)}" title="Monter">↑</button><button class="gx" data-a="down"${i<L.length-1?'':' disabled'} aria-label="Descendre le groupe ${grEsc(g.n)}" title="Descendre">↓</button></div>`).join('')
     ||'<p class="mnote">Aucun groupe : la carte sera vide.</p>';
   const g=L[GR_SEL];
   $('grEdit').innerHTML=!g?'<p class="mnote">Créez un groupe avec « + Nouveau groupe ».</p>':`
     <label class="gl">Nom<input type="text" class="gnom" data-f="n" maxlength="30" value="${grEsc(g.n)}"></label>
-    <div class="grow"><label>Valeur<input type="number" data-f="cout" min="1" max="500" step="1" value="${g.cout}"></label>
+    <div class="grow"><span class="gfq">Fréquence ${freqHtml(g.f??1,grEsc(g.n))}</span><label>Valeur<input type="number" data-f="cout" min="1" max="500" step="1" value="${g.cout}"></label>
       <label class="gon"><input type="checkbox" data-f="on"${g.on?' checked':''}>Actif</label></div>
     <h3>Patrouilles <span>${g.pats.length>1?'une au hasard par groupe posé':g.pats.length?'toujours la même':'aucune choisie : une au hasard parmi toutes'}</span></h3>
     <div class="gpats">${g.pats.map(v=>`<span class="gpat">${(PATS.find(p=>p[0]===v)||[,v])[1]}<button class="gx" data-a="delp" data-v="${v}" aria-label="Retirer la patrouille ${(PATS.find(p=>p[0]===v)||[,v])[1]}" title="Retirer">×</button></span>`).join('')}
@@ -77,7 +77,8 @@ $('grEdit').addEventListener('change',e=>{const t=e.target,g=GROUPES.liste[GR_SE
     if(f==='k')m.k=t.value;else if(f==='min'){m.min=Math.max(0,Math.min(20,Math.round(+t.value||0)));if(m.max<m.min)m.max=m.min;}else if(f==='max'){m.max=nb(1,20);if(m.min>m.max)m.min=m.max;}}
   else if(f==='n')g.n=t.value.trim().slice(0,30)||'Groupe';else if(f==='cout')g.cout=nb(1,500);else if(f==='addp'){if(t.value&&!g.pats.includes(t.value))g.pats.push(t.value);}else if(f==='on')g.on=t.checked?1:0;
   saveGroupes();buildGroupes();});
-$('grEdit').addEventListener('click',e=>{const t=e.target.closest('button[data-a]');if(!t)return;const L=GROUPES.liste,g=L[GR_SEL],a=t.dataset.a;if(!g)return;
+$('grEdit').addEventListener('click',e=>{const q=e.target.closest('button[data-fq]');if(q&&GROUPES.liste[GR_SEL]){GROUPES.liste[GR_SEL].f=+q.dataset.fq;saveGroupes();buildGroupes();const n=$('grEdit').querySelector(`button[data-fq="${q.dataset.fq}"]`);if(n)n.focus();return;}
+  const t=e.target.closest('button[data-a]');if(!t)return;const L=GROUPES.liste,g=L[GR_SEL],a=t.dataset.a;if(!g)return;
   if(a==='delg')L.splice(GR_SEL,1);
   else if(a==='dup'&&L.length<40){const c=JSON.parse(JSON.stringify(g));c.n=(c.n+' 2').slice(0,30);L.splice(GR_SEL+1,0,c);GR_SEL++;}
   else if(a==='addm'&&g.m.length<6)g.m.push({k:'crabos',min:1,max:1});

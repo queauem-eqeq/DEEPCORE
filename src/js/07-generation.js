@@ -11,7 +11,7 @@ function logPush(m,c){G.log=G.log||[];const last=G.log[G.log.length-1];
   if(G.log.length>60)G.log.shift();}
 function say(m,c){G.msg={m,c:c||''};logPush(m,c);}
 function sayMore(m,c){G.msg=G.msg?{m:G.msg.m+' '+m,c:c||G.msg.c}:{m,c:c||''};logPush(m,c);}
-const blocks=v=>v===ROCK||v===MOUNT||v===HARD||v===CHASM||v===SHIP||v===WALL||v===PILLAR||v===LOCK||v===SECRET;
+const blocks=v=>v===ROCK||v===MOUNT||v===HARD||v===CHASM||v===SHIP||v===WALL||v===PILLAR||v===LOCK||v===SECRET||v>=MACHINE;   // machines, antennes et terminaux barrent le pas (mais pas la vue)
 // Diagonales comme dans Brogue : un pas (ou un coup) en diagonale est impossible si l'une des deux cases voisines
 // orthogonales est une paroi (rocher, montagne, coque du vaisseau) — on ne coupe pas les coins. Vaut pour tout le monde.
 const wallish=v=>v===ROCK||v===MOUNT||v===SHIP||v===WALL||v===PILLAR||v===LOCK||v===SECRET;

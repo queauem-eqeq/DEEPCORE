@@ -114,6 +114,9 @@ function tryMove(dx,dy){
   if(v===LOCK){const i=idx(nx,ny);
     if(!(G.st.cles>0)){say('Porte verrouillée : il faut une clé.');SFX.blocked();render();return;}
     G.st.cles--;G.t[i]=DOOR;G.turn++;G.msg=null;SFX.serrure();say('La clé tourne dans la serrure : la porte est ouverte.','good');pass(DUR.wait||100);computeFOV();render();return;}
+  if(v===ANTENNA){antenneUse(idx(nx,ny));return;}
+  if(v===TERMINAL){terminalUse(idx(nx,ny));return;}
+  if(v===MACHINE){say('Machine hors d’usage : elle barre le passage. Une charge sismique la réduirait en gravats.');SFX.blocked();render();return;}
   if(bati(v)){say((v===PILLAR?'Pilier':'Mur bâti')+' : la foreuse ne l’entame pas. Seule une charge sismique l’ouvre.');SFX.blocked();render();return;}
   if(v===ROCK||v===MOUNT){
     if(nx===0||ny===0||nx===W-1||ny===H-1){say('Bord de la carte : roche impossible à briser.');SFX.blocked();render();return;}

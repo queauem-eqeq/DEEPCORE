@@ -281,7 +281,9 @@ function poseGroupe(g,gi,id){{const l=g.pats&&g.pats.length?g.pats:g.pat?[g.pat]
 function spawnGroupes(){G.animals=[];G.fauna=[];G.pool=[0];G.beasts=[];G.beastSeen={};G.packs={};G.patr={};
   const total=Math.round(GROUPES.budget*W*H/(96*64));let reste=total,id=0;const rate={},pose={};
   for(let t=0;t<600;t++){const ok=GROUPES.liste.map((g,i)=>[g,i]).filter(([g,i])=>g.on&&g.m.length&&Math.max(1,g.cout)<=reste&&(rate[i]||0)<3);if(!ok.length)break;
-    const [g,gi]=ok[rnd(0,ok.length-1)];
+    // tirage pondéré par la fréquence du groupe : − deux fois moins souvent, + deux fois plus
+    const pds=ok.map(([g])=>[.5,1,2][g.f??1]);let tir=Math.random()*pds.reduce((a,b)=>a+b,0),ki=0;while(ki<ok.length-1&&(tir-=pds[ki])>0)ki++;
+    const [g,gi]=ok[ki];
     const r=poseGroupe(g,gi,id);
     if(r===true){reste-=Math.max(1,g.cout);id++;pose[g.n]=(pose[g.n]||0)+1;}else if(r!=='vide')rate[gi]=(rate[gi]||0)+1;}
   G.menace={total,reste,pose};}

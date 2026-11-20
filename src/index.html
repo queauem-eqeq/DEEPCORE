@@ -51,6 +51,21 @@
     <div class="mdcols"><section><h3>Monde</h3><div class="gen" id="gen"></div></section><section><h3>Structures</h3><div class="gen" id="genS"></div></section></div>
   </div>
 </div>
+<!-- Fenêtre Artefacts (Lab, 20 novembre 2026) : les systèmes greffés sur chaque carte, avec leur fréquence. -->
+<div class="modal" id="artefacts" role="dialog" aria-modal="true" aria-labelledby="artTitle" hidden>
+  <div class="mcard" tabindex="-1">
+    <div class="mhead"><h2 id="artTitle">Artefacts</h2><button id="artClose" aria-label="Fermer les artefacts">Fermer</button></div>
+    <p class="mnote">Des systèmes qui se greffent sur chaque carte, à l’intérieur des bâtiments. Cochez ceux à générer et réglez leur fréquence : − rare, = normale, + fréquente. Les changements valent à la prochaine carte (REGEN).</p>
+    <div class="artliste" id="artList"></div>
+  </div>
+</div>
+<!-- Terminal : le texte lu par la foreuse. -->
+<div class="modal" id="terminal" role="dialog" aria-modal="true" aria-labelledby="termTitre" hidden>
+  <div class="mcard" tabindex="-1">
+    <div class="mhead"><h2 id="termTitre">Terminal</h2><button id="termClose" aria-label="Fermer le terminal">Fermer</button></div>
+    <p class="termtxt" id="termTxt"></p>
+  </div>
+</div>
 <!-- Fenêtre Groupes (Lab, 19 novembre 2026) : création et réglage des groupes d'ennemis. -->
 <div class="modal" id="groupes" role="dialog" aria-modal="true" aria-labelledby="grTitle" hidden>
   <div class="mcard" tabindex="-1">
@@ -143,6 +158,7 @@
         <div class="labbtns">
           <button id="bestBtn">Bestiaire</button>
           <button id="grBtn" aria-haspopup="dialog" title="Créer et régler les groupes d’ennemis">Groupes</button>
+          <button id="artBtn" aria-haspopup="dialog" title="Antennes, pièces d’herbe, machines, terminaux">Artefacts</button>
           <button id="discBtn">Discrétion</button>
           <button id="curBtn">Tile editor</button>
           <button id="introBtn" title="Générer une nouvelle planète et rejouer la cinématique d’arrivée">Intro</button>
@@ -163,6 +179,7 @@
 <script src="js/06b-groupes.js"></script>
 <script src="js/07-generation.js"></script>
 <script src="js/07b-batiments.js"></script>
+<script src="js/07c-artefacts.js"></script>
 <script src="js/08-faune.js"></script>
 <script src="js/09-vision-deplacement-forage.js"></script>
 <script src="js/10-rendu.js"></script>

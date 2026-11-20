@@ -224,7 +224,7 @@ function viseeOk(){if(!VISEE||G.over)return;const {i,x,y}=VISEE,o=G.inv[i];
   let roches=0;
   for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){const zx=x+dx,zy=y+dy;
     if(zx<1||zy<1||zx>=W-1||zy>=H-1)continue;const j=idx(zx,zy),v=G.t[j];
-    if(v!==ROCK&&v!==MOUNT&&v!==HARD&&!bati(v))continue;
+    if(v!==ROCK&&v!==MOUNT&&v!==HARD&&v!==MACHINE&&!bati(v))continue;
     G.t[j]=RUBBLE;if(G.dmg)delete G.dmg[j];roches++;
     if(G.ore&&G.ore[j]&&!oreSol(G.ore[j])){const l=oreLv(G.ore[j]),mt=oreMat(G.ore[j]);G.ore[j]=(mt?'m':'')+'sol'+l;
       sayMore(mt?'De la Matière tombe au sol.':'Des éclats de métal tombent au sol.','good');}}

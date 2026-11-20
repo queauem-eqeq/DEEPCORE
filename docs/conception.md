@@ -195,6 +195,30 @@ Touche **O** ou bouton **EXPLORER** (sous MARCHE / ÉQUIPEMENT, à côté d'un b
 
 Jugée trop haute et trop étroite (640 × 835), elle est passée à 940 × 390 environ : la base et la portée du moment sur une ligne, les six modificateurs en tableau à gauche (situation, effet, portée), les règles à droite (chance d'être remarqué, portée en chasse, perte de trace, plancher, arrondis, ordre). « Valeur par défaut » est monté dans l'en-tête, à côté de « Fermer ». Les règles elles-mêmes n'ont pas changé.
 
+## 3 quater. Artefacts (20 novembre 2026)
+
+Des **systèmes qui se greffent sur chaque carte**, à l'intérieur des bâtiments. Chacun s'active ou se coupe pour la
+génération et a une **fréquence sur trois crans [− = +]**, dans **Lab → Artefacts** (mémorisé sous `np-artefacts`, joint à
+l'enregistrement des réglages). Code : `src/js/07c-artefacts.js`, appelé à la fin de la génération des bâtiments.
+
+| Artefact | Ce qu'il fait | Fréquence − / = / + |
+|---|---|---|
+| **Antenne** | La foreuse l'active **en avançant dessus** (un battement) : elle s'allume et **lève le brouillard dans un disque de 20 cases de large** autour d'elle, murs compris. Une seule fois. | une carte sur deux / 1 / 2 par carte |
+| **Pièces envahies d'herbe** | La pièce entière est couverte d'herbes **hautes et basses mêlées** par touffes (le site et les clés gardent leur sol). | 8 % / 18 % / 35 % des pièces |
+| **Machines** | Dix machines hors d'usage (tuyaux, serveur, caisses, ordinateur, établi, cuve, générateur, console, turbine, armoire électrique), posées en **obstacles** : une à cinq par pièce choisie. **Elles barrent le pas mais pas la vue**, au contraire des piliers. Une charge sismique les réduit en gravats. | 15 % / 35 % / 60 % des pièces |
+| **Terminal** | La foreuse l'active en avançant dessus : une fenêtre affiche **un texte** (huit fragments de journal écrits par Claude, à remplacer ; le temps ne passe pas). | 1 / 2 / 4 par carte |
+
+- Trois terrains : `MACHINE`, `ANTENNA`, `TERMINAL`. Infranchissables pour tous, transparents à la vue, sans effet sur la
+  discrétion. `G.art[case]` : la variante d'une machine, l'état d'une antenne, le texte d'un terminal.
+- **Un obstacle ne coupe jamais un passage** : il n'est posé ni devant une porte ou une ouverture, ni là où il séparerait
+  la pièce en deux. Vérifié sur 40 cartes : aucune case rendue inaccessible. Antennes et terminaux vont de préférence
+  contre un mur, les machines sept fois sur dix.
+- Treize tuiles retouchables au Tile editor, groupe « Artefacts » (dessins de départ faits par Claude).
+- Mesuré sur 20 cartes aux réglages par défaut : 1 antenne, 2 terminaux, 2 pièces d'herbe et 9 machines par carte en moyenne.
+
+**Fréquence des groupes d'ennemis** : le même sélecteur [− = +] est dans la fiche de chaque groupe (Lab → Groupes). Au
+tirage, un groupe « − » sort deux fois moins souvent qu'un groupe « = », un groupe « + » deux fois plus.
+
 ## 4. Terrains
 
 **13 novembre 2026** : les herbes basses et les herbes basses, qui faisaient deux terrains distincts, n'en font plus qu'un, **les herbes basses**. La génération pose donc des herbes hautes et des herbes basses ; marcher dans les hautes les couche en basses. La tuile éditable « Herbes basses » a été renommée « Herbes basses » (sa clé `flat0` n'a pas changé : les retouches sont conservées).

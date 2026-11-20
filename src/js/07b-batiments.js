@@ -8,6 +8,9 @@ function batiTuile(t,x,y,put){
   if(t===WALL||t===SECRET){const b=y<H-1?G.t[idx(x,y+1)]:WALL;put(b===WALL||b===SECRET?TL.wall:TL.wallFace,.95);return;}
   put(TL.floor,.5);
   if(t===PILLAR)put(TL.pillar,.95);
+  else if(t===MACHINE)put(TL['mach'+((G.art&&G.art[idx(x,y)])||0)],1);
+  else if(t===ANTENNA)put(G.art&&G.art[idx(x,y)]===1?TL.antenneOn:TL.antenne,1);
+  else if(t===TERMINAL)put(TL.terminal,1);
   else if(t===DOOR){const cote=y>0&&y<H-1&&G.t[idx(x,y-1)]===WALL&&G.t[idx(x,y+1)]===WALL;   // porte percée dans un mur vertical
     put(porteOuverte(x,y)?(cote?TL.doorOpenV:TL.doorOpen):TL.door,1);}
 }
@@ -129,7 +132,7 @@ function entrees(B,S,t,atteint){const {own,porte,pied,interdit}=B,cand=[];
 // Pose les structures sur la carte déjà générée (relief, vaisseau, site). Elles peuvent recouvrir la montagne et l'eau ;
 // si une entrée donne sur de la roche, un couloir est percé jusqu'à elle (connect).
 function batiments(){
-  G.batis=[];G.cles={};G.pb={};const pct=GEN.structure||0,N=W*H;if(pct<=0)return;
+  G.batis=[];G.cles={};G.pb={};G.art={};G.artN=null;const pct=GEN.structure||0,N=W*H;if(pct<=0)return;
   const total=Math.round(N*pct/100);if(total<45)return;
   const t0=G.t.slice();
   for(let essai=0;essai<6;essai++){
@@ -171,7 +174,7 @@ function batiments(){
       if(ok&&connectedAll(t)){
         G.batis=strs.map(S=>({style:S.st.n,pieces:S.pieces.filter(p=>p.g!=='couloir').length,cases:S.emprise,entrees:S.entrees.map(e=>[e.x,e.y])}));
         G.pb={};for(const i of garde)if(t[i]===BRIDGE)G.pb[i]=1;   // les ponts des pièces, pour le rendu
-        siteAuFond(B,strs);petites(B,strs);const sec=secrets(B,strs);verrous(B,strs,sec);return;}
+        siteAuFond(B,strs);petites(B,strs);const sec=secrets(B,strs);verrous(B,strs,sec);artefacts(B,strs);return;}
     }
     for(let i=0;i<N;i++)G.t[i]=t0[i];
   }
