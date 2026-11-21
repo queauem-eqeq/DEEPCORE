@@ -43,12 +43,14 @@
   <div class="mcard wide" tabindex="-1">
     <div class="mhead"><h2 id="mdTitle">Monde</h2><button id="mdClose" aria-label="Fermer le menu Monde">Fermer</button></div>
     <div class="mdrec" id="genR"></div>
+    <div class="mdamb" id="genA"></div>
     <div class="mdarch">
-      <label for="mdSel">Archétype</label><select id="mdSel"></select>
-      <label for="mdNom">Nom</label><input type="text" id="mdNom" maxlength="30" placeholder="Nom du monde" autocomplete="off">
+      <label for="mdSel">Preset de niveau</label><select id="mdSel"></select>
+      <label for="mdNom">Nom</label><input type="text" id="mdNom" maxlength="30" placeholder="Nom du preset" autocomplete="off">
       <button class="go" id="mdSave">Enregistrer</button><button id="mdDel">Supprimer</button>
       <span class="saved" id="mdMsg" role="status"></span>
     </div>
+    <div class="mdgo"><button class="go" id="essaiBtn" title="Fermer et générer une carte avec les réglages en cours">GÉNÉRER LA CARTE</button></div>
     <div class="mdcols"><section><h3>Monde</h3><div class="gen" id="gen"></div></section><section><h3 id="genSTitre">Structures</h3><div class="gen" id="genS"></div></section></div>
   </div>
 </div>
@@ -150,8 +152,7 @@
     </div>
     <canvas id="mini" aria-label="Mini-carte des zones explorées"></canvas>
     <div class="seenwrap"><div class="seen" id="msg" role="region" aria-label="En vue"></div></div>
-    <div class="btnrow"><button class="go" id="restart" title="Générer une nouvelle carte avec les réglages en cours">REGEN</button><button id="mondeBtn" aria-haspopup="dialog" title="Relief, taille et archétypes de monde">MONDE</button><button id="lifeBtn" aria-haspopup="dialog" title="Faune : budget de menace et groupes d’ennemis">LIFE</button></div>
-    <label class="rndrow" for="rndChk" title="REGEN tire d’abord au hasard le relief, la forme du massif, l’archétype et les autres réglages du menu Monde (sauf la taille de la carte)"><input type="checkbox" id="rndChk">Réglages au hasard</label>
+    <div class="btnrow"><button class="go" id="restart" title="Relancer une carte avec les réglages en cours du menu Monde">REGEN</button><button id="mondeBtn" aria-haspopup="dialog" title="Relief, taille et archétypes de monde">MONDE</button><button id="lifeBtn" aria-haspopup="dialog" title="Faune : budget de menace et groupes d’ennemis">LIFE</button></div>
     <details class="fold" id="fd-pal">
       <summary><h2>Palette</h2></summary>
       <div class="pal">

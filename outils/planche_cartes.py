@@ -4,6 +4,7 @@
     python3 outils/planche_cartes.py SORTIE.png CAS.json [taille]
     python3 outils/planche_cartes.py SORTIE.png amb:RECETTE [taille]      les ambiances de la recette, une carte chacune
     python3 outils/planche_cartes.py SORTIE.png amb:RECETTE:CLE [taille]  douze cartes de la même ambiance
+    python3 outils/planche_cartes.py SORTIE.png monde:RECETTE[:BATI] [taille]  les archétypes monde (douze premiers)
 
 CAS.json : une liste de [nom, {réglages}] ; un réglage « amb » choisit une ambiance, « recette » la recette,
 « niv » le niveau (au-delà de 1 : arrivée par un puits). Le jeu est lu dans src/, rien n'y est modifié.
@@ -40,6 +41,15 @@ async def principal(sortie: pathlib.Path, quoi: str, taille: int, extra: dict) -
                 cas = [[f'{noms[cles.index(m[2])]} {i + 1}', {'recette': rec, 'amb': m[2], 'niv': NIV.get(rec, 1)}] for i in range(12)]
             else:
                 cas = [[n, {'recette': rec, 'amb': c, 'niv': NIV.get(rec, 1)}] for c, n in zip(cles, noms)][:12]
+        elif quoi.startswith('monde:'):   # les archétypes monde, sur la recette donnée et son archétype bâti (facultatif) : monde:RECETTE[:BATI]
+            m = quoi.split(':')
+            rec = m[1]
+            cles = await page.evaluate("Object.keys(AMB_MONDE)")
+            noms = await page.evaluate("Object.values(AMB_MONDE).map(a=>a.n)")
+            cas = [[n, dict({'recette': rec, 'ambM': c, 'niv': NIV.get(rec, 1)}, **({'amb': m[2]} if len(m) > 2 else {}))] for c, n in zip(cles, noms)]
+            if 'debut' in extra:
+                cas = cas[extra.pop('debut'):]
+            cas = cas[:12]
         else:
             cas = json.loads(pathlib.Path(quoi).read_text(encoding='utf-8'))
         pl = {'taille': taille, 'cas': cas}

@@ -252,7 +252,8 @@ et le seuil ; `ZESSAI` compte les cartes retirées. Ces trois variables sont de 
 
 **La descente compte trois niveaux** (`NIV_MAX`, `RECETTE_NIV`) : niveau 1 `atterrissage`, niveau 2 `cavernes`, niveau 3 `base`.
 Forer le site du niveau 3 atteint le noyau. Chaque niveau est généré avec les réglages que le menu Monde garde pour sa
-recette ; la case « Réglages au hasard » tire une ambiance à chaque niveau.
+recette (le monde, colonne de gauche, est commun à toutes). Les boutons Lab → Niv1/Niv2/Niv3 tirent un archétype
+monde et un archétype bâti au hasard.
 
 `ENFOUI()` dit si la recette en cours a un complexe enfoui ; dans ce cas `GEN.structure` (« Surface bâtie ») ne compte pas.
 
@@ -260,13 +261,21 @@ Les pourcentages du menu Monde (eau, montagne, gouffre, herbe) valent pour la **
 
 ### Menu Monde par recette
 
-« Recette de niveau » est le premier choix, en haut, sur toute la largeur. Chaque recette **déclare ses réglages**
+Disposition (22 novembre 2026, demande de l'utilisateur), de haut en bas :
+
+1. **Recette de niveau**, sur toute la largeur ;
+2. **Archétype monde** et **Archétype bâti**, côte à côte (voir « Archétypes monde et bâti ») ;
+3. **Preset de niveau** : liste, nom, Enregistrer, Supprimer ;
+4. **GÉNÉRER LA CARTE** : ferme la fenêtre et génère une carte avec les réglages en cours ;
+5. un trait, puis les deux colonnes de réglages : à gauche le **monde**, à droite le **bâti** de la recette.
+
+Chaque recette **déclare ses réglages**
 dans `RECETTES[…].regl` : la colonne de droite se reconstruit au changement de recette et n'affiche que ceux-là.
 Ajouter une recette, c'est ajouter une entrée à `RECETTES` ; le menu n'est pas à retoucher.
 
 Une ligne de `regl` : `['num',clé,libellé,min,max,départ,[fourchette de hasard]]` ou
-`['sel',clé,libellé,choix,départ,[valeurs tirables]]`. La fourchette finale sert à la case « Réglages au hasard » ;
-absente, le réglage n'est pas tiré. La valeur en cours est dans `GEN[clé]` ; celles des autres recettes attendent
+`['sel',clé,libellé,choix,départ,[valeurs tirables]]`. La fourchette finale servait à l'ancienne case « Réglages au
+hasard » (retirée le 22 novembre 2026) ; elle n'est plus lue. La valeur en cours est dans `GEN[clé]` ; celles des autres recettes attendent
 dans `GEN.rec[recette]` (enregistré avec `np-gen`), si bien que changer de recette et revenir ne perd rien.
 
 Réglages de `atterrissage`. Chacun donne **un centre** ; la génération tire autour à chaque carte (`autour()`).
@@ -285,12 +294,8 @@ S'y ajoutent, communs : archétype de structure, pièces par structure, ouvertur
 pièces secrètes. « Surface bâtie », « Nombre de structures » et « Portes d'entrée » ne figurent pas dans cette
 recette : le complexe a toujours une seule porte, et sa taille vient de `zComplexe`.
 
-**Case « Réglages au hasard »**, sous le bouton REGEN. Cochée, REGEN tire d'abord tous les réglages du menu Monde,
-puis génère ; le menu se met à jour, donc on voit ce qui a été tiré et on peut repartir de là. Chaque réglage a sa
-fourchette de tirage, plus étroite que ses bornes : le hasard ne doit jamais rendre une carte sans intérêt. Sont
-laissés tels quels la **taille de la carte** et les réglages dont 0 veut dire « automatique » (pièces par
-structure, portes d'entrée). Le relief est tiré avec un biais vers le bas (plafonds `HASARD_REL` : eau 30,
-montagne 30, gouffre 12, herbe 45). État mémorisé dans `GEN.hasard`. Code : `hasardReglages()`, `06-reglages.js`.
+**Case « Réglages au hasard »** (20 novembre 2026) : **retirée le 22 novembre 2026**. REGEN relance toujours les réglages
+en cours ; le hasard ne sert plus qu'aux boutons Lab → Niv1/Niv2/Niv3, qui tirent les deux archétypes.
 
 ### Grain, regroupement et ambiances (21 novembre 2026)
 
@@ -303,23 +308,51 @@ partout (une « soupe »). Deux réglages de relief, dans la colonne de gauche d
   échelle ; pour chaque tache, on tire jusqu'à dix emplacements et on garde celui où ce champ est le plus fort
   (`meilleurePlace`). À 0, les taches sont éparpillées comme avant.
 
-**Ambiances** (`AMBIANCES[recette]`, `06-reglages.js`) : chaque recette a une dizaine de préréglages nommés, premier
-choix de la colonne de droite. Une ambiance remet les réglages de sa recette à leur valeur de départ et le relief à
-`AMB_DEF`, puis pose les siens (relief compris). Toucher un curseur repasse sur « Personnalisée ». Le nom de
-l'ambiance est affiché dans le Statut et dans le message d'arrivée (`G.amb`).
+### Archétypes monde et bâti (22 novembre 2026)
 
-- Niveau 1 : Grande prairie, Rives du grand lac, Marais, Désert de pierre, Terre fracturée, Chaos rocheux, Chaîne de
-  montagnes, Forteresse sous la montagne, Dédale de tunnels, Ruines noyées.
-- Niveau 2 : Grottes sauvages, Cathédrale, Termitière, Cité enfouie, Avant-postes, Lac souterrain, Jardins
-  engloutis, Abîmes, Dédale de boyaux, Bunker, Chaos d'éboulis.
-- Classique : Avant-poste isolé, Citadelle, Bases jumelles, Hangars, Ruines sous les herbes, Station lacustre,
-  Plateau désert, Champ de failles, Cols de montagne, Marécage.
-- Niveau 3 : voir « La grande base ».
+Les ambiances du 21 novembre réglaient à la fois le monde et le bâti. Elles sont **séparées en deux listes**, choisies
+indépendamment sous la recette (`06-reglages.js`) :
 
-**« Réglages au hasard » tire désormais une ambiance**, puis fait varier les curseurs qu'elle ne fixe pas et le
-relief de ± 15 % : chaque niveau a un caractère reconnaissable au lieu d'une moyenne de tout. Une recette sans
-ambiance garde l'ancien tirage. Les **archétypes de monde** enregistrés avant le 21 novembre 2026 ont été effacés à
-la demande de l'utilisateur (une fois, clé `np-mondes-v`) ; la fonction d'enregistrement reste.
+- **Archétype monde** (`AMB_MONDE`, choix dans `GEN.ambM`) : **commun à toutes les recettes**. Il règle la colonne de
+  gauche et elle seule (`MONDE_KEYS`) : eau, montagne, gouffre, herbe, méthode, remplissage, itérations, grain,
+  regroupement, et le **sol sous roche** des recettes souterraines (`cvMont`, `cvGouf`, `cvRoc`). Il remet d'abord ces
+  réglages à `AMB_DEF`, puis pose les siens. Quatorze mondes : Désert de poussière, Prairie ondoyante, Bocage, Herbes
+  géantes, Archipel, Mer intérieure, Marais, Canyons, Champ de cratères, Terre engloutie, Chaîne de montagnes,
+  Pierrier, Mesas, Toundra fracturée. Leviers : ce qui domine (rien, herbe, eau, montagne, gouffre) ; la forme des
+  taches (« bruit » fait des chaînes et des failles, l'automate des taches ; peu d'itérations avec un fort
+  remplissage les déchiquette, beaucoup les arrondit) ; leur taille (grain) ; leur rassemblement (regroupement).
+- **Archétype bâti** (`AMBIANCES[recette]`, choix dans `GEN.amb`, rangé par recette) : **propre à chaque recette**.
+  Il règle la colonne de droite et elle seule : il la remet à ses valeurs de départ, puis pose les siennes.
+  - Niveau 1 : Forteresse sous la montagne, Dédale de tunnels, Ruines effondrées, Petit poste isolé, Mine
+    abandonnée, Coffre-fort, Falaise, Terrier, Hangars creusés, Sanctuaire caché.
+  - Niveau 2 : Grottes sauvages, Cathédrale, Termitière, Cité enfouie, Avant-postes, Front de taille, Ruines
+    englouties, Dédale de boyaux, Bunker, Grottes déchiquetées.
+  - Niveau 3 : Citadelle, Ruche, Deux ailes, Complexe piégé, Base morte, Galeries de mine, Grand atrium, Base
+    adossée, Blockhaus, Hangars de maintenance.
+  - Classique : Avant-poste isolé, Citadelle, Bases jumelles, Hangars, Ruines, Hameau, Entrepôt, Station de forage,
+    Labyrinthe, Camp ouvert.
+
+Toucher un curseur repasse sur « Personnalisé » **la liste de sa colonne seulement**. Le nom affiché dans le Statut
+et à l'arrivée (`G.amb`, `ambDouble()`) est « monde · bâti ».
+
+**Recettes souterraines** (cavernes, base) : la colonne de gauche montre l'eau et l'herbe, puis la montagne, le
+gouffre et les rochers épars **du sol sous roche** (`SOL_LBL`), à la place de la montagne et du gouffre du dehors,
+qui n'y servent pas. Ces trois réglages étaient avant dans la colonne de droite, rangés par recette ; ils sont
+désormais communs, comme le reste du monde.
+
+**Qui tire quoi** :
+- **REGEN** et **GÉNÉRER LA CARTE** : les réglages en cours, tels quels.
+- **Lab → Niv1, Niv2, Niv3** : un archétype monde et un archétype bâti de la recette du niveau, tirés au hasard
+  (`hasardReglages()`), puis le menu du joueur est remis en place.
+- **La descente** en jeu : les réglages en cours du menu pour la recette du niveau.
+
+**Presets de niveau** (`MONDES`, `np-mondes`) : la recette, les deux archétypes choisis et tous les curseurs des deux
+colonnes, enregistrés sous un nom. La liste ne montre que ceux de la recette en cours ; recharger un preset rend la
+recette, le monde et le bâti. La taille de la carte n'en fait pas partie.
+
+**Règle (22 novembre 2026)** : tout réglage de génération ajouté plus tard va dans l'une des deux colonnes
+(`MONDE_KEYS` à gauche, `regl` de la recette à droite), et **les archétypes de cette colonne doivent lui donner une
+valeur** dès qu'il change leur caractère.
 
 Outils : `outils/planche_cartes.py` (douze cartes côte à côte avec leurs mesures) et
 `outils/scripts/mesure-ambiances.js` (quinze cartes par ambiance). Chiffres dans `docs/mesures.md`.
@@ -346,8 +379,9 @@ La génération, dans l'ordre :
 4. **Boyaux** : arbre couvrant (Prim) entre les cavernes, puis `cvBoyaux` boucles et `cvCuls` culs-de-sac de 8 à 18
    cases. Chaque boyau est le chemin le moins cher dans un bruit, **de bord de caverne à bord de caverne** ; la
    sinuosité règle le poids du bruit, et traverser un secteur bâti coûte cinq fois plus cher.
-5. **Relief du sol** : la montagne, le gouffre et les rochers épars viennent des curseurs de la recette (`cvMont`,
-   `cvGouf`, `cvRoc`), pas de la colonne de gauche ; l'eau et l'herbe viennent de la colonne de gauche.
+5. **Relief du sol** : la montagne, le gouffre et les rochers épars viennent du « sol sous roche » de la colonne de
+   gauche (`cvMont`, `cvGouf`, `cvRoc`, réglés par l'archétype monde depuis le 22 novembre 2026), pas de la montagne
+   et du gouffre du dehors ; l'eau et l'herbe aussi viennent de la colonne de gauche.
 6. **Arrivée par un puits** : pas de vaisseau, la foreuse débouche sur un carré de 3 × 3 sec, **toujours dans une
    caverne ou un boyau large**. Le message d'arrivée est celui de la descente.
 7. **Bâtiments enchâssés** (`batiments()`, mode `cav`) : chaque bâtiment part d'une graine tirée dans un secteur bâti,
@@ -388,9 +422,9 @@ des cavernes est réduite en proportion de la surface de la carte.
 S'y ajoutent les réglages communs : archétype, ouvertures, verrous, secrets. « Nombre de cavernes » (`cvNb`) n'existe
 plus : il est remplacé par la taille.
 
-**Ambiances** (`AMBIANCES`, `06-reglages.js`) : un préréglage remet tous les curseurs `cv…` à leur valeur de départ
-puis pose les siens ; toucher ensuite à un curseur repasse sur « Personnalisée ». Ajouter une ambiance = ajouter une
-entrée.
+**Archétypes bâtis** (`AMBIANCES.cavernes`, `06-reglages.js`) : un préréglage remet tous les curseurs `cv…` à leur
+valeur de départ puis pose les siens ; toucher ensuite à un curseur repasse sur « Personnalisé ». Le sol (montagne,
+gouffre, rochers) est réglé par l'archétype monde. Liste complète dans « Archétypes monde et bâti ».
 
 | Ambiance | Ce qu'elle règle |
 |---|---|
@@ -474,17 +508,17 @@ journal donne le compte ; survoler ce qui est détecté dit ce que c'est et s'il
 ### Menus Monde et Life
 
 Deux fenêtres, ouvertes par deux boutons sous la mini-carte, à côté de **REGEN** : **MONDE** (le relief) et
-**LIFE** (la faune). Un archétype de monde ne décrit **que la génération**.
+**LIFE** (la faune). Un preset de niveau ne décrit **que la génération**.
 
 - **REGEN** génère une nouvelle carte avec les réglages en cours.
-- **Monde** : à gauche taille, eau, montagne, gouffre, herbe, méthode de relief, remplissage, itérations ; à droite
-  les réglages de la recette. En bas, **GÉNÉRER LA CARTE** ferme la fenêtre et génère aussitôt.
+- **Monde** : en haut la recette, les archétypes monde et bâti, le preset de niveau et **GÉNÉRER LA CARTE** (ferme
+  la fenêtre et génère aussitôt) ; dessous, à gauche le monde (taille, terrain, relief), à droite les réglages de la
+  recette. Voir « Menu Monde par recette ».
 - **Life** : budget de menace et groupes actifs. Ces réglages **ne font partie d'aucun archétype** : ils valent
   pour toutes les cartes jusqu'à ce qu'on les change.
-- **Archétypes de monde** : en tête de la fenêtre Monde, un champ **Nom** et **Enregistrer** gardent **les seuls
-  réglages de génération** sous ce nom ; la liste déroulante les recharge ; **Supprimer** retire l'archétype
-  choisi. Enregistrer sous un nom existant le met à jour. Mémorisés sous `np-mondes` et joints à l'enregistrement
-  dans la base. Ils ne portent ni la recette ni les réglages « z… ».
+- **Presets de niveau** : un champ **Nom** et **Enregistrer** gardent la recette, les deux archétypes et tous les
+  réglages de génération sous ce nom ; la liste les recharge ; **Supprimer** retire le preset choisi. Enregistrer
+  sous un nom existant le met à jour. Mémorisés sous `np-mondes` et joints à l'enregistrement dans la base.
 
 ### Banc de combat
 
@@ -1151,9 +1185,9 @@ Du niveau 2 au niveau 3, la descente se joue. `playForage(suite, 2)` ; Lab → *
   précédent** (`end`, `09-vision-deplacement-forage.js`) ferme l'écran de forage, joue la cinématique, puis appelle
   `niveauSuivant()`.
 - `niveauSuivant()` : le niveau 2 est généré avec **la recette « cavernes » et les réglages que le joueur lui a
-  donnés dans le menu Monde** (ceux gardés dans `GEN.rec.cavernes`, ambiance comprise ; les valeurs de départ s'il n'y
+  donnés dans le menu Monde** (ceux gardés dans `GEN.rec.cavernes`, archétype bâti compris ; les valeurs de départ s'il n'y
   a jamais touché), quelle que soit la recette affichée dans le menu (`RECETTE_NIV`). La taille de carte, l'eau et
-  l'herbe sont celles du menu. Si « Réglages au hasard » est cochée, ils sont d'abord tirés, comme pour REGEN. Le
+  l'herbe sont celles du menu. Lab → Niv2 et Niv3 tirent d'abord un archétype monde et un archétype bâti. Le
   menu Monde du joueur est remis en place aussitôt après. Avant le 21 novembre au soir, tout était tiré au hasard. Pas de
   vaisseau : on arrive par le puits. `genPlanet` refait l'objet `G`, donc ce que **la foreuse garde est remis en
   place juste après** : vie, énergie, inventaire, matière en réserve, tours et distance parcourue.

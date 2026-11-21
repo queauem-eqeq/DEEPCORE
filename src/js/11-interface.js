@@ -145,7 +145,7 @@ function applySaved(d){
   if(d.groupes){const g=groupesSains(d.groupes);if(g){GROUPES=groupesV2(g);saveGroupes();}}   // les anciennes intensités par espèce (d.intensite) ne sont plus lues
   if(d.mondes&&typeof d.mondes==='object'&&Date.parse(d.enregistreLe)>Date.parse('2026-11-21T05:00:00Z')){   // les archétypes d'avant cette date ont été effacés
     MONDES=Object.assign({},MONDES,d.mondes);saveMondes();}
-  if(d.generation){const g=d.generation;GEN_LBL.forEach(([k])=>{if(num(g[k]))GEN[k]=0;});GEN_LBL.forEach(([k])=>{if(num(g[k]))setGen(k,g[k]);});
+  if(d.generation){const g=d.generation;GEN_LBL.forEach(([k])=>{if(num(g[k]))GEN[k]=0;});GEN_LBL.forEach(([k])=>{if(num(g[k]))setGen(k,g[k],true);});
     if(METHODS.some(m=>m[0]===g.methode)){GEN.methode=g.methode;$('gm').value=g.methode;}
     if(num(g.remplissage))setCA('remplissage',g.remplissage,35,70);if(num(g.iterations))setCA('iterations',g.iterations,1,10);caState();saveGen();}
   if(d.palette&&Array.isArray(d.palette.palettes)){d.palette.palettes.forEach(pp=>{const t=PRESETS.find(x=>x.n===pp.nom);if(t&&Array.isArray(pp.couleurs)&&pp.couleurs.length===3)t.c=pp.couleurs.slice();});
@@ -193,6 +193,4 @@ function toggleVision(){SHOWVIS=!SHOWVIS;say(SHOWVIS?'Portée de discrétion aff
 function toggleFog(){fog=!fog;try{localStorage.setItem('np-fog',fog?'on':'off');}catch(e){}say(fog?'Brouillard de guerre activé.':'Brouillard de guerre désactivé.','info');render();}
 ['fd-sac','fd-pal','fd-lab'].forEach(id=>{const d=$(id);try{d.open=localStorage.getItem('np-'+id)==='open';}catch(e){}
   d.addEventListener('toggle',()=>{try{localStorage.setItem('np-'+id,d.open?'open':'closed');}catch(e){}});});
-$('rndChk').checked=!!GEN.hasard;
-$('rndChk').addEventListener('change',e=>{GEN.hasard=e.target.checked;saveGen();});
-$('restart').onclick=e=>{e.preventDefault();e.stopPropagation();unlock();SFX.start();if(GEN.hasard)hasardReglages();newGame();started=true;$('overlay').hidden=true;render();};
+$('restart').onclick=e=>{e.preventDefault();e.stopPropagation();unlock();SFX.start();newGame();started=true;$('overlay').hidden=true;render();};

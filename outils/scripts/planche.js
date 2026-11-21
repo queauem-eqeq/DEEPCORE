@@ -11,8 +11,9 @@
     const sauve=JSON.parse(JSON.stringify(GEN));
     GEN.taille=PL.taille||3;if(r.recette){recRange();recPrend(r.recette);}
     if(r.amb&&typeof ambiance==='function')ambiance(r.amb,r.recette||GEN.recette);
-    if(r.hasard){hasardReglages();GEN.taille=PL.taille||3;nom=ambNom(GEN.recette,GEN.amb)||nom;}   // comme la case « Réglages au hasard » : une ambiance tirée
-    for(const k in r)if(k!=='amb'&&k!=='niv'&&k!=='recette')GEN[k]=r[k];
+    if(r.ambM&&typeof ambMonde==='function')ambMonde(r.ambM);   // archétype monde (22 novembre 2026)
+    if(r.hasard){hasardReglages();GEN.taille=PL.taille||3;nom=ambDouble()||nom;}   // comme les boutons Lab → Niv : un archétype monde et un bâti tirés
+    for(const k in r)if(k!=='amb'&&k!=='ambM'&&k!=='niv'&&k!=='recette')GEN[k]=r[k];
     SANS_VAISSEAU=(r.niv||1)>1;NIV_GEN=r.niv||1;const t0=performance.now();niveau();G.niv=r.niv||1;SANS_VAISSEAU=false;const ms=performance.now()-t0;
     const ox=10+(n%cols)*pw,oy=34+((n/cols)|0)*ph,N=W*H,cnt={};
     for(let i=0;i<N;i++){const v=G.t[i];let col='#2c3a2e',k='sol';

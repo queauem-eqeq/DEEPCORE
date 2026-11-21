@@ -239,3 +239,18 @@ Les chiffres mesurés sont dans `mesures.md`.
 - **Valeurs de groupe réglées à la main** : remplacées par des valeurs mesurées au banc. Budget de 110 ramené à 80.
 - **Seconde descente en simple cinématique** : remplacée par le mini-jeu des mines. Espace et Entrée ne passent plus
   cette scène, pour qu'on ne perde pas 30 points de vie par mégarde.
+
+## 22 novembre 2026 : archétypes monde et bâti séparés
+
+- **Ambiances mêlant monde et bâti** (21 novembre, 41 ambiances) : une seule liste par recette réglait à la fois la
+  colonne de gauche (terrain, relief) et celle de droite (massif, tunnels, bâti). Remplacée par deux listes
+  indépendantes : 14 archétypes monde communs à toutes les recettes, une dizaine d'archétypes bâtis par recette. Les
+  ambiances surtout « de terrain » (Grande prairie, Rives du grand lac, Désert de pierre, Lac souterrain, Jardins
+  engloutis, Abîmes, Serres, Réservoirs, Station lacustre, Plateau désert, Cols…) sont devenues des mondes ou ont été
+  refaites en bâti.
+- **Case « Réglages au hasard »** sous REGEN : retirée. REGEN relance les réglages en cours ; seuls les boutons Lab →
+  Niv1/Niv2/Niv3 tirent au hasard (un monde et un bâti).
+- **Sol des cavernes et des poches** (montagne, gouffre, rochers) : sorti de la colonne de droite, rangé par recette,
+  pour la colonne Monde, commun.
+- **Archétypes de monde** enregistrés (relief seul) : deviennent les **presets de niveau** (recette, deux archétypes,
+  tous les curseurs). Ceux déjà enregistrés restent lisibles, sans recette.

@@ -227,9 +227,6 @@ kbd{font-family:var(--mono);color:var(--fg);border:1px solid var(--line);padding
 
 /* Inventaire (14-inventaire.js) : fenêtre plein écran, la liste à gauche, la fiche de l'objet choisi (dessin ASCII coloré) à droite */
 .btnrow{display:flex;gap:8px}
-.rndrow{display:flex;align-items:center;gap:7px;margin-top:7px;font-family:var(--display);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--dim);cursor:pointer}
-.rndrow input{accent-color:var(--c3);width:auto;cursor:pointer}
-.rndrow:hover{color:var(--fg)}
 .btnrow .pace{flex:1 1 0;min-width:0}
 #inventaire .mcard:focus{outline:none}
 .inv{display:grid;gap:10px}
@@ -289,12 +286,18 @@ kbd{font-family:var(--mono);color:var(--fg);border:1px solid var(--line);padding
 .bnum.mat{color:var(--c1)}
 /* Menu Monde : archétypes en tête, Génération et Faune côte à côte */
 #monde .mcard:focus{outline:none}
-.mdarch{display:flex;flex-wrap:wrap;gap:8px 10px;align-items:center;margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid var(--line);font-size:12px}
+.mdarch{display:flex;flex-wrap:wrap;gap:8px 10px;align-items:center;margin-bottom:10px;font-size:12px}
 .mdarch label{color:var(--dim);font-size:11px;letter-spacing:.14em;text-transform:uppercase}
 .mdarch select,.mdarch input{font:inherit;color:var(--fg);background:var(--void);border:1px solid var(--line);padding:4px 6px;min-width:0}
 .mdarch select{flex:1 1 180px;max-width:260px}.mdarch input{flex:1 1 140px;max-width:220px}
-.mdarch .saved{flex:1 1 100%;min-height:1.4em}.mdarch .saved.err{color:var(--life)}
-.mdrec{display:flex;gap:10px;align-items:center;margin-bottom:14px;font-size:12px}
+.mdarch .saved{flex:1 1 100%;min-height:1.4em}.mdarch .saved:empty{display:none}.mdarch .saved.err{color:var(--life)}
+.mdrec{display:flex;gap:10px;align-items:center;margin-bottom:10px;font-size:12px}
+/* les deux archétypes, monde et bâti, côte à côte sous la recette (22 novembre 2026) */
+.mdamb{display:grid;grid-template-columns:auto minmax(0,1fr) auto minmax(0,1fr);gap:8px 10px;align-items:center;margin-bottom:12px;font-size:12px}
+.mdamb label{color:var(--fg);font-size:11px;letter-spacing:.14em;text-transform:uppercase;white-space:nowrap}
+.mdamb select{min-width:0;font:inherit;color:var(--fg);background:var(--void);border:1px solid var(--c3);padding:5px 6px}
+.mdgo{margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid var(--line)}.mdgo .go{width:100%}
+@media (max-width:720px){.mdamb{grid-template-columns:auto minmax(0,1fr)}}
 .mdrec label{color:var(--fg);font-size:11px;letter-spacing:.14em;text-transform:uppercase;white-space:nowrap}
 .mdrec select{flex:1 1 auto;min-width:0;font:inherit;color:var(--fg);background:var(--void);border:1px solid var(--c3);padding:5px 6px}
 .mdcols{display:grid;grid-template-columns:1fr 1fr;gap:28px;align-items:start}

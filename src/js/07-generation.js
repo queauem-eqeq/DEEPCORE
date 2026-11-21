@@ -259,7 +259,7 @@ function niveau(refait){drilling=false;
     if(G.batis.length||!ZONE||!(ENFOUI()||GEN.structure>0))break;}
   if(mieux&&mieux.G!==G){G=mieux.G;ZONE=mieux.ZONE;ZINFO=mieux.ZINFO;SECT=mieux.SECT;CVT=mieux.CVT;BATI_DER=mieux.BD;}
   {const o=cv&&typeof document!=='undefined'&&document.getElementById('genObt');if(o)o.textContent=obtenuTxt();}
-  G.amb=ambNom(GEN.recette,GEN.amb);   // nom de l'ambiance, affiché dans le Statut et à l'arrivée
+  G.amb=ambDouble();   // « monde · bâti », les deux archétypes, affiché dans le Statut et à l'arrivée
   durcir();   // la roche dure avant les métaux : ils n'y apparaissent jamais
   {const a=W*H/(48*32);G.eff={};G.fum={};hideOre(Math.max(1,Math.round(GISEMENTS.metal*a)),Math.max(1,Math.round(GISEMENTS.mat*a)));}
   G.sonar=1;   // sonar à émettre (voir sonarStart, 10-rendu) : il part 10 à 20 tours après l'arrivée
@@ -297,9 +297,9 @@ function eboulis(){
 // remet le menu Monde tel qu'il était avant un tirage provisoire (les réglages d'une autre recette ne doivent pas y traîner)
 function genRemet(sauve){for(const k in GEN)if(!(k in sauve))delete GEN[k];Object.assign(GEN,sauve);saveGen();buildGen();}
 const RECETTE_NIV=n=>n<=1?'atterrissage':n===2?'cavernes':'base';   // la recette de chaque niveau de la descente (le niveau 1 suit le menu Monde)
-function niveauSuivant(hasard){   // hasard : tirer les réglages même si la case « Réglages au hasard » n'est pas cochée (Lab → Niv2)
+function niveauSuivant(hasard){   // hasard : un archétype monde et un archétype bâti tirés au hasard (Lab → Niv2, Niv3)
   const sauve=JSON.parse(JSON.stringify(GEN)),inv=G.inv,st=G.st,tour=G.turn,dist=G.dist,niv=(G.niv||1)+1;
-  recRange();recPrend(RECETTE_NIV(niv));if(hasard||GEN.hasard)hasardReglages();else if(GEN.amb)ambiance(GEN.amb);SANS_VAISSEAU=true;NIV_GEN=niv;   // sans hasard : l'ambiance choisie pour cette recette dans le menu Monde, relief compris
+  recRange();recPrend(RECETTE_NIV(niv));if(hasard)hasardReglages();SANS_VAISSEAU=true;NIV_GEN=niv;   // sans hasard : les réglages en cours du menu Monde pour cette recette
   niveau();   // genPlanet refait l'objet G : tout ce que la foreuse garde est remis en place juste après
   SANS_VAISSEAU=false;genRemet(sauve);
   G.inv=inv;G.st=st;G.niv=niv;G.turn=tour;G.dist=dist;G.over=null;drilling=false;
