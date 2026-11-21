@@ -233,6 +233,9 @@ $('niv1Btn').onclick=()=>{unlock();if(TRAV)stopTravel();
   genRemet(sauve);started=true;$('overlay').hidden=true;render();playIntro();};
 $('niv2Btn').onclick=()=>{unlock();if(TRAV)stopTravel();$('overlay').hidden=true;started=true;
   playForage(()=>{G.niv=1;niveauSuivant(true);render();},1);};
+// Niv3 : la seconde descente (mini-jeu des mines), puis une grande base aux réglages tirés au hasard
+$('niv3Btn').onclick=()=>{unlock();if(TRAV)stopTravel();$('overlay').hidden=true;started=true;
+  playForage(()=>{G.niv=2;niveauSuivant(true);render();},2);};
 function savePresets(){try{localStorage.setItem('np-presets',JSON.stringify(PRESETS.map(p=>p.c)));localStorage.setItem('np-preset-active',PRESET_ACTIVE);}catch(e){}touchLocal();}
 function drawPresets(){$('presets').innerHTML=PRESETS.map((p,i)=>`<button data-p="${i}" title="${p.n}" aria-label="Palette ${p.n}" aria-pressed="${i===PRESET_ACTIVE}">${[2,1,0].map(j=>`<i style="background:${p.c[j]}"></i>`).join('')}</button>`).join('');
   $('palName').textContent=PRESETS[PRESET_ACTIVE].n;}
