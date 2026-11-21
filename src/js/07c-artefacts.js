@@ -72,13 +72,20 @@ function artefacts(B,strs){G.art={};const A=ARTEFACTS,t=G.t,site=G.sites&&G.site
 
 // la foreuse avance sur une antenne : elle s'allume et lève le brouillard autour d'elle
 const ANT_R=15;
+/* Allumage (22 novembre 2026) : le disque se découvre en une seconde, anneau par anneau — les cases à 1 de l'antenne, puis à 2,
+   à 3… jusqu'au bord, au rythme du cercle qui s'étend. ANT_ANIM[case] = instant de l'allumage, le temps de l'animation
+   (fxLoop rappelle antVis à chaque image). Mouvement réduit : tout d'un coup, comme avant. */
+const ANT_DUR=1000,ANT_ANIM={};
+const antAnime=()=>{for(const k in ANT_ANIM)return true;return false;};
 // Tant qu'une antenne est allumée, tout son disque reste en vue : le brouillard n'y revient pas (appelé par computeFOV).
-function antVis(){if(!G.art)return;for(const k in G.art){const i=+k;if(G.art[k]!==1||G.t[i]!==ANTENNA)continue;const x=i%W,y=(i/W)|0;
-  for(let dy=-ANT_R;dy<=ANT_R;dy++)for(let dx=-ANT_R;dx<=ANT_R;dx++){const a=x+dx,b=y+dy;if(a<0||b<0||a>=W||b>=H||dx*dx+dy*dy>ANT_R*ANT_R+ANT_R)continue;const j=idx(a,b);vis[j]=1;G.seen[j]=1;}}}
+function antVis(){if(!G.art)return;const now=performance.now();for(const k in G.art){const i=+k;if(G.art[k]!==1||G.t[i]!==ANTENNA)continue;const x=i%W,y=(i/W)|0;
+  let R2=ANT_R*ANT_R+ANT_R;if(ANT_ANIM[i]!=null){const p=(now-ANT_ANIM[i])/ANT_DUR;if(p>=1||reduced)delete ANT_ANIM[i];else{const r=Math.floor(p*(ANT_R+1))+1;R2=Math.min(R2,r*r);}}   // anneau r : les cases à moins de r de distance
+  for(let dy=-ANT_R;dy<=ANT_R;dy++)for(let dx=-ANT_R;dx<=ANT_R;dx++){const a=x+dx,b=y+dy;if(a<0||b<0||a>=W||b>=H||dx*dx+dy*dy>R2)continue;const j=idx(a,b);vis[j]=1;G.seen[j]=1;}}}
 function antenneUse(i){G.art=G.art||{};const x=i%W,y=(i/W)|0;
   if(G.art[i]===1){say('Antenne : déjà en service.');SFX.blocked();render();return;}
-  G.art[i]=1;let n=0;for(let dy=-ANT_R;dy<=ANT_R;dy++)for(let dx=-ANT_R;dx<=ANT_R;dx++){const a=x+dx,b=y+dy;if(a<0||b<0||a>=W||b>=H||dx*dx+dy*dy>ANT_R*ANT_R+ANT_R)continue;const j=idx(a,b);if(!G.seen[j]){G.seen[j]=1;n++;}}
-  G.turn++;G.msg=null;addFx({kind:'sonar',x,y,r:ANT_R+1,dur:reduced?1:700});SFX.sonar(.7);
+  G.art[i]=1;let n=0;for(let dy=-ANT_R;dy<=ANT_R;dy++)for(let dx=-ANT_R;dx<=ANT_R;dx++){const a=x+dx,b=y+dy;if(a<0||b<0||a>=W||b>=H||dx*dx+dy*dy>ANT_R*ANT_R+ANT_R)continue;if(!G.seen[idx(a,b)])n++;}   // compté ici, découvert par antVis
+  if(!reduced)ANT_ANIM[i]=performance.now();
+  G.turn++;G.msg=null;addFx({kind:'sonar',ant:1,x,y,r:ANT_R+1,dur:reduced?1:ANT_DUR});SFX.sonar(.7);
   say(`L’antenne s’allume : ${n?`${n} cases apparaissent sur la carte, et la zone restera en vue`:'la zone alentour restera en vue'}.`,'good');pass(DUR.wait||100);computeFOV();render();}
 // la foreuse avance sur un terminal : il affiche son texte (le temps ne passe pas)
 function terminalUse(i){const [titre,txt]=TERM_TXT[((G.art&&G.art[i])||0)%TERM_TXT.length];

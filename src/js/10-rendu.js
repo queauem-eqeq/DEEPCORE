@@ -84,7 +84,7 @@ function drawBoom(){const fl=1-(performance.now()-BOOM.t0)/180;
 function addFx(f){f.t0=performance.now();if(f.kind==='num')f.stack=FX.filter(o=>o.kind==='num'&&o.x===f.x&&o.y===f.y&&fxP(o)<.5).length;FX.push(f);if(!fxRaf)fxRaf=requestAnimationFrame(fxLoop);}
 // grains d'un effet de consommable : position dans la case et instant d'apparition, tirés une fois pour toutes
 const fxGrains=n=>Array.from({length:n},()=>({x:rnd(0,13),y:rnd(3,14),d:Math.random()*.55}));
-function fxLoop(){const now=performance.now();FX=FX.filter(f=>now-f.t0<f.dur);render();fxRaf=(FX.length||animVif())?requestAnimationFrame(fxLoop):0;}   // une mine armée ou un paralyzor accroché gardent le rendu en marche
+function fxLoop(){const now=performance.now();FX=FX.filter(f=>now-f.t0<f.dur);if(antAnime())antVis();render();fxRaf=(FX.length||animVif())?requestAnimationFrame(fxLoop):0;}   // une mine armée ou un paralyzor accroché gardent le rendu en marche
 const fxP=f=>Math.min(1,(performance.now()-f.t0)/f.dur);
 function lungeOff(match){if(reduced)return [0,0];const f=FX.find(match);if(!f)return [0,0];const k=Math.sin(Math.PI*fxP(f))*.4*S;return [f.dx*k,f.dy*k];}
 
@@ -155,7 +155,7 @@ function sonarStart(){G.sonar=2;G.sonX=G.px;G.sonY=G.py;const r=Math.hypot(Math.
   addFx({kind:'sonar',x:G.px,y:G.py,r,dur});SFX.sonar(dur/1000);
   const l=Object.values(G.ore||{}),m=l.filter(oreMat).length,n=l.length-m;
   sayMore(`Sonar : ${n} gisement${n>1?'s':''} de métal et ${m} de Matière détecté${l.length>1?'s':''}.`,'info');}
-function sonarR(){if(!G||G.sonar===1)return -1;const f=FX.find(f=>f.kind==='sonar');return f?fxP(f)*f.r:Infinity;}
+function sonarR(){if(!G||G.sonar===1)return -1;const f=FX.find(f=>f.kind==='sonar'&&!f.ant);return f?fxP(f)*f.r:Infinity;}   // f.ant : le cercle d'une antenne ne détecte pas les gisements
 const sonarVu=(i,sr)=>Math.hypot(i%W-(G.sonX??G.px),((i/W)|0)-(G.sonY??G.py))<=sr;
 function render(){
   if(!fxRaf&&animVif())fxRaf=requestAnimationFrame(fxLoop);
