@@ -259,12 +259,15 @@ function newGame(){SANS_VAISSEAU=false;niveau();G.niv=1;   // G n'existe qu'une 
   else say('Descente terminée : la foreuse a débouché dans un réseau de cavernes. Un site de forage plus bas est signalé.','info');}   // arrivée par un puits (recette cavernes)
 // Nouvelle partie lancée par le joueur : la cinématique d'arrivée se rejoue (21 novembre 2026)
 function nouvellePartie(){newGame();started=true;$('overlay').hidden=true;render();playIntro();}
-/* Niveau suivant (21 novembre 2026) : pas de vaisseau, on arrive par le puits. Les réglages du niveau sont tirés
-   au hasard pour l'instant, sans toucher au menu Monde du joueur, qui est remis en place aussitôt après.
+/* Niveau suivant (21 novembre 2026) : pas de vaisseau, on arrive par le puits. Le niveau 2 (et les suivants, tant qu'ils n'ont
+   pas leur recette) est généré avec la recette « cavernes » et les réglages que le joueur lui a donnés dans le menu Monde,
+   quelle que soit la recette affichée ; la case « Réglages au hasard » les tire d'abord, comme pour REGEN. Le menu Monde du
+   joueur est remis en place aussitôt après. Avant : tous les réglages étaient tirés au hasard, sur la recette du menu.
    La foreuse garde tout ce qu'elle avait : vie, énergie, inventaire et matière en réserve. */
+const RECETTE_NIV=n=>n<=1?'atterrissage':'cavernes';   // la recette de chaque niveau de la descente (le niveau 1 suit le menu Monde)
 function niveauSuivant(){
   const sauve=JSON.parse(JSON.stringify(GEN)),inv=G.inv,st=G.st,tour=G.turn,dist=G.dist,niv=(G.niv||1)+1;
-  hasardReglages();SANS_VAISSEAU=true;
+  recRange();recPrend(RECETTE_NIV(niv));if(GEN.hasard)hasardReglages();SANS_VAISSEAU=true;
   niveau();   // genPlanet refait l'objet G : tout ce que la foreuse garde est remis en place juste après
   SANS_VAISSEAU=false;Object.assign(GEN,sauve);saveGen();buildGen();
   G.inv=inv;G.st=st;G.niv=niv;G.turn=tour;G.dist=dist;G.over=null;drilling=false;
