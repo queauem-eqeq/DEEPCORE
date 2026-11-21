@@ -588,3 +588,19 @@ première descente : 0 mine, vie 77/100, arrivée oui, 15.4 s
 25 de vie, aucun pilote : 11/12 foreuses détruites, 0 passées quand même au niveau suivant (attendu : 0)
 passer avec 12 de vie : vie 1, arrivée oui, mort non
 ```
+
+### Peuplement avec la référence du joueur (21 novembre 2026, 22 h 30)
+
+Groupes et niveaux relus dans l'artefact (voir conception, « Référence du joueur »). Même script (`mesure-faune.js`),
+moyennes par carte :
+
+| Niveau | Budget dépensé | Groupes | Créatures | Extérieur / bâti / tunnels (créatures) |
+|---|---|---|---|---|
+| 1 (atterrissage) | 39,5 sur 45 | 5,7 | 28,2 | 23,2 / 4,0 / 1,1 |
+| 2 (cavernes) | 53,0 sur 54 | 10,3 | 34,3 | 28,6 / 5,1 / 0,6 |
+| 3 (base) | 62,5 sur 63 | 11,1 | 33,4 | 13,7 / 17,8 / 1,9 |
+
+Le niveau 1 ne pose que des crabots (seul groupe permis : Large crabot groupe, 4 à 6 crabots). Le crabot est l'espèce la plus
+présente aux trois niveaux (28, 10 et 9 par carte). Les valeurs de groupes ne sont plus toutes celles du banc : ce sont celles
+du joueur. Essais `test-ennemis.js` : tous passent ; l'essai « navette » échoue de temps en temps selon le tirage de la carte
+(1 fois sur 5 ce soir-là, y compris avant ce changement de réglages : il ne dépend pas des groupes).

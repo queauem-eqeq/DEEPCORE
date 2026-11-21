@@ -21,7 +21,7 @@ const LIEUX=[['ext','Extérieur'],['bati','Bâti'],['tunnel','Tunnels']];
    Le budget de chaque niveau se règle à part (avant : un budget et une pente en % par niveau). Un groupe n'est posé que s'il est
    actif (Lab → Groupes) ET dans la liste du niveau. Départ : les groupes arrivent peu à peu, les plus durs au niveau 3.
    Un groupe créé par le joueur est permis partout tant qu'il ne l'a pas retiré d'un niveau. */
-const GR_NIVS=[1,2,3],GR_NIV_DEF={'Chasse à courre':[2,3],'Escouade de réparation':[2,3],'Embuscade gluante':[2,3],'Poste de garde':[2,3],'Batterie':[3],'Convoi':[3],'Ronde de drones':[3],'Broyeur solitaire':[2,3],'Mines & Sentinelles':[2,3]};
+const GR_NIVS=[1,2,3],GR_NIV_DEF={"Crabots":[2,3],"Bande de relais":[2,3],"Family":[2,3],"3-5 puces + sentinelles":[2,3],"1-2 Mines":[2,3],"Mines & Sentinelles":[2,3],"2-3 sentinelles":[2,3],"Banc de torpilles":[2,3],"Broyeur solitaire":[2,3],"Puces en groupes":[2,3],"Poste de garde":[2,3],"Batterie":[3],"Essaim de drones":[2,3],"Escouade de réparation":[2,3],"Embuscade gluante":[2,3],"Chasse à courre":[2,3],"Convoi":[3],"Tireurs embusqués":[2,3],"Ronde de drones":[3]};
 function nivSains(d,liste,budget,pente){const o={};
   for(const n of GR_NIVS){const s=d&&d[n],b=s&&isFinite(+s.budget)?Math.max(0,Math.min(2000,Math.round(+s.budget))):Math.round(budget*(1+pente/100*(n-1)));
     o[n]={budget:b,part:partSaine(s&&s.part,n),gr:s&&Array.isArray(s.gr)?liste.map(g=>g.n).filter(x=>s.gr.includes(x)):liste.map(g=>g.n).filter(x=>(GR_NIV_DEF[x]||GR_NIVS).includes(n))};}
@@ -30,29 +30,31 @@ const nivDe=n=>GROUPES.niv[Math.max(1,Math.min(3,n||1))];
 // Répartition de départ, par niveau : celle que donnaient les anciennes densités (mesurée le 21 novembre 2026 sur 12 cartes par niveau).
 const PART_DEF=n=>({1:{ext:75,bati:20,tunnel:5},2:{ext:80,bati:18,tunnel:2},3:{ext:35,bati:60,tunnel:5}})[n],PART_PLAFOND=3;
 function partSaine(p,n){const o=PART_DEF(n);if(p&&typeof p==='object')for(const [k] of LIEUX)if(isFinite(+p[k])&&p[k]!==''&&p[k]!=null)o[k]=Math.max(0,Math.min(100,Math.round(+p[k])));return o;}
-// Dix groupes du joueur (lus dans la base de l'artefact le 20 novembre 2026), neuf groupes nouveaux bâtis sur les cinq espèces du
+// RÉFÉRENCE DU JOUEUR : groupes, ordre, valeurs, patrouilles, lieux et niveaux relus dans la base de l'artefact le 21 novembre 2026
+// à 22 h 25 (reglages/courant). Avant : dix groupes du joueur (lus dans la base de l'artefact le 20 novembre 2026), neuf groupes nouveaux bâtis sur les cinq espèces du
 // 21 novembre. VALEURS MESURÉES le 21 novembre au banc de combat (voir docs/mesures.md) : vie perdue par la foreuse de série face au
 // groupe en assaut, moyenne de l'effectif minimal et de l'effectif maximal, divisée par 4.
 const GROUPES_DEF=()=>groupesSains({budget:80,v:2,pente:20,liste:[
-  {"cout":7,"f":1,"m":[{"k":"paralyzor","max":1,"min":1},{"k":"crabos","max":1,"min":1},{"k":"cafar","max":1,"min":1},{"k":"mine","max":1,"min":1},{"k":"insectoide","max":1,"min":1}],"n":"Family","on":1,"pats":["affut","territoire"],"lieux":["ext"]},
-  {"cout":8,"f":1,"m":[{"k":"insectoide","max":5,"min":3},{"k":"paralyzor","max":1,"min":1}],"n":"3-5 puces + sentinelles","on":1,"pats":[],"lieux":["ext"]},
-  {"cout":3,"f":1,"m":[{"k":"mine","max":2,"min":1}],"n":"1-2 Mines","on":1,"pats":["affut","errance"],"lieux":["tunnel","bati"]},
-  {"cout":5,"f":1,"m":[{"k":"mine","max":2,"min":2},{"k":"paralyzor","max":1,"min":1}],"n":"Mines & Sentinelles","on":0,"pats":["affut","territoire"],"lieux":["bati"]},
-  {"cout":5,"f":1,"m":[{"k":"cafar","max":4,"min":2}],"n":"Bande de relais","on":1,"pats":["voyage","errance","ronde"],"lieux":["ext","tunnel"]},
-  {"cout":3,"f":1,"m":[{"k":"paralyzor","max":3,"min":2}],"n":"2-3 sentinelles","on":1,"pats":["territoire","ronde"],"lieux":["bati"]},
-  {"cout":3,"f":1,"m":[{"k":"crabos","max":2,"min":1}],"n":"Crabots","on":1,"pats":["ronde","errance","voyage","territoire","sentinelle","affut"],"lieux":[]},
-  {"cout":3,"f":1,"m":[{"k":"brochon","max":2,"min":1}],"n":"Banc de torpilles","on":1,"pats":["ronde","errance"],"lieux":["ext"]},
-  {"cout":11,"f":1,"m":[{"k":"mastok","max":1,"min":1}],"n":"Broyeur solitaire","on":0,"pats":["territoire","errance"],"lieux":["ext","bati"]},
-  {"cout":16,"f":1,"m":[{"k":"insectoide","max":8,"min":6},{"k":"mine","max":1,"min":0}],"n":"Puces en groupes","on":1,"pats":["voyage"],"lieux":["ext"]},
-  {"cout":10,"f":1,"m":[{"k":"gardien","max":1,"min":1},{"k":"paralyzor","max":2,"min":1}],"n":"Poste de garde","on":1,"pats":["garde"],"lieux":["bati"]},
-  {"cout":13,"f":1,"m":[{"k":"artilleur","max":2,"min":2},{"k":"gardien","max":1,"min":0}],"n":"Batterie","on":1,"pats":["garde","sentinelle"],"lieux":["bati"]},
-  {"cout":3,"f":0,"m":[{"k":"drone","max":5,"min":3}],"n":"Essaim de drones","on":1,"pats":["voyage","navette"],"lieux":["ext","bati"]},
+  {"cout":3,"f":2,"m":[{"k":"crabos","max":2,"min":1}],"n":"Crabots","on":1,"pats":["voyage","ronde","navette","sentinelle"],"lieux":[]},
+  {"cout":7,"f":2,"m":[{"k":"crabos","max":6,"min":4}],"n":"Large crabot groupe","on":1,"pats":["voyage","navette","ronde"],"lieux":[]},
+  {"cout":5,"f":2,"m":[{"k":"cafar","max":4,"min":3}],"n":"Bande de relais","on":1,"pats":["voyage","errance","ronde"],"lieux":[]},
+  {"cout":7,"f":0,"m":[{"k":"paralyzor","max":1,"min":1},{"k":"crabos","max":1,"min":1},{"k":"cafar","max":1,"min":1},{"k":"mine","max":1,"min":1},{"k":"insectoide","max":1,"min":1}],"n":"Family","on":1,"pats":["territoire","ronde"],"lieux":[]},
+  {"cout":8,"f":0,"m":[{"k":"insectoide","max":5,"min":3},{"k":"paralyzor","max":1,"min":1}],"n":"3-5 puces + sentinelles","on":1,"pats":["voyage"],"lieux":[]},
+  {"cout":3,"f":1,"m":[{"k":"mine","max":2,"min":1}],"n":"1-2 Mines","on":1,"pats":["errance"],"lieux":[]},
+  {"cout":6,"f":1,"m":[{"k":"mine","max":3,"min":3},{"k":"paralyzor","max":2,"min":2}],"n":"Mines & Sentinelles","on":1,"pats":["navette","ronde"],"lieux":[]},
+  {"cout":3,"f":1,"m":[{"k":"paralyzor","max":3,"min":2}],"n":"2-3 sentinelles","on":1,"pats":["territoire","ronde","navette"],"lieux":[]},
+  {"cout":3,"f":0,"m":[{"k":"brochon","max":2,"min":1}],"n":"Banc de torpilles","on":1,"pats":["errance"],"lieux":["ext"]},
+  {"cout":11,"f":1,"m":[{"k":"mastok","max":1,"min":1}],"n":"Broyeur solitaire","on":1,"pats":["territoire","garde","sentinelle"],"lieux":[]},
+  {"cout":10,"f":0,"m":[{"k":"insectoide","max":8,"min":6},{"k":"mine","max":1,"min":0}],"n":"Puces en groupes","on":1,"pats":["voyage"],"lieux":[]},
+  {"cout":10,"f":1,"m":[{"k":"gardien","max":1,"min":1},{"k":"paralyzor","max":2,"min":1}],"n":"Poste de garde","on":1,"pats":["garde"],"lieux":[]},
+  {"cout":13,"f":1,"m":[{"k":"artilleur","max":2,"min":2},{"k":"gardien","max":1,"min":0}],"n":"Batterie","on":1,"pats":["garde","sentinelle"],"lieux":[]},
+  {"cout":3,"f":1,"m":[{"k":"drone","max":5,"min":3}],"n":"Essaim de drones","on":1,"pats":["voyage","navette","ronde"],"lieux":["bati","ext"]},
   {"cout":6,"f":1,"m":[{"k":"crabos","max":2,"min":2},{"k":"soudeur","max":1,"min":1}],"n":"Escouade de réparation","on":1,"pats":["ronde","navette"],"lieux":[]},
-  {"cout":4,"f":1,"m":[{"k":"englueur","max":2,"min":1},{"k":"mine","max":2,"min":1}],"n":"Embuscade gluante","on":1,"pats":["affut"],"lieux":["tunnel","bati"]},
-  {"cout":6,"f":1,"m":[{"k":"englueur","max":1,"min":1},{"k":"cafar","max":3,"min":2}],"n":"Chasse à courre","on":1,"pats":["voyage","navette"],"lieux":["ext"]},
-  {"cout":11,"f":1,"m":[{"k":"gardien","max":1,"min":1},{"k":"soudeur","max":1,"min":1},{"k":"drone","max":2,"min":2}],"n":"Convoi","on":1,"pats":["navette"],"lieux":["bati"]},
-  {"cout":5,"f":1,"m":[{"k":"artilleur","max":2,"min":1}],"n":"Tireurs embusqués","on":1,"pats":["affut","sentinelle"],"lieux":["ext"]},
-  {"cout":2,"f":0,"m":[{"k":"drone","max":2,"min":2},{"k":"paralyzor","max":1,"min":1}],"n":"Ronde de drones","on":1,"pats":["ronde"],"lieux":["bati"]}]});
+  {"cout":4,"f":1,"m":[{"k":"englueur","max":2,"min":1},{"k":"mine","max":2,"min":1}],"n":"Embuscade gluante","on":1,"pats":["affut"],"lieux":[]},
+  {"cout":7,"f":1,"m":[{"k":"englueur","max":1,"min":1},{"k":"cafar","max":4,"min":3}],"n":"Chasse à courre","on":1,"pats":["voyage","navette"],"lieux":["ext"]},
+  {"cout":11,"f":1,"m":[{"k":"gardien","max":1,"min":1},{"k":"soudeur","max":1,"min":1},{"k":"drone","max":2,"min":2}],"n":"Convoi","on":1,"pats":["navette"],"lieux":[]},
+  {"cout":5,"f":1,"m":[{"k":"artilleur","max":2,"min":1}],"n":"Tireurs embusqués","on":1,"pats":["affut","sentinelle"],"lieux":[]},
+  {"cout":2,"f":1,"m":[{"k":"drone","max":2,"min":2},{"k":"paralyzor","max":1,"min":1}],"n":"Ronde de drones","on":0,"pats":["ronde"],"lieux":[]}]});
 /* Passage à la version 2 : des groupes enregistrés avant le 21 novembre 2026 (navigateur ou base de l'artefact) n'ont ni lieux, ni
    densités, ni les neuf groupes nouveaux. Une seule fois : un groupe qui porte le nom d'un groupe de départ reçoit ses lieux et sa
    valeur mesurée (son état actif et sa fréquence sont gardés), les groupes nouveaux sont ajoutés à la suite, les autres ne bougent pas. */

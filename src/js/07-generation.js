@@ -313,7 +313,7 @@ const BEST_LIST=()=>[{key:'insectoide',o:SPECIES[0],ic:'an0r',role:'Suit à dist
 const BEST_DEF={};BEST_LIST().forEach(e=>{BEST_DEF[e.key]={};BFIELDS.forEach(([f])=>BEST_DEF[e.key][f]=e.o[f]);});
 try{const b=JSON.parse(localStorage.getItem('np-best')||'null');if(b)BEST_LIST().forEach(e=>{if(b[e.key])BFIELDS.forEach(([f])=>{if(typeof b[e.key][f]==='number')e.o[f]=b[e.key][f];});});}catch(e){}
 function saveBest(){const o={};BEST_LIST().forEach(e=>{o[e.key]={};BFIELDS.forEach(([f])=>o[e.key][f]=e.o[f]);});try{localStorage.setItem('np-best',JSON.stringify(o));}catch(e){}touchLocal();}
-try{if(localStorage.getItem('np-mig')!=='eq1'){SPECIES[0].v=6;BEASTS[0].pv=25;saveBest();
+try{if(localStorage.getItem('np-mig')!=='eq1'){SPECIES[0].v=6;saveBest();   /* le crabot garde les PV de BEASTS (22, réglage du joueur) : la mise à 25 est retirée le 21 novembre 2026 */
   localStorage.setItem('np-mig','eq1');}}catch(e){}
 /* Fenêtre Bestiaire (refaite le 19 novembre 2026) : à droite la liste des espèces en colonne ; à gauche, jusqu'à quatre
    espèces choisies, côte à côte dans un tableau — une ligne par statistique — pour les modifier et les comparer.

@@ -30,7 +30,7 @@ revient sur **3 niveaux** ; elle n'est pas encore codée, et forer termine la pa
   sélecteur de 64 teintes (8 familles × 8 nuances) ; bouton « Rétablir ».
 - Polices : Chakra Petch (titres), JetBrains Mono (interface).
 - **Les dessins par défaut sont ceux de l'utilisateur**, retouchés au Tile editor et recopiés dans le code (bloc
-  `TUILES_JOUEUR` à la fin de `03-tuiles.js`, qui passe après toutes les autres définitions). Dernière recopie le 21 novembre 2026 : Sentinelle, abysse, liquides, machines 6 à 8 et tous les objets au sol, redessinés dans les couleurs du monde (dont le nouveau gyroscope).
+  `TUILES_JOUEUR` à la fin de `03-tuiles.js`, qui passe après toutes les autres définitions). Dernière recopie le 21 novembre 2026 à 22 h 25 (pile et site de forage inconnu) ; plus tôt le même jour : Sentinelle, abysse, liquides, machines 6 à 8 et tous les objets au sol, redessinés dans les couleurs du monde (dont le nouveau gyroscope).
 
 ### Rendu des terrains particuliers
 
@@ -140,11 +140,22 @@ et maximal, et porte une **valeur de menace** fixée à la main.
   valeurs mesurées étant plus basses que les anciennes, le budget a suivi pour garder la même densité).
 - **Valeur d'un groupe = vie perdue au banc ÷ 4** (`outils/valeur_groupes.py`), avec un supplément pour ce que le banc
   ne voit pas : mines (explosion par surprise), relais (alerte), englueur (il empêche la fuite). Tableau dans `mesures.md`.
-- Dix-neuf groupes de départ : les dix de l'utilisateur et neuf nouveaux (Poste de garde, Batterie, Essaim de drones,
+- **Référence du joueur, 21 novembre 2026 à 22 h 25** : les groupes de départ (`GROUPES_DEF`), leur ordre, leurs valeurs,
+  fréquences, patrouilles et lieux, et les groupes permis par niveau (`GR_NIV_DEF`) sont ceux que l'utilisateur a réglés
+  dans l'artefact (`reglages/courant`). Vingt groupes, avec le nouveau « Large crabot groupe » (4 à 6 crabots, valeur 7).
+  Les valeurs sont désormais **les siennes**, plus forcément celles mesurées au banc (Puces en groupes : 10 au lieu de 16 ;
+  Chasse à courre : 7 ; Mines & Sentinelles : 6). Presque tous les groupes sont **sans lieu imposé** (partout) ; seuls
+  Banc de torpilles et Chasse à courre restent en extérieur, Essaim de drones en extérieur et bâti. Niveaux : **niveau 1,
+  un seul groupe permis (Large crabot groupe)** ; niveau 2, 17 groupes ; niveau 3, les 20. Budgets (80, 96, 112) et
+  répartition par lieu inchangés. Bestiaire : identique au code, sauf qu'une vieille mise à niveau remettait le crabot à
+  25 PV sur un navigateur neuf ; elle est retirée, il a 22 PV partout. Tuiles relues : pile et site de forage inconnu.
+  Fabricateur : niveaux 2 et 3 seulement (`ART_NIV_DEF`).
+- Avant cette date, dix-neuf groupes de départ : les dix de l'utilisateur et neuf nouveaux (Poste de garde, Batterie, Essaim de drones,
   Escouade de réparation, Embuscade gluante, Chasse à courre, Convoi, Tireurs embusqués, Ronde de drones). Des groupes
   enregistrés avant cette date passent une fois par `groupesV2` : lieux et valeurs mesurées pour ceux qui portent un nom
   de départ, groupes nouveaux ajoutés à la suite, budget rapporté de 110 à 80.
 - Mesuré en taille 3 : 22 créatures au niveau 1, 26 au niveau 2, 32 au niveau 3.
+  Avec la référence du joueur du 21 novembre au soir : 28, 34 et 33 créatures par carte (`mesures.md`).
 
 ### Fenêtre LIFE : tout se règle par niveau de profondeur (21 novembre 2026, après-midi)
 
@@ -155,10 +166,10 @@ et tunnels (% du budget).
 
 - `GROUPES.niv[n] = {budget, gr:[noms]}`. Budgets de départ 80, 96 et 112 ; la « menace en plus par niveau » en % a
   disparu, chaque budget se règle à part. Un groupe n'est posé que s'il est actif (Lab → Groupes) **et** dans la liste du
-  niveau. Au départ les groupes arrivent peu à peu : 10 au niveau 1, 16 au niveau 2, les 19 au niveau 3 (Batterie, Convoi
-  et Ronde de drones sont réservés au niveau 3). Un groupe créé ou dupliqué est permis partout ; renommé ou supprimé, les
+  niveau. Au départ (référence du joueur, 21 novembre 2026) : 1 groupe au niveau 1, 17 au niveau 2, les 20 au niveau 3
+  (Batterie, Convoi et Ronde de drones sont réservés au niveau 3). Un groupe créé ou dupliqué est permis partout ; renommé ou supprimé, les
   listes suivent.
-- `ARTEFACTS[k].niv` : niveaux où l'artefact peut apparaître (`artOn`). Départ : tourelles laser et piles à partir du
+- `ARTEFACTS[k].niv` : niveaux où l'artefact peut apparaître (`artOn`). Départ : tourelles laser, piles et fabricateur à partir du
   niveau 2, croix laser au niveau 3, tout le reste partout. La fréquence reste dans Lab → Artefacts.
 
 ### Styles de patrouille
