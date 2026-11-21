@@ -32,6 +32,7 @@ Le jeu est une page web en plusieurs fichiers (`src/`), **sans étape d'assembla
   scène dans la page et renvoie ce qu'on veut lire.
 - `python3 outils/simul.py [detection|fuite|tout]` : rejoue des situations dans le moteur et mesure.
 - `python3 outils/perf.py` : fluidité.
+- `python3 outils/animation_cavernes.py SORTIE.gif [essais] [réglages]` : GIF animé de la génération d'un niveau « cavernes » (roche, cavernes, boyaux, bâtiments, portes), tiré du vrai moteur sans toucher à `src/`.
 - `outils/scripts/` : scripts à passer à `jeu.py` — `six-cartes.js` (six cartes côte à côte, tunnels en jaune),
   `mesure-recettes.js` (40 cartes par taille et par recette : complexes, tunnels, sorties), `cavernes.js` (six cartes de la recette cavernes), `mesure-cavernes.js` (40 cartes par réglage : part de cavernes, bâtiments, connexité).
 
