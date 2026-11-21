@@ -132,7 +132,7 @@ const recDef=l=>l[0]==='num'?l[5]:l[4];   // valeur de départ ; ce qui suit est
 function recRange(){if(!GEN.rec||typeof GEN.rec!=='object')GEN.rec={};const o=GEN.rec[GEN.recette]={};for(const l of recLignes(GEN.recette))o[l[1]]=GEN[l[1]];}
 // passe à la recette r : ses valeurs gardées, sinon celles en cours (réglages communs), sinon les valeurs de départ
 function recPrend(r){if(!RECETTES[r])r='atterrissage';const s=(GEN.rec&&GEN.rec[r])||{};
-  for(const l of recLignes(r)){const k=l[1],d=recDef(l);GEN[k]=recBon(l,s[k])?s[k]:recBon(l,GEN[k])?GEN[k]:d;}
+  for(const l of recLignes(r)){const k=l[1],d=recDef(l);GEN[k]=recBon(l,s[k])?s[k]:k!=='amb'&&recBon(l,GEN[k])?GEN[k]:d;}   // l'ambiance ne se transmet pas d'une recette à l'autre : deux recettes ont des ambiances de même clé
   GEN.recette=r;}
 recPrend(GEN.recette);
 /* Case « Réglages au hasard » (20 novembre 2026) : cochée, le bouton REGEN tire d'abord tous les réglages du menu Monde, puis

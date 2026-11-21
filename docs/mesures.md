@@ -555,8 +555,8 @@ Foreuse de série, vie d'essai 1000, groupe en assaut, arène dégagée (maréca
 | Tireurs embusqués | 10,8 | 31,2 | 21,0 | 5 | 5 | nouveau |
 | Ronde de drones | 9,2 | 7,0 | 8,1 | 2 | 2 | nouveau |
 
-Par espèce, seule, en assaut : puce 1,6 · crabot 8,7 · relais 2,9 · broyeur 47 · mine 6 · sentinelle 3,1 · gardien 30 environ
-(48 avant réglage) · artilleur 11 · drone 1,3 · soudeur 1,4 · englueur 2,6. Le banc sous-estime ce qui ne blesse pas
+Par espèce, seule, en assaut : puce 1,6 · crabot 8,7 · relais 2,9 · broyeur 47 · mine 6 · sentinelle 3,1 · gardien 28
+(48 avant réglage) · artilleur 11 · drone 1,3 · soudeur 1,6 · englueur 3,5. Le banc sous-estime ce qui ne blesse pas
 directement : son pilote fonce sur tout et ne fuit jamais.
 
 ### Peuplement : vingt cartes par niveau (`outils/scripts/mesure-faune.js`)

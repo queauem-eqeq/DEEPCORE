@@ -295,7 +295,7 @@ function genRemet(sauve){for(const k in GEN)if(!(k in sauve))delete GEN[k];Objec
 const RECETTE_NIV=n=>n<=1?'atterrissage':n===2?'cavernes':'base';   // la recette de chaque niveau de la descente (le niveau 1 suit le menu Monde)
 function niveauSuivant(hasard){   // hasard : tirer les réglages même si la case « Réglages au hasard » n'est pas cochée (Lab → Niv2)
   const sauve=JSON.parse(JSON.stringify(GEN)),inv=G.inv,st=G.st,tour=G.turn,dist=G.dist,niv=(G.niv||1)+1;
-  recRange();recPrend(RECETTE_NIV(niv));if(hasard||GEN.hasard)hasardReglages();SANS_VAISSEAU=true;NIV_GEN=niv;
+  recRange();recPrend(RECETTE_NIV(niv));if(hasard||GEN.hasard)hasardReglages();else if(GEN.amb)ambiance(GEN.amb);SANS_VAISSEAU=true;NIV_GEN=niv;   // sans hasard : l'ambiance choisie pour cette recette dans le menu Monde, relief compris
   niveau();   // genPlanet refait l'objet G : tout ce que la foreuse garde est remis en place juste après
   SANS_VAISSEAU=false;genRemet(sauve);
   G.inv=inv;G.st=st;G.niv=niv;G.turn=tour;G.dist=dist;G.over=null;drilling=false;
