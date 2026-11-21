@@ -277,12 +277,14 @@ function eboulis(){
     if(!(sol(v)||v===RUBBLE)||!libre(x,y)||DIRS.some(([dx,dy])=>!canWalk(t[idx(x+dx,y+dy)],true)||isWater(t[idx(x+dx,y+dy)])))continue;
     t[idx(x,y)]=ROCK;k++;}
   computeFOV();}
+// remet le menu Monde tel qu'il était avant un tirage provisoire (les réglages d'une autre recette ne doivent pas y traîner)
+function genRemet(sauve){for(const k in GEN)if(!(k in sauve))delete GEN[k];Object.assign(GEN,sauve);saveGen();buildGen();}
 const RECETTE_NIV=n=>n<=1?'atterrissage':'cavernes';   // la recette de chaque niveau de la descente (le niveau 1 suit le menu Monde)
-function niveauSuivant(){
+function niveauSuivant(hasard){   // hasard : tirer les réglages même si la case « Réglages au hasard » n'est pas cochée (Lab → Niv2)
   const sauve=JSON.parse(JSON.stringify(GEN)),inv=G.inv,st=G.st,tour=G.turn,dist=G.dist,niv=(G.niv||1)+1;
-  recRange();recPrend(RECETTE_NIV(niv));if(GEN.hasard)hasardReglages();SANS_VAISSEAU=true;
+  recRange();recPrend(RECETTE_NIV(niv));if(hasard||GEN.hasard)hasardReglages();SANS_VAISSEAU=true;
   niveau();   // genPlanet refait l'objet G : tout ce que la foreuse garde est remis en place juste après
-  SANS_VAISSEAU=false;Object.assign(GEN,sauve);saveGen();buildGen();
+  SANS_VAISSEAU=false;genRemet(sauve);
   G.inv=inv;G.st=st;G.niv=niv;G.turn=tour;G.dist=dist;G.over=null;drilling=false;
   eboulis();
   say(`Niveau ${G.niv}. La foreuse a percé le plafond et s'est écrasée plus bas. Un nouveau site de forage est signalé.`,'info');}

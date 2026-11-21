@@ -796,7 +796,7 @@ pièce ils deviennent du sol, sous un mur du mur) ; seuls le vaisseau et le bord
   défilement en temps réel. Saisie à l'intérieur, le cadre suit le pointeur sans sauter ; à l'extérieur, il se
   centre d'abord sous le pointeur.
 - Sous-menus repliables : **Inventaire**, **Génération** (+ REGEN), **Life**, **Palette**, **Lab** (Bestiaire,
-  Groupes, Artefacts, Discrétion, Tile editor, Intro, aide des touches).
+  Groupes, Artefacts, Discrétion, Tile editor, Niv1, Niv2, aide des touches).
 
 ### Souris et inspection
 
@@ -858,7 +858,7 @@ Vue de dessus du début à la fin, vaisseau nez vers le haut. Durée ≈ 11,6 s.
 (`np-intro`) et, depuis le 21 novembre 2026, **à chaque nouvelle partie lancée par le joueur** (`nouvellePartie`,
 appelée par les boutons « Nouvelle exploration » et par le rallumage) : elle marque l'arrivée au niveau 1, comme la
 cinématique de forage marque le passage au niveau suivant. Pas après une mise à jour de page en cours de partie,
-pas si l'utilisateur a demandé moins d'animations. **Lab → Intro** génère une nouvelle planète et rejoue la scène ; REGEN ne la joue pas. **Échap,
+pas si l'utilisateur a demandé moins d'animations. **Lab → Niv1** rejoue la scène puis lance un niveau 1 (recette « atterrissage ») aux réglages tirés au hasard ; **Lab → Niv2** joue la cinématique de forage puis lance un niveau 2 (recette « cavernes ») aux réglages tirés au hasard, la foreuse gardant ce qu'elle a. Dans les deux cas le menu Monde du joueur est remis tel qu'il était ; seule la taille de carte en est reprise (21 novembre 2026 ; avant, un bouton « Intro » rejouait l'arrivée sur la carte du menu). REGEN ne joue aucune cinématique. **Échap,
 Espace ou Entrée** passe directement au posé.
 
 - **Variations à chaque lancement** : descente de 5,9 à 9,3 s ; l'entrée dans l'atmosphère commence entre 5 et
