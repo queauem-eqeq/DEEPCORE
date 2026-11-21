@@ -496,7 +496,7 @@ Version d'essai : tous les objets sont donnés au départ, non équipés sauf la
   repliable **Inventaire** de la colonne (les consommables : nom, nombre, **USE**, **[X]**).
 - **Dix places** dans l'inventaire, **une par sorte** quel que soit le nombre d'exemplaires. Ramasser une sorte
   nouvelle quand les 10 places sont prises est refusé et **l'objet reste au sol**. **[X] jette UN exemplaire au sol**,
-  sous la foreuse (21 novembre 2026 ; avant, il détruisait la pile) : la place se libère quand le dernier exemplaire est jeté.
+  sur une case libre voisine (21 novembre 2026 ; avant, il détruisait la pile) : la place se libère quand le dernier exemplaire est jeté.
   La **clé** est un consommable comme les autres (voir § portes verrouillées) : elle s'empile, se jette, se ramasse.
 - **Touche I** : ouvre le sous-menu et choisit le premier consommable ; **↑ ↓** parcourir, **Entrée** utiliser,
   **X**, **Suppr** ou **J** jeter un exemplaire au sol, **Échap** ou **I** sortir.
@@ -511,7 +511,9 @@ Version d'essai : tous les objets sont donnés au départ, non équipés sauf la
 - **Maximum de vie ou d'énergie modifié par un objet** : la jauge garde sa proportion (100/100 → 130/130, 50/100 →
   65/130). S'équiper ne soigne pas, retirer puis remettre ne rapporte rien.
 - **Le visuel de la foreuse suit l'équipement** : l'arme dessine la moitié avant, l'armure la moitié arrière.
-- **Jeter** pose l'objet au sol sous la foreuse ; repasser dessus le ramasse, ou touche **G**.
+- **Jeter** (et **[X]** du sac) pose l'objet au sol **sur la première case libre la plus proche, jamais sous la foreuse** (21 novembre 2026) : les huit
+  cases voisines d'abord (orthogonales avant diagonales), puis de plus en plus loin en suivant les cases praticables (`caseJet`). Libre : ni obstacle,
+  ni eau profonde, ni porte, ni créature, ni autre objet. Sans aucune case libre, il tombe sous la foreuse. Marcher dessus le ramasse, ou touche **G**.
   **Tuile au sol** (21 novembre 2026) : chaque objet a la sienne, `o_` + clé de l'objet (`PAT.o_foreuse`, `o_usine`, `o_servo`, `o_optique`,
   `o_viseur`, `o_conden`, `o_gyro`, `o_stabil`, `o_accu`, `o_repar`, `o_batterie`, `o_fumigene`, `o_charge`), retouchables dans l'éditeur
   (groupe « Objets au sol ») ; la clé garde `cle`. S'il y a plusieurs objets sur une case, on voit le dernier posé. `PAT.objet` ne sert plus que de repli.

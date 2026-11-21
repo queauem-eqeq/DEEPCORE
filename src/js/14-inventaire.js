@@ -271,11 +271,20 @@ function invEquip(i){const o=G.inv[i];if(!o||G.over)return;const d=ITEMS[o.k],e=
     if(sl.n>1){invSay(`Les ${sl.n} emplacements d’accessoire sont pris : retirez-en un d’abord.`,'warn');SFX.blocked();render();return;}
     const old=G.inv.find(p=>p.eq&&ITEMS[p.k].slot===d.slot);invApply(old,-1);old.eq=0;rem=` à la place de : ${ITEMS[old.k].n}`;}
   o.eq=1;invApply(o,1);invSay(`${d.n} équipé${e}${rem} (${modTxt(d)}).`,'good');SFX.done();invChanged();}
+/* Où tombe un objet jeté (21 novembre 2026) : jamais sous la foreuse, mais sur la première case libre la plus proche — d'abord les huit
+   cases adjacentes (les orthogonales avant les diagonales), puis de plus en plus loin, en suivant les cases praticables. Libre : ni obstacle,
+   ni eau profonde, ni porte, ni créature, ni autre objet ou clé. Faute de place dans les environs, l'objet tombe quand même sous la foreuse. */
+function caseJet(){const lib=(x,y)=>{const t=G.t[idx(x,y)],i=idx(x,y);return !blocks(t)&&t!==DEEP&&t!==DOOR&&t!==DECK&&!beastAt(x,y)&&!animalAt(x,y)&&!(G.items&&G.items[i]&&G.items[i].length)&&!(G.cles&&G.cles[i]);};
+  const ORD=[[0,-1],[1,0],[0,1],[-1,0],[1,-1],[1,1],[-1,1],[-1,-1]],vu=new Set([idx(G.px,G.py)]),q=[[G.px,G.py]];
+  for(let k=0;k<q.length&&k<600;k++){const [x,y]=q[k];
+    for(const [dx,dy] of ORD){const a=x+dx,b=y+dy;if(a<1||b<1||a>=W-1||b>=H-1)continue;const j=idx(a,b);if(vu.has(j))continue;vu.add(j);
+      if(blocks(G.t[j]))continue;if(lib(a,b))return j;q.push([a,b]);}}
+  return idx(G.px,G.py);}
 function invDrop(i){const o=G.inv[i];if(!o||G.over)return;const d=ITEMS[o.k];
   if(o.eq&&d.slot==='arme'){invSay(ARME_FIXE,'warn');SFX.blocked();render();return;}
   if(o.eq){invApply(o,-1);o.eq=0;}
   invTake(i);
-  const c=idx(G.px,G.py);G.items=G.items||{};(G.items[c]=G.items[c]||[]).push(o.k);
+  const c=caseJet();G.items=G.items||{};(G.items[c]=G.items[c]||[]).push(o.k);
   invSay(`${d.n} jeté${accord(d)} au sol.`);SFX.thud();invChanged();}
 // ramasse tout ce qui est posé sous la foreuse ; more : à la suite d'un déplacement (complète le message du pas)
 function invPickup(more){const c=idx(G.px,G.py),l=G.items&&G.items[c];if(!l||!l.length)return false;
@@ -361,9 +370,9 @@ function sacHTML(){const l=invConsos();
 function sacDraw(){const el=$('sac');if(!el||!G||!G.inv)return;
   const l=invConsos(),h=sacHTML();if(h!==SAC_H){el.innerHTML=h;SAC_H=h;}
   const n=$('sacN');if(n){const txt=`[${l.length}/${SAC_MAX}]`;if(n.textContent!==txt)n.textContent=txt;n.classList.toggle('full',l.length>=SAC_MAX);}}
-// [X] : un exemplaire du consommable tombe au sol, sous la foreuse (21 novembre 2026 ; avant, [X] détruisait toute la pile)
+// [X] : un exemplaire du consommable tombe au sol, sur une case libre voisine (caseJet) (21 novembre 2026 ; avant, [X] détruisait toute la pile)
 function sacJeter(i){const o=G.inv[i];if(!o||G.over||!ITEMS[o.k].conso)return;const d=ITEMS[o.k],n=o.n||1;
-  invTake(i);const c=idx(G.px,G.py);G.items=G.items||{};(G.items[c]=G.items[c]||[]).push(o.k);
+  invTake(i);const c=caseJet();G.items=G.items||{};(G.items[c]=G.items[c]||[]).push(o.k);
   say(`${d.n} jeté${accord(d)} au sol${n>1?` (il en reste ${n-1})`:` : une place libérée (${invConsos().length}/${SAC_MAX})`}.`);SFX.thud();
   sacFix();SAC_H='';invChanged();}
 /* Navigation au clavier (touche I) : ouvre le sous-menu s'il est replié et choisit le premier consommable.
