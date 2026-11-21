@@ -841,6 +841,27 @@ Espace ou Entrée** passe directement au posé.
 - **Performance** : la carte entière est pré-composée une fois (16 px par case) ; chaque tuile du sol n'est plus
   qu'une copie. Sur écran haute densité, l'intro est rendue à densité réduite puis agrandie sans lissage.
 
+## 10 ter. Cinématique de forage (21 novembre 2026)
+
+Pour le passage au niveau suivant. Vue **de côté**, tout en **caractères ASCII** (comme les dessins d'équipement), environ 15 s ;
+`src/js/14b-forage.js`. **`playForage(suite)`** la lance et appelle `suite()` à la fin (rien ne l'appelle encore dans le jeu :
+la descente par niveaux, étape 4 de la refonte, doit s'y brancher) ; **F9** la lance pour l'essayer. **Échap, Espace ou Entrée** la
+passent (fondu court). Pas jouée si l'utilisateur a demandé moins d'animations.
+
+- **Foreuse** : 15 lignes sur 11 colonnes (`FG_ART`, couleurs par `FG_MSK`, tirées de la palette en cours), nez vers le bas ; le
+  foret tourne en alternant `▓`/`▒` ; la pointe clignote. Écran de 36 lignes de haut : la foreuse en occupe 42 %.
+- **0 à 2,4 s, surface** : allumage (tremblement, bruit qui monte), fumée par les deux échappements, poussière au pied.
+- **2,4 à 12,6 s, forage** : la caméra suit. Huit **strates** (`FG_LAY`) de 145 lignes en tout : sol meuble, argile, roche tendre,
+  roche dure, filon (losanges de la couleur 1 qui scintillent), basalte, cristaux, noyau dense. Chacune a sa couleur (palette en
+  cours × luminosité), ses caractères, sa densité, sa dureté `w` : le temps par ligne. Plus c'est dur, plus la foreuse ralentit,
+  tremble, crache d'étincelles et grince. Limites des strates ondulées. Éclats et poussière rebondissent sur les parois du puits.
+  À droite, une coupe géologique avec un repère de profondeur ; à gauche, le tableau de bord (profondeur, strate, rotation, dureté).
+- **Fin** : la foreuse perce le plafond d'une caverne (34 lignes, stalactites), tombe (alerte « perte de support »), s'écrase (flash,
+  grand tremblement, nuage de poussière, éclats, étincelles), rebondit un peu, puis fondu au noir.
+- **Son** : synthétisé, sans fichier (moteur en dents de scie, grincement haché par la rotation, grondement filtré ; impacts de
+  roche, claquement à chaque changement de strate, fracas du plafond et de l'impact).
+- **Vérification** : `python3 outils/forage.py DOSSIER [t1 t2 …]` (images aux instants donnés, contrôle de fin et d'erreurs).
+
 ## 11. Règles à ne pas casser
 
 - **Pas de blindage, pas de réparation automatique.** La défense fait rater les coups, elle ne les réduit jamais.
