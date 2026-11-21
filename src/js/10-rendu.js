@@ -176,12 +176,13 @@ function render(){
     if(t>=WALL)batiTuile(t,x,y,(tl,a)=>put(tl,x,y,a*k));else
     if(t!==BRIDGE)put(TL.ground0,x,y,.6*k);   // sol uniforme : plus de variations près des sites (13 novembre 2026)
     if(t===ROCK)put(h%3?TL.rock:TL.rock2,x,y,.95*k);
-    else if(t===MOUNT)put(y>0&&G.t[idx(x,y-1)]===MOUNT?TL.mtBody:TL.mtTop,x,y,.9*k);
-    else if(t===HARD)put(TL.hard,x,y,.95*k);
+    else if(t===MOUNT){const up=y>0?G.t[idx(x,y-1)]:-1;if(up===MOUNT)put(TL.mtBody,x,y,.9*k);else{if(up===HARD)put(TL.softTopBg,x,y,.9*k);put(TL.mtTop,x,y,.9*k);}}   // sous de la roche dure, la crête se pose sur un fond de roche dure
+    else if(t===HARD){const up=y>0?G.t[idx(x,y-1)]:-1;   // comme la montagne : crête irrégulière en haut, posée sur de la roche tendre
+      if(up!==HARD){if(up===MOUNT||up===ROCK)put(TL.hardTopBg,x,y,.9*k);put(TL.hardTop,x,y,.9*k);}else put(TL.hardBody,x,y,.9*k);}
     else if((t===SHIP||t===DECK)&&G.ship){const sk=TL['ship_'+(x-G.ship.x)+'_'+(y-G.ship.y)];if(sk)put(sk,x,y,k);}
     if(t===MOUNT&&G.ore&&G.ore[i]&&!oreSol(G.ore[i]))put(oreTile(G.ore[i],false),x,y,k);
-    else if(t===LIQ){ctx.globalAlpha=.24*k;ctx.fillStyle=PAL['2'];ctx.fillRect((x-camX)*S,(y-camY)*S,S,S);put((liqFrame+(h%2))%2?TL.liq1:TL.liq0,x,y,.9*k);}
-    else if(t===DEEP){ctx.globalAlpha=k;ctx.fillStyle='#01060c';ctx.fillRect((x-camX)*S,(y-camY)*S,S,S);ctx.globalAlpha=.08*k;ctx.fillStyle=PAL['2'];ctx.fillRect((x-camX)*S,(y-camY)*S,S,S);put((liqFrame+(h%2))%2?TL.deep1:TL.deep0,x,y,.4*k);}
+    else if(t===LIQ){ctx.globalAlpha=.24*k;ctx.fillStyle=PAL['e'];ctx.fillRect((x-camX)*S,(y-camY)*S,S,S);put((liqFrame+(h%2))%2?TL.liq1:TL.liq0,x,y,.9*k);}
+    else if(t===DEEP){ctx.globalAlpha=k;ctx.fillStyle='#01060c';ctx.fillRect((x-camX)*S,(y-camY)*S,S,S);ctx.globalAlpha=.08*k;ctx.fillStyle=PAL['e'];ctx.fillRect((x-camX)*S,(y-camY)*S,S,S);put((liqFrame+(h%2))%2?TL.deep1:TL.deep0,x,y,.4*k);}
     else if(t===CHASM){ctx.globalAlpha=1;ctx.fillStyle='#000';ctx.fillRect((x-camX)*S,(y-camY)*S,S,S);if(CHASM_OV){ctx.globalAlpha=k;ctx.drawImage(CHASM_OV,x*16,y*16,16,16,(x-camX)*S,(y-camY)*S,S,S);}}
     else if(t===RUBBLE)put(TL.rubble,x,y,.65*k);
     // herbes assombries de moitié le 15 novembre 2026 (elles ressortaient trop) : même teinte, luminosité divisée par deux
@@ -194,7 +195,7 @@ function render(){
   if(G.ore)for(const k in G.ore){if(!oreSol(G.ore[k]))continue;const i=+k;if(fog&&!G.seen[i])continue;put(oreTile(G.ore[k],true),i%W,(i/W)|0,fog&&!vis[i]?.35:1);}
   {const sr=sonarR();if(sr>0&&G.ore&&fog)for(const k in G.ore){const i=+k;if(G.seen[i]||!sonarVu(i,sr))continue;put(oreTile(G.ore[k],oreSol(G.ore[k])),i%W,(i/W)|0,1);}}   // gisements détectés par le sonar, même hors de vue
   if(G.cles)for(const k in G.cles){const i=+k;if(fog&&!G.seen[i])continue;put(TL.cle,i%W,(i/W)|0,fog&&!vis[i]?.35:1);}   // clés au sol
-  if(G.items)for(const k in G.items){const i=+k;if(fog&&!G.seen[i])continue;put(TL.objet,i%W,(i/W)|0,fog&&!vis[i]?.35:1);}   // objets posés au sol
+  if(G.items)for(const k in G.items){const i=+k,l=G.items[k];if(!l||!l.length||fog&&!G.seen[i])continue;put(itemTile(l[l.length-1]),i%W,(i/W)|0,fog&&!vis[i]?.35:1);}   // un objet au sol : sa tuile (le dernier posé s'il y en a plusieurs)   // objets posés au sol
   if(G.splat)for(const [px,py,c,sz] of G.splat){const i=idx(Math.floor(px/S),Math.floor(py/S));if(fog&&!G.seen[i])continue;   // débris au sol
     ctx.globalAlpha=fog&&!vis[i]?.3:1;ctx.fillStyle=c;ctx.fillRect(px-camX*S,py-camY*S,sz,sz);}
   ctx.globalAlpha=1;

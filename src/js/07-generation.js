@@ -314,15 +314,15 @@ const oreLv=v=>+String(v).slice(-1)||3,oreSol=v=>/^m?sol/.test(String(v)),oreMat
 /* Roche dure (16 novembre 2026) : plus on s'enfonce dans un massif, plus la montagne devient dure.
    La profondeur d'une case est sa distance au premier terrain qui n'est pas de la montagne (4 directions) ;
    la chance de durcir monte avec elle, de sorte qu'un massif garde une écorce tendre et un cœur impénétrable.
-   La rangée extérieure de la carte reste de la montagne ordinaire (déjà indestructible par ailleurs). */
+   La rangée extérieure de la carte est en roche dure (21 novembre 2026). */
 const DURCIR=[0,0,0,.3,.65,.9,1];   // rien sous deux cases de profondeur : les massifs gardent une écorce tendre
 function durcir(){const t=G.t,d=new Int16Array(W*H).fill(-1),q=[];
   for(let i=0;i<W*H;i++)if(t[i]!==MOUNT){d[i]=0;q.push(i);}
   for(let k=0;k<q.length;k++){const c=q[k],x=c%W,y=(c/W)|0;
     for(let n=0;n<4;n++){const a=x+DIRS[n][0],b=y+DIRS[n][1];if(a<0||b<0||a>=W||b>=H)continue;const j=idx(a,b);
       if(d[j]<0){d[j]=d[c]+1;q.push(j);}}}
-  for(let i=0;i<W*H;i++){const x=i%W,y=(i/W)|0;if(t[i]!==MOUNT||x<1||y<1||x>=W-1||y>=H-1)continue;
-    if(Math.random()<DURCIR[Math.min(d[i],DURCIR.length-1)])t[i]=HARD;}}
+  for(let i=0;i<W*H;i++){const x=i%W,y=(i/W)|0;if(x<1||y<1||x>=W-1||y>=H-1){t[i]=HARD;continue;}
+    if(t[i]!==MOUNT)continue;if(Math.random()<DURCIR[Math.min(d[i],DURCIR.length-1)])t[i]=HARD;}}
 function hideOre(nMetal=3,nMat=1){G.ore={};const lib=[];
   for(let i=0;i<W*H;i++){const x=i%W,y=(i/W)|0;if(G.t[i]===MOUNT&&x>0&&y>0&&x<W-1&&y<H-1)lib.push(i);}
   for(let i=lib.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[lib[i],lib[j]]=[lib[j],lib[i]];}
