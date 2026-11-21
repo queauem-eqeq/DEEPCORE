@@ -4,8 +4,7 @@
     python3 outils/animation_cavernes.py SORTIE.gif [essais] [parametres]
 
 `essais` : nombre de cartes tirées (défaut 8) ; la plus lisible est gardée (le plus de bâtiments, puis le plus d'étapes).
-`parametres` : réglages du menu Monde, séparés par des virgules (défaut `cvPart=20,cvNb=6,cvBoyaux=2,cvBati=3,cvSurf=14`).
-Avec une part de cavernes trop grande, les cavernes fusionnent et les étapes se distinguent mal.
+`parametres` : réglages du menu Monde, séparés par des virgules (défaut `cvPart=28,cvTaille=220,cvBoyaux=2,cvBati=3,cvSurf=14`).
 
 Le moteur est instrumenté dans la page, sans toucher à `src/` : `cavernes()` et `reliePortes()` sont recopiées en
 mémoire avec des points de capture (une image par caverne, par boyau, par boucle, par cul-de-sac). Si ces fonctions
@@ -22,31 +21,32 @@ from playwright.async_api import async_playwright
 
 RACINE = pathlib.Path(__file__).resolve().parent.parent
 JEU = 'file://' + str(RACINE / 'src' / 'index.html')
-DEFAUT = 'cvPart=20,cvNb=6,cvBoyaux=2,cvBati=3,cvSurf=14'
+DEFAUT = 'cvPart=28,cvTaille=220,cvBoyaux=2,cvBati=3,cvSurf=14'
 
 # (texte à trouver dans cavernes(), remplacement) : chaque remplacement ajoute un point de capture SNAP(nom, t, centres)
 MARQUEURS = [
     ('t.fill(MOUNT);', 't.fill(MOUNT);SNAP("roche",t);'),
-    ('cen.push([x0+c0[0],y0+c0[1]]);}', 'cen.push([x0+c0[0],y0+c0[1]]);SNAP("caverne",t,cen);}'),
-    ('for(const [i,j] of arcs)boyau(cen[i],cen[j],Math.random()<.35?2:1);',
-     'SNAP("centres",t,cen);for(const [i,j] of arcs){boyau(cen[i],cen[j],Math.random()<.35?2:1);SNAP("boyau",t,cen);}'),
-    ('if(bj>=0){arcs.push([i,bj]);boyau(cen[i],cen[bj],1);}}', 'if(bj>=0){arcs.push([i,bj]);boyau(cen[i],cen[bj],1);SNAP("boucle",t,cen);}}'),
-    ('Math.round(c[1]+Math.sin(a)*L)))],1);}', 'Math.round(c[1]+Math.sin(a)*L)))],1);SNAP("impasse",t,cen);}'),
+    ('cen.push([c0%W,(c0/W)|0]);cav.push(liste);tot+=liste.length;}}', 'cen.push([c0%W,(c0/W)|0]);cav.push(liste);tot+=liste.length;SNAP("caverne",t,cen);}}'),
+    ('CVT.nbPose=cen.length;', 'CVT.nbPose=cen.length;SNAP("complément",t,cen);'),
+    ('for(const [i,j] of arcs){boyau(i,c=>lab[c]===j+1,largeur());}',
+     'SNAP("centres",t,cen);for(const [i,j] of arcs){boyau(i,c=>lab[c]===j+1,largeur());SNAP("boyau",t,cen);}'),
+    ('if(bj>=0){arcs.push([i,bj]);boyau(i,c=>lab[c]===bj+1,largeur());}}', 'if(bj>=0){arcs.push([i,bj]);boyau(i,c=>lab[c]===bj+1,largeur());SNAP("boucle",t,cen);}}'),
+    ('boyau(ka,c=>c===b,1);break;}}', 'boyau(ka,c=>c===b,1);SNAP("impasse",t,cen);break;}}'),
 ]
 
 JS = r"""
 (args => {
   const [reglages, marqueurs] = args;
-  window.__S = [];
+  window.__S = []; window.__A = [];   // __A : une liste de vues par carte tirée (niveau() en tire jusqu'à six et garde la meilleure)
   // 0 roche · 1 caverne ou boyau · 2 mur · 3 sol de bâtiment · 4 porte · 5 boyau de porte
   const cls0 = v => v === MOUNT ? 0 : v === GROUND ? 1 : 2;
   const cls1 = (v, i, tun) => v === WALL ? 2 : v === DOOR ? 4 : (tun && G.tun && G.tun[i] && ZONE[i] !== 0 && v !== MOUNT) ? 5 : ZONE[i] === 0 ? 1 : v === MOUNT ? 0 : blocks(v) ? 0 : 3;
   window.SNAP = (nom, t, extra) => {
     if (nom === 'bâtiments') while (__S.length && ['bâtiments', 'portes'].includes(__S[__S.length - 1].nom)) __S.pop();
-    if (nom === 'roche') __S.length = 0;
+    if (nom === 'roche') { window.__S = []; __A.push(__S); }
     const post = nom === 'bâtiments' || nom === 'portes', a = new Array(W * H);
     for (let i = 0; i < W * H; i++) a[i] = post ? cls1(t[i], i, nom === 'portes') : cls0(t[i]);
-    __S.push({ nom, c: a, cen: extra ? extra.map(c => c.slice()) : null });
+    __S.push({ nom, c: a, cen: extra ? extra.map(c => c.slice()) : null }); if (nom !== 'roche') __S.cvt = CVT;
   };
   window.__cav0 = window.__cav0 || cavernes.toString();
   window.__rel0 = window.__rel0 || reliePortes;
@@ -56,7 +56,7 @@ JS = r"""
   window.reliePortes = function (t, B, strs) { SNAP('bâtiments', t); const r = __rel0(t, B, strs); if (r) SNAP('portes', t); return r; };
   Object.assign(GEN, { recette: 'cavernes', taille: 4 }, reglages);
   newGame();
-  return { W, H, px: G.px, py: G.py, S: __S, nb: (G.batis || []).length };
+  return { W, H, px: G.px, py: G.py, S: (__A.find(s => s.cvt === CVT) || __S), nb: (G.batis || []).length };
 })
 """
 
@@ -64,17 +64,18 @@ COUL = {0: (38, 43, 48), 1: (93, 127, 90), 2: (232, 238, 240), 3: (127, 183, 201
 NEUF = (190, 235, 140)
 TITRES = {
     'roche': ('Départ', 'Toute la carte est de la roche pleine.'),
-    'caverne': ('Les cavernes', "Chaque forme est tirée par un automate cellulaire, loin des cavernes déjà posées."),
+    'caverne': ('Les cavernes', "Chacune est posée dans un secteur « cavernes », sans toucher les autres : de la roche les sépare."),
+    'complément': ('Le complément', "Les cavernes grossissent par leurs bords jusqu'à la surface demandée."),
     'centres': ('Un centre par caverne', "C'est de là que partiront les boyaux."),
     'boyau': ('Les boyaux', 'Un arbre couvrant relie toutes les cavernes : tout est connecté.'),
     'boucle': ('Les boucles', 'Des liaisons en plus pour pouvoir tourner en rond.'),
     'impasse': ('Les culs-de-sac', 'Quelques boyaux qui ne mènent nulle part.'),
-    'bâtiments': ('Les bâtiments', 'Enchâssés dans la roche, à distance les uns des autres, chacun avec ses portes.'),
+    'bâtiments': ('Les bâtiments', 'Enchâssés dans les secteurs bâtis, à distance les uns des autres, chacun avec ses portes.'),
     'portes': ('Les accès', 'Chaque porte est reliée à la caverne la plus proche par un petit boyau.'),
     'final': ('Niveau prêt', 'Le joueur arrive par un puits (rose), sans vaisseau.'),
 }
 ORDRE = list(TITRES)
-DUREE = {'roche': 1600, 'caverne': 650, 'centres': 1500, 'boyau': 550, 'boucle': 550, 'impasse': 550, 'bâtiments': 2000, 'portes': 2200}
+DUREE = {'roche': 1600, 'caverne': 650, 'complément': 1500, 'centres': 1500, 'boyau': 550, 'boucle': 550, 'impasse': 550, 'bâtiments': 2000, 'portes': 2200}
 POLICES = ['/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf', '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf']
 
 

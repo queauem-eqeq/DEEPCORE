@@ -210,3 +210,18 @@ Les chiffres mesurés sont dans `mesures.md`.
   retirée le soir même** (PR n° 24). Elle donnait environ 2 bâtiments et 11 % de surface bâtie, au centre comme en
   périphérie, mais les cavernes, contournant les réserves, perdaient leur forme. On est revenu au premier état : cavernes
   creusées d'abord, bâtiments glissés ensuite dans la roche qui reste (surtout en périphérie).
+- **Refonte de la recette le même jour** (demande : des cartes plus précises et plus thématiques). Constat, mesuré sur
+  300 cartes : les cavernes se chevauchaient et se fondaient en une seule (82 à 87 % de la surface pour 2, 4 ou 6
+  cavernes demandées), les bâtiments restaient au bord et n'atteignaient pas la surface demandée, le relief rebouchait
+  19 % du sol. Refait : **secteurs** (cavernes, bâti, roche pleine) avec quatre dispositions, cavernes sans
+  chevauchement avec écart de roche, complément de surface, boyaux par chemin le moins cher, relief propre à la
+  recette, pièces visées, contrôle de la carte et **cinq ambiances**. « Nombre de cavernes » est remplacé par
+  « Taille des cavernes ».
+- Les secteurs ne sont pas la réservation rejetée plus haut : une caverne naît entière dans son secteur, elle ne
+  contourne rien.
+- **Proposés puis non retenus** : les curseurs « Équilibre cavernes ↔ bâti » et « Roche pleine ». Ils faisaient
+  doublon avec « Part de cavernes » et « Surface bâtie » et pouvaient les contredire ; la place des secteurs se
+  déduit maintenant de ces deux-là.
+- **Premier essai de forme** (automate cellulaire semé plus dense au centre) : des cavernes en pavés serrés, comme
+  des pâtés de maisons. Remplacé par un disque déformé par un bruit, et un complément qui pousse en lobes.
+- **Couloir de service entre deux bâtiments** : proposé, refusé par l'utilisateur.

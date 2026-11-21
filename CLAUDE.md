@@ -35,7 +35,7 @@ Le jeu est une page web en plusieurs fichiers (`src/`), **sans étape d'assembla
 - `python3 outils/animation_cavernes.py SORTIE.gif [essais] [réglages]` : GIF animé de la génération d'un niveau « cavernes » (roche, cavernes, boyaux, bâtiments, portes), tiré du vrai moteur sans toucher à `src/`.
 - `python3 outils/animation_niveau.py atterrissage|classique SORTIE.gif [essais]` : même chose pour le niveau 1 et la recette classique (relief, vaisseau, site, bâtiments, tunnels).
 - `outils/scripts/` : scripts à passer à `jeu.py` — `six-cartes.js` (six cartes côte à côte, tunnels en jaune),
-  `mesure-recettes.js` (40 cartes par taille et par recette : complexes, tunnels, sorties), `cavernes.js` (six cartes de la recette cavernes), `mesure-cavernes.js` (40 cartes par réglage : part de cavernes, bâtiments, connexité).
+  `mesure-recettes.js` (40 cartes par taille et par recette : complexes, tunnels, sorties), `cavernes.js` (six cartes de la recette cavernes, secteurs teintés ; `window.CAS` choisit les cartes), `mesure-cavernes.js` (25 cartes par réglage et par ambiance : obtenu contre visé, pièces, connexité).
 
 ## Banc de combat
 Artefact à part (https://claude.ai/artifact/9BKRaoB4hzgdWhzYFx5A6q) qui rejoue des combats dans le vrai moteur, sur carte de taille 1.

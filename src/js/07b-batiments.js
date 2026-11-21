@@ -35,7 +35,7 @@ function formePiece(st){
   rect(0,0,w,h);return {c,g:'rect'};
 }
 // Une structure dans le lot [lx0..lx1] × [ly0..ly1] ; écrit dans own (numéro de pièce + 1), porte, pied (emprise : sols et murs).
-function accretion(B,lot,cible,st){
+function accretion(B,lot,cible,st,dep){   // dep (cavernes) : cadre où tirer la première pièce, le lot étant toute la carte
   const {own,porte,pied,interdit}=B,[lx0,ly0,lx1,ly1]=lot,pieces=[],base=B.pieces.length;
   const dans=(x,y)=>x>=lx0&&y>=ly0&&x<=lx1&&y<=ly1,vide=(x,y)=>{const i=idx(x,y);return dans(x,y)&&!interdit[i]&&!own[i]&&!porte[i];};
   let emprise=0;
@@ -46,11 +46,11 @@ function accretion(B,lot,cible,st){
     for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){if(!dx&&!dy)continue;const a=x+dx,b=y+dy,j=idx(a,b);
       if(a<1||b<1||a>=W-1||b>=H-1||interdit[j]||own[j]||(porte[j]&&j!==sauf))return false;}return true;});
   // première pièce, vers le milieu du lot
-  for(let k=0;k<200&&!pieces.length;k++){const f=formePiece(st),ox=rnd(lx0+1,Math.max(lx0+1,lx1-12)),oy=rnd(ly0+1,Math.max(ly0+1,ly1-9)),cells=f.c.map(([x,y])=>[x+ox,y+oy]);
+  for(let k=0;k<200&&!pieces.length;k++){const f=formePiece(st),ox=dep?rnd(dep[0],dep[2]):rnd(lx0+1,Math.max(lx0+1,lx1-12)),oy=dep?rnd(dep[1],dep[3]):rnd(ly0+1,Math.max(ly0+1,ly1-9)),cells=f.c.map(([x,y])=>[x+ox,y+oy]);
     if(tient(cells,-1))pose(cells,f.g);}
   if(!pieces.length)return null;
-  const maxP=GEN.sPieces>0?GEN.sPieces:1e9;let nP=1;
-  for(let k=0,kmax=Math.max(800,cible*8);k<kmax&&emprise<cible&&nP<maxP;k++){
+  const maxP=st.np||(!st.libre&&GEN.sPieces>0?GEN.sPieces:1e9),plaf=st.np?cible*1.35:cible;let nP=1;   // st.np (cavernes) : nombre de pièces visé, la surface peut déborder d'un tiers pour l'atteindre
+  for(let k=0,kmax=Math.max(800,cible*(st.np?16:8));k<kmax&&emprise<plaf&&nP<maxP;k++){
     const p=pieces[rnd(0,pieces.length-1)],fi=p.c[rnd(0,p.c.length-1)],fx=fi%W,fy=(fi/W)|0,[dx,dy]=D4[rnd(0,3)],cx=fx+dx,cy=fy+dy,ci=idx(cx,cy);
     if(!vide(cx,cy)||!vide(cx+dy,cy+dx)||!vide(cx-dy,cy-dx))continue;   // la porte veut un mur de chaque côté
     const f=formePiece(st),bord=f.c.filter(([x,y])=>!f.c.some(q=>q[0]===x-dx&&q[1]===y-dy)),[ex,ey]=bord[rnd(0,bord.length-1)];
@@ -128,7 +128,7 @@ function entrees(B,S,t,atteint,dE,proche){const {own,porte,pied,interdit}=B,cand
   if(!cand.length)return [];
   if(dE){const r=new Map(cand.map(e=>[e,proche?Math.random()*3+dE[e.o]:Math.random()*6-dE[e.o]]));cand.sort((a,b)=>r.get(a)-r.get(b));}   // proche (cavernes) : la porte regarde plutôt la caverne la plus proche   // complexe enfoui : la porte est plutôt du côté le plus enfoncé dans le massif, le tunnel contourne
   else cand.sort((a,b)=>(b.libre-a.libre)||Math.random()-.5);
-  const n=dE?(proche&&S.emprise>=170?2:1):GEN.sEntrees>0?GEN.sEntrees:1+(S.pieces.length>=7?1:0)+(S.pieces.length>=16?1:0),pris=[],ecart=Math.max(GEN.sEntrees>0?4:8,Math.sqrt(S.emprise)*(GEN.sEntrees>0?.35:.7));
+  const n=dE?(proche?Math.max(1,Math.min(3,Math.round(GEN.cvPortes||1))):1):GEN.sEntrees>0?GEN.sEntrees:1+(S.pieces.length>=7?1:0)+(S.pieces.length>=16?1:0),pris=[],ecart=Math.max(GEN.sEntrees>0?4:8,Math.sqrt(S.emprise)*(GEN.sEntrees>0?.35:.7));
   for(const e of cand){if(pris.length>=n)break;if(pris.some(q=>Math.hypot(q.x-e.x,q.y-e.y)<ecart))continue;pris.push(e);}
   for(const e of pris){porte[e.c]=1;pied[e.c]=1;}
   return pris;}
@@ -136,9 +136,9 @@ function entrees(B,S,t,atteint,dE,proche){const {own,porte,pied,interdit}=B,cand
 // si une entrée donne sur de la roche, un couloir est percé jusqu'à elle (connect).
 // Cavernes : nombre de bâtiments (curseur, ± 1 au tirage) et part de la surface bâtie qui revient à chacun
 function cibles_cav(total){
-  let k=Math.max(1,Math.min(4,Math.round(autour('cvBati',.3))));k=Math.max(1,Math.min(k,Math.floor(total/60)));
+  let k=Math.max(1,Math.min(6,Math.round(autour('cvBati',.2))));k=Math.max(1,Math.min(k,Math.floor(total/50)));CVT.bati=k;
   const w=Array.from({length:k},()=>.65+Math.random()*.7),sw=w.reduce((a,b)=>a+b,0);
-  return w.map(v=>Math.max(55,Math.round(total*v/sw)));}
+  return w.map(v=>Math.max(45,Math.round(total*v/sw)));}
 function batiments(){
   G.batis=[];G.cles={};G.pb={};G.art={};G.artN=null;G.tun={};const pct=ENFOUI()?100:GEN.structure||0,N=W*H;if(pct<=0)return;
   // complexe enfoui (recette à zones) : il ne tient que dans le massif, à plus de 5 cases de la lisière et du bord de carte (la place d'un tunnel), et n'en prend pas la moitié (le reste est pour les tunnels)
@@ -154,14 +154,14 @@ function batiments(){
         for(const [dx,dy] of D4){const a=x+dx,e=y+dy;if(a<0||e<0||a>=W||e>=H)continue;const j=idx(a,e);if(ok[j]&&!vu[j]){vu[j]=1;q.push(j);}}}
       if(q.length>mN){mN=q.length;zb=b;}}
     if(!zb)return;}
-  const total=cav?Math.max(60,Math.round(N*autour('cvSurf',.15)/100)):enf?Math.max(50,Math.round(mN*Math.min(.8,autour('zComplexe',.15)/100*(W>=72?1:4/3)))):Math.round(N*pct/100);   // complexe enfoui : part du massif, réglée par le curseur (un tiers de plus sur les petites cartes)if(total<45)return;
+  const total=cav?Math.max(50,Math.round(N*CVT.surf/100)):enf?Math.max(50,Math.round(mN*Math.min(.8,autour('zComplexe',.15)/100*(W>=72?1:4/3)))):Math.round(N*pct/100);   // complexe enfoui : part du massif, réglée par le curseur (un tiers de plus sur les petites cartes)if(total<45)return;
   const t0=G.t.slice();
   const nEssais=enf?12:6;   // complexe enfoui : plus d'essais, il n'est jamais posé en terrain ouvert (20 novembre 2026)
   for(let essai=0;essai<nEssais;essai++){
     const t=G.t,B={own:new Int16Array(N),porte:new Uint8Array(N),pied:new Uint8Array(N),interdit:new Uint8Array(N),sol:new Uint8Array(N).fill(FLOOR),pieces:[]};
     for(let i=0;i<N;i++){const x=i%W,y=(i/W)|0,v=t[i];
       if(x<2||y<2||x>=W-2||y>=H-2)B.interdit[i]=1;   // les gouffres naturels ne gênent plus : une pièce posée dessus les change en sol (19 novembre 2026)
-      else if(enf&&(dE[i]<=mg||x<mE||y<mE||x>W-mE-1||y>H-mE-1))B.interdit[i]=1;
+      else if(enf&&(dE[i]<=mg||x<mE||y<mE||x>W-mE-1||y>H-mE-1||(cav&&SECT[i]!==1)))B.interdit[i]=1;   // cavernes : un bâtiment ne sort pas des secteurs bâtis
       else if(v===SHIP||v===DECK)for(let dy=-3;dy<=3;dy++)for(let dx=-2;dx<=2;dx++)B.interdit[idx(Math.max(0,Math.min(W-1,x+dx)),Math.max(0,Math.min(H-1,y+dy)))]=1;}
     for(let dy=-2;dy<=2;dy++)for(let dx=-2;dx<=2;dx++)B.interdit[idx(Math.max(0,Math.min(W-1,G.px+dx)),Math.max(0,Math.min(H-1,G.py+dy)))]=1;
     const deux=enf?false:GEN.sNb===2?total>=90:GEN.sNb===1?false:total>=260&&Math.random()<.5,part=deux?.2+Math.random()*.6:1,cibles=cav?cibles_cav(total):deux?[Math.round(total*part),total-Math.round(total*part)]:[total];
@@ -173,6 +173,7 @@ function batiments(){
       if(vert){const c=Math.round(3+(W-6)*Math.max(.22,Math.min(.78,pa)));zones[0]=[3,3,c-3,H-4];zones[1]=[c+3,3,W-4,H-4];}
       else{const c=Math.round(3+(H-6)*Math.max(.25,Math.min(.75,pa)));zones[0]=[3,3,W-4,c-3];zones[1]=[3,c+3,W-4,H-4];}
       if(inv)zones.reverse();}
+    const graines=[];   // cavernes : d'où part chaque bâtiment, dans un secteur bâti, loin des autres et là où il y a de la place
     for(let s=0;s<cibles.length;s++){if(cav)for(let i=0;i<N;i++)if(sepa[i])B.interdit[i]=1;
       const cible=cibles[s],aire=cible*1.7,asp=1+Math.random()*.9,[zx0,zy0,zx1,zy1]=zones[s],zw=zx1-zx0+1,zh=zy1-zy0+1;
       let lw=Math.min(zw,Math.round(Math.sqrt(aire*asp))),lh=Math.min(zh,Math.round(aire/lw));if(lw<10)lw=Math.min(zw,10);if(lh<8)lh=Math.min(zh,8);
@@ -180,9 +181,18 @@ function batiments(){
       let best=null,bb=1e9;
       for(let k=0;k<60;k++){const x0=rnd(zx0,zx1-lw+1),y0=rnd(zy0,zy1-lh+1);
         let bad=0;for(let y=y0;y<y0+lh;y+=2)for(let x=x0;x<x0+lw;x+=2)if(B.interdit[idx(x,y)])bad++;if(bad<bb){bb=bad;best=[x0,y0,x0+lw-1,y0+lh-1];}}
-      if(cav)best=[zx0,zy0,zx1,zy1];   // cavernes : le lot est toute la carte, le bâtiment se glisse là où la roche est assez épaisse
+      let dep=null,stS=STYLES[cles[s%cles.length]];
+      if(cav){best=[zx0,zy0,zx1,zy1];   // cavernes : le lot est toute la carte, le bâtiment s'étale dans les secteurs bâtis à partir de sa graine
+        let g=null,gs=-1;
+        for(let k=0;k<60;k++){const x=rnd(6,W-7),y=rnd(5,H-6);if(B.interdit[idx(x,y)])continue;let lib=0;
+          for(let dy=-4;dy<=4;dy+=2)for(let dx=-6;dx<=6;dx+=2)if(!B.interdit[idx(Math.max(0,Math.min(W-1,x+dx)),Math.max(0,Math.min(H-1,y+dy)))])lib++;
+          let d=30;for(const q of graines)d=Math.min(d,Math.hypot(q[0]-x,q[1]-y));const sc=lib/35*(4+d)+Math.random()*2;if(sc>gs){gs=sc;g=[x,y];}}
+        if(!g)continue;graines.push(g);dep=[Math.max(3,g[0]-6),Math.max(3,g[1]-4),g[0],g[1]];
+        const np=Math.round(GEN.cvPieces||0);stS=Object.assign({},stS,{libre:1});   // « Pièces par bâtiment » : un nombre visé ; les pièces sont agrandies ou rétrécies pour tenir la surface
+        if(np>=2){const a0=((stS.rw[0]+stS.rw[1])/2+1.6)*((stS.rh[0]+stS.rh[1])/2+1.6),k=Math.max(.55,Math.min(2,Math.sqrt(cible/np/a0/1.3)));
+          stS.np=np;stS.rw=[Math.max(3,Math.round(stS.rw[0]*k)),Math.max(4,Math.round(stS.rw[1]*k))];stS.rh=[Math.max(3,Math.round(stS.rh[0]*k)),Math.max(4,Math.round(stS.rh[1]*k))];}}
       if(!best)continue;lots.push(best);
-      const S=accretion(B,best,cible,STYLES[cles[s%cles.length]]);if(!S||S.pieces.length<2)continue;
+      const S=accretion(B,best,cible,stS,dep);if(!S||S.pieces.length<2)continue;
       boucles(B,S);amenager(B,S);S.cle=cles[s%cles.length];strs.push(S);
       if(cav)for(const p of S.pieces)for(const i of p.c){const x=i%W,y=(i/W)|0;for(let dy=-3;dy<=3;dy++)for(let dx=-3;dx<=3;dx++)sepa[idx(Math.max(0,Math.min(W-1,x+dx)),Math.max(0,Math.min(H-1,y+dy)))]=1;}}
     if(cav)B.interdit.set(ind0);

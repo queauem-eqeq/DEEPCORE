@@ -29,6 +29,20 @@ const R_STYLE=['sel','sStyle','Archétype de structure',[['','Au hasard']].conca
   R_PIECES=['num','sPieces','Pièces par structure',0,40,0],   // sans fourchette de hasard : 0 veut dire « pas de limite », et un tirage bas ferait un complexe de trois pièces
   R_OUVERT=['num','sOuvert','Ouvertures sans porte (%)',0,100,25,[0,60]],R_VERROUS=['num','sVerrous','Portes verrouillées',0,3,1,[0,3]],R_SECRETS=['num','sSecrets','Pièces secrètes',0,3,1,[0,3]];
 const R_AIDE='Avant-poste : petites pièces, peu de boucles. Hangar : grandes salles à piliers. Complexe de forage : couloirs et gouffres. Ruine : cavernes effondrées.';
+/* Ambiances du niveau 2 (21 novembre 2026) : un préréglage remet tous les curseurs « cavernes » à leur valeur de départ, puis pose les siens.
+   Toucher ensuite à un curseur repasse sur « Personnalisée ». */
+const AMBIANCES={
+  sauvage:{n:'Grottes sauvages',v:{cvDispo:'mel',cvPart:45,cvTaille:300,cvVar:70,cvForme:70,cvBoyaux:3,cvCuls:3,cvMont:5,cvRoc:3,cvBati:1,cvSurf:6,cvPieces:4}},
+  cathedrale:{n:'Cathédrale',v:{cvDispo:'cav',cvPart:40,cvTaille:800,cvVar:30,cvEcart:6,cvForme:35,cvLarg:2,cvBoyaux:1,cvCuls:1,cvMont:2,cvGouf:5,cvBati:2,cvSurf:10}},
+  termitiere:{n:'Termitière',v:{cvDispo:'mel',cvPart:26,cvTaille:50,cvVar:20,cvEcart:2,cvForme:40,cvSinu:70,cvBoyaux:5,cvCuls:5,cvMont:0,cvGouf:1,cvRoc:1,cvBati:2,cvSurf:10}},
+  cite:{n:'Cité enfouie',v:{cvDispo:'cite',cvPart:18,cvTaille:120,cvBati:4,cvSurf:30,cvPieces:12,cvPortes:2}},
+  postes:{n:'Avant-postes',v:{cvDispo:'mel',cvPart:30,cvTaille:160,cvBati:5,cvSurf:12,cvPieces:4}}};
+function ambiance(a){const A=AMBIANCES[a];if(!A)return;for(const l of recLignes('cavernes'))if(l[1].startsWith('cv'))GEN[l[1]]=recDef(l);Object.assign(GEN,A.v);GEN.cvAmb=a;}
+// Ce que la dernière carte « cavernes » a donné, sous les réglages (G.obt, rempli par cvBilan)
+function obtenuTxt(){const r=n=>Math.round(n),N=SIZES[GEN.taille][0]*SIZES[GEN.taille][1],v=Math.max(1,Math.min(30,Math.round(N*GEN.cvPart/100/Math.max(16,GEN.cvTaille*Math.max(.3,Math.min(1,N/6144))))));
+  let s=`Ces réglages visent environ ${v} caverne${v>1?'s':''}.`;const o=typeof G!=='undefined'&&G&&G.recette==='cavernes'&&G.obt;
+  if(o)s+=` Carte en cours : ${r(o.cav)} % de cavernes (visé ${r(o.vise.cav)}) · ${o.nb} caverne${o.nb>1?'s':''} (${o.vise.nb}) · ${o.bat} bâtiment${o.bat>1?'s':''} (${o.vise.bat}) · ${r(o.surf)} % bâti (${r(o.vise.surf)}) · ${({mel:'zones mélangées',cote:'un côté chacun',cite:'cité au centre',cav:'cavernes au centre'})[o.dispo]}.`;
+  return s;}
 const RECETTES={atterrissage:{n:'Niveau 1 : extérieur, montagne, complexe enfoui',zones:true,enfoui:true,titre:'Massif, tunnels, complexe',
     aide:'Chaque curseur donne un centre : la carte varie autour à chaque tirage. '+R_AIDE,
     regl:[['sub','Massif'],['sel','zForme','Forme du massif',[['','Au hasard'],['cote','Un côté'],['coin','Un coin']],'',['cote','coin']],
@@ -37,11 +51,18 @@ const RECETTES={atterrissage:{n:'Niveau 1 : extérieur, montagne, complexe enfou
       ['num','zSorties','Sorties du réseau',1,3,2,[1,3]],['num','zPorte','Éloignement de la porte (cases)',10,45,30,[15,42]],
       ['sub','Complexe'],R_STYLE,R_PIECES,R_OUVERT,R_VERROUS,R_SECRETS]},
   cavernes:{n:'Niveau 2 : réseau de cavernes, bâtiments enchâssés',zones:true,enfoui:true,cavernes:true,sansVaisseau:true,titre:'Cavernes, boyaux, bâtiments',
-    aide:'Tout est sous roche : la foreuse arrive par un puits. Chaque curseur donne un centre : la carte varie autour à chaque tirage. Les pourcentages de relief (eau, gouffre, herbe) valent pour le sol des cavernes. '+R_AIDE,
-    regl:[['sub','Cavernes'],['num','cvPart','Part de cavernes (% de la carte)',20,55,36,[28,48]],['num','cvNb','Nombre de cavernes (peu de grandes ↔ beaucoup de petites)',1,12,6,[3,9]],
-      ['num','cvBoyaux','Boucles entre cavernes',0,4,2,[0,3]],
-      ['sub','Bâtiments'],['num','cvBati','Nombre de bâtiments',1,4,2,[1,3]],['num','cvSurf','Surface bâtie (% de la carte)',6,30,14,[8,22]],
-      R_STYLE,R_PIECES,R_OUVERT,R_VERROUS,R_SECRETS]},
+    aide:'Tout est sous roche : la foreuse arrive par un puits. Chaque curseur donne un centre : la carte varie autour à chaque tirage. L’eau et l’herbe de la colonne de gauche valent pour le sol des cavernes ; la montagne et le gouffre de cette recette se règlent ici. '+R_AIDE,
+    regl:[['sel','cvAmb','Ambiance (préréglage)',[['','Personnalisée']].concat(Object.keys(AMBIANCES).map(k=>[k,AMBIANCES[k].n])),''],
+      ['sel','cvDispo','Disposition des zones',[['','Au hasard'],['mel','Mélangée'],['cote','Cavernes d’un côté, bâti de l’autre'],['cite','Cité au centre'],['cav','Cavernes au centre']],'',['mel','cote','cite','cav']],
+      ['sub','Cavernes'],['num','cvPart','Part de cavernes (% de la carte)',10,60,32,[22,45]],['num','cvTaille','Taille des cavernes (cases)',30,800,240,[60,450]],
+      ['num','cvVar','Variété des tailles (0 : toutes pareilles)',0,100,40,[10,80]],['num','cvEcart','Roche entre deux cavernes (cases)',1,8,3,[2,5]],
+      ['num','cvForme','Forme (0 : ronde · 100 : déchiquetée)',0,100,50,[20,80]],
+      ['sub','Boyaux'],['num','cvLarg','Largeur des boyaux',1,3,1,[1,2]],['num','cvSinu','Sinuosité',0,100,50,[20,80]],
+      ['num','cvBoyaux','Boucles entre cavernes',0,6,2,[0,4]],['num','cvCuls','Culs-de-sac',0,6,2,[0,4]],
+      ['sub','Sol des cavernes'],['num','cvMont','Montagne (%)',0,15,4,[0,8]],['num','cvGouf','Gouffre (%)',0,10,3,[0,6]],['num','cvRoc','Rochers épars (%)',0,8,2,[0,4]],
+      ['sub','Bâtiments'],['num','cvBati','Nombre de bâtiments',1,6,2,[1,4]],['num','cvSurf','Surface bâtie (% de la carte)',5,40,14,[8,24]],
+      ['num','cvPieces','Pièces par bâtiment (0 : automatique)',0,25,0],['num','cvPortes','Portes par bâtiment',1,3,1,[1,2]],
+      R_STYLE,R_OUVERT,R_VERROUS,R_SECRETS]},
   classique:{n:'Classique : terrain partout, bâtiments posés dessus',titre:'Structures',aide:R_AIDE,
     regl:[R_STYLE,['sel','sNb','Nombre de structures',[[0,'Une ou deux'],[1,'Une'],[2,'Deux']],0,[0,1,2]],['num','structure','Surface bâtie (%)',0,70,10,[6,22]],
       R_PIECES,['num','sEntrees','Portes d’entrée',0,4,0],R_OUVERT,R_VERROUS,R_SECRETS]}};
@@ -68,7 +89,7 @@ function hasardReglages(){
   for(const l of recLignes(GEN.recette)){const k=l[1];
     if(l[0]==='num'){const f=l[6];if(f)GEN[k]=rnd(f[0],f[1]);}
     else{const f=l[5];if(f&&f.length)GEN[k]=f[rnd(0,f.length-1)];}}
-  saveGen();buildGen();}
+  if(GEN.cvAmb)GEN.cvAmb='';saveGen();buildGen();}
 // valeur tirée autour du centre donné par un curseur : centre × (1 ± p)
 const autour=(k,p)=>GEN[k]*(1+(Math.random()*2-1)*p);
 function setTaille(v){v=Math.max(1,Math.min(5,Math.round(+v||4)));GEN.taille=v;$('gr-taille').value=v;$('gn-taille').value=v;
@@ -80,7 +101,8 @@ function setCA(k,v,mn,mx){v=Math.max(mn,Math.min(mx,Math.round(+v||mn)));GEN[k]=
 function caState(){const off=GEN.methode==='bruit';$('gn-remplissage').disabled=off;$('gn-iterations').disabled=off;}
 // La faune se règle par groupes : voir 06b-groupes (19 novembre 2026 ; avant, une intensité par espèce).
 // Colonne de droite du menu Monde : les réglages que déclare la recette en cours (20 novembre 2026 ; avant, une liste fixe de « Structures »).
-function setS(k,v){const l=recLignes(GEN.recette).find(l=>l[1]===k);if(!l)return;v=Math.max(l[3],Math.min(l[4],Math.round(+v||0)));GEN[k]=v;$('gr-'+k).value=v;$('gn-'+k).value=v;saveGen();}
+function setS(k,v){const l=recLignes(GEN.recette).find(l=>l[1]===k);if(!l)return;v=Math.max(l[3],Math.min(l[4],Math.round(+v||0)));GEN[k]=v;$('gr-'+k).value=v;$('gn-'+k).value=v;persoAmb(k);saveGen();}
+function persoAmb(k){if(k.startsWith('cv')&&k!=='cvAmb'){if(GEN.cvAmb){GEN.cvAmb='';const e=$('gs-cvAmb');if(e)e.value='';}const o=$('genObt');if(o)o.textContent=obtenuTxt();}}
 function setStruct(v){setS('structure',v);}
 function buildStruct(){
   recPrend(GEN.recette);const rec=RECETTES[GEN.recette];
@@ -90,10 +112,10 @@ function buildStruct(){
     if(ty==='sub')return `<div class="sub">${k}</div>`;
     if(ty==='sel')return `<div class="g2"><label for="gs-${k}">${lb}</label><select id="gs-${k}">${l[3].map(([v,t])=>`<option value="${v}"${GEN[k]===v?' selected':''}>${t}</option>`).join('')}</select></div>`;
     return `<div class="g"><label for="gn-${k}">${lb}</label><input type="range" id="gr-${k}" min="${l[3]}" max="${l[4]}" step="1" value="${GEN[k]}" aria-label="${lb}"><input type="number" id="gn-${k}" min="${l[3]}" max="${l[4]}" step="1" value="${GEN[k]}"></div>`;}).join('')
-   +`<div class="sum">${rec.aide||''}</div>`;
+   +(rec.cavernes?`<div class="sum" id="genObt">${obtenuTxt()}</div>`:'')+`<div class="sum">${rec.aide||''}</div>`;
   $('gs-recette').addEventListener('change',e=>{recRange();recPrend(e.target.value);saveGen();buildStruct();$('gs-recette').focus();});
   for(const l of recLignes(GEN.recette)){const k=l[1];
-    if(l[0]==='sel')$('gs-'+k).addEventListener('change',e=>{const v=e.target.value;GEN[k]=typeof l[4]==='number'?+v:v;saveGen();});
+    if(l[0]==='sel')$('gs-'+k).addEventListener('change',e=>{const v=e.target.value;GEN[k]=typeof l[4]==='number'?+v:v;if(k==='cvAmb'){ambiance(v);saveGen();buildStruct();$('gs-cvAmb').focus();return;}persoAmb(k);saveGen();});
     else{$('gr-'+k).addEventListener('input',e=>setS(k,e.target.value));$('gn-'+k).addEventListener('change',e=>setS(k,e.target.value));}}
 }
 function buildGen(){

@@ -183,7 +183,7 @@ function genPlanet(){
     roughBorder(t);   // bord de carte irrégulier, en roche
     {const c=GEN.zExt/100-Math.max(0,ZESSAI-2)*.06;ZONE=rec.cavernes?cavernes(t):rec.zones?massif(t,[Math.max(.25,c-.1),Math.min(.9,c+.1)],GEN.zForme):null;}   // curseur « Part d'extérieur » : le centre, ± 10 points ; le massif s'épaissit si le complexe n'a pas tenu (ZESSAI)Nt=N;
     if(ZONE){Nt=0;for(let i=0;i<N;i++)if(t[i]===GROUND)Nt++;}   // les pourcentages du relief valent pour la zone extérieure
-    const mode=GEN.methode,mt=P('montagne'),ct=P('gouffre');
+    const mode=GEN.methode,mt=rec.cavernes?Math.round(Nt*(GEN.cvMont??4)/100):P('montagne'),ct=rec.cavernes?Math.round(Nt*(GEN.cvGouf??3)/100):P('gouffre');   // cavernes : le sol a son propre relief, plus doux (curseurs de la recette)
     const mSize=p=>[rnd(SZ(14,4),SZ(30,6))-Math.round(p*8*F),rnd(SZ(9,3),SZ(18,5))-Math.round(p*4*F)],cSize=()=>[rnd(SZ(8,3),SZ(18,5)),rnd(SZ(5,3),SZ(10,4))];
     const cz=noise(SZ(11,4)),cm=fbm(),crev=sc((x,y)=>-Math.abs(cz(x,y)-.5)-(cm(x,y)<.45?1:0));
     if(mode==='bruit'){rankFill(t,sc(fbm()),mt,MOUNT);rankFill(t,crev,ct,CHASM);}
@@ -199,12 +199,12 @@ function genPlanet(){
     {const gros=noise(SZ(15,5)),moyen=noise(SZ(6,3)),touffe=noise(SZ(3,2)),gc=[],gn=new Float32Array(N);for(let i=0;i<N;i++)if(t[i]===GRASS)gc.push(i);
       for(const i of gc){const x=i%W,y=(i/W)|0,g=gros(x,y)*2-1;gn[i]=Math.sign(g)*g*g*1.5+(moyen(x,y)*2-1)*.45+(touffe(x,y)*2-1)*.6+(Math.random()*2-1)*.35;}
       gc.sort((a,b)=>gn[a]-gn[b]);for(const i of gc.slice(0,Math.round(gc.length*(.35+Math.random()*.3))))t[i]=FLAT;}
-    for(let i=0;i<N;i++)if(t[i]===GROUND&&Math.random()<.035)t[i]=ROCK;
+    for(let i=0;i<N;i++)if(t[i]===GROUND&&Math.random()<(rec.cavernes?(GEN.cvRoc??2)/100:.035))t[i]=ROCK;
     tidyChasms(t);connect(t);tidyChasms(t);separateWater(t);
     const ship=(SANS_VAISSEAU||rec.sansVaisseau)?null:placeShip(t,ZONE&&((x,y)=>ZINFO.f(x,y)>ZINFO.cut+(1-ZINFO.cut)*.4));   // on atterrit loin du massiflet sx,sy;
     if(ship){sx=ship.x+2;sy=ship.y+2;}
     else{let ok=false;                                             // niveaux suivants : arrivée par le puits, sur un carré de sol dégagé
-      for(let k=0;k<4000&&!ok;k++){sx=rnd(4,W-5);sy=rnd(4,H-5);ok=true;for(let dy=-1;dy<=1&&ok;dy++)for(let dx=-1;dx<=1;dx++){const v=t[idx(sx+dx,sy+dy)];if(!canWalk(v,true)||isWater(v)){ok=false;break;}}}   // le puits débouche toujours au sec
+      for(let k=0;k<4000&&!ok;k++){sx=rnd(4,W-5);sy=rnd(4,H-5);ok=true;for(let dy=-1;dy<=1&&ok;dy++)for(let dx=-1;dx<=1;dx++){const v=t[idx(sx+dx,sy+dy)];if(!canWalk(v,true)||isWater(v)||(rec.cavernes&&ZONE[idx(sx+dx,sy+dy)])){ok=false;break;}}}   // le puits débouche toujours au sec
       if(ok)for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++)t[idx(sx+dx,sy+dy)]=GROUND;   // herbes comprises : le puits les a couchées (sans cela, un biome très herbu ne trouvait pas de place et la génération traînait)
       if(!ok){if(!last)continue;sx=W>>1;sy=H>>1;for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++)t[idx(sx+dx,sy+dy)]=GROUND;}}
     const st=idx(sx,sy);   // la foreuse démarre au fond du couloir (case du haut), mèche vers la porte
@@ -239,7 +239,12 @@ let SANS_VAISSEAU=false;
 function niveau(){drilling=false;
   // structures bâties (07b), avant la roche dure et les métaux. Recette à complexe enfoui : si le complexe n'a pas tenu dans le
   // massif, on retire une carte entière (dix fois au plus) plutôt que de le poser en terrain ouvert.
-  for(let k=0;k<10;k++){ZESSAI=k;genPlanet();G.w=W;G.h=H;batiments();if(G.batis.length||!ZONE||!(ENFOUI()||GEN.structure>0))break;}
+  const cv=!!(RECETTES[GEN.recette]||{}).cavernes;let mieux=null;
+  for(let k=0;k<10;k++){ZESSAI=k;genPlanet();G.w=W;G.h=H;batiments();
+    if(cv){const e=cvBilan();if(!mieux||e<mieux.e)mieux={e,G,ZONE,ZINFO,SECT,CVT};if(e<=1.6||k>=5)break;continue;}   // cavernes : la carte est mesurée ; trop loin de ce qui est demandé, elle est refaite (six au plus) et la meilleure est gardée
+    if(G.batis.length||!ZONE||!(ENFOUI()||GEN.structure>0))break;}
+  if(mieux&&mieux.G!==G){G=mieux.G;ZONE=mieux.ZONE;ZINFO=mieux.ZINFO;SECT=mieux.SECT;CVT=mieux.CVT;}
+  {const o=cv&&typeof document!=='undefined'&&document.getElementById('genObt');if(o)o.textContent=obtenuTxt();}
   durcir();   // la roche dure avant les métaux : ils n'y apparaissent jamais
   {const a=W*H/(48*32);G.eff={};G.fum={};hideOre(Math.max(1,Math.round(GISEMENTS.metal*a)),Math.max(1,Math.round(GISEMENTS.mat*a)));}
   G.sonar=1;   // sonar à émettre (voir sonarStart, 10-rendu) : il part 10 à 20 tours après l'arrivée
