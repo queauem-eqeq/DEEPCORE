@@ -80,13 +80,11 @@ let LIFE={insectoide:0};BEASTS.forEach(b=>{LIFE[b.key]=0;});
 const grEsc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const grEffectif=g=>{let a=0,b=0;for(const m of g.m){a+=m.min;b+=m.max;}return a===b?''+a:a+' à '+b;};
 const grCompo=g=>{const E=ESPECES();return g.m.map(m=>(m.min===m.max?m.min:m.min+'-'+m.max)+' '+((E.find(e=>e[0]===m.k)||[,'?'])[1])).join(' + ')||'vide';};
-function grInfo(){const m=G&&G.menace,p=m&&m.pose?Object.keys(m.pose).map(k=>m.pose[k]+' × '+k).join(', '):'';
-  $('grInfo').textContent=(m?`Carte en cours : ${m.total-m.reste} dépensés sur ${m.total}${p?' ('+p+')':''}.`:'');}
 /* Fenêtre Groupes (refaite le 19 novembre 2026) : à gauche la fiche du groupe choisi, à droite la liste en colonne.
    Dans la liste, un clic choisit le groupe, la case l'active, et on le déplace à la souris (glisser) ou par ↑ ↓. */
 let GR_SEL=0;
 function buildGroupes(){const E=ESPECES(),ic=k=>ICON[k==='insectoide'?'an0r':'bz'+BEASTS.findIndex(b=>b.key===k)+'r']||'',L=GROUPES.liste;
-  GR_SEL=Math.max(0,Math.min(L.length-1,GR_SEL));grInfo();
+  GR_SEL=Math.max(0,Math.min(L.length-1,GR_SEL));
   $('grList').innerHTML=L.map((g,i)=>`<div class="grl${i===GR_SEL?' sel':''}${g.on?'':' inactif'}" data-g="${i}" draggable="true">
       <span class="grip" aria-hidden="true">⠿</span><input type="checkbox" data-f="on"${g.on?' checked':''} aria-label="Activer le groupe ${grEsc(g.n)}" title="Actif">
       <button class="grnom" data-a="sel" aria-pressed="${i===GR_SEL}"><b>${grEsc(g.n)}</b><span>${['− ','','+ '][g.f??1]}valeur ${g.cout} · ${grEsc(grCompo(g))}</span></button>

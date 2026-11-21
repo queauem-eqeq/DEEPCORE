@@ -334,15 +334,13 @@ kbd{font-family:var(--mono);color:var(--fg);border:1px solid var(--line);padding
 
 /* Fenêtre Groupes (Lab) : fiche du groupe à gauche, liste en colonne à droite (19 novembre 2026) */
 #groupes .mcard{width:min(900px,100%)}
-.grtop{display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px;font-size:12px;color:var(--dim)}
-.grtop label{display:flex;align-items:center;gap:8px;color:var(--fg)}
 .grcols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,340px);gap:16px;align-items:start}
 @media (max-width:720px){.grcols{grid-template-columns:1fr}}
 .gredit{border:1px solid var(--line);padding:12px;display:grid;gap:10px;min-width:0}
 .gredit h3{margin:4px 0 0;font-size:12px;display:flex;justify-content:space-between;align-items:baseline;border-top:1px solid var(--line);padding-top:10px}
 .gredit h3 span{font-weight:400;color:var(--dim);font-size:11px}
-.gredit input,.gredit select,.grtop input{font:inherit;color:var(--fg);background:var(--void);border:1px solid var(--line);padding:2px 4px;min-width:0}
-.gredit input[type=number],.grtop input{width:56px;text-align:right}
+.gredit input,.gredit select{font:inherit;color:var(--fg);background:var(--void);border:1px solid var(--line);padding:2px 4px;min-width:0}
+.gredit input[type=number]{width:56px;text-align:right}
 .gredit .gl{display:grid;grid-template-columns:auto minmax(0,1fr);gap:8px;align-items:center;color:var(--dim);font-size:12px}
 .gredit .gnom{font-weight:700}
 .grow{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center}
