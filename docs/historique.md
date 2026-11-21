@@ -225,3 +225,17 @@ Les chiffres mesurés sont dans `mesures.md`.
 - **Premier essai de forme** (automate cellulaire semé plus dense au centre) : des cavernes en pavés serrés, comme
   des pâtés de maisons. Remplacé par un disque déformé par un bruit, et un complément qui pousse en lobes.
 - **Couloir de service entre deux bâtiments** : proposé, refusé par l'utilisateur.
+
+## 21 novembre 2026 (nuit) : ce qui a été remplacé
+
+- **Relief semé en petites taches partout** : remplacé par le grain et le regroupement par régions. En taille 3, toutes
+  les cartes se ressemblaient.
+- **« Réglages au hasard » tirait chaque curseur séparément** : il tire maintenant une ambiance, puis fait varier le
+  reste. Le tirage curseur par curseur donnait une moyenne de tout, sans caractère.
+- **Archétypes de monde enregistrés** : effacés à la demande de l'utilisateur. Les ambiances les remplacent ; la
+  fonction d'enregistrement reste.
+- **Couloir de sentinelles** (proposé le 20 novembre) : écarté par l'utilisateur au profit des tourelles à rythme
+  prévisible. **Avertissement avant le tir** : essayé en maquette, retiré, il aidait trop.
+- **Valeurs de groupe réglées à la main** : remplacées par des valeurs mesurées au banc. Budget de 110 ramené à 80.
+- **Seconde descente en simple cinématique** : remplacée par le mini-jeu des mines. Espace et Entrée ne passent plus
+  cette scène, pour qu'on ne perde pas 30 points de vie par mégarde.

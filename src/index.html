@@ -67,12 +67,21 @@
     <p class="termtxt" id="termTxt"></p>
   </div>
 </div>
+<!-- Fabricateur (21 novembre 2026) : des objets contre de la Matière. Voir 14c-fabricateur. -->
+<div class="modal" id="fabric" role="dialog" aria-modal="true" aria-labelledby="fabTitre" hidden>
+  <div class="mcard" tabindex="-1">
+    <div class="mhead"><h2 id="fabTitre">Fabricateur</h2><button id="fabClose" aria-label="Fermer le fabricateur">Fermer</button></div>
+    <div class="sum" id="fabMat"></div>
+    <div class="fabwrap"><div id="fabList" role="list"></div><div id="fabVue" aria-live="polite"></div></div>
+    <div class="sum" id="fabMsg" aria-live="polite"></div>
+  </div>
+</div>
 <!-- Fenêtre Groupes (Lab, 19 novembre 2026) : création et réglage des groupes d'ennemis. -->
 <div class="modal" id="groupes" role="dialog" aria-modal="true" aria-labelledby="grTitle" hidden>
   <div class="mcard" tabindex="-1">
     <div class="mhead"><h2 id="grTitle">Groupes</h2><button id="grClose" aria-label="Fermer les groupes">Fermer</button></div>
     <p class="mnote">Un groupe réunit une ou plusieurs espèces et porte une valeur de menace. À chaque nouvelle carte, le budget achète au hasard des groupes actifs, jusqu’à épuisement. Les changements sont mémorisés et valent à la prochaine carte (REGEN).</p>
-    <div class="grtop"><label for="grBudget">Budget de menace<input type="number" id="grBudget" min="0" max="2000" step="5"></label><span id="grInfo" role="status"></span></div>
+    <div class="grtop"><span id="grInfo" role="status"></span></div>
     <div class="grcols">
       <section class="gredit" id="grEdit" aria-label="Réglage du groupe choisi"></section>
       <section class="grside" aria-label="Groupes existants"><div class="grliste" id="grList"></div>
@@ -166,6 +175,7 @@
           <button id="curBtn">Tile editor</button>
           <button id="niv1Btn" title="Rejouer la cinématique d’arrivée, puis un niveau 1 aux réglages tirés au hasard">Niv1</button>
           <button id="niv2Btn" title="Jouer la cinématique de forage, puis un niveau 2 aux réglages tirés au hasard">Niv2</button>
+          <button id="niv3Btn" title="Jouer la seconde descente (le mini-jeu des mines), puis un niveau 3 aux réglages tirés au hasard">Niv3</button>
         </div>
         <p class="keys"><kbd>ZQSD</kbd> <kbd>↑↓←→</kbd> pavé num. · <kbd>A</kbd><kbd>E</kbd><kbd>W</kbd><kbd>C</kbd> diagonales · Souris : survol = inspection, clic = y aller · <kbd>X</kbd> inspection au clavier (<kbd>Entrée</kbd> pour y aller) · <kbd>R</kbd> courir / marcher · <kbd>T</kbd> équipement · <kbd>I</kbd> inventaire · <kbd>O</kbd> exploration automatique (s’arrête au moindre événement) · <kbd>F</kbd> forer · <kbd>Espace</kbd> <kbd>5</kbd> attendre un tour · <kbd>P</kbd> repos jusqu’à l’énergie pleine · <kbd>B</kbd> brouillard de guerre · <kbd>V</kbd> champs de vision des ennemis · <kbd>!</kbd> son · <kbd>M</kbd> mode carte (déplacements = défilement, <kbd>Maj</kbd> pour aller plus vite, mini-carte : clic pour recentrer, glisser le cadre pour défiler)</p>
       </div>
@@ -177,6 +187,7 @@
 <script src="js/01-sons.js"></script>
 <script src="js/02-palette.js"></script>
 <script src="js/03-tuiles.js"></script>
+<script src="js/03b-tuiles-machines.js"></script>
 <script src="js/04-vaisseau.js"></script>
 <script src="js/05-tuiles-editables.js"></script>
 <script src="js/06-reglages.js"></script>
@@ -186,6 +197,8 @@
 <script src="js/07c-artefacts.js"></script>
 <script src="js/07d-tunnels.js"></script>
 <script src="js/07e-cavernes.js"></script>
+<script src="js/07f-machines.js"></script>
+<script src="js/07g-base.js"></script>
 <script src="js/08-faune.js"></script>
 <script src="js/09-vision-deplacement-forage.js"></script>
 <script src="js/10-rendu.js"></script>
@@ -193,5 +206,6 @@
 <script src="js/12-souris.js"></script>
 <script src="js/13-editeur-tuiles.js"></script>
 <script src="js/14-inventaire.js"></script>
+<script src="js/14c-fabricateur.js"></script>
 <script src="js/14b-forage.js"></script>
 <script src="js/15-intro.js"></script>

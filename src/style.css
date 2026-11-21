@@ -403,3 +403,31 @@ kbd{font-family:var(--mono);color:var(--fg);border:1px solid var(--line);padding
 .freq button[aria-pressed=true]{color:var(--void);background:var(--c1);border-color:var(--c1)}
 .gfq{display:flex;align-items:center;gap:6px;color:var(--dim);font-size:12px}
 .termtxt{font-size:13px;line-height:1.6;color:var(--fg);margin:0;white-space:pre-wrap;max-width:60ch}
+
+/* Fabricateur (21 novembre 2026) */
+#fabList{display:grid;gap:4px;max-height:min(52vh,420px);overflow-y:auto}
+.fabl{display:grid;grid-template-columns:minmax(150px,1fr) 2fr 48px;gap:10px;align-items:baseline;text-align:left;padding:7px 10px;background:transparent;border:1px solid var(--line);color:var(--fg);font:inherit;cursor:pointer}
+.fabl b{color:var(--c3);font-weight:normal}
+.fabl span{font-size:12px;color:var(--dim,#8aa9a2)}
+.fabl i{font-style:normal;text-align:right;color:var(--c1)}
+.fabl.sel{border-color:var(--c1)}
+.fabl.cher{cursor:default}
+.fabl.cher b,.fabl.cher i{color:var(--dim,#5f7a74)}
+
+/* Fenêtre LIFE : sélecteur de niveau et listes par niveau (21 novembre 2026) */
+.lfniv{display:flex;align-items:center;gap:8px;margin:0 0 10px}
+.lfniv span{color:var(--c3)}
+.lfniv button{min-width:40px;padding:5px 0}
+.lfniv button.on{border-color:var(--c1);color:var(--c1)}
+#life .sub span{float:right;font-size:11px;color:var(--dim)}
+#life .gpats{margin:0 0 10px}
+.gpat.inactif{border-color:var(--line);color:var(--dim)}
+
+/* Fabricateur : la liste à gauche, l'illustration de l'objet sélectionné à droite (21 novembre 2026) */
+#fabric .mcard{width:min(940px,100%)}
+.fabwrap{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:16px;align-items:start}
+#fabVue{border:1px solid var(--line);padding:12px;text-align:center;min-height:260px}
+#fabVue .iart{font-size:24px;display:inline-block;text-align:left}
+#fabVue b{display:block;color:var(--c3);font-weight:normal;margin:0 0 6px}
+#fabVue p{margin:0 0 6px;font-size:12px;color:var(--dim);text-align:left}
+@media (max-width:720px){.fabwrap{grid-template-columns:1fr}#fabVue{min-height:0}}

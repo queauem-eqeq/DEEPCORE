@@ -35,8 +35,15 @@ Le jeu est une page web en plusieurs fichiers (`src/`), **sans étape d'assembla
 - `python3 outils/perf.py` : fluidité.
 - `python3 outils/animation_cavernes.py SORTIE.gif [essais] [réglages]` : GIF animé de la génération d'un niveau « cavernes » (roche, cavernes, boyaux, bâtiments, portes), tiré du vrai moteur sans toucher à `src/`.
 - `python3 outils/animation_niveau.py atterrissage|classique SORTIE.gif [essais]` : même chose pour le niveau 1 et la recette classique (relief, vaisseau, site, bâtiments, tunnels).
+- `python3 outils/planche_cartes.py SORTIE.png amb:RECETTE [taille]` : douze cartes côte à côte avec leurs mesures, une par
+  ambiance de la recette (`amb:RECETTE:CLE` : douze cartes de la même ambiance ; ou un fichier de cas en JSON).
+- `python3 outils/valeur_groupes.py [essais]` (après `outils/banc.py`) : la valeur de chaque groupe de départ, mesurée au banc.
+- `python3 outils/forage.py DOSSIER niv2 t1 t2 …` : images de la seconde descente (le mini-jeu des mines).
+- **Essais automatiques**, à passer à `jeu.py` et à relancer après tout changement de ces systèmes : `test-machines.js`
+  (machines), `test-ennemis.js` (espèces, patrouilles, lieux), `test-forage.js` (mini-jeu), `test-descente.js` (la descente
+  entière, trois niveaux) ; mesures : `mesure-ambiances.js`, `mesure-faune.js`. Chacun renvoie une ligne par essai.
 - `outils/scripts/` : scripts à passer à `jeu.py` — `six-cartes.js` (six cartes côte à côte, tunnels en jaune),
-  `mesure-recettes.js` (40 cartes par taille et par recette : complexes, tunnels, sorties), `cavernes.js` (six cartes de la recette cavernes, secteurs teintés ; `window.CAS` choisit les cartes), `mesure-cavernes.js` (25 cartes par réglage et par ambiance : obtenu contre visé, pièces, connexité).
+  `mesure-recettes.js` (40 cartes par taille et par recette : complexes, tunnels, sorties), `cavernes.js` (six cartes de la recette cavernes, secteurs teintés ; `window.CAS` choisit les cartes), `planche-objets.js` (chaque objet : illustration ASCII et tuile au sol côte à côte), `mesure-cavernes.js` (25 cartes par réglage et par ambiance : obtenu contre visé, pièces, connexité).
 
 ## Banc de combat
 Artefact à part (https://claude.ai/artifact/9BKRaoB4hzgdWhzYFx5A6q) qui rejoue des combats dans le vrai moteur, sur carte de taille 1.
@@ -58,10 +65,10 @@ Artefact à part (https://claude.ai/artifact/9BKRaoB4hzgdWhzYFx5A6q) qui rejoue 
   globale (pas de modules, pas d'import/export)** : une constante déclarée dans un fichier est visible dans les suivants ;
   attention aux noms en double (`const` redéclarée = erreur de syntaxe) et aux noms qui existent déjà dans `window`.
   Un nouveau fichier doit aussi être ajouté en balise `<script>` dans `index.html`.
-  00 base · 01 sons · 02 palette · 03 tuiles (motifs 16×16) · 04 vaisseau · 05 tuiles éditables · 06 réglages ·
-  07 génération de la carte · 07b bâtiments · 07c artefacts · 07d zones et tunnels · 07e cavernes · 08 faune et prédateurs · 09 vision, déplacement, forage · 10 rendu et gouffres ·
+  00 base · 01 sons · 02 palette · 03 tuiles (motifs 16×16) · 03b tuiles des machines · 04 vaisseau · 05 tuiles éditables · 06 réglages et ambiances ·
+  06b groupes · 07 génération de la carte · 07b bâtiments · 07c artefacts · 07d zones et tunnels · 07e cavernes · 07f machines · 07g grande base · 08 faune et prédateurs · 09 vision, déplacement, forage · 10 rendu et gouffres ·
   11 interface (mode carte, « En vue », commandes, enregistrement) · 12 souris et inspection · 13 éditeur de tuiles ·
-  14 inventaire et équipement · 15 cinématique d'intro (qui lance aussi le jeu : rester le dernier).
+  14 inventaire et équipement · 14b forage (cinématique et mini-jeu des mines) · 14c fabricateur · 15 cinématique d'intro (qui lance aussi le jeu : rester le dernier).
 - `docs/` : conception, mesures, notes sur Brogue (voir plus haut). `planches/` : planches de travail
   (vaisseau, gouffres). `outils/` : scripts de vérification (voir plus haut).
 

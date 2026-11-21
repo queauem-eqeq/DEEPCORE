@@ -4,7 +4,7 @@
   const cas=window.CAS||[['Départ',{}],['Départ',{}],['Petites cavernes (50 cases)',{cvTaille:50}],['Grandes cavernes (600 cases)',{cvTaille:600,cvPart:40}],['Cité au centre, 4 bâtiments',{cvDispo:'cite',cvBati:4,cvSurf:24}],['Un côté chacun',{cvDispo:'cote',cvBati:3,cvSurf:20}]];
   const S=4,c=document.createElement('canvas');c.width=1280;c.height=800;c.style.cssText='position:fixed;left:0;top:0;z-index:99999;background:#0b0f10';document.body.appendChild(c);
   const x=c.getContext('2d');x.font='12px monospace';const res=[];
-  cas.forEach(([nom,r],n)=>{Object.assign(GEN,base,r);if(r.amb)ambiance(r.amb);if(r.hasard)hasardReglages();newGame();
+  cas.forEach(([nom,r],n)=>{Object.assign(GEN,base,r);if(r.amb)ambiance(r.amb,'cavernes');if(r.hasard)hasardReglages();newGame();
     const ox=20+(n%3)*420,oy=40+((n/3)|0)*385;
     for(let i=0;i<W*H;i++){const v=G.t[i];let col='#2c3a2e';
       if(G.tun[i])col='#f2c230';else if(v===DOOR)col='#ff4d4d';else if(v===WALL)col='#e8eef0';else if(v===FLOOR)col='#7fb7c9';

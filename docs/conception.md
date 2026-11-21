@@ -119,14 +119,54 @@ et maximal, et porte une **valeur de menace** fixée à la main.
   parfois absente. Si tout le groupe tire 0, rien n'est posé et rien n'est dépensé. Le maximum reste d'au moins 1.
 - **Lab → Groupes** : à gauche la fiche du groupe choisi (nom, valeur, styles de patrouille, case « actif »,
   jusqu'à six espèces avec leur effectif, fréquence, Dupliquer, Supprimer) ; à droite la liste des groupes en
-  colonne, qu'on réordonne en glissant ou par ↑ ↓. La fenêtre rappelle le budget de la carte en cours et ce qu'il a
-  acheté. « Groupes par défaut » (deux clics) remet les groupes de départ. **Enregistrer** écrit groupes, valeurs
+  colonne, qu'on réordonne en glissant ou par ↑ ↓. La fenêtre rappelle ce que le budget de la carte en cours a
+  acheté ; le budget lui-même ne s'y règle plus (champ retiré le 21 novembre 2026) : il se règle par niveau dans LIFE. « Groupes par défaut » (deux clics) remet les groupes de départ. **Enregistrer** écrit groupes, valeurs
   et budget dans la base de l'artefact (`reglages/courant`, champ `groupes`).
 - **LIFE** (colonne de droite) : le budget et une case à cocher par groupe.
 - Mémorisé dans le navigateur (`np-groupes`) et dans l'enregistrement des réglages.
 - Les effectifs par espèce (`LIFE`, `spawnAnimals`, `spawnBeasts`) ne servent plus qu'au banc de combat et aux mesures.
 
+### Lieux, densité et valeurs mesurées (21 novembre 2026)
+
+- **Trois lieux** (`lieuDe`) : l'**extérieur** (terrain naturel, poches et cavernes comprises), le **bâti** (sol des
+  bâtiments) et les **tunnels**. Le budget de chaque niveau est **réparti directement** entre eux
+  (`GROUPES.niv[n].part`, fenêtre LIFE, en % du budget) : niveau 1 : 75 / 20 / 5 ; niveau 2 : 80 / 18 / 2 ; niveau 3 :
+  35 / 60 / 5 (extérieur / bâti / tunnels). Les trois parts sont ramenées à 100. Un lieu absent de la carte rend sa part
+  aux autres ; un lieu ne reçoit jamais plus de **trois fois sa part de surface** (`PART_PLAFOND`), le surplus va aux
+  autres. Remplace, le 21 novembre 2026 au soir, les « densités par lieu » (80 / 130 / 40 % de la surface), que
+  l'utilisateur ne comprenait pas ; les parts de départ sont celles que ces densités donnaient en moyenne.
+- Chaque groupe déclare ses **lieux** (Lab → Groupes ; aucun coché : partout). Un groupe naît dans son lieu.
+- Le budget monte de **20 % par niveau** (`GROUPES.pente`). Budget de départ : **80** pour 96 × 64 (110 avant ; les
+  valeurs mesurées étant plus basses que les anciennes, le budget a suivi pour garder la même densité).
+- **Valeur d'un groupe = vie perdue au banc ÷ 4** (`outils/valeur_groupes.py`), avec un supplément pour ce que le banc
+  ne voit pas : mines (explosion par surprise), relais (alerte), englueur (il empêche la fuite). Tableau dans `mesures.md`.
+- Dix-neuf groupes de départ : les dix de l'utilisateur et neuf nouveaux (Poste de garde, Batterie, Essaim de drones,
+  Escouade de réparation, Embuscade gluante, Chasse à courre, Convoi, Tireurs embusqués, Ronde de drones). Des groupes
+  enregistrés avant cette date passent une fois par `groupesV2` : lieux et valeurs mesurées pour ceux qui portent un nom
+  de départ, groupes nouveaux ajoutés à la suite, budget rapporté de 110 à 80.
+- Mesuré en taille 3 : 22 créatures au niveau 1, 26 au niveau 2, 32 au niveau 3.
+
+### Fenêtre LIFE : tout se règle par niveau de profondeur (21 novembre 2026, après-midi)
+
+Demande de l'utilisateur. De haut en bas : un **sélecteur de niveau** (1, 2, 3), puis pour ce niveau le **budget de
+menace**, les **groupes possibles** et les **artefacts et machines possibles**. Les deux listes se règlent comme les
+patrouilles d'un groupe : des étiquettes qu'on retire, un menu déroulant pour en ajouter. En dessous, la **répartition des ennemis** du niveau entre extérieur, bâti
+et tunnels (% du budget).
+
+- `GROUPES.niv[n] = {budget, gr:[noms]}`. Budgets de départ 80, 96 et 112 ; la « menace en plus par niveau » en % a
+  disparu, chaque budget se règle à part. Un groupe n'est posé que s'il est actif (Lab → Groupes) **et** dans la liste du
+  niveau. Au départ les groupes arrivent peu à peu : 10 au niveau 1, 16 au niveau 2, les 19 au niveau 3 (Batterie, Convoi
+  et Ronde de drones sont réservés au niveau 3). Un groupe créé ou dupliqué est permis partout ; renommé ou supprimé, les
+  listes suivent.
+- `ARTEFACTS[k].niv` : niveaux où l'artefact peut apparaître (`artOn`). Départ : tourelles laser et piles à partir du
+  niveau 2, croix laser au niveau 3, tout le reste partout. La fréquence reste dans Lab → Artefacts.
+
 ### Styles de patrouille
+
+Deux styles ajoutés le 21 novembre 2026 : **navette** (va-et-vient entre le point de départ et un point à 16-30 cases,
+halte de 2 à 5 battements à chaque bout) et **garde** (le groupe se poste près du point à garder le plus proche — site,
+porte verrouillée, grille, fabricateur, station, porte d'entrée — et ne s'en écarte pas de plus de 3 cases).
+
 
 Le style est porté par le **groupe**, pas par l'espèce : un crabot peut faire la ronde dans un groupe et garder un
 territoire dans un autre. Le sélecteur **ajoute** un style ; chaque style choisi s'affiche en étiquette, retirable.
@@ -188,7 +228,12 @@ et le seuil ; `ZESSAI` compte les cartes retirées. Ces trois variables sont de 
   massif** à plus de 5 cases de la lisière et du bord de carte (4 en taille 2, 3 en taille 1), atteint par un
   réseau de tunnels. Le site de forage est au fond du complexe.
 - `cavernes` (21 novembre 2026, niveau 2) : **tout est sous roche**. Voir « Réseau de cavernes » plus bas.
+- `base` (21 novembre 2026, niveau 3) : **la grande base**. Voir « La grande base » plus bas.
 - `classique` : la génération d'avant la refonte (terrain partout, une ou deux structures posées dessus).
+
+**La descente compte trois niveaux** (`NIV_MAX`, `RECETTE_NIV`) : niveau 1 `atterrissage`, niveau 2 `cavernes`, niveau 3 `base`.
+Forer le site du niveau 3 atteint le noyau. Chaque niveau est généré avec les réglages que le menu Monde garde pour sa
+recette ; la case « Réglages au hasard » tire une ambiance à chaque niveau.
 
 `ENFOUI()` dit si la recette en cours a un complexe enfoui ; dans ce cas `GEN.structure` (« Surface bâtie ») ne compte pas.
 
@@ -227,6 +272,38 @@ fourchette de tirage, plus étroite que ses bornes : le hasard ne doit jamais re
 laissés tels quels la **taille de la carte** et les réglages dont 0 veut dire « automatique » (pièces par
 structure, portes d'entrée). Le relief est tiré avec un biais vers le bas (plafonds `HASARD_REL` : eau 30,
 montagne 30, gouffre 12, herbe 45). État mémorisé dans `GEN.hasard`. Code : `hasardReglages()`, `06-reglages.js`.
+
+### Grain, regroupement et ambiances (21 novembre 2026)
+
+Constat en taille 3 : toutes les cartes se ressemblaient, parce que chaque terrain était semé en petites taches
+partout (une « soupe »). Deux réglages de relief, dans la colonne de gauche du menu Monde, y remédient :
+
+- **Grain** (`GEN.grain`, 0 à 100, départ 65) : taille des taches de montagne, de gouffre, d'eau et d'herbe.
+  50 donne la taille d'avant ; 100 des masses (un grand lac, une chaîne) ; 0 un relief émietté.
+- **Regroupement par régions** (`GEN.regroupe`, 0 à 100, départ 45) : chaque terrain a un champ d'affinité à grande
+  échelle ; pour chaque tache, on tire jusqu'à dix emplacements et on garde celui où ce champ est le plus fort
+  (`meilleurePlace`). À 0, les taches sont éparpillées comme avant.
+
+**Ambiances** (`AMBIANCES[recette]`, `06-reglages.js`) : chaque recette a une dizaine de préréglages nommés, premier
+choix de la colonne de droite. Une ambiance remet les réglages de sa recette à leur valeur de départ et le relief à
+`AMB_DEF`, puis pose les siens (relief compris). Toucher un curseur repasse sur « Personnalisée ». Le nom de
+l'ambiance est affiché dans le Statut et dans le message d'arrivée (`G.amb`).
+
+- Niveau 1 : Grande prairie, Rives du grand lac, Marais, Désert de pierre, Terre fracturée, Chaos rocheux, Chaîne de
+  montagnes, Forteresse sous la montagne, Dédale de tunnels, Ruines noyées.
+- Niveau 2 : Grottes sauvages, Cathédrale, Termitière, Cité enfouie, Avant-postes, Lac souterrain, Jardins
+  engloutis, Abîmes, Dédale de boyaux, Bunker, Chaos d'éboulis.
+- Classique : Avant-poste isolé, Citadelle, Bases jumelles, Hangars, Ruines sous les herbes, Station lacustre,
+  Plateau désert, Champ de failles, Cols de montagne, Marécage.
+- Niveau 3 : voir « La grande base ».
+
+**« Réglages au hasard » tire désormais une ambiance**, puis fait varier les curseurs qu'elle ne fixe pas et le
+relief de ± 15 % : chaque niveau a un caractère reconnaissable au lieu d'une moyenne de tout. Une recette sans
+ambiance garde l'ancien tirage. Les **archétypes de monde** enregistrés avant le 21 novembre 2026 ont été effacés à
+la demande de l'utilisateur (une fois, clé `np-mondes-v`) ; la fonction d'enregistrement reste.
+
+Outils : `outils/planche_cartes.py` (douze cartes côte à côte avec leurs mesures) et
+`outils/scripts/mesure-ambiances.js` (quinze cartes par ambiance). Chiffres dans `docs/mesures.md`.
 
 ### Réseau de cavernes (`07e-cavernes.js`)
 
@@ -363,7 +440,7 @@ La roche dure vient ensuite : le cœur du massif est impénétrable, les parois 
 
 Second métal, **couleur accent** (les éclats de réparation sont couleur bio), mêmes dessins et mêmes trois tailles.
 Pris dans la montagne, il tombe quand on brise la paroi ; passer dessus ajoute **30, 40 ou 50** à la réserve
-**Matière**, affichée sous les jauges. Elle servira à construire de l'équipement ; elle ne sert encore à rien.
+**Matière**, affichée sous les jauges. Elle se dépense au **fabricateur** (21 novembre 2026).
 
 ### Sonar
 
@@ -400,6 +477,22 @@ Options : ennemis en alerte, vie d'essai. Onglets « Mes résultats » (gardés 
 (un clic sur une ligne reprend la configuration). Il sert à régler les coûts de menace ; **à republier quand le
 moteur change**, sinon il mesure l'ancien jeu.
 
+### La grande base (`07g-base.js`, 21 novembre 2026)
+
+Recette `base` (`zones`, `enfoui`, `cavernes`, `base`, `sansVaisseau`) : le moteur du niveau 2, réglé autrement. Beaucoup de
+bâti (2 à 6 **ailes**, 18 à 45 % de la carte), une ou deux petites **poches** de terrain naturel qui servent d'extérieur
+(8 à 22 %), et un **réseau de tunnels** qui relie les portes des ailes aux poches et entre elles. `baseFinir()` ajoute :
+
+1. **des galeries en plus**, comme au niveau 1 : culs-de-sac de 4 à 14 cases et petites salles irrégulières, creusés dans
+   la roche à partir du réseau, jamais à moins de 2 cases d'un bâtiment (`bsTunnels`, `bsSalles`) ;
+2. **l'arrivée dans la base** : la foreuse débouche dans une pièce d'une aile, parmi le quart des emplacements les plus
+   éloignés du site, sur un carré de 3 × 3 de sol bâti. Jamais derrière une porte verrouillée ou dérobée : on vérifie
+   qu'elle rejoint l'ancien point d'arrivée sans clé. Des débris tombent autour d'elle (`eboulis`, sol bâti compris).
+
+« Salles-machines (% de la fréquence du Lab) » (`bsMachines`) multiplie le nombre de machines de la base.
+Garde-fou valable pour toutes les recettes : si, machines posées, le site n'est plus atteignable (`accesSite()`), la carte
+est refaite (trois fois au plus).
+
 ## 3 ter. Exploration automatique
 
 Touche **O** ou bouton **EXPLORER** : la foreuse explore seule.
@@ -434,6 +527,68 @@ Code : `07c-artefacts.js`, appelé à la fin de la génération des bâtiments.
 - **Un obstacle ne coupe jamais un passage** : il n'est posé ni devant une porte ou une ouverture, ni là où il
   séparerait la pièce en deux. Antennes et terminaux vont de préférence contre un mur, les machines sept fois sur dix.
 - Treize tuiles retouchables au Tile editor, groupe « Artefacts ».
+
+## 3 quinquies. Machines (`07f-machines.js`, 21 novembre 2026)
+
+Nées de la conversation « Couloir de tourelles laser ». Des **salles-machines** greffées sur les bâtiments : beaucoup
+dans la grande base, un tiers ailleurs. Elles s'activent et se dosent dans Lab → Artefacts, comme les autres artefacts.
+Terrains 23 à 30 (`00-base.js`), tous infranchissables, aucun ne coupe la vue ; tuiles dans `03b-tuiles-machines.js`,
+retouchables dans le Tile editor (groupe « Machines »).
+
+| Machine | Règle |
+|---|---|
+| **Tourelle laser** | Encastrée dans un mur, elle tire un rayon droit à travers la pièce jusqu'au premier obstacle. Deux tourelles voisines tirent ensemble : le « laser large », deux cases. Une salle porte 1 à 4 bandes, séparées par deux cases sûres. Période 4 à 7 battements, allumée 1. |
+| **Croix laser** | Un pylône qui éclaire ses quatre cases voisines ; les diagonales sont sûres. Quadrillage d'un pylône sur trois. Période 3 à 7, allumée 1 ou 2. |
+| **Levier** | La foreuse l'actionne en avançant dessus. Il déploie un pont (une fois pour toutes) ou coupe les lasers de sa salle (il se rebascule). |
+| **Pont à levier** | Un fossé de deux cases coupe une pièce d'un mur à l'autre ; le pont, deux cases, est rétracté. Le levier est posé du côté d'où l'on vient, dans la pièce ou ailleurs. Une fois sur trois, le pont est alimenté par une pile au lieu d'un levier. |
+| **Pile énergétique** | La foreuse la pousse en avançant dessus, jamais en diagonale, sur sol libre. Posée sur son **socle**, elle alimente ce qui y est relié ; retirée, tout se referme. Elle arrête les lasers. |
+| **Chargeur** | Rappelle sa pile à son point de départ : une pile coincée ne bloque rien pour de bon. |
+| **Grille d'énergie** | Ferme l'unique entrée d'un **dépôt** (2 consommables, et 6 fois sur 10 une pièce d'équipement). Elle ne garde jamais le chemin du site. |
+| **Station de réparation** | Une fois : vie et énergie au maximum. Le bruit met en chasse les ennemis à 12 cases. |
+| **Fabricateur** | Voir « Fabricateur ». Un par niveau, garanti. |
+
+- **Aucun avertissement avant un tir** (choix de l'utilisateur) : chaque laser a sa période et son décalage, tirés à la
+  génération ; on apprend le rythme en regardant. L'état affiché est celui du battement en cours.
+- **Les lasers blessent tout le monde**, 10 points (`MACH_DM`) : la foreuse comme les ennemis. Un ennemi calme n'entre
+  pas dans le champ d'un laser (`G.lz`), un ennemi en chasse le traverse : on peut l'y attirer.
+- Un rayon s'arrête à une porte : jamais de piège sur une case de passage ni devant une porte.
+- La pose d'une pile et de son socle est vérifiée par un parcours de type « sokoban » dans leur pièce (2 poussées au moins).
+- Une charge sismique détruit tourelle, pylône, grille, levier, station, chargeur et fabricateur.
+- État dans `G` (sauvegardé) : `G.mt`, `G.las`, `G.lz`, `G.circ`, `G.soc`, `G.piles`. `accesSite()` dit si le site reste
+  atteignable, leviers et socles compris.
+
+Essais : `outils/scripts/test-machines.js` (22 vérifications dans le vrai moteur).
+
+### Fabricateur (`14c-fabricateur.js`)
+
+Premier usage de la **Matière**. Avancer sur un fabricateur ouvre une liste : tous les consommables, et quatre pièces
+d'équipement tirées au hasard, propres à ce fabricateur. Une fabrication prend 3 battements ; l'objet est ramassé s'il y
+a de la place, sinon posé sous la foreuse. Flèches et Entrée, ou clic ; Échap ferme.
+**Chaque illustration ASCII reprend la tuile de l'objet posé au sol** (21 novembre 2026) : même silhouette, mêmes couleurs (accent, bio, monde, blanc, rouge). La tuile fait foi : quand on redessine une tuile `o_…`, l'illustration est à reprendre à la main. Les quatre objets du fabricateur ont leur propre tuile (`o_vrille`, `o_trepan`, `o_carene`, `o_blindage`). Contrôle : `outils/scripts/planche-objets.js` montre les deux côte à côte.
+
+**À droite de la liste, l'illustration ASCII de l'objet sélectionné** (celle de l'inventaire, `artHTML`), son nom, son effet
+et sa description ; elle suit les flèches, le survol et le focus (21 novembre 2026, après-midi).
+
+| Objet | Prix | Objet | Prix |
+|---|---|---|---|
+| Batterie | 14 | Stabilisateur, Servomoteur | 45 |
+| Fumigène | 16 | Viseur laser, Gyroscope | 50 |
+| Réparobots | 18 | Condensateur | 55 |
+| Clé | 22 | Carène légère (armure) | 60 |
+| Charge sismique | 26 | Vrille rapide (arme) | 70 |
+| Accumulateur, Téléobjectif | 40 | Trépan lourd (arme), Blindage composite (armure) | 85 |
+
+Repère : une carte de taille 3 porte deux gisements de Matière de 30 à 50, soit 80 environ par niveau.
+Quatre pièces nouvelles (choix de l'utilisateur, « consommables + équipement ») : **Vrille rapide** (1d4+4, coup −30,
+CRIT +5, POW 9), **Trépan lourd** (2d6+4, coup +25, POW 12), **Carène légère** (DEF +5, VIT +1, DIS −1, POW 9),
+**Blindage composite** (DEF +18, VIT −1, POW 12). Leurs tuiles au sol sont la tuile générique, à dessiner.
+
+### Deux règles de génération du 21 novembre 2026 (après-midi)
+
+- **Un gisement de métal ou de Matière ne touche jamais plus de 3 roches dures** (parmi ses 8 voisines) : `hideOre`
+  ne retient que ces cases. Faute de place, sur une carte qui n'en offre pas assez, il reprend toute la roche tendre.
+- **La zone dégagée autour du vaisseau est un ovale** (`SHIP_OVALE`), centré sur lui, avec une case de marge au moins
+  autour de la coque. C'était un rectangle.
 
 ## 4. Terrains
 
@@ -649,6 +804,21 @@ s au pluriel sur un nom qui en porte déjà un : « la puce », « la torpille �
   ordinaire. **Le trait rouge se voit toujours** : droit sur la foreuse s'il touche, à côté s'il rate ; il crépite
   puis s'éteint. Attention : « Sentinelle » est aussi le nom d'un style de patrouille.
 
+### Cinq espèces du 21 novembre 2026
+
+Ajoutées à la fin de `BEASTS` (tuiles `bz6` à `bz10`, dessins de départ). Stats dans le Bestiaire.
+
+| Espèce | Rôle | Capacité (`08-faune.js`) |
+|---|---|---|
+| **Gardien** | Lent, blindé (45 PV, DEF 30), frappe à 4-7 | aucune : il tient un poste (style « garde ») |
+| **Artilleur** | Laser à 5 cases, 4-7 dégâts | `cadence:2` (un tir tous les deux battements), `recul:2` (s'écarte quand la foreuse est à 2 cases) |
+| **Drone** | Rapide, fragile, en essaim | `vol` : gouffres et eau ne l'arrêtent pas ; partage ce qu'il voit avec sa bande |
+| **Soudeur** | Soutien | `soin:5`, `portee:4` : répare l'allié le plus abîmé à portée ; `recul:1` : fuit le contact |
+| **Englueur** | Contrôle | `glu:4` : un jet tous les 3 battements englue la foreuse 3 battements (pas deux fois plus longs) ; garde ses distances |
+
+L'englueur reprend l'idée du Gluar, retiré le 17 novembre 2026 avec les espèces absentes du Bestiaire. Aucune stat des
+espèces existantes n'a été changée. Essais : `outils/scripts/test-ennemis.js`.
+
 ### Comportements communs
 
 - **Eau, trois cas** : **nageurs** (Crabot, Torpille) — ils y vont naturellement, en chasse comme en errance ;
@@ -708,7 +878,7 @@ remplace la plus ancienne. **Enregistrer** écrit les valeurs dans la base de l'
 
 ## 8. Objectifs et progression
 
-- **Un seul site de forage par carte**, de profondeur 10 (valeur affichée, sans effet de jeu). Il est **dans la
+- **Un seul site de forage par carte**. Son marqueur (tuile « Site ») **reste le même une fois trouvé** (21 novembre 2026 : il ne se change plus en anneau chiffré, et la profondeur n'est plus affichée) ; en posant la foreuse dessus : « Site de forage détecté. [F] pour forer. ». Il est **dans la
   pièce la plus profonde** du complexe, la plus éloignée des entrées : traverser le bâtiment est l'objectif.
 - **Forer** : touche F sur le site (ou clic sur la foreuse posée dessus) → barre « Forage en cours » d'une seconde,
   puis l'écran **« NOYAU ATTEINT »** (bilan en tours, cases parcourues, Matière) et **Nouvelle exploration**.
@@ -925,6 +1095,28 @@ l'essayer. **Échap, Espace ou Entrée** la passent. Pas jouée si l'utilisateur
 - **Son** : synthétisé, sans fichier (moteur, grincement haché par la rotation, grondement ; plongeon, impacts de roche,
   changement de matière, fracas du plafond, de l'impact et de la machine qui se couche).
 - **Vérification** : `python3 outils/forage.py DOSSIER [t1 t2 …]`. Mesuré le 21 novembre 2026 : 52 images par seconde.
+
+### Seconde descente : le mini-jeu des mines (21 novembre 2026)
+
+Du niveau 2 au niveau 3, la descente se joue. `playForage(suite, 2)` ; Lab → **Niv3** ou Maj + F9 pour l'essayer.
+
+- La foreuse est **plus petite** (caractères d'un 52ᵉ de la hauteur d'écran, contre un 36ᵉ) et tenue en haut de l'écran :
+  on voit 0,7 écran devant elle. La descente est plus longue que la première et la foreuse répond
+  plus vite aux commandes.
+- Des **mines explosives** naissent juste sous le bas de l'écran, par rangées de plus en plus
+  serrées. Sept sur dix sont visées sur la route de la foreuse ; une fois sur quatre, une seconde mine vient à côté.
+  Une mine est un pavé plein de 7 × 3 caractères, rouge et blanc en alternance.
+- Toucher une mine (elle saute dès qu'elle est dans le puits) coûte **12 points de vie** (`FG_MINE_DM`), de la vraie vie de la
+  foreuse. **À zéro, la foreuse explose** : écran « FOREUSE DÉTRUITE », pas de niveau 3.
+- Échap passe la scène contre **30 points de vie** (`FG_PASSE_DM`), sans jamais tuer. Espace et Entrée ne passent plus.
+- **La vie restante est affichée pendant toutes les descentes**, la première comprise, sur un fond noir plein (le
+  texte se lisait mal sur la roche). Le mini-jeu ajoute le compte des mines touchées et l'alerte « mine sur la route ».
+- **Retouches du 21 novembre 2026, soir** (demande de l'utilisateur) : la descente dure **5 secondes de plus** (390 lignes,
+  27 secondes environ ; les rangées de mines sont espacées de 17 à 25 lignes pour ne pas doubler les dégâts, 23 mines
+  environ) ; **la roche dure du mini-jeu est en couleur bio** (le basalte était gris) ; **les commandes de direction sont
+  inversées aux deux descentes** : la touche de gauche pousse la foreuse à droite, et l'inverse, au clavier comme au doigt.
+- Mesuré après ces retouches (`outils/scripts/test-forage.js`, douze descentes par pilote) : sans diriger, 6,5 mines
+  touchées et 75 points perdus, 4 foreuses détruites sur 12 ; pilote maladroit, 41 points ; pilote attentif, 6 points.
 
 ### Enchaînement dans le jeu (21 novembre 2026)
 
