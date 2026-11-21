@@ -224,7 +224,15 @@ function introFrame(now){const I=INTRO;if(!I)return;ensureChasmOv();ensureSolOv(
   introCv.style.opacity=t>T5?String(1-clamp01((t-T5)/(TEND-T5))):'1';
   if(t>=TEND){endIntro();return;}
   requestAnimationFrame(introFrame);}
-$('introBtn').onclick=()=>{unlock();if(TRAV)stopTravel();newGame();started=true;$('overlay').hidden=true;render();playIntro();};
+/* Lab → Niv1 et Niv2 (21 novembre 2026 ; avant, un seul bouton « Intro » qui rejouait l'arrivée sur la carte du menu Monde).
+   Niv1 : la cinématique d'arrivée, puis un niveau 1 (recette « atterrissage ») aux réglages tirés au hasard.
+   Niv2 : la cinématique de forage, puis un niveau 2 (recette « cavernes ») aux réglages tirés au hasard ; la foreuse garde
+   ce qu'elle a. Dans les deux cas le menu Monde du joueur est remis tel qu'il était : seule la taille de carte en est reprise. */
+$('niv1Btn').onclick=()=>{unlock();if(TRAV)stopTravel();
+  const sauve=JSON.parse(JSON.stringify(GEN));recRange();recPrend(RECETTE_NIV(1));hasardReglages();newGame();
+  genRemet(sauve);started=true;$('overlay').hidden=true;render();playIntro();};
+$('niv2Btn').onclick=()=>{unlock();if(TRAV)stopTravel();$('overlay').hidden=true;started=true;
+  playForage(()=>{G.niv=1;niveauSuivant(true);render();},1);};
 function savePresets(){try{localStorage.setItem('np-presets',JSON.stringify(PRESETS.map(p=>p.c)));localStorage.setItem('np-preset-active',PRESET_ACTIVE);}catch(e){}touchLocal();}
 function drawPresets(){$('presets').innerHTML=PRESETS.map((p,i)=>`<button data-p="${i}" title="${p.n}" aria-label="Palette ${p.n}" aria-pressed="${i===PRESET_ACTIVE}">${[2,1,0].map(j=>`<i style="background:${p.c[j]}"></i>`).join('')}</button>`).join('');
   $('palName').textContent=PRESETS[PRESET_ACTIVE].n;}
