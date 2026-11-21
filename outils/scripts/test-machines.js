@@ -4,6 +4,8 @@
   const K=(window.TM||{}).k||30,out=[],v=(nom,ok,det)=>out.push((ok?'ok    ':'ÉCHEC ')+nom+(det!=null?' — '+det:''));
   const carte=(amb)=>{GEN.taille=3;recRange();recPrend('base');ambiance(amb||'citadelle','base');SANS_VAISSEAU=true;NIV_GEN=3;niveau();G.niv=3;SANS_VAISSEAU=false;G.beasts=[];G.animals=[];};   // niveau 3 : toutes les machines y sont permises
   const sauve=JSON.parse(JSON.stringify(GEN));
+  // Les essais portent sur toutes les machines, quels que soient les réglages de départ (la croix laser est désactivée par défaut depuis le 21 novembre 2026).
+  const artSauve=JSON.parse(JSON.stringify(ARTEFACTS));for(const k in ARTEFACTS)ARTEFACTS[k].on=1;
   // A. génération
   {const tot={},ambs=Object.keys(AMBIANCES.base);let acc=0,ms=0,ser=0,dep=0;
     for(let k=0;k<K;k++){const t0=performance.now();carte(ambs[k%ambs.length]);ms+=performance.now()-t0;if(accesSite()>=0)acc++;for(const m in G.machN)tot[m]=(tot[m]||0)+G.machN[m];
@@ -46,5 +48,5 @@
   // G. station
   if(trouve(()=>G.t.includes(STATION))){const i=G.t.indexOf(STATION);G.st.vie=40;G.st.energie=10;machBump(i%W,(i/W)|0,1,0);v('station : vie et énergie au maximum, une fois',G.st.vie===G.st.vieMax&&G.st.energie>=G.st.energieMax-1&&G.art[i]===1);}
   v('fabricateur présent sur la carte',G.t.includes(FABRIC)||trouve(()=>G.t.includes(FABRIC)));
-  genRemet(sauve);return out.join('\n');
+  genRemet(sauve);for(const k in artSauve)ARTEFACTS[k]=artSauve[k];return out.join('\n');
 })()

@@ -142,6 +142,12 @@ et maximal, et porte une **valeur de menace** fixée à la main.
   valeurs mesurées étant plus basses que les anciennes, le budget a suivi pour garder la même densité).
 - **Valeur d'un groupe = vie perdue au banc ÷ 4** (`outils/valeur_groupes.py`), avec un supplément pour ce que le banc
   ne voit pas : mines (explosion par surprise), relais (alerte), englueur (il empêche la fuite). Tableau dans `mesures.md`.
+- **Référence du joueur, relue le 21 novembre 2026 à 23 h 39** (remplace sur ces points celle de 22 h 25, décrite juste
+  après) : niveau 1, cinq groupes permis (Crabots, Bande de relais, 1-2 Mines, Banc de torpilles, Puces en groupes) ;
+  niveau 2, quinze ; niveau 3, les vingt. Ronde de drones est actif. Artefacts : croix laser **désactivée** par défaut,
+  machines en fréquence normale, ponts à levier et station de réparation au niveau 3 seulement, fabricateur aux niveaux 2
+  et 3. Palette Néon : `#ffa53a`, `#8fe6cf`, `#285e86`. Bestiaire et tuiles : inchangés. La configuration d'essai
+  (génération, taille de carte, état de la partie) n'est pas recopiée.
 - **Référence du joueur, 21 novembre 2026 à 22 h 25** : les groupes de départ (`GROUPES_DEF`), leur ordre, leurs valeurs,
   fréquences, patrouilles et lieux, et les groupes permis par niveau (`GR_NIV_DEF`) sont ceux que l'utilisateur a réglés
   dans l'artefact (`reglages/courant`). Vingt groupes, avec le nouveau « Large crabot groupe » (4 à 6 crabots, valeur 7).
@@ -157,7 +163,7 @@ et maximal, et porte une **valeur de menace** fixée à la main.
   enregistrés avant cette date passent une fois par `groupesV2` : lieux et valeurs mesurées pour ceux qui portent un nom
   de départ, groupes nouveaux ajoutés à la suite, budget rapporté de 110 à 80.
 - Mesuré en taille 3 : 22 créatures au niveau 1, 26 au niveau 2, 32 au niveau 3.
-  Avec la référence du joueur du 21 novembre au soir : 28, 34 et 33 créatures par carte (`mesures.md`).
+  Avec la référence du joueur du 21 novembre à 23 h 39 : 27, 34 et 37 créatures par carte (`mesures.md`).
 
 ### Fenêtre LIFE : tout se règle par niveau de profondeur (21 novembre 2026, après-midi)
 
@@ -168,11 +174,11 @@ et tunnels (% du budget).
 
 - `GROUPES.niv[n] = {budget, gr:[noms]}`. Budgets de départ 80, 96 et 112 ; la « menace en plus par niveau » en % a
   disparu, chaque budget se règle à part. Un groupe n'est posé que s'il est actif (Lab → Groupes) **et** dans la liste du
-  niveau. Au départ (référence du joueur, 21 novembre 2026) : 1 groupe au niveau 1, 17 au niveau 2, les 20 au niveau 3
-  (Batterie, Convoi et Ronde de drones sont réservés au niveau 3). Un groupe créé ou dupliqué est permis partout ; renommé ou supprimé, les
+  niveau. Au départ (référence du joueur, 21 novembre 2026 à 23 h 39) : 5 groupes au niveau 1, 15 au niveau 2, les 20 au
+  niveau 3. Un groupe créé ou dupliqué est permis partout ; renommé ou supprimé, les
   listes suivent.
 - `ARTEFACTS[k].niv` : niveaux où l'artefact peut apparaître (`artOn`). Départ : tourelles laser, piles et fabricateur à partir du
-  niveau 2, croix laser au niveau 3, tout le reste partout. La fréquence reste dans Lab → Artefacts.
+  niveau 2 ; croix laser, ponts à levier et station de réparation au niveau 3 ; tout le reste partout. La fréquence reste dans Lab → Artefacts.
 
 ### Styles de patrouille
 

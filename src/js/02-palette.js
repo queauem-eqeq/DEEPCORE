@@ -4,7 +4,7 @@ const PRESETS=[
   {n:'Phosphore',c:['#89989f','#ff0000','#3c4021']},
   {n:'Mars',c:['#8b5b22','#4fb8ff','#8b51d7']},
   {n:'Glace',c:['#e8f6ff','#7fc8ff','#b28bff']},
-  {n:'Néon',c:['#ffa53a','#4bdcba','#593f1c']},
+  {n:'Néon',c:['#ffa53a','#8fe6cf','#285e86']},
   {n:'Rouille',c:['#df49ab','#b4efe3','#e0703b']},
   {n:'Abysse',c:['#f69131','#dee9f8','#4fb8ff']},
   {n:'Ambre',c:['#c23029','#adcef5','#307e67']}

@@ -604,3 +604,16 @@ Le niveau 1 ne pose que des crabots (seul groupe permis : Large crabot groupe, 4
 présente aux trois niveaux (28, 10 et 9 par carte). Les valeurs de groupes ne sont plus toutes celles du banc : ce sont celles
 du joueur. Essais `test-ennemis.js` : tous passent ; l'essai « navette » échoue de temps en temps selon le tirage de la carte
 (1 fois sur 5 ce soir-là, y compris avant ce changement de réglages : il ne dépend pas des groupes).
+
+### Peuplement avec la référence relue à 23 h 39 (21 novembre 2026)
+
+| Niveau | Budget dépensé | Groupes | Créatures | Espèces les plus présentes |
+|---|---|---|---|---|
+| 1 (atterrissage) | 44,3 sur 45 | 10,5 | 27,3 | Relais 11,2 · Crabot 7,0 · Mine 3,9 · Puce 2,6 · Torpille 1,4 |
+| 2 (cavernes) | 53,4 sur 54 | 10,8 | 34,0 | Crabot 8,2 · Drone 6,1 · Relais 5,7 · Sentinelle 5,0 · Mine 3,8 |
+| 3 (base) | 62,5 sur 63 | 11,8 | 37,0 | Crabot 8,4 · Relais 5,8 · Drone 5,5 · Sentinelle 5,2 · Mine 3,5 |
+
+Le niveau 1 n'est plus fait que de crabots : cinq groupes y sont permis, le relais y domine. `test-machines.js` met désormais
+toutes les machines en service pour ses essais (la croix laser est désactivée par défaut). Ses essais de levier et de grille
+échouent de temps en temps selon le tirage de la carte, avant comme après ce changement.
+
