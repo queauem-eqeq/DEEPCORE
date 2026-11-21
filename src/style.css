@@ -84,7 +84,9 @@ body{margin:0;background:var(--black);color:var(--fg);font:13px/1.45 var(--mono)
 .gen .g2{display:grid;grid-template-columns:minmax(0,1fr) 118px;gap:8px;align-items:center}
 .gen select{width:100%;font:inherit;color:var(--fg);background:var(--void);border:1px solid var(--line);padding:2px 4px}
 .gen input:disabled{opacity:.4}
-.gen .sub{font-family:var(--display);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--dim);margin-top:4px}
+.gen .sub{font-family:var(--display);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--c1);margin-top:4px}
+/* Menus (21 novembre 2026) : les titres de colonne (h3) sont en couleur monde, les sous-titres (.sub) en couleur accent. */
+.modal .mcard h3{color:var(--c3)}
 .gen .sum{font-size:11px;color:var(--dim)}
 .labbtns{display:flex;flex-wrap:wrap;gap:6px}
 .labbtns button{padding:2px 8px;font-size:11px;letter-spacing:.14em;border-color:var(--c3);color:var(--c3)}
