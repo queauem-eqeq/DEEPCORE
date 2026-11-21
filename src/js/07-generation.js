@@ -8,7 +8,7 @@ let G,vis=new Uint8Array(W*H),liqFrame=0,started=false,drilling=false;
 function logPush(m,c){G.log=G.log||[];const last=G.log[G.log.length-1];
   if(last&&last.m===m&&last.t===G.turn)return;
   if(last&&last.m===m){last.n=(last.n||1)+1;last.t=G.turn;}else G.log.push({m,c:c||'',t:G.turn});
-  if(G.log.length>60)G.log.shift();}
+  if(G.log.length>200)G.log.shift();}   // le journal du bas défile : on garde les 200 derniers messages
 function say(m,c){G.msg={m,c:c||''};logPush(m,c);}
 function sayMore(m,c){G.msg=G.msg?{m:G.msg.m+' '+m,c:c||G.msg.c}:{m,c:c||''};logPush(m,c);}
 const blocks=v=>v===ROCK||v===MOUNT||v===HARD||v===CHASM||v===SHIP||v===WALL||v===PILLAR||v===LOCK||v===SECRET||v>=MACHINE;   // machines, antennes et terminaux barrent le pas (mais pas la vue)

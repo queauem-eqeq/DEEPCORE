@@ -80,9 +80,15 @@ function side(){
   $('matN').textContent=G.st.matiere||0;   // avalée par le commentaire depuis le 16 novembre 2026 : la matière ne s'affichait plus
   if(!$('inventaire').hidden)invDraw();
   $('msg').innerHTML=seenHTML();
-  const lg=(G.log||[]).slice(-5);
-  $('log').innerHTML=lg.map(e=>`<li class="${e.c||''}${e.t===G.turn&&!e.c?' new':''}"><span class="t">T${String(e.t).padStart(3,'0')}</span>${e.m}${e.n>1?`<span class="x">×${e.n}</span>`:''}</li>`).join('');
+  logDraw();
 }
+/* Journal du bas (22 novembre 2026) : il défile (molette, barre) pour relire les messages plus anciens. Il n'est refait que
+   quand il change ; un nouveau message le ramène tout en bas, sinon on reste là où on lisait. */
+let LOG_SIG='';
+function logDraw(){const lg=G.log||[],L=lg[lg.length-1],nouveau=`${lg.length}|${L?L.m+L.n+L.t:''}`,sig=nouveau+'|'+G.turn;if(sig===LOG_SIG)return;
+  const el=$('log'),bas=!LOG_SIG||LOG_SIG.slice(0,LOG_SIG.lastIndexOf('|'))!==nouveau,top=el.scrollTop;LOG_SIG=sig;
+  el.innerHTML=lg.map(e=>`<li class="${e.c||''}${e.t===G.turn&&!e.c?' new':''}"><span class="t">T${String(e.t).padStart(3,'0')}</span>${e.m}${e.n>1?`<span class="x">×${e.n}</span>`:''}</li>`).join('');
+  el.scrollTop=bas?el.scrollHeight:top;}
 
 
 /* ---------- Commandes ---------- */

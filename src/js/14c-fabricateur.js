@@ -34,13 +34,16 @@ function fabListe(i){G.fab=G.fab||{};
 const fabEffet=k=>{const d=ITEMS[k];if(d.conso)return d.eff||'';const l=[];if(d.de)l.push('dégâts '+deTxt(d.de));
   for(const m in d.mod||{}){const v=d.mod[m],M=MODS[m];if(M)l.push(`${M[0]} ${v>0?'+':'−'}${Math.abs(v)}${M[2]||''}`);}
   return SLOTS[d.slot].nom+(l.length?' · '+l.join(' · '):'');};
+// famille d'un objet, pour la couleur de son nom (22 novembre 2026) : consommable, accessoire, arme ou armure
+const fabFam=k=>{const d=ITEMS[k];return d.conso?'conso':d.slot==='acc'?'acc':'eq';};
 function fabBuild(){const l=fabListe(FAB_CASE),m=G.st.matiere||0;FAB_SEL=Math.max(0,Math.min(l.length-1,FAB_SEL));
   $('fabMat').textContent=`Matière en réserve : ${m}`;
   $('fabList').innerHTML=l.map((k,n)=>{const p=FAB_PRIX[k],ok=m>=p;
-    return `<button class="fabl${n===FAB_SEL?' sel':''}${ok?'':' cher'}" data-n="${n}" aria-disabled="${ok?'false':'true'}"><b>${ITEMS[k].n}</b><span>${fabEffet(k)}</span><i>${p}</i></button>`;}).join('');
+    return `<button class="fabl f-${fabFam(k)}${n===FAB_SEL?' sel':''}${ok?'':' cher'}" data-n="${n}" aria-disabled="${ok?'false':'true'}"><b><u>${n+1}</u>${ITEMS[k].n}</b><span>${fabEffet(k)}</span><i>${p}</i></button>`;}).join('');
   const b=$('fabList').querySelector('.sel');if(b)b.scrollIntoView({block:'nearest'});fabVue();}
 // à droite : l'illustration ASCII de l'objet sélectionné (la même que dans l'inventaire), son nom et sa description
 function fabVue(){const k=fabListe(FAB_CASE)[FAB_SEL],d=k&&ITEMS[k];if(!d){$('fabVue').innerHTML='';return;}
+  $('fabVue').className='f-'+fabFam(k);   // hauteur fixe (style.css) : la fenêtre ne bouge pas d'un objet à l'autre
   $('fabVue').innerHTML=`<div class="iart" aria-hidden="true">${d.art?artHTML(d):''}</div><b>${d.n}</b><p>${fabEffet(k)}</p><p>${d.d||''}</p>`;}
 function fabSel(n){if(n===FAB_SEL)return;FAB_SEL=n;for(const b of $('fabList').children)b.classList.toggle('sel',+b.dataset.n===n);fabVue();}
 function fabOpen(i){if(TRAV)stopTravel();if(EXPL)stopExplore();FAB_CASE=i;FAB_SEL=0;$('fabMsg').textContent='Choisissez un objet : Entrée ou clic pour le fabriquer.';fabBuild();$('fabric').hidden=false;$('fabric').querySelector('.mcard').focus();SFX.spot();}
@@ -53,11 +56,14 @@ function fabFais(n){const l=fabListe(FAB_CASE),k=l[n];if(!k||G.over)return;FAB_S
   $('fabMsg').textContent=`${ITEMS[k].n} fabriqué${ITEMS[k].f?'e':''}${ITEMS[k].pl?'s':''}.`+((G.items[c]||[]).includes(k)?' Inventaire plein : l’objet est au sol, sous la foreuse.':'');
   if(G.over&&G.over.dead){fabClose();dead();return;}
   fabBuild();render();}
-function fabKey(ev){const l=fabListe(FAB_CASE);
+/* Clavier : flèches, Z/S, ou le pavé numérique (8 et 2 montent et descendent, 5 ou Entrée fabrique, 22 novembre 2026).
+   Les chiffres du haut du clavier (1 à 9) choisissent directement l'objet de ce numéro. */
+function fabKey(ev){const l=fabListe(FAB_CASE),c=ev.code||'',np=c.startsWith('Numpad');
   if(ev.key==='Escape'){ev.preventDefault();fabClose();}
-  else if(ev.key==='ArrowDown'||ev.key==='s'){ev.preventDefault();FAB_SEL=(FAB_SEL+1)%l.length;fabBuild();}
-  else if(ev.key==='ArrowUp'||ev.key==='z'||ev.key==='w'){ev.preventDefault();FAB_SEL=(FAB_SEL+l.length-1)%l.length;fabBuild();}
-  else if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();fabFais(FAB_SEL);}}
+  else if(ev.key==='ArrowDown'||ev.key==='s'||c==='Numpad2'){ev.preventDefault();FAB_SEL=(FAB_SEL+1)%l.length;fabBuild();}
+  else if(ev.key==='ArrowUp'||ev.key==='z'||ev.key==='w'||c==='Numpad8'){ev.preventDefault();FAB_SEL=(FAB_SEL+l.length-1)%l.length;fabBuild();}
+  else if(ev.key==='Enter'||ev.key===' '||c==='Numpad5'){ev.preventDefault();fabFais(FAB_SEL);}
+  else if(!np&&/^[1-9]$/.test(ev.key)&&+ev.key<=l.length){ev.preventDefault();FAB_SEL=+ev.key-1;fabBuild();}}
 $('fabClose').onclick=fabClose;$('fabric').addEventListener('pointerdown',ev=>{if(ev.target===$('fabric'))fabClose();});
 $('fabList').addEventListener('pointerover',e=>{const b=e.target.closest('button[data-n]');if(b)fabSel(+b.dataset.n);});   // survol ou focus : l'illustration suit
 $('fabList').addEventListener('focusin',e=>{const b=e.target.closest('button[data-n]');if(b)fabSel(+b.dataset.n);});

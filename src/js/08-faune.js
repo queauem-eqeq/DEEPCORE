@@ -384,7 +384,8 @@ function effTick(){const E=G.eff;if(!E||G.over)return;
   if(E.glu>0&&--E.glu===0)sayMore('La glu se détache : la foreuse retrouve sa vitesse.','good');
   fumTick();}
 /* Mine (19 novembre 2026) : elle fonce sur la foreuse ; arrivée à une case, elle s'arme (elle clignote) et ne bouge plus,
-   puis explose 1 à 3 battements plus tard. L'explosion frappe un carré de 3 × 3 centré sur elle : la foreuse et toute
+   puis explose 2 à 3 battements plus tard (22 novembre 2026 ; avant 1 à 3 : à 1, elle sautait au battement suivant, sans
+   laisser le temps de réagir). L'explosion frappe un carré de 3 × 3 centré sur elle : la foreuse et toute
    créature qui s'y trouve. Ses dégâts sont ceux de sa fiche (dégâts min et max du Bestiaire). Détruite avant, elle n'explose pas. */
 /* Englueur (21 novembre 2026) : un jet de glu à distance. S'il touche, la foreuse est engluée 3 battements (pas deux fois plus
    longs, voir stepDur) ; le jet lui-même ne blesse pas. */
@@ -419,7 +420,7 @@ function beastsAct(){
     if(alarms.length&&alarms[alarms.length-1]===b)raiseAlarm(b);
     if(sp.mine){                                                                      // mine : armée, elle attend l'explosion ; sinon elle s'arme à une case de la foreuse
       if(b.fuse>0){if(--b.fuse<=0)boom.push(b);continue;}
-      if(b.hunt>0&&cheb(b,G.px,G.py)<=1){b.fuse=rnd(1,3);if(beastVisible(b)){sayMore('La mine s’arme !','warn');SFX.spot();}continue;}}
+      if(b.hunt>0&&cheb(b,G.px,G.py)<=1){b.fuse=rnd(2,3);if(beastVisible(b)){sayMore('La mine s’arme !','warn');SFX.spot();}continue;}}
     if(sp.soin){let c=null,m=0;for(const o of G.beasts){if(o===b||cheb(o,b.x,b.y)>(sp.portee||3))continue;const q=pvDe(BEASTS[o.sp])-o.hp;if(q>m){m=q;c=o;}}   // soudeur : répare l'allié le plus abîmé à portée
       if(c){const h=Math.min(sp.soin,m);c.hp+=h;if(beastVisible(c)){addFx({kind:'num',x:c.x,y:c.y,txt:'+'+h,col:PAL['2'],dur:750});addFx({kind:'laser',o:b,x:c.x,y:c.y,ox:0,oy:0,dur:260});}}}
     if(sp.recul&&b.hunt>0&&sees&&cheb(b,G.px,G.py)<=sp.recul){const x0=b.x,y0=b.y;stepAway(b,(x,y)=>beastFits(b,x,y));if(b.x!==x0||b.y!==y0){b.mp=Math.min(b.mp,.99);if(b.cd>0)b.cd--;continue;}}   // il s'écarte ; acculé, il se bat

@@ -619,7 +619,11 @@ Essais : `outils/scripts/test-machines.js` (22 vérifications dans le vrai moteu
 
 Premier usage de la **Matière**. Avancer sur un fabricateur ouvre une liste : tous les consommables, et quatre pièces
 d'équipement tirées au hasard, propres à ce fabricateur. Une fabrication prend 3 battements ; l'objet est ramassé s'il y
-a de la place, sinon posé sous la foreuse. Flèches et Entrée, ou clic ; Échap ferme.
+a de la place, sinon posé sous la foreuse. Flèches (ou Z/S) et Entrée, ou clic ; Échap ferme. **Pavé numérique** (22 novembre
+2026) : 8 et 2 montent et descendent, 5 fabrique ; les chiffres 1 à 9 du haut du clavier choisissent l'objet de ce numéro,
+affiché devant son nom. **La fenêtre ne bouge pas** d'un objet à l'autre : liste et panneau de droite ont une hauteur fixe,
+et les descriptions trop longues (Fumigène, Charge sismique, Clé) ont été raccourcies. **Couleur du nom par famille** :
+consommables en bio, accessoires en monde, armes et armures en accent (grisé si la Matière manque).
 **Chaque illustration ASCII reprend la tuile de l'objet posé au sol** (21 novembre 2026) : même silhouette, mêmes couleurs (accent, bio, monde, blanc, rouge). La tuile fait foi : quand on redessine une tuile `o_…`, l'illustration est à reprendre à la main. Les quatre objets du fabricateur ont leur propre tuile (`o_vrille`, `o_trepan`, `o_carene`, `o_blindage`). Contrôle : `outils/scripts/planche-objets.js` montre les deux côte à côte.
 
 **À droite de la liste, l'illustration ASCII de l'objet sélectionné** (celle de l'inventaire, `artHTML`), son nom, son effet
@@ -852,7 +856,7 @@ s au pluriel sur un nom qui en porte déjà un : « la puce », « la torpille �
   groupe ne sont pas alertées, et aucune autre espèce ne partage.
 - **Torpille** : ne quitte jamais l'eau ; invisible dès qu'elle plonge en eau profonde.
 - **Mine** : elle fonce dès qu'elle a repéré la foreuse. Arrivée **à une case**, elle **s'arme** : elle ne bouge
-  plus et **clignote**, puis **explose 1 à 3 battements plus tard** — **20 dégâts** dans un **carré de 3 × 3** à la
+  plus et **clignote**, puis **explose 2 à 3 battements plus tard** (1 à 3 jusqu'au 22 novembre 2026 : à 1, elle sautait au battement suivant) — **20 dégâts** dans un **carré de 3 × 3** à la
   foreuse et à toute créature qui s'y trouve. Détruite avant, elle n'explose pas ; elle n'a pas d'autre attaque.
   L'animation est un carré de 3 × 3 en pavés fins de 2 pixels (blanc plein, damier accent, braises couleur monde) ;
   **la charge sismique montre la même**.
@@ -1012,7 +1016,8 @@ pièce ils deviennent du sol, sous un mur du mur) ; seuls le vaisseau et le bord
 - **Pas d'écran d'accueil** : la partie commence directement, foreuse dans la soute. Le son s'active à la première
   touche ou au premier clic.
 - Plein écran ; colonne noire à droite, défilable à la molette ou au doigt mais sans barre de défilement ; journal
-  de bord sous la carte (5 dernières lignes, numéro de tour, ×N pour les répétitions).
+  de bord sous la carte (5 lignes visibles, numéro de tour, ×N pour les répétitions). **Il défile** (22 novembre 2026) :
+molette ou fine barre pour remonter jusqu'aux 200 derniers messages ; un nouveau message le ramène tout en bas.
 - **Statut** : barres ASCII `█`/`░` — Vie en bio, Énergie en accent — suivies de leur valeur chiffrée. Le
   remplissage est un **calque de `█` découpé à la largeur exacte** posé sur un fond de `░`, donc juste à toute
   largeur de colonne et à toute taille de police.

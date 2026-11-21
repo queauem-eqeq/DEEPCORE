@@ -13,8 +13,9 @@ body{margin:0;background:var(--black);color:var(--fg);font:13px/1.45 var(--mono)
 .game{display:grid;grid-template-columns:minmax(0,1fr) 260px;height:100%}
 .left{display:grid;grid-template-rows:minmax(0,1fr) auto;min-width:0;min-height:0}
 .log{background:var(--black);border-top:1px solid var(--line);padding-block:6px 8px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:16px;font-size:12px;line-height:1.5;height:calc(5 * 1.5em + 14px);overflow:hidden}
-.log ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;justify-content:flex-end;height:100%}
-.log li{color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;opacity:.75}
+.log ul{list-style:none;margin:0;padding:0 6px 0 0;display:flex;flex-direction:column;height:100%;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--c3) transparent}
+.log li:first-child{margin-top:auto}   /* peu de messages : collés en bas, comme avant */
+.log li{flex:none;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;opacity:.75}
 .log li:last-child{opacity:1}
 .log li.new{color:var(--fg)}
 .log li.warn{color:var(--c3)}.log li.info{color:var(--c2)}.log li.good{color:var(--c1)}
@@ -406,10 +407,14 @@ kbd{font-family:var(--mono);color:var(--fg);border:1px solid var(--line);padding
 .termtxt{font-size:13px;line-height:1.6;color:var(--fg);margin:0;white-space:pre-wrap;max-width:60ch}
 
 /* Fabricateur (21 novembre 2026) */
-#fabList{display:grid;gap:4px;max-height:min(52vh,420px);overflow-y:auto}
+#fabList{display:grid;gap:4px;align-content:start;height:min(52vh,400px);overflow-y:auto}
 .fabl{display:grid;grid-template-columns:minmax(150px,1fr) 2fr 48px;gap:10px;align-items:baseline;text-align:left;padding:7px 10px;background:transparent;border:1px solid var(--line);color:var(--fg);font:inherit;cursor:pointer}
-.fabl b{color:var(--c3);font-weight:normal}
-.fabl span{font-size:12px;color:var(--dim,#8aa9a2)}
+.fabl b{color:var(--c3);font-weight:normal;white-space:nowrap}
+.fabl b u{text-decoration:none;color:var(--dim);margin-right:8px}
+.fabl span{font-size:12px;color:var(--dim,#8aa9a2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* couleur du nom par famille (22 novembre 2026) : consommable bio, accessoire monde, arme et armure accent */
+.fabl.f-conso b,#fabVue.f-conso b{color:var(--c2)}.fabl.f-acc b,#fabVue.f-acc b{color:var(--c3)}.fabl.f-eq b,#fabVue.f-eq b{color:var(--c1)}
+.fabl.cher b{color:var(--dim,#5f7a74)}
 .fabl i{font-style:normal;text-align:right;color:var(--c1)}
 .fabl.sel{border-color:var(--c1)}
 .fabl.cher{cursor:default}
@@ -427,8 +432,9 @@ kbd{font-family:var(--mono);color:var(--fg);border:1px solid var(--line);padding
 /* Fabricateur : la liste à gauche, l'illustration de l'objet sélectionné à droite (21 novembre 2026) */
 #fabric .mcard{width:min(940px,100%)}
 .fabwrap{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:16px;align-items:start}
-#fabVue{border:1px solid var(--line);padding:12px;text-align:center;min-height:260px}
+#fabVue{border:1px solid var(--line);padding:12px;text-align:center;height:min(52vh,400px);overflow:hidden;box-sizing:border-box}
 #fabVue .iart{font-size:24px;display:inline-block;text-align:left}
 #fabVue b{display:block;color:var(--c3);font-weight:normal;margin:0 0 6px}
 #fabVue p{margin:0 0 6px;font-size:12px;color:var(--dim);text-align:left}
-@media (max-width:720px){.fabwrap{grid-template-columns:1fr}#fabVue{min-height:0}}
+@media (max-width:720px){.fabwrap{grid-template-columns:1fr}#fabVue{height:auto}#fabList{height:auto;max-height:40vh}}
+#fabMsg{min-height:1.5em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
