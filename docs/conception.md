@@ -119,8 +119,8 @@ et maximal, et porte une **valeur de menace** fixée à la main.
   parfois absente. Si tout le groupe tire 0, rien n'est posé et rien n'est dépensé. Le maximum reste d'au moins 1.
 - **Lab → Groupes** : à gauche la fiche du groupe choisi (nom, valeur, styles de patrouille, case « actif »,
   jusqu'à six espèces avec leur effectif, fréquence, Dupliquer, Supprimer) ; à droite la liste des groupes en
-  colonne, qu'on réordonne en glissant ou par ↑ ↓. La fenêtre rappelle le budget de la carte en cours et ce qu'il a
-  acheté. « Groupes par défaut » (deux clics) remet les groupes de départ. **Enregistrer** écrit groupes, valeurs
+  colonne, qu'on réordonne en glissant ou par ↑ ↓. La fenêtre rappelle ce que le budget de la carte en cours a
+  acheté ; le budget lui-même ne s'y règle plus (champ retiré le 21 novembre 2026) : il se règle par niveau dans LIFE. « Groupes par défaut » (deux clics) remet les groupes de départ. **Enregistrer** écrit groupes, valeurs
   et budget dans la base de l'artefact (`reglages/courant`, champ `groupes`).
 - **LIFE** (colonne de droite) : le budget et une case à cocher par groupe.
 - Mémorisé dans le navigateur (`np-groupes`) et dans l'enregistrement des réglages.
