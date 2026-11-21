@@ -26,6 +26,7 @@ revient sur **3 niveaux** ; elle n'est pas encore codée, et forer termine la pa
   montagnes), **#2 Bio** (bleu `#4fb8ff`), **#3 Accent** (turquoise `#8fe6cf`). Dans le code les clés sont `3`
   monde, `2` bio, `1` accent.
 - 8 palettes prédéfinies, toutes modifiables (Origine, Phosphore, Mars, Glace, Néon, Rouille, Abysse, Ambre) ;
+  Le sélecteur à 64 couleurs **reste ouvert après un choix** (21 novembre 2026), pour essayer plusieurs couleurs de suite ; on le ferme en recliquant sur la pastille ou avec Échap.
   sélecteur de 64 teintes (8 familles × 8 nuances) ; bouton « Rétablir ».
 - Polices : Chakra Petch (titres), JetBrains Mono (interface).
 - **Les dessins par défaut sont ceux de l'utilisateur**, retouchés au Tile editor et recopiés dans le code (bloc
@@ -64,10 +65,20 @@ revient sur **3 niveaux** ; elle n'est pas encore codée, et forer termine la pa
   **ondulée de ×0,3 à ×1,9** par un bruit : une plage d'un côté, un bord franc de l'autre. La profondeur se lit à
   la distance au rivage, diagonales comprises. Deux lacs qui se touchent n'en font qu'un.
   **L'eau profonde peut toucher la terre** : on peut y tomber d'un pas, sans bande d'eau peu profonde pour prévenir.
+  **Couleur de l'eau (21 novembre 2026)** : l'eau n'est plus de la couleur bio mais **dérivée de la couleur monde** du biome,
+  décalée de [teinte −12°, clarté −8, saturation 0] (`EAU` dans `02-palette.js`, couleur `PAL['e']`) : un vert-bleu sombre. Choisie par
+  l'utilisateur parmi six variantes d'essai ; les tuiles d'eau gardent le code `2` dans leurs dessins, lu comme `e` (`EAU_TUILES`).
 - **Roche dure au cœur des massifs** : chaque case de montagne est durcie avec une chance qui monte avec sa
   **profondeur** dans le massif (distance au premier terrain qui n'est pas de la montagne, en 4 directions) : rien
   à une ou deux cases, puis 30 %, 65 %, 90 %, 100 %. Écorce tendre, cœur impénétrable. Posée **avant** les métaux,
-  qui n'apparaissent jamais dedans. La rangée extérieure reste de la montagne ordinaire.
+  qui n'apparaissent jamais dedans.
+  **La rangée extérieure de la carte est en roche dure** (21 novembre 2026). **Dessin** : plus de tuile propre — la roche dure reprend
+  les tuiles de la montagne tendre (`mtBody`, `mtTop`, retouches comprises) en encre foncée (`PAL['d']` = couleur monde, clarté −16,
+  `HARD_CLAIR` dans `02-palette.js`). Même logique : la case dont le haut n'est pas de la roche dure porte la crête irrégulière,
+  posée sur un fond de roche tendre quand la case du dessus est de la montagne ou du rocher.
+  Seule la partie **au-dessus de la ligne de crête** est un fond (`hardTopBg`, `softTopBg`) : sinon les trous de la crête laissent voir la
+  roche tendre et la crête paraît plus claire. Réciproquement, la crête d'une montagne tendre située **sous** de la roche dure se pose sur un
+  fond de roche dure, pas sur le sol.
 - Relief : méthode **Automate cellulaire**, **Bruit** ou **Mixte** ; réglages Remplissage (35-70 %) et Itérations (1-10).
 - Connectivité garantie : les zones isolées sont reliées par le plus court chemin (pont sur gouffre, col dans la
   montagne, rocher dégagé) ; petites poches comblées.
@@ -176,6 +187,7 @@ et le seuil ; `ZESSAI` compte les cartes retirées. Ces trois variables sont de 
   Le vaisseau se pose dans la partie de l'extérieur la plus éloignée du massif. Un seul complexe, **creusé dans le
   massif** à plus de 5 cases de la lisière et du bord de carte (4 en taille 2, 3 en taille 1), atteint par un
   réseau de tunnels. Le site de forage est au fond du complexe.
+- `cavernes` (21 novembre 2026, niveau 2) : **tout est sous roche**. Voir « Réseau de cavernes » plus bas.
 - `classique` : la génération d'avant la refonte (terrain partout, une ou deux structures posées dessus).
 
 `ENFOUI()` dit si la recette en cours a un complexe enfoui ; dans ce cas `GEN.structure` (« Surface bâtie ») ne compte pas.
@@ -215,6 +227,46 @@ fourchette de tirage, plus étroite que ses bornes : le hasard ne doit jamais re
 laissés tels quels la **taille de la carte** et les réglages dont 0 veut dire « automatique » (pièces par
 structure, portes d'entrée). Le relief est tiré avec un biais vers le bas (plafonds `HASARD_REL` : eau 30,
 montagne 30, gouffre 12, herbe 45). État mémorisé dans `GEN.hasard`. Code : `hasardReglages()`, `06-reglages.js`.
+
+### Réseau de cavernes (`07e-cavernes.js`)
+
+Recette `cavernes` (`zones`, `enfoui`, `cavernes`, `sansVaisseau`). Pas d'extérieur à ciel ouvert : la carte est une roche
+pleine où l'on creuse. Ici `ZONE` vaut **0 dans les cavernes et les boyaux** et 1 dans la roche, si bien que `distExt()`
+donne la distance à la caverne la plus proche et que les pourcentages de relief (eau, montagne, gouffre, herbe) valent
+pour le sol des cavernes.
+
+- **Cavernes** (`cavernes()`) : `cvNb` blobs irréguliers (automate cellulaire, `caBlob`), posés le plus loin possible
+  des précédents, pour une surface totale `cvPart` % de la carte. Le nombre est le curseur « peu de grandes ↔ beaucoup
+  de petites » ; chaque blob est un poids tiré entre 0,6 et 1,4.
+- **Boyaux** : arbre couvrant (Prim) entre les centres, de 1 à 2 cases de large, sinueux (marche qui penche vers
+  la cible) ; puis `cvBoyaux` boucles entre cavernes voisines non reliées, et 1 à 3 culs-de-sac de 8 à 18 cases.
+- **Arrivée par un puits** : pas de vaisseau, la foreuse débouche sur un carré de sol sec de 3 × 3 (chemin déjà là pour
+  `SANS_VAISSEAU`). Le message d'arrivée est celui de la descente.
+- **Bâtiments enchâssés** (`batiments()`, mode `cav`) : `cvBati` bâtiments (± 1 au tirage, 4 au plus, au moins deux quand
+  on en demande deux) se partagent `cvSurf` % de la carte (visée : la roche disponible plafonne le résultat, 8 à 12 %
+  en pratique). Le lot est toute la carte : le bâtiment s'étale là où la roche est assez épaisse, à plus de 2 cases
+  d'une caverne et à plus de 3 cases du bord ; trois cases de roche séparent deux bâtiments. Chaque bâtiment a **une
+  porte** (deux si l'emprise dépasse 170 cases), du côté de la caverne la plus proche (`entrees(…, proche)`).
+- **Boyau de porte** (`reliePortes()`) : de chaque porte à la caverne la plus proche, chemin le moins cher dans un bruit,
+  loin des autres bâtiments ; il compte dans `G.tun` (jaune sur les planches). Si une porte n'atteint aucune caverne, la
+  structure est refaite (douze essais).
+- Le site de forage est dans la pièce la plus profonde du plus grand bâtiment (`siteAuFond`). Verrous, secrets, pièces
+  secrètes et artefacts passent par le même code que le niveau 1.
+
+Réglages (centre autour duquel la carte varie à chaque tirage) :
+
+| Réglage (clé) | Bornes, départ | Tirage |
+|---|---|---|
+| Part de cavernes (`cvPart`) | 20 à 55 %, 36 | ± 12 % de la valeur ; 18 à 60 % au final |
+| Nombre de cavernes (`cvNb`) | 1 à 12, 6 | ± 25 % |
+| Boucles entre cavernes (`cvBoyaux`) | 0 à 4, 2 | ± 20 % |
+| Nombre de bâtiments (`cvBati`) | 1 à 4, 2 | ± 30 %, au moins 60 cases chacun |
+| Surface bâtie (`cvSurf`) | 6 à 30 %, 14 | ± 15 % |
+
+S'y ajoutent les réglages communs : archétype, pièces, ouvertures, verrous, secrets. **Limites connues** : les
+bâtiments se logent surtout en périphérie, là où la roche est épaisse ; sur les petites cartes (taille 2), un seul
+bâtiment, parfois aucun ; la faune (étape 3) n'est pas encore répartie par lieu. Mesure : `outils/scripts/mesure-cavernes.js` ;
+vue d'ensemble : `outils/scripts/cavernes.js`.
 
 ### Forme du massif
 
@@ -443,10 +495,11 @@ Version d'essai : tous les objets sont donnés au départ, non équipés sauf la
 - **Deux endroits, un seul sac** : la fenêtre **Équipement** (armes, armures, accessoires) et le sous-menu
   repliable **Inventaire** de la colonne (les consommables : nom, nombre, **USE**, **[X]**).
 - **Dix places** dans l'inventaire, **une par sorte** quel que soit le nombre d'exemplaires. Ramasser une sorte
-  nouvelle quand les 10 places sont prises est refusé et **l'objet reste au sol**. **[X] détruit la pile entière**
-  (c'est ce qui libère une place) ; un consommable ne peut pas être jeté au sol.
+  nouvelle quand les 10 places sont prises est refusé et **l'objet reste au sol**. **[X] jette UN exemplaire au sol**,
+  sur une case libre voisine (21 novembre 2026 ; avant, il détruisait la pile) : la place se libère quand le dernier exemplaire est jeté.
+  La **clé** est un consommable comme les autres (voir § portes verrouillées) : elle s'empile, se jette, se ramasse.
 - **Touche I** : ouvre le sous-menu et choisit le premier consommable ; **↑ ↓** parcourir, **Entrée** utiliser,
-  **Suppr** ou **J** détruire la pile, **Échap** ou **I** sortir.
+  **X**, **Suppr** ou **J** jeter un exemplaire au sol, **Échap** ou **I** sortir.
 - **Touche T** : la fenêtre Équipement, plein écran. Liste à gauche (`/` arme, `[` armure, `=` accessoire ; un
   objet équipé y reste, en couleur monde, mention « équipé ») ; fiche à droite (dessin ASCII coloré, description,
   effets, **Équiper / Retirer**, **Jeter**). Clavier : ↑ ↓, **Entrée** équiper, **J** jeter, **G** ramasser.
@@ -458,7 +511,12 @@ Version d'essai : tous les objets sont donnés au départ, non équipés sauf la
 - **Maximum de vie ou d'énergie modifié par un objet** : la jauge garde sa proportion (100/100 → 130/130, 50/100 →
   65/130). S'équiper ne soigne pas, retirer puis remettre ne rapporte rien.
 - **Le visuel de la foreuse suit l'équipement** : l'arme dessine la moitié avant, l'armure la moitié arrière.
-- **Jeter** pose l'objet au sol sous la foreuse ; repasser dessus le ramasse, ou touche **G**.
+- **Jeter** (et **[X]** du sac) pose l'objet au sol **sur la première case libre la plus proche, jamais sous la foreuse** (21 novembre 2026) : les huit
+  cases voisines d'abord (orthogonales avant diagonales), puis de plus en plus loin en suivant les cases praticables (`caseJet`). Libre : ni obstacle,
+  ni eau profonde, ni porte, ni créature, ni autre objet. Sans aucune case libre, il tombe sous la foreuse. Marcher dessus le ramasse, ou touche **G**.
+  **Tuile au sol** (21 novembre 2026) : chaque objet a la sienne, `o_` + clé de l'objet (`PAT.o_foreuse`, `o_usine`, `o_servo`, `o_optique`,
+  `o_viseur`, `o_conden`, `o_gyro`, `o_stabil`, `o_accu`, `o_repar`, `o_batterie`, `o_fumigene`, `o_charge`), retouchables dans l'éditeur
+  (groupe « Objets au sol ») ; la clé garde `cle`. S'il y a plusieurs objets sur une case, on voit le dernier posé. `PAT.objet` ne sert plus que de repli.
 
 | Objet | Type | POW | Effets |
 |---|---|---|---|
@@ -659,7 +717,8 @@ pièce ils deviennent du sol, sous un mur du mur) ; seuls le vaisseau et le bord
   passage** vers ce qu'il y a derrière (au moins 6 cases) ; on choisit d'abord celle qui **enferme le site de
   forage**, sinon la plus petite réserve. Jamais une porte d'entrée. Les **clés sont posées au sol**, une par
   serrure, toutes pareilles, **là où l'on arrive sans rien ouvrir** — aucune impasse possible — de préférence à
-  l'intérieur d'une structure et loin du départ. Le compte s'affiche sous Statut. Il n'y a **jamais plus de clés
+  l'intérieur d'une structure et loin du départ. **La clé est un objet du sac** (21 novembre 2026) : plus de ligne « Clés » sous Statut ; on la ramasse comme un objet, elle prend une place
+  d'inventaire (les clés s'empilent), on peut la jeter, et la porte la prélève dans le sac. Il n'y a **jamais plus de clés
   que de serrures**. Ouvrir fait tourner la clé (`SFX.serrure`).
 - **Pièces secrètes** (0 à 3, 1 par défaut) : une pièce à **un seul passage** dont la porte est **dérobée** — elle
   a en tout point l'air d'un mur (dessin, fiche de survol, mini-carte) et se comporte comme tel. Jamais la pièce du

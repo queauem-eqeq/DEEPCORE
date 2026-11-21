@@ -7,8 +7,9 @@ const CURSOR_DEF=curOutline(curGen((x,y)=>((y===0||y===15)&&(x<5||x>10))||((x===
 const TILE_LIST=[
   ['Viseur',[['cursor','Viseur']]],
   ['Foreuse et faune',[['robot_u','Foreuse'],['an0r',SPECIES[0].n],...BEASTS.map((b,i)=>['bz'+i+'r',b.n])]],
-  ['Terrain',[['ground0','Sol'],['rock','Rocher'],['rock2','Rocher 2'],['mtTop','Crête'],['mtBody','Montagne'],['hard','Roche dure'],['wall','Mur'],['wallFace','Mur (face)'],['floor','Sol bâti'],['door','Porte'],['doorOpen','Porte ouverte'],['doorOpenV','Porte ouverte (côté)'],['pillar','Pilier'],['lock','Porte verrouillée'],['cle','Clé'],['liq0','Eau A'],['liq1','Eau B'],['deep0','Eau profonde'],['grass0','Herbes hautes'],['flat0','Herbes basses'],['rubble','Gravats'],['crackH','Fissures'],['wade','Remous'],['wadeDeep','Remous profond']]],
-  ['Objets',[['siteUnknown','Site'],['objet','Objet au sol'],['ore1','Éclats petits (montagne)'],['ore2','Éclats moyens (montagne)'],['ore','Éclats gros (montagne)'],['oreSol1','Éclats petits (sol)'],['oreSol2','Éclats moyens (sol)'],['oreSol','Éclats gros (sol)']]],
+  ['Terrain',[['ground0','Sol'],['rock','Rocher'],['rock2','Rocher 2'],['mtTop','Crête'],['mtBody','Montagne'],['wall','Mur'],['wallFace','Mur (face)'],['floor','Sol bâti'],['door','Porte'],['doorOpen','Porte ouverte'],['doorOpenV','Porte ouverte (côté)'],['pillar','Pilier'],['lock','Porte verrouillée'],['cle','Clé'],['liq0','Eau A'],['liq1','Eau B'],['deep0','Eau profonde'],['grass0','Herbes hautes'],['flat0','Herbes basses'],['rubble','Gravats'],['crackH','Fissures'],['wade','Remous'],['wadeDeep','Remous profond']]],
+  ['Objets au sol',[['o_foreuse','Foreuse'],['o_usine','Coque d’usine'],['o_servo','Servomoteur'],['o_optique','Téléobjectif'],['o_viseur','Viseur laser'],['o_conden','Condensateur'],['o_gyro','Gyroscope'],['o_stabil','Stabilisateur'],['o_accu','Accumulateur'],['o_repar','Réparobots'],['o_batterie','Batterie'],['o_fumigene','Fumigène'],['o_charge','Charge sismique']]],
+  ['Objets',[['siteUnknown','Site'],['objet','Objet au sol (générique)'],['ore1','Éclats petits (montagne)'],['ore2','Éclats moyens (montagne)'],['ore','Éclats gros (montagne)'],['oreSol1','Éclats petits (sol)'],['oreSol2','Éclats moyens (sol)'],['oreSol','Éclats gros (sol)']]],
   ['Artefacts',[['antenne','Antenne'],['antenneOn','Antenne allumée'],['terminal','Terminal'],['mach0','Machine : Tuyaux'],['mach1','Machine : Serveur'],['mach2','Machine : Caisses'],['mach3','Machine : Ordinateur'],['mach4','Machine : Établi'],['mach5','Machine : Cuve'],['mach6','Machine : Générateur'],['mach7','Machine : Console'],['mach8','Machine : Turbine'],['mach9','Machine : Armoire électrique']]],
   ['Vaisseau',[['ship','Cargo']]],
   ['Intro',[['nuage0','Nuage plein'],['nuage1','Nuage texturé'],['nuage2','Bord diagonal'],['nuage3','Bord croisé'],['nuage4','Bord rayé'],['nuage5','Bord tramé']]]];
@@ -54,6 +55,13 @@ for(const k of SHIP_KEYS){const [,cx,cy]=k.split('_').map(Number);PAT[k]=(x,y)=>
 PAT.robot_r=(x,y)=>TF('robot_u')(y,15-x);PAT.robot_d=(x,y)=>TF('robot_u')(15-x,15-y);PAT.robot_l=(x,y)=>TF('robot_u')(15-y,x);
 for(const k of ['an0',...BEASTS.map((_,i)=>'bz'+i)])PAT[k+'l']=(x,y)=>TF(k+'r')(15-x,y);
 // mine armée : la tuile de la mine, bio en rouge et accent en blanc ; elle alterne avec la tuile normale (clignotement)
+// Roche dure (21 novembre 2026) : mêmes dessins que la montagne tendre (retouches comprises), en encre foncée 'd'
+PAT.hardBody=(x,y)=>{const c=TF('mtBody')(x,y);return c==='3'?'d':c;};PAT.hardTop=(x,y)=>{const c=TF('mtTop')(x,y);return c==='3'?'d':c;};
+// Fonds des crêtes : seule la partie AU-DESSUS de la ligne de crête est un fond, le reste garde ses trous (sinon la crête sombre paraît plus claire)
+const crestY=(f,x)=>{for(let y=0;y<16;y++)if(f(x,y)!=='.')return y;return 16;};
+PAT.hardTopBg=(x,y)=>{const f=TF('mtTop');return y<crestY(f,x)&&TF('mtBody')(x,y)==='3'?'3':'.';};   // crête de roche dure : fond de roche tendre
+PAT.softTopBg=(x,y)=>{const f=TF('mtTop');return y<crestY(f,x)&&TF('mtBody')(x,y)==='3'?'d':'.';};   // crête de roche tendre sous de la roche dure : fond de roche dure
+TILE_DEPS.mtBody=['mtBody','hardBody','hardTopBg','softTopBg'];TILE_DEPS.mtTop=['mtTop','hardTop','hardTopBg','softTopBg'];
 PAT.mineA=(x,y)=>{const c=TF('bz'+MINE_I+'r')(x,y);return c==='2'?'r':c==='1'?'w':c==='r'?'w':c;};TILE_DEPS['bz'+MINE_I+'r'].push('mineA');
 PAT.deep1=(x,y)=>TF('deep0')((x+14)%16,y);
 let TL={},ANIMG=[],fog=true;
@@ -62,9 +70,10 @@ const inkCol=ch=>ch==='0'?'#020605':ch==='r'?'#b8242a':ch==='w'?'#ffffff':PAL[ch
 function tileCanvas(src,w=16,h=16){const c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d');
   for(let j=0;j<h;j++)for(let i=0;i<w;i++){const ch=typeof src==='function'?src(i,j):src[j][i];const col=inkCol(ch);if(col){x.fillStyle=col;x.fillRect(i,j,1,1);}}return c;}
 // reconstruit une tuile retouchée et ses variantes
-function rebuildTile(k){for(const d of TILE_DEPS[k]||[k]){if(d==='ship')TL.ship=tileCanvas(TF('ship'),SGW*16,SGH*16);else if(PAT[d])TL[d]=tileCanvas(PAT[d]);if(/^(an|bz)\d+r$|^robot_r$/.test(d)){try{ICON[d]=TL[d].toDataURL();}catch(e){}}}buildCursor();if(k==='robot_u')robotTiles();}
+function eauSrc(k){const f=PAT[k];return typeof f==='function'?(x,y)=>{const c=f(x,y);return c==='2'?'e':c;}:f.map(r=>r.replace(/2/g,'e'));}   // tuiles d'eau : encre bio -> couleur eau
+function rebuildTile(k){for(const d of TILE_DEPS[k]||[k]){if(d==='ship')TL.ship=tileCanvas(TF('ship'),SGW*16,SGH*16);else if(PAT[d])TL[d]=tileCanvas(EAU_TUILES.includes(d)?eauSrc(d):PAT[d]);if(/^(an|bz)\d+r$|^robot_r$/.test(d)){try{ICON[d]=TL[d].toDataURL();}catch(e){}}}buildCursor();if(k==='robot_u')robotTiles();}
 function buildTiles(){
-  TL={};for(const k in PAT)TL[k]=tileCanvas(PAT[k]);
+  TL={};for(const k in PAT)TL[k]=tileCanvas(EAU_TUILES.includes(k)?eauSrc(k):PAT[k]);
   // la Matière reprend les dessins des éclats de métal (retouches comprises), en couleur accent au lieu de bio
   for(const k of ['ore','ore1','ore2','oreSol','oreSol1','oreSol2']){const f=TF(k);TL[k.replace('ore','mat')]=tileCanvas((x,y)=>{const c=f(x,y);return c==='2'?'1':c;});}TL.ship=tileCanvas(TF('ship'),SGW*16,SGH*16);buildCursor();
   ICON={};for(const k in TL)if(/^(an|bz)\d+r$|^robot_r$/.test(k)){try{ICON[k]=TL[k].toDataURL();}catch(e){}}

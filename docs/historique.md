@@ -195,3 +195,18 @@ Les chiffres mesurés sont dans `mesures.md`.
 - **Fusion dans `main`** (PR n° 22) ; version `claude/version-2026-11-20-7`.
 - **Ce document est créé** le même jour : `conception.md` passe de 118 à 65 Ko en perdant son historique, qui
   atterrit ici, et ses mesures, qui vont dans `mesures.md`.
+
+## 21 novembre 2026 : recette « réseau de cavernes »
+
+- Demande : une recette de niveau « réseau de caverne avec bâtiments ». Choix de l'utilisateur : c'est le **niveau 2**
+  (la grande « pièce extérieure » du plan devient une caverne), **tout sous roche** (arrivée par un puits), bâtiments
+  **enchâssés avec une porte sur une caverne**, cavernes **réglables entre « peu de grandes » et « beaucoup de petites »**.
+- Premier essai : `Float32Array` pour les distances du chemin de porte, alors que la priorité du tas est un double :
+  les cases étaient prises pour périmées et un tiers des portes ne trouvait pas de caverne. Distances en `Float64Array`.
+- Les bâtiments posés dans un lot rectangulaire (meilleur de 60 tirages) ne remplissaient que 8 % de la carte ; avec un
+  lot égal à la carte entière, un peu plus (9 à 12 %). Piste non retenue pour l'instant : réserver la place des bâtiments
+  avant de creuser les cavernes, pour qu'ils puissent aussi se trouver au centre de la carte.
+- **Réservation de la place des bâtiments avant de creuser les cavernes : essayée, jugée moins bien par l'utilisateur,
+  retirée le soir même** (PR n° 24). Elle donnait environ 2 bâtiments et 11 % de surface bâtie, au centre comme en
+  périphérie, mais les cavernes, contournant les réserves, perdaient leur forme. On est revenu au premier état : cavernes
+  creusées d'abord, bâtiments glissés ensuite dans la roche qui reste (surtout en périphérie).

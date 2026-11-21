@@ -33,7 +33,7 @@ Le jeu est une page web en plusieurs fichiers (`src/`), **sans étape d'assembla
 - `python3 outils/simul.py [detection|fuite|tout]` : rejoue des situations dans le moteur et mesure.
 - `python3 outils/perf.py` : fluidité.
 - `outils/scripts/` : scripts à passer à `jeu.py` — `six-cartes.js` (six cartes côte à côte, tunnels en jaune),
-  `mesure-recettes.js` (40 cartes par taille et par recette : complexes, tunnels, sorties).
+  `mesure-recettes.js` (40 cartes par taille et par recette : complexes, tunnels, sorties), `cavernes.js` (six cartes de la recette cavernes), `mesure-cavernes.js` (40 cartes par réglage : part de cavernes, bâtiments, connexité).
 
 ## Banc de combat
 Artefact à part (https://claude.ai/artifact/9BKRaoB4hzgdWhzYFx5A6q) qui rejoue des combats dans le vrai moteur, sur carte de taille 1.
@@ -56,7 +56,7 @@ Artefact à part (https://claude.ai/artifact/9BKRaoB4hzgdWhzYFx5A6q) qui rejoue 
   attention aux noms en double (`const` redéclarée = erreur de syntaxe) et aux noms qui existent déjà dans `window`.
   Un nouveau fichier doit aussi être ajouté en balise `<script>` dans `index.html`.
   00 base · 01 sons · 02 palette · 03 tuiles (motifs 16×16) · 04 vaisseau · 05 tuiles éditables · 06 réglages ·
-  07 génération de la carte · 07b bâtiments · 07c artefacts · 07d zones et tunnels · 08 faune et prédateurs · 09 vision, déplacement, forage · 10 rendu et gouffres ·
+  07 génération de la carte · 07b bâtiments · 07c artefacts · 07d zones et tunnels · 07e cavernes · 08 faune et prédateurs · 09 vision, déplacement, forage · 10 rendu et gouffres ·
   11 interface (mode carte, « En vue », commandes, enregistrement) · 12 souris et inspection · 13 éditeur de tuiles ·
   14 inventaire et équipement · 15 cinématique d'intro (qui lance aussi le jeu : rester le dernier).
 - `docs/` : conception, mesures, notes sur Brogue (voir plus haut). `planches/` : planches de travail
@@ -86,6 +86,15 @@ version : `version-AAAA-MM-JJ-n`. Y copier le contenu de `src/` tel quel (`index
 le jeu se lance en ouvrant `index.html`. Passer par le pont vers l'ordinateur : copier les fichiers dans
 `/mnt/user-data/outputs/<version>/`, puis `device_commit_files` ; si le dossier n'est pas encore relié à la session,
 `device_request_folder_access` le demande. Inutile de recopier quand seuls des documents changent.
+
+## Archive des captures d'écran
+**Chaque capture d'écran de contrôle prise pendant une conversation est aussi sauvegardée** (consigne du 21 novembre 2026),
+dans `F:\WORK\IAZONE\DEEPCORE\captures\AAAA-MM-JJ\` : un dossier par jour, des noms de fichier parlants, et un
+`LISEZ-MOI.txt` qui dit ce que montre chaque image. Même chemin que la copie du jeu : copier les images dans
+`/mnt/user-data/outputs/captures-AAAA-MM-JJ/`, puis `device_commit_files` ; `device_request_folder_access` si le dossier
+n'est pas relié. Si le dossier du jour existe déjà, y ajouter les nouvelles images. Les captures de mise au point qui
+s'écrasent à chaque génération ne comptent pas. Les captures des conversations d'avant cette date sont perdues : les images ne
+survivent pas à une séance.
 
 ## Publication sur GitHub Pages
 Le jeu est en ligne sur https://queauem-eqeq.github.io/DEEPCORE/ à chaque fusion dans `main`.
