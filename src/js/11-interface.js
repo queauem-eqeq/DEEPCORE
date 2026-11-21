@@ -142,7 +142,7 @@ function applySaved(d){
   if(d.bestiaire)BEST_LIST().forEach(e=>{const b=d.bestiaire[e.key];if(b)BFIELDS.forEach(([f])=>{if(num(b[f]))e.o[f]=b[f];});});saveBest();
   if(num(d.discretion))setStealthBase(d.discretion);
   if(d.artefacts){ARTEFACTS=artefactsSains(d.artefacts);saveArtefacts();}
-  if(d.groupes){const g=groupesSains(d.groupes);if(g){GROUPES=g;saveGroupes();}}   // les anciennes intensités par espèce (d.intensite) ne sont plus lues
+  if(d.groupes){const g=groupesSains(d.groupes);if(g){GROUPES=groupesV2(g);saveGroupes();}}   // les anciennes intensités par espèce (d.intensite) ne sont plus lues
   if(d.mondes&&typeof d.mondes==='object'&&Date.parse(d.enregistreLe)>Date.parse('2026-11-21T05:00:00Z')){   // les archétypes d'avant cette date ont été effacés
     MONDES=Object.assign({},MONDES,d.mondes);saveMondes();}
   if(d.generation){const g=d.generation;GEN_LBL.forEach(([k])=>{if(num(g[k]))GEN[k]=0;});GEN_LBL.forEach(([k])=>{if(num(g[k]))setGen(k,g[k]);});

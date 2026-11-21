@@ -12,7 +12,7 @@
     GEN.taille=PL.taille||3;if(r.recette){recRange();recPrend(r.recette);}
     if(r.amb&&typeof ambiance==='function')ambiance(r.amb,r.recette||GEN.recette);
     for(const k in r)if(k!=='amb'&&k!=='niv'&&k!=='recette')GEN[k]=r[k];
-    SANS_VAISSEAU=(r.niv||1)>1;const t0=performance.now();niveau();G.niv=r.niv||1;SANS_VAISSEAU=false;const ms=performance.now()-t0;
+    SANS_VAISSEAU=(r.niv||1)>1;NIV_GEN=r.niv||1;const t0=performance.now();niveau();G.niv=r.niv||1;SANS_VAISSEAU=false;const ms=performance.now()-t0;
     const ox=10+(n%cols)*pw,oy=34+((n/cols)|0)*ph,N=W*H,cnt={};
     for(let i=0;i<N;i++){const v=G.t[i];let col='#2c3a2e',k='sol';
       if(G.tun&&G.tun[i]){col='#f2c230';k='tunnel';}else if(v===DOOR||v===LOCK){col='#ff4d4d';k='porte';}else if(v===WALL||v===SECRET||v===PILLAR){col='#e8eef0';k='mur';}else if(v===FLOOR){col='#7fb7c9';k='bati';}

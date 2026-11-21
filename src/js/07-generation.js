@@ -267,7 +267,7 @@ function niveau(refait){drilling=false;
   if(G.sites[0]&&accesSite()<0&&(refait||0)<3)return niveau((refait||0)+1);   // garde-fou : un site inatteignable, la carte est refaite (trois fois au plus)
   spawnGroupes();lastAct='move';palBiome(null);buildTiles();turnStealth();computeFOV();}
 const fauneTxt=()=>[...new Set([...(G.animals||[]).map(a=>SPECIES[a.sp].n),...(G.beasts||[]).map(b=>BEASTS[b.sp].n)])].join(', ')||'aucune';
-function newGame(){SANS_VAISSEAU=false;niveau();G.niv=1;   // G n'existe qu'une fois la carte générée
+function newGame(){SANS_VAISSEAU=false;NIV_GEN=1;niveau();G.niv=1;   // G n'existe qu'une fois la carte générée
   if(G.ship)say('Atterrissage confirmé. Un site de forage signalé par l’orbiteur. La foreuse est dans la soute ; la porte est à l’arrière.','info');
   else say('Descente terminée : la foreuse a débouché dans un réseau de cavernes. Un site de forage plus bas est signalé.','info');}   // arrivée par un puits (recette cavernes)
 // Nouvelle partie lancée par le joueur : la cinématique d'arrivée se rejoue (21 novembre 2026)
@@ -295,7 +295,7 @@ function genRemet(sauve){for(const k in GEN)if(!(k in sauve))delete GEN[k];Objec
 const RECETTE_NIV=n=>n<=1?'atterrissage':n===2?'cavernes':'base';   // la recette de chaque niveau de la descente (le niveau 1 suit le menu Monde)
 function niveauSuivant(hasard){   // hasard : tirer les réglages même si la case « Réglages au hasard » n'est pas cochée (Lab → Niv2)
   const sauve=JSON.parse(JSON.stringify(GEN)),inv=G.inv,st=G.st,tour=G.turn,dist=G.dist,niv=(G.niv||1)+1;
-  recRange();recPrend(RECETTE_NIV(niv));if(hasard||GEN.hasard)hasardReglages();SANS_VAISSEAU=true;
+  recRange();recPrend(RECETTE_NIV(niv));if(hasard||GEN.hasard)hasardReglages();SANS_VAISSEAU=true;NIV_GEN=niv;
   niveau();   // genPlanet refait l'objet G : tout ce que la foreuse garde est remis en place juste après
   SANS_VAISSEAU=false;genRemet(sauve);
   G.inv=inv;G.st=st;G.niv=niv;G.turn=tour;G.dist=dist;G.over=null;drilling=false;
