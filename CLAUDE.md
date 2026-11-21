@@ -28,6 +28,7 @@ Le jeu est une page web en plusieurs fichiers (`src/`), **sans étape d'assembla
 
 ## Outils de vérification
 - `python3 outils/captures.py DOSSIER t1 t2 …` : images de l'intro à ces instants, contrôle des erreurs.
+- `python3 outils/forage.py DOSSIER t1 t2 …` : images de la cinématique de forage à ces instants (la touche F9 la lance dans le jeu).
 - `python3 outils/jeu.py DOSSIER [script.js]` : image de la partie, intro passée ; le script prépare la
   scène dans la page et renvoie ce qu'on veut lire.
 - `python3 outils/simul.py [detection|fuite|tout]` : rejoue des situations dans le moteur et mesure.

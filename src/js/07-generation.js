@@ -235,6 +235,7 @@ const pvDe=sp=>sp.pv,dmgDe=sp=>sp.dmin+Math.floor(Math.random()*(sp.dmax-sp.dmin
 // Gisements pour une carte de taille 2 ; les autres tailles en proportion de leur surface.
 const GISEMENTS={metal:3,mat:1};
 let SANS_VAISSEAU=false;
+const NIV_MAX=2;   // nombre de niveaux (21 novembre 2026 : la descente revient, deux pour commencer)
 // Génère la carte à partir des réglages en cours du menu Monde (relief, taille, faune), avec le vaisseau.
 function niveau(){drilling=false;
   // structures bâties (07b), avant la roche dure et les métaux. Recette à complexe enfoui : si le complexe n'a pas tenu dans le
@@ -253,9 +254,21 @@ function niveau(){drilling=false;
   G.st.matiere=G.st.matiere||0;G.sonarAt=(G.turn||0)+10+Math.floor(Math.random()*11);
   spawnGroupes();lastAct='move';palBiome(null);buildTiles();turnStealth();computeFOV();}
 const fauneTxt=()=>[...new Set([...(G.animals||[]).map(a=>SPECIES[a.sp].n),...(G.beasts||[]).map(b=>BEASTS[b.sp].n)])].join(', ')||'aucune';
-function newGame(){niveau();
+function newGame(){SANS_VAISSEAU=false;niveau();G.niv=1;   // G n'existe qu'une fois la carte générée
   if(G.ship)say('Atterrissage confirmé. Un site de forage signalé par l’orbiteur. La foreuse est dans la soute ; la porte est à l’arrière.','info');
   else say('Descente terminée : la foreuse a débouché dans un réseau de cavernes. Un site de forage plus bas est signalé.','info');}   // arrivée par un puits (recette cavernes)
+// Nouvelle partie lancée par le joueur : la cinématique d'arrivée se rejoue (21 novembre 2026)
+function nouvellePartie(){newGame();started=true;$('overlay').hidden=true;render();playIntro();}
+/* Niveau suivant (21 novembre 2026) : pas de vaisseau, on arrive par le puits. Les réglages du niveau sont tirés
+   au hasard pour l'instant, sans toucher au menu Monde du joueur, qui est remis en place aussitôt après.
+   La foreuse garde tout ce qu'elle avait : vie, énergie, inventaire et matière en réserve. */
+function niveauSuivant(){
+  const sauve=JSON.parse(JSON.stringify(GEN)),inv=G.inv,st=G.st,tour=G.turn,dist=G.dist,niv=(G.niv||1)+1;
+  hasardReglages();SANS_VAISSEAU=true;
+  niveau();   // genPlanet refait l'objet G : tout ce que la foreuse garde est remis en place juste après
+  SANS_VAISSEAU=false;Object.assign(GEN,sauve);saveGen();buildGen();
+  G.inv=inv;G.st=st;G.niv=niv;G.turn=tour;G.dist=dist;G.over=null;drilling=false;
+  say(`Niveau ${G.niv}. La foreuse a percé le plafond et s'est écrasée plus bas. Un nouveau site de forage est signalé.`,'info');}
 
 /* ---------- Bestiaire : édition des statistiques ---------- */
 const BFIELDS=[['v','Vitesse',1,10],['pv','PV',1,200],['dmin','Dégâts min',0,100],['dmax','Dégâts max',0,100],['pre','Précision',0,250],['def','Défense',0,150],['crit','Crit %',0,100]];

@@ -854,9 +854,11 @@ recopier** la configuration d'essai que la base contient aussi (génération, é
 
 ## 10 bis. Cinématique d'intro
 
-Vue de dessus du début à la fin, vaisseau nez vers le haut. Durée ≈ 11,6 s. Jouée **au premier lancement
-seulement** (`np-intro`), pas après une mise à jour de page en cours de partie, pas si l'utilisateur a demandé
-moins d'animations. **Lab → Intro** génère une nouvelle planète et rejoue la scène ; REGEN ne la joue pas. **Échap,
+Vue de dessus du début à la fin, vaisseau nez vers le haut. Durée ≈ 11,6 s. Jouée au premier lancement
+(`np-intro`) et, depuis le 21 novembre 2026, **à chaque nouvelle partie lancée par le joueur** (`nouvellePartie`,
+appelée par les boutons « Nouvelle exploration » et par le rallumage) : elle marque l'arrivée au niveau 1, comme la
+cinématique de forage marque le passage au niveau suivant. Pas après une mise à jour de page en cours de partie,
+pas si l'utilisateur a demandé moins d'animations. **Lab → Intro** génère une nouvelle planète et rejoue la scène ; REGEN ne la joue pas. **Échap,
 Espace ou Entrée** passe directement au posé.
 
 - **Variations à chaque lancement** : descente de 5,9 à 9,3 s ; l'entrée dans l'atmosphère commence entre 5 et
@@ -889,6 +891,55 @@ Espace ou Entrée** passe directement au posé.
   avec la vue du jeu.
 - **Performance** : la carte entière est pré-composée une fois (16 px par case) ; chaque tuile du sol n'est plus
   qu'une copie. Sur écran haute densité, l'intro est rendue à densité réduite puis agrandie sans lissage.
+
+## 10 ter. Cinématique de forage (21 novembre 2026)
+
+Pour le passage au niveau suivant. Vue **de côté**, tout en **caractères ASCII** (comme les dessins d'équipement),
+environ 15 s ; `src/js/14b-forage.js`. **`playForage(suite, niv)`** la lance et appelle `suite()` à la fin (rien ne
+l'appelle encore dans le jeu : la descente par niveaux, étape 4 de la refonte, doit s'y brancher) ; **F9** la lance pour
+l'essayer. **Échap, Espace ou Entrée** la passent. Pas jouée si l'utilisateur a demandé moins d'animations.
+
+- **La machine tourne.** Elle démarre **couchée à l'horizontale** sur l'herbe, nez à droite, moteur qui monte ; elle se
+  cabre, plante son nez et **plonge à la verticale** (1,3 s) ; à l'arrivée elle touche le fond, **bascule sur le côté**
+  autour de son nez, rebondit et se **recouche à l'horizontale**. Le dessin (`FG_ART`, 15 lignes sur 11 colonnes) est
+  tourné en **échantillonnant la grille de caractères** depuis l'écran (`fgDrill`, donc jamais de trou, aucun lissage) ;
+  au-delà de 45 degrés chaque caractère est remplacé par son équivalent tourné d'un quart de tour (`FG_RG`, `FG_RD`).
+  Elle reste en ASCII à tous les angles, un peu anguleuse à l'horizontale.
+- **La roche n'est pas en bandes** : c'est un champ en deux dimensions (`fgMat`). Un bruit de valeur lissé, **étiré à
+  l'horizontale**, donne des lentilles larges et plates qui s'interpénètrent ; un deuxième bruit, de plus basse
+  fréquence, sème de **grosses masses de roche dure** (mesuré le 21 novembre 2026 : 23 % du volume en moyenne, de 20 à
+  27 % selon le tirage). Les limites de matière ondulent au lieu d'être droites.
+- **Un profil par niveau** (`FG_NIV`) : matières de fond selon la profondeur, matière dure semée, seuil, entremêlement.
+  **Niveau 1 : terre meuble, argile, roche, de grosses masses de roche dure** — rien de plus. Filon, basalte, cristaux
+  et noyau dense (`FG_MAT`) sont réservés aux profils des niveaux plus bas, esquissés mais pas encore réglés.
+- **Pivoter et contourner** : la foreuse sonde la dureté 11 lignes devant elle, à gauche et à droite. Au-delà de 1,5 elle
+  glisse vers le côté le plus tendre, **prend un angle** (l'inclinaison suit sa vitesse latérale, bornée à 25 degrés) et
+  contourne la masse ; le bandeau affiche « masse dure devant ».
+- **Diriger** : **flèches gauche et droite, Q et D, 4 et 6 du pavé numérique**, ou maintenir le doigt d'un côté de
+  l'écran. Vitesse latérale bornée à 16 colonnes par seconde.
+- **Vitesse** : inversement proportionnelle à la dureté sous la pointe ; la poussée monte après 6 s pour que la descente
+  ne traîne pas. Plus c'est dur, plus elle tremble, grince et crache d'étincelles. Forage mesuré : environ 9 s.
+- **Le puits garde la trace du chemin** (`F.tr`, un centre par ligne) : il se courbe, et les éclats rebondissent sur les
+  parois.
+- **Bandeau** : niveau, profondeur, matière, dureté, cap, rotation, et une coupe des matières à droite.
+- **Son** : synthétisé, sans fichier (moteur, grincement haché par la rotation, grondement ; plongeon, impacts de roche,
+  changement de matière, fracas du plafond, de l'impact et de la machine qui se couche).
+- **Vérification** : `python3 outils/forage.py DOSSIER [t1 t2 …]`. Mesuré le 21 novembre 2026 : 52 images par seconde.
+
+### Enchaînement dans le jeu (21 novembre 2026)
+
+**La descente par niveaux est revenue**, sur `NIV_MAX = 2` niveaux pour commencer (`07-generation.js`).
+
+- `G.niv` porte le numéro du niveau ; le panneau affiche « Niveau N · largeur × hauteur ».
+- **Forer le site du dernier niveau** gagne la partie comme avant (« NOYAU ATTEINT »). **Forer celui d'un niveau
+  précédent** (`end`, `09-vision-deplacement-forage.js`) ferme l'écran de forage, joue la cinématique, puis appelle
+  `niveauSuivant()`.
+- `niveauSuivant()` : les réglages du niveau sont **tirés au hasard** (`hasardReglages`) — c'est provisoire, en
+  attendant les recettes 2 et 3 — sans toucher au menu Monde du joueur, remis en place aussitôt après. Pas de
+  vaisseau : on arrive par le puits. `genPlanet` refait l'objet `G`, donc ce que **la foreuse garde est remis en
+  place juste après** : vie, énergie, inventaire, matière en réserve, tours et distance parcourue.
+- **F9 reste** : il joue la cinématique seule, sans changer de niveau.
+- La taille de la carte ne change pas d'un niveau à l'autre (elle s'applique au lancement).
 
 ## 11. Règles à ne pas casser
 
