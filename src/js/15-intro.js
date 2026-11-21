@@ -263,7 +263,8 @@ function start(data){
   /* 17 novembre 2026 : six espèces retirées. Dans une partie enregistrée, les créatures portent le rang de leur espèce :
      on retire celles des espèces disparues (rangs 2 à 7) et on renumérote le Mastok (8 → 2) et le Brochon (9 → 3). */
   if(!G.bz17){if(G.beasts)G.beasts=G.beasts.filter(b=>!(b.sp>=2&&b.sp<=7)).map(b=>{if(b.sp===8)b.sp=2;else if(b.sp===9)b.sp=3;return b;});G.bz17=1;}
-  delete G.mode;delete G.niv;delete G.biome;delete G.suite;   // partie enregistrée avant le 16 novembre 2026 : la descente et ses biomes n'existent plus
+  delete G.mode;delete G.biome;delete G.suite;   // partie enregistrée avant le 16 novembre 2026 : ses biomes n'existent plus
+  if(!(G.niv>=1&&G.niv<=NIV_MAX))G.niv=1;   // la descente est revenue le 21 novembre 2026, sur NIV_MAX niveaux
   if(G.st.matiere==null)G.st.matiere=0;if(G.sonar==null)G.sonar=1;   // partie commencée avant la descente
   palBiome(null);buildTiles();   // partie commencée avant l'inventaire
   delete G.gems;   // le joyau et son menu d'amélioration ont été retirés le 16 novembre 2026

@@ -75,7 +75,9 @@ function side(){
   // Le sous-menu Statistiques a été retiré le 15 novembre 2026 : les stats sont dans la fenêtre Équipement.
   sacDraw();
   {const E=G.eff||{},l=[];if(E.poison>0)l.push(`<span style="color:var(--life)">Poison ${E.poison}</span>`);if(E.glu>0)l.push(`Englué ${E.glu}`);{const f=G.fum&&G.fum[idx(G.px,G.py)];if(f)l.push(`<span style="color:var(--c1)">Dans la fumée ${f.v}</span>`);}$('effs').innerHTML=l.join(' · ');}
-  $('lvl').textContent=`Carte ${W} × ${H}`;   // plus de niveau ni de biome depuis le 16 novembre 2026 : une seule carte, réglée dans le menu Monde$('matN').textContent=G.st.matiere||0;
+  // le niveau est revenu le 21 novembre 2026 ; la taille de la carte se règle dans le menu Monde
+  $('lvl').textContent=`Niveau ${G.niv||1} · ${W} × ${H}`;
+  $('matN').textContent=G.st.matiere||0;   // avalée par le commentaire depuis le 16 novembre 2026 : la matière ne s'affichait plus
   if(!$('inventaire').hidden)invDraw();
   $('msg').innerHTML=seenHTML();
   const lg=(G.log||[]).slice(-5);
