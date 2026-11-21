@@ -561,6 +561,8 @@ directement : son pilote fonce sur tout et ne fuit jamais.
 
 ### Peuplement : vingt cartes par niveau (`outils/scripts/mesure-faune.js`)
 
+**21 novembre 2026, soir — répartition directe par lieu** (12 cartes par niveau, ambiances au hasard). Budget dépensé : 79 / 95 / 111 aux niveaux 1 / 2 / 3 (65 / 81 / 112 avec les anciennes densités, qui laissaient une part du budget inemployée aux niveaux 1 et 2). Part dépensée extérieur / bâti / tunnels : 77 / 18 / 5, 83 / 17 / 1, 34 / 61 / 5. Les chiffres ci-dessous datent d'avant ce changement.
+
 ```
 == atterrissage (niveau 1) : budget 45.0, dépensé 35.2 · 7.2 groupes · 21.1 créatures par carte
    par lieu : ext 16.3 créatures sur 1334.7 cases (1.2 pour 100 cases, budget 28.6) · bati 4.0 créatures sur 116.2 cases (3.5 pour 100 cases, budget 5.0) · tunnel 0.7 créatures sur 148.4 cases (0.5 pour 100 cases, budget 1.6)

@@ -129,9 +129,12 @@ et maximal, et porte une **valeur de menace** fixée à la main.
 ### Lieux, densité et valeurs mesurées (21 novembre 2026)
 
 - **Trois lieux** (`lieuDe`) : l'**extérieur** (terrain naturel, poches et cavernes comprises), le **bâti** (sol des
-  bâtiments) et les **tunnels**. Le budget est partagé entre eux à proportion de leur surface praticable, puis multiplié
-  par la **densité du lieu** (`GROUPES.dens`, fenêtre LIFE) : extérieur 80 %, bâti 130 %, tunnels 40 %. Les bâtiments
-  sont donc gardés de près, les tunnels restent presque vides.
+  bâtiments) et les **tunnels**. Le budget de chaque niveau est **réparti directement** entre eux
+  (`GROUPES.niv[n].part`, fenêtre LIFE, en % du budget) : niveau 1 : 75 / 20 / 5 ; niveau 2 : 80 / 18 / 2 ; niveau 3 :
+  35 / 60 / 5 (extérieur / bâti / tunnels). Les trois parts sont ramenées à 100. Un lieu absent de la carte rend sa part
+  aux autres ; un lieu ne reçoit jamais plus de **trois fois sa part de surface** (`PART_PLAFOND`), le surplus va aux
+  autres. Remplace, le 21 novembre 2026 au soir, les « densités par lieu » (80 / 130 / 40 % de la surface), que
+  l'utilisateur ne comprenait pas ; les parts de départ sont celles que ces densités donnaient en moyenne.
 - Chaque groupe déclare ses **lieux** (Lab → Groupes ; aucun coché : partout). Un groupe naît dans son lieu.
 - Le budget monte de **20 % par niveau** (`GROUPES.pente`). Budget de départ : **80** pour 96 × 64 (110 avant ; les
   valeurs mesurées étant plus basses que les anciennes, le budget a suivi pour garder la même densité).
@@ -147,8 +150,8 @@ et maximal, et porte une **valeur de menace** fixée à la main.
 
 Demande de l'utilisateur. De haut en bas : un **sélecteur de niveau** (1, 2, 3), puis pour ce niveau le **budget de
 menace**, les **groupes possibles** et les **artefacts et machines possibles**. Les deux listes se règlent comme les
-patrouilles d'un groupe : des étiquettes qu'on retire, un menu déroulant pour en ajouter. La densité par lieu, commune à
-tous les niveaux, reste en bas.
+patrouilles d'un groupe : des étiquettes qu'on retire, un menu déroulant pour en ajouter. En dessous, la **répartition des ennemis** du niveau entre extérieur, bâti
+et tunnels (% du budget).
 
 - `GROUPES.niv[n] = {budget, gr:[noms]}`. Budgets de départ 80, 96 et 112 ; la « menace en plus par niveau » en % a
   disparu, chaque budget se règle à part. Un groupe n'est posé que s'il est actif (Lab → Groupes) **et** dans la liste du

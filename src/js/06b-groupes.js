@@ -11,8 +11,9 @@
 const PATS=[['errance','Errance'],['voyage','Voyage en bande'],['ronde','Ronde'],['territoire','Territoire'],['sentinelle','Sentinelle'],['affut','Affût'],['navette','Navette'],['garde','Garde']];
 const ESPECES=()=>[['insectoide',SPECIES[0].n],...BEASTS.map(b=>[b.key,b.n])];
 /* Lieux et densité (21 novembre 2026). La carte a trois sortes de lieux : l'extérieur (terrain naturel, poches et cavernes comprises),
-   le bâti (sol des bâtiments) et les tunnels. Le budget de menace est partagé entre eux à proportion de leur surface praticable,
-   puis multiplié par la densité du lieu (GROUPES.dens, en %) : on peut donc vider les tunnels ou charger les bâtiments. Chaque
+   le bâti (sol des bâtiments) et les tunnels. Le budget de menace de chaque niveau est réparti directement entre eux
+   (GROUPES.niv[n].part, en % du budget, ramenés à 100 ; un lieu absent de la carte rend sa part aux autres, et un lieu ne reçoit
+   jamais plus de PART_PLAFOND fois sa part de surface : voir spawnGroupes). Chaque
    groupe déclare les lieux où il peut apparaître (g.lieux ; vide : partout). Le budget monte de GROUPES.pente % par niveau de la
    descente. */
 const LIEUX=[['ext','Extérieur'],['bati','Bâti'],['tunnel','Tunnels']];
@@ -23,14 +24,16 @@ const LIEUX=[['ext','Extérieur'],['bati','Bâti'],['tunnel','Tunnels']];
 const GR_NIVS=[1,2,3],GR_NIV_DEF={'Chasse à courre':[2,3],'Escouade de réparation':[2,3],'Embuscade gluante':[2,3],'Poste de garde':[2,3],'Batterie':[3],'Convoi':[3],'Ronde de drones':[3],'Broyeur solitaire':[2,3],'Mines & Sentinelles':[2,3]};
 function nivSains(d,liste,budget,pente){const o={};
   for(const n of GR_NIVS){const s=d&&d[n],b=s&&isFinite(+s.budget)?Math.max(0,Math.min(2000,Math.round(+s.budget))):Math.round(budget*(1+pente/100*(n-1)));
-    o[n]={budget:b,gr:s&&Array.isArray(s.gr)?liste.map(g=>g.n).filter(x=>s.gr.includes(x)):liste.map(g=>g.n).filter(x=>(GR_NIV_DEF[x]||GR_NIVS).includes(n))};}
+    o[n]={budget:b,part:partSaine(s&&s.part,n),gr:s&&Array.isArray(s.gr)?liste.map(g=>g.n).filter(x=>s.gr.includes(x)):liste.map(g=>g.n).filter(x=>(GR_NIV_DEF[x]||GR_NIVS).includes(n))};}
   return o;}
 const nivDe=n=>GROUPES.niv[Math.max(1,Math.min(3,n||1))];
-const DENS_DEF=()=>({ext:80,bati:130,tunnel:40});
+// Répartition de départ, par niveau : celle que donnaient les anciennes densités (mesurée le 21 novembre 2026 sur 12 cartes par niveau).
+const PART_DEF=n=>({1:{ext:75,bati:20,tunnel:5},2:{ext:80,bati:18,tunnel:2},3:{ext:35,bati:60,tunnel:5}})[n],PART_PLAFOND=3;
+function partSaine(p,n){const o=PART_DEF(n);if(p&&typeof p==='object')for(const [k] of LIEUX)if(isFinite(+p[k])&&p[k]!==''&&p[k]!=null)o[k]=Math.max(0,Math.min(100,Math.round(+p[k])));return o;}
 // Dix groupes du joueur (lus dans la base de l'artefact le 20 novembre 2026), neuf groupes nouveaux bâtis sur les cinq espèces du
 // 21 novembre. VALEURS MESURÉES le 21 novembre au banc de combat (voir docs/mesures.md) : vie perdue par la foreuse de série face au
 // groupe en assaut, moyenne de l'effectif minimal et de l'effectif maximal, divisée par 4.
-const GROUPES_DEF=()=>groupesSains({budget:80,v:2,pente:20,dens:DENS_DEF(),liste:[
+const GROUPES_DEF=()=>groupesSains({budget:80,v:2,pente:20,liste:[
   {"cout":7,"f":1,"m":[{"k":"paralyzor","max":1,"min":1},{"k":"crabos","max":1,"min":1},{"k":"cafar","max":1,"min":1},{"k":"mine","max":1,"min":1},{"k":"insectoide","max":1,"min":1}],"n":"Family","on":1,"pats":["affut","territoire"],"lieux":["ext"]},
   {"cout":8,"f":1,"m":[{"k":"insectoide","max":5,"min":3},{"k":"paralyzor","max":1,"min":1}],"n":"3-5 puces + sentinelles","on":1,"pats":[],"lieux":["ext"]},
   {"cout":3,"f":1,"m":[{"k":"mine","max":2,"min":1}],"n":"1-2 Mines","on":1,"pats":["affut","errance"],"lieux":["tunnel","bati"]},
@@ -57,17 +60,16 @@ function groupesV2(g){if(!g||g.v>=2)return g;const D=GROUPES_DEF();
   for(const x of g.liste){const d=D.liste.find(y=>y.n===x.n);if(d){x.lieux=d.lieux.slice();x.cout=d.cout;}else if(!x.lieux)x.lieux=[];}
   for(const d of D.liste)if(!g.liste.some(x=>x.n===d.n)&&g.liste.length<40)g.liste.push(d);
   g.budget=Math.round(g.budget*80/110);   // les valeurs mesurées sont plus basses que les anciennes : le budget suit, pour garder la même densité
-  g.dens=D.dens;g.pente=D.pente;g.v=2;g.niv=nivSains(null,g.liste,g.budget,g.pente);return g;}
+  g.pente=D.pente;g.v=2;g.niv=nivSains(null,g.liste,g.budget,g.pente);return g;}
 // remet d'aplomb des groupes lus dans le navigateur ou dans la base : bornes, espèces inconnues écartées.
 // L'effectif minimal peut être 0 : l'espèce est alors parfois absente du groupe.
 function groupesSains(d){const ks=ESPECES().map(e=>e[0]),n=(v,mn,mx,df)=>Number.isFinite(+v)&&v!==''&&v!=null?Math.max(mn,Math.min(mx,Math.round(+v))):df;
   if(!d||!Array.isArray(d.liste))return null;
-  const dn=DENS_DEF();if(d.dens&&typeof d.dens==='object')for(const [k] of LIEUX)dn[k]=n(d.dens[k],0,400,dn[k]);
   const liste=d.liste.slice(0,40).map(g=>({n:String(g.n||'Groupe').slice(0,30),lieux:[...new Set(Array.isArray(g.lieux)?g.lieux:[])].filter(v=>LIEUX.some(l=>l[0]===v)),cout:n(g.cout,1,500,1),on:g.on?1:0,f:[0,1,2].includes(+g.f)?+g.f:1,
     pats:[...new Set(Array.isArray(g.pats)?g.pats:[g.pat||'errance'])].filter(v=>PATS.some(p=>p[0]===v)),   // liste vide permise : le style est alors tiré parmi tous
     m:(Array.isArray(g.m)?g.m:[]).filter(m=>m&&ks.includes(m.k)).slice(0,6).map(m=>{const a=n(m.min,0,20,1),b=n(m.max,1,20,Math.max(1,a));return {k:m.k,min:Math.min(a,b),max:Math.max(a,b)};})}));
   const bud=n(d.budget,0,2000,80),pen=n(d.pente,0,200,20),niv=nivSains(d.niv,liste,bud,pen);
-  return {budget:niv[1].budget,v:d.v>=2?2:1,pente:pen,dens:dn,niv,liste};}
+  return {budget:niv[1].budget,v:d.v>=2?2:1,pente:pen,niv,liste};}
 let GROUPES=GROUPES_DEF();
 try{const g=groupesSains(JSON.parse(localStorage.getItem('np-groupes')||'null'));if(g)GROUPES=groupesV2(g);}catch(e){}
 function saveGroupes(){for(const n of GR_NIVS)GROUPES.niv[n].gr=GROUPES.niv[n].gr.filter(x=>GROUPES.liste.some(g=>g.n===x));GROUPES.budget=GROUPES.niv[1].budget;   // un groupe supprimé quitte les listes des niveaux
@@ -119,11 +121,12 @@ function buildLife(){const N=LIFE_NIV,L=nivDe(N),puce=(a,v,l,t)=>`<span class="g
     +`<div class="sub">Artefacts et machines possibles au niveau ${N} <span>${arts.length} sur ${ART_LISTE.length}</span></div>`
     +`<div class="gpats">${arts.map(([k,l])=>puce('delan',k,l+(ARTEFACTS[k].on?'':' (inactif)'),!ARTEFACTS[k].on)).join('')||'<span class="mnote">Aucun.</span>'}
       ${artHors.length?`<select data-f="addan" aria-label="Ajouter un artefact au niveau ${N}"><option value="">+ Ajouter…</option>${artHors.map(([k,l])=>`<option value="${k}">${l}</option>`).join('')}</select>`:''}</div>`
-    +`<div class="sub">Densité par lieu, tous niveaux (% du budget rapporté à la surface)</div>`+LIEUX.map(([k,l])=>`<div class="g2"><label for="lfD-${k}">${l}</label><input type="number" id="lfD-${k}" data-d="${k}" min="0" max="400" step="10" value="${GROUPES.dens[k]}"></div>`).join('')
+    +`<div class="sub">Répartition des ennemis au niveau ${N} <span>% du budget</span></div>`+LIEUX.map(([k,l])=>`<div class="g2"><label for="lfD-${k}">${l}</label><input type="number" id="lfD-${k}" data-d="${k}" min="0" max="100" step="5" value="${L.part[k]}"></div>`).join('')
+    +(()=>{const s=LIEUX.reduce((a,[k])=>a+L.part[k],0);return s===100?'':`<div class="mnote">Total ${s} % : ${s?'les trois parts sont ramenées à 100 ('+LIEUX.map(([k,l])=>l.toLowerCase()+' '+Math.round(L.part[k]*100/s)).join(', ')+').':'aucun ennemi à ce niveau.'}</div>`;})()
     +(G&&G.menace&&G.menace.lieux?`<div class="sum">Carte en cours (niveau ${G.niv||1}) : ${LIEUX.map(([k,l])=>l.toLowerCase()+' '+(G.menace.lieux[k]?G.menace.lieux[k].dep+' / '+G.menace.lieux[k].b:'0')).join(' · ')}.</div>`:'')
-    +`<div class="sum">Le budget vaut pour une carte de 96 × 64 et suit la surface de la carte (ici ${Math.round(L.budget*W*H/(96*64))}). Il achète au hasard des groupes de la liste, jusqu’à épuisement. Créer, régler ou désactiver un groupe : Lab → Groupes. Fréquence d’un artefact : Lab → Artefacts.</div>`;}
+    +`<div class="sum">Le budget vaut pour une carte de 96 × 64 et suit la surface de la carte (ici ${Math.round(L.budget*W*H/(96*64))}). Il achète au hasard des groupes de la liste, jusqu’à épuisement. Un lieu absent de la carte rend sa part aux autres ; un lieu très petit est plafonné à trois fois sa part de surface. Créer, régler ou désactiver un groupe : Lab → Groupes. Fréquence d’un artefact : Lab → Artefacts.</div>`;}
 $('life').addEventListener('change',e=>{const t=e.target,L=nivDe(LIFE_NIV);
-  if(t.dataset.d){GROUPES.dens[t.dataset.d]=Math.max(0,Math.min(400,Math.round(+t.value||0)));saveGroupes();return;}
+  if(t.dataset.d){L.part[t.dataset.d]=Math.max(0,Math.min(100,Math.round(+t.value||0)));saveGroupes();buildLife();return;}
   if(t.id==='lfBudget'){L.budget=Math.max(0,Math.min(2000,Math.round(+t.value||0)));saveGroupes();buildLife();return;}
   if(t.dataset.f==='addgn'&&t.value){if(!L.gr.includes(t.value))L.gr.push(t.value);saveGroupes();buildLife();return;}
   if(t.dataset.f==='addan'&&t.value){const a=ARTEFACTS[t.value];if(a){a.niv=ART_NIVS.filter(n=>n===LIFE_NIV||(a.niv||ART_NIVS).includes(n));saveArtefacts();buildLife();}}});

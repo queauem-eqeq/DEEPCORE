@@ -296,10 +296,15 @@ let NIV_GEN=1;   // niveau de la descente en cours de génération (posé par ne
 const lieuDe=i=>{const v=G.t[i];return G.tun&&G.tun[i]?'tunnel':(v===FLOOR||v===DOOR||(v===BRIDGE&&G.pb&&G.pb[i]))?'bati':'ext';};
 function spawnGroupes(){G.animals=[];G.fauna=[];G.pool=[0];G.beasts=[];G.beastSeen={};G.packs={};G.patr={};
   const NV=nivDe(NIV_GEN),total=Math.round(NV.budget*W*H/(96*64));let id=0;const rate={},pose={};   // budget et groupes du niveau de profondeur (fenêtre LIFE)
-  // cases praticables de chaque lieu, et part du budget qui lui revient (surface × densité)
+  // cases praticables de chaque lieu, et part du budget qui lui revient : la répartition du niveau (fenêtre LIFE), ramenée à 100 sur les
+  // lieux présents ; un lieu ne dépasse pas PART_PLAFOND fois sa part de surface, le surplus va aux autres à proportion de leur part
   const cases={ext:[],bati:[],tunnel:[]};for(let i=0;i<W*H;i++)if(canWalk(G.t[i],true))cases[lieuDe(i)].push(i);
-  const tot=cases.ext.length+cases.bati.length+cases.tunnel.length||1,dens=GROUPES.dens||DENS_DEF(),lieux={};let report=0,depense=0;
-  for(const [l] of LIEUX.slice().sort((a,b)=>cases[b[0]].length-cases[a[0]].length)){const b=Math.round(total*cases[l].length/tot*(dens[l]??100)/100);let reste=b+report;lieux[l]={b,dep:0};
+  const tot=cases.ext.length+cases.bati.length+cases.tunnel.length||1,lieux={},bud={};let report=0,depense=0;
+  {let libres=LIEUX.map(l=>l[0]).filter(l=>cases[l].length&&NV.part[l]>0),resteB=total;
+   for(let t=0;t<3&&libres.length;t++){const sp=libres.reduce((a,l)=>a+NV.part[l],0),trop=libres.filter(l=>resteB*NV.part[l]/sp>total*PART_PLAFOND*cases[l].length/tot);
+     if(!trop.length){for(const l of libres)bud[l]=resteB*NV.part[l]/sp;break;}
+     for(const l of trop){bud[l]=total*PART_PLAFOND*cases[l].length/tot;resteB-=bud[l];}libres=libres.filter(l=>!trop.includes(l));}}
+  for(const [l] of LIEUX.slice().sort((a,b)=>cases[b[0]].length-cases[a[0]].length)){const b=Math.round(bud[l]||0);let reste=b+report;lieux[l]={b,dep:0};
     if(!cases[l].length){report=reste;continue;}
     for(let t=0;t<300;t++){const ok=GROUPES.liste.map((g,i)=>[g,i]).filter(([g,i])=>g.on&&NV.gr.includes(g.n)&&g.m.length&&Math.max(1,g.cout)<=reste&&(rate[i+l]||0)<3&&(!g.lieux||!g.lieux.length||g.lieux.includes(l)));if(!ok.length)break;
       // tirage pondéré par la fréquence du groupe : − deux fois moins souvent, + deux fois plus
