@@ -220,7 +220,7 @@ function inspectHTML(){const {x,y}=HOV;if(x<0||y<0||x>=W||y>=H)return '';
   let act='';
   if(d===0)act=s?'<kbd>F</kbd> ou clic : forer ce site.':'';
   else if(d===1&&occ)act='Clic : frapper avec la foreuse.';
-  else if(d===1&&t===LOCK)act=G.st.cles>0?'Clic : ouvrir avec une clé.':'';
+  else if(d===1&&t===LOCK)act=nbCles()>0?'Clic : ouvrir avec une clé.':'';
   else if(d===1&&(t===HARD||bati(t)))act='';
   else if(d===1&&(t===ROCK||t===MOUNT))act=border?'':'Clic : coup de foreuse (10 énergie).';
   else if(d===1&&t===CHASM)act='';

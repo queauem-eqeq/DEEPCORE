@@ -495,10 +495,11 @@ Version d'essai : tous les objets sont donnés au départ, non équipés sauf la
 - **Deux endroits, un seul sac** : la fenêtre **Équipement** (armes, armures, accessoires) et le sous-menu
   repliable **Inventaire** de la colonne (les consommables : nom, nombre, **USE**, **[X]**).
 - **Dix places** dans l'inventaire, **une par sorte** quel que soit le nombre d'exemplaires. Ramasser une sorte
-  nouvelle quand les 10 places sont prises est refusé et **l'objet reste au sol**. **[X] détruit la pile entière**
-  (c'est ce qui libère une place) ; un consommable ne peut pas être jeté au sol.
+  nouvelle quand les 10 places sont prises est refusé et **l'objet reste au sol**. **[X] jette UN exemplaire au sol**,
+  sous la foreuse (21 novembre 2026 ; avant, il détruisait la pile) : la place se libère quand le dernier exemplaire est jeté.
+  La **clé** est un consommable comme les autres (voir § portes verrouillées) : elle s'empile, se jette, se ramasse.
 - **Touche I** : ouvre le sous-menu et choisit le premier consommable ; **↑ ↓** parcourir, **Entrée** utiliser,
-  **Suppr** ou **J** détruire la pile, **Échap** ou **I** sortir.
+  **X**, **Suppr** ou **J** jeter un exemplaire au sol, **Échap** ou **I** sortir.
 - **Touche T** : la fenêtre Équipement, plein écran. Liste à gauche (`/` arme, `[` armure, `=` accessoire ; un
   objet équipé y reste, en couleur monde, mention « équipé ») ; fiche à droite (dessin ASCII coloré, description,
   effets, **Équiper / Retirer**, **Jeter**). Clavier : ↑ ↓, **Entrée** équiper, **J** jeter, **G** ramasser.
@@ -511,6 +512,9 @@ Version d'essai : tous les objets sont donnés au départ, non équipés sauf la
   65/130). S'équiper ne soigne pas, retirer puis remettre ne rapporte rien.
 - **Le visuel de la foreuse suit l'équipement** : l'arme dessine la moitié avant, l'armure la moitié arrière.
 - **Jeter** pose l'objet au sol sous la foreuse ; repasser dessus le ramasse, ou touche **G**.
+  **Tuile au sol** (21 novembre 2026) : chaque objet a la sienne, `o_` + clé de l'objet (`PAT.o_foreuse`, `o_usine`, `o_servo`, `o_optique`,
+  `o_viseur`, `o_conden`, `o_gyro`, `o_stabil`, `o_accu`, `o_repar`, `o_batterie`, `o_fumigene`, `o_charge`), retouchables dans l'éditeur
+  (groupe « Objets au sol ») ; la clé garde `cle`. S'il y a plusieurs objets sur une case, on voit le dernier posé. `PAT.objet` ne sert plus que de repli.
 
 | Objet | Type | POW | Effets |
 |---|---|---|---|
@@ -711,7 +715,8 @@ pièce ils deviennent du sol, sous un mur du mur) ; seuls le vaisseau et le bord
   passage** vers ce qu'il y a derrière (au moins 6 cases) ; on choisit d'abord celle qui **enferme le site de
   forage**, sinon la plus petite réserve. Jamais une porte d'entrée. Les **clés sont posées au sol**, une par
   serrure, toutes pareilles, **là où l'on arrive sans rien ouvrir** — aucune impasse possible — de préférence à
-  l'intérieur d'une structure et loin du départ. Le compte s'affiche sous Statut. Il n'y a **jamais plus de clés
+  l'intérieur d'une structure et loin du départ. **La clé est un objet du sac** (21 novembre 2026) : plus de ligne « Clés » sous Statut ; on la ramasse comme un objet, elle prend une place
+  d'inventaire (les clés s'empilent), on peut la jeter, et la porte la prélève dans le sac. Il n'y a **jamais plus de clés
   que de serrures**. Ouvrir fait tourner la clé (`SFX.serrure`).
 - **Pièces secrètes** (0 à 3, 1 par défaut) : une pièce à **un seul passage** dont la porte est **dérobée** — elle
   a en tout point l'air d'un mur (dessin, fiche de survol, mini-carte) et se comporte comme tel. Jamais la pièce du

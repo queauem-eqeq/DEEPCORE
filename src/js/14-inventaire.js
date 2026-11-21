@@ -141,7 +141,13 @@ const ITEMS={
     vise:1,plein:st=>false,non:'',
     use:st=>'',
     art:["      ┌─┐   *  ", "    ▄▄┴─┴▄▄ │  ", "   █████████┘  ", "   ████▒████   ", "   █████████   ", "    ▀▀▀▀▀▀▀    "],
-    col:["......ddd...r..", "....33ddd33.d..", "...333333333d..", "...3333r3333...", "...333333333...", "....3333333...."]}
+    col:["......ddd...r..", "....33ddd33.d..", "...333333333d..", "...3333r3333...", "...333333333...", "....3333333...."]},
+  cle:{n:'Clé',f:1,conso:1,eff:'Ouvre une porte verrouillée',
+    d:'Clé de porte verrouillée : on l’utilise en marchant contre la porte, qui s’ouvre et consomme la clé. On peut la jeter au sol comme n’importe quel objet.',
+    plein:st=>true,non:'Une clé s’utilise en marchant contre une porte verrouillée.',
+    use:st=>'',
+    art:["  ┌───┐        ", "  │ o │        ", "  └─┬─┘        ", "    │          ", "    ├─┐        ", "    └─┘        "],
+    col:["..ddddd........", "..d.1.d........", "..dd1dd........", "....d..........", "....d1d........", "....ddd........"]}
 };
 // Objets donnés au départ, non équipés (phase d'essai : plus tard ils se trouveront au sol ou sur les ennemis).
 // Le second terme est le nombre d'exemplaires d'un consommable : ils s'empilent sur une seule ligne (« ×2 »).
@@ -152,7 +158,10 @@ const INV_TEST=[['foreuse'],['usine'],['servo'],['optique'],['viseur'],['conden'
 const invTest=()=>INV_TEST.map(([k,n])=>n?{k,eq:0,n}:{k,eq:k==='foreuse'||k==='usine'?1:0});
 // partie commencée avant un ajout d'objets : on complète le sac, et il y a toujours une arme en main
 // Les armes et armures retirées le 16 novembre 2026 n'ont plus aucune trace dans le code (19 novembre 2026) : ni dessin, ni modificateur.
-function invMigre(){for(const [k,n] of INV_TEST)if(!G.inv.some(o=>o.k===k))G.inv.push(n?{k,eq:0,n}:{k,eq:0});
+const nbCles=()=>{const o=(G.inv||[]).find(o=>o.k==='cle');return o?(o.n||1):0;};   // les clés sont des objets du sac (21 novembre 2026), plus un compteur
+const itemTile=k=>k==='cle'?TL.cle:(TL['o_'+k]||TL.objet);   // tuile d'un objet posé au sol
+function invMigre(){if(G.st&&G.st.cles>0){const o=G.inv.find(o=>o.k==='cle');if(o)o.n=(o.n||1)+G.st.cles;else G.inv.push({k:'cle',eq:0,n:G.st.cles});}if(G.st)delete G.st.cles;   // ancien compteur de clés -> objet
+  for(const [k,n] of INV_TEST)if(!G.inv.some(o=>o.k===k))G.inv.push(n?{k,eq:0,n}:{k,eq:0});
   G.inv=G.inv.filter(o=>ITEMS[o.k]);G.inv.sort((a,b)=>INV_TEST.findIndex(t=>t[0]===a.k)-INV_TEST.findIndex(t=>t[0]===b.k));
   if(!G.inv.some(o=>o.eq&&ITEMS[o.k].slot==='arme'))G.inv.find(o=>o.k==='foreuse').eq=1;
   // la Coque d'usine est portée d'origine : son DEF +10 est déjà compris dans les stats de départ, donc on la marque équipée sans appliquer son effet
@@ -348,17 +357,17 @@ function sacHTML(){const l=invConsos();
   return l.map(i=>{const o=G.inv[i],d=ITEMS[o.k];
     return `<div class="cr${SAC_NAV&&i===SAC_SEL?' sel':''}"><span title="${esc(d.d)}">${d.n}</span><em>×${o.n||1}</em>` +
       `<button class="pace" data-u="${i}" title="${esc(d.n+' : '+d.d)}">USE</button>` +
-      `<button class="pace del" data-x="${i}" title="Détruire toute la pile (${o.n||1}) pour libérer une place">[X]</button></div>`;}).join('');}
+      `<button class="pace del" data-x="${i}" title="Jeter un exemplaire au sol${(o.n||1)>1?' (il en restera '+((o.n||1)-1)+')':''}">[X]</button></div>`;}).join('');}
 function sacDraw(){const el=$('sac');if(!el||!G||!G.inv)return;
   const l=invConsos(),h=sacHTML();if(h!==SAC_H){el.innerHTML=h;SAC_H=h;}
   const n=$('sacN');if(n){const txt=`[${l.length}/${SAC_MAX}]`;if(n.textContent!==txt)n.textContent=txt;n.classList.toggle('full',l.length>=SAC_MAX);}}
-// détruire une pile entière : c'est ce qui libère une place, une sorte de consommable occupant une place
-function sacDetruire(i){const o=G.inv[i];if(!o||G.over||!ITEMS[o.k].conso)return;const d=ITEMS[o.k],n=o.n||1;
-  G.inv.splice(i,1);if(INV_SEL>i)INV_SEL--;invFix();
-  say(`${d.n}${n>1?` ×${n}`:''} détruit${accord(d)} : une place libérée (${invConsos().length}/${SAC_MAX}).`,'warn');SFX.blocked();
-  sacFix();render();}
+// [X] : un exemplaire du consommable tombe au sol, sous la foreuse (21 novembre 2026 ; avant, [X] détruisait toute la pile)
+function sacJeter(i){const o=G.inv[i];if(!o||G.over||!ITEMS[o.k].conso)return;const d=ITEMS[o.k],n=o.n||1;
+  invTake(i);const c=idx(G.px,G.py);G.items=G.items||{};(G.items[c]=G.items[c]||[]).push(o.k);
+  say(`${d.n} jeté${accord(d)} au sol${n>1?` (il en reste ${n-1})`:` : une place libérée (${invConsos().length}/${SAC_MAX})`}.`);SFX.thud();
+  sacFix();SAC_H='';invChanged();}
 /* Navigation au clavier (touche I) : ouvre le sous-menu s'il est replié et choisit le premier consommable.
-   Ensuite ↑ ↓ pour parcourir, Entrée pour utiliser, Suppr ou J pour détruire la pile, Échap ou I pour sortir. */
+   Ensuite ↑ ↓ pour parcourir, Entrée pour utiliser, X, Suppr ou J pour jeter un exemplaire au sol, Échap ou I pour sortir. */
 function sacFix(){const l=invConsos();if(!l.length){SAC_SEL=-1;SAC_NAV=false;return;}if(!l.includes(SAC_SEL))SAC_SEL=l[0];}
 function sacNav(on){const f=$('fd-sac');
   if(on&&SAC_NAV){SAC_NAV=false;SAC_H='';sacDraw();render();return;}                       // I une seconde fois : on ressort
@@ -371,12 +380,12 @@ function sacKey(ev){const k=ev.key.toLowerCase(),l=invConsos(),d=KEYS[k];
   if(k==='escape'||k==='i'){ev.preventDefault();sacNav(false);return true;}
   if(d&&d[0]===0){ev.preventDefault();const p=l.indexOf(SAC_SEL);SAC_SEL=l[((p<0?0:p)+d[1]+l.length)%l.length];SAC_H='';sacDraw();return true;}
   if(k==='enter'||k===' '){ev.preventDefault();invEquip(SAC_SEL);sacFix();SAC_H='';render();return true;}
-  if(k==='j'||k==='delete'||k==='backspace'){ev.preventDefault();sacDetruire(SAC_SEL);return true;}
+  if(k==='x'||k==='j'||k==='delete'||k==='backspace'){ev.preventDefault();sacJeter(SAC_SEL);return true;}
   if(['shift','control','alt','meta'].includes(k))return false;
   SAC_NAV=false;SAC_H='';sacDraw();return false;}   // toute autre touche sort de la navigation et repart au jeu
 $('fd-sac').addEventListener('toggle',()=>{if(!$('fd-sac').open&&SAC_NAV){SAC_NAV=false;SAC_H='';sacDraw();render();}});
 $('sac').addEventListener('click',ev=>{
-  const x=ev.target.closest('[data-x]');if(x){x.blur();sacDetruire(+x.dataset.x);return;}
+  const x=ev.target.closest('[data-x]');if(x){x.blur();sacJeter(+x.dataset.x);return;}
   const b=ev.target.closest('[data-u]');if(!b||G.over)return;b.blur();SAC_SEL=+b.dataset.u;invEquip(SAC_SEL);sacFix();SAC_H='';render();});
 function invOpen(on){const m=$('inventaire');
   if(on){if(TRAV||REST){stopTravel('Trajet interrompu.');stopRest('Repos interrompu.');}
