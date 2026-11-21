@@ -27,3 +27,4 @@ Sous chaque nom : sol ouvert, eau et bâti en % de la carte, cases de tunnel, b�
 17-vaisseau-zone-degagee-ovale.png                la zone dégagée autour du vaisseau, en ovale (ambiance « Grande prairie », brouillard coupé)
 18-life-niveau-budget-groupes-artefacts.png       fenêtre LIFE refaite : sélecteur de niveau, budget, groupes et artefacts possibles au niveau 3
 19-fabricateur-illustration-ascii.png           fabricateur : la liste à gauche, l'illustration ASCII de l'objet sélectionné à droite (ici la Vrille rapide)
+20-forage-mini-jeu-roche-dure-bio.png            mini-jeu allongé de 5 secondes : les masses de roche dure en couleur bio (bleuté), trois mines en vue

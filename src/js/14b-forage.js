@@ -45,7 +45,7 @@ const FG_MAT=[
   {n:'ROCHE',d:1.3,ch:"░▒░",dn:.95,k:['g',.52]},
   {n:'ROCHE DURE',d:2.8,ch:"▓█▓",dn:1,k:['2',.6]},
   {n:'FILON',d:1.6,ch:"▒░▒",dn:.95,k:['g',.52],ore:.12,oreCh:'◆'},
-  {n:'BASALTE',d:4.2,ch:"█▓█",dn:1,k:['g',.24]},
+  {n:'BASALTE',d:4.2,ch:"█▓█",dn:1,k:['2',.5]},   // la roche dure du mini-jeu : couleur bio (21 novembre 2026 ; gris avant)
   {n:'CRISTAUX',d:2.4,ch:"▒╬▓",dn:.95,k:['3',.8],ore:.09,oreCh:'◇'},
   {n:'NOYAU DENSE',d:5,ch:"█▓█",dn:1,k:['1',.45]}];
 /* Un profil par niveau. b : la matière de fond selon la profondeur relative (perturbée par un bruit, donc les
@@ -54,7 +54,7 @@ const FG_MAT=[
    mel(m,n) : l'entremêlement, deux matières de fond qui s'interpénètrent en lentilles. */
 const FG_NIV=[
   {D0:150,b:[[0,0],[.05,1],[.17,2]],dur:3,seuil:p=>.665-.05*p,des:.15,mel:(m,n)=>m===2&&n>.70?1:m===1&&n<.30?2:m},
-  {D0:250,b:[[0,2],[.22,4],[.5,2]],dur:5,seuil:p=>.6-.05*p,des:.05,mel:(m,n)=>m===2&&n>.68?4:m},
+  {D0:390,b:[[0,2],[.22,4],[.5,2]],dur:5,seuil:p=>.6-.05*p,des:.05,mel:(m,n)=>m===2&&n>.68?4:m},
   {D0:190,b:[[0,5],[.3,6],[.62,5],[.84,7]],dur:7,seuil:p=>.6-.07*p,des:.05,mel:(m,n)=>m===5&&n>.72?6:m}];
 const FG_T0=2.5,FG_PLG=1.3,FG_CAV=34,FG_R=6,FG_POSE=3.2,FG_FONT='"JetBrains Mono", ui-monospace, Menlo, Consolas, monospace';
 const FG_SMOKE=['#c4cdd0','#9aa5a9','#737f84','#4d585d','#2e373b'];
@@ -159,7 +159,7 @@ function skipForage(){const F=FORAGE;if(!F||F.ph>=4)return;
 function fgMines(F,dt){const bas=F.R*.7;
   while(F.mNext<F.D0-16&&F.d+bas>=F.mNext){const p=F.d/F.D0,vise=Math.random()<.7,x=Math.round(F.cx+F.vx*.9+(vise?fgRnd(-4,4):(Math.random()<.5?-1:1)*fgRnd(12,26)));
     F.mines.push({x,y:F.mNext,ok:1});if(Math.random()<.25)F.mines.push({x:x+(Math.random()<.5?-1:1)*Math.round(fgRnd(15,19)),y:F.mNext+Math.round(fgRnd(-2,2)),ok:1});
-    F.mNext+=Math.round(fgRnd(13,19)*(1-.3*p));}
+    F.mNext+=Math.round(fgRnd(17,25)*(1-.3*p));}   // rangées espacées quand la descente a été allongée de 5 secondes, pour ne pas doubler les dégâts
   for(const m of F.mines){if(!m.ok||Math.abs(m.y-F.d)>1.4||Math.abs(m.x-F.cx)>FG_R-1)continue;m.ok=0;F.touche++;F.stun=.45;F.flash=.5;F.imp=1.1;fgBoom(F,'impact');
     fgSparks(F,40,m.x,m.y,22);fgChips(F,50,m.x,m.y,18,-14,30);for(let i=0;i<14;i++)fgSmoke(F,m.x+fgRnd(-4,4),m.y+fgRnd(-2,2),fgRnd(-9,9),fgRnd(-6,3),fgRnd(1.2,2),1,2.4);
     if(typeof G!=='undefined'&&G&&G.st){const dm=Math.min(FG_MINE_DM,G.st.vie);G.st.vie-=dm;F.perdu+=dm;
@@ -171,12 +171,13 @@ function endForage(){const F=FORAGE;if(F&&F.snd)F.snd.stop();FORAGE=null;fgCv.hi
   if(F&&F.jeu&&typeof G!=='undefined'&&G&&!G.over){try{sayMore(F.passe?`Descente à l’aveugle : −${F.perdu} vie.`:F.touche?`Descente : ${F.touche} mine${F.touche>1?'s':''} touchée${F.touche>1?'s':''}, −${F.perdu} vie.`:'Descente sans une égratignure : aucune mine touchée.',F.perdu?'warn':'good');render();}catch(e){}}}
 // diriger : flèches, Q et D, 4 et 6 du pavé numérique
 function fgKey(e,v){const F=FORAGE;if(!F)return;const k=(e.key||'').toLowerCase(),c=e.code||'';
-  if(k==='arrowleft'||k==='q'||c==='Numpad4')F.kl=v;else if(k==='arrowright'||k==='d'||c==='Numpad6')F.kr=v;}
+  // commandes inversées à la demande de l'utilisateur (21 novembre 2026) : la touche de gauche pousse la foreuse à droite, et l'inverse
+  if(k==='arrowleft'||k==='q'||c==='Numpad4')F.kr=v;else if(k==='arrowright'||k==='d'||c==='Numpad6')F.kl=v;}
 addEventListener('keydown',e=>fgKey(e,1));
 addEventListener('keyup',e=>fgKey(e,0));
 // au doigt ou à la souris : maintenir d'un côté de la foreuse pour la tirer de ce côté
 function fgPointer(e,on){const F=FORAGE;if(!F)return;unlock();if(!on){F.kl=F.kr=0;return;}
-  const s=(e.clientX*F.dpr-F.w/2)/F.cw+F.camX;F.kl=s<F.cx-1?1:0;F.kr=s>F.cx+1?1:0;}
+  const s=(e.clientX*F.dpr-F.w/2)/F.cw+F.camX;F.kr=s<F.cx-1?1:0;F.kl=s>F.cx+1?1:0;}   // inversé aussi au doigt et à la souris
 fgCv.addEventListener('pointerdown',e=>fgPointer(e,true));
 fgCv.addEventListener('pointermove',e=>{if(e.buttons)fgPointer(e,true);});
 fgCv.addEventListener('pointerup',e=>fgPointer(e,false));

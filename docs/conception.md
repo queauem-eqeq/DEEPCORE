@@ -1096,18 +1096,22 @@ l'essayer. **Échap, Espace ou Entrée** la passent. Pas jouée si l'utilisateur
 Du niveau 2 au niveau 3, la descente se joue. `playForage(suite, 2)` ; Lab → **Niv3** ou Maj + F9 pour l'essayer.
 
 - La foreuse est **plus petite** (caractères d'un 52ᵉ de la hauteur d'écran, contre un 36ᵉ) et tenue en haut de l'écran :
-  on voit 0,7 écran devant elle. La descente est plus longue (250 lignes, 22 secondes environ) et la foreuse répond
+  on voit 0,7 écran devant elle. La descente est plus longue que la première et la foreuse répond
   plus vite aux commandes.
-- Des **mines explosives** naissent juste sous le bas de l'écran, une rangée toutes les 13 à 19 lignes, de plus en plus
+- Des **mines explosives** naissent juste sous le bas de l'écran, par rangées de plus en plus
   serrées. Sept sur dix sont visées sur la route de la foreuse ; une fois sur quatre, une seconde mine vient à côté.
-  18 mines environ par descente. Une mine est un pavé plein de 7 × 3 caractères, rouge et blanc en alternance.
+  Une mine est un pavé plein de 7 × 3 caractères, rouge et blanc en alternance.
 - Toucher une mine (elle saute dès qu'elle est dans le puits) coûte **12 points de vie** (`FG_MINE_DM`), de la vraie vie de la
   foreuse. **À zéro, la foreuse explose** : écran « FOREUSE DÉTRUITE », pas de niveau 3.
 - Échap passe la scène contre **30 points de vie** (`FG_PASSE_DM`), sans jamais tuer. Espace et Entrée ne passent plus.
 - **La vie restante est affichée pendant toutes les descentes**, la première comprise, sur un fond noir plein (le
   texte se lisait mal sur la roche). Le mini-jeu ajoute le compte des mines touchées et l'alerte « mine sur la route ».
-- Mesuré (`outils/scripts/test-forage.js`) : sans diriger, 5,6 mines touchées et 66 points perdus ; pilote maladroit,
-  30 points ; pilote attentif, 6 points.
+- **Retouches du 21 novembre 2026, soir** (demande de l'utilisateur) : la descente dure **5 secondes de plus** (390 lignes,
+  27 secondes environ ; les rangées de mines sont espacées de 17 à 25 lignes pour ne pas doubler les dégâts, 23 mines
+  environ) ; **la roche dure du mini-jeu est en couleur bio** (le basalte était gris) ; **les commandes de direction sont
+  inversées aux deux descentes** : la touche de gauche pousse la foreuse à droite, et l'inverse, au clavier comme au doigt.
+- Mesuré après ces retouches (`outils/scripts/test-forage.js`, douze descentes par pilote) : sans diriger, 6,5 mines
+  touchées et 75 points perdus, 4 foreuses détruites sur 12 ; pilote maladroit, 41 points ; pilote attentif, 6 points.
 
 ### Enchaînement dans le jeu (21 novembre 2026)
 
