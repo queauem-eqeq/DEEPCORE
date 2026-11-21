@@ -12,8 +12,15 @@
 const ART_LISTE=[['antenne','Antenne','Activée par la foreuse, elle reste allumée et tient en vue un disque de 30 cases de large.',[.5,1,2]],
   ['herbe','Pièces envahies d’herbe','Des pièces remplies d’herbes hautes et basses mêlées.',[.08,.18,.35]],
   ['machines','Machines','Dix machines hors d’usage posées en obstacles : elles barrent le pas, pas la vue.',[.15,.35,.6]],
-  ['terminal','Terminal','Activé par la foreuse, il affiche un texte.',[1,2,4]]];
-const ARTEFACTS_DEF=()=>({antenne:{on:1,f:1},herbe:{on:1,f:1},machines:{on:1,f:2},terminal:{on:1,f:1}});   // réglage du joueur, 20 novembre 2026
+  ['terminal','Terminal','Activé par la foreuse, il affiche un texte.',[1,2,4]],
+  // machines (21 novembre 2026, 07f-machines) : nombre de salles par carte dans la grande base ; un tiers ailleurs (le fabricateur : partout pareil)
+  ['lasers','Tourelles laser','Des tourelles encastrées dans un mur balaient la pièce par bandes. Aucun avertissement : chaque bande a son rythme.',[1,2,4]],
+  ['croix','Croix laser','Un champ de pylônes qui éclairent leurs quatre cases voisines, chacun à son rythme.',[1,2,3]],
+  ['ponts','Ponts à levier','Un fossé coupe une salle ; un levier, ailleurs, déploie le pont.',[.5,1.5,3]],
+  ['piles','Piles, socles et dépôts','Une grille d’énergie garde un dépôt. Poussez la pile sur son socle pour l’ouvrir.',[.5,1.5,3]],
+  ['station','Station de réparation','Vie et énergie au maximum, une seule fois. Le bruit attire les ennemis proches.',[.3,.7,1.2]],
+  ['fabric','Fabricateur','Fabrique des objets contre de la Matière.',[.5,1,2]]];
+const ARTEFACTS_DEF=()=>({antenne:{on:1,f:1},herbe:{on:1,f:1},machines:{on:1,f:2},terminal:{on:1,f:1},lasers:{on:1,f:1},croix:{on:1,f:1},ponts:{on:1,f:1},piles:{on:1,f:1},station:{on:1,f:1},fabric:{on:1,f:1}});   // réglage du joueur, 20 novembre 2026
 function artefactsSains(d){const o=ARTEFACTS_DEF();if(d&&typeof d==='object')for(const [k] of ART_LISTE)if(d[k]){o[k].on=d[k].on?1:0;o[k].f=[0,1,2].includes(+d[k].f)?+d[k].f:1;}return o;}
 let ARTEFACTS=ARTEFACTS_DEF();
 try{ARTEFACTS=artefactsSains(JSON.parse(localStorage.getItem('np-artefacts')||'null'));}catch(e){}

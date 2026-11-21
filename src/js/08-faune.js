@@ -11,7 +11,7 @@ const animalAt=(x,y)=>G.animals&&G.animals.find(a=>a.x===x&&a.y===y);
 const isWater=v=>v===LIQ||v===DEEP,canWalk=(v,mouille)=>!blocks(v)&&(mouille||!isWater(v));
 const mouilleOk=(sp,o)=>!!sp.nage||(!sp.sec&&(o.hunt>0||!!o.aware||!!o.enraged))||isWater(G.t[idx(o.x,o.y)]);
 const canHit=o=>Math.max(Math.abs(o.x-G.px),Math.abs(o.y-G.py))<=1&&diagOk(o.x,o.y,Math.sign(G.px-o.x),Math.sign(G.py-o.y));   // pas d'attaque à travers un coin
-const animalOk=(x,y,m)=>{if(x<1||y<1||x>=W-1||y>=H-1)return false;const v=G.t[idx(x,y)];return canWalk(v,m)&&!(x===G.px&&y===G.py)&&!animalAt(x,y)&&!beastAt(x,y);};
+const animalOk=(x,y,m)=>{if(x<1||y<1||x>=W-1||y>=H-1)return false;const v=G.t[idx(x,y)];return canWalk(v,m)&&!(G.lz&&G.lz[idx(x,y)])&&!(x===G.px&&y===G.py)&&!animalAt(x,y)&&!beastAt(x,y);};   // les insectoïdes n'entrent pas dans le champ d'un laser
 /* Deux façons de peupler la carte (19 novembre 2026).
    - spawnGroupes : le jeu. Un budget de menace achète des groupes réglés dans Lab → Groupes (voir 06b-groupes).
    - spawnAnimals / spawnBeasts : effectifs par espèce lus dans LIFE. Ne sert plus qu'au banc de combat et aux mesures. */
@@ -140,7 +140,7 @@ const PAT_CIBLE={ronde:1,territoire:1,sentinelle:1,affut:1},PAT_BLOC=8;let PAT_B
 let PATD={};
 function patBfs(tx,ty,eau){const d=new Int16Array(W*H).fill(-1),q=[idx(tx,ty)];d[q[0]]=0;
   for(let k=0;k<q.length;k++){const c=q[k],x=c%W,y=(c/W)|0;for(const[dx,dy]of DIRS){const a=x+dx,b=y+dy;if(a<1||b<1||a>=W-1||b>=H-1)continue;
-    const j=idx(a,b),v=G.t[j];if(d[j]>=0||!diagOk(x,y,dx,dy)||(eau?!isWater(v):!canWalk(v,false)))continue;d[j]=d[c]+1;q.push(j);}}return d;}
+    const j=idx(a,b),v=G.t[j];if(d[j]>=0||!diagOk(x,y,dx,dy)||(eau?!isWater(v):!canWalk(v,false))||(G.lz&&G.lz[j]))continue;d[j]=d[c]+1;q.push(j);}}return d;}
 const patD=P=>{const k=P.tx+','+P.ty+','+P.eau;return PATD[k]||(PATD[k]=patBfs(P.tx,P.ty,P.eau));};
 // n points accessibles depuis le point de départ, entre a et b cases de lui, écartés les uns des autres, rangés en boucle
 function patPoints(P,n,a,b){const d=patBfs(P.hx,P.hy,P.eau),pts=[];
@@ -245,6 +245,7 @@ const beastAt=(x,y)=>G.beasts&&G.beasts.find(b=>b.x===x&&b.y===y);
 function beastFits(b,x,y){const spB=BEASTS[b.sp],mB=mouilleOk(spB,b);
   for(const[dx,dy]of FOOT){const cx=x+dx,cy=y+dy;if(cx<1||cy<1||cx>=W-1||cy>=H-1)return false;const v=G.t[idx(cx,cy)];
   if(spB.aqua&&!isWater(v))return false;   // le brochon ne quitte jamais l'eau
+  if(!(b.hunt>0)&&G.lz&&G.lz[idx(cx,cy)])return false;   // calme, il n'entre pas dans le champ d'un laser ; en chasse, il fonce (21 novembre 2026)
   if(!canWalk(v,mB)||(cx===G.px&&cy===G.py)||animalAt(cx,cy))return false;const o=beastAt(cx,cy);if(o&&o!==b)return false;}return true;}
 const beastCache=b=>!!BEASTS[b.sp].cache&&G.t[idx(b.x,b.y)]===DEEP;   // le brochon en eau profonde : invisible, même à côté
 const beastVisible=b=>!beastCache(b)&&(!fog||FOOT.some(([dx,dy])=>vis[idx(b.x+dx,b.y+dy)]));

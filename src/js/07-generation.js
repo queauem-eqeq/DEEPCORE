@@ -244,16 +244,16 @@ const pvDe=sp=>sp.pv,dmgDe=sp=>sp.dmin+Math.floor(Math.random()*(sp.dmax-sp.dmin
 // Gisements pour une carte de taille 2 ; les autres tailles en proportion de leur surface.
 const GISEMENTS={metal:3,mat:1};
 let SANS_VAISSEAU=false;
-const NIV_MAX=2;   // nombre de niveaux (21 novembre 2026 : la descente revient, deux pour commencer)
+const NIV_MAX=3;   // nombre de niveaux (21 novembre 2026 : la descente revient ; trois avec la grande base)
 // Génère la carte à partir des réglages en cours du menu Monde (relief, taille, faune), avec le vaisseau.
-function niveau(){drilling=false;
+function niveau(refait){drilling=false;
   // structures bâties (07b), avant la roche dure et les métaux. Recette à complexe enfoui : si le complexe n'a pas tenu dans le
   // massif, on retire une carte entière (dix fois au plus) plutôt que de le poser en terrain ouvert.
   const cv=!!(RECETTES[GEN.recette]||{}).cavernes;let mieux=null;
   for(let k=0;k<10;k++){ZESSAI=k;genPlanet();G.w=W;G.h=H;batiments();
-    if(cv){const e=cvBilan();if(!mieux||e<mieux.e)mieux={e,G,ZONE,ZINFO,SECT,CVT};if(e<=1.6||k>=5)break;continue;}   // cavernes : la carte est mesurée ; trop loin de ce qui est demandé, elle est refaite (six au plus) et la meilleure est gardée
+    if(cv){const e=cvBilan();if(!mieux||e<mieux.e)mieux={e,G,ZONE,ZINFO,SECT,CVT,BD:BATI_DER};if(e<=1.6||k>=5)break;continue;}   // cavernes : la carte est mesurée ; trop loin de ce qui est demandé, elle est refaite (six au plus) et la meilleure est gardée
     if(G.batis.length||!ZONE||!(ENFOUI()||GEN.structure>0))break;}
-  if(mieux&&mieux.G!==G){G=mieux.G;ZONE=mieux.ZONE;ZINFO=mieux.ZINFO;SECT=mieux.SECT;CVT=mieux.CVT;}
+  if(mieux&&mieux.G!==G){G=mieux.G;ZONE=mieux.ZONE;ZINFO=mieux.ZINFO;SECT=mieux.SECT;CVT=mieux.CVT;BATI_DER=mieux.BD;}
   {const o=cv&&typeof document!=='undefined'&&document.getElementById('genObt');if(o)o.textContent=obtenuTxt();}
   G.amb=ambNom(GEN.recette,GEN.amb);   // nom de l'ambiance, affiché dans le Statut et à l'arrivée
   durcir();   // la roche dure avant les métaux : ils n'y apparaissent jamais
@@ -262,6 +262,9 @@ function niveau(){drilling=false;
   G.items={};G.tracks={};G.lastDir=null;G.beasts=[];G.blood={};G.fv=2;
   G.inv=invTest();G.log=[];
   G.st.matiere=G.st.matiere||0;G.sonarAt=(G.turn||0)+10+Math.floor(Math.random()*11);
+  if(typeof baseFinir==='function'&&(RECETTES[GEN.recette]||{}).base)baseFinir();
+  machines();
+  if(G.sites[0]&&accesSite()<0&&(refait||0)<3)return niveau((refait||0)+1);   // garde-fou : un site inatteignable, la carte est refaite (trois fois au plus)
   spawnGroupes();lastAct='move';palBiome(null);buildTiles();turnStealth();computeFOV();}
 const fauneTxt=()=>[...new Set([...(G.animals||[]).map(a=>SPECIES[a.sp].n),...(G.beasts||[]).map(b=>BEASTS[b.sp].n)])].join(', ')||'aucune';
 function newGame(){SANS_VAISSEAU=false;niveau();G.niv=1;   // G n'existe qu'une fois la carte générée
@@ -279,7 +282,7 @@ function nouvellePartie(){newGame();started=true;$('overlay').hidden=true;render
    posés seulement là où leurs huit voisines sont libres : ils ne peuvent donc fermer aucun passage. Rien sur l'eau, les
    gouffres, les bâtiments, un objet, une clé ou une créature. */
 function eboulis(){
-  const t=G.t,R=5,sol=v=>v===GROUND||v===GRASS||v===FLAT,libre=(x,y)=>{const i=idx(x,y);return !(G.items&&G.items[i]&&G.items[i].length)&&!(G.cles&&G.cles[i])&&!beastAt(x,y)&&!animalAt(x,y)&&!G.sites.some(s=>s.x===x&&s.y===y);};
+  const t=G.t,R=5,dansBase=G.arrivee==='base',sol=v=>v===GROUND||v===GRASS||v===FLAT||(dansBase&&v===FLOOR),libre=(x,y)=>{const i=idx(x,y);if(dansBase&&((G.soc&&G.soc[i]!=null)||(G.lz&&G.lz[i])||B_PORTE(i)))return false;return !(G.items&&G.items[i]&&G.items[i].length)&&!(G.cles&&G.cles[i])&&!beastAt(x,y)&&!animalAt(x,y)&&!G.sites.some(s=>s.x===x&&s.y===y);};
   for(let dy=-R;dy<=R;dy++)for(let dx=-R;dx<=R;dx++){const x=G.px+dx,y=G.py+dy,d=Math.hypot(dx,dy);if((!dx&&!dy)||d>R+.5||x<1||y<1||x>=W-1||y>=H-1)continue;
     if(sol(t[idx(x,y)])&&libre(x,y)&&Math.random()<.85*Math.pow(1-d/(R+1),1.6))t[idx(x,y)]=RUBBLE;}
   for(let k=0,n=rnd(1,3),e=0;k<n&&e<60;e++){const a=Math.random()*6.283,d=1.6+Math.random()*2.4,x=G.px+Math.round(Math.cos(a)*d),y=G.py+Math.round(Math.sin(a)*d);
@@ -289,7 +292,7 @@ function eboulis(){
   computeFOV();}
 // remet le menu Monde tel qu'il était avant un tirage provisoire (les réglages d'une autre recette ne doivent pas y traîner)
 function genRemet(sauve){for(const k in GEN)if(!(k in sauve))delete GEN[k];Object.assign(GEN,sauve);saveGen();buildGen();}
-const RECETTE_NIV=n=>n<=1?'atterrissage':'cavernes';   // la recette de chaque niveau de la descente (le niveau 1 suit le menu Monde)
+const RECETTE_NIV=n=>n<=1?'atterrissage':n===2?'cavernes':'base';   // la recette de chaque niveau de la descente (le niveau 1 suit le menu Monde)
 function niveauSuivant(hasard){   // hasard : tirer les réglages même si la case « Réglages au hasard » n'est pas cochée (Lab → Niv2)
   const sauve=JSON.parse(JSON.stringify(GEN)),inv=G.inv,st=G.st,tour=G.turn,dist=G.dist,niv=(G.niv||1)+1;
   recRange();recPrend(RECETTE_NIV(niv));if(hasard||GEN.hasard)hasardReglages();SANS_VAISSEAU=true;
@@ -297,7 +300,8 @@ function niveauSuivant(hasard){   // hasard : tirer les réglages même si la ca
   SANS_VAISSEAU=false;genRemet(sauve);
   G.inv=inv;G.st=st;G.niv=niv;G.turn=tour;G.dist=dist;G.over=null;drilling=false;
   eboulis();
-  say(`Niveau ${G.niv}${G.amb?' — '+G.amb:''}. La foreuse a percé le plafond et s'est écrasée plus bas. Un nouveau site de forage est signalé.`,'info');}
+  say(G.arrivee==='base'?`Niveau ${G.niv}${G.amb?' — '+G.amb:''}. La foreuse a traversé le plafond d’une salle : elle est dans une base enfouie. Un site de forage est signalé plus loin.`:`Niveau ${G.niv}${G.amb?' — '+G.amb:''}. La foreuse a percé le plafond et s'est écrasée plus bas. Un nouveau site de forage est signalé.`,'info');}
+const B_PORTE=i=>!!(BATI_DER&&BATI_DER.B.porte[i])||D4.some(([dx,dy])=>{const v=G.t[idx(i%W+dx,((i/W)|0)+dy)];return v===DOOR||v===LOCK;});   // devant un passage : pas de débris
 
 /* ---------- Bestiaire : édition des statistiques ---------- */
 const BFIELDS=[['v','Vitesse',1,10],['pv','PV',1,200],['dmin','Dégâts min',0,100],['dmax','Dégâts max',0,100],['pre','Précision',0,250],['def','Défense',0,150],['crit','Crit %',0,100]];

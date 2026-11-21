@@ -11,6 +11,8 @@ function batiTuile(t,x,y,put){
   else if(t===MACHINE)put(TL['mach'+((G.art&&G.art[idx(x,y)])||0)],1);
   else if(t===ANTENNA)put(G.art&&G.art[idx(x,y)]===1?TL.antenneOn:TL.antenne,1);
   else if(t===TERMINAL)put(TL.terminal,1);
+  else if(t===FLOOR){if(G.soc&&G.soc[idx(x,y)]!=null)put(TL.socle,1);}
+  else if(machTuile(t))machTuileRendu(t,x,y,put);
   else if(t===DOOR){const cote=y>0&&y<H-1&&G.t[idx(x,y-1)]===WALL&&G.t[idx(x,y+1)]===WALL;   // porte percée dans un mur vertical
     put(porteOuverte(x,y)?(cote?TL.doorOpenV:TL.doorOpen):TL.door,1);}
 }
@@ -139,7 +141,7 @@ function cibles_cav(total){
   let k=Math.max(1,Math.min(6,Math.round(autour('cvBati',.2))));k=Math.max(1,Math.min(k,Math.floor(total/50)));CVT.bati=k;
   const w=Array.from({length:k},()=>.65+Math.random()*.7),sw=w.reduce((a,b)=>a+b,0);
   return w.map(v=>Math.max(45,Math.round(total*v/sw)));}
-function batiments(){
+function batiments(){BATI_DER=null;
   G.batis=[];G.cles={};G.pb={};G.art={};G.artN=null;G.tun={};const pct=ENFOUI()?100:GEN.structure||0,N=W*H;if(pct<=0)return;
   // complexe enfoui (recette à zones) : il ne tient que dans le massif, à plus de 5 cases de la lisière et du bord de carte (la place d'un tunnel), et n'en prend pas la moitié (le reste est pour les tunnels)
   const enf=!!(ZONE&&ENFOUI()),cav=enf&&!!(RECETTES[GEN.recette]||{}).cavernes,dE=enf?distExt():null,mg=cav?2:W>=72?5:W>=48?4:3,mE=cav?3:mg;let zb=null,mN=0;   // cav : recette cavernes, bâtiments enchâssés entre les cavernes (21 novembre 2026)
@@ -215,7 +217,7 @@ function batiments(){
       if(ok&&connectedAll(t)){
         G.batis=strs.map(S=>({style:S.st.n,pieces:S.pieces.filter(p=>p.g!=='couloir').length,cases:S.emprise,entrees:S.entrees.map(e=>[e.x,e.y])}));
         G.pb={};for(const i of garde)if(t[i]===BRIDGE)G.pb[i]=1;   // les ponts des pièces, pour le rendu
-        siteAuFond(B,strs);petites(B,strs);const sec=secrets(B,strs);verrous(B,strs,sec);artefacts(B,strs);return;}
+        siteAuFond(B,strs);petites(B,strs);const sec=secrets(B,strs);verrous(B,strs,sec);artefacts(B,strs);BATI_DER={B,strs};return;}
     }
     for(let i=0;i<N;i++)G.t[i]=t0[i];
   }

@@ -11,6 +11,7 @@ const TILE_LIST=[
   ['Objets au sol',[['o_foreuse','Foreuse'],['o_usine','Coque d’usine'],['o_servo','Servomoteur'],['o_optique','Téléobjectif'],['o_viseur','Viseur laser'],['o_conden','Condensateur'],['o_gyro','Gyroscope'],['o_stabil','Stabilisateur'],['o_accu','Accumulateur'],['o_repar','Réparobots'],['o_batterie','Batterie'],['o_fumigene','Fumigène'],['o_charge','Charge sismique']]],
   ['Objets',[['siteUnknown','Site'],['objet','Objet au sol (générique)'],['ore1','Éclats petits (montagne)'],['ore2','Éclats moyens (montagne)'],['ore','Éclats gros (montagne)'],['oreSol1','Éclats petits (sol)'],['oreSol2','Éclats moyens (sol)'],['oreSol','Éclats gros (sol)']]],
   ['Artefacts',[['antenne','Antenne'],['antenneOn','Antenne allumée'],['terminal','Terminal'],['mach0','Machine : Tuyaux'],['mach1','Machine : Serveur'],['mach2','Machine : Caisses'],['mach3','Machine : Ordinateur'],['mach4','Machine : Établi'],['mach5','Machine : Cuve'],['mach6','Machine : Générateur'],['mach7','Machine : Console'],['mach8','Machine : Turbine'],['mach9','Machine : Armoire électrique']]],
+  ['Machines',[['tourelle','Tourelle laser'],['tourelleOn','Tourelle laser (tir)'],['pylone','Croix laser'],['pyloneOn','Croix laser (allumée)'],['pile','Pile énergétique'],['socle','Socle'],['socleOn','Socle alimenté'],['levier','Levier'],['levierOn','Levier (actionné)'],['grille','Grille d’énergie'],['station','Station de réparation'],['stationOff','Station (vide)'],['chargeur','Chargeur de pile'],['fabric','Fabricateur']]],
   ['Vaisseau',[['ship','Cargo']]],
   ['Intro',[['nuage0','Nuage plein'],['nuage1','Nuage texturé'],['nuage2','Bord diagonal'],['nuage3','Bord croisé'],['nuage4','Bord rayé'],['nuage5','Bord tramé']]]];
 const TILE_DEPS={robot_u:['robot_u','robot_r','robot_d','robot_l'],an0r:['an0r','an0l'],bz0r:['bz0r','bz0l'],bz1r:['bz1r','bz1l'],deep0:['deep0','deep1'],grass0:['grass0'],gem:['gem','gemDim','gemHole'],ship:['ship',...SHIP_KEYS]};
@@ -52,6 +53,7 @@ for(const [,l] of TILE_LIST)for(const [k] of l)PAT_ORIG[k]=k==='cursor'?CURSOR_D
 for(const k in PAT_ORIG)if(k!=='cursor'&&k!=='ship')PAT[k]=(x,y)=>TF(k)(x,y);
 // tuiles du vaisseau posées case par case sur la carte, découpées dans l'image d'ensemble
 for(const k of SHIP_KEYS){const [,cx,cy]=k.split('_').map(Number);PAT[k]=(x,y)=>TF('ship')(cx*16+x,cy*16+y);}
+for(const k of ['tourelle','tourelleOn']){PAT[k+'_d']=(x,y)=>TF(k)(x,y);PAT[k+'_u']=(x,y)=>TF(k)(15-x,15-y);PAT[k+'_l']=(x,y)=>TF(k)(y,15-x);PAT[k+'_r']=(x,y)=>TF(k)(15-y,x);TILE_DEPS[k]=[k,k+'_d',k+'_u',k+'_r',k+'_l'];}   // tourelle : quatre sens de tir
 PAT.robot_r=(x,y)=>TF('robot_u')(y,15-x);PAT.robot_d=(x,y)=>TF('robot_u')(15-x,15-y);PAT.robot_l=(x,y)=>TF('robot_u')(15-y,x);
 for(const k of ['an0',...BEASTS.map((_,i)=>'bz'+i)])PAT[k+'l']=(x,y)=>TF(k+'r')(15-x,y);
 // mine armée : la tuile de la mine, bio en rouge et accent en blanc ; elle alterne avec la tuile normale (clignotement)

@@ -58,6 +58,17 @@ const AMBIANCES={
   boyaux:{n:'Dédale de boyaux',v:{eau:2,herbe:2,cvDispo:'mel',cvPart:15,cvTaille:45,cvVar:30,cvEcart:3,cvSinu:90,cvBoyaux:6,cvCuls:6,cvLarg:1,cvMont:0,cvGouf:0,cvBati:3,cvSurf:8,cvPieces:3}},
   bunker:{n:'Bunker',v:{eau:2,herbe:2,cvDispo:'cite',cvPart:14,cvTaille:140,cvVar:20,cvBati:1,cvSurf:34,cvPieces:20,cvPortes:1,sStyle:'forage',sVerrous:3,sOuvert:5}},
   eboulis:{n:'Chaos d’éboulis',v:{eau:2,herbe:6,grain:35,regroupe:0,cvPart:46,cvTaille:360,cvForme:95,cvVar:60,cvRoc:8,cvMont:14,cvGouf:2,cvBati:1,cvSurf:6}}},
+ base:{
+  citadelle:{n:'Citadelle',v:{herbe:10,eau:4,cvDispo:'cite',cvBati:5,cvSurf:42,cvPortes:2,bsTunnels:90,sStyle:'forage',sVerrous:2}},
+  ruche:{n:'Ruche',v:{herbe:6,eau:2,cvDispo:'mel',cvBati:6,cvSurf:36,cvPieces:7,cvPortes:3,bsTunnels:180,bsSalles:3,sStyle:'avant'}},
+  ailes:{n:'Deux ailes',v:{herbe:12,eau:6,cvDispo:'cote',cvBati:2,cvSurf:34,cvPieces:14,cvPortes:2,bsTunnels:120}},
+  piege:{n:'Complexe piégé',v:{herbe:3,eau:1,cvDispo:'cite',cvBati:4,cvSurf:40,bsMachines:220,sVerrous:3,sStyle:'forage',bsTunnels:60}},
+  morte:{n:'Base morte',v:{herbe:45,eau:12,grain:80,cvDispo:'mel',cvBati:5,cvSurf:34,bsMachines:40,sStyle:'ruine',sOuvert:75,sVerrous:0,sSecrets:3,cvPart:13}},
+  mine:{n:'Galeries de mine',v:{herbe:2,eau:2,cvDispo:'mel',cvBati:4,cvSurf:24,cvPieces:5,bsTunnels:290,bsSalles:5,cvCuls:5,cvRoc:6,sStyle:'avant'}},
+  serres:{n:'Serres',v:{herbe:75,eau:6,grain:85,regroupe:40,cvDispo:'cav',cvPart:20,cvTaille:560,cvBati:4,cvSurf:30,sOuvert:60,cvMont:0,cvGouf:0}},
+  reservoirs:{n:'Réservoirs',v:{eau:58,herbe:4,grain:100,regroupe:100,cvDispo:'cote',cvPart:18,cvTaille:500,cvBati:4,cvSurf:32,cvMont:0,cvGouf:0,cvRoc:0}},
+  blockhaus:{n:'Blockhaus',v:{herbe:2,eau:1,cvDispo:'cite',cvBati:3,cvSurf:40,cvPieces:18,cvPortes:1,sStyle:'forage',sVerrous:3,sOuvert:5,bsTunnels:50,bsSalles:1}},
+  hangars:{n:'Hangars de maintenance',v:{herbe:4,eau:2,cvDispo:'mel',cvBati:4,cvSurf:42,cvPortes:2,sStyle:'hangar',sOuvert:55,bsTunnels:100}}},
  classique:{
   isole:{n:'Avant-poste isolé',v:{herbe:22,eau:8,montagne:10,gouffre:2,structure:5,sNb:1,sStyle:'avant',sPieces:4}},
   citadelle:{n:'Citadelle',v:{herbe:8,eau:3,montagne:6,gouffre:1,structure:46,sNb:1,sStyle:'forage',sEntrees:2,sVerrous:3,sOuvert:10}},
@@ -76,7 +87,7 @@ function ambiance(a,rec){rec=rec||GEN.recette;const A=(AMBIANCES[rec]||{})[a];if
   Object.assign(GEN,AMB_DEF,A.v);GEN.amb=a;}
 // Ce que la dernière carte « cavernes » a donné, sous les réglages (G.obt, rempli par cvBilan)
 function obtenuTxt(){const r=n=>Math.round(n),N=SIZES[GEN.taille][0]*SIZES[GEN.taille][1],v=Math.max(1,Math.min(30,Math.round(N*GEN.cvPart/100/Math.max(16,GEN.cvTaille*Math.max(.3,Math.min(1,N/6144))))));
-  let s=`Ces réglages visent environ ${v} caverne${v>1?'s':''}.`;const o=typeof G!=='undefined'&&G&&G.recette==='cavernes'&&G.obt;
+  let s=`Ces réglages visent environ ${v} caverne${v>1?'s':''}.`;const o=typeof G!=='undefined'&&G&&(RECETTES[G.recette]||{}).cavernes&&G.obt;
   if(o)s+=` Carte en cours : ${r(o.cav)} % de cavernes (visé ${r(o.vise.cav)}) · ${o.nb} caverne${o.nb>1?'s':''} (${o.vise.nb}) · ${o.bat} bâtiment${o.bat>1?'s':''} (${o.vise.bat}) · ${r(o.surf)} % bâti (${r(o.vise.surf)}) · ${({mel:'zones mélangées',cote:'un côté chacun',cite:'cité au centre',cav:'cavernes au centre'})[o.dispo]}.`;
   return s;}
 const RECETTES={atterrissage:{n:'Niveau 1 : extérieur, montagne, complexe enfoui',zones:true,enfoui:true,titre:'Massif, tunnels, complexe',
@@ -98,6 +109,16 @@ const RECETTES={atterrissage:{n:'Niveau 1 : extérieur, montagne, complexe enfou
       ['sub','Sol des cavernes'],['num','cvMont','Montagne (%)',0,15,4,[0,8]],['num','cvGouf','Gouffre (%)',0,10,3,[0,6]],['num','cvRoc','Rochers épars (%)',0,8,2,[0,4]],
       ['sub','Bâtiments'],['num','cvBati','Nombre de bâtiments',1,6,2,[1,4]],['num','cvSurf','Surface bâtie (% de la carte)',5,40,14,[8,24]],
       ['num','cvPieces','Pièces par bâtiment (0 : automatique)',0,25,0],['num','cvPortes','Portes par bâtiment',1,3,1,[1,2]],
+      R_STYLE,R_OUVERT,R_VERROUS,R_SECRETS]},
+  base:{n:'Niveau 3 : grande base, poches extérieures, tunnels',zones:true,enfoui:true,cavernes:true,base:true,sansVaisseau:true,titre:'Base, poches, tunnels',
+    aide:'La foreuse débouche dans une aile de la base. Les ailes sont reliées par un réseau de tunnels ; une ou deux poches de terrain naturel servent d’extérieur. Les salles-machines (lasers, ponts, piles, dépôts) se règlent ici et dans Lab → Artefacts. Chaque curseur donne un centre. '+R_AIDE,
+    regl:[R_AMB('base'),['sel','cvDispo','Disposition',[['','Au hasard'],['mel','Ailes et poches mêlées'],['cote','Base d’un côté, poches de l’autre'],['cite','Base au centre'],['cav','Poche au centre']],'cite',['mel','cote','cite']],
+      ['sub','Base'],['num','cvBati','Ailes de la base',2,6,5,[4,6]],['num','cvSurf','Surface bâtie (% de la carte)',18,45,38,[32,42]],
+      ['num','cvPieces','Pièces par aile (0 : automatique)',0,25,0],['num','cvPortes','Portes par aile',1,3,2,[2,3]],['num','bsMachines','Salles-machines (% de la fréquence du Lab)',0,250,100,[70,160]],
+      ['sub','Poches extérieures'],['num','cvPart','Part de la carte (%)',8,22,9,[8,13]],['num','cvTaille','Taille d’une poche (cases)',120,600,320,[240,420]],['num','cvForme','Forme (0 : ronde · 100 : déchiquetée)',0,100,50,[20,80]],
+      ['sub','Tunnels'],['num','bsTunnels','Galeries en plus (cases)',0,300,110,[60,200]],['num','bsSalles','Salles de tunnel',0,5,2,[1,4]],
+      ['num','cvBoyaux','Boucles entre poches',0,6,1,[0,2]],['num','cvCuls','Culs-de-sac des poches',0,6,2,[0,3]],['num','cvSinu','Sinuosité',0,100,50,[20,80]],
+      ['sub','Sol des poches'],['num','cvMont','Montagne (%)',0,15,3,[0,8]],['num','cvGouf','Gouffre (%)',0,10,2,[0,6]],['num','cvRoc','Rochers épars (%)',0,8,2,[0,4]],
       R_STYLE,R_OUVERT,R_VERROUS,R_SECRETS]},
   classique:{n:'Classique : terrain partout, bâtiments posés dessus',titre:'Structures',aide:R_AIDE,
     regl:[R_AMB('classique'),R_STYLE,['sel','sNb','Nombre de structures',[[0,'Une ou deux'],[1,'Une'],[2,'Deux']],0,[0,1,2]],['num','structure','Surface bâtie (%)',0,70,10,[6,22]],

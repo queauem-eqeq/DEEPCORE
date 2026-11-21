@@ -69,7 +69,7 @@ function stepDur(v,run){return DUR.pas*5/robotVit()*slowOf(v)*(run?SPRINT_MULT:1
 function portesPrises(){const s=new Set();for(const l of [G.animals,G.beasts])for(const o of l||[]){const i=idx(o.x,o.y);if(G.t[i]===DOOR)s.add(i);}return s;}
 function portesBruit(av){for(const i of portesPrises())if(!av.has(i)&&vis[i]){SFX.porte(.6);return;}}
 function pass(d,wait){G.time=(G.time||0)+d;G.debt=(G.debt||0)+d;
-  while(G.debt>=TICK-1e-6&&!G.over){G.debt-=TICK;if(wait)drift(true);const av=portesPrises();animalsAct();beastsAct();portesBruit(av);effTick();regen(wait);}
+  while(G.debt>=TICK-1e-6&&!G.over){G.debt-=TICK;if(wait)drift(true);const av=portesPrises();animalsAct();beastsAct();machTick();portesBruit(av);effTick();regen(wait);}
   if(!G.over)turnStealth();}                            // une action rapide peut ne faire battre personne : la portée affichée reste juste
 function toggleSprint(){if(!G||G.over)return;
   if(!G.sprint&&G.st.energie<SPRINT_COST){say(`Énergie insuffisante pour courir (${Math.floor(G.st.energie)}/${SPRINT_COST}).`,'warn');SFX.blocked();render();return;}
@@ -115,6 +115,7 @@ function tryMove(dx,dy){
   if(v===LOCK){const i=idx(nx,ny);
     if(!nbCles()){say('Porte verrouillée : il faut une clé.');SFX.blocked();render();return;}
     invTake(G.inv.findIndex(o=>o.k==='cle'));sacFix();SAC_H='';G.t[i]=DOOR;G.turn++;G.msg=null;SFX.serrure();say('La clé tourne dans la serrure : la porte est ouverte.','good');pass(DUR.wait||100);computeFOV();render();return;}
+  if(machTuile(v)){if(machBump(nx,ny,dx,dy)!=='go')return;v=G.t[idx(nx,ny)];}
   if(v===ANTENNA){antenneUse(idx(nx,ny));return;}
   if(v===TERMINAL){terminalUse(idx(nx,ny));return;}
   if(v===MACHINE){say('Machine hors d’usage : elle barre le passage. Une charge sismique la réduirait en gravats.');SFX.blocked();render();return;}

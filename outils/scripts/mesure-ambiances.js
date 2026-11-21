@@ -7,7 +7,7 @@
       for(let k=0;k<K;k++){recRange();recPrend(rec);ambiance(a,rec);GEN.taille=MA.taille||3;SANS_VAISSEAU=NIV[rec]>1;const t0=performance.now();niveau();G.niv=NIV[rec];SANS_VAISSEAU=false;ms+=performance.now()-t0;
         const N=W*H,ok=v=>!blocks(v)||v===LOCK||v===SECRET||(typeof machPassable==='function'&&machPassable(v)),d=new Int32Array(N).fill(-1),q=[idx(G.px,G.py)];d[q[0]]=0;
         for(let i=0;i<q.length;i++){const c=q[i],x=c%W,y=(c/W)|0;for(const [dx,dy] of D4){const j=idx(x+dx,y+dy);if(d[j]<0&&ok(G.t[j])){d[j]=d[c]+1;q.push(j);}}}
-        const ds=G.sites[0]?d[idx(G.sites[0].x,G.sites[0].y)]:-1;if(ds>=0){acc++;dist+=ds;}
+        const ds=typeof accesSite==='function'?accesSite():(G.sites[0]?d[idx(G.sites[0].x,G.sites[0].y)]:-1);if(ds>=0){acc++;dist+=ds;}
         for(let i=0;i<N;i++){const v=G.t[i];if(v===GROUND||v===GRASS||v===FLAT||v===RUBBLE)ouv++;else if(isWater(v))eau++;else if(v===CHASM)gou++;else if(v===FLOOR)bat++;else if(v>=MACHINE)mach++;}
         if(!(G.batis||[]).length)sansB++;pie+=(G.batis||[]).reduce((s,b)=>s+(b.pieces||0),0);tun+=G.tunN||0;genRemet(sauve);}
       const N=SIZES[MA.taille||3][0]*SIZES[MA.taille||3][1],f=v=>(v*100/K/N).toFixed(0).padStart(2);

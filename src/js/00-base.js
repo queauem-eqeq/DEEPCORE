@@ -4,7 +4,7 @@ const SIZES=[null,[32,22],[48,32],[72,48],[96,64],[144,96]];
 function setSize(n){const s=SIZES[n]||SIZES[4];W=s[0];H=s[1];F=W/96;}
 // Échelle de génération : 1 pour une planète de 96 × 64 (taille actuelle) ; les tailles de relief, lacs et distances suivent
 let F=W/96;const SZ=(v,mn)=>Math.max(mn||2,Math.round(v*F));
-const GROUND=0,ROCK=1,MOUNT=2,LIQ=3,GRASS=4,FLAT=5,DEEP=6,CHASM=7,BRIDGE=8,RUBBLE=9,LOW=10,SHIP=11,DECK=12,HARD=13,WALL=14,FLOOR=15,DOOR=16,PILLAR=17,LOCK=18,SECRET=19,MACHINE=20,ANTENNA=21,TERMINAL=22;   // SECRET = porte dérobée : en tout point un mur, jusqu'à ce qu'on la découvre en se reposant à côté   // LOCK = porte verrouillée (19 novembre 2026) : un mur tant qu'on n'a pas de clé
+const GROUND=0,ROCK=1,MOUNT=2,LIQ=3,GRASS=4,FLAT=5,DEEP=6,CHASM=7,BRIDGE=8,RUBBLE=9,LOW=10,SHIP=11,DECK=12,HARD=13,WALL=14,FLOOR=15,DOOR=16,PILLAR=17,LOCK=18,SECRET=19,MACHINE=20,ANTENNA=21,TERMINAL=22,TURRET=23,PYLON=24,PILE=25,FABRIC=26,LEVIER=27,GRILLE=28,STATION=29,CHARGEUR=30;   // 23 à 30 : machines (07f-machines)   // SECRET = porte dérobée : en tout point un mur, jusqu'à ce qu'on la découvre en se reposant à côté   // LOCK = porte verrouillée (19 novembre 2026) : un mur tant qu'on n'a pas de clé
 // Bâtiments (18 novembre 2026) : WALL = mur bâti, FLOOR = sol bâti, DOOR = porte (fermée tant que personne n'est dessus), PILLAR = pilier.
 // Murs et piliers : infranchissables, opaques, et la foreuse ne les entame pas ; seule la charge sismique les ouvre.
 const bati=v=>v===WALL||v===PILLAR||v===LOCK||v===SECRET;
