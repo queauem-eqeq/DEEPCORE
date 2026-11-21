@@ -38,7 +38,11 @@ function fabBuild(){const l=fabListe(FAB_CASE),m=G.st.matiere||0;FAB_SEL=Math.ma
   $('fabMat').textContent=`Matière en réserve : ${m}`;
   $('fabList').innerHTML=l.map((k,n)=>{const p=FAB_PRIX[k],ok=m>=p;
     return `<button class="fabl${n===FAB_SEL?' sel':''}${ok?'':' cher'}" data-n="${n}" aria-disabled="${ok?'false':'true'}"><b>${ITEMS[k].n}</b><span>${fabEffet(k)}</span><i>${p}</i></button>`;}).join('');
-  const b=$('fabList').querySelector('.sel');if(b)b.scrollIntoView({block:'nearest'});}
+  const b=$('fabList').querySelector('.sel');if(b)b.scrollIntoView({block:'nearest'});fabVue();}
+// à droite : l'illustration ASCII de l'objet sélectionné (la même que dans l'inventaire), son nom et sa description
+function fabVue(){const k=fabListe(FAB_CASE)[FAB_SEL],d=k&&ITEMS[k];if(!d){$('fabVue').innerHTML='';return;}
+  $('fabVue').innerHTML=`<div class="iart" aria-hidden="true">${d.art?artHTML(d):''}</div><b>${d.n}</b><p>${fabEffet(k)}</p><p>${d.d||''}</p>`;}
+function fabSel(n){if(n===FAB_SEL)return;FAB_SEL=n;for(const b of $('fabList').children)b.classList.toggle('sel',+b.dataset.n===n);fabVue();}
 function fabOpen(i){if(TRAV)stopTravel();if(EXPL)stopExplore();FAB_CASE=i;FAB_SEL=0;$('fabMsg').textContent='Choisissez un objet : Entrée ou clic pour le fabriquer.';fabBuild();$('fabric').hidden=false;$('fabric').querySelector('.mcard').focus();SFX.spot();}
 function fabClose(){$('fabric').hidden=true;FAB_CASE=-1;render();}
 function fabFais(n){const l=fabListe(FAB_CASE),k=l[n];if(!k||G.over)return;FAB_SEL=n;const p=FAB_PRIX[k],m=G.st.matiere||0;
@@ -55,4 +59,6 @@ function fabKey(ev){const l=fabListe(FAB_CASE);
   else if(ev.key==='ArrowUp'||ev.key==='z'||ev.key==='w'){ev.preventDefault();FAB_SEL=(FAB_SEL+l.length-1)%l.length;fabBuild();}
   else if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();fabFais(FAB_SEL);}}
 $('fabClose').onclick=fabClose;$('fabric').addEventListener('pointerdown',ev=>{if(ev.target===$('fabric'))fabClose();});
+$('fabList').addEventListener('pointerover',e=>{const b=e.target.closest('button[data-n]');if(b)fabSel(+b.dataset.n);});   // survol ou focus : l'illustration suit
+$('fabList').addEventListener('focusin',e=>{const b=e.target.closest('button[data-n]');if(b)fabSel(+b.dataset.n);});
 $('fabList').addEventListener('click',e=>{const b=e.target.closest('button[data-n]');if(b)fabFais(+b.dataset.n);});

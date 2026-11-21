@@ -422,3 +422,12 @@ kbd{font-family:var(--mono);color:var(--fg);border:1px solid var(--line);padding
 #life .sub span{float:right;font-size:11px;color:var(--dim)}
 #life .gpats{margin:0 0 10px}
 .gpat.inactif{border-color:var(--line);color:var(--dim)}
+
+/* Fabricateur : la liste à gauche, l'illustration de l'objet sélectionné à droite (21 novembre 2026) */
+#fabric .mcard{width:min(940px,100%)}
+.fabwrap{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:16px;align-items:start}
+#fabVue{border:1px solid var(--line);padding:12px;text-align:center;min-height:260px}
+#fabVue .iart{font-size:24px;display:inline-block;text-align:left}
+#fabVue b{display:block;color:var(--c3);font-weight:normal;margin:0 0 6px}
+#fabVue p{margin:0 0 6px;font-size:12px;color:var(--dim);text-align:left}
+@media (max-width:720px){.fabwrap{grid-template-columns:1fr}#fabVue{min-height:0}}
