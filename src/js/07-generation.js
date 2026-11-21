@@ -264,6 +264,19 @@ function nouvellePartie(){newGame();started=true;$('overlay').hidden=true;render
    quelle que soit la recette affichée ; la case « Réglages au hasard » les tire d'abord, comme pour REGEN. Le menu Monde du
    joueur est remis en place aussitôt après. Avant : tous les réglages étaient tirés au hasard, sur la recette du menu.
    La foreuse garde tout ce qu'elle avait : vie, énergie, inventaire et matière en réserve. */
+/* Éboulis d'arrivée (21 novembre 2026) : la foreuse a percé le plafond, des débris de roche sont éparpillés autour d'elle.
+   Des gravats (praticables), serrés au pied de la foreuse et de plus en plus rares jusqu'à 5 cases, et un à trois rochers
+   posés seulement là où leurs huit voisines sont libres : ils ne peuvent donc fermer aucun passage. Rien sur l'eau, les
+   gouffres, les bâtiments, un objet, une clé ou une créature. */
+function eboulis(){
+  const t=G.t,R=5,sol=v=>v===GROUND||v===GRASS||v===FLAT,libre=(x,y)=>{const i=idx(x,y);return !(G.items&&G.items[i]&&G.items[i].length)&&!(G.cles&&G.cles[i])&&!beastAt(x,y)&&!animalAt(x,y)&&!G.sites.some(s=>s.x===x&&s.y===y);};
+  for(let dy=-R;dy<=R;dy++)for(let dx=-R;dx<=R;dx++){const x=G.px+dx,y=G.py+dy,d=Math.hypot(dx,dy);if((!dx&&!dy)||d>R+.5||x<1||y<1||x>=W-1||y>=H-1)continue;
+    if(sol(t[idx(x,y)])&&libre(x,y)&&Math.random()<.85*Math.pow(1-d/(R+1),1.6))t[idx(x,y)]=RUBBLE;}
+  for(let k=0,n=rnd(1,3),e=0;k<n&&e<60;e++){const a=Math.random()*6.283,d=1.6+Math.random()*2.4,x=G.px+Math.round(Math.cos(a)*d),y=G.py+Math.round(Math.sin(a)*d);
+    if(x<2||y<2||x>=W-2||y>=H-2||Math.max(Math.abs(x-G.px),Math.abs(y-G.py))<2)continue;const v=t[idx(x,y)];
+    if(!(sol(v)||v===RUBBLE)||!libre(x,y)||DIRS.some(([dx,dy])=>!canWalk(t[idx(x+dx,y+dy)],true)||isWater(t[idx(x+dx,y+dy)])))continue;
+    t[idx(x,y)]=ROCK;k++;}
+  computeFOV();}
 const RECETTE_NIV=n=>n<=1?'atterrissage':'cavernes';   // la recette de chaque niveau de la descente (le niveau 1 suit le menu Monde)
 function niveauSuivant(){
   const sauve=JSON.parse(JSON.stringify(GEN)),inv=G.inv,st=G.st,tour=G.turn,dist=G.dist,niv=(G.niv||1)+1;
@@ -271,6 +284,7 @@ function niveauSuivant(){
   niveau();   // genPlanet refait l'objet G : tout ce que la foreuse garde est remis en place juste après
   SANS_VAISSEAU=false;Object.assign(GEN,sauve);saveGen();buildGen();
   G.inv=inv;G.st=st;G.niv=niv;G.turn=tour;G.dist=dist;G.over=null;drilling=false;
+  eboulis();
   say(`Niveau ${G.niv}. La foreuse a percé le plafond et s'est écrasée plus bas. Un nouveau site de forage est signalé.`,'info');}
 
 /* ---------- Bestiaire : édition des statistiques ---------- */

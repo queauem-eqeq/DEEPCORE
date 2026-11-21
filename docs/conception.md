@@ -930,6 +930,11 @@ l'essayer. **Échap, Espace ou Entrée** la passent. Pas jouée si l'utilisateur
 
 **La descente par niveaux est revenue**, sur `NIV_MAX = 2` niveaux pour commencer (`07-generation.js`).
 
+- **Éboulis d'arrivée** (`eboulis()`, appelé par `niveauSuivant()`) : la foreuse a percé le plafond, des débris de roche
+  sont éparpillés autour d'elle. Des **gravats** (praticables) serrés à son pied et de plus en plus rares jusqu'à
+  5 cases, plus **un à trois rochers** à 2 à 4 cases, posés seulement là où leurs huit voisines sont libres (aucun
+  passage ne peut être fermé). Rien sur l'eau, les gouffres, les bâtiments, les objets ni les créatures. Seulement à la
+  descente : REGEN sur la recette cavernes n'en pose pas.
 - `G.niv` porte le numéro du niveau ; le panneau affiche « Niveau N · largeur × hauteur ».
 - **Forer le site du dernier niveau** gagne la partie comme avant (« NOYAU ATTEINT »). **Forer celui d'un niveau
   précédent** (`end`, `09-vision-deplacement-forage.js`) ferme l'écran de forage, joue la cinématique, puis appelle
