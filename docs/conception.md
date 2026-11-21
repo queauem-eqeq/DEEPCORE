@@ -123,6 +123,8 @@ et maximal, et porte une **valeur de menace** fixée à la main.
   (retirés le 21 novembre 2026) : le budget se règle par niveau dans LIFE. « Groupes par défaut » (deux clics) remet les groupes de départ. **Enregistrer** écrit groupes, valeurs
   et budget dans la base de l'artefact (`reglages/courant`, champ `groupes`).
 - **LIFE** (colonne de droite) : le budget et une case à cocher par groupe.
+  Bouton **Enregistrer** en bas de la fenêtre (21 novembre 2026) : le même enregistrement que dans Groupes, Bestiaire et le
+  Tile editor — tout part d'un bloc dans la base de l'artefact (`reglages/courant`).
 - Mémorisé dans le navigateur (`np-groupes`) et dans l'enregistrement des réglages.
 - Les effectifs par espèce (`LIFE`, `spawnAnimals`, `spawnBeasts`) ne servent plus qu'au banc de combat et aux mesures.
 

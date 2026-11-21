@@ -173,6 +173,7 @@ async function saveSettings(b,m){b=b instanceof HTMLElement?b:$('saveBtn');m=m||
 $('saveBtn').onclick=()=>saveSettings();
 $('bestSave').onclick=()=>saveSettings($('bestSave'),$('bestMsg'));
 $('grSave').onclick=()=>saveSettings($('grSave'),$('grMsg'));
+$('lfSave').onclick=()=>saveSettings($('lfSave'),$('lfMsg'));   // même enregistrement, depuis la fenêtre LIFE (21 novembre 2026)
 $('bestClose').onclick=closeBest;
 $('discClose').onclick=closeDisc;
 $('discretion').addEventListener('click',e=>{if(e.target===$('discretion'))closeDisc();});
