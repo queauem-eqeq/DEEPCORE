@@ -124,7 +124,7 @@ const BUTIN_DEPOT=()=>{const c=Object.keys(ITEMS).filter(k=>ITEMS[k].conso&&k!==
 function machines(){G.las=[];G.lz={};G.circ=[];G.soc={};G.piles={};G.mt=0;G.machN={};
   if(!BATI_DER||!G.batis||!G.batis.length)return;const {B,strs}=BATI_DER,t=G.t,N=W*H,A=ARTEFACTS,site=G.sites&&G.sites[0]?idx(G.sites[0].x,G.sites[0].y):-1,dep=idx(G.px,G.py);
   const base=!!(RECETTES[GEN.recette]||{}).base,fac=base?(GEN.bsMachines??100)/100:.35,compte=n=>Math.floor(n)+(Math.random()<n-Math.floor(n)?1:0);
-  const fq=(k,f)=>{const a=A[k];if(!a||!a.on)return 0;return compte(ART_LISTE.find(m=>m[0]===k)[3][a.f]*(f??fac));};
+  const fq=(k,f)=>{const a=A[k];if(!a||!artOn(k))return 0;return compte(ART_LISTE.find(m=>m[0]===k)[3][a.f]*(f??fac));};
   const pieces=[];for(const S of strs)for(const p of S.pieces)if(p.c.length>=9&&!p.c.includes(site)&&!p.c.includes(dep)&&!p.c.some(i=>t[i]!==FLOOR&&t[i]!==PILLAR&&t[i]!==CHASM&&t[i]!==BRIDGE&&t[i]!==MACHINE))pieces.push(p);
   const mel=l=>l.slice().sort(()=>Math.random()-.5),murV=i=>D4.some(([dx,dy])=>t[idx(i%W+dx,((i/W)|0)+dy)]===WALL);
   const pres=i=>{const x=i%W,y=(i/W)|0;return B.porte[i]||D4.some(([dx,dy])=>{const j=idx(x+dx,y+dy);return B.porte[j]||t[j]===DOOR||t[j]===LOCK;});};   // case de passage : jamais de piège juste devant une porte

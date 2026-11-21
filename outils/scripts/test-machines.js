@@ -2,7 +2,7 @@
    window.TM = {k} règle le nombre de cartes. Renvoie un rapport, une ligne par essai : « ok » ou « ÉCHEC ». */
 (() => {
   const K=(window.TM||{}).k||30,out=[],v=(nom,ok,det)=>out.push((ok?'ok    ':'ÉCHEC ')+nom+(det!=null?' — '+det:''));
-  const carte=(amb)=>{GEN.taille=3;recRange();recPrend('base');ambiance(amb||'citadelle','base');SANS_VAISSEAU=true;niveau();G.niv=3;SANS_VAISSEAU=false;G.beasts=[];G.animals=[];};
+  const carte=(amb)=>{GEN.taille=3;recRange();recPrend('base');ambiance(amb||'citadelle','base');SANS_VAISSEAU=true;NIV_GEN=3;niveau();G.niv=3;SANS_VAISSEAU=false;G.beasts=[];G.animals=[];};   // niveau 3 : toutes les machines y sont permises
   const sauve=JSON.parse(JSON.stringify(GEN));
   // A. génération
   {const tot={},ambs=Object.keys(AMBIANCES.base);let acc=0,ms=0,ser=0,dep=0;

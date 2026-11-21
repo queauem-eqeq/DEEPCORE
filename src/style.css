@@ -413,3 +413,12 @@ kbd{font-family:var(--mono);color:var(--fg);border:1px solid var(--line);padding
 .fabl.sel{border-color:var(--c1)}
 .fabl.cher{cursor:default}
 .fabl.cher b,.fabl.cher i{color:var(--dim,#5f7a74)}
+
+/* Fenêtre LIFE : sélecteur de niveau et listes par niveau (21 novembre 2026) */
+.lfniv{display:flex;align-items:center;gap:8px;margin:0 0 10px}
+.lfniv span{color:var(--c3)}
+.lfniv button{min-width:40px;padding:5px 0}
+.lfniv button.on{border-color:var(--c1);color:var(--c1)}
+#life .sub span{float:right;font-size:11px;color:var(--dim)}
+#life .gpats{margin:0 0 10px}
+.gpat.inactif{border-color:var(--line);color:var(--dim)}

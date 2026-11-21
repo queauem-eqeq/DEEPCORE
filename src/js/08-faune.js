@@ -295,13 +295,13 @@ function poseGroupe(g,gi,id,cases){{const l=g.pats&&g.pats.length?g.pats:g.pat?[
 let NIV_GEN=1;   // niveau de la descente en cours de génération (posé par newGame et niveauSuivant) : la menace monte avec lui
 const lieuDe=i=>{const v=G.t[i];return G.tun&&G.tun[i]?'tunnel':(v===FLOOR||v===DOOR||(v===BRIDGE&&G.pb&&G.pb[i]))?'bati':'ext';};
 function spawnGroupes(){G.animals=[];G.fauna=[];G.pool=[0];G.beasts=[];G.beastSeen={};G.packs={};G.patr={};
-  const total=Math.round(GROUPES.budget*W*H/(96*64)*(1+(GROUPES.pente??20)/100*Math.max(0,NIV_GEN-1)));let id=0;const rate={},pose={};
+  const NV=nivDe(NIV_GEN),total=Math.round(NV.budget*W*H/(96*64));let id=0;const rate={},pose={};   // budget et groupes du niveau de profondeur (fenêtre LIFE)
   // cases praticables de chaque lieu, et part du budget qui lui revient (surface × densité)
   const cases={ext:[],bati:[],tunnel:[]};for(let i=0;i<W*H;i++)if(canWalk(G.t[i],true))cases[lieuDe(i)].push(i);
   const tot=cases.ext.length+cases.bati.length+cases.tunnel.length||1,dens=GROUPES.dens||DENS_DEF(),lieux={};let report=0,depense=0;
   for(const [l] of LIEUX.slice().sort((a,b)=>cases[b[0]].length-cases[a[0]].length)){const b=Math.round(total*cases[l].length/tot*(dens[l]??100)/100);let reste=b+report;lieux[l]={b,dep:0};
     if(!cases[l].length){report=reste;continue;}
-    for(let t=0;t<300;t++){const ok=GROUPES.liste.map((g,i)=>[g,i]).filter(([g,i])=>g.on&&g.m.length&&Math.max(1,g.cout)<=reste&&(rate[i+l]||0)<3&&(!g.lieux||!g.lieux.length||g.lieux.includes(l)));if(!ok.length)break;
+    for(let t=0;t<300;t++){const ok=GROUPES.liste.map((g,i)=>[g,i]).filter(([g,i])=>g.on&&NV.gr.includes(g.n)&&g.m.length&&Math.max(1,g.cout)<=reste&&(rate[i+l]||0)<3&&(!g.lieux||!g.lieux.length||g.lieux.includes(l)));if(!ok.length)break;
       // tirage pondéré par la fréquence du groupe : − deux fois moins souvent, + deux fois plus
       const pds=ok.map(([g])=>[.5,1,2][g.f??1]);let tir=Math.random()*pds.reduce((a,b)=>a+b,0),ki=0;while(ki<ok.length-1&&(tir-=pds[ki])>0)ki++;
       const [g,gi]=ok[ki],r=poseGroupe(g,gi,id,cases[l]);

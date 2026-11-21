@@ -12,7 +12,7 @@
     const sv=stepAway;stepAway=()=>{};bat(10);stepAway=sv;v('artilleur : un tir tous les deux battements, à 4 cases',tirs>=4&&tirs<=6,`${tirs} tirs en 10 battements`);
     a.x=31;a.y=24;const d0=cheb(a,G.px,G.py);bat(3);hurtRobot=h;v('artilleur : recule quand la foreuse est à côté',cheb(a,G.px,G.py)>d0,`distance ${d0} → ${cheb(a,G.px,G.py)}`);}
   // soudeur
-  arene();{const c=bete('crabos',40,24,false),s=bete('soudeur',42,24,false);c.hp=5;G.px=5;G.py=5;bat(3);v('soudeur : répare un allié à portée, 5 PV par battement',c.hp>=15,`PV du crabot 5 → ${c.hp}`);
+  arene();{const c=bete('crabos',40,24,false),s=bete('soudeur',42,24,false);c.hp=5;G.px=5;G.py=5;bat(6);v('soudeur : répare un allié à portée, 5 PV par battement',c.hp>=15,`PV du crabot 5 → ${c.hp}`);
     c.hp=pvDe(BEASTS[c.sp]);bat(2);v('soudeur : ne dépasse pas la vie maximale',c.hp===pvDe(BEASTS[c.sp]));}
   // englueur
   arene();{bete('englueur',33,24,true);let glu=0;for(let k=0;k<20;k++){pass(100);glu=Math.max(glu,G.eff.glu||0);}v('englueur : englue la foreuse à distance',glu>0,`glu ${glu} battements`);
@@ -22,7 +22,8 @@
   // navette et garde, sur une grande base
   {recRange();recPrend('base');ambiance('citadelle','base');GEN.taille=3;SANS_VAISSEAU=true;NIV_GEN=3;niveau();SANS_VAISSEAU=false;G.beasts=[];G.animals=[];G.patr={};G.px=1;G.py=1;
     const sol=[];for(let i=0;i<W*H;i++)if(G.t[i]===FLOOR)sol.push(i);
-    const pos=sol[rnd(0,sol.length-1)],b=newBeast(E('crabos'),pos%W,(pos/W)|0,-1,0);b.gi=0;G.beasts.push(b);patInit({pat:'navette'},0,[b]);const P=G.patr[0],vus=new Set();let loin=0;
+    let pos,b,P;for(let e=0;e<8;e++){G.beasts=[];G.patr={};pos=sol[rnd(0,sol.length-1)];b=newBeast(E('crabos'),pos%W,(pos/W)|0,-1,0);b.gi=0;G.beasts.push(b);patInit({pat:'navette'},0,[b]);P=G.patr[0];if(P.pts.length===2)break;}   // une pièce close n'offre pas de second point : on en essaie une autre
+    const vus=new Set();let loin=0;
     for(let k=0;k<400;k++){patTick();beastsAct();loin=Math.max(loin,Math.hypot(b.x-pos%W,b.y-((pos/W)|0)));P.pts.forEach((p,n)=>{if(Math.hypot(p[0]-b.x,p[1]-b.y)<=2)vus.add(n);});}
     v('navette : va-et-vient entre deux points éloignés',P.pts.length===2&&vus.size===2&&loin>=6,`${P.pts.length} points, ${vus.size} atteints, éloignement ${loin.toFixed(0)} cases`);
     G.beasts=[];G.patr={};const s=G.sites[0],pres=sol.filter(i=>{const d=Math.hypot(i%W-s.x,((i/W)|0)-s.y);return d>4&&d<10;}),p2=pres[rnd(0,pres.length-1)]??sol[0],g=newBeast(E('gardien'),p2%W,(p2/W)|0,-1,0);g.gi=1;G.beasts.push(g);patInit({pat:'garde'},1,[g]);

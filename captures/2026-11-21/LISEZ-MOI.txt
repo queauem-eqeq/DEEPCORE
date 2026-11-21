@@ -24,3 +24,5 @@ Sous chaque nom : sol ouvert, eau et bâti en % de la carte, cases de tunnel, b�
 14-machines-tourelles-laser-leviers-fosses.png    en jeu : tourelles dans le mur de droite, une bande qui tire, fossés et leviers
 15-niveau3-arrivee-dans-la-base.png               arrivée au niveau 3 : la foreuse dans une pièce, débris au sol, message d'arrivée
 16-douze-niveaux-au-hasard-niv1-niv2-niv3.png     « Réglages au hasard » : quatre niveaux 1, quatre niveaux 2, quatre niveaux 3
+17-vaisseau-zone-degagee-ovale.png                la zone dégagée autour du vaisseau, en ovale (ambiance « Grande prairie », brouillard coupé)
+18-life-niveau-budget-groupes-artefacts.png       fenêtre LIFE refaite : sélecteur de niveau, budget, groupes et artefacts possibles au niveau 3

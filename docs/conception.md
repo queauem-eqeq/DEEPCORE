@@ -143,6 +143,21 @@ et maximal, et porte une **valeur de menace** fixée à la main.
   de départ, groupes nouveaux ajoutés à la suite, budget rapporté de 110 à 80.
 - Mesuré en taille 3 : 22 créatures au niveau 1, 26 au niveau 2, 32 au niveau 3.
 
+### Fenêtre LIFE : tout se règle par niveau de profondeur (21 novembre 2026, après-midi)
+
+Demande de l'utilisateur. De haut en bas : un **sélecteur de niveau** (1, 2, 3), puis pour ce niveau le **budget de
+menace**, les **groupes possibles** et les **artefacts et machines possibles**. Les deux listes se règlent comme les
+patrouilles d'un groupe : des étiquettes qu'on retire, un menu déroulant pour en ajouter. La densité par lieu, commune à
+tous les niveaux, reste en bas.
+
+- `GROUPES.niv[n] = {budget, gr:[noms]}`. Budgets de départ 80, 96 et 112 ; la « menace en plus par niveau » en % a
+  disparu, chaque budget se règle à part. Un groupe n'est posé que s'il est actif (Lab → Groupes) **et** dans la liste du
+  niveau. Au départ les groupes arrivent peu à peu : 10 au niveau 1, 16 au niveau 2, les 19 au niveau 3 (Batterie, Convoi
+  et Ronde de drones sont réservés au niveau 3). Un groupe créé ou dupliqué est permis partout ; renommé ou supprimé, les
+  listes suivent.
+- `ARTEFACTS[k].niv` : niveaux où l'artefact peut apparaître (`artOn`). Départ : tourelles laser et piles à partir du
+  niveau 2, croix laser au niveau 3, tout le reste partout. La fréquence reste dans Lab → Artefacts.
+
 ### Styles de patrouille
 
 Deux styles ajoutés le 21 novembre 2026 : **navette** (va-et-vient entre le point de départ et un point à 16-30 cases,
@@ -560,6 +575,13 @@ Repère : une carte de taille 3 porte deux gisements de Matière de 30 à 50, so
 Quatre pièces nouvelles (choix de l'utilisateur, « consommables + équipement ») : **Vrille rapide** (1d4+4, coup −30,
 CRIT +5, POW 9), **Trépan lourd** (2d6+4, coup +25, POW 12), **Carène légère** (DEF +5, VIT +1, DIS −1, POW 9),
 **Blindage composite** (DEF +18, VIT −1, POW 12). Leurs tuiles au sol sont la tuile générique, à dessiner.
+
+### Deux règles de génération du 21 novembre 2026 (après-midi)
+
+- **Un gisement de métal ou de Matière ne touche jamais plus de 3 roches dures** (parmi ses 8 voisines) : `hideOre`
+  ne retient que ces cases. Faute de place, sur une carte qui n'en offre pas assez, il reprend toute la roche tendre.
+- **La zone dégagée autour du vaisseau est un ovale** (`SHIP_OVALE`), centré sur lui, avec une case de marge au moins
+  autour de la coque. C'était un rectangle.
 
 ## 4. Terrains
 

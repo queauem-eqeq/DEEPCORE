@@ -236,7 +236,7 @@ function mondeDel(){const v=$('mdSel').value;if(!v.startsWith('u:')){mondeMsg('C
   const n=v.slice(2);delete MONDES[n];saveMondes();mondeListe('');$('mdNom').value='';mondeMsg(`« ${n} » supprimé.`);}
 function mondeOpen(){if(TRAV)stopTravel();if(REST)stopRest();if(EXPL)stopExplore();mondeListe($('mdSel').value);mondeMsg('');$('monde').hidden=false;$('monde').querySelector('.mcard').focus();}
 // Fenêtre Life : la faune, sortie du menu Monde le 18 novembre 2026
-function lifeOpen(){if(TRAV)stopTravel();if(REST)stopRest();if(EXPL)stopExplore();buildLife();$('faune').hidden=false;$('faune').querySelector('.mcard').focus();}
+function lifeOpen(){if(TRAV)stopTravel();if(REST)stopRest();if(EXPL)stopExplore();LIFE_NIV=Math.max(1,Math.min(3,(G&&G.niv)||1));buildLife();$('faune').hidden=false;$('faune').querySelector('.mcard').focus();}
 function lifeClose(){$('faune').hidden=true;$('lifeBtn').focus();render();}
 $('lifeBtn').onclick=lifeOpen;$('lfClose').onclick=lifeClose;
 $('faune').addEventListener('pointerdown',ev=>{if(ev.target===$('faune'))lifeClose();});

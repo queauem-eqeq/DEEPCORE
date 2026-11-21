@@ -139,11 +139,15 @@ function tidyChasms(t){
       if(![0,1,2,3].some(d=>{const a=x+DIRS[d][0],b=y+DIRS[d][1];return a>=0&&b>=0&&a<W&&b<H&&t[idx(a,b)]===CHASM;})){t[i]=GROUND;ch=true;}}
     if(!ch)break;}}
 // Pose le vaisseau sur une zone dégagée (marge d'une case autour) ; à défaut, sur la zone la moins encombrée, puis relie tout
-function placeShip(t,ou){const ok=v=>v===GROUND||v===GRASS||v===FLAT||v===RUBBLE||v===ROCK;let bx=3,by=3,bb=1e9;
-  for(let k=0;k<800&&bb>0;k++){const x0=rnd(3,W-SGW-4),y0=rnd(3,H-SGH-4);let bad=0;if(ou&&k<600&&!ou(x0+SGW/2,y0+SGH/2))continue;   // ou : zone d'atterrissage imposée, relâchée si elle ne donne rien
-    for(let y=y0-1;y<=y0+SGH;y++)for(let x=x0-1;x<=x0+SGW;x++)if(!ok(t[idx(x,y)]))bad++;
+// La zone dégagée est un OVALE centré sur le vaisseau (21 novembre 2026 ; un rectangle avant), qui déborde de sa coque d'une case au moins.
+const SHIP_OVALE=(()=>{const l=[],a=SGW/2+2.4,b=SGH/2+2.4,cx=(SGW-1)/2,cy=(SGH-1)/2;for(let y=-3;y<SGH+3;y++)for(let x=-3;x<SGW+3;x++){const dx=(x-cx)/a,dy=(y-cy)/b;let dans=dx*dx+dy*dy<=1;
+    if(!dans)for(let v=-1;v<=1&&!dans;v++)for(let u=-1;u<=1;u++){const r=SHIP_GRID[y+v];if(r&&r[x+u]&&r[x+u]!=='.'){dans=true;break;}}   // jamais moins d'une case de marge autour de la coque
+    if(dans)l.push([x,y]);}return l;})();
+function placeShip(t,ou){const ok=v=>v===GROUND||v===GRASS||v===FLAT||v===RUBBLE||v===ROCK;let bx=4,by=4,bb=1e9;
+  for(let k=0;k<800&&bb>0;k++){const x0=rnd(4,W-SGW-5),y0=rnd(4,H-SGH-5);let bad=0;if(ou&&k<600&&!ou(x0+SGW/2,y0+SGH/2))continue;   // ou : zone d'atterrissage imposée, relâchée si elle ne donne rien
+    for(const [dx,dy] of SHIP_OVALE)if(!ok(t[idx(x0+dx,y0+dy)]))bad++;
     if(bad<bb){bb=bad;bx=x0;by=y0;}}
-  for(let y=by-1;y<=by+SGH;y++)for(let x=bx-1;x<=bx+SGW;x++)t[idx(x,y)]=GROUND;
+  for(const [dx,dy] of SHIP_OVALE)t[idx(bx+dx,by+dy)]=GROUND;
   for(let cy=0;cy<SGH;cy++)for(let cx=0;cx<SGW;cx++){const c=SHIP_GRID[cy][cx];if(c==='.')continue;t[idx(bx+cx,by+cy)]=(c==='I'||c==='D')?DECK:SHIP;}
   if(bb>0)connect(t);
   tidyChasms(t);
@@ -375,6 +379,9 @@ function durcir(){const t=G.t,d=new Int16Array(W*H).fill(-1),q=[];
   for(let i=0;i<W*H;i++){const x=i%W,y=(i/W)|0;if(x<1||y<1||x>=W-1||y>=H-1){t[i]=HARD;continue;}
     if(t[i]!==MOUNT)continue;if(Math.random()<DURCIR[Math.min(d[i],DURCIR.length-1)])t[i]=HARD;}}
 function hideOre(nMetal=3,nMat=1){G.ore={};const lib=[];
-  for(let i=0;i<W*H;i++){const x=i%W,y=(i/W)|0;if(G.t[i]===MOUNT&&x>0&&y>0&&x<W-1&&y<H-1)lib.push(i);}
+  // un gisement ne touche jamais plus de 3 roches dures (ses 8 voisines) : on doit pouvoir l'atteindre sans charge (21 novembre 2026)
+  const dures=i=>{let n=0;for(const [dx,dy] of DIRS)if(G.t[idx(i%W+dx,((i/W)|0)+dy)]===HARD)n++;return n;},tous=[];
+  for(let i=0;i<W*H;i++){const x=i%W,y=(i/W)|0;if(G.t[i]===MOUNT&&x>0&&y>0&&x<W-1&&y<H-1){tous.push(i);if(dures(i)<=3)lib.push(i);}}
+  if(lib.length<nMetal+nMat)lib.splice(0,lib.length,...tous);   // carte sans roche tendre assez dégagée : on reprend tout, faute de mieux
   for(let i=lib.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[lib[i],lib[j]]=[lib[j],lib[i]];}
   lib.slice(0,nMetal+nMat).forEach((i,k)=>{const r=Math.random();G.ore[i]=(k<nMetal?'':'m')+'roche'+(r<ORE_MIX[1]?1:r<ORE_MIX[1]+ORE_MIX[2]?2:3);});}

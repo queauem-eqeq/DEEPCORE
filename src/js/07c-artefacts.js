@@ -21,8 +21,14 @@ const ART_LISTE=[['antenne','Antenne','Activée par la foreuse, elle reste allum
   ['station','Station de réparation','Vie et énergie au maximum, une seule fois. Le bruit attire les ennemis proches.',[.3,.7,1.2]],
   ['fabric','Fabricateur','Fabrique des objets contre de la Matière.',[.5,1,2]]];
 const ARTEFACTS_DEF=()=>({antenne:{on:1,f:1},herbe:{on:1,f:1},machines:{on:1,f:2},terminal:{on:1,f:1},lasers:{on:1,f:1},croix:{on:1,f:1},ponts:{on:1,f:1},piles:{on:1,f:1},station:{on:1,f:1},fabric:{on:1,f:1}});   // réglage du joueur, 20 novembre 2026
-function artefactsSains(d){const o=ARTEFACTS_DEF();if(d&&typeof d==='object')for(const [k] of ART_LISTE)if(d[k]){o[k].on=d[k].on?1:0;o[k].f=[0,1,2].includes(+d[k].f)?+d[k].f:1;}return o;}
-let ARTEFACTS=ARTEFACTS_DEF();
+/* Niveaux de profondeur où un artefact peut apparaître (21 novembre 2026, réglé dans la fenêtre LIFE). Départ : les lasers à partir
+   du niveau 2, les croix au niveau 3, les piles à partir du niveau 2, tout le reste partout. */
+const ART_NIV_DEF={lasers:[2,3],croix:[3],piles:[2,3]},ART_NIVS=[1,2,3];
+function artefactsSains(d){const o=ARTEFACTS_DEF();for(const [k] of ART_LISTE)o[k].niv=(ART_NIV_DEF[k]||ART_NIVS).slice();
+  if(d&&typeof d==='object')for(const [k] of ART_LISTE)if(d[k]){o[k].on=d[k].on?1:0;o[k].f=[0,1,2].includes(+d[k].f)?+d[k].f:1;if(Array.isArray(d[k].niv))o[k].niv=ART_NIVS.filter(n=>d[k].niv.includes(n));}return o;}
+// l'artefact est-il permis sur la carte en cours de génération ? (actif dans le Lab, et permis à ce niveau)
+const artOn=k=>{const a=ARTEFACTS[k];return !!(a&&a.on&&(!a.niv||a.niv.includes(Math.min(3,typeof NIV_GEN==='number'?NIV_GEN:1))));};
+let ARTEFACTS=artefactsSains(null);
 try{ARTEFACTS=artefactsSains(JSON.parse(localStorage.getItem('np-artefacts')||'null'));}catch(e){}
 function saveArtefacts(){try{localStorage.setItem('np-artefacts',JSON.stringify(ARTEFACTS));}catch(e){}touchLocal();}
 // sélecteur de fréquence à trois crans, partagé avec la fenêtre Groupes
@@ -53,15 +59,15 @@ function artefacts(B,strs){G.art={};const A=ARTEFACTS,t=G.t,site=G.sites&&G.site
   const pose=(p,terrain,val,mur)=>{const c=p.c.filter(i=>artLibre(B,i,site));if(!c.length)return -1;const m=c.filter(murV),l=mur&&m.length?m:c,i=l[rnd(0,l.length-1)];t[i]=terrain;G.art[i]=val;return i;};
   G.artN={antenne:0,herbe:0,machines:0,terminal:0};
   // 2. herbe : la pièce entière, hautes et basses mêlées par petites touffes (le site et les clés gardent leur sol)
-  if(A.herbe.on){const pris=mel().filter(p=>!p.c.includes(site)).slice(0,compte(pieces.length*fq('herbe')));
+  if(artOn('herbe')){const pris=mel().filter(p=>!p.c.includes(site)).slice(0,compte(pieces.length*fq('herbe')));
     for(const p of pris){const g=Math.random()*10,h=Math.random()*10;p.herbe=1;G.artN.herbe++;
       for(const i of p.c)if(t[i]===FLOOR&&i!==site&&!G.cles[i]){const x=i%W,y=(i/W)|0;t[i]=Math.sin(x*.9+g)+Math.cos(y*1.1+h)+Math.random()*.9>.45?GRASS:FLAT;}}}
   const libres=()=>mel().filter(p=>!p.herbe);
   // 1. antenne et 4. terminal : un par pièce, contre un mur si possible
-  if(A.antenne.on){let n=compte(fq('antenne'));for(const p of libres()){if(n<=0)break;if(pose(p,ANTENNA,0,true)>=0){n--;p.ant=1;G.artN.antenne++;}}}
-  if(A.terminal.on){let n=compte(fq('terminal')),k=rnd(0,TERM_TXT.length-1);for(const p of libres()){if(n<=0)break;if(p.ant)continue;if(pose(p,TERMINAL,k%TERM_TXT.length,true)>=0){n--;k++;G.artN.terminal++;}}}
+  if(artOn('antenne')){let n=compte(fq('antenne'));for(const p of libres()){if(n<=0)break;if(pose(p,ANTENNA,0,true)>=0){n--;p.ant=1;G.artN.antenne++;}}}
+  if(artOn('terminal')){let n=compte(fq('terminal')),k=rnd(0,TERM_TXT.length-1);for(const p of libres()){if(n<=0)break;if(p.ant)continue;if(pose(p,TERMINAL,k%TERM_TXT.length,true)>=0){n--;k++;G.artN.terminal++;}}}
   // 3. machines : une à cinq par pièce choisie, selon sa taille
-  if(A.machines.on){const pris=libres().slice(0,compte(pieces.length*fq('machines')));
+  if(artOn('machines')){const pris=libres().slice(0,compte(pieces.length*fq('machines')));
     for(const p of pris){let n=Math.max(1,Math.min(5,Math.round(p.c.length/14)));for(let k=0;k<n;k++)if(pose(p,MACHINE,rnd(0,9),Math.random()<.7)>=0)G.artN.machines++;}}}
 
 // la foreuse avance sur une antenne : elle s'allume et lève le brouillard autour d'elle
