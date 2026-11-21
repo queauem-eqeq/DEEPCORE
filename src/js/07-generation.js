@@ -271,9 +271,14 @@ function niveau(refait){drilling=false;
   if(G.sites[0]&&accesSite()<0&&(refait||0)<3)return niveau((refait||0)+1);   // garde-fou : un site inatteignable, la carte est refaite (trois fois au plus)
   spawnGroupes();lastAct='move';palBiome(null);buildTiles();turnStealth();computeFOV();}
 const fauneTxt=()=>[...new Set([...(G.animals||[]).map(a=>SPECIES[a.sp].n),...(G.beasts||[]).map(b=>BEASTS[b.sp].n)])].join(', ')||'aucune';
-function newGame(){SANS_VAISSEAU=false;NIV_GEN=1;niveau();G.niv=1;   // G n'existe qu'une fois la carte générée
+/* Le niveau d'une carte générée depuis le menu (REGEN, GÉNÉRER LA CARTE) est celui de sa recette (22 novembre 2026 ; avant,
+   toujours 1) : une carte « cavernes » est un niveau 2, une « base » un niveau 3, et prend la faune (fenêtre LIFE) et les
+   artefacts de ce niveau. La descente reprend de là. */
+const NIV_RECETTE=r=>r==='cavernes'?2:r==='base'?3:1;
+function newGame(){SANS_VAISSEAU=false;NIV_GEN=NIV_RECETTE(GEN.recette);niveau();G.niv=NIV_GEN;   // G n'existe qu'une fois la carte générée
   if(G.ship)say('Atterrissage confirmé. Un site de forage signalé par l’orbiteur. La foreuse est dans la soute ; la porte est à l’arrière.','info');
-  else say('Descente terminée : la foreuse a débouché dans un réseau de cavernes. Un site de forage plus bas est signalé.','info');}   // arrivée par un puits (recette cavernes)
+  else if(G.arrivee==='base')say(`Niveau ${G.niv} : la foreuse a traversé le plafond d’une salle, dans une base enfouie. Un site de forage est signalé plus loin.`,'info');
+  else say(`Niveau ${G.niv} : la foreuse a débouché dans un réseau de cavernes. Un site de forage plus bas est signalé.`,'info');}   // arrivée par un puits
 // Nouvelle partie lancée par le joueur : la cinématique d'arrivée se rejoue (21 novembre 2026)
 function nouvellePartie(){newGame();started=true;$('overlay').hidden=true;render();playIntro();}
 /* Niveau suivant (21 novembre 2026) : pas de vaisseau, on arrive par le puits. Le niveau 2 (et les suivants, tant qu'ils n'ont

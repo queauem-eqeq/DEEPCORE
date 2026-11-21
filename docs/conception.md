@@ -341,7 +341,10 @@ qui n'y servent pas. Ces trois réglages étaient avant dans la colonne de droit
 désormais communs, comme le reste du monde.
 
 **Qui tire quoi** :
-- **REGEN** et **GÉNÉRER LA CARTE** : les réglages en cours, tels quels.
+- **REGEN** et **GÉNÉRER LA CARTE** : les réglages en cours, tels quels. La carte prend **le niveau de sa recette**
+  (`NIV_RECETTE` : cavernes 2, base 3, les autres 1), donc la faune (fenêtre LIFE) et les artefacts de ce niveau ;
+  avant le 22 novembre 2026, toujours le niveau 1, si bien qu'une carte « cavernes » ou « base » générée depuis le
+  menu avait la faune et les artefacts du niveau 1.
 - **Lab → Niv1, Niv2, Niv3** : un archétype monde et un archétype bâti de la recette du niveau, tirés au hasard
   (`hasardReglages()`), puis le menu du joueur est remis en place.
 - **La descente** en jeu : les réglages en cours du menu pour la recette du niveau.
