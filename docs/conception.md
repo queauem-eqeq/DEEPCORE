@@ -76,6 +76,9 @@ revient sur **3 niveaux** ; elle n'est pas encore codée, et forer termine la pa
   les tuiles de la montagne tendre (`mtBody`, `mtTop`, retouches comprises) en encre foncée (`PAL['d']` = couleur monde, clarté −16,
   `HARD_CLAIR` dans `02-palette.js`). Même logique : la case dont le haut n'est pas de la roche dure porte la crête irrégulière,
   posée sur un fond de roche tendre quand la case du dessus est de la montagne ou du rocher.
+  Seule la partie **au-dessus de la ligne de crête** est un fond (`hardTopBg`, `softTopBg`) : sinon les trous de la crête laissent voir la
+  roche tendre et la crête paraît plus claire. Réciproquement, la crête d'une montagne tendre située **sous** de la roche dure se pose sur un
+  fond de roche dure, pas sur le sol.
 - Relief : méthode **Automate cellulaire**, **Bruit** ou **Mixte** ; réglages Remplissage (35-70 %) et Itérations (1-10).
 - Connectivité garantie : les zones isolées sont reliées par le plus court chemin (pont sur gouffre, col dans la
   montagne, rocher dégagé) ; petites poches comblées.

@@ -99,8 +99,8 @@ function introCell(x,i,px,py){const t=G.t[i],h=hash(i%W,(i/W)|0),put2=(tl,a)=>{i
   if(t>=WALL)batiTuile(t,i%W,(i/W)|0,put2);else
   if(t!==BRIDGE)put2(TL.ground0,.6);
   if(t===ROCK)put2(h%3?TL.rock:TL.rock2,.95);
-  else if(t===MOUNT){const up=i>=W&&G.t[i-W]===MOUNT;put2(up?TL.mtBody:TL.mtTop,.9);}
-  else if(t===HARD){const up=i>=W?G.t[i-W]:-1;if(up!==HARD){if(up===MOUNT||up===ROCK)put2(TL.mtBody,.9);put2(TL.hardTop,.9);}else put2(TL.hardBody,.9);}
+  else if(t===MOUNT){const up=i>=W?G.t[i-W]:-1;if(up===MOUNT)put2(TL.mtBody,.9);else{if(up===HARD)put2(TL.softTopBg,.9);put2(TL.mtTop,.9);}}
+  else if(t===HARD){const up=i>=W?G.t[i-W]:-1;if(up!==HARD){if(up===MOUNT||up===ROCK)put2(TL.hardTopBg,.9);put2(TL.hardTop,.9);}else put2(TL.hardBody,.9);}
   else if(t===LIQ){x.globalAlpha=.24;x.fillStyle=PAL['e'];x.fillRect(px,py,S,S);put2(h%2?TL.liq1:TL.liq0,.9);}
   else if(t===DEEP){x.globalAlpha=1;x.fillStyle='#01060c';x.fillRect(px,py,S,S);x.globalAlpha=.08;x.fillStyle=PAL['e'];x.fillRect(px,py,S,S);put2(h%2?TL.deep1:TL.deep0,.4);}
   else if(t===CHASM){x.globalAlpha=1;x.fillStyle='#000';x.fillRect(px,py,S,S);if(CHASM_OV)x.drawImage(CHASM_OV,(i%W)*16,((i/W)|0)*16,16,16,px,py,S,S);}

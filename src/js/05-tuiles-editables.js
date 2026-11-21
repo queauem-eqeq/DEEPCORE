@@ -56,7 +56,11 @@ for(const k of ['an0',...BEASTS.map((_,i)=>'bz'+i)])PAT[k+'l']=(x,y)=>TF(k+'r')(
 // mine armée : la tuile de la mine, bio en rouge et accent en blanc ; elle alterne avec la tuile normale (clignotement)
 // Roche dure (21 novembre 2026) : mêmes dessins que la montagne tendre (retouches comprises), en encre foncée 'd'
 PAT.hardBody=(x,y)=>{const c=TF('mtBody')(x,y);return c==='3'?'d':c;};PAT.hardTop=(x,y)=>{const c=TF('mtTop')(x,y);return c==='3'?'d':c;};
-TILE_DEPS.mtBody=['mtBody','hardBody'];TILE_DEPS.mtTop=['mtTop','hardTop'];
+// Fonds des crêtes : seule la partie AU-DESSUS de la ligne de crête est un fond, le reste garde ses trous (sinon la crête sombre paraît plus claire)
+const crestY=(f,x)=>{for(let y=0;y<16;y++)if(f(x,y)!=='.')return y;return 16;};
+PAT.hardTopBg=(x,y)=>{const f=TF('mtTop');return y<crestY(f,x)&&TF('mtBody')(x,y)==='3'?'3':'.';};   // crête de roche dure : fond de roche tendre
+PAT.softTopBg=(x,y)=>{const f=TF('mtTop');return y<crestY(f,x)&&TF('mtBody')(x,y)==='3'?'d':'.';};   // crête de roche tendre sous de la roche dure : fond de roche dure
+TILE_DEPS.mtBody=['mtBody','hardBody','hardTopBg','softTopBg'];TILE_DEPS.mtTop=['mtTop','hardTop','hardTopBg','softTopBg'];
 PAT.mineA=(x,y)=>{const c=TF('bz'+MINE_I+'r')(x,y);return c==='2'?'r':c==='1'?'w':c==='r'?'w':c;};TILE_DEPS['bz'+MINE_I+'r'].push('mineA');
 PAT.deep1=(x,y)=>TF('deep0')((x+14)%16,y);
 let TL={},ANIMG=[],fog=true;
