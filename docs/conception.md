@@ -71,7 +71,11 @@ revient sur **3 niveaux** ; elle n'est pas encore codée, et forer termine la pa
 - **Roche dure au cœur des massifs** : chaque case de montagne est durcie avec une chance qui monte avec sa
   **profondeur** dans le massif (distance au premier terrain qui n'est pas de la montagne, en 4 directions) : rien
   à une ou deux cases, puis 30 %, 65 %, 90 %, 100 %. Écorce tendre, cœur impénétrable. Posée **avant** les métaux,
-  qui n'apparaissent jamais dedans. La rangée extérieure reste de la montagne ordinaire.
+  qui n'apparaissent jamais dedans.
+  **La rangée extérieure de la carte est en roche dure** (21 novembre 2026). **Dessin** : plus de tuile propre — la roche dure reprend
+  les tuiles de la montagne tendre (`mtBody`, `mtTop`, retouches comprises) en encre foncée (`PAL['d']` = couleur monde, clarté −16,
+  `HARD_CLAIR` dans `02-palette.js`). Même logique : la case dont le haut n'est pas de la roche dure porte la crête irrégulière,
+  posée sur un fond de roche tendre quand la case du dessus est de la montagne ou du rocher.
 - Relief : méthode **Automate cellulaire**, **Bruit** ou **Mixte** ; réglages Remplissage (35-70 %) et Itérations (1-10).
 - Connectivité garantie : les zones isolées sont reliées par le plus court chemin (pont sur gouffre, col dans la
   montagne, rocher dégagé) ; petites poches comblées.

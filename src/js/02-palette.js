@@ -29,5 +29,6 @@ function teinter(hex,dh,dl,ds){if(!dh&&!dl&&!ds)return hex;const n=parseInt(hex.
 /* L'eau est une couleur dérivée du monde (21 novembre 2026) : PAL['e'] = couleur monde du biome + décalage EAU = [teinte (degrés), clarté, saturation (points)].
    Les tuiles d'eau gardent le code '2' dans leurs dessins ; buildTiles() le lit comme 'e' pour elles seules (EAU_TUILES). */
 const EAU=[-12,-8,0];   // choix du 21 novembre 2026 après essai de six variantes : teinte −12°, clarté −8
+const HARD_CLAIR=16;   // la roche dure : la couleur monde en plus sombre (clarté −16), code d'encre 'd'
 const EAU_TUILES=['liq0','liq1','deep0','deep1','wade','wadeDeep'];
-function palBiome(t){TEINTE=t||[0,0,0,0,0];PAL={'1':teinter(PAL_U['1'],TEINTE[0]),'2':teinter(PAL_U['2'],TEINTE[1]),'3':teinter(PAL_U['3'],TEINTE[2],TEINTE[3],TEINTE[4])};PAL['e']=teinter(PAL['3'],EAU[0],EAU[1],EAU[2]);}
+function palBiome(t){TEINTE=t||[0,0,0,0,0];PAL={'1':teinter(PAL_U['1'],TEINTE[0]),'2':teinter(PAL_U['2'],TEINTE[1]),'3':teinter(PAL_U['3'],TEINTE[2],TEINTE[3],TEINTE[4])};PAL['e']=teinter(PAL['3'],EAU[0],EAU[1],EAU[2]);PAL['d']=teinter(PAL['3'],0,-HARD_CLAIR,0);}

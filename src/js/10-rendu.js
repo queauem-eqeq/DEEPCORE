@@ -177,7 +177,8 @@ function render(){
     if(t!==BRIDGE)put(TL.ground0,x,y,.6*k);   // sol uniforme : plus de variations près des sites (13 novembre 2026)
     if(t===ROCK)put(h%3?TL.rock:TL.rock2,x,y,.95*k);
     else if(t===MOUNT)put(y>0&&G.t[idx(x,y-1)]===MOUNT?TL.mtBody:TL.mtTop,x,y,.9*k);
-    else if(t===HARD)put(TL.hard,x,y,.95*k);
+    else if(t===HARD){const up=y>0?G.t[idx(x,y-1)]:-1;   // comme la montagne : crête irrégulière en haut, posée sur de la roche tendre
+      if(up!==HARD){if(up===MOUNT||up===ROCK)put(TL.mtBody,x,y,.9*k);put(TL.hardTop,x,y,.9*k);}else put(TL.hardBody,x,y,.9*k);}
     else if((t===SHIP||t===DECK)&&G.ship){const sk=TL['ship_'+(x-G.ship.x)+'_'+(y-G.ship.y)];if(sk)put(sk,x,y,k);}
     if(t===MOUNT&&G.ore&&G.ore[i]&&!oreSol(G.ore[i]))put(oreTile(G.ore[i],false),x,y,k);
     else if(t===LIQ){ctx.globalAlpha=.24*k;ctx.fillStyle=PAL['e'];ctx.fillRect((x-camX)*S,(y-camY)*S,S,S);put((liqFrame+(h%2))%2?TL.liq1:TL.liq0,x,y,.9*k);}
