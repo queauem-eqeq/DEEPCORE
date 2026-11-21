@@ -232,41 +232,90 @@ montagne 30, gouffre 12, herbe 45). État mémorisé dans `GEN.hasard`. Code : `
 
 Recette `cavernes` (`zones`, `enfoui`, `cavernes`, `sansVaisseau`). Pas d'extérieur à ciel ouvert : la carte est une roche
 pleine où l'on creuse. Ici `ZONE` vaut **0 dans les cavernes et les boyaux** et 1 dans la roche, si bien que `distExt()`
-donne la distance à la caverne la plus proche et que les pourcentages de relief (eau, montagne, gouffre, herbe) valent
-pour le sol des cavernes.
+donne la distance à la caverne la plus proche. Refait le 21 novembre 2026 (secteurs, cavernes séparées, ambiances).
 
-- **Cavernes** (`cavernes()`) : `cvNb` blobs irréguliers (automate cellulaire, `caBlob`), posés le plus loin possible
-  des précédents, pour une surface totale `cvPart` % de la carte. Le nombre est le curseur « peu de grandes ↔ beaucoup
-  de petites » ; chaque blob est un poids tiré entre 0,6 et 1,4.
-- **Boyaux** : arbre couvrant (Prim) entre les centres, de 1 à 2 cases de large, sinueux (marche qui penche vers
-  la cible) ; puis `cvBoyaux` boucles entre cavernes voisines non reliées, et 1 à 3 culs-de-sac de 8 à 18 cases.
-- **Arrivée par un puits** : pas de vaisseau, la foreuse débouche sur un carré de sol sec de 3 × 3 (chemin déjà là pour
-  `SANS_VAISSEAU`). Le message d'arrivée est celui de la descente.
-- **Bâtiments enchâssés** (`batiments()`, mode `cav`) : `cvBati` bâtiments (± 1 au tirage, 4 au plus, au moins deux quand
-  on en demande deux) se partagent `cvSurf` % de la carte (visée : la roche disponible plafonne le résultat, 8 à 12 %
-  en pratique). Le lot est toute la carte : le bâtiment s'étale là où la roche est assez épaisse, à plus de 2 cases
-  d'une caverne et à plus de 3 cases du bord ; trois cases de roche séparent deux bâtiments. Chaque bâtiment a **une
-  porte** (deux si l'emprise dépasse 170 cases), du côté de la caverne la plus proche (`entrees(…, proche)`).
-- **Boyau de porte** (`reliePortes()`) : de chaque porte à la caverne la plus proche, chemin le moins cher dans un bruit,
-  loin des autres bâtiments ; il compte dans `G.tun` (jaune sur les planches). Si une porte n'atteint aucune caverne, la
-  structure est refaite (douze essais).
-- Le site de forage est dans la pièce la plus profonde du plus grand bâtiment (`siteAuFond`). Verrous, secrets, pièces
-  secrètes et artefacts passent par le même code que le niveau 1.
+La génération, dans l'ordre :
 
-Réglages (centre autour duquel la carte varie à chaque tirage) :
+1. **Secteurs** (`secteurs()`, variable `SECT`) : la carte est coupée en 6 à 18 zones aux frontières sinueuses (une pour
+   400 cases environ). Chacune reçoit un rôle : **0 cavernes, 1 bâti, 2 roche pleine**. La place donnée aux cavernes et
+   au bâti se déduit de « Part de cavernes » et de « Surface bâtie » ; le reste est de la roche pleine. La
+   **disposition** dit où vont les uns et les autres : mélangée, cavernes d'un côté et bâti de l'autre, cité au centre
+   (bâti au milieu, cavernes en anneau), cavernes au centre, ou l'une des quatre au hasard.
+2. **Cavernes** (`cavernes()`, `caForme()`) : chaque forme est un disque déformé par un bruit puis lissé. Elles sont
+   posées les plus grandes d'abord, **dans les secteurs « cavernes », sans jamais se chevaucher**, à au moins
+   `cvEcart` cases de roche les unes des autres. Leur nombre vient de la part demandée divisée par la taille demandée
+   (30 au plus). Une caverne qui ne tient nulle part est réduite.
+3. **Complément** : les cavernes grossissent par leurs bords (en lobes, guidés par un bruit), sans sortir de leurs
+   secteurs ni s'approcher d'une autre, jusqu'à la surface demandée.
+4. **Boyaux** : arbre couvrant (Prim) entre les cavernes, puis `cvBoyaux` boucles et `cvCuls` culs-de-sac de 8 à 18
+   cases. Chaque boyau est le chemin le moins cher dans un bruit, **de bord de caverne à bord de caverne** ; la
+   sinuosité règle le poids du bruit, et traverser un secteur bâti coûte cinq fois plus cher.
+5. **Relief du sol** : la montagne, le gouffre et les rochers épars viennent des curseurs de la recette (`cvMont`,
+   `cvGouf`, `cvRoc`), pas de la colonne de gauche ; l'eau et l'herbe viennent de la colonne de gauche.
+6. **Arrivée par un puits** : pas de vaisseau, la foreuse débouche sur un carré de 3 × 3 sec, **toujours dans une
+   caverne ou un boyau large**. Le message d'arrivée est celui de la descente.
+7. **Bâtiments enchâssés** (`batiments()`, mode `cav`) : chaque bâtiment part d'une graine tirée dans un secteur bâti,
+   loin des autres graines, et s'étale **sans sortir des secteurs bâtis**, à plus de 2 cases d'une caverne et à plus de
+   3 cases du bord ; trois cases de roche séparent deux bâtiments, et ils ne sont jamais reliés entre eux. « Pièces par
+   bâtiment » est un **nombre visé** : la taille des pièces est ajustée (de 0,55 à 2 fois) pour tenir la surface, qui
+   peut déborder d'un tiers. Chaque bâtiment a `cvPortes` portes, du côté de la caverne la plus proche.
+8. **Boyau de porte** (`reliePortes()`) : de chaque porte à la caverne la plus proche ; il compte dans `G.tun` (jaune
+   sur les planches). Si une porte n'atteint aucune caverne, la structure est refaite (douze essais).
+9. Site de forage dans la pièce la plus profonde du plus grand bâtiment (`siteAuFond`). Verrous, secrets, pièces
+   secrètes et artefacts passent par le même code que le niveau 1.
+10. **Contrôle** (`cvBilan()`, dans `niveau()`) : la carte est mesurée et comparée à ce que le tirage visait (`CVT`).
+    Trop loin, elle est refaite ; au bout de six, la meilleure est gardée. Le résultat est dans `G.obt` et s'affiche
+    sous les réglages du menu Monde (« Carte en cours : 32 % de cavernes (visé 31) · 8 cavernes (8) · … »).
+
+Réglages (centre autour duquel la carte varie à chaque tirage). Les tailles sont en cases ; sous la taille 4, la taille
+des cavernes est réduite en proportion de la surface de la carte.
 
 | Réglage (clé) | Bornes, départ | Tirage |
 |---|---|---|
-| Part de cavernes (`cvPart`) | 20 à 55 %, 36 | ± 12 % de la valeur ; 18 à 60 % au final |
-| Nombre de cavernes (`cvNb`) | 1 à 12, 6 | ± 25 % |
-| Boucles entre cavernes (`cvBoyaux`) | 0 à 4, 2 | ± 20 % |
-| Nombre de bâtiments (`cvBati`) | 1 à 4, 2 | ± 30 %, au moins 60 cases chacun |
-| Surface bâtie (`cvSurf`) | 6 à 30 %, 14 | ± 15 % |
+| Ambiance (`cvAmb`) | voir plus bas | un préréglage |
+| Disposition (`cvDispo`) | au hasard (départ), mélangée, un côté chacun, cité au centre, cavernes au centre | |
+| Part de cavernes (`cvPart`) | 10 à 60 %, 32 | ± 8 % de la valeur |
+| Taille des cavernes (`cvTaille`) | 30 à 800 cases, 240 | ± 15 % ; le nombre de cavernes s'en déduit |
+| Variété des tailles (`cvVar`) | 0 à 100, 40 | 0 : toutes pareilles ; 100 : de 1 à 13 |
+| Roche entre deux cavernes (`cvEcart`) | 1 à 8 cases, 3 | |
+| Forme (`cvForme`) | 0 (ronde) à 100 (déchiquetée), 50 | |
+| Largeur des boyaux (`cvLarg`) | 1 à 3, 1 | chaque boyau : la valeur, ou une case de moins quatre fois sur dix |
+| Sinuosité (`cvSinu`) | 0 à 100, 50 | |
+| Boucles (`cvBoyaux`) | 0 à 6, 2 | ± 20 % |
+| Culs-de-sac (`cvCuls`) | 0 à 6, 2 | ± 25 % |
+| Montagne, gouffre, rochers (`cvMont`, `cvGouf`, `cvRoc`) | 0 à 15, 4 · 0 à 10, 3 · 0 à 8, 2 (% du sol) | |
+| Nombre de bâtiments (`cvBati`) | 1 à 6, 2 | ± 20 %, au moins 50 cases chacun |
+| Surface bâtie (`cvSurf`) | 5 à 40 %, 14 | ± 10 % |
+| Pièces par bâtiment (`cvPieces`) | 0 (automatique), 2 à 25 | nombre visé |
+| Portes par bâtiment (`cvPortes`) | 1 à 3, 1 | |
 
-S'y ajoutent les réglages communs : archétype, pièces, ouvertures, verrous, secrets. **Limites connues** : les
-bâtiments se logent surtout en périphérie, là où la roche est épaisse ; sur les petites cartes (taille 2), un seul
-bâtiment, parfois aucun ; la faune (étape 3) n'est pas encore répartie par lieu. Mesure : `outils/scripts/mesure-cavernes.js` ;
-vue d'ensemble : `outils/scripts/cavernes.js`.
+S'y ajoutent les réglages communs : archétype, ouvertures, verrous, secrets. « Nombre de cavernes » (`cvNb`) n'existe
+plus : il est remplacé par la taille.
+
+**Ambiances** (`AMBIANCES`, `06-reglages.js`) : un préréglage remet tous les curseurs `cv…` à leur valeur de départ
+puis pose les siens ; toucher ensuite à un curseur repasse sur « Personnalisée ». Ajouter une ambiance = ajouter une
+entrée.
+
+| Ambiance | Ce qu'elle règle |
+|---|---|
+| Grottes sauvages | 45 % de cavernes de 300 cases, très variées et déchiquetées ; un petit bâtiment de 4 pièces |
+| Cathédrale | cavernes de 800 cases au centre, 6 cases de roche entre elles, boyaux larges ; 2 bâtiments |
+| Termitière | une trentaine de cavernes de 50 cases, 5 boucles, 5 culs-de-sac, boyaux très sinueux |
+| Cité enfouie | cité au centre : 4 bâtiments de 12 pièces sur 30 % de la carte, 18 % de cavernes autour |
+| Avant-postes | 5 bâtiments de 4 pièces, mélangés aux cavernes |
+
+**Mesures** du 21 novembre 2026 (25 cartes par réglage, `outils/scripts/mesure-cavernes.js`), taille 4 sauf mention :
+part de cavernes obtenue à moins de 2 points de la part visée dans tous les cas (15, 32, 45 et 55 %) ; nombre de
+cavernes 8,1 pour 8,1 visées au départ, 4,6 pour 4,7 avec des cavernes de 400 cases, 24 pour 30 avec des cavernes de
+50 cases ; surface bâtie 12,7 % pour 13,9 visés au départ, 28,8 pour 29,5 en « Cité enfouie » ; toutes les cartes
+sont entièrement reliées. Avant la refonte : une seule caverne faisait 82 à 87 % de la surface quel que soit le
+nombre demandé, et 14 % de surface bâtie demandés en donnaient 9 à 10.
+
+**Limites connues** : en taille 2, un seul bâtiment la moitié du temps ; 6 bâtiments sur 30 % ne donnent que 22 % ;
+au-delà d'une dizaine de pièces par bâtiment, le nombre visé n'est atteint que si la surface le permet (8 à 9 pièces
+obtenues pour 10 à 12 demandées) ; avec 55 % de cavernes la surface bâtie plafonne vers 10 % ; la faune n'est pas
+encore répartie par lieu. Vue d'ensemble : `outils/scripts/cavernes.js` (les secteurs y sont teintés ; `window.CAS`
+permet de choisir les six cartes).
 
 ### Forme du massif
 

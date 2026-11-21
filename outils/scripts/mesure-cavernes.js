@@ -1,9 +1,12 @@
 (() => {
-  const d={recette:'cavernes',cvPart:36,cvNb:6,cvBoyaux:2,cvBati:2,cvSurf:14};
-  const cas=[['départ, taille 4',{taille:4}],['taille 3',{taille:3}],['taille 2',{taille:2}],['peu de grandes',{taille:4,cvNb:2,cvPart:42}],['beaucoup de petites',{taille:4,cvNb:11,cvPart:30}],['4 bâtiments',{taille:4,cvBati:4,cvSurf:24}],['1 petit bâtiment',{taille:4,cvBati:1,cvSurf:8}],['grande carte 5',{taille:5}]];
+  const base={recette:'cavernes',taille:4};for(const l of recLignes('cavernes'))base[l[1]]=recDef(l);
+  const cas=[['départ',{}],['taille 3',{taille:3}],['taille 2',{taille:2}],['taille 5',{taille:5}],['cav 50 cases',{cvTaille:50}],['cav 400',{cvTaille:400}],['cav 800 part 45',{cvTaille:800,cvPart:45}],['part 15',{cvPart:15}],['part 55',{cvPart:55}],['6 bât 30 %',{cvBati:6,cvSurf:30}],['1 bât 6 %',{cvBati:1,cvSurf:6}],['3 bât 10 pièces',{cvBati:3,cvSurf:20,cvPieces:10}],['2 bât 4 pièces',{cvBati:2,cvSurf:14,cvPieces:4}]]
+    .concat(Object.keys(AMBIANCES).map(a=>['amb '+AMBIANCES[a].n,{amb:a}]));
   const out=[];
-  for(const [nom,r] of cas){Object.assign(GEN,d,{taille:4},r);let cav=0,bat=0,tun=0,emp=0,conn=0,tot=0,t0=performance.now();const nb=[0,0,0,0,0];
-    for(let k=0;k<40;k++){newGame();tot++;let n=0;for(let i=0;i<W*H;i++)if(ZONE&&!ZONE[i])n++;cav+=100*n/(W*H);bat+=G.batis.length;nb[G.batis.length]++;tun+=G.tunN||0;emp+=G.batis.reduce((a,b)=>a+b.cases,0)*100/(W*H);{const ok=v=>!blocks(v)||v===LOCK||v===SECRET,vu=new Uint8Array(W*H),q=[idx(G.px,G.py)];vu[q[0]]=1;for(let a=0;a<q.length;a++){const c=q[a],x=c%W,y=(c/W)|0;for(const [dx,dy] of D4){const j=idx(x+dx,y+dy);if(!vu[j]&&ok(G.t[j])){vu[j]=1;q.push(j);}}}let tt=0;for(let i=0;i<W*H;i++)if(ok(G.t[i]))tt++;if(q.length===tt&&vu[idx(G.sites[0].x,G.sites[0].y)])conn++;}}
-    out.push(`${nom} : cavernes ${(cav/tot).toFixed(0)} % · bâtiments ${(bat/tot).toFixed(1)} [0:${nb[0]} 1:${nb[1]} 2:${nb[2]} 3:${nb[3]} 4:${nb[4]}] · surface bâtie ${(emp/tot).toFixed(0)} % · boyaux de porte ${(tun/tot).toFixed(0)} · tout relié (verrous et secrets franchis, site atteint) ${conn}/${tot} · ${((performance.now()-t0)/tot).toFixed(0)} ms/carte`);}
+  for(const [nom,r] of cas){Object.assign(GEN,base,r);if(r.amb)ambiance(r.amb);const K=25;let c=0,vc=0,nb=0,vn=0,b=0,vb=0,s=0,vs=0,pc=0,np=0,conn=0,t0=performance.now(),big=0;
+    for(let k=0;k<K;k++){newGame();const o=G.obt;c+=o.cav;vc+=o.vise.cav;nb+=o.nb;vn+=o.vise.nb;b+=o.bat;vb+=o.vise.bat;s+=o.surf;vs+=o.vise.surf;for(const x of G.batis){pc+=x.pieces;np++;}
+      const ok=v=>!blocks(v)||v===LOCK||v===SECRET,vu=new Uint8Array(W*H),q=[idx(G.px,G.py)];vu[q[0]]=1;for(let a=0;a<q.length;a++){const cc=q[a],x=cc%W,y=(cc/W)|0;for(const [dx,dy] of D4){const j=idx(x+dx,y+dy);if(!vu[j]&&ok(G.t[j])){vu[j]=1;q.push(j);}}}let tt=0;for(let i=0;i<W*H;i++)if(ok(G.t[i]))tt++;if(q.length===tt&&vu[idx(G.sites[0].x,G.sites[0].y)])conn++;}
+    const f=(a)=>(a/K).toFixed(1);
+    out.push(`${nom} : cavernes ${f(c)} % (visé ${f(vc)}) · nb ${f(nb)} (${f(vn)}) · bât ${f(b)} (${f(vb)}) · bâti ${f(s)} % (${f(vs)}) · pièces/bât ${(pc/Math.max(1,np)).toFixed(1)} · relié ${conn}/${K} · ${((performance.now()-t0)/K).toFixed(0)} ms`);}
   return out.join('\n');
 })()
