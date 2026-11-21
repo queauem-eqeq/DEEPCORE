@@ -75,7 +75,9 @@ function side(){
   // Le sous-menu Statistiques a été retiré le 15 novembre 2026 : les stats sont dans la fenêtre Équipement.
   sacDraw();
   {const E=G.eff||{},l=[];if(E.poison>0)l.push(`<span style="color:var(--life)">Poison ${E.poison}</span>`);if(E.glu>0)l.push(`Englué ${E.glu}`);{const f=G.fum&&G.fum[idx(G.px,G.py)];if(f)l.push(`<span style="color:var(--c1)">Dans la fumée ${f.v}</span>`);}$('effs').innerHTML=l.join(' · ');}
-  $('lvl').textContent=`Carte ${W} × ${H}`;   // plus de niveau ni de biome depuis le 16 novembre 2026 : une seule carte, réglée dans le menu Monde$('matN').textContent=G.st.matiere||0;
+  // le niveau est revenu le 21 novembre 2026 ; la taille de la carte se règle dans le menu Monde
+  $('lvl').textContent=`Niveau ${G.niv||1} · ${W} × ${H}`;
+  $('matN').textContent=G.st.matiere||0;   // avalée par le commentaire depuis le 16 novembre 2026 : la matière ne s'affichait plus
   if(!$('inventaire').hidden)invDraw();
   $('msg').innerHTML=seenHTML();
   const lg=(G.log||[]).slice(-5);
@@ -89,6 +91,8 @@ const KEYS={arrowup:[0,-1],arrowdown:[0,1],arrowleft:[-1,0],arrowright:[1,0],z:[
   '8':[0,-1],'2':[0,1],'4':[-1,0],'6':[1,0],'7':[-1,-1],'9':[1,-1],'1':[-1,1],'3':[1,1]};
 addEventListener('keydown',ev=>{
   if(INTRO){ev.preventDefault();if(ev.key==='Escape'||ev.key===' '||ev.key==='Enter')skipIntro();return;}
+  if(FORAGE){ev.preventDefault();if(ev.key==='Escape'||ev.key===' '||ev.key==='Enter')skipForage();return;}
+  if(ev.key==='F9'){ev.preventDefault();playForage();return;}   // essai de la cinématique de forage (21 novembre 2026)
   if(!$('inventaire').hidden){invKey(ev);return;}
   if(SAC_NAV&&$('overlay').hidden&&ev.target.tagName!=='INPUT'){if(sacKey(ev))return;}   // navigation au clavier dans le sous-menu Inventaire
   if(!$('monde').hidden){if(ev.key==='Escape'){ev.preventDefault();mondeClose();}return;}
