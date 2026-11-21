@@ -76,7 +76,7 @@ function side(){
   sacDraw();
   {const E=G.eff||{},l=[];if(E.poison>0)l.push(`<span style="color:var(--life)">Poison ${E.poison}</span>`);if(E.glu>0)l.push(`Englué ${E.glu}`);{const f=G.fum&&G.fum[idx(G.px,G.py)];if(f)l.push(`<span style="color:var(--c1)">Dans la fumée ${f.v}</span>`);}$('effs').innerHTML=l.join(' · ');}
   // le niveau est revenu le 21 novembre 2026 ; la taille de la carte se règle dans le menu Monde
-  $('lvl').textContent=`Niveau ${G.niv||1} · ${W} × ${H}`;
+  $('lvl').textContent=`Niveau ${G.niv||1}${G.amb?' · '+G.amb:''} · ${W} × ${H}`;
   $('matN').textContent=G.st.matiere||0;   // avalée par le commentaire depuis le 16 novembre 2026 : la matière ne s'affichait plus
   if(!$('inventaire').hidden)invDraw();
   $('msg').innerHTML=seenHTML();
@@ -142,7 +142,8 @@ function applySaved(d){
   if(num(d.discretion))setStealthBase(d.discretion);
   if(d.artefacts){ARTEFACTS=artefactsSains(d.artefacts);saveArtefacts();}
   if(d.groupes){const g=groupesSains(d.groupes);if(g){GROUPES=g;saveGroupes();}}   // les anciennes intensités par espèce (d.intensite) ne sont plus lues
-  if(d.mondes&&typeof d.mondes==='object'){MONDES=Object.assign({},MONDES,d.mondes);saveMondes();}
+  if(d.mondes&&typeof d.mondes==='object'&&Date.parse(d.enregistreLe)>Date.parse('2026-11-21T05:00:00Z')){   // les archétypes d'avant cette date ont été effacés
+    MONDES=Object.assign({},MONDES,d.mondes);saveMondes();}
   if(d.generation){const g=d.generation;GEN_LBL.forEach(([k])=>{if(num(g[k]))GEN[k]=0;});GEN_LBL.forEach(([k])=>{if(num(g[k]))setGen(k,g[k]);});
     if(METHODS.some(m=>m[0]===g.methode)){GEN.methode=g.methode;$('gm').value=g.methode;}
     if(num(g.remplissage))setCA('remplissage',g.remplissage,35,70);if(num(g.iterations))setCA('iterations',g.iterations,1,10);caState();saveGen();}

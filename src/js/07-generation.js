@@ -2,7 +2,7 @@
 function noise(scale){const gw=Math.ceil(W/scale)+2,g=Array.from({length:gw*(Math.ceil(H/scale)+2)},Math.random);
   return (x,y)=>{const gx=x/scale,gy=y/scale,x0=Math.floor(gx),y0=Math.floor(gy),tx=gx-x0,ty=gy-y0,sx=tx*tx*(3-2*tx),sy=ty*ty*(3-2*ty),v=(i,j)=>g[j*gw+i];
     return (v(x0,y0)*(1-sx)+v(x0+1,y0)*sx)*(1-sy)+(v(x0,y0+1)*(1-sx)+v(x0+1,y0+1)*sx)*sy;};}
-function fbm(){const a=noise(SZ(14,4)),b=noise(SZ(6,3));return (x,y)=>a(x,y)*.7+b(x,y)*.3;}
+function fbm(g){g=g||1;const a=noise(Math.max(3,Math.round(SZ(14,4)*g))),b=noise(Math.max(2,Math.round(SZ(6,3)*g)));return (x,y)=>a(x,y)*.7+b(x,y)*.3;}
 let G,vis=new Uint8Array(W*H),liqFrame=0,started=false,drilling=false;
 
 function logPush(m,c){G.log=G.log||[];const last=G.log[G.log.length-1];
@@ -39,11 +39,15 @@ function connectedAll(t){let s0=-1,tot=0;for(let i=0;i<W*H;i++)if(!blocks(t[i]))
   for(let k=0;k<q.length;k++){const c=q[k],x=c%W,y=(c/W)|0;for(const[dx,dy]of DIRS){const a=x+dx,b=y+dy;if(a<0||b<0||a>=W||b>=H)continue;const j=idx(a,b);if(!seen[j]&&!blocks(t[j])&&diagOk(x,y,dx,dy,t)){seen[j]=1;q.push(j);}}}
   return q.length===tot;}
 // Pose des blobs un par un ; avec check, un blob qui coupe la carte est refusé
-function placeBlobs(t,target,val,size,fill,iters,check){
+// aff, K (21 novembre 2026, « regroupement ») : parmi K emplacements tirés, on garde celui où le champ d'affinité du terrain est le plus
+// fort ; les taches d'un même terrain se rassemblent alors en régions (une chaîne, une prairie) au lieu de s'éparpiller.
+const meilleurePlace=(w,h,aff,K,x0,y0)=>{let bx=rnd(x0,Math.max(x0,W-w-x0)),by=rnd(y0,Math.max(y0,H-h-y0));if(!aff||K<2)return [bx,by];
+  let bv=aff(bx+w/2,by+h/2)+Math.random()*.2;for(let k=1;k<K;k++){const x=rnd(x0,Math.max(x0,W-w-x0)),y=rnd(y0,Math.max(y0,H-h-y0)),v=aff(x+w/2,y+h/2)+Math.random()*.2;if(v>bv){bv=v;bx=x;by=y;}}return [bx,by];};
+function placeBlobs(t,target,val,size,fill,iters,check,aff,K){
   let count=0,tries=0;
   while(count<target&&tries<300){tries++;
     const [w,h]=size(count/Math.max(1,target)),cells=caBlob(w,h,fill,iters);if(cells.length<4)continue;
-    const ox=rnd(1,W-w-1),oy=rnd(1,H-h-1),ch=[];
+    const [ox,oy]=meilleurePlace(w,h,aff,tries<150?K:1,1,1),ch=[];
     for(const [x,y] of cells){const i=idx(ox+x,oy+y);if(t[i]===GROUND){ch.push(i);t[i]=val;}}
     if(!ch.length)continue;
     if(check&&!connectedAll(t)){for(const i of ch)t[i]=GROUND;continue;}
@@ -64,12 +68,12 @@ function nearChasm(t){const n=new Uint8Array(W*H);
      - « à-pic » (1 sur 5)   : que de l'eau profonde, qui descend d'un coup depuis la rive ;
      - sinon                 : rive de largeur moyenne tirée entre 0,4 et 3,6 cases, ondulée de ×0,3 à ×1,9 autour du lac.
    La profondeur se lit à la distance au rivage (en cases, diagonales comprises) : profond là où elle dépasse la largeur de rive. */
-function placeLakes(t,target){
+function placeLakes(t,target,gs,aff,K){gs=gs||1;
   const near=nearChasm(t),ok=i=>t[i]===GROUND&&!near[i],rive=noise(SZ(8,3));
   let count=0,tries=0;
   while(count<target&&tries<600){tries++;
-    const p=count/Math.max(1,target),w=Math.max(6,Math.round((26-p*10)*F)),h=Math.max(4,Math.round((13-p*5)*F)),cells=caBlob(w,h,.55,5);if(cells.length<6)continue;
-    const ox=rnd(2,W-w-2),oy=rnd(2,H-h-2);
+    const p=count/Math.max(1,target),w=Math.min(W-6,Math.max(10,Math.round((26-p*10)*F*gs))),h=Math.min(H-6,Math.max(6,Math.round((13-p*5)*F*gs))),cells=caBlob(w,h,.55,5);if(cells.length<6)continue;
+    const [ox,oy]=meilleurePlace(w,h,aff,tries<300?K:1,2,2);
     // un lac qui empiète trop sur la marge d'un gouffre est refusé, pour garder des rives naturelles
     let hit=0;for(const [x,y] of cells)if(near[idx(ox+x,oy+y)])hit++;
     if(tries<450&&hit>cells.length*.15)continue;
@@ -184,14 +188,19 @@ function genPlanet(){
     {const c=GEN.zExt/100-Math.max(0,ZESSAI-2)*.06;ZONE=rec.cavernes?cavernes(t):rec.zones?massif(t,[Math.max(.25,c-.1),Math.min(.9,c+.1)],GEN.zForme):null;}   // curseur « Part d'extérieur » : le centre, ± 10 points ; le massif s'épaissit si le complexe n'a pas tenu (ZESSAI)Nt=N;
     if(ZONE){Nt=0;for(let i=0;i<N;i++)if(t[i]===GROUND)Nt++;}   // les pourcentages du relief valent pour la zone extérieure
     const mode=GEN.methode,mt=rec.cavernes?Math.round(Nt*(GEN.cvMont??4)/100):P('montagne'),ct=rec.cavernes?Math.round(Nt*(GEN.cvGouf??3)/100):P('gouffre');   // cavernes : le sol a son propre relief, plus doux (curseurs de la recette)
-    const mSize=p=>[rnd(SZ(14,4),SZ(30,6))-Math.round(p*8*F),rnd(SZ(9,3),SZ(18,5))-Math.round(p*4*F)],cSize=()=>[rnd(SZ(8,3),SZ(18,5)),rnd(SZ(5,3),SZ(10,4))];
+    /* Grain et regroupement (21 novembre 2026) : « grain » règle la taille des taches de relief (50 : la taille d'avant ; 0 : émietté ;
+       100 : massif), « regroupe » le nombre d'emplacements essayés pour chaque tache (0 : éparpillé comme avant). Chaque terrain a son
+       propre champ d'affinité, à grande échelle : ses taches se rassemblent là où il est fort. */
+    const gs=Math.pow(2,((GEN.grain??50)-50)/40),KR=1+Math.round((GEN.regroupe??0)/100*9),affN=()=>noise(Math.max(8,Math.round(W/3.2))),aM=affN(),aC=affN(),aE=affN(),aH=affN();
+    const bx=v=>Math.max(3,Math.min(W-6,Math.round(v*gs))),by=v=>Math.max(3,Math.min(H-6,Math.round(v*gs)));
+    const mSize=p=>[bx(rnd(SZ(14,4),SZ(30,6))-Math.round(p*8*F)),by(rnd(SZ(9,3),SZ(18,5))-Math.round(p*4*F))],cSize=()=>[bx(rnd(SZ(8,3),SZ(18,5))),by(rnd(SZ(5,3),SZ(10,4)))];
     const cz=noise(SZ(11,4)),cm=fbm(),crev=sc((x,y)=>-Math.abs(cz(x,y)-.5)-(cm(x,y)<.45?1:0));
-    if(mode==='bruit'){rankFill(t,sc(fbm()),mt,MOUNT);rankFill(t,crev,ct,CHASM);}
-    else if(mode==='automate'){const a=placeBlobs(t,mt,MOUNT,mSize,fill,it,true);if(a<mt)rankFill(t,sc(fbm()),mt-a,MOUNT);const b=placeBlobs(t,ct,CHASM,cSize,fill,it,false);if(b<ct)rankFill(t,crev,ct-b,CHASM);}
-    else{const n=rankFill(t,sc(fbm()),Math.round(mt/2),MOUNT),a=placeBlobs(t,mt-n,MOUNT,mSize,fill,it,true);if(n+a<mt)rankFill(t,sc(fbm()),mt-n-a,MOUNT);
-      const c=rankFill(t,crev,Math.round(ct/2),CHASM),b=placeBlobs(t,ct-c,CHASM,cSize,fill,it,false);if(c+b<ct)rankFill(t,crev,ct-c-b,CHASM);}
-    placeLakes(t,P('eau'));
-    const gC=placeBlobs(t,P('herbe'),GRASS,()=>[rnd(SZ(10,4),SZ(22,6)),rnd(SZ(6,3),SZ(13,4))],.5,4,false);if(gC<P('herbe'))rankFill(t,sc(fbm()),P('herbe')-gC,GRASS);
+    if(mode==='bruit'){rankFill(t,sc(fbm(gs)),mt,MOUNT);rankFill(t,crev,ct,CHASM);}
+    else if(mode==='automate'){const a=placeBlobs(t,mt,MOUNT,mSize,fill,it,true,aM,KR);if(a<mt)rankFill(t,sc(fbm(gs)),mt-a,MOUNT);const b=placeBlobs(t,ct,CHASM,cSize,fill,it,false,aC,KR);if(b<ct)rankFill(t,crev,ct-b,CHASM);}
+    else{const n=rankFill(t,sc(fbm()),Math.round(mt/2),MOUNT),a=placeBlobs(t,mt-n,MOUNT,mSize,fill,it,true,aM,KR);if(n+a<mt)rankFill(t,sc(fbm()),mt-n-a,MOUNT);
+      const c=rankFill(t,crev,Math.round(ct/2),CHASM),b=placeBlobs(t,ct-c,CHASM,cSize,fill,it,false,aC,KR);if(c+b<ct)rankFill(t,crev,ct-c-b,CHASM);}
+    placeLakes(t,P('eau'),gs,aE,KR);
+    const gC=placeBlobs(t,P('herbe'),GRASS,()=>[bx(rnd(SZ(10,4),SZ(22,6))),by(rnd(SZ(6,3),SZ(13,4)))],.5,4,false,aH,KR);if(gC<P('herbe'))rankFill(t,sc(fbm()),P('herbe')-gC,GRASS);
     // Herbes hautes / basses (15 novembre 2026) : plus de coupure nette moitié-moitié. Trois couches s'additionnent : de grandes zones
     // (qui donnent parfois une forte majorité de hautes ou de basses), des bosquets et des touffes de 2 à 6 cases, et un grain case par case.
     // Les grandes zones sont écrasées vers le milieu (mises au carré) : le plus souvent c'est le mélange qui l'emporte.
@@ -246,6 +255,7 @@ function niveau(){drilling=false;
     if(G.batis.length||!ZONE||!(ENFOUI()||GEN.structure>0))break;}
   if(mieux&&mieux.G!==G){G=mieux.G;ZONE=mieux.ZONE;ZINFO=mieux.ZINFO;SECT=mieux.SECT;CVT=mieux.CVT;}
   {const o=cv&&typeof document!=='undefined'&&document.getElementById('genObt');if(o)o.textContent=obtenuTxt();}
+  G.amb=ambNom(GEN.recette,GEN.amb);   // nom de l'ambiance, affiché dans le Statut et à l'arrivée
   durcir();   // la roche dure avant les métaux : ils n'y apparaissent jamais
   {const a=W*H/(48*32);G.eff={};G.fum={};hideOre(Math.max(1,Math.round(GISEMENTS.metal*a)),Math.max(1,Math.round(GISEMENTS.mat*a)));}
   G.sonar=1;   // sonar à émettre (voir sonarStart, 10-rendu) : il part 10 à 20 tours après l'arrivée
@@ -287,7 +297,7 @@ function niveauSuivant(hasard){   // hasard : tirer les réglages même si la ca
   SANS_VAISSEAU=false;genRemet(sauve);
   G.inv=inv;G.st=st;G.niv=niv;G.turn=tour;G.dist=dist;G.over=null;drilling=false;
   eboulis();
-  say(`Niveau ${G.niv}. La foreuse a percé le plafond et s'est écrasée plus bas. Un nouveau site de forage est signalé.`,'info');}
+  say(`Niveau ${G.niv}${G.amb?' — '+G.amb:''}. La foreuse a percé le plafond et s'est écrasée plus bas. Un nouveau site de forage est signalé.`,'info');}
 
 /* ---------- Bestiaire : édition des statistiques ---------- */
 const BFIELDS=[['v','Vitesse',1,10],['pv','PV',1,200],['dmin','Dégâts min',0,100],['dmax','Dégâts max',0,100],['pre','Précision',0,250],['def','Défense',0,150],['crit','Crit %',0,100]];

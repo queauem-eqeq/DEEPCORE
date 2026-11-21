@@ -228,6 +228,38 @@ laissés tels quels la **taille de la carte** et les réglages dont 0 veut dire 
 structure, portes d'entrée). Le relief est tiré avec un biais vers le bas (plafonds `HASARD_REL` : eau 30,
 montagne 30, gouffre 12, herbe 45). État mémorisé dans `GEN.hasard`. Code : `hasardReglages()`, `06-reglages.js`.
 
+### Grain, regroupement et ambiances (21 novembre 2026)
+
+Constat en taille 3 : toutes les cartes se ressemblaient, parce que chaque terrain était semé en petites taches
+partout (une « soupe »). Deux réglages de relief, dans la colonne de gauche du menu Monde, y remédient :
+
+- **Grain** (`GEN.grain`, 0 à 100, départ 65) : taille des taches de montagne, de gouffre, d'eau et d'herbe.
+  50 donne la taille d'avant ; 100 des masses (un grand lac, une chaîne) ; 0 un relief émietté.
+- **Regroupement par régions** (`GEN.regroupe`, 0 à 100, départ 45) : chaque terrain a un champ d'affinité à grande
+  échelle ; pour chaque tache, on tire jusqu'à dix emplacements et on garde celui où ce champ est le plus fort
+  (`meilleurePlace`). À 0, les taches sont éparpillées comme avant.
+
+**Ambiances** (`AMBIANCES[recette]`, `06-reglages.js`) : chaque recette a une dizaine de préréglages nommés, premier
+choix de la colonne de droite. Une ambiance remet les réglages de sa recette à leur valeur de départ et le relief à
+`AMB_DEF`, puis pose les siens (relief compris). Toucher un curseur repasse sur « Personnalisée ». Le nom de
+l'ambiance est affiché dans le Statut et dans le message d'arrivée (`G.amb`).
+
+- Niveau 1 : Grande prairie, Rives du grand lac, Marais, Désert de pierre, Terre fracturée, Chaos rocheux, Chaîne de
+  montagnes, Forteresse sous la montagne, Dédale de tunnels, Ruines noyées.
+- Niveau 2 : Grottes sauvages, Cathédrale, Termitière, Cité enfouie, Avant-postes, Lac souterrain, Jardins
+  engloutis, Abîmes, Dédale de boyaux, Bunker, Chaos d'éboulis.
+- Classique : Avant-poste isolé, Citadelle, Bases jumelles, Hangars, Ruines sous les herbes, Station lacustre,
+  Plateau désert, Champ de failles, Cols de montagne, Marécage.
+- Niveau 3 : voir « La grande base ».
+
+**« Réglages au hasard » tire désormais une ambiance**, puis fait varier les curseurs qu'elle ne fixe pas et le
+relief de ± 15 % : chaque niveau a un caractère reconnaissable au lieu d'une moyenne de tout. Une recette sans
+ambiance garde l'ancien tirage. Les **archétypes de monde** enregistrés avant le 21 novembre 2026 ont été effacés à
+la demande de l'utilisateur (une fois, clé `np-mondes-v`) ; la fonction d'enregistrement reste.
+
+Outils : `outils/planche_cartes.py` (douze cartes côte à côte avec leurs mesures) et
+`outils/scripts/mesure-ambiances.js` (quinze cartes par ambiance). Chiffres dans `docs/mesures.md`.
+
 ### Réseau de cavernes (`07e-cavernes.js`)
 
 Recette `cavernes` (`zones`, `enfoui`, `cavernes`, `sansVaisseau`). Pas d'extérieur à ciel ouvert : la carte est une roche
