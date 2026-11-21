@@ -9,20 +9,20 @@
 Object.assign(ITEMS,{
   vrille:{n:'Vrille rapide',f:1,slot:'arme',req:9,de:{n:1,f:4,p:4},mod:{coup:-30,crit:5},
     d:'Une mèche fine qui tourne vite : coups moins lourds, mais plus rapprochés et plus souvent critiques.',
-    art:["  ▄▄▄          ","  ███▄▄▄▄▄▄▄▄  ","  ███▒▒▒▒▒▒▒▒▀ ","  ███▀▀▀▀▀▀▀▀  ","  ▀▀▀          "],
-    col:["..111..........","..11122222222..","..111wwwwwwww2.","..11122222222..","..111.........."]},
+    art:["     █▓▓▓█     ", "     ▐▒▒▒▌     ", "      ▐▒▌      ", "      ▐▒▌      ", "      ▐▒▌      ", "       ▀       "],
+    col:[".....31113.....", ".....21112.....", "......212......", "......212......", "......212......", ".......2......."]},
   trepan:{n:'Trépan lourd',slot:'arme',req:12,de:{n:2,f:6,p:4},mod:{coup:25},
     d:'Une tête de forage massive : chaque coup compte double, mais il faut le temps de l’armer.',
-    art:["  ▄▄▄▄▄▄       ","  ██████▄▄▄▄   ","  ██████████▄▄ ","  ██████████▀▀ ","  ██████▀▀▀▀   ","  ▀▀▀▀▀▀       "],
-    col:["..111111.......","..1111112222...","..111111222222.","..111111222222.","..1111112222...","..111111......."]},
+    art:["  ▄▄▄▄▄▄▄▄▄▄▄  ", "  █▓▓▓▓▓▓▓▓▓█  ", " ▐▒▒▒▒▒▒▒▒▒▒▒▌ ", " ▐▒▒▒▒▒▒▒▒▒▒▒▌ ", "  ▀▒▒▒▒▒▒▒▒▒▀  ", "    ▀▀▀▀▀▀▀    "],
+    col:["..33333333333..", "..31111111113..", ".2111111111112.", ".2111111111112.", "..21111111112..", "....2222222...."]},
   carene:{n:'Carène légère',f:1,slot:'armure',req:9,mod:{def:5,vitesse:1,dis:-1},
     d:'Une coque allégée : moins de protection, mais la foreuse va plus vite et s’entend de moins loin.',
-    art:['     ▄▄▄▄▄     ','   ▄▀░░░░░▀▄   ','   █░░░░░░░█   ','   ▀▄░░░░░▄▀   ','     ▀▀▀▀▀     '],
-    col:['.....ddddd.....','...dd33333dd...','...d3333333d...','...dd33333dd...','.....ddddd.....']},
+    art:["   ▄       ▄   ", "   █▀▀▀▀▀▀▀█   ", "   █░░░█░░░█   ", "    ▀▄░░░▄▀    ", "      ▀▀▀      "],
+    col:["...3.......3...", "...333333333...", "...322232223...", "....3322233....", "......333......"]},
   blindage:{n:'Blindage composite',slot:'armure',req:12,mod:{def:18,vitesse:-1},
     d:'Des plaques épaisses : la foreuse encaisse bien mieux, et se traîne un peu.',
-    art:['   ▄▄▄▄▄▄▄▄▄   ',' ▄▀▓▓▓▓▓▓▓▓▓▀▄ ',' █▓▓▒▒▒▒▒▒▒▓▓█ ',' █▓▓▒▒▒▒▒▒▒▓▓█ ',' ▀▄▓▓▓▓▓▓▓▓▓▄▀ ','   ▀▀▀▀▀▀▀▀▀   '],
-    col:['...wwwwwwwww...','.ww333333333ww.','.w33111111133w.','.w33111111133w.','.ww333333333ww.','...wwwwwwwww...']}});
+    art:[" ▄▄         ▄▄ ", " █▓█▀▀▀▀▀▀▀█▓█ ", " █▓▒▒▒▐█▌▒▒▒▓█ ", " █▓▒▒▒▒▒▒▒▒▒▓█ ", "  ▀▄▓▓▓▓▓▓▓▄▀  ", "    ▀▀▀▀▀▀▀    "],
+    col:[".ww.........ww.", ".w3wwwwwwwww3w.", ".w31113331113w.", ".w31111111113w.", "..ww3333333ww..", "....wwwwwww...."]}});
 const FAB_PRIX={repar:18,batterie:14,fumigene:16,charge:26,cle:22,accu:40,optique:40,servo:45,stabil:45,viseur:50,gyro:50,conden:55,carene:60,vrille:70,trepan:85,blindage:85};
 const FAB_DUREE=300;
 let FAB_CASE=-1,FAB_SEL=0;

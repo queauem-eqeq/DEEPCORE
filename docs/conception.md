@@ -561,6 +561,8 @@ Essais : `outils/scripts/test-machines.js` (22 vérifications dans le vrai moteu
 Premier usage de la **Matière**. Avancer sur un fabricateur ouvre une liste : tous les consommables, et quatre pièces
 d'équipement tirées au hasard, propres à ce fabricateur. Une fabrication prend 3 battements ; l'objet est ramassé s'il y
 a de la place, sinon posé sous la foreuse. Flèches et Entrée, ou clic ; Échap ferme.
+**Chaque illustration ASCII reprend la tuile de l'objet posé au sol** (21 novembre 2026) : même silhouette, mêmes couleurs (accent, bio, monde, blanc, rouge). La tuile fait foi : quand on redessine une tuile `o_…`, l'illustration est à reprendre à la main. Les quatre objets du fabricateur ont leur propre tuile (`o_vrille`, `o_trepan`, `o_carene`, `o_blindage`). Contrôle : `outils/scripts/planche-objets.js` montre les deux côte à côte.
+
 **À droite de la liste, l'illustration ASCII de l'objet sélectionné** (celle de l'inventaire, `artHTML`), son nom, son effet
 et sa description ; elle suit les flèches, le survol et le focus (21 novembre 2026, après-midi).
 

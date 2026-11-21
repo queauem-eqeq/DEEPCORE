@@ -43,7 +43,7 @@ Le jeu est une page web en plusieurs fichiers (`src/`), **sans étape d'assembla
   (machines), `test-ennemis.js` (espèces, patrouilles, lieux), `test-forage.js` (mini-jeu), `test-descente.js` (la descente
   entière, trois niveaux) ; mesures : `mesure-ambiances.js`, `mesure-faune.js`. Chacun renvoie une ligne par essai.
 - `outils/scripts/` : scripts à passer à `jeu.py` — `six-cartes.js` (six cartes côte à côte, tunnels en jaune),
-  `mesure-recettes.js` (40 cartes par taille et par recette : complexes, tunnels, sorties), `cavernes.js` (six cartes de la recette cavernes, secteurs teintés ; `window.CAS` choisit les cartes), `mesure-cavernes.js` (25 cartes par réglage et par ambiance : obtenu contre visé, pièces, connexité).
+  `mesure-recettes.js` (40 cartes par taille et par recette : complexes, tunnels, sorties), `cavernes.js` (six cartes de la recette cavernes, secteurs teintés ; `window.CAS` choisit les cartes), `planche-objets.js` (chaque objet : illustration ASCII et tuile au sol côte à côte), `mesure-cavernes.js` (25 cartes par réglage et par ambiance : obtenu contre visé, pièces, connexité).
 
 ## Banc de combat
 Artefact à part (https://claude.ai/artifact/9BKRaoB4hzgdWhzYFx5A6q) qui rejoue des combats dans le vrai moteur, sur carte de taille 1.
