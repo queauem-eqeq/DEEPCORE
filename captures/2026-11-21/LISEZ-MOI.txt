@@ -1,0 +1,26 @@
+Captures de contrôle de la nuit du 21 novembre 2026 (recherche et développement : ambiances, grande base, machines,
+fabricateur, ennemis, mini-jeu des mines). Rangées ici, dans le dépôt, parce que l'ordinateur était éteint à la fin de
+la séance : elles n'ont pas pu être déposées dans F:\WORK\IAZONE\DEEPCORE\captures\2026-11-21\. À y recopier.
+
+Sur les planches de cartes : jaune = tunnels · bleu clair = sol bâti · blanc = murs · rouge vif = portes et lasers ·
+rouge sombre = cases qu'un laser peut éclairer · jaune vif = socles et piles · noir = gouffres · vert = herbe · bleu = eau ·
+gris sombre = roche · carré rose = arrivée de la foreuse · carré blanc et violet = site de forage.
+Sous chaque nom : sol ouvert, eau et bâti en % de la carte, cases de tunnel, bâtiments et pièces, longueur du trajet jusqu'au site.
+
+00-avant-niveau1-douze-cartes-sans-ambiance.png   AVANT : douze cartes du niveau 1 en taille 3, toutes semblables (relief en petites taches)
+01-menu-monde-ambiance-et-grain.png               menu Monde : le choix « Ambiance » à droite, « Grain » et « Regroupement » à gauche
+02-ambiances-niveau1.png                          les dix ambiances du niveau 1, une carte chacune
+03-ambiances-niveau2-cavernes.png                 les onze ambiances du niveau 2 (cavernes)
+04-ambiances-classique.png                        les dix ambiances de la recette classique
+05-ambiances-niveau3-grande-base.png              les dix ambiances du niveau 3 (grande base)
+06-machines-croix-laser-pile-socle-chargeur.png   en jeu : deux croix laser allumées, un levier ; à gauche une pile, son socle, son chargeur, un fabricateur
+07-machines-pile-station-fabricateur-fosse.png    en jeu : pile, socle et chargeur ; fossé à franchir, station de réparation (croix), fabricateur
+08-fabricateur-liste.png                          la fenêtre du fabricateur après deux fabrications
+09-bestiaire-cinq-nouveaux-ennemis.png            Bestiaire : Gardien, Artilleur, Drone, Soudeur, Englueur en fin de liste
+10-groupes-lieux-et-valeurs.png                   Lab → Groupes : la ligne « Lieux » et les valeurs mesurées
+11-life-densite-par-lieu.png                      fenêtre LIFE : densité par lieu et menace par niveau
+12-forage-mini-jeu-des-mines.png                  seconde descente : la foreuse plus petite, quatre mines, la vie et le compte des mines
+13-forage-premiere-descente-avec-vie.png          première descente : la ligne VIE ajoutée (prise avant le fond noir du texte)
+14-machines-tourelles-laser-leviers-fosses.png    en jeu : tourelles dans le mur de droite, une bande qui tire, fossés et leviers
+15-niveau3-arrivee-dans-la-base.png               arrivée au niveau 3 : la foreuse dans une pièce, débris au sol, message d'arrivée
+16-douze-niveaux-au-hasard-niv1-niv2-niv3.png     « Réglages au hasard » : quatre niveaux 1, quatre niveaux 2, quatre niveaux 3

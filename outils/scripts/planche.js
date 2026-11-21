@@ -11,6 +11,7 @@
     const sauve=JSON.parse(JSON.stringify(GEN));
     GEN.taille=PL.taille||3;if(r.recette){recRange();recPrend(r.recette);}
     if(r.amb&&typeof ambiance==='function')ambiance(r.amb,r.recette||GEN.recette);
+    if(r.hasard){hasardReglages();GEN.taille=PL.taille||3;nom=ambNom(GEN.recette,GEN.amb)||nom;}   // comme la case « Réglages au hasard » : une ambiance tirée
     for(const k in r)if(k!=='amb'&&k!=='niv'&&k!=='recette')GEN[k]=r[k];
     SANS_VAISSEAU=(r.niv||1)>1;NIV_GEN=r.niv||1;const t0=performance.now();niveau();G.niv=r.niv||1;SANS_VAISSEAU=false;const ms=performance.now()-t0;
     const ox=10+(n%cols)*pw,oy=34+((n/cols)|0)*ph,N=W*H,cnt={};
@@ -33,7 +34,7 @@
     const pieces=(G.batis||[]).reduce((a,b)=>a+(b.pieces||0),0);
     x.fillStyle='#e8eef0';x.fillText(nom,ox,oy-18);x.fillStyle=ds<0?'#ff5a5a':'#9aa';
     const lig=`ouv ${p('sol')+p('herbe')} eau ${p('eau')} bâti ${p('bati')} tun ${cnt.tunnel||0} · ${(G.batis||[]).length}b ${pieces}p · site ${ds<0?'INACCESSIBLE':ds}`;
-    x.fillText(lig,ox,oy-5);out.push(`${nom} | ${lig} | gouffre ${p('gouffre')}% massif ${p('massif')}% décor ${cnt.machine||0} pièges ${JSON.stringify(G.machN||{})} bêtes ${(G.beasts||[]).length} | ${ms|0} ms`);
+    x.fillText(lig,ox,oy-5,pw-18);out.push(`${nom} | ${lig} | gouffre ${p('gouffre')}% massif ${p('massif')}% décor ${cnt.machine||0} pièges ${JSON.stringify(G.machN||{})} bêtes ${(G.beasts||[]).length} | ${ms|0} ms`);
     genRemet(sauve);});
   return out.join('\n');
 })()
