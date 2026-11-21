@@ -930,12 +930,20 @@ l'essayer. **Échap, Espace ou Entrée** la passent. Pas jouée si l'utilisateur
 
 **La descente par niveaux est revenue**, sur `NIV_MAX = 2` niveaux pour commencer (`07-generation.js`).
 
+- **Éboulis d'arrivée** (`eboulis()`, appelé par `niveauSuivant()`) : la foreuse a percé le plafond, des débris de roche
+  sont éparpillés autour d'elle. Des **gravats** (praticables) serrés à son pied et de plus en plus rares jusqu'à
+  5 cases, plus **un à trois rochers** à 2 à 4 cases, posés seulement là où leurs huit voisines sont libres (aucun
+  passage ne peut être fermé). Rien sur l'eau, les gouffres, les bâtiments, les objets ni les créatures. Seulement à la
+  descente : REGEN sur la recette cavernes n'en pose pas.
 - `G.niv` porte le numéro du niveau ; le panneau affiche « Niveau N · largeur × hauteur ».
 - **Forer le site du dernier niveau** gagne la partie comme avant (« NOYAU ATTEINT »). **Forer celui d'un niveau
   précédent** (`end`, `09-vision-deplacement-forage.js`) ferme l'écran de forage, joue la cinématique, puis appelle
   `niveauSuivant()`.
-- `niveauSuivant()` : les réglages du niveau sont **tirés au hasard** (`hasardReglages`) — c'est provisoire, en
-  attendant les recettes 2 et 3 — sans toucher au menu Monde du joueur, remis en place aussitôt après. Pas de
+- `niveauSuivant()` : le niveau 2 est généré avec **la recette « cavernes » et les réglages que le joueur lui a
+  donnés dans le menu Monde** (ceux gardés dans `GEN.rec.cavernes`, ambiance comprise ; les valeurs de départ s'il n'y
+  a jamais touché), quelle que soit la recette affichée dans le menu (`RECETTE_NIV`). La taille de carte, l'eau et
+  l'herbe sont celles du menu. Si « Réglages au hasard » est cochée, ils sont d'abord tirés, comme pour REGEN. Le
+  menu Monde du joueur est remis en place aussitôt après. Avant le 21 novembre au soir, tout était tiré au hasard. Pas de
   vaisseau : on arrive par le puits. `genPlanet` refait l'objet `G`, donc ce que **la foreuse garde est remis en
   place juste après** : vie, énergie, inventaire, matière en réserve, tours et distance parcourue.
 - **F9 reste** : il joue la cinématique seule, sans changer de niveau.
