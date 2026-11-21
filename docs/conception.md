@@ -30,7 +30,7 @@ revient sur **3 niveaux** ; elle n'est pas encore codée, et forer termine la pa
   sélecteur de 64 teintes (8 familles × 8 nuances) ; bouton « Rétablir ».
 - Polices : Chakra Petch (titres), JetBrains Mono (interface).
 - **Les dessins par défaut sont ceux de l'utilisateur**, retouchés au Tile editor et recopiés dans le code (bloc
-  `TUILES_JOUEUR` à la fin de `03-tuiles.js`, qui passe après toutes les autres définitions).
+  `TUILES_JOUEUR` à la fin de `03-tuiles.js`, qui passe après toutes les autres définitions). Dernière recopie le 21 novembre 2026 : Sentinelle, abysse, liquides, machines 6 à 8 et tous les objets au sol, redessinés dans les couleurs du monde (dont le nouveau gyroscope).
 
 ### Rendu des terrains particuliers
 
