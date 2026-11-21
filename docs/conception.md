@@ -875,7 +875,7 @@ remplace la plus ancienne. **Enregistrer** écrit les valeurs dans la base de l'
 
 ## 8. Objectifs et progression
 
-- **Un seul site de forage par carte**, de profondeur 10 (valeur affichée, sans effet de jeu). Il est **dans la
+- **Un seul site de forage par carte**. Son marqueur (tuile « Site ») **reste le même une fois trouvé** (21 novembre 2026 : il ne se change plus en anneau chiffré, et la profondeur n'est plus affichée) ; en posant la foreuse dessus : « Site de forage détecté. [F] pour forer. ». Il est **dans la
   pièce la plus profonde** du complexe, la plus éloignée des entrées : traverser le bâtiment est l'objectif.
 - **Forer** : touche F sur le site (ou clic sur la foreuse posée dessus) → barre « Forage en cours » d'une seconde,
   puis l'écran **« NOYAU ATTEINT »** (bilan en tours, cases parcourues, Matière) et **Nouvelle exploration**.

@@ -200,7 +200,7 @@ function render(){
     ctx.globalAlpha=fog&&!vis[i]?.3:1;ctx.fillStyle=c;ctx.fillRect(px-camX*S,py-camY*S,sz,sz);}
   ctx.globalAlpha=1;
   // (les taches de sang ne sont plus dessinées depuis le 19 novembre 2026 : les ennemis laissent des débris)
-  for(const s of G.sites){if(fog&&!G.seen[idx(s.x,s.y)])continue;put(s.known?(TL['site'+s.depth]||TL.site10):TL.siteUnknown,s.x,s.y,!fog||vis[idx(s.x,s.y)]?1:.35);}
+  for(const s of G.sites){if(fog&&!G.seen[idx(s.x,s.y)])continue;put(TL.siteUnknown,s.x,s.y,!fog||vis[idx(s.x,s.y)]?1:.35);}
   // touche V : portée de discrétion de la foreuse — les cases d'où un ennemi peut vous remarquer, entourées d'un pointillé
   if(SHOWVIS&&!G.over){
     const r=G.stealth||STEALTH_BASE,cells=new Set();

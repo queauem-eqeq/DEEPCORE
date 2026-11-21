@@ -161,7 +161,7 @@ function tryMove(dx,dy){
     if(dv)addFx({kind:'soin',x:G.px,y:G.py,dur:900,gr:fxGrains(9)});if(de)addFx({kind:'ener',x:G.px,y:G.py,dur:900,gr:fxGrains(9)});}}}
   invPickup(true);
   const s=siteAt(G.px,G.py);
-  if(s){if(!s.known)SFX.analyse();s.known=true;say(`Site de forage : profondeur ${s.depth}. [F] pour forer.`,'good');}
+  if(s){if(!s.known)SFX.analyse();s.known=true;say('Site de forage détecté. [F] pour forer.','good');}
   computeFOV();render();if(G.over&&G.over.dead)dead();
 }
 
