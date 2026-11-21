@@ -843,24 +843,33 @@ Espace ou Entrée** passe directement au posé.
 
 ## 10 ter. Cinématique de forage (21 novembre 2026)
 
-Pour le passage au niveau suivant. Vue **de côté**, tout en **caractères ASCII** (comme les dessins d'équipement), environ 15 s ;
-`src/js/14b-forage.js`. **`playForage(suite)`** la lance et appelle `suite()` à la fin (rien ne l'appelle encore dans le jeu :
-la descente par niveaux, étape 4 de la refonte, doit s'y brancher) ; **F9** la lance pour l'essayer. **Échap, Espace ou Entrée** la
-passent (fondu court). Pas jouée si l'utilisateur a demandé moins d'animations.
+Pour le passage au niveau suivant. Vue **de côté**, tout en **caractères ASCII** (comme les dessins d'équipement),
+environ 15 s ; `src/js/14b-forage.js`. **`playForage(suite, niv)`** la lance et appelle `suite()` à la fin (rien ne
+l'appelle encore dans le jeu : la descente par niveaux, étape 4 de la refonte, doit s'y brancher) ; **F9** la lance pour
+l'essayer. **Échap, Espace ou Entrée** la passent. Pas jouée si l'utilisateur a demandé moins d'animations.
 
-- **Foreuse** : 15 lignes sur 11 colonnes (`FG_ART`, couleurs par `FG_MSK`, tirées de la palette en cours), nez vers le bas ; le
-  foret tourne en alternant `▓`/`▒` ; la pointe clignote. Écran de 36 lignes de haut : la foreuse en occupe 42 %.
-- **0 à 2,4 s, surface** : allumage (tremblement, bruit qui monte), fumée par les deux échappements, poussière au pied.
-- **2,4 à 12,6 s, forage** : la caméra suit. Huit **strates** (`FG_LAY`) de 145 lignes en tout : sol meuble, argile, roche tendre,
-  roche dure, filon (losanges de la couleur 1 qui scintillent), basalte, cristaux, noyau dense. Chacune a sa couleur (palette en
-  cours × luminosité), ses caractères, sa densité, sa dureté `w` : le temps par ligne. Plus c'est dur, plus la foreuse ralentit,
-  tremble, crache d'étincelles et grince. Limites des strates ondulées. Éclats et poussière rebondissent sur les parois du puits.
-  À droite, une coupe géologique avec un repère de profondeur ; à gauche, le tableau de bord (profondeur, strate, rotation, dureté).
-- **Fin** : la foreuse perce le plafond d'une caverne (34 lignes, stalactites), tombe (alerte « perte de support »), s'écrase (flash,
-  grand tremblement, nuage de poussière, éclats, étincelles), rebondit un peu, puis fondu au noir.
-- **Son** : synthétisé, sans fichier (moteur en dents de scie, grincement haché par la rotation, grondement filtré ; impacts de
-  roche, claquement à chaque changement de strate, fracas du plafond et de l'impact).
-- **Vérification** : `python3 outils/forage.py DOSSIER [t1 t2 …]` (images aux instants donnés, contrôle de fin et d'erreurs).
+- **Foreuse** : 15 lignes sur 11 colonnes (`FG_ART`, couleurs par `FG_MSK`, tirées de la palette en cours), nez vers le
+  bas, 42 % de la hauteur de l'écran. Le foret tourne en alternant `▓`/`▒` ; la pointe clignote.
+- **La roche n'est pas en bandes** : c'est un champ en deux dimensions (`fgMat`). Un bruit de valeur lissé, **étiré à
+  l'horizontale**, donne des lentilles larges et plates qui s'interpénètrent ; un deuxième bruit sème des **masses de
+  roche dure** dedans (environ 9 % du volume au niveau 1). Les limites de matière ondulent au lieu d'être droites.
+- **Un profil par niveau** (`FG_NIV`) : matières de fond selon la profondeur, matière dure semée, seuil, entremêlement.
+  **Niveau 1 : terre meuble, argile, roche, quelques masses de roche dure** — rien de plus. Filon, basalte, cristaux et
+  noyau dense (`FG_MAT`) sont réservés aux profils des niveaux plus bas, esquissés mais pas encore réglés.
+- **Pivoter et contourner** : la foreuse sonde la dureté 9 lignes devant elle, à gauche et à droite. Au-delà de 1,5 elle
+  glisse vers le côté le plus tendre, prend un angle et contourne la masse ; le bandeau affiche « masse dure devant ».
+- **Diriger** : **flèches gauche et droite**, ou maintenir le doigt d'un côté de l'écran. Vitesse latérale bornée à
+  15 colonnes par seconde. Mesuré : sans rien faire, la foreuse traverse 6 % de roche dure contre 9 % en ligne droite.
+- **Vitesse** : inversement proportionnelle à la dureté sous la pointe ; la poussée monte après 6 s pour que la descente
+  ne traîne pas. Plus c'est dur, plus elle tremble, grince et crache d'étincelles.
+- **Le puits garde la trace du chemin** (`F.tr`, un centre par ligne) : il se courbe, la foreuse **épouse cette courbe**
+  (chaque ligne du dessin suit la trace), et les éclats rebondissent sur les parois.
+- **Fin** : la foreuse perce le plafond d'une caverne (34 lignes, stalactites), tombe (alerte « perte de support »),
+  s'écrase (flash, grand tremblement, poussière, éclats, étincelles), rebondit, puis fondu au noir.
+- **Bandeau** : niveau, profondeur, matière, dureté, cap, rotation, et une coupe des matières à droite.
+- **Son** : synthétisé, sans fichier (moteur, grincement haché par la rotation, grondement ; impacts de roche,
+  changement de matière, fracas du plafond et de l'impact).
+- **Vérification** : `python3 outils/forage.py DOSSIER [t1 t2 …]`. Mesuré le 21 novembre 2026 : 62 images par seconde.
 
 ## 11. Règles à ne pas casser
 
