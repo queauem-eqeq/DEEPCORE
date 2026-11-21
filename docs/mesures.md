@@ -467,3 +467,122 @@ la date de chaque mesure est celle à laquelle elle a été prise, avec le jeu d
   sorties, aucune erreur.
 - **Ce que ces chiffres disent** : les sorties demandées ne sont pas toutes creusées (1,4 à 1,6 pour 2 demandées),
   et demander 400 cases de tunnel n'en donne que 230 à 260 — complexe et tunnels se partagent le massif.
+
+## Nuit du 21 novembre 2026 : ambiances, machines, ennemis, mini-jeu
+
+Tout est mesuré en **taille 3** (72 × 48), dans le vrai moteur. Détection et fuite relancées (`outils/simul.py`) : inchangées.
+
+### Ambiances : quinze cartes par ambiance (`outils/scripts/mesure-ambiances.js`)
+
+Pourcentages de la carte entière. « machines » compte toutes les cases de décor et de machine. Site accessible partout.
+
+```
+== atterrissage
+Grande prairie               accès 15/15 · ouvert 45 % · eau  5 % · gouffre  2 % · bâti  2 % · 3.7 pièces · tunnels 148 · machines 8 · trajet 108 · sans bâtiment 0 · 132 ms
+Rives du grand lac           accès 15/15 · ouvert 33 % · eau 20 % · gouffre  0 % · bâti  2 % · 2.9 pièces · tunnels 155 · machines 7 · trajet 111 · sans bâtiment 0 · 157 ms
+Marais                       accès 15/15 · ouvert 40 % · eau 14 % · gouffre  0 % · bâti  2 % · 3.5 pièces · tunnels 140 · machines 9 · trajet 118 · sans bâtiment 0 · 122 ms
+Désert de pierre             accès 15/15 · ouvert 49 % · eau  0 % · gouffre  1 % · bâti  2 % · 3.3 pièces · tunnels 113 · machines 7 · trajet 103 · sans bâtiment 0 · 102 ms
+Terre fracturée              accès 15/15 · ouvert 38 % · eau  2 % · gouffre 11 % · bâti  2 % · 3.6 pièces · tunnels 148 · machines 9 · trajet 115 · sans bâtiment 0 · 87 ms
+Chaos rocheux                accès 15/15 · ouvert 36 % · eau  2 % · gouffre  1 % · bâti  2 % · 3.3 pièces · tunnels 146 · machines 8 · trajet 104 · sans bâtiment 0 · 87 ms
+Chaîne de montagnes          accès 15/15 · ouvert 33 % · eau  5 % · gouffre  2 % · bâti  2 % · 3.9 pièces · tunnels 139 · machines 9 · trajet 122 · sans bâtiment 0 · 108 ms
+Forteresse sous la montagne  accès 15/15 · ouvert 30 % · eau  2 % · gouffre  1 % · bâti  8 % · 8.4 pièces · tunnels 83 · machines 24 · trajet 145 · sans bâtiment 0 · 108 ms
+Dédale de tunnels            accès 15/15 · ouvert 35 % · eau  2 % · gouffre  1 % · bâti  2 % · 4.6 pièces · tunnels 231 · machines 9 · trajet 106 · sans bâtiment 0 · 96 ms
+Ruines noyées                accès 15/15 · ouvert 32 % · eau 10 % · gouffre  1 % · bâti  4 % · 7.1 pièces · tunnels 144 · machines 15 · trajet 128 · sans bâtiment 0 · 105 ms
+== cavernes
+Grottes sauvages             accès 15/15 · ouvert 37 % · eau  4 % · gouffre  2 % · bâti  2 % · 3.7 pièces · tunnels 4 · machines 8 · trajet 76 · sans bâtiment 0 · 147 ms
+Cathédrale                   accès 15/15 · ouvert 35 % · eau  2 % · gouffre  2 % · bâti  3 % · 5.3 pièces · tunnels 8 · machines 11 · trajet 72 · sans bâtiment 0 · 151 ms
+Termitière                   accès 15/15 · ouvert 28 % · eau  1 % · gouffre  1 % · bâti  4 % · 6.3 pièces · tunnels 5 · machines 15 · trajet 77 · sans bâtiment 0 · 193 ms
+Cité enfouie                 accès 15/15 · ouvert 20 % · eau  1 % · gouffre  1 % · bâti 11 % · 22.7 pièces · tunnels 35 · machines 31 · trajet 69 · sans bâtiment 0 · 207 ms
+Avant-postes                 accès 15/15 · ouvert 26 % · eau  3 % · gouffre  1 % · bâti  3 % · 9.9 pièces · tunnels 11 · machines 12 · trajet 82 · sans bâtiment 0 · 164 ms
+Lac souterrain               accès 15/15 · ouvert 23 % · eau 23 % · gouffre  0 % · bâti  3 % · 4.8 pièces · tunnels 11 · machines 11 · trajet 72 · sans bâtiment 0 · 121 ms
+Jardins engloutis            accès 15/15 · ouvert 36 % · eau  4 % · gouffre  0 % · bâti  3 % · 5.9 pièces · tunnels 8 · machines 12 · trajet 80 · sans bâtiment 0 · 274 ms
+Abîmes                       accès 15/15 · ouvert 35 % · eau  0 % · gouffre  5 % · bâti  3 % · 5.1 pièces · tunnels 8 · machines 12 · trajet 87 · sans bâtiment 0 · 103 ms
+Dédale de boyaux             accès 15/15 · ouvert 18 % · eau  1 % · gouffre  0 % · bâti  3 % · 7.2 pièces · tunnels 9 · machines 14 · trajet 90 · sans bâtiment 0 · 167 ms
+Bunker                       accès 15/15 · ouvert 16 % · eau  1 % · gouffre  1 % · bâti 14 % · 20.0 pièces · tunnels 3 · machines 35 · trajet 98 · sans bâtiment 0 · 388 ms
+Chaos d’éboulis              accès 15/15 · ouvert 35 % · eau  1 % · gouffre  0 % · bâti  2 % · 3.6 pièces · tunnels 3 · machines 8 · trajet 97 · sans bâtiment 0 · 89 ms
+== base
+Citadelle                    accès 15/15 · ouvert 14 % · eau  1 % · gouffre  1 % · bâti 15 % · 21.1 pièces · tunnels 137 · machines 49 · trajet 109 · sans bâtiment 0 · 332 ms
+Ruche                        accès 15/15 · ouvert 15 % · eau  1 % · gouffre  1 % · bâti 13 % · 31.1 pièces · tunnels 170 · machines 42 · trajet 98 · sans bâtiment 0 · 130 ms
+Deux ailes                   accès 15/15 · ouvert 12 % · eau  1 % · gouffre  1 % · bâti 15 % · 25.3 pièces · tunnels 74 · machines 46 · trajet 98 · sans bâtiment 0 · 106 ms
+Complexe piégé               accès 15/15 · ouvert 13 % · eau  1 % · gouffre  1 % · bâti 15 % · 21.4 pièces · tunnels 98 · machines 57 · trajet 113 · sans bâtiment 0 · 244 ms
+Base morte                   accès 15/15 · ouvert 15 % · eau  3 % · gouffre  1 % · bâti 12 % · 17.6 pièces · tunnels 104 · machines 32 · trajet 87 · sans bâtiment 0 · 241 ms
+Galeries de mine             accès 15/15 · ouvert 13 % · eau  1 % · gouffre  1 % · bâti  9 % · 17.9 pièces · tunnels 102 · machines 31 · trajet 89 · sans bâtiment 0 · 71 ms
+Serres                       accès 15/15 · ouvert 22 % · eau  3 % · gouffre  0 % · bâti  9 % · 14.4 pièces · tunnels 71 · machines 32 · trajet 84 · sans bâtiment 0 · 320 ms
+Réservoirs                   accès 15/15 · ouvert 14 % · eau 11 % · gouffre  0 % · bâti 12 % · 17.3 pièces · tunnels 120 · machines 41 · trajet 110 · sans bâtiment 0 · 255 ms
+Blockhaus                    accès 15/15 · ouvert 12 % · eau  1 % · gouffre  1 % · bâti 16 % · 33.6 pièces · tunnels 44 · machines 50 · trajet 134 · sans bâtiment 0 · 163 ms
+Hangars de maintenance       accès 15/15 · ouvert 14 % · eau  1 % · gouffre  1 % · bâti 14 % · 15.3 pièces · tunnels 84 · machines 47 · trajet 95 · sans bâtiment 0 · 264 ms
+== classique
+Avant-poste isolé            accès 15/15 · ouvert 52 % · eau  7 % · gouffre  2 % · bâti  2 % · 3.9 pièces · tunnels 0 · machines 8 · trajet 66 · sans bâtiment 0 · 75 ms
+Citadelle                    accès 15/15 · ouvert 29 % · eau  0 % · gouffre  0 % · bâti 22 % · 27.1 pièces · tunnels 0 · machines 48 · trajet 115 · sans bâtiment 0 · 79 ms
+Bases jumelles               accès 15/15 · ouvert 43 % · eau  3 % · gouffre  2 % · bâti 11 % · 18.5 pièces · tunnels 0 · machines 31 · trajet 107 · sans bâtiment 0 · 138 ms
+Hangars                      accès 15/15 · ouvert 45 % · eau  1 % · gouffre  0 % · bâti 15 % · 14.0 pièces · tunnels 0 · machines 38 · trajet 78 · sans bâtiment 0 · 84 ms
+Ruines sous les herbes       accès 15/15 · ouvert 53 % · eau  4 % · gouffre  2 % · bâti  8 % · 10.5 pièces · tunnels 0 · machines 23 · trajet 78 · sans bâtiment 0 · 78 ms
+Station lacustre             accès 15/15 · ouvert 24 % · eau 37 % · gouffre  0 % · bâti  4 % · 7.5 pièces · tunnels 0 · machines 16 · trajet 69 · sans bâtiment 0 · 111 ms
+Plateau désert               accès 15/15 · ouvert 61 % · eau  0 % · gouffre  1 % · bâti  4 % · 4.0 pièces · tunnels 0 · machines 12 · trajet 70 · sans bâtiment 0 · 157 ms
+Champ de failles             accès 15/15 · ouvert 41 % · eau  2 % · gouffre 20 % · bâti  4 % · 5.7 pièces · tunnels 0 · machines 16 · trajet 63 · sans bâtiment 0 · 105 ms
+Cols de montagne             accès 15/15 · ouvert 25 % · eau  3 % · gouffre  2 % · bâti  3 % · 6.1 pièces · tunnels 0 · machines 13 · trajet 67 · sans bâtiment 0 · 129 ms
+Marécage                     accès 15/15 · ouvert 43 % · eau 25 % · gouffre  0 % · bâti  3 % · 5.8 pièces · tunnels 0 · machines 13 · trajet 54 · sans bâtiment 0 · 84 ms
+```
+
+### Machines de la grande base (`outils/scripts/test-machines.js`, 150 cartes)
+
+Par carte, fréquences du Lab au cran du milieu : ponts 1,5 · tourelles 2,1 salles · croix 1,3 salle · piles 0,7 ·
+station 0,7 · fabricateur 1,0. Site accessible sur 150 cartes sur 150 ; 22 vérifications de comportement réussies.
+
+### Valeur des groupes au banc (`outils/valeur_groupes.py`, 40 combats par effectif)
+
+Foreuse de série, vie d'essai 1000, groupe en assaut, arène dégagée (marécage pour les torpilles). Valeur = moyenne ÷ 4.
+
+| Groupe | Vie perdue (min) | (max) | Moyenne | Valeur mesurée | Valeur retenue | Avant |
+|---|---|---|---|---|---|---|
+| Family | 27,3 | 32,6 | 30,0 | 7 | 7 | 4 |
+| 3-5 puces + sentinelles | 17,7 | 43,4 | 30,5 | 8 | 8 | 5 |
+| 1-2 Mines | 3,0 | 7,0 | 5,0 | 1 | 3 (surprise) | 4 |
+| Mines & Sentinelles | 11,1 | 15,1 | 13,1 | 3 | 5 (surprise) | 4 |
+| Bande de relais | 7,2 | 19,1 | 13,2 | 3 | 5 (alerte) | 6 |
+| 2-3 sentinelles | 9,1 | 14,4 | 11,8 | 3 | 3 | 5 |
+| Crabots | 7,1 | 15,2 | 11,1 | 3 | 3 | 3 |
+| Banc de torpilles | 7,1 | 17,1 | 12,1 | 3 | 3 | 5 |
+| Broyeur solitaire | 43,5 | 47,7 | 45,6 | 11 | 11 | 10 |
+| Puces en groupes | 36,2 | 89,5 | 62,9 | 16 | 16 | 15 |
+| Poste de garde | 35,9 | 40,1 | 38,0 | 10 | 10 | nouveau |
+| Batterie | 29,2 | 77,3 | 53,2 | 13 | 13 | nouveau |
+| Essaim de drones | 8,3 | 19,0 | 13,7 | 3 | 3 | nouveau |
+| Escouade de réparation | 25,3 | 22,9 | 24,1 | 6 | 6 | nouveau |
+| Embuscade gluante | 6,4 | 12,1 | 9,2 | 2 | 4 (glu, surprise) | nouveau |
+| Chasse à courre | 9,8 | 20,3 | 15,1 | 4 | 6 (glu, alerte) | nouveau |
+| Convoi | 46,3 | 45,4 | 45,8 | 11 | 11 | nouveau |
+| Tireurs embusqués | 10,8 | 31,2 | 21,0 | 5 | 5 | nouveau |
+| Ronde de drones | 9,2 | 7,0 | 8,1 | 2 | 2 | nouveau |
+
+Par espèce, seule, en assaut : puce 1,6 · crabot 8,7 · relais 2,9 · broyeur 47 · mine 6 · sentinelle 3,1 · gardien 30 environ
+(48 avant réglage) · artilleur 11 · drone 1,3 · soudeur 1,4 · englueur 2,6. Le banc sous-estime ce qui ne blesse pas
+directement : son pilote fonce sur tout et ne fuit jamais.
+
+### Peuplement : vingt cartes par niveau (`outils/scripts/mesure-faune.js`)
+
+```
+== atterrissage (niveau 1) : budget 45.0, dépensé 35.2 · 7.2 groupes · 21.1 créatures par carte
+   par lieu : ext 16.3 créatures sur 1334.7 cases (1.2 pour 100 cases, budget 28.6) · bati 4.0 créatures sur 116.2 cases (3.5 pour 100 cases, budget 5.0) · tunnel 0.7 créatures sur 148.4 cases (0.5 pour 100 cases, budget 1.6)
+   espèces : Puce 4.0 · Relais 3.7 · Crabot 3.5 · Drone 3.0 · Sentinelle 2.3 · Mine 1.1 · Artilleur 0.9 · Englueur 0.9 · Torpille 0.9 · Soudeur 0.6 · Gardien 0.1
+   groupes : Crabots 1.3 · Tireurs embusqués 0.7 · Bande de relais 0.7 · Chasse à courre 0.6 · Escouade de réparation 0.6 · Banc de torpilles 0.5 · 2-3 sentinelles 0.5 · Essaim de drones 0.5 · Ronde de drones 0.5 · Puces en groupes 0.3 · Family 0.3 · 3-5 puces + sentinelles 0.3 · 1-2 Mines 0.2 · Embuscade gluante 0.2 · Poste de garde 0.1
+== cavernes (niveau 2) : budget 54.0, dépensé 46.4 · 8.8 groupes · 26.4 créatures par carte
+   par lieu : ext 19.0 créatures sur 1082.5 cases (1.8 pour 100 cases, budget 36.0) · bati 7.3 créatures sur 154.1 cases (4.8 pour 100 cases, budget 10.3) · tunnel 0.0 créatures sur 9.5 cases (0.0 pour 100 cases, budget 0.0)
+   espèces : Puce 7.3 · Drone 3.6 · Relais 3.4 · Crabot 3.2 · Sentinelle 3.0 · Mine 1.4 · Artilleur 1.3 · Torpille 1.2 · Englueur 1.1 · Soudeur 0.8 · Gardien 0.1
+   groupes : Crabots 1.0 · 3-5 puces + sentinelles 0.9 · Banc de torpilles 0.8 · Escouade de réparation 0.8 · Ronde de drones 0.8 · Chasse à courre 0.7 · Tireurs embusqués 0.6 · Bande de relais 0.6 · Essaim de drones 0.6 · Puces en groupes 0.5 · 2-3 sentinelles 0.5 · 1-2 Mines 0.4 · Family 0.3 · Embuscade gluante 0.3 · Batterie 0.1 · Poste de garde 0.1
+== base (niveau 3) : budget 63.0, dépensé 61.1 · 12.3 groupes · 33.9 créatures par carte
+   par lieu : ext 12.9 créatures sur 489.6 cases (2.6 pour 100 cases, budget 22.3) · bati 19.8 créatures sur 476.1 cases (4.2 pour 100 cases, budget 36.9) · tunnel 1.1 créatures sur 102.2 cases (1.1 pour 100 cases, budget 1.9)
+   espèces : Drone 6.5 · Crabot 5.6 · Sentinelle 5.0 · Puce 3.8 · Mine 3.3 · Relais 2.5 · Englueur 2.0 · Soudeur 1.4 · Gardien 1.4 · Artilleur 1.4 · Torpille 0.9
+   groupes : Crabots 2.3 · 1-2 Mines 1.1 · Embuscade gluante 1.0 · Escouade de réparation 0.9 · Ronde de drones 0.9 · 2-3 sentinelles 0.8 · Essaim de drones 0.8 · Poste de garde 0.7 · Banc de torpilles 0.6 · Convoi 0.6 · 3-5 puces + sentinelles 0.5 · Tireurs embusqués 0.5 · Chasse à courre 0.4 · Bande de relais 0.4 · Family 0.3 · Batterie 0.3 · Puces en groupes 0.2
+```
+
+### Mini-jeu des mines : douze descentes par pilote (`outils/scripts/test-forage.js`)
+
+```
+aucun pilote  : 17.5 mines semées · 5.6 touchées · −66 vie en moyenne · 2/12 foreuses détruites · 10/12 arrivées au niveau 3 · 21.9 s
+maladroit     : 18.2 mines semées · 2.5 touchées · −30 vie en moyenne · 0/12 foreuses détruites · 12/12 arrivées au niveau 3 · 22.6 s
+attentif      : 18.9 mines semées · 0.5 touchées · −6 vie en moyenne · 0/12 foreuses détruites · 12/12 arrivées au niveau 3 · 22.6 s
+première descente : 0 mine, vie 77/100, arrivée oui, 15.4 s
+25 de vie, aucun pilote : 11/12 foreuses détruites, 0 passées quand même au niveau suivant (attendu : 0)
+passer avec 12 de vie : vie 1, arrivée oui, mort non
+```

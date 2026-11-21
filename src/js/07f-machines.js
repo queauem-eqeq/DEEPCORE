@@ -126,7 +126,6 @@ function machines(){G.las=[];G.lz={};G.circ=[];G.soc={};G.piles={};G.mt=0;G.mach
   const base=!!(RECETTES[GEN.recette]||{}).base,fac=base?(GEN.bsMachines??100)/100:.35,compte=n=>Math.floor(n)+(Math.random()<n-Math.floor(n)?1:0);
   const fq=(k,f)=>{const a=A[k];if(!a||!a.on)return 0;return compte(ART_LISTE.find(m=>m[0]===k)[3][a.f]*(f??fac));};
   const pieces=[];for(const S of strs)for(const p of S.pieces)if(p.c.length>=9&&!p.c.includes(site)&&!p.c.includes(dep)&&!p.c.some(i=>t[i]!==FLOOR&&t[i]!==PILLAR&&t[i]!==CHASM&&t[i]!==BRIDGE&&t[i]!==MACHINE))pieces.push(p);
-  if(!pieces.length)return;
   const mel=l=>l.slice().sort(()=>Math.random()-.5),murV=i=>D4.some(([dx,dy])=>t[idx(i%W+dx,((i/W)|0)+dy)]===WALL);
   const pres=i=>{const x=i%W,y=(i/W)|0;return B.porte[i]||D4.some(([dx,dy])=>{const j=idx(x+dx,y+dy);return B.porte[j]||t[j]===DOOR||t[j]===LOCK;});};   // case de passage : jamais de piège juste devant une porte
   const libre=i=>t[i]===FLOOR&&i!==site&&i!==dep&&!(G.items[i]&&G.items[i].length)&&!G.cles[i]&&!(G.soc[i]!=null)&&!G.lz[i];
@@ -211,7 +210,10 @@ function machines(){G.las=[];G.lz={};G.circ=[];G.soc={};G.piles={};G.mt=0;G.mach
   essaie(fq('lasers'),p=>{const g=tourelles(p);if(!g)return false;inc('lasers');if(Math.random()<.6)coupe(p,g);return true;});
   essaie(fq('croix'),p=>{const g=croix(p);if(!g)return false;inc('croix');if(Math.random()<.4)coupe(p,g);return true;});
   for(let k=fq('station');k>0;k--)for(const p of mel(pieces)){if(p.mach==='lasers'||p.mach==='croix')continue;if(pose(p,STATION,0,true)>=0){inc('station');break;}}
-  for(let k=fq('fabric',1);k>0;k--)for(const p of mel(pieces)){if(p.mach==='lasers'||p.mach==='croix')continue;if(pose(p,FABRIC,0,true)>=0){inc('fabric');break;}}
+  // le fabricateur : dans une pièce sans laser ; à défaut (petit complexe du niveau 1), n'importe où dans un bâtiment
+  for(let k=fq('fabric',1);k>0;k--){let fait=false;for(const p of mel(pieces)){if(p.mach==='lasers'||p.mach==='croix')continue;if(pose(p,FABRIC,0,true)>=0){fait=true;break;}}
+    if(!fait)for(const S of mel(strs)){for(const p of mel(S.pieces)){if(p.c.length>=6&&pose(p,FABRIC,0,true)>=0){fait=true;break;}}if(fait)break;}
+    if(fait)inc('fabric');}
   machZone();if(G.artN)Object.assign(G.artN,G.machN);
   // garde-fou : si malgré tout le site n'est plus atteignable, tous les circuits sont ouverts d'office
   if(accesSite()<0){for(const c of G.circ){c.on=1;c.perm=1;if(c.k==='levier')G.art[c.c]=1;circApplique(c,true);}}
