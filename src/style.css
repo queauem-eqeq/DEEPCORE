@@ -298,7 +298,15 @@ kbd{font-family:var(--mono);color:var(--fg);border:1px solid var(--line);padding
 .mdcols{display:grid;grid-template-columns:1fr 1fr;gap:28px;align-items:start}
 .mdcols h3{font-family:var(--display);font-size:12px;font-weight:500;letter-spacing:.24em;text-transform:uppercase;color:var(--dim);margin:0 0 10px}
 .mdcols .gen{margin-bottom:0}
-@media (max-width:720px){.mdcols{grid-template-columns:1fr}}
+/* Le menu Monde ne dépasse jamais l'écran (21 novembre 2026) : l'en-tête, la recette et les archétypes restent en vue,
+   et chaque colonne défile pour son compte. Avant, une recette à nombreux réglages poussait le haut du menu hors de l'écran. */
+#monde .mcard{max-height:calc(100vh - 40px);max-height:calc(100dvh - 40px);display:flex;flex-direction:column;overflow:hidden}
+#monde .mcard>*{flex:0 0 auto}
+#monde .mdcols{flex:1 1 auto;min-height:0;grid-template-rows:minmax(0,1fr);align-items:stretch}
+#monde .mdcols section{display:flex;flex-direction:column;min-height:0}
+#monde .mdcols .gen{flex:1 1 auto;min-height:0;overflow-y:auto;align-content:start;padding-right:8px;scrollbar-width:thin;scrollbar-color:var(--c3) transparent}
+@media (max-width:720px){.mdcols{grid-template-columns:1fr}
+  #monde .mdcols{display:block;overflow-y:auto}#monde .mdcols section{display:block;margin-bottom:18px}#monde .mdcols .gen{overflow:visible}}
 .mdcols .gen .g2{grid-template-columns:minmax(0,1fr) 190px}
 .col>.btnrow>button{flex:1 1 0;min-width:0}
 /* Discrétion : fenêtre large et basse (15 novembre 2026) */
