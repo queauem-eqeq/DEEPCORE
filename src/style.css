@@ -77,7 +77,7 @@ body{margin:0;background:var(--black);color:var(--fg);font:13px/1.45 var(--mono)
 .pal{display:grid;gap:8px}
 #mini{display:block;width:100%;image-rendering:pixelated;outline:1px solid var(--line)}
 .gen{display:grid;gap:8px;margin-bottom:10px}
-.gen .g{display:grid;grid-template-columns:minmax(0,1fr) 72px 46px;gap:8px;align-items:center}
+.gen .g{display:grid;grid-template-columns:minmax(0,1fr) 72px 58px;gap:8px;align-items:center}
 .gen label{color:var(--dim)}
 .gen input[type=range]{width:100%;accent-color:var(--c3)}
 .gen input[type=number]{width:100%;font:inherit;color:var(--fg);background:var(--void);border:1px solid var(--line);padding:2px 4px;text-align:right}
