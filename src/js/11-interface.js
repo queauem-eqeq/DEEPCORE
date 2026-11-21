@@ -97,6 +97,7 @@ addEventListener('keydown',ev=>{
   if(SAC_NAV&&$('overlay').hidden&&ev.target.tagName!=='INPUT'){if(sacKey(ev))return;}   // navigation au clavier dans le sous-menu Inventaire
   if(!$('monde').hidden){if(ev.key==='Escape'){ev.preventDefault();mondeClose();}return;}
   if(!$('faune').hidden){if(ev.key==='Escape'){ev.preventDefault();lifeClose();}return;}
+  if(!$('fabric').hidden){fabKey(ev);return;}
   if(!$('terminal').hidden){if(ev.key==='Escape'||ev.key==='Enter'||ev.key===' '){ev.preventDefault();closeTerminal();}return;}
   if(!$('artefacts').hidden){if(ev.key==='Escape'){ev.preventDefault();closeArtefacts();}return;}
   if(!$('groupes').hidden){if(ev.key==='Escape'){ev.preventDefault();closeGroupes();}return;}
