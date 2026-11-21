@@ -29,3 +29,4 @@ Sous chaque nom : sol ouvert, eau et bâti en % de la carte, cases de tunnel, b�
 19-fabricateur-illustration-ascii.png           fabricateur : la liste à gauche, l'illustration ASCII de l'objet sélectionné à droite (ici la Vrille rapide)
 20-forage-mini-jeu-roche-dure-bio.png            mini-jeu allongé de 5 secondes : les masses de roche dure en couleur bio (bleuté), trois mines en vue
 21-objets-ascii-et-tuiles.png                   les 18 objets : illustration ASCII (en haut) refaite d'après la tuile au sol (en bas) ; quatre tuiles neuves pour les objets du fabricateur
+22-stabilisateur-ascii-et-tuile.png               Stabilisateur : illustration ASCII reprise (à gauche) pour coller à la tuile (à droite)
