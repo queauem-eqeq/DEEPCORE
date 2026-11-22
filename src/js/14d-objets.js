@@ -9,7 +9,7 @@
    5. Matière au sol (butin d'exploration), Module de puissance (POW +1 pour toujours), Surrégime, Camouflage optique.
    Ce que la foreuse sait (plans, capsules identifiées, noms de code) vit dans G.st.savoir : G.st suit la foreuse d'un niveau
    à l'autre. Valeurs réglables : Lab → Items (np-items). */
-const ITEM_VAL_DEF={repar:{soin:50},batterie:{energie:50,choc:12,etourdi:6},charge:{degats:30},puissance:{pow:1,deg:8},
+const ITEM_VAL_DEF={repar:{soin:50},batterie:{energie:50,choc:12,etourdi:6},charge:{degats:30},puissance:{pow:1,deg:5},
   berserk:{crit:50,duree:10},camo:{duree:10},balise:{rayon:20},court:{etourdi:10},matiere:{mat:15}};
 const ITEM_VAL_LIB={soin:'Vie rendue',energie:'Énergie rendue',choc:'Dégâts de la décharge',etourdi:'Étourdissement (battements)',degats:'Dégâts',pow:'POW gagné',deg:'Dégâts par point de POW en trop (%)',crit:'CRIT en plus (points)',duree:'Durée (battements)',rayon:'Rayon de l’appel (cases)',mat:'Matière rendue'};
 let ITEM_VAL=JSON.parse(JSON.stringify(ITEM_VAL_DEF));
@@ -212,6 +212,8 @@ function itemsApplique(o){const num=v=>typeof v==='number'&&isFinite(v);if(!o||t
   for(const k in o.de||{})if(ITEMS[k]&&ITEMS[k].de)for(const f of ['n','f','p'])if(num(o.de[k][f]))ITEMS[k].de[f]=o.de[k][f];
   itemTxt();}
 try{itemsApplique(JSON.parse(localStorage.getItem('np-items')||'null'));}catch(e){}
+// 22 novembre 2026, choix de l'utilisateur : +5 % de dégâts par point de POW en trop (8 % quelques heures). Un réglage déjà gardé à 8 est ramené à 5, une fois.
+try{if(localStorage.getItem('np-mig-pow')!=='5'){localStorage.setItem('np-mig-pow','5');if(ITEM_VAL.puissance.deg===8){ITEM_VAL.puissance.deg=5;if(localStorage.getItem('np-items'))localStorage.setItem('np-items',JSON.stringify(itemsEtat()));}}}catch(e){}
 itemTxt();
 function saveItems(){try{localStorage.setItem('np-items',JSON.stringify(itemsEtat()));}catch(e){}touchLocal();itemTxt();SAC_H='';INV_H=null;}
 const ITEMS_FAM=[['Consommables',k=>CONSO[k]||k==='cle'],['Butin',k=>k==='matiere'],['Armes',k=>ITEMS[k].slot==='arme'],['Armures',k=>ITEMS[k].slot==='armure'],['Accessoires',k=>ITEMS[k].slot==='acc']];

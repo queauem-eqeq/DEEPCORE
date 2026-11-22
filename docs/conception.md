@@ -797,7 +797,7 @@ Modèle Brogue :
 | Batterie | Énergie +50 | décharge : 12 dégâts, **étourdi 6 battements** (un Bloqueur étourdi lâche prise) |
 | Fumigène | nuage là où on le lance ; **les ennemis ne perdent la trace que si la foreuse est dedans** | idem |
 | Charge sismique | 3 × 3, 30 dégâts, roche brisée | idem |
-| **Module de puissance** | **POW +1 pour toujours** ; chaque point de POW au-dessus du POW requis par l'arme donne +8 % de dégâts (+1,5 % avant) | ses coups portent 25 % plus fort |
+| **Module de puissance** | **POW +1 pour toujours** ; chaque point de POW au-dessus du POW requis par l'arme donne **+5 % de dégâts** (+1,5 % avant ; 8 % essayé quelques heures le 22 novembre, baissé parce que la foreuse de série rattrapait le Trépan) | ses coups portent 25 % plus fort |
 | **Surrégime** | CRIT +50 pendant 10 battements ; la foreuse vire au rouge | ses coups sont tous critiques pendant 10 battements |
 | **Camouflage optique** | invisible 10 battements : vue seulement au contact, les poursuivants à distance lâchent ; **rompu par un coup ou un forage** | il disparaît 10 battements (visible au contact) |
 | **Balise** (néfaste) | tous les ennemis à 20 cases savent où est la foreuse | lancée au loin, ils y courent : un leurre |

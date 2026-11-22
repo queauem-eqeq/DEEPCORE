@@ -349,9 +349,9 @@ const armeFact=(st,d)=>{const e=powEcart(d,st);return e<0?Math.pow(POW_MANQUE,-e
 const armureDef=(st,d)=>{const e=powEcart(d,st);return e<0?POW_DEF_MANQUE*e:POW_DEF_EXCES*e;};
 // stats de combat de la foreuse telles qu'elles comptent ; st, arme, armure : pour simuler un autre équipement (fenêtre Équipement)
 const robotPre=(st,d)=>{st=st||G.st;return Math.round(st.pre*armeFact(st,d===undefined?eqDe('arme'):d));};
-// 22 novembre 2026 : chaque point de POW au-dessus du POW requis par l'arme ajoute POW_DEG % de dégâts (réglable, Lab → Items → Module de
+// 22 novembre 2026 : chaque point de POW au-dessus du POW requis par l'arme ajoute 5 % de dégâts (8 % d'abord, baissé le jour même : les armes légères en profitaient trop) (réglable, Lab → Items → Module de
 // puissance) ; avant, +1,5 % seulement, comme pour la précision : un Module de puissance ne se sentait pas.
-const degFact=(st,d)=>{const e=powEcart(d,st);return e<0?Math.pow(POW_MANQUE,-e):Math.pow(1+(typeof ITEM_VAL!=='undefined'?ITEM_VAL.puissance.deg:8)/100,e);};
+const degFact=(st,d)=>{const e=powEcart(d,st);return e<0?Math.pow(POW_MANQUE,-e):Math.pow(1+(typeof ITEM_VAL!=='undefined'?ITEM_VAL.puissance.deg:5)/100,e);};
 const robotDegs=(st,d)=>{st=st||G.st;const a=d===undefined?eqDe('arme'):d,de=armeDe(a),k=degFact(st,a),b=st.degats||0;
   return [Math.max(1,Math.round((de.n+de.p+b)*k)),Math.max(1,Math.round((de.n*de.f+de.p+b)*k))];};
 const robotDeg=()=>{const a=eqDe('arme');return Math.max(1,Math.round((deTire(armeDe(a))+(G.st.degats||0))*armeFact(G.st,a)));};
