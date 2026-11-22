@@ -1241,8 +1241,8 @@ Espace ou Entrée** passe directement au posé.
 
 Pour le passage au niveau suivant. Vue **de côté**, tout en **caractères ASCII** (comme les dessins d'équipement),
 environ 15 s ; `src/js/14b-forage.js`. **`playForage(suite, niv)`** la lance et appelle `suite()` à la fin (rien ne
-l'appelle encore dans le jeu : la descente par niveaux, étape 4 de la refonte, doit s'y brancher) ; **NIV2** la lance pour (F9 jusqu'au 23 novembre 2026) —
-l'essayer. **Échap, Espace ou Entrée** la passent. Pas jouée si l'utilisateur a demandé moins d'animations.
+l'appelle encore dans le jeu : la descente par niveaux, étape 4 de la refonte, doit s'y brancher) ; **NIV2** la lance pour
+l'essayer (F9 jusqu'au 23 novembre 2026). **Échap, Espace ou Entrée** la passent. Pas jouée si l'utilisateur a demandé moins d'animations.
 
 - **Échelle** : caractères d'un 52ᵉ de la hauteur d'écran, comme à la seconde descente (22 novembre 2026 ; avant, un
   36ᵉ, trop zoomé). Le compteur **PROFONDEUR** part de la profondeur du niveau quitté (`profNiv`) : 0 → 1 564 m à la
