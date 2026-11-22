@@ -80,9 +80,10 @@ function side(){
   sacDraw();
   {const E=G.eff||{},l=[];if(E.poison>0)l.push(`<span style="color:var(--life)">Poison ${E.poison}</span>`);if(E.glu>0)l.push(`Englué ${E.glu}`);{const f=G.fum&&G.fum[idx(G.px,G.py)];if(f)l.push(`<span style="color:var(--c1)">Dans la fumée ${f.v}</span>`);}$('effs').innerHTML=l.join(' · ');}
   // le niveau est revenu le 21 novembre 2026 ; la taille de la carte se règle dans le menu Monde
-  $('lvl').textContent=`Niveau ${G.niv||1}${G.amb?' · '+G.amb:''} · ${W} × ${H}`;
-  // Carte : profondeur du niveau (raccord avec le compteur des descentes), puis les deux archétypes (22 novembre 2026)
-  {const n=G.niv||1,p=profNiv(n);$('cProf').textContent=`LVL${n}  [${p?'-'+p:0}m]`;$('cMonde').textContent=`Monde : ${G.archM||'—'}`;$('cBati').textContent=`Bâti : ${G.archB||'—'}`;}
+  // Carte (22 novembre 2026) : niveau, profondeur (raccord avec le compteur des descentes) et taille, puis l'archétype monde et
+  // l'archétype bâti, sans étiquette. Remplace la ligne du niveau qui était en haut de la colonne.
+  {const n=G.niv||1,p=profNiv(n),[am,ab]=G.archM?[G.archM,G.archB]:(G.amb||'').split(' · ');
+    $('cProf').textContent=`Niveau ${n} · ${p?'−'+p:0} m · ${W}×${H}`;$('cMonde').textContent=am||'Personnalisé';$('cBati').textContent=ab||'Personnalisé';}
   $('matN').textContent=G.st.matiere||0;   // avalée par le commentaire depuis le 16 novembre 2026 : la matière ne s'affichait plus
   if(!$('inventaire').hidden)invDraw();
   $('msg').innerHTML=seenHTML();

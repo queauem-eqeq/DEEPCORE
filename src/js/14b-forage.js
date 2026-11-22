@@ -156,7 +156,7 @@ function fgBoom(F,k){
 function playForage(suite,niv){
   if(reduced||FORAGE){suite&&suite();return;}
   unlock();if(typeof TRAV!=='undefined'&&TRAV)stopTravel();
-  const jeu=(niv||1)>=2,dpr=Math.min(devicePixelRatio||1,2),w=Math.round(innerWidth*dpr),h=Math.round(innerHeight*dpr),size=Math.max(jeu?9:12,Math.round(h/(jeu?52:36))),chh=size,cw=Math.round(size*.6);   // mini-jeu : caractères plus petits, la foreuse aussi
+  const jeu=(niv||1)>=2,dpr=Math.min(devicePixelRatio||1,2),w=Math.round(innerWidth*dpr),h=Math.round(innerHeight*dpr),size=Math.max(9,Math.round(h/52)),chh=size,cw=Math.round(size*.6);   // même échelle aux deux descentes (22 novembre 2026 ; la première était plus zoomée, h ÷ 36)
   fgCv.width=w;fgCv.height=h;
   FORAGE={x:fgx,w,h,dpr,cw,chh,font:`${size}px ${FG_FONT}`,R:Math.ceil(h/chh)+1,C:Math.ceil(w/cw)+3,
     P:FG_NIV[Math.max(0,Math.min(FG_NIV.length-1,(niv||1)-1))],niv:niv||1,

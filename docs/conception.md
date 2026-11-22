@@ -1100,9 +1100,10 @@ pièce ils deviennent du sol, sous un mur du mur) ; seuls le vaisseau et le bord
 - **Barres de défilement** (22 novembre 2026) : 4 pixels, sans fond, couleur du texte secondaire (`--dim`), plus
   claires au survol ; « thin » sous Firefox. Ne pas poser `scrollbar-width` ou `scrollbar-color` sur un élément :
   Chrome les préférerait et rendrait la barre épaisse.
-- Plein écran ; colonne noire à droite. **Son haut reste fixe** (22 novembre 2026) : ligne du niveau, barres Vie,
-  Énergie, Matière, boutons, effets en cours et **Inventaire**. **Seul ce qui suit défile**, à la molette ou au doigt,
-  sans barre de défilement. Le titre « Statut » a été retiré le même jour. Journal
+- Plein écran ; colonne noire à droite. **Son haut reste fixe** (22 novembre 2026) : barres Vie, Énergie, Matière,
+  boutons, effets en cours et **Inventaire**. **Seul ce qui suit défile**, à la molette ou au doigt, sans barre de
+  défilement. Le titre « Statut » et la ligne du niveau ont été retirés le même jour (le niveau est sous la mini-carte).
+  Journal
   de bord sous la carte (5 lignes visibles, numéro de tour, ×N pour les répétitions). **Il défile** (22 novembre 2026) :
 molette ou fine barre pour remonter jusqu'aux 200 derniers messages ; un nouveau message le ramène tout en bas. Un message
   trop long passe à la ligne, aligné après le numéro de tour.
@@ -1111,10 +1112,11 @@ molette ou fine barre pour remonter jusqu'aux 200 derniers messages ; un nouveau
   largeur de colonne et à toute taille de police.
 - **En vue** (sous la Carte) : la fiche d'inspection de la case survolée, puis les créatures visibles (icône,
   barre de vie ASCII, colonnes TOUCHER / SUBIR colorées).
-- **Carte** (sous-menu repliable sous l'Inventaire, 22 novembre 2026) : la mini-carte, puis trois lignes —
-  `LVL2  [-1564m]` (le niveau et sa profondeur : 0 au niveau 1, puis la fin de chaque descente, les mêmes chiffres que
-  le compteur PROFONDEUR des cinématiques de forage, qui part de la profondeur du niveau quitté : `profNiv`, 14b),
-  l'**archétype monde** et l'**archétype bâti** de la carte. Elle **s'ouvre d'elle-même en mode carte (M)** et se referme
+- **Carte** (sous-menu repliable sous l'Inventaire, 22 novembre 2026) : la mini-carte, puis trois lignes en capitales
+  couleur monde, sans étiquette — `NIVEAU 2 · −1564 M · 96×64` (le niveau, sa profondeur et la taille de la carte ; la
+  profondeur vaut 0 au niveau 1, puis la fin de chaque descente, les mêmes chiffres que le compteur PROFONDEUR des
+  cinématiques de forage, qui part de la profondeur du niveau quitté : `profNiv`, 14b), puis l'**archétype monde** et
+  l'**archétype bâti** de la carte (« Personnalisé » s'il n'y en a pas). Elle **s'ouvre d'elle-même en mode carte (M)** et se referme
   en sortant, sauf si elle était déjà ouverte avant.
 - **Mini-carte** pleine largeur ; ennemis en points rouges ; un clic recentre la vue ; bouton maintenu + glisser =
   défilement en temps réel. Saisie à l'intérieur, le cadre suit le pointeur sans sauter ; à l'extérieur, il se
@@ -1228,6 +1230,9 @@ environ 15 s ; `src/js/14b-forage.js`. **`playForage(suite, niv)`** la lance et 
 l'appelle encore dans le jeu : la descente par niveaux, étape 4 de la refonte, doit s'y brancher) ; **F9** la lance pour
 l'essayer. **Échap, Espace ou Entrée** la passent. Pas jouée si l'utilisateur a demandé moins d'animations.
 
+- **Échelle** : caractères d'un 52ᵉ de la hauteur d'écran, comme à la seconde descente (22 novembre 2026 ; avant, un
+  36ᵉ, trop zoomé). Le compteur **PROFONDEUR** part de la profondeur du niveau quitté (`profNiv`) : 0 → 1 564 m à la
+  première descente, 1 564 → 5 168 m à la seconde.
 - **La machine tourne.** Elle démarre **couchée à l'horizontale** sur l'herbe, nez à droite, moteur qui monte ; elle se
   cabre, plante son nez et **plonge à la verticale** (1,3 s) ; à l'arrivée elle touche le fond, **bascule sur le côté**
   autour de son nez, rebondit et se **recouche à l'horizontale**. Le dessin (`FG_ART`, 15 lignes sur 11 colonnes) est
@@ -1270,7 +1275,8 @@ l'essayer. **Échap, Espace ou Entrée** la passent. Pas jouée si l'utilisateur
 
 Du niveau 2 au niveau 3, la descente se joue. `playForage(suite, 2)` ; Lab → **Niv3** ou Maj + F9 pour l'essayer.
 
-- La foreuse est **plus petite** (caractères d'un 52ᵉ de la hauteur d'écran, contre un 36ᵉ) et tenue en haut de l'écran :
+- Caractères d'un 52ᵉ de la hauteur d'écran — **la même échelle aux deux descentes depuis le 22 novembre 2026** (la
+  première, en 36ᵉ, était trop zoomée). La foreuse est tenue en haut de l'écran :
   on voit 0,7 écran devant elle. La descente est plus longue que la première et la foreuse répond
   plus vite aux commandes.
 - Des **mines explosives** naissent juste sous le bas de l'écran, par rangées de plus en plus
