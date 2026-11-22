@@ -33,7 +33,7 @@ revient sur **3 niveaux** ; elle n'est pas encore codée, et forer termine la pa
   en recliquant sur la pastille ou avec Échap. Bouton « Rétablir ». Un réglage enregistré à trois couleurs est ignoré.
 - Polices : Chakra Petch (titres), JetBrains Mono (interface).
 - **Les dessins par défaut sont ceux de l'utilisateur**, retouchés au Tile editor et recopiés dans le code (bloc
-  `TUILES_JOUEUR` à la fin de `03-tuiles.js`, qui passe après toutes les autres définitions). Dernière recopie le 21 novembre 2026 à 22 h 25 (pile et site de forage inconnu) ; plus tôt le même jour : Sentinelle, abysse, liquides, machines 6 à 8 et tous les objets au sol, redessinés dans les couleurs du monde (dont le nouveau gyroscope).
+  `TUILES_JOUEUR` à la fin de `03-tuiles.js`, qui passe après toutes les autres définitions). Dernière recopie le 22 novembre 2026 à 16 h 33 : antenne allumée, Torpille, Mine, Drone, Soudeur, machine 5, Blindage composite dans `TUILES_JOUEUR`, et capsule, Court-circuit, Matière, plan, Module de puissance, rayon laser, explosion 2 dans `TUILES_JOUEUR_B` (fin de `03b-tuiles-machines.js`, parce que ces tuiles y sont définies). Recopie précédente le 21 novembre 2026 à 22 h 25 (pile et site de forage inconnu) ; plus tôt le même jour : Sentinelle, abysse, liquides, machines 6 à 8 et tous les objets au sol, redessinés dans les couleurs du monde (dont le nouveau gyroscope).
 
 ### Rendu des terrains particuliers
 
