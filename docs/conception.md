@@ -1121,7 +1121,7 @@ molette ou fine barre pour remonter jusqu'aux 200 derniers messages ; un nouveau
 - **Mini-carte** pleine largeur ; ennemis en points rouges ; un clic recentre la vue ; bouton maintenu + glisser =
   défilement en temps réel. Saisie à l'intérieur, le cadre suit le pointeur sans sauter ; à l'extérieur, il se
   centre d'abord sous le pointeur.
-- Sous-menus repliables : **Inventaire**, **Carte**, **Palette**, **Lab** (Bestiaire,
+- Sous-menus repliables : **Inventaire**, **Carte**, **Lab**, **Palette** (Palette sous Lab depuis le 22 novembre 2026 ; Carte sous Inventaire et Palette sous Lab à 5 px, les autres à 20) (Bestiaire,
   Groupes, Artefacts, Discrétion, Tile editor, Niv1, Niv2, aide des touches).
 
 ### Souris et inspection

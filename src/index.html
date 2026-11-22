@@ -168,19 +168,6 @@
     </div>
     <div class="seenwrap"><div class="seen" id="msg" role="region" aria-label="En vue"></div></div>
     <div class="btnrow"><button class="go" id="restart" title="Relancer une carte avec les réglages en cours du menu Monde">REGEN</button><button id="mondeBtn" aria-haspopup="dialog" title="Relief, taille et archétypes de monde">MONDE</button><button id="lifeBtn" aria-haspopup="dialog" title="Faune : budget de menace et groupes d’ennemis">LIFE</button></div>
-    <details class="fold" id="fd-pal">
-      <summary><h2>Palette</h2></summary>
-      <div class="pal">
-        <label for="pc3">#1 Monde <button class="swb" id="pc3" data-k="3" aria-expanded="false" aria-label="Couleur 1 : monde"></button></label>
-        <label for="pc2">#2 Bio <button class="swb" id="pc2" data-k="2" aria-expanded="false" aria-label="Couleur 2 : bio"></button></label>
-        <label for="pc1">#3 Accent <button class="swb" id="pc1" data-k="1" aria-expanded="false" aria-label="Couleur 3 : accent"></button></label>
-        <label for="pc4">#4 Danger <button class="swb" id="pc4" data-k="4" aria-expanded="false" aria-label="Couleur 4 : danger"></button></label>
-        <label for="pc5">#5 Bâti <button class="swb" id="pc5" data-k="5" aria-expanded="false" aria-label="Couleur 5 : bâti"></button></label>
-        <div class="cgrid" id="cgrid" role="listbox" aria-label="Nuancier LACKING64, 64 couleurs" hidden></div>
-        <div class="pnm"><span id="palName">Origine</span><button id="palReset" title="Rétablir les couleurs d’origine de cette palette">Rétablir</button></div>
-        <div class="presets" id="presets"></div>
-      </div>
-    </details>
     <details class="fold" id="fd-lab">
       <summary><h2>Lab</h2></summary>
       <div class="foldwrap">
@@ -196,6 +183,19 @@
           <button id="niv3Btn" title="Jouer la seconde descente (le mini-jeu des mines), puis un niveau 3 aux réglages tirés au hasard">Niv3</button>
         </div>
         <p class="keys"><kbd>ZQSD</kbd> <kbd>↑↓←→</kbd> pavé num. · <kbd>A</kbd><kbd>E</kbd><kbd>W</kbd><kbd>C</kbd> diagonales · Souris : survol = inspection, clic = y aller · <kbd>X</kbd> inspection au clavier (<kbd>Entrée</kbd> pour y aller) · <kbd>R</kbd> courir / marcher · <kbd>T</kbd> équipement · <kbd>I</kbd> inventaire · <kbd>O</kbd> exploration automatique (s’arrête au moindre événement) · <kbd>F</kbd> forer · <kbd>Espace</kbd> <kbd>5</kbd> attendre un tour · <kbd>P</kbd> repos jusqu’à l’énergie pleine · <kbd>B</kbd> brouillard de guerre · <kbd>V</kbd> champs de vision des ennemis · <kbd>!</kbd> son · <kbd>M</kbd> mode carte (déplacements = défilement, <kbd>Maj</kbd> pour aller plus vite, mini-carte : clic pour recentrer, glisser le cadre pour défiler)</p>
+      </div>
+    </details>
+    <details class="fold" id="fd-pal">
+      <summary><h2>Palette</h2></summary>
+      <div class="pal">
+        <label for="pc3">#1 Monde <button class="swb" id="pc3" data-k="3" aria-expanded="false" aria-label="Couleur 1 : monde"></button></label>
+        <label for="pc2">#2 Bio <button class="swb" id="pc2" data-k="2" aria-expanded="false" aria-label="Couleur 2 : bio"></button></label>
+        <label for="pc1">#3 Accent <button class="swb" id="pc1" data-k="1" aria-expanded="false" aria-label="Couleur 3 : accent"></button></label>
+        <label for="pc4">#4 Danger <button class="swb" id="pc4" data-k="4" aria-expanded="false" aria-label="Couleur 4 : danger"></button></label>
+        <label for="pc5">#5 Bâti <button class="swb" id="pc5" data-k="5" aria-expanded="false" aria-label="Couleur 5 : bâti"></button></label>
+        <div class="cgrid" id="cgrid" role="listbox" aria-label="Nuancier LACKING64, 64 couleurs" hidden></div>
+        <div class="pnm"><span id="palName">Origine</span><button id="palReset" title="Rétablir les couleurs d’origine de cette palette">Rétablir</button></div>
+        <div class="presets" id="presets"></div>
       </div>
     </details>
     </div>
