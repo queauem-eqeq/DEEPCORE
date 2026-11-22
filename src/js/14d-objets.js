@@ -187,6 +187,13 @@ addFx({kind:'ener',x,y,dur:1000,gr:fxGrains(12)});}
   const neuf=identifier(k);invTake(i);sacFix();SAC_H='';
   say(`${neuf?`Capsule ${savoir().codes[k]} : c’était ${nom}. `:''}${nom} : ${txt}.`,ton);(son&&SFX[son]?SFX[son]:SFX.spot)();
   if(consoTemps())return;invChanged();}
+/* F9 (23 novembre 2026, pour les essais) : un exemplaire de chaque consommable existant (capsules et clé) au sac, identifié ;
+   ce qui ne tient pas dans les 20 places est laissé de côté. */
+function f9Consos(){const pris=[],laisses=[];
+  for(const k of Object.keys(ITEMS).filter(k=>ITEMS[k].conso)){if(sacPlaces()>=SAC_MAX){laisses.push(k);continue;}
+    if(CONSO[k])identifier(k);const o=G.inv.find(o=>o.k===k);if(o)o.n=(o.n||1)+1;else G.inv.push({k,eq:0,n:1});pris.push(k);}
+  say(`F9 : ${pris.length} consommable${pris.length>1?'s':''} ajouté${pris.length>1?'s':''} à l’inventaire${laisses.length?` ; inventaire plein, ${laisses.length} laissé${laisses.length>1?'s':''} de côté`:''} (${sacPlaces()}/${SAC_MAX}).`,laisses.length?'warn':'good');
+  SFX.spot();sacFix();SAC_H='';INV_H=null;render();}
 const fumDedans=()=>!!(G.fum&&G.fum[idx(G.px,G.py)]);
 
 /* ----- La foreuse change d'allure : immobilisée (damier bio / bâti), engluée (teinte bio), camouflée (trame), en surrégime (rouge) ----- */

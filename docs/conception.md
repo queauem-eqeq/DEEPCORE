@@ -1241,7 +1241,7 @@ Espace ou Entrée** passe directement au posé.
 
 Pour le passage au niveau suivant. Vue **de côté**, tout en **caractères ASCII** (comme les dessins d'équipement),
 environ 15 s ; `src/js/14b-forage.js`. **`playForage(suite, niv)`** la lance et appelle `suite()` à la fin (rien ne
-l'appelle encore dans le jeu : la descente par niveaux, étape 4 de la refonte, doit s'y brancher) ; **F9** la lance pour
+l'appelle encore dans le jeu : la descente par niveaux, étape 4 de la refonte, doit s'y brancher) ; **NIV2** la lance pour (F9 jusqu'au 23 novembre 2026) —
 l'essayer. **Échap, Espace ou Entrée** la passent. Pas jouée si l'utilisateur a demandé moins d'animations.
 
 - **Échelle** : caractères d'un 52ᵉ de la hauteur d'écran, comme à la seconde descente (22 novembre 2026 ; avant, un
@@ -1287,7 +1287,7 @@ l'essayer. **Échap, Espace ou Entrée** la passent. Pas jouée si l'utilisateur
 
 ### Seconde descente : le mini-jeu des mines (21 novembre 2026)
 
-Du niveau 2 au niveau 3, la descente se joue. `playForage(suite, 2)` ; Lab → **Niv3** ou Maj + F9 pour l'essayer.
+Du niveau 2 au niveau 3, la descente se joue. `playForage(suite, 2)` ; **NIV3** pour l'essayer (Maj + F9 jusqu'au 23 novembre 2026).
 
 - Caractères d'un 52ᵉ de la hauteur d'écran — **la même échelle aux deux descentes depuis le 22 novembre 2026** (la
   première, en 36ᵉ, était trop zoomée). La foreuse est tenue en haut de l'écran :
@@ -1328,7 +1328,7 @@ Du niveau 2 au niveau 3, la descente se joue. `playForage(suite, 2)` ; Lab → *
   menu Monde du joueur est remis en place aussitôt après. Avant le 21 novembre au soir, tout était tiré au hasard. Pas de
   vaisseau : on arrive par le puits. `genPlanet` refait l'objet `G`, donc ce que **la foreuse garde est remis en
   place juste après** : vie, énergie, inventaire, matière en réserve, tours et distance parcourue.
-- **F9 reste** : il joue la cinématique seule, sans changer de niveau.
+- **F9** (23 novembre 2026) ne lance plus la cinématique : il ajoute **un exemplaire de chaque consommable** à l'inventaire (capsules identifiées et clé), dans la limite des 20 places. Touche d'essai, absente du sous-menu Contrôles.
 - La taille de la carte ne change pas d'un niveau à l'autre (elle s'applique au lancement).
 
 ## 11. Règles à ne pas casser

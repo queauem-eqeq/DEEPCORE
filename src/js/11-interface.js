@@ -105,7 +105,9 @@ const KEYS={arrowup:[0,-1],arrowdown:[0,1],arrowleft:[-1,0],arrowright:[1,0],z:[
 addEventListener('keydown',ev=>{
   if(INTRO){ev.preventDefault();if(ev.key==='Escape'||ev.key===' '||ev.key==='Enter')skipIntro();return;}
   if(FORAGE){ev.preventDefault();if(ev.key==='Escape'||(!FORAGE.jeu&&(ev.key===' '||ev.key==='Enter')))skipForage();return;}   // mini-jeu : seul Échap passe (cela coûte de la vie)
-  if(ev.key==='F9'){ev.preventDefault();playForage(null,ev.shiftKey?2:1);return;}   // Maj + F9 : la seconde descente, le mini-jeu des mines   // essai de la cinématique de forage (21 novembre 2026)
+  // F9 (23 novembre 2026 ; avant, la cinématique de forage, qu'on lance aussi par NIV2 et NIV3) : un exemplaire de chaque
+  // consommable dans l'inventaire, déjà identifié, dans la limite des 20 places
+  if(ev.key==='F9'){ev.preventDefault();if(G&&!G.over)f9Consos();return;}
   if(!$('inventaire').hidden){invKey(ev);return;}
   if(SAC_NAV&&$('overlay').hidden&&ev.target.tagName!=='INPUT'){if(sacKey(ev))return;}   // navigation au clavier dans le sous-menu Inventaire
   if(!$('monde').hidden){if(ev.key==='Escape'){ev.preventDefault();mondeClose();}return;}

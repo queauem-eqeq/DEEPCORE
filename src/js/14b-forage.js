@@ -7,7 +7,7 @@
    La roche n'est pas en bandes : c'est un champ en deux dimensions, des lentilles de matières entremêlées, avec
    de grosses masses de roche dure semées dedans. Devant une masse, la foreuse pivote d'elle-même pour la
    contourner ; le joueur l'aide avec les flèches, Q et D, ou 4 et 6 du pavé numérique (ou le doigt sur l'écran).
-   playForage(suite, niv) lance la scène et appelle suite() à la fin ; F9 la lance pour l'essayer.
+   playForage(suite, niv) lance la scène et appelle suite() à la fin ; NIV2 et NIV3 la lancent pour l'essayer (F9 ne la lance plus depuis le 23 novembre 2026).
    Niveau 1 : terre, argile, roche, quelques masses dures. Les filons, cristaux et basalte sont pour plus bas.
    SECONDE DESCENTE (niveau 2 vers 3, 21 novembre 2026) : un vrai mini-jeu. La foreuse est plus petite à l'écran (on voit plus loin
    devant elle), la descente est plus longue, et des MINES EXPLOSIVES sont semées dans la roche, la plupart sur sa route. Toucher
