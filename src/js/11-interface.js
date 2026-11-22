@@ -1,6 +1,10 @@
 /* ---------- Mode carte : la vue défile sans déplacer le robot ---------- */
 let freeCam=false,camCX=0,camCY=0;
-function setFreeCam(on){freeCam=on;if(on){camCX=G.px;camCY=G.py;}$('camTag').hidden=!on;render();}
+/* Mode carte (M) : la Carte de la colonne s'ouvre en y entrant et se referme en sortant, sauf si elle était déjà ouverte avant
+   (22 novembre 2026). */
+let CARTE_AVANT=null;
+function setFreeCam(on){const f=$('fd-carte');if(on&&!freeCam){CARTE_AVANT=f.open;f.open=true;}else if(!on&&freeCam&&CARTE_AVANT===false){f.open=false;CARTE_AVANT=null;}
+  freeCam=on;if(on){camCX=G.px;camCY=G.py;}$('camTag').hidden=!on;render();}
 function panCam(dx,dy){camCX=Math.max(0,Math.min(W-1,camCX+dx));camCY=Math.max(0,Math.min(H-1,camCY+dy));render();}
 // Mini-carte : un clic recentre la vue ; bouton maintenu + glisser = défilement en temps réel.
 // Saisi à l'intérieur, le cadre suit le pointeur sans sauter ; saisi à l'extérieur, il se centre d'abord sous le pointeur.
@@ -77,6 +81,8 @@ function side(){
   {const E=G.eff||{},l=[];if(E.poison>0)l.push(`<span style="color:var(--life)">Poison ${E.poison}</span>`);if(E.glu>0)l.push(`Englué ${E.glu}`);{const f=G.fum&&G.fum[idx(G.px,G.py)];if(f)l.push(`<span style="color:var(--c1)">Dans la fumée ${f.v}</span>`);}$('effs').innerHTML=l.join(' · ');}
   // le niveau est revenu le 21 novembre 2026 ; la taille de la carte se règle dans le menu Monde
   $('lvl').textContent=`Niveau ${G.niv||1}${G.amb?' · '+G.amb:''} · ${W} × ${H}`;
+  // Carte : profondeur du niveau (raccord avec le compteur des descentes), puis les deux archétypes (22 novembre 2026)
+  {const n=G.niv||1,p=profNiv(n);$('cProf').textContent=`LVL${n}  [${p?'-'+p:0}m]`;$('cMonde').textContent=`Monde : ${G.archM||'—'}`;$('cBati').textContent=`Bâti : ${G.archB||'—'}`;}
   $('matN').textContent=G.st.matiere||0;   // avalée par le commentaire depuis le 16 novembre 2026 : la matière ne s'affichait plus
   if(!$('inventaire').hidden)invDraw();
   $('msg').innerHTML=seenHTML();
@@ -201,6 +207,7 @@ const saveSnd=()=>{try{localStorage.setItem('np-son',JSON.stringify(SND));}catch
 function toggleSound(){SND.on=!SND.on;saveSnd();say(SND.on?'Son activé.':'Son coupé.','info');if(SND.on){unlock();SFX.spot();}render();}
 function toggleVision(){SHOWVIS=!SHOWVIS;say(SHOWVIS?'Portée de discrétion affichée.':'Portée de discrétion masquée.','info');render();}
 function toggleFog(){fog=!fog;try{localStorage.setItem('np-fog',fog?'on':'off');}catch(e){}say(fog?'Brouillard de guerre activé.':'Brouillard de guerre désactivé.','info');render();}
-['fd-sac','fd-pal','fd-lab'].forEach(id=>{const d=$(id);try{d.open=localStorage.getItem('np-'+id)==='open';}catch(e){}
+$('fd-carte').addEventListener('toggle',()=>{if(G)render();});   // la mini-carte se dessine à l'ouverture
+['fd-sac','fd-carte','fd-pal','fd-lab'].forEach(id=>{const d=$(id);try{d.open=localStorage.getItem('np-'+id)==='open';}catch(e){}
   d.addEventListener('toggle',()=>{try{localStorage.setItem('np-'+id,d.open?'open':'closed');}catch(e){}});});
 $('restart').onclick=e=>{e.preventDefault();e.stopPropagation();unlock();SFX.start();newGame();started=true;$('overlay').hidden=true;render();};

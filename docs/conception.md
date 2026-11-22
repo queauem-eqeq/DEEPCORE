@@ -230,7 +230,7 @@ faune réglés dans le **menu Monde**. **REGEN** (et **GÉNÉRER LA CARTE**, dan
 avec les réglages du moment. Forer le site atteint le noyau : écran « NOYAU ATTEINT », puis une nouvelle carte.
 Mort : idem.
 
-- **Taille** : celle du menu Monde. Affichée en jeu sous le titre Statut (« Carte 96 × 64 »).
+- **Taille** : celle du menu Monde. Affichée en jeu en haut de la colonne (« Niveau 1 · 96 × 64 »).
 - **Gisements** : 3 de métal et 1 de Matière pour une carte de taille 2, les autres tailles en proportion de leur
   surface. Chaque gisement vaut **30, 40 ou 50**.
 - **Palette** : celle du joueur, sans variation.
@@ -878,7 +878,7 @@ s'efface case par case. Les ennemis qui chassaient **perdent aussitôt la trace*
 - Dessiné avec les **six tuiles de nuage** de l'intro ; **les tuiles changent d'un battement à l'autre** (cœur si
   les huit voisines sont de la fumée, bord sinon ; une case sur deux retire sa tuile au hasard dans sa famille), si
   bien que le nuage a l'air de vivre. Elles pâlissent dans leurs quatre derniers battements.
-- Sous Statut, « Dans la fumée N » tant que la foreuse y est.
+- Sous les barres, « Dans la fumée N » tant que la foreuse y est.
 
 **Charge sismique : une visée.** L'utiliser n'explose pas tout de suite : une **case rouge** s'ouvre une case devant
 la foreuse (sur elle tant que la capsule n'est pas identifiée). On la déplace à la souris ou aux touches de direction,
@@ -1100,19 +1100,26 @@ pièce ils deviennent du sol, sous un mur du mur) ; seuls le vaisseau et le bord
 - **Barres de défilement** (22 novembre 2026) : 4 pixels, sans fond, couleur du texte secondaire (`--dim`), plus
   claires au survol ; « thin » sous Firefox. Ne pas poser `scrollbar-width` ou `scrollbar-color` sur un élément :
   Chrome les préférerait et rendrait la barre épaisse.
-- Plein écran ; colonne noire à droite, défilable à la molette ou au doigt mais sans barre de défilement ; journal
+- Plein écran ; colonne noire à droite. **Son haut reste fixe** (22 novembre 2026) : ligne du niveau, barres Vie,
+  Énergie, Matière, boutons, effets en cours et **Inventaire**. **Seul ce qui suit défile**, à la molette ou au doigt,
+  sans barre de défilement. Le titre « Statut » a été retiré le même jour. Journal
   de bord sous la carte (5 lignes visibles, numéro de tour, ×N pour les répétitions). **Il défile** (22 novembre 2026) :
 molette ou fine barre pour remonter jusqu'aux 200 derniers messages ; un nouveau message le ramène tout en bas. Un message
   trop long passe à la ligne, aligné après le numéro de tour.
-- **Statut** : barres ASCII `█`/`░` — Vie en bio, Énergie en accent — suivies de leur valeur chiffrée. Le
+- **Barres** (l'ancien Statut) : barres ASCII `█`/`░` — Vie en bio, Énergie en accent — suivies de leur valeur chiffrée. Le
   remplissage est un **calque de `█` découpé à la largeur exacte** posé sur un fond de `░`, donc juste à toute
   largeur de colonne et à toute taille de police.
-- **En vue** (sous la mini-carte) : la fiche d'inspection de la case survolée, puis les créatures visibles (icône,
+- **En vue** (sous la Carte) : la fiche d'inspection de la case survolée, puis les créatures visibles (icône,
   barre de vie ASCII, colonnes TOUCHER / SUBIR colorées).
+- **Carte** (sous-menu repliable sous l'Inventaire, 22 novembre 2026) : la mini-carte, puis trois lignes —
+  `LVL2  [-1564m]` (le niveau et sa profondeur : 0 au niveau 1, puis la fin de chaque descente, les mêmes chiffres que
+  le compteur PROFONDEUR des cinématiques de forage, qui part de la profondeur du niveau quitté : `profNiv`, 14b),
+  l'**archétype monde** et l'**archétype bâti** de la carte. Elle **s'ouvre d'elle-même en mode carte (M)** et se referme
+  en sortant, sauf si elle était déjà ouverte avant.
 - **Mini-carte** pleine largeur ; ennemis en points rouges ; un clic recentre la vue ; bouton maintenu + glisser =
   défilement en temps réel. Saisie à l'intérieur, le cadre suit le pointeur sans sauter ; à l'extérieur, il se
   centre d'abord sous le pointeur.
-- Sous-menus repliables : **Inventaire**, **Génération** (+ REGEN), **Life**, **Palette**, **Lab** (Bestiaire,
+- Sous-menus repliables : **Inventaire**, **Carte**, **Palette**, **Lab** (Bestiaire,
   Groupes, Artefacts, Discrétion, Tile editor, Niv1, Niv2, aide des touches).
 
 ### Souris et inspection

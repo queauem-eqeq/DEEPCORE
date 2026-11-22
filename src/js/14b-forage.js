@@ -72,6 +72,11 @@ const FG_NIV=[
 const FG_ANN_T0=1,FG_ANN_T1=2,FG_ANNONCE=4.5,FG_T0=2.5,FG_PLG=1.3,FG_CAV=34,FG_R=6,FG_POSE=3.2,FG_FONT='"JetBrains Mono", ui-monospace, Menlo, Consolas, monospace';
 const FG_SMOKE=['#c4cdd0','#9aa5a9','#737f84','#4d585d','#2e373b'];
 let FORAGE=null,FG_CB=null;
+/* Profondeur du haut de chaque niveau, en mètres (22 novembre 2026) : 0 au niveau 1, puis la fin de chaque descente (le
+   perçage et la chute dans la caverne, (D0 + FG_CAV) × 8,5 m). Le compteur PROFONDEUR des descentes part de là, et la
+   Carte de la colonne affiche la même valeur : les chiffres se suivent d'un écran à l'autre. */
+const FG_M=8.5;
+function profNiv(n){let d=0;for(let k=1;k<(n||1);k++){const P=FG_NIV[Math.min(FG_NIV.length-1,k-1)];d+=Math.round((P.D0+FG_CAV)*FG_M);}return d;}
 const fgCv=$('forageCv'),fgx=fgCv.getContext('2d');
 function fgMix(hex,k){const m=/^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i.exec(hex)||['','b5','c2','c6'],v=i=>Math.max(0,Math.min(255,Math.round(parseInt(m[i],16)*k)));return `rgb(${v(1)},${v(2)},${v(3)})`;}
 function fgH(F,x,y,k){let h=(x*374761393+y*668265263+(k||0)*1442695041+F.seed)|0;h=Math.imul(h^(h>>>13),1274126177);h^=h>>>16;return (h>>>0)/4294967296;}
@@ -353,7 +358,7 @@ function fgHud(F,t){const x=F.x,{w,h,dpr}=F,fs=Math.round(12*dpr),lh=Math.round(
   const nd=Math.max(0,Math.min(5,Math.round(F.hs*5))),esp=v=>String(v).replace(/\B(?=(\d{3})+$)/g,' '),
     cap=F.ph!==1?'—':F.th<-2?'◄'.repeat(Math.min(3,1+Math.round(-F.th/9))):F.th>2?'►'.repeat(Math.min(3,1+Math.round(F.th/9))):'▼',
     rpm=F.ph===0?Math.round(400+2600*Math.min(1,t/FG_T0)):fall?Math.max(0,Math.round(3200*(1-(t-F.tF)/2))):Math.round(2300+900*F.hs);
-  const L=[['FORAGE ▸ SÉQUENCE DE DESCENTE',F.pal.a],[`NIVEAU     ${F.niv} → ${F.niv+1}`,F.pal.g],[`PROFONDEUR ${esp(Math.round(F.d*8.5))} m`,F.pal.g],
+  const L=[['FORAGE ▸ SÉQUENCE DE DESCENTE',F.pal.a],[`NIVEAU     ${F.niv} → ${F.niv+1}`,F.pal.g],[`PROFONDEUR ${esp(profNiv(F.niv)+Math.round(F.d*FG_M))} m`,F.pal.g],
     [`MATIÈRE    ${fall?'CAVERNE':F.ph===0?'SURFACE':M.n}`,F.ph===1&&M.d>2.5?F.pal.o:F.pal.g],
     [`DURETÉ     ${'▮'.repeat(nd)}${'▯'.repeat(5-nd)}`,F.pal.g],[`CAP        ${cap}`,F.pal.g],[`ROTATION   ${esp(rpm)} tr/min`,F.pal.g]];
   {const st=typeof G!=='undefined'&&G&&G.st;if(st){const v=Math.max(0,Math.round(st.vie)),mx=Math.max(1,Math.round(st.vieMax||100)),n=Math.max(0,Math.min(10,Math.ceil(v*10/mx)));   // la vie de la foreuse, à toutes les descentes

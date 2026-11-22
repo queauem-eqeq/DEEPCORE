@@ -259,7 +259,7 @@ function niveau(refait){drilling=false;
     if(G.batis.length||!ZONE||!(ENFOUI()||GEN.structure>0))break;}
   if(mieux&&mieux.G!==G){G=mieux.G;ZONE=mieux.ZONE;ZINFO=mieux.ZINFO;SECT=mieux.SECT;CVT=mieux.CVT;BATI_DER=mieux.BD;}
   {const o=cv&&typeof document!=='undefined'&&document.getElementById('genObt');if(o)o.textContent=obtenuTxt();}
-  G.amb=ambDouble();   // « monde · bâti », les deux archétypes, affiché dans le Statut et à l'arrivée
+  G.amb=ambDouble();G.archM=ambMNom(GEN.ambM)||'Personnalisé';G.archB=ambNom(GEN.recette,GEN.amb)||'Personnalisé';   // les deux archétypes, un par un, pour la Carte de la colonne   // « monde · bâti », les deux archétypes, affiché dans le Statut et à l'arrivée
   durcir();   // la roche dure avant les métaux : ils n'y apparaissent jamais
   {const a=W*H/(48*32);G.eff={};G.fum={};hideOre(Math.max(1,Math.round(GISEMENTS.metal*a)),Math.max(1,Math.round(GISEMENTS.mat*a)));}
   G.sonar=1;   // sonar à émettre (voir sonarStart, 10-rendu) : il part 10 à 30 tours après l’arrivée (22 novembre 2026 ; avant 10 à 20)

@@ -133,8 +133,10 @@
   <section class="log" aria-label="Journal de bord"><ul id="log" aria-live="polite"></ul></section>
   </div>
   <aside class="col">
+    <!-- 22 novembre 2026 : le haut de la colonne (niveau, barres, boutons, inventaire) reste fixe ; seul ce qui suit défile.
+         Le titre « Statut » a été retiré. -->
+    <div class="colfixe">
     <div>
-      <h2>Statut</h2>
       <div class="lvl" id="lvl"></div>
       <div class="rows">
         <div class="bar2"><span>Vie</span><span class="abar life" role="meter" aria-label="Vie" id="lifeT"></span><span class="bnum" id="lifeN"></span></div>
@@ -149,6 +151,14 @@
       <summary><h2>Inventaire</h2><span class="cnt" id="sacN" title="Places occupées sur 10 : une sorte de consommable par place"></span></summary>
       <div class="sac" id="sac"></div>
     </details>
+    </div>
+    <div class="coldefil">
+    <!-- Carte (22 novembre 2026) : la mini-carte et la fiche du niveau. Elle s'ouvre d'elle-même en mode carte (M). -->
+    <details class="fold" id="fd-carte">
+      <summary><h2>Carte</h2></summary>
+      <canvas id="mini" aria-label="Mini-carte des zones explorées"></canvas>
+      <div class="carteinfo"><div id="cProf"></div><div id="cMonde"></div><div id="cBati"></div></div>
+    </details>
     <div class="pad" id="pad">
       <div class="dpad">
         <button data-d="-1,-1" aria-label="Haut gauche">↖</button><button data-d="0,-1" aria-label="Haut">↑</button><button data-d="1,-1" aria-label="Haut droite">↗</button>
@@ -157,7 +167,6 @@
       </div>
       <button id="restPad" class="pace" title="Repos (P) : attendre jusqu’à l’énergie pleine">REPOS</button>
     </div>
-    <canvas id="mini" aria-label="Mini-carte des zones explorées"></canvas>
     <div class="seenwrap"><div class="seen" id="msg" role="region" aria-label="En vue"></div></div>
     <div class="btnrow"><button class="go" id="restart" title="Relancer une carte avec les réglages en cours du menu Monde">REGEN</button><button id="mondeBtn" aria-haspopup="dialog" title="Relief, taille et archétypes de monde">MONDE</button><button id="lifeBtn" aria-haspopup="dialog" title="Faune : budget de menace et groupes d’ennemis">LIFE</button></div>
     <details class="fold" id="fd-pal">
@@ -190,6 +199,7 @@
         <p class="keys"><kbd>ZQSD</kbd> <kbd>↑↓←→</kbd> pavé num. · <kbd>A</kbd><kbd>E</kbd><kbd>W</kbd><kbd>C</kbd> diagonales · Souris : survol = inspection, clic = y aller · <kbd>X</kbd> inspection au clavier (<kbd>Entrée</kbd> pour y aller) · <kbd>R</kbd> courir / marcher · <kbd>T</kbd> équipement · <kbd>I</kbd> inventaire · <kbd>O</kbd> exploration automatique (s’arrête au moindre événement) · <kbd>F</kbd> forer · <kbd>Espace</kbd> <kbd>5</kbd> attendre un tour · <kbd>P</kbd> repos jusqu’à l’énergie pleine · <kbd>B</kbd> brouillard de guerre · <kbd>V</kbd> champs de vision des ennemis · <kbd>!</kbd> son · <kbd>M</kbd> mode carte (déplacements = défilement, <kbd>Maj</kbd> pour aller plus vite, mini-carte : clic pour recentrer, glisser le cadre pour défiler)</p>
       </div>
     </details>
+    </div>
   </aside>
 </div>
 
