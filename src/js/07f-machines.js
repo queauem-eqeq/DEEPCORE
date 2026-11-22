@@ -122,7 +122,7 @@ function accesSite(depuis){const N=W*H,t=G.t,ouvert=new Set();let d;
   const s=G.sites[0];return s?d[idx(s.x,s.y)]:-1;}
 /* ----- Génération ----- */
 const BUTIN_DEPOT=()=>typeof butinCoffre==='function'?butinCoffre('depot'):['matiere','matiere'];
-function machines(){G.las=[];G.lz={};G.circ=[];G.soc={};G.piles={};G.mt=0;G.machN={};G.pieges=[];G.niche={};
+function machines(){G.las=[];G.lz={};G.circ=[];G.soc={};G.piles={};G.mt=0;G.machN={};G.pieges=[];G.niche={};G.choix=[];G.vit={};
   if(!BATI_DER||!G.batis||!G.batis.length)return;const {B,strs}=BATI_DER,t=G.t,N=W*H,A=ARTEFACTS,site=G.sites&&G.sites[0]?idx(G.sites[0].x,G.sites[0].y):-1,dep=idx(G.px,G.py);
   const base=!!(RECETTES[GEN.recette]||{}).base,fac=base?(GEN.bsMachines??100)/100:.35,compte=n=>Math.floor(n)+(Math.random()<n-Math.floor(n)?1:0);
   const fq=(k,f)=>{const a=A[k];if(!a||!artOn(k))return 0;return compte(ART_LISTE.find(m=>m[0]===k)[3][a.f]*(f??fac));};
@@ -233,13 +233,26 @@ function machines(){G.las=[];G.lz={};G.circ=[];G.soc={};G.piles={};G.mt=0;G.mach
     G.pieges.push({c:app,n:sel.map(a=>a[0]),f:sel.map(a=>a[1]),on:1});for(const [j] of sel)G.niche[j]=1;
     const but=typeof butinCoffre==='function'?butinCoffre('piege'):['matiere','matiere'];for(const o of but)(G.items[app]=G.items[app]||[]).push(o);
     p.mach='piege';return true;};
+  /* -- vitrines (22 novembre 2026, d'après les coffres de Brogue) : une petite pièce en cul-de-sac, trois vitrines, un lot dans chacune.
+     On n'en emporte qu'un : les autres se verrouillent. Rien à combattre : le choix est le jeu. */
+  const vitrines=p=>{const P=new Set(p.c),ent=[];if(p.c.length<9||p.c.length>48)return false;
+    for(const i of p.c)for(const j of v4(i))if(!P.has(j)&&!blocks(t[j])&&!ent.includes(j))ent.push(j);
+    if(ent.length!==1||G.lz[ent[0]])return false;
+    const c=p.c.filter(i=>libre(i)&&!pres(i)&&artLibre(B,i,site)).sort((a,b)=>pas(b,ent[0])-pas(a,ent[0])),sel=[];
+    for(const i of c){if(sel.length>=3)break;if(sel.every(j=>pas(i,j)>=2))sel.push(i);}
+    if(sel.length<3)return false;const bc=typeof butinCoffre==='function';
+    const lots=bc?[[planTire()],[equipTire()],[consoTire(),consoTire()]]:[['matiere'],['matiere'],['matiere']];
+    sel.forEach((i,n)=>{G.items[i]=lots[n].slice();G.vit[i]=1;});G.choix.push({c:sel,on:1});p.mach='vitrines';return true;};
+  // récompense d'une salle à lasers : un butin au fond, là où mène la traversée
+  const recompense=p=>{const d=dist(),c=p.c.filter(i=>libre(i)&&d[i]>=0&&!G.lz[i]).sort((a,b)=>d[b]-d[a])[0];if(c!=null&&Math.random()<.7)(G.items[c]=G.items[c]||[]).push(typeof consoTire==='function'&&Math.random()<.5?consoTire():'matiere');};
   // ----- répartition -----
   const essaie=(n,f)=>{let fait=0;for(const p of mel(pieces)){if(fait>=n)break;if(p.mach||p.herbe)continue;if(f(p))fait++;}return fait;};
   for(let k=essaie(fq('ponts'),pont);k>0;k--)inc('ponts');
   for(let k=essaie(fq('piles'),depot);k>0;k--)inc('piles');
   for(let k=essaie(fq('pieges'),piege);k>0;k--)inc('pieges');
-  essaie(fq('lasers'),p=>{const g=tourelles(p);if(!g)return false;inc('lasers');if(Math.random()<.6)coupe(p,g);return true;});
-  essaie(fq('croix'),p=>{const g=croix(p);if(!g)return false;inc('croix');if(Math.random()<.4)coupe(p,g);return true;});
+  essaie(fq('lasers'),p=>{const g=tourelles(p);if(!g)return false;inc('lasers');machZone();recompense(p);if(Math.random()<.6)coupe(p,g);return true;});
+  essaie(fq('croix'),p=>{const g=croix(p);if(!g)return false;inc('croix');machZone();recompense(p);if(Math.random()<.4)coupe(p,g);return true;});
+  for(let k=essaie(fq('vitrines',1),vitrines);k>0;k--)inc('vitrines');
   for(let k=fq('station');k>0;k--)for(const p of mel(pieces)){if(p.mach==='lasers'||p.mach==='croix')continue;if(pose(p,STATION,0,true)>=0){inc('station');break;}}
   // le fabricateur : dans une pièce sans laser ; à défaut (petit complexe du niveau 1), n'importe où dans un bâtiment
   for(let k=fq('fabric',1);k>0;k--){let fait=false;for(const p of mel(pieces)){if(p.mach==='lasers'||p.mach==='croix')continue;if(pose(p,FABRIC,0,true)>=0){fait=true;break;}}
@@ -258,3 +271,8 @@ function piegeTest(c){const p=(G.pieges||[]).find(p=>p.on&&p.c===c);if(!p)return
     const b=newBeast(s,x,y,bande,-1);b.hunt=1;b.mp=0;b.nd=1;spot(b);G.beasts.push(b);n++;addFx({kind:'alerte',o:b,dur:900});});
   if(!n)return;addFx({kind:'shake',amp:7,dur:300});if(typeof SFX!=='undefined')SFX.explode();
   sayMore(`Piège ! ${n} relais surgissent des murs.`,'warn');}
+
+/* ----- Vitrines : un seul lot (22 novembre 2026). G.choix [{c:[cases], on}] ; G.vit {case:1} pour le dessin du socle. ----- */
+function choixTest(c){const g=(G.choix||[]).find(g=>g.on&&g.c.includes(c));if(!g)return;g.on=0;
+  for(const i of g.c){if(i!==c&&G.items)delete G.items[i];if(i!==c)G.vit[i]=2;}delete G.vit[c];
+  if(typeof SFX!=='undefined')SFX.serrure();sayMore('Vous prenez un lot : les deux autres vitrines se verrouillent.','info');}

@@ -617,3 +617,138 @@ Le niveau 1 n'est plus fait que de crabots : cinq groupes y sont permis, le rela
 toutes les machines en service pour ses essais (la croix laser est désactivée par défaut). Ses essais de levier et de grille
 échouent de temps en temps selon le tirage de la carte, avant comme après ce changement.
 
+
+## Nuit du 22 novembre 2026 : machines lisibles, objets, équilibrage
+
+Branche `claude/machines-objets-2026-11-22`. Données brutes : `banc/archives/2026-11-22/`.
+
+### Machines et butin (`outils/scripts/test-machines.js`, 30 cartes de la grande base, toutes machines actives)
+
+Site accessible 30/30, 258 ms par carte. Par carte : lasers 2,1 · croix 1,7 · salles piégées 1,0 · stations 0,7 · ponts 0,4 ·
+vitrines 0,4 · piles 0,3 · fabricateur 1,0. **Les ponts et les piles sont plus rares qu'avant** (0,5 à 1,5 visés) : un pont
+n'est gardé que s'il est le seul chemin ou s'il mène à un cul-de-sac, et la pile doit pouvoir être poussée jusqu'au socle
+par les portes. À surveiller en jouant : monter leur fréquence (Lab → Artefacts, « + ») si on en voit trop peu.
+
+Butin par carte, réglages de départ, dix cartes par niveau (script de mesure de la séance) :
+
+| Niveau | Culs-de-sac garnis | Pièces secrètes garnies | Matière au sol (blocs de 15) | Plans | Modules de puissance | Capsules | Équipements | Gisements de Matière |
+|---|---|---|---|---|---|---|---|---|
+| 1 (atterrissage) | 6,0 | 0,3 | 3,3 | 1,5 | 1,0 | 2,7 | 0,2 | 76 |
+| 2 (cavernes) | 6,0 | 0,3 | 3,4 | 1,5 | 1,0 | 3,2 | 0,4 | 78 |
+| 3 (base) | 6,0 | 1,2 | 6,3 | 2,7 | 1,4 | 5,9 | 0,6 | 74 |
+
+Soit, sans compter ce que lâchent les robots : 125 de Matière au niveau 1, 130 au niveau 2, 170 au niveau 3.
+
+### Valeur des groupes au banc (assaut, arène dégagée, vie d'essai 1000, 120 combats par effectif)
+
+Valeur = vie perdue en moyenne ÷ 4. La colonne « écart » signale les groupes dont le coût ne suit plus la mesure.
+
+| Groupe | Vie perdue (mini) | Vie perdue (maxi) | Valeur mesurée | Coût actuel | Écart |
+|---|---|---|---|---|---|
+| Crabots | 6,3 | 14,4 | 2,6 | 3 |  |
+| Large crabot groupe | 34,7 | 74,5 | 13,7 | 7 | sous-évalué |
+| Bande de relais | 12,7 | 22,1 | 4,3 | 5 |  |
+| Family | 26,8 | 26,3 | 6,6 | 7 |  |
+| 3-5 puces + sentinelles | 19,8 | 43,9 | 8,0 | 8 |  |
+| 1-2 Mines | 0,7 | 1,2 | 0,2 | 3 | surévalué |
+| Mines & Sentinelles | 20,9 | 21,3 | 5,3 | 6 |  |
+| 2-3 sentinelles | 8,5 | 14,6 | 2,9 | 3 |  |
+| Banc de torpilles | 7,4 | 15,1 | 2,8 | 3 |  |
+| Broyeur solitaire | 49,1 | 50,4 | 12,4 | 11 |  |
+| Puces en groupes | 40,2 | 93,1 | 16,7 | 10 | sous-évalué |
+| Poste de garde | 12,9 | 19,7 | 4,1 | 10 | surévalué |
+| Batterie | 30,4 | 54,3 | 10,6 | 13 |  |
+| Essaim de drones | 8,2 | 15,6 | 3,0 | 3 |  |
+| Escouade de réparation | 22,5 | 22 | 5,6 | 6 |  |
+| Embuscade gluante | 4 | 9,1 | 1,6 | 4 | surévalué |
+| Chasse à courre | 17 | 24,5 | 5,2 | 7 |  |
+| Convoi | 20,1 | 19,7 | 5,0 | 11 | surévalué |
+| Tireurs embusqués | 10,3 | 31,7 | 5,2 | 5 |  |
+| Ronde de drones | 8,6 | 8 | 2,1 | 2 |  |
+
+Lecture. **Le Bloqueur fait peu de dégâts** (Poste de garde 38 → 16 de vie perdue, Convoi 46 → 20) : sa menace est
+d'immobiliser, ce que l'assaut en terrain dégagé ne mesure pas. Les groupes qui le contiennent sont à rechiffrer (Poste de
+garde 10 → 5, Convoi 11 → 6) ou à renforcer avec des tireurs. **Large crabot groupe** (13,7 pour 7) et **Puces en groupes**
+(16,7 pour 10) sont les plus sous-évalués. Les coûts n'ont pas été changés : les groupes sont un réglage du joueur.
+
+### Groupes contre équipements (vie réelle 100, assaut, 200 combats par case)
+
+Vie perdue en moyenne, et entre parenthèses la part de foreuses détruites quand elle n'est pas nulle.
+
+| Ennemis | nu | 2 réparobots | 1 batterie | 1 surrégime | trousse complète | Vrille | Carène | Viseur + stabilisateur + gyroscope |
+|---|---|---|---|---|---|---|---|---|
+| 4 crabots | 34 | 28 | 30 | 25 | 24 | 28 | 35 | 25 |
+| 6 crabots | 72 (14 %) | 25 | 62 (10 %) | 50 (3 %) | 28 | 54 (3 %) | 70 (15 %) | 53 (5 %) |
+| 4 relais | 20 | 22 | 20 | 22 | 19 | 18 | 23 | 15 |
+| 7 relais (salle piégée) | 53 (4 %) | 27 | 52 (2 %) | 51 (5 %) | 26 | 39 | 53 (4 %) | 34 |
+| Broyeur | 51 (3 %) | 27 | 52 (1 %) | 33 | 27 | 40 (1 %) | 51 (1 %) | 37 (1 %) |
+| Broyeur + 2 crabots | 70 (15 %) | 30 | 64 (11 %) | 56 (5 %) | 26 | 61 (7 %) | 72 (18 %) | 55 (7 %) |
+| Bloqueur seul | 8 | 8 | 2 | 6 | 2 | 6 | 8 | 5 |
+| Bloqueur + 2 artilleurs | 52 (1 %) | 26 | 47 | 49 (1 %) | 26 | 44 | 38 | 40 |
+| Bloqueur + 2 mines | 13 | 12 | 7 | 10 | 10 | 9 | 12 | 8 |
+| Bloqueur + 2 sentinelles | 20 | 21 | 14 | 15 | 12 | 15 | 20 | 14 |
+| 2 Bloqueurs + 3 crabots | 58 (4 %) | 26 | 53 (2 %) | 43 (1 %) | 28 | 45 | 60 (5 %) | 40 |
+| 8 puces | 75 (26 %) | 29 | 73 (21 %) | 74 (22 %) | 30 | 54 (2 %) | 62 (15 %) | 55 (3 %) |
+| Englueur + 4 relais | 25 | 25 | 22 | 25 | 23 | 20 | 23 | 17 |
+| 2 englueurs + 2 mines | 10 | 10 | 11 | 9 | 12 | 7 | 5 | 7 |
+| 3 sentinelles + 3 mines | 30 | 28 | 32 | 26 | 28 | 21 | 32 | 23 |
+| Soudeur + 2 crabots | 22 | 20 | 21 | 15 | 15 | 17 | 21 | 16 |
+| 5 drones | 17 | 17 | 14 | 16 | 14 | 13 | 18 | 12 |
+| 2 artilleurs | 32 | 26 | 32 | 31 | 27 | 29 | 17 | 25 |
+
+Mesuré avec la batterie à 8 dégâts et 4 battements d'étourdissement, le surrégime à 8 battements (valeurs d'avant la série
+suivante). « Trousse complète » : 2 réparobots, 1 charge, 1 batterie, 1 surrégime, utilisés par le pilote (`consoPilote`,
+`banc/banc.js`) ; dans cette série la charge n'était pas réellement lancée (défaut du pilote, corrigé ensuite).
+
+### Variantes d'objets (vie réelle 100, 200 combats par case)
+
+| Équipement | 6 crabots | Broyeur + 2 crabots | 8 puces | Bloqueur + 2 artilleurs | 2 artilleurs | 7 relais | 2 Bloqueurs + 3 crabots | 3 sentinelles + 3 mines |
+|---|---|---|---|---|---|---|---|---|
+| nu | 71 (15 %) | 72 (20 %) | 73 (24 %) | 52 | 30 | 49 (2 %) | 60 (2 %) | 32 |
+| POW 11 | 68 (12 %) | 70 (17 %) | 71 (21 %) | 49 (1 %) | 30 | 49 (1 %) | 56 (1 %) | 30 |
+| POW 12 | 70 (17 %) | 68 (12 %) | 70 (19 %) | 52 (1 %) | 29 | 47 (1 %) | 57 (1 %) | 31 |
+| POW 13 | 66 (7 %) | 67 (17 %) | 66 (15 %) | 49 | 31 | 45 (1 %) | 53 (1 %) | 28 |
+| Trépan P12 (2d6+4) | 62 (7 %) | 64 (17 %) | 63 (13 %) | 47 | 29 | 55 (7 %) | 54 (2 %) | 29 |
+| Trépan P12 2d6+6 | 48 (1 %) | 55 (5 %) | 53 (8 %) | 44 (1 %) | 28 | 48 (4 %) | 43 | 24 |
+| Trépan P12 2d6+8 | 43 (1 %) | 45 (2 %) | 46 (1 %) | 41 | 26 | 31 | 34 | 20 |
+| Trépan P13 2d6+6 | 46 (2 %) | 55 (8 %) | 51 (4 %) | 42 | 27 | 43 (2 %) | 41 (1 %) | 23 |
+| Vrille P10 | 52 (2 %) | 62 (8 %) | 55 (2 %) | 44 | 30 | 36 | 41 (1 %) | 21 |
+| Vrille P12 | 50 (1 %) | 59 (8 %) | 52 (2 %) | 44 | 27 | 36 | 42 | 20 |
+| Blindage P12 (+18,VIT-1) | 67 (15 %) | 70 (21 %) | 70 (12 %) | 75 (14 %) | 57 (1 %) | 48 (1 %) | 52 (1 %) | 32 |
+| Blindage +25 VIT-1 | 61 (7 %) | 62 (9 %) | 68 (10 %) | 71 (9 %) | 52 (1 %) | 42 (1 %) | 49 | 30 |
+| Blindage +18 VIT 0 | 62 (7 %) | 62 (11 %) | 66 (16 %) | 46 (1 %) | 28 | 46 (1 %) | 52 (1 %) | 29 |
+| Blindage +25 VIT 0 | 61 (5 %) | 58 (9 %) | 62 (13 %) | 41 | 26 | 40 (1 %) | 47 | 26 |
+| Blindage +30 VIT-1 | 58 (7 %) | 56 (7 %) | 62 (4 %) | 67 (5 %) | 52 (1 %) | 40 (1 %) | 46 (1 %) | 28 |
+| Surrégime 8 | 48 (1 %) | 53 (6 %) | 72 (22 %) | 49 | 30 | 51 (4 %) | 44 (1 %) | 26 |
+| Surrégime 12 | 40 (2 %) | 46 (3 %) | 74 (26 %) | 47 | 31 | 52 (3 %) | 35 (1 %) | 23 |
+| Batterie 4 | 62 (9 %) | 62 (6 %) | 78 (32 %) | 47 (1 %) | 32 | 47 (3 %) | 52 (1 %) | 31 |
+| Batterie étourdi 6, choc 12 | 60 (7 %) | 57 (7 %) | 64 (10 %) | 44 | 30 | 50 (1 %) | 51 (4 %) | 29 |
+| Charge 30 | 36 | 42 (2 %) | 29 | 27 | 25 | 26 | 34 | 16 |
+| 2 charges | 19 | 16 | 14 | 21 | 24 | 9 | 19 | 8 |
+
+Les lignes « Charge 30 » et « 2 charges » viennent de la série refaite avec le pilote corrigé.
+
+Ce que les chiffres disent, et ce qui a été réglé en conséquence :
+
+- **La charge sismique est le consommable le plus fort** : 30 à 40 points de vie épargnés par charge contre un groupe
+  (6 crabots : 71 → 36 → 19), sans compter la roche. Prix **26 → 34**.
+- **Réparobots** : deux réparobots épargnent 45 points dans les gros combats (prix 18, inchangé).
+- **Surrégime** : 20 points épargnés contre crabots et Broyeur, rien contre les puces (trop nombreuses). Durée **8 → 10**, prix 20.
+- **Batterie en décharge** : faible à 8 dégâts et 4 battements ; à 12 et 6 elle épargne 10 à 15 points et libère d'un
+  Bloqueur. Valeurs retenues : **12 dégâts, 6 battements**.
+- **POW** : un Module de puissance changeait +1,5 % de dégâts, autant dire rien. Passé à **+8 % par point au-dessus du POW
+  requis** ; l'effet reste modeste avec la foreuse de série (les seuils de coups pour tuer bougent peu) et se sent surtout
+  avec le Trépan. À rejuger en jouant : 10 à 12 % se défendrait.
+- **Trépan lourd** : à 2d6+4 il valait à peine mieux que la foreuse de série, et moins que la Vrille (moins chère, POW 9).
+  Passé à **2d6+6**. Porté sans le POW requis (POW 10), il est désastreux (89 % de morts contre 6 crabots) : le malus fonctionne.
+- **Blindage composite** : à DEF +18 (soit +8 sur la coque d'usine), aucun gain, et VIT −1 le rend pire contre les tireurs
+  (2 artilleurs : 31 → 57). Passé à **DEF +25** ; il reste mauvais contre les tireurs, c'est son défaut voulu.
+- **Carène légère** : la meilleure réponse aux tireurs (2 artilleurs : 31 → 17).
+- **Salle piégée** : 7 relais d'un coup coûtent 50 points de vie à une foreuse sans rien, 4 relais 20 ; une charge bien
+  placée divise par deux.
+- **8 puces** et **Broyeur + 2 crabots** sont les combats les plus meurtriers (20 à 25 % de morts sans objets).
+
+### Détection et fuite (`outils/simul.py tout`)
+
+Relancé après les changements : valeurs inchangées (perd la trace à 13 cases : 100 % en 36 tours ; terrain dégagé, 12 cases
+d'avance : 50 % semée ; herbes hautes en zigzag : 100 %).

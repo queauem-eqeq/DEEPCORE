@@ -3,7 +3,9 @@
   const d = document.createElement('div');
   d.style.cssText = 'position:fixed;inset:0;z-index:99999;background:#000;display:grid;grid-template-columns:repeat(6,1fr);gap:6px;padding:8px;font:11px monospace;color:#aaa';
   const sans = [];
+  TOUT_CONNU = true;
   for (const k in ITEMS) {
+    if (ITEMS[k].plan) continue;   // les plans partagent tous la même tuile
     const c = document.createElement('div');
     c.style.cssText = 'border:1px solid #333;padding:4px;display:flex;flex-direction:column;align-items:center;gap:4px';
     c.innerHTML = `<b style="color:#fff">${ITEMS[k].n}</b><pre class="iart" style="margin:0;font-size:11px;line-height:1.05">${ITEMS[k].art ? artHTML(ITEMS[k]) : ''}</pre>`;

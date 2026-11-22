@@ -11,7 +11,8 @@ Object.assign(ITEMS,{
     d:'Une mèche fine qui tourne vite : coups moins lourds, mais plus rapprochés et plus souvent critiques.',
     art:["     █▓▓▓█     ", "     ▐▒▒▒▌     ", "      ▐▒▌      ", "      ▐▒▌      ", "      ▐▒▌      ", "       ▀       "],
     col:[".....31113.....", ".....21112.....", "......212......", "......212......", "......212......", ".......2......."]},
-  trepan:{n:'Trépan lourd',slot:'arme',req:12,de:{n:2,f:6,p:4},mod:{coup:25},
+  trepan:{n:'Trépan lourd',slot:'arme',req:12,de:{n:2,f:6,p:6},mod:{coup:25},   // 2d6+6 depuis le 22 novembre 2026 (2d6+4 : à peine mieux que la foreuse de série, voir docs/mesures.md)
+    
     d:'Une tête de forage massive : chaque coup compte double, mais il faut le temps de l’armer.',
     art:["  ▄▄▄▄▄▄▄▄▄▄▄  ", "  █▓▓▓▓▓▓▓▓▓█  ", " ▐▒▒▒▒▒▒▒▒▒▒▒▌ ", " ▐▒▒▒▒▒▒▒▒▒▒▒▌ ", "  ▀▒▒▒▒▒▒▒▒▒▀  ", "    ▀▀▀▀▀▀▀    "],
     col:["..33333333333..", "..31111111113..", ".2111111111112.", ".2111111111112.", "..21111111112..", "....2222222...."]},
@@ -19,11 +20,12 @@ Object.assign(ITEMS,{
     d:'Une coque allégée : moins de protection, mais la foreuse va plus vite et s’entend de moins loin.',
     art:["   ▄       ▄   ", "   █▀▀▀▀▀▀▀█   ", "   █░░░█░░░█   ", "    ▀▄░░░▄▀    ", "      ▀▀▀      "],
     col:["...3.......3...", "...333333333...", "...322232223...", "....3322233....", "......333......"]},
-  blindage:{n:'Blindage composite',slot:'armure',req:12,mod:{def:18,vitesse:-1},
+  blindage:{n:'Blindage composite',slot:'armure',req:12,mod:{def:25,vitesse:-1},   // DEF +25 depuis le 22 novembre 2026 (+18 : aucun gain mesuré)
+    
     d:'Des plaques épaisses : la foreuse encaisse bien mieux, et se traîne un peu.',
     art:[" ▄▄         ▄▄ ", " █▓█▀▀▀▀▀▀▀█▓█ ", " █▓▒▒▒▐█▌▒▒▒▓█ ", " █▓▒▒▒▒▒▒▒▒▒▓█ ", "  ▀▄▓▓▓▓▓▓▓▄▀  ", "    ▀▀▀▀▀▀▀    "],
     col:[".ww.........ww.", ".w3wwwwwwwww3w.", ".w31113331113w.", ".w31111111113w.", "..ww3333333ww..", "....wwwwwww...."]}});
-const FAB_PRIX={repar:18,batterie:14,fumigene:16,charge:26,cle:22,accu:40,optique:40,servo:45,stabil:45,viseur:50,gyro:50,conden:55,carene:60,vrille:70,trepan:85,blindage:85};
+const FAB_PRIX={repar:18,batterie:14,fumigene:16,charge:34,cle:22,accu:40,optique:40,servo:45,stabil:45,viseur:50,gyro:50,conden:55,carene:60,vrille:70,trepan:85,blindage:85};
 const FAB_DUREE=300;
 let FAB_CASE=-1,FAB_SEL=0;
 // ce que propose ce fabricateur : tous les consommables, et quatre équipements à lui

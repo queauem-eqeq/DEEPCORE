@@ -69,7 +69,7 @@ function travelStep(){const T=TRAV;if(!T)return;if(busy()){stopTravel();return;}
 let EXPL=null;
 const EXPL_VUS=new WeakSet();   // créatures déjà signalées : chacune n'interrompt l'exploration qu'une fois (sinon un insectoïde qui suit la foreuse l'arrêterait sans cesse)
 function exploreScan(E,deep){const N=W*H,prev=new Int32Array(N).fill(-2),q=[idx(G.px,G.py)];prev[q[0]]=-1;const plein=G.st.vie>=G.st.vieMax;
-  const butin=j=>{if(G.cles&&G.cles[j])return 'une clé';if(G.items&&G.items[j]&&G.items[j].length)return 'un objet';const o=G.ore&&G.ore[j];if(o&&oreSol(o)&&(oreMat(o)||!plein))return oreMat(o)?'de la Matière':'des éclats de métal';
+  const butin=j=>{if(G.cles&&G.cles[j])return 'une clé';if(G.items&&G.items[j]&&G.items[j].length&&!(G.pieges||[]).some(p=>p.on&&p.c===j)&&!(G.vit&&G.vit[j]))return 'un objet';   /* l'exploration automatique ne touche ni à l'appât d'une salle piégée ni aux vitrines : c'est au joueur de choisir */const o=G.ore&&G.ore[j];if(o&&oreSol(o)&&(oreMat(o)||!plein))return oreMat(o)?'de la Matière':'des éclats de métal';
     return null;};
   for(let k=0;k<q.length;k++){const c=q[k],x=c%W,y=(c/W)|0;
     if(k>0){if(butin(c))return {c,prev};

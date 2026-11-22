@@ -68,7 +68,7 @@ Artefact à part (https://claude.ai/artifact/9BKRaoB4hzgdWhzYFx5A6q) qui rejoue 
   00 base · 01 sons · 02 palette · 03 tuiles (motifs 16×16) · 03b tuiles des machines · 04 vaisseau · 05 tuiles éditables · 06 réglages et ambiances ·
   06b groupes · 07 génération de la carte · 07b bâtiments · 07c artefacts · 07d zones et tunnels · 07e cavernes · 07f machines · 07g grande base · 08 faune et prédateurs · 09 vision, déplacement, forage · 10 rendu et gouffres ·
   11 interface (mode carte, « En vue », commandes, enregistrement) · 12 souris et inspection · 13 éditeur de tuiles ·
-  14 inventaire et équipement · 14b forage (cinématique et mini-jeu des mines) · 14c fabricateur · 15 cinématique d'intro (qui lance aussi le jeu : rester le dernier).
+  14 inventaire et équipement · 14b forage (cinématique et mini-jeu des mines) · 14c fabricateur · 14d objets (butin, capsules à identifier, visée, plans, Lab → Items) · 15 cinématique d'intro (qui lance aussi le jeu : rester le dernier).
 - `docs/` : conception, mesures, notes sur Brogue (voir plus haut). `planches/` : planches de travail
   (vaisseau, gouffres). `outils/` : scripts de vérification (voir plus haut).
 
@@ -134,12 +134,13 @@ modification, marquer la version actuelle. Dernière version à fichier unique :
   n'y a pas de base, et le stockage du navigateur n'est pas lisible depuis la session. Quand il demande que ses
   réglages deviennent ceux du jeu publié, les lire avec `db_get` sur `reglages/courant` (artefact
   `acb8696b-fff0-42ad-824a-fd58fe7cdf1e`) et les recopier dans `src/` : dessins dans `rows` des `BEASTS` et dans `PAT`,
-  stats dans les `BEASTS`, couleurs dans `PRESETS`. Ne pas recopier la configuration d'essai que la base contient aussi
+  stats dans les `BEASTS`, couleurs dans `PRESETS`, objets (`items` : prix, effets, butin) dans `14c`/`14d`. Ne pas recopier la configuration d'essai que la base contient aussi
   (génération, intensités, état de la partie). Le 16 novembre, l'insectoïde a été laissé tel quel à sa demande. Renommer une tuile (clé de `PAT`) abandonne les retouches faites dessus : le signaler.
 - **Une nouvelle espèce s'ajoute à la fin de `BEASTS`**, jamais au milieu : les tuiles des créatures sont numérotées
   (`bz0`…`bz9`, dans l'ordre de la liste) et les retouches du joueur sont enregistrées sous ces numéros. Insérer une
   espèce décale toutes les suivantes et colle leurs retouches sur la mauvaise bête (16 novembre 2026 : le brochon,
   inséré avant le mastok, portait la tuile du mastok).
-- Tuiles : motifs 16×16 en texte. Codes : `.` transparent · `0` noir · `w` blanc · `r` rouge · `1` accent · `2` bio · `3` monde.
+- Tuiles : motifs 16×16 en texte. Codes : `.` transparent · `0` noir · `w` blanc · `r` danger (rouge) · `1` accent · `2` bio · `3` monde
+  (lu « bâti » sur les tuiles de `BATI_TUILES`). Palettes à cinq couleurs, toutes tirées de LACKING64 (`02-palette.js`).
 - Pas de dépendance externe ni d'étape de compilation : ce qui est dans `src/` est ce qui est publié. Une bibliothèque
   ne peut venir que d'un des hôtes autorisés par l'artefact (cdnjs, jsdelivr, unpkg) ou être copiée dans `src/`.

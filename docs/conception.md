@@ -22,12 +22,15 @@ revient sur **3 niveaux** ; elle n'est pas encore codée, et forer termine la pa
 ## 2. Direction visuelle
 
 - Tuiles pixel art 16 × 16, affichées en 32 × 32 ; fond quasi noir. Pas d'effet d'écran.
-- **Palette à trois couleurs**, dans cet ordre dans le menu : **#1 Monde** (ambre `#ffa53a` : sol, rochers,
-  montagnes), **#2 Bio** (bleu `#4fb8ff`), **#3 Accent** (turquoise `#8fe6cf`). Dans le code les clés sont `3`
-  monde, `2` bio, `1` accent.
-- 8 palettes prédéfinies, toutes modifiables (Origine, Phosphore, Mars, Glace, Néon, Rouille, Abysse, Ambre) ;
-  Le sélecteur à 64 couleurs **reste ouvert après un choix** (21 novembre 2026), pour essayer plusieurs couleurs de suite ; on le ferme en recliquant sur la pastille ou avec Échap.
-  sélecteur de 64 teintes (8 familles × 8 nuances) ; bouton « Rétablir ».
+- **Palette à cinq couleurs** (22 novembre 2026 ; trois avant), dans cet ordre dans le menu : **#1 Monde** (sol, rochers,
+  montagnes), **#2 Bio**, **#3 Accent**, **#4 Danger** (lasers, dégâts, alertes : l'ancien rouge fixe), **#5 Bâti** (murs, sols,
+  portes et piliers des bâtiments, pour que l'intérieur ne se confonde plus avec la montagne). Le blanc reste fixe. Dans le
+  code les clés sont `3` monde, `2` bio, `1` accent, `4` danger, `5` bâti ; les encres `r` et `L` des tuiles se lisent en
+  couleur danger, et l'encre `3` se lit en couleur bâti sur les tuiles de `BATI_TUILES` (`02-palette.js`).
+- **Toutes les couleurs viennent de LACKING64** (lospec.com/palette-list/lacking64) : 8 palettes neuves, toutes modifiables
+  (Braise, Lagon, Désert, Jungle, Améthyste, Cendre, Glacier, Magma ; Braise par défaut, la plus proche de l'ancienne
+  Rouille), et le **sélecteur de teinte montre les 64 couleurs de LACKING64**. Il reste ouvert après un choix ; on le ferme
+  en recliquant sur la pastille ou avec Échap. Bouton « Rétablir ». Un réglage enregistré à trois couleurs est ignoré.
 - Polices : Chakra Petch (titres), JetBrains Mono (interface).
 - **Les dessins par défaut sont ceux de l'utilisateur**, retouchés au Tile editor et recopiés dans le code (bloc
   `TUILES_JOUEUR` à la fin de `03-tuiles.js`, qui passe après toutes les autres définitions). Dernière recopie le 21 novembre 2026 à 22 h 25 (pile et site de forage inconnu) ; plus tôt le même jour : Sentinelle, abysse, liquides, machines 6 à 8 et tous les objets au sol, redessinés dans les couleurs du monde (dont le nouveau gyroscope).
@@ -596,30 +599,49 @@ retouchables dans le Tile editor (groupe « Machines »).
 |---|---|
 | **Tourelle laser** | Encastrée dans un mur, elle tire un rayon droit à travers la pièce jusqu'au premier obstacle. Deux tourelles voisines tirent ensemble : le « laser large », deux cases. Une salle porte 1 à 4 bandes, séparées par deux cases sûres. Période 4 à 7 battements, allumée 1. |
 | **Croix laser** | Un pylône qui éclaire ses quatre cases voisines ; les diagonales sont sûres. Quadrillage d'un pylône sur trois. Période 3 à 7, allumée 1 ou 2. |
-| **Levier** | La foreuse l'actionne en avançant dessus. Il déploie un pont (une fois pour toutes) ou coupe les lasers de sa salle (il se rebascule). |
-| **Pont à levier** | Un fossé de deux cases coupe une pièce d'un mur à l'autre ; le pont, deux cases, est rétracté. Le levier est posé du côté d'où l'on vient, dans la pièce ou ailleurs. Une fois sur trois, le pont est alimenté par une pile au lieu d'un levier. |
-| **Pile énergétique** | La foreuse la pousse en avançant dessus, jamais en diagonale, sur sol libre. Posée sur son **socle**, elle alimente ce qui y est relié ; retirée, tout se referme. Elle arrête les lasers. |
-| **Chargeur** | Rappelle sa pile à son point de départ : une pile coincée ne bloque rien pour de bon. |
-| **Grille d'énergie** | Ferme l'unique entrée d'un **dépôt** (2 consommables, et 6 fois sur 10 une pièce d'équipement). Elle ne garde jamais le chemin du site. |
+| **Levier** | La foreuse l'actionne en avançant dessus. Il déploie un pont (une fois pour toutes) ou coupe les lasers de sa salle (il se rebascule). **Toujours dans la salle de ce qu'il commande.** |
+| **Pont à levier** | Le **gouffre prend presque toute la salle**, d'un mur à l'autre ; il ne reste qu'une bande de sol (une ou deux cases) à chaque bout. Le levier est **au pied du pont**, du côté d'où l'on vient. Deux cas seulement : le pont est le **seul chemin** vers le site, ou l'autre rive est un **cul-de-sac avec un butin** (Matière). Si les deux rives se rejoignent par ailleurs, la salle n'est pas retenue. Une fois sur trois, un socle remplace le levier. |
+| **Pile énergétique** | La foreuse la pousse en avançant dessus, jamais en diagonale, sur sol libre ; **elle passe les portes**. Posée sur son **socle**, elle alimente ce qui y est relié ; retirée, tout se referme. Elle arrête les lasers. |
+| **Distributeur de pile** (l'ancien chargeur) | **La pile attend à côté de lui.** Avancer dessus la rappelle à cette place : une pile coincée ne bloque rien pour de bon. |
+| **Socle** | Posé **près de ce qu'il alimente** : devant la grille (2 à 4 pas), ou au pied du pont. La pile et son distributeur sont à 6-18 pas, dans une pièce voisine quand il y en a une. |
+| **Grille d'énergie** | Ferme l'unique entrée d'un **dépôt** (un plan, deux capsules ou une capsule et un équipement, de la Matière). Elle ne garde jamais le chemin du site. |
+| **Salle piégée** | Un butin au milieu de la pièce (plan ou équipement, capsule, Matière) ; 4 à 8 **relais cachés dans des niches** des murs (tuile « niche », visible : le piège se lit). Ramasser l'appât les fait surgir, déjà en chasse. Ils ne lâchent rien. L'exploration automatique ne touche pas à l'appât. |
+| **Vitrines** | Une petite pièce en cul-de-sac, trois lots sous vitrine (un plan, un équipement, deux capsules) : **on n'en emporte qu'un**, les deux autres se verrouillent. Idée des coffres de Brogue. |
 | **Station de réparation** | Une fois : vie et énergie au maximum. Le bruit met en chasse les ennemis à 12 cases. |
 | **Fabricateur** | Voir « Fabricateur ». Un par niveau, garanti. |
 
+- **Lisibilité (22 novembre 2026, d'après Brogue)** : un mécanisme est toujours à côté de ce qu'il commande, et chaque salle
+  se comprend d'un coup d'œil. Une salle à lasers porte 7 fois sur 10 un butin au fond (Matière ou capsule).
+- **Un laser ne tire que si la foreuse le voit** (22 novembre 2026) : sa tourelle, son pylône ou une case de son rayon est en
+  vue (`machVu`). Sans témoin il reste éteint : les ennemis en vadrouille ne s'y blessent plus. Le rythme, lui, continue de
+  tourner (`G.mt`). On peut toujours attirer un ennemi dans un rayon qu'on regarde.
 - **Aucun avertissement avant un tir** (choix de l'utilisateur) : chaque laser a sa période et son décalage, tirés à la
   génération ; on apprend le rythme en regardant. L'état affiché est celui du battement en cours.
 - **Les lasers blessent tout le monde**, 10 points (`MACH_DM`) : la foreuse comme les ennemis. Un ennemi calme n'entre
   pas dans le champ d'un laser (`G.lz`), un ennemi en chasse le traverse : on peut l'y attirer.
 - Un rayon s'arrête à une porte : jamais de piège sur une case de passage ni devant une porte.
-- La pose d'une pile et de son socle est vérifiée par un parcours de type « sokoban » dans leur pièce (2 poussées au moins).
+- La pose d'une pile et de son socle est vérifiée par un parcours de type « sokoban » sur le sol et les portes à 18 pas du socle (3 poussées au moins) ; à sa place, la pile ne coupe aucun passage.
 - Une charge sismique détruit tourelle, pylône, grille, levier, station, chargeur et fabricateur.
-- État dans `G` (sauvegardé) : `G.mt`, `G.las`, `G.lz`, `G.circ`, `G.soc`, `G.piles`. `accesSite()` dit si le site reste
+- État dans `G` (sauvegardé) : `G.mt`, `G.las`, `G.lz`, `G.circ`, `G.soc`, `G.piles`, `G.pieges`, `G.niche`, `G.choix`, `G.vit`. `accesSite()` dit si le site reste
   atteignable, leviers et socles compris.
 
-Essais : `outils/scripts/test-machines.js` (22 vérifications dans le vrai moteur).
+Essais : `outils/scripts/test-machines.js` (33 vérifications dans le vrai moteur).
+
+### Butin d'exploration (`butinExplo`, `14d-objets.js`, 22 novembre 2026)
+
+Posé à la fin de la génération, sur toutes les recettes. **Pièces secrètes** : chacune reçoit un lot au fond (capsule,
+Matière, une fois sur deux un plan, une fois sur quatre un Module de puissance). **Culs-de-sac et coins reculés** : les cases
+d'où plus rien ne mène ailleurs, entourées d'obstacles sur trois côtés au moins, et les plus loin du trajet arrivée → site ;
+5 à 10 par carte (6 sur une carte de taille 3), espacées. La plus reculée porte un **Module de puissance**, la suivante un
+**plan**, la troisième une **capsule**, les autres de la **Matière** (15). Mesures : `docs/mesures.md`.
 
 ### Fabricateur (`14c-fabricateur.js`)
 
-Premier usage de la **Matière**. Avancer sur un fabricateur ouvre une liste : tous les consommables, et quatre pièces
-d'équipement tirées au hasard, propres à ce fabricateur. Une fabrication prend 3 battements ; l'objet est ramassé s'il y
+Premier usage de la **Matière**. Avancer sur un fabricateur ouvre une liste : **seulement les objets dont la foreuse a trouvé
+le plan** (22 novembre 2026 ; avant : tous les consommables et quatre équipements au hasard). Sans aucun plan, il le dit et
+ne propose rien. Les plans se trouvent au sol, dans les dépôts, les salles piégées, les vitrines, et sur les robots abattus :
+objets simples au niveau 1 (réparobots, batterie, fumigène, clé), consommables avancés et accessoires au niveau 2, armes et
+armures au niveau 3 (un cran d'avance possible). Un plan déjà connu se recycle en 10 de Matière. Le Module de puissance ne se fabrique pas. Une fabrication prend 3 battements ; l'objet est ramassé s'il y
 a de la place, sinon posé sous la foreuse. Flèches (ou Z/S) et Entrée, ou clic ; Échap ferme. **Pavé numérique** (22 novembre
 2026) : 8 et 2 montent et descendent, 5 fabrique ; les chiffres 1 à 9 du haut du clavier choisissent l'objet de ce numéro,
 affiché devant son nom. **La fenêtre ne bouge pas** d'un objet à l'autre : liste et panneau de droite ont une hauteur fixe,
@@ -635,14 +657,18 @@ et sa description ; elle suit les flèches, le survol et le focus (21 novembre 2
 | Batterie | 14 | Stabilisateur, Servomoteur | 45 |
 | Fumigène | 16 | Viseur laser, Gyroscope | 50 |
 | Réparobots | 18 | Condensateur | 55 |
-| Clé | 22 | Carène légère (armure) | 60 |
-| Charge sismique | 26 | Vrille rapide (arme) | 70 |
-| Accumulateur, Téléobjectif | 40 | Trépan lourd (arme), Blindage composite (armure) | 85 |
+| Surrégime | 20 | Carène légère (armure) | 60 |
+| Clé | 22 | Vrille rapide (arme) | 70 |
+| Camouflage optique | 24 | Trépan lourd (arme), Blindage composite (armure) | 85 |
+| Charge sismique | **34** (26 avant : c'est le consommable qui épargne le plus de vie, voir mesures) | Accumulateur, Téléobjectif | 40 |
 
-Repère : une carte de taille 3 porte deux gisements de Matière de 30 à 50, soit 80 environ par niveau.
+Tous les prix se règlent dans **Lab → Items**.
+
+Repère : une carte de taille 3 porte deux gisements de Matière de 30 à 50, soit 70 à 80 par niveau, plus le butin au sol
+(2 à 4 blocs de 15) et ce que lâchent les robots : 120 à 150 par niveau en explorant tout.
 Quatre pièces nouvelles (choix de l'utilisateur, « consommables + équipement ») : **Vrille rapide** (1d4+4, coup −30,
-CRIT +5, POW 9), **Trépan lourd** (2d6+4, coup +25, POW 12), **Carène légère** (DEF +5, VIT +1, DIS −1, POW 9),
-**Blindage composite** (DEF +18, VIT −1, POW 12). Leurs tuiles au sol sont la tuile générique, à dessiner.
+CRIT +5, POW 9), **Trépan lourd** (2d6+6 depuis le 22 novembre 2026, 2d6+4 avant ; coup +25, POW 12), **Carène légère** (DEF +5, VIT +1, DIS −1, POW 9),
+**Blindage composite** (DEF +25 depuis le 22 novembre 2026, +18 avant ; VIT −1, POW 12). Leurs tuiles au sol sont la tuile générique, à dessiner.
 
 ### Deux règles de génération du 21 novembre 2026 (après-midi)
 
@@ -752,7 +778,35 @@ Modèle Brogue :
 
 ## 6 bis. Équipement et inventaire
 
-Version d'essai : tous les objets sont donnés au départ, non équipés sauf la foreuse et la Coque d'usine.
+**Rien n'est donné au départ** (22 novembre 2026), sauf la foreuse et la Coque d'usine : tout le reste se trouve ou se fabrique.
+
+### Capsules, visée, plans (`14d-objets.js`, 22 novembre 2026)
+
+- **Consommables non identifiés.** Chaque sorte porte un **nom de code** tiré à chaque partie (« Capsule //KZ7-3FQ ») et la même
+  tuile de capsule au sol. Le premier usage révèle ce que c'est, pour toute la partie ; trouver le plan aussi. La clé et la
+  Matière sont toujours connues. Ce que la foreuse sait (plans, capsules identifiées, codes) est dans `G.st.savoir` et la
+  suit d'un niveau à l'autre.
+- **Tout consommable se vise**, comme la charge sismique, jusqu'à 4 cases : une case, un carré de 3 × 3 (charge) ou le disque
+  du nuage (fumigène). La visée s'ouvre **sur la foreuse** pour les objets qui la servent : Entrée deux fois = sur soi.
+  Sur un ennemi, l'objet sert l'ennemi ou le frappe ; dans le vide, il est perdu.
+
+| Consommable | Sur la foreuse | Sur un ennemi |
+|---|---|---|
+| Réparobots | Vie +50 | le répare de 50 PV |
+| Batterie | Énergie +50 | décharge : 12 dégâts, **étourdi 6 battements** (un Bloqueur étourdi lâche prise) |
+| Fumigène | nuage là où on le lance ; **les ennemis ne perdent la trace que si la foreuse est dedans** | idem |
+| Charge sismique | 3 × 3, 30 dégâts, roche brisée | idem |
+| **Module de puissance** | **POW +1 pour toujours** ; chaque point de POW au-dessus du POW requis par l'arme donne +8 % de dégâts (+1,5 % avant) | ses coups portent 25 % plus fort |
+| **Surrégime** | CRIT +50 pendant 10 battements ; la foreuse vire au rouge | ses coups sont tous critiques pendant 10 battements |
+| **Camouflage optique** | invisible 10 battements : vue seulement au contact, les poursuivants à distance lâchent ; **rompu par un coup ou un forage** | il disparaît 10 battements (visible au contact) |
+| **Matière** (butin au sol) | +15 en réserve, dès qu'on marche dessus | – |
+
+- **Butin des robots** : un robot abattu lâche parfois un objet (Broyeur 90 %, Bloqueur 60 %, Soudeur 45 %, Artilleur et
+  Englueur 35 %, Sentinelle 25 %, Torpille 10 %, Crabot 8 %, Relais 6 %, Drone 5 %, Mine 0) : Matière 40 %, capsule 35 %,
+  plan 18 %, équipement 7 %.
+- **Lab → Items** : tout ce qui existe, avec ses valeurs modifiables (prix, effets, dés, modificateurs, POW requis, butin par
+  espèce), « Rétablir » et « Enregistrer » (navigateur `np-items`, et base de l'artefact sous `items`).
+- **Allure de la foreuse** : engluée, elle prend la couleur bio ; en surrégime, la couleur danger ; camouflée, une trame.
 
 - **Emplacements** : 1 arme, 1 armure, 3 accessoires. **Il y a toujours une arme en main** : on ne peut ni la
   retirer ni la jeter, seulement la remplacer. **Toute arme fore la roche pareil** : l'arme ne change que le
@@ -875,11 +929,11 @@ Ajoutées à la fin de `BEASTS` (tuiles `bz6` à `bz10`, dessins de départ). St
 
 | Espèce | Rôle | Capacité (`08-faune.js`) |
 |---|---|---|
-| **Gardien** | Lent, blindé (45 PV, DEF 30), frappe à 4-7 | aucune : il tient un poste (style « garde ») |
+| **Bloqueur** (l'ancien Gardien, 22 novembre 2026) | Rapide (VIT 8), 30 PV, DEF 15, frappe à 2-4 | `bloque` : au contact il **agrippe la foreuse, qui ne peut plus se déplacer** (ni forer) tant qu'il vit ; un trait rouge les relie. Étourdi (batterie), il lâche. La clé reste `gardien` pour les groupes ; ses stats s'enregistrent sous `bloqueur` (`bk`). |
 | **Artilleur** | Laser à 5 cases, 4-7 dégâts | `cadence:2` (un tir tous les deux battements), `recul:2` (s'écarte quand la foreuse est à 2 cases) |
 | **Drone** | Rapide, fragile, en essaim | `vol` : gouffres et eau ne l'arrêtent pas ; partage ce qu'il voit avec sa bande |
 | **Soudeur** | Soutien | `soin:5`, `portee:4` : répare l'allié le plus abîmé à portée ; `recul:1` : fuit le contact |
-| **Englueur** | Contrôle | `glu:4` : un jet tous les 3 battements englue la foreuse 3 battements (pas deux fois plus longs) ; garde ses distances |
+| **Englueur** | Contrôle | `glu:4` : une **boule de glu** (tuile « glu », plus un trait de laser) tous les 3 battements englue la foreuse 3 battements (pas deux fois plus longs) ; **la foreuse engluée prend la couleur bio** ; garde ses distances |
 
 L'englueur reprend l'idée du Gluar, retiré le 17 novembre 2026 avec les espèces absentes du Bestiaire. Aucune stat des
 espèces existantes n'a été changée. Essais : `outils/scripts/test-ennemis.js`.
@@ -1219,6 +1273,8 @@ Du niveau 2 au niveau 3, la descente se joue. `playForage(suite, 2)` ; Lab → *
 
 - **Pas de blindage, pas de réparation automatique.** La défense fait rater les coups, elle ne les réduit jamais.
 - **Une nouvelle espèce s'ajoute à la fin de `BEASTS`** (§ 7).
+- **Un objet ne change pas de clé** (`ITEMS`) : les plans connus, les capsules identifiées et les réglages de Lab → Items
+  sont enregistrés sous ces clés.
 - **Ne pas renommer les clés `np-*` ni `reglages/courant`** (§ 10). Renommer une tuile (clé de `PAT`) abandonne les
   retouches faites dessus : le signaler.
 - **Pas de dépendance externe ni d'étape de compilation** : ce qui est dans `src/` est ce qui est publié. Une

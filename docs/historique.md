@@ -260,3 +260,22 @@ Les chiffres mesurés sont dans `mesures.md`.
   0 h 31). Stats, palettes, groupes, artefacts et discrétion étaient déjà identiques ; deux dessins différaient (le site
   de forage et le Gardien) et la palette par défaut devient **Rouille**. Bug corrigé au passage : sans réglage
   enregistré dans le navigateur, le jeu prenait la palette n° 0 (Origine) au lieu de la palette par défaut.
+
+## 22 novembre 2026 (nuit) : machines lisibles, objets à trouver
+
+Ce qui a été remplacé, et pourquoi (demandes de l'utilisateur, « chaque machine doit se lire comme dans Brogue ») :
+
+- **Le pont au fossé de deux cases, levier posé n'importe où** : remplacé par un gouffre qui prend la salle, levier au pied du
+  pont. Le levier placé dans une autre pièce ne se comprenait pas.
+- **Pile, socle et chargeur dans la même pièce, loin de la grille** : le socle est maintenant près de la grille, la pile près
+  de son distributeur, dans la pièce voisine.
+- **Les lasers qui tirent sans témoin** : ils blessaient les monstres en vadrouille. Ils ne tirent plus que vus.
+- **Le Gardien** (lent, blindé, 45 PV) : devenu le Bloqueur. L'idée d'un ennemi qui immobilise avait déjà été codée le
+  19 novembre (le Paralyzor) puis retirée le soir même ; elle revient à la demande de l'utilisateur, sous une autre forme
+  (rapide, frappe peu, lâche s'il est étourdi).
+- **Le jet de glu dessiné comme un laser** : c'est une boule.
+- **Tous les objets donnés au départ** (phase d'essai) : plus rien n'est donné.
+- **Le fabricateur qui propose tout** : il faut les plans.
+- **Les palettes à trois couleurs et le nuancier maison de 64 teintes** : cinq couleurs, LACKING64.
+- **Le fumigène qui fait perdre la trace où qu'il soit posé** : seulement si la foreuse est dans le nuage, puisqu'on peut
+  maintenant le lancer à distance.

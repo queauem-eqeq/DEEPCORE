@@ -224,7 +224,7 @@ function invDrop(i){const o=G.inv[i];if(!o||G.over)return;const d=ITEMS[o.k];
   const c=caseJet();G.items=G.items||{};(G.items[c]=G.items[c]||[]).push(o.k);
   invSay(`${d.n} jeté${accord(d)} au sol.`);SFX.thud();invChanged();}
 // ramasse tout ce qui est posé sous la foreuse ; more : à la suite d'un déplacement (complète le message du pas)
-function invPickup(more){const c=idx(G.px,G.py);if(G.items&&G.items[c]&&G.items[c].length){piegeTest(c);butinPrend(c,more);}   // appât d'une salle piégée ; Matière et plans ne vont pas au sac
+function invPickup(more){const c=idx(G.px,G.py);if(G.items&&G.items[c]&&G.items[c].length){choixTest(c);piegeTest(c);butinPrend(c,more);}   // appât d'une salle piégée ; Matière et plans ne vont pas au sac
   const l=G.items&&G.items[c];if(!l||!l.length)return false;
   const pris=[],laisses=[];
   for(const k of l){const pile=ITEMS[k].conso&&G.inv.find(o=>o.k===k);

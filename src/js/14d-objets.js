@@ -9,9 +9,9 @@
    5. Matière au sol (butin d'exploration), Module de puissance (POW +1 pour toujours), Surrégime, Camouflage optique.
    Ce que la foreuse sait (plans, capsules identifiées, noms de code) vit dans G.st.savoir : G.st suit la foreuse d'un niveau
    à l'autre. Valeurs réglables : Lab → Items (np-items). */
-const ITEM_VAL_DEF={repar:{soin:50},batterie:{energie:50,choc:8,etourdi:4},charge:{degats:30},puissance:{pow:1},
-  berserk:{crit:50,duree:8},camo:{duree:10},matiere:{mat:15}};
-const ITEM_VAL_LIB={soin:'Vie rendue',energie:'Énergie rendue',choc:'Dégâts de la décharge',etourdi:'Étourdissement (battements)',degats:'Dégâts',pow:'POW gagné',crit:'CRIT en plus (points)',duree:'Durée (battements)',mat:'Matière rendue'};
+const ITEM_VAL_DEF={repar:{soin:50},batterie:{energie:50,choc:12,etourdi:6},charge:{degats:30},puissance:{pow:1,deg:8},
+  berserk:{crit:50,duree:10},camo:{duree:10},matiere:{mat:15}};
+const ITEM_VAL_LIB={soin:'Vie rendue',energie:'Énergie rendue',choc:'Dégâts de la décharge',etourdi:'Étourdissement (battements)',degats:'Dégâts',pow:'POW gagné',deg:'Dégâts par point de POW en trop (%)',crit:'CRIT en plus (points)',duree:'Durée (battements)',mat:'Matière rendue'};
 let ITEM_VAL=JSON.parse(JSON.stringify(ITEM_VAL_DEF));
 // chance qu'un robot abattu lâche un objet, par espèce (clé du Bestiaire)
 const DROPS_DEF={crabos:8,cafar:6,mastok:90,brochon:10,mine:0,paralyzor:25,gardien:60,artilleur:35,drone:5,soudeur:45,englueur:35};
@@ -37,7 +37,7 @@ Object.assign(ITEMS,{
   matiere:{n:'Matière',mat:1,eff:'Matière +15',d:'Un bloc de Matière brute : il rejoint la réserve dès qu’on le ramasse.',
     art:["     ▄▄        ", "   ▄████▄  ▄▄  ", "  ████████████ ", "   ▀████████▀  ", "      ▀▀▀▀     "],
     col:[".....11........", "...11w111..11..", "..111111111w11.", "...1111111111..", "......1111....."]}});
-Object.assign(FAB_PRIX,{berserk:24,camo:24});
+Object.assign(FAB_PRIX,{berserk:20,camo:24});
 const FAB_PRIX_DEF=Object.assign({},FAB_PRIX);
 
 /* ----- Ce que la foreuse sait ----- */
@@ -116,12 +116,15 @@ function butinExplo(){const N=W*H,t=G.t,dep=idx(G.px,G.py),s0=G.sites&&G.sites[0
     butinCoffre('secret').forEach((k,n)=>pose(c[Math.min(n,c.length-1)],k));G.butinN.secret++;}
   // trajet principal, puis l'écart de chaque case à ce trajet
   const chemin=[dep];if(site>=0&&d[site]>=0){let c=site;while(c!==dep){chemin.push(c);const x=c%W,y=(c/W)|0;let m=c;for(const [dx,dy] of D4){const j=idx(x+dx,y+dy);if(d[j]>=0&&d[j]<d[m])m=j;}if(m===c)break;c=m;}}
-  const dc=bfs(chemin,false),cand=[];
-  for(let y=2;y<H-2;y++)for(let x=2;x<W-2;x++){const i=idx(x,y);if(d[i]<0||dc[i]<12||!libre(i))continue;let n=0,max=true,porte=false;
-    for(const [dx,dy] of DIRS){const j=idx(x+dx,y+dy),v=t[j];if(v===DOOR||v===LOCK||v===SECRET)porte=true;if(d[j]>=0){n++;if(d[j]>d[i])max=false;}}
-    if(max&&!porte&&n<=5)cand.push(i);}   // rien ne mène plus loin, et un mur au moins sur trois côtés : un fond de cul-de-sac ou un coin
-  cand.sort((a,b)=>dc[b]-dc[a]);const pris=[],nb=Math.max(3,Math.min(7,Math.round(N/1500)));
-  for(const i of cand){if(pris.length>=nb)break;if(pris.some(j=>Math.max(Math.abs(i%W-j%W),Math.abs(((i/W)|0)-((j/W)|0)))<10))continue;pris.push(i);}
+  const dc=bfs(chemin,false),nb=Math.max(5,Math.min(10,Math.round(N/600))),pris=[];
+  // rien ne mène plus loin, et un mur au moins sur trois côtés : un fond de cul-de-sac ou un coin. On commence par les plus reculés
+  // (12 pas d'écart au trajet, 10 cases entre deux butins), puis on desserre si la carte en offre trop peu.
+  for(const [ecart,esp] of [[12,10],[8,8],[5,6]]){if(pris.length>=nb)break;const cand=[];
+    for(let y=2;y<H-2;y++)for(let x=2;x<W-2;x++){const i=idx(x,y);if(d[i]<0||dc[i]<ecart||!libre(i)||pris.includes(i))continue;let n=0,max=true,porte=false;
+      for(const [dx,dy] of DIRS){const j=idx(x+dx,y+dy),v=t[j];if(v===DOOR||v===LOCK||v===SECRET)porte=true;if(d[j]>=0){n++;if(d[j]>d[i])max=false;}}
+      if(max&&!porte&&n<=5)cand.push(i);}
+    cand.sort((a,b)=>dc[b]-dc[a]);
+    for(const i of cand){if(pris.length>=nb)break;if(pris.some(j=>Math.max(Math.abs(i%W-j%W),Math.abs(((i/W)|0)-((j/W)|0)))<esp))continue;pris.push(i);}}
   pris.forEach((i,n)=>pose(i,n===0?'puissance':n===1?planTire():n===2?consoTire():'matiere'));G.butinN.explo=pris.length;}
 
 /* ----- Ramassage : la Matière rejoint la réserve, un plan s'apprend, le reste va au sac ----- */
