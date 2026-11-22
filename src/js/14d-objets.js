@@ -243,12 +243,15 @@ function baliseJoue(e,sp,boom){const q=baliseDe(e);if(!q){e.leurre=0;return fals
   e.mp=Math.min(2,e.mp+sp.v/5/slowOf(G.t[idx(e.x,e.y)],sp.swim));const m=mouilleOk(sp,e),kD=q.id+':'+(m?1:0);let D=BAL_D.get(kD);if(!D){D=distFrom(q.x,q.y,m);BAL_D.set(kD,D);}
   while(e.mp>=1&&!G.over){e.mp-=1;if(cheb(e,q.x,q.y)<=1){e.mp=Math.min(e.mp,.99);break;}if(!chaseStep(e,D,(x,y)=>beastFits(e,x,y),q.x,q.y))break;}
   return true;}
-/* F9 (23 novembre 2026, pour les essais) : un exemplaire de chaque consommable existant (capsules et clé) au sac, identifié ;
-   ce qui ne tient pas dans les 20 places est laissé de côté. */
-function f9Consos(){const pris=[],laisses=[];
-  for(const k of Object.keys(ITEMS).filter(k=>ITEMS[k].conso)){if(sacPlaces()>=SAC_MAX){laisses.push(k);continue;}
-    if(CONSO[k])identifier(k);const o=G.inv.find(o=>o.k===k);if(o)o.n=(o.n||1)+1;else G.inv.push({k,eq:0,n:1});pris.push(k);}
-  say(`F9 : ${pris.length} consommable${pris.length>1?'s':''} ajouté${pris.length>1?'s':''} à l’inventaire${laisses.length?` ; inventaire plein, ${laisses.length} laissé${laisses.length>1?'s':''} de côté`:''} (${sacPlaces()}/${SAC_MAX}).`,laisses.length?'warn':'good');
+/* F9 (23 novembre 2026, pour les essais) : au moins un exemplaire de chaque consommable existant (capsules et clé) dans le sac,
+   identifié. Une sorte déjà présente n'est pas ajoutée. S'il manque des places, F9 retire des doublons — un exemplaire à la
+   fois, toujours sur la plus grosse pile — jusqu'à ce que toutes les sortes tiennent. */
+function f9Consos(){const sortes=Object.keys(ITEMS).filter(k=>ITEMS[k].conso),manque=sortes.filter(k=>!G.inv.some(o=>o.k===k));let retires=0;
+  for(const k of sortes)if(CONSO[k])identifier(k);
+  while(sacPlaces()+manque.length>SAC_MAX){const piles=G.inv.filter(o=>ITEMS[o.k].conso&&(o.n||1)>1).sort((a,b)=>(b.n||1)-(a.n||1));if(!piles.length)break;piles[0].n--;retires++;}
+  const pris=[];for(const k of manque){if(sacPlaces()>=SAC_MAX)break;G.inv.push({k,eq:0,n:1});pris.push(k);}
+  say(!manque.length?`F9 : l’inventaire a déjà un exemplaire de chaque consommable (${sacPlaces()}/${SAC_MAX}).`
+    :`F9 : ${pris.length} consommable${pris.length>1?'s':''} ajouté${pris.length>1?'s':''}${retires?`, ${retires} doublon${retires>1?'s':''} retiré${retires>1?'s':''} pour faire de la place`:''} (${sacPlaces()}/${SAC_MAX}).`,'good');
   SFX.spot();sacFix();SAC_H='';INV_H=null;render();}
 const fumDedans=()=>!!(G.fum&&G.fum[idx(G.px,G.py)]);
 

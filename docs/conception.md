@@ -1338,7 +1338,7 @@ Du niveau 2 au niveau 3, la descente se joue. `playForage(suite, 2)` ; **NIV3** 
   menu Monde du joueur est remis en place aussitôt après. Avant le 21 novembre au soir, tout était tiré au hasard. Pas de
   vaisseau : on arrive par le puits. `genPlanet` refait l'objet `G`, donc ce que **la foreuse garde est remis en
   place juste après** : vie, énergie, inventaire, matière en réserve, tours et distance parcourue.
-- **F9** (23 novembre 2026) ne lance plus la cinématique : il ajoute **un exemplaire de chaque consommable** à l'inventaire (capsules identifiées et clé), dans la limite des 20 places. Touche d'essai, absente du sous-menu Contrôles.
+- **F9** (23 novembre 2026) ne lance plus la cinématique : il garantit **au moins un exemplaire de chaque consommable** dans l'inventaire (capsules identifiées et clé) : une sorte déjà présente n'est pas ajoutée ; s'il manque des places, il **retire des doublons** (un exemplaire à la fois, sur la plus grosse pile) jusqu'à ce que toutes les sortes tiennent. Touche d'essai, absente du sous-menu Contrôles.
 - La taille de la carte ne change pas d'un niveau à l'autre (elle s'applique au lancement).
 
 ## 11. Règles à ne pas casser
