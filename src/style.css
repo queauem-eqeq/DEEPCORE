@@ -395,7 +395,7 @@ kbd{font-family:var(--mono);color:var(--fg);border:1px solid var(--line);padding
 /* Artefacts, terminal et sélecteur de fréquence [− = +] (20 novembre 2026) */
 #artefacts .mcard{width:min(640px,100%)}#terminal .mcard{width:min(520px,100%)}
 .artliste{display:grid;gap:6px;max-height:max(200px,calc(100vh - 260px));overflow-y:auto;padding-right:8px}   /* défile (22 novembre 2026) */
-#life .lfscroll{max-height:max(160px,calc(100vh - 420px));overflow-y:auto;padding-right:8px;display:grid;gap:inherit;align-content:start}   /* LIFE : tout ce qui suit le budget défile */
+#life .lfscroll{max-height:max(160px,calc(100vh - 300px));overflow-y:auto;padding-right:8px;display:grid;gap:inherit;align-content:start}   /* LIFE : tout ce qui suit le budget défile */
 .artl{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:center;border:1px solid var(--line);padding:8px 10px}
 .artl input{accent-color:var(--c3)}
 .artl label{display:grid;gap:2px;cursor:pointer}.artl label span{font-size:11px;color:var(--dim)}
