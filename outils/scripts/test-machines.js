@@ -49,9 +49,10 @@
     if(!pousse&&G.piles[a]){const q=G.piles[a];delete G.piles[a];G.t[a]=FLOOR;G.t[p.soc]=PILE;G.piles[p.soc]=q;}
     const px0=G.px,py0=G.py;socMaj();v('pile sur le socle : la grille s’ouvre',G.t[g]!==GRILLE&&c.on===1);
     v('le dépôt contient du butin',Object.keys(G.items).length>0,Object.values(G.items).flat().join(', '));
-    {const lib=G.t.findIndex((v,i)=>v===FLOOR&&i!==p.home&&!G.soc[i]);G.px=lib%W;G.py=(lib/W)|0;}   // la foreuse quitte la place de la pile
+    const ou=[G.px,G.py];{const lib=G.t.findIndex((v,i)=>v===FLOOR&&i!==p.home&&!G.soc[i]);G.px=lib%W;G.py=(lib/W)|0;}
+   // la foreuse quitte la place de la pile
     machBump(p.ch%W,(p.ch/W)|0,1,0);v('chargeur : la pile revient, la grille se referme',G.t[p.home]===PILE&&G.t[g]===GRILLE&&c.on===0);
-    v('site toujours accessible, grille fermée',accesSite()>=0);}else v('pile trouvée',false);
+    G.px=ou[0];G.py=ou[1];v('site toujours accessible, grille fermée',accesSite()>=0);}   // mesuré depuis la place de la foreuse, pas depuis la case d'essaielse v('pile trouvée',false);
   // F bis. salle piégée
   if(trouve(()=>G.pieges.length>0)){const pg=G.pieges[0];G.beasts=[];G.px=pg.c%W;G.py=(pg.c/W)|0;const nb=pg.n.length;
     v('salle piégée : des niches dans les murs, un appât au milieu',nb>=4&&(G.items[pg.c]||[]).length>0,`${nb} niches, appât : ${(G.items[pg.c]||[]).join(', ')}`);
