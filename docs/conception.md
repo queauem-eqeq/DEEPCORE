@@ -811,7 +811,7 @@ Modèle Brogue :
 | **Court-circuit** (néfaste) | énergie à zéro | hors service 10 battements, sans dégât ; un Bloqueur lâche |
 | **Matière** (butin au sol) | +15 en réserve, dès qu'on marche dessus ; au sol, elle a le dessin des **éclats moyens** en couleur Matière (23 novembre 2026 : sa tuile propre « Matière (butin) » est retirée du Tile editor) | – |
 
-**Balise posée** (23 novembre 2026). Lancée ailleurs que sur la foreuse, la balise **vole jusqu'à la case visée** et s'y
+**Balise posée** (23 novembre 2026). Lancée ailleurs que sur la foreuse, la balise **vole jusqu'à la case visée** (elle n'y apparaît qu'à la fin du vol) et s'y
 pose (sur la case libre la plus proche si un obstacle ou une créature l'occupe). Elle **hurle 25 battements** — « Balise N »
 sous les barres — avec un point rouge qui clignote. Tant qu'elle hurle, **tout ennemi à 20 cases d'elle, ou qui chasse la
 foreuse, la délaisse pour s'acharner sur la balise** : il y court et l'attaque au contact ; les tireurs (Sentinelle,

@@ -202,7 +202,7 @@ const baliseAt=(x,y)=>(G.balises||[]).find(q=>q.x===x&&q.y===y);
 function balisePose(x,y){const V=ITEM_VAL.balise;G.balises=G.balises||[];
   let c=idx(x,y);if(blocks(G.t[c])||G.t[c]===DEEP||beastAt(x,y)||animalAt(x,y)||baliseAt(x,y)||(x===G.px&&y===G.py))c=caseSol(x,y,false);
   const q={id:(G.baliseN=(G.baliseN||0)+1),x:c%W,y:(c/W)|0,hp:V.pv,t:V.duree};G.balises.push(q);
-  addFx({kind:'jet',ax:G.px,ay:G.py,bx:q.x,by:q.y,dur:280});addFx({kind:'shake',amp:4,dur:250});
+  addFx({kind:'jet',ax:G.px,ay:G.py,bx:q.x,by:q.y,q:q.id,dur:280});addFx({kind:'shake',amp:4,dur:250});
   return baliseAppel(q);}
 // les ennemis à portée, ou en chasse, passent sur la balise : ils oublient la foreuse
 function baliseAppel(q){const V=ITEM_VAL.balise;let n=0;
