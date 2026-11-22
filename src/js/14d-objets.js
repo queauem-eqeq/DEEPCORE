@@ -10,8 +10,8 @@
    Ce que la foreuse sait (plans, capsules identifiées, noms de code) vit dans G.st.savoir : G.st suit la foreuse d'un niveau
    à l'autre. Valeurs réglables : Lab → Items (np-items). */
 const ITEM_VAL_DEF={repar:{soin:50},batterie:{energie:50,choc:12,etourdi:6},charge:{degats:30},puissance:{pow:1,deg:5},
-  berserk:{crit:50,duree:10},camo:{duree:10},balise:{rayon:20},court:{etourdi:10},matiere:{mat:15}};
-const ITEM_VAL_LIB={soin:'Vie rendue',energie:'Énergie rendue',choc:'Dégâts de la décharge',etourdi:'Étourdissement (battements)',degats:'Dégâts',pow:'POW gagné',deg:'Dégâts par point de POW en trop (%)',crit:'CRIT en plus (points)',duree:'Durée (battements)',rayon:'Rayon de l’appel (cases)',mat:'Matière rendue'};
+  berserk:{crit:50,duree:10},camo:{duree:10},balise:{rayon:20,duree:25,pv:40,degats:20},court:{etourdi:10},matiere:{mat:15}};
+const ITEM_VAL_LIB={soin:'Vie rendue',energie:'Énergie rendue',choc:'Dégâts de la décharge',etourdi:'Étourdissement (battements)',degats:'Dégâts',pow:'POW gagné',deg:'Dégâts par point de POW en trop (%)',crit:'CRIT en plus (points)',duree:'Durée (battements)',rayon:'Rayon de l’appel (cases)',pv:'PV de la balise posée',degats:'Dégâts de son explosion',mat:'Matière rendue'};
 let ITEM_VAL=JSON.parse(JSON.stringify(ITEM_VAL_DEF));
 // chance qu'un robot abattu lâche un objet, par espèce (clé du Bestiaire)
 const DROPS_DEF={crabos:8,cafar:6,mastok:90,brochon:10,mine:0,paralyzor:25,gardien:60,artilleur:35,drone:5,soudeur:45,englueur:35};
@@ -35,8 +35,8 @@ Object.assign(ITEMS,{
     art:["   ·  ·  ·  ·  ", "  ·  ▄▄▄▄▄  ·  ", "  · █░▒█▒░█ ·  ", "  ·  ▀▀▀▀▀  ·  ", "   ·  ·  ·  ·  "],
     col:["...3..3..3..3..", "..3..wwwww..3..", "..3.w33w33w.3..", "..3..wwwww..3..", "...3..3..3..3.."]},
   // Capsules néfastes (22 novembre 2026) : mauvaises sur la foreuse, utiles lancées ailleurs. C'est ce qui fait de l'identification un pari.
-  balise:{n:'Balise',conso:1,son:'alarme',eff:'Appelle les ennemis à 20 cases',
-    d:'Un émetteur qui hurle : tous les ennemis alentour convergent vers lui. Sur la foreuse, c’est une catastrophe ; lancée au loin, c’est un leurre.',
+  balise:{n:'Balise',conso:1,son:'alarme',eff:'Leurre : attire les ennemis 25 battements',
+    d:'Un émetteur qui hurle. Lancée au loin, elle reste au sol 25 battements : les ennemis à 20 cases, et tous ceux qui chassent la foreuse, l’oublient et s’acharnent sur la balise (40 PV) ; détruite, elle explose. Sur la foreuse, c’est une catastrophe : tous savent où elle est.',
     plein:st=>false,non:'',use:st=>'',
     art:["      ) ) )    ", "     ▄▄█▄▄     ", "     █ ● █     ", "     ▀▀█▀▀     ", "    ▄▄▄█▄▄▄    "],
     col:["......r.r.r....", ".....wwwww.....", ".....w.r.w.....", ".....wwwww.....", "....wwwwwww...."]},
@@ -179,15 +179,70 @@ addFx({kind:'ener',x,y,dur:1000,gr:fxGrains(12)});}
   else if(k==='camo'){if(moi){G.eff.camo=V.duree;for(const e of G.beasts||[])if(e.hunt&&Math.max(Math.abs(e.x-G.px),Math.abs(e.y-G.py))>1){e.hunt=0;forget(e);}txt=`la foreuse disparaît pendant ${V.duree} battements`;}
     else if(b){b.camo=V.duree;txt=`${leNom(sp)} disparaît pendant ${V.duree} battements`;ton='warn';}
     else{txt='le voile se dissipe sans rien couvrir';ton='warn';}}
-  else if(k==='balise'){const camo=moi&&G.eff&&G.eff.camo>0;if(camo)G.eff.camo=0;let n=0;/* posée sur la foreuse, la balise rompt son camouflage optique ; lancée au loin, non (23 novembre 2026) */
-    for(const e of G.beasts||[])if(Math.max(Math.abs(e.x-x),Math.abs(e.y-y))<=V.rayon&&!(e.stun>0)){e.hunt=1;e.mem=[x,y];if(moi)spot(e);n++;}
-    addFx({kind:'shake',amp:4,dur:250});txt=moi?`la balise hurle sur la foreuse : ${n} ennemi${n>1?'s':''} alentour ${n>1?'savent':'sait'} où elle est`:`la balise hurle là-bas : ${n} ennemi${n>1?'s':''} y ${n>1?'courent':'court'}`;ton=moi?'warn':'good';if(camo){txt+=' ; le camouflage optique se rompt';ton='warn';}}
+  else if(k==='balise'){
+    if(moi){const camo=G.eff&&G.eff.camo>0;if(camo)G.eff.camo=0;let n=0;   /* sur la foreuse : tous savent où elle est, et le camouflage se rompt */
+      for(const e of G.beasts||[])if(Math.max(Math.abs(e.x-x),Math.abs(e.y-y))<=V.rayon&&!(e.stun>0)){e.hunt=1;e.leurre=0;spot(e);n++;}
+      addFx({kind:'shake',amp:4,dur:250});txt=`la balise hurle sur la foreuse : ${n} ennemi${n>1?'s':''} alentour ${n>1?'savent':'sait'} où elle est`+(camo?' ; le camouflage optique se rompt':'');ton='warn';}
+    else{const q=balisePose(x,y);txt=`la balise tombe au sol et hurle : ${q} ennemi${q>1?'s':''} l’${q>1?'oublient':'oublie'} pour elle, pendant ${V.duree} battements`;}}
   else if(k==='court'){if(moi){st.energie=0;txt='surtension : l’énergie tombe à zéro';ton='warn';addFx({kind:'shake',amp:5,dur:250});}
     else if(b){b.stun=V.etourdi;b.tient=0;txt=`${leNom(sp)} est hors service pendant ${V.etourdi} battements`;num('HS',PAL['3']);addFx({kind:'flash',beast:b,dur:220});}
     else{txt='la surtension se perd dans le sol';ton='warn';}}
   const neuf=identifier(k);invTake(i);sacFix();SAC_H='';
   say(`${neuf?`Capsule ${savoir().codes[k]} : c’était ${nom}. `:''}${nom} : ${txt}.`,ton);(son&&SFX[son]?SFX[son]:SFX.spot)();
   if(consoTemps())return;invChanged();}
+/* Balise posée (23 novembre 2026). Lancée ailleurs que sur la foreuse, la balise vole jusqu'à la case visée (sur la case libre
+   la plus proche si un obstacle ou une créature l'occupe), s'y pose et hurle pendant `duree` battements (25). Tant qu'elle hurle,
+   tout ennemi à `rayon` cases d'elle (20), ou qui chasse la foreuse, l'oublie et s'acharne sur la balise : il y court et
+   l'attaque (les tireurs à portée lui tirent dessus, les mines s'arment à côté). Elle a `pv` PV (40), barre les passages comme
+   une créature, et explose comme une mine (zoneBoom, `degats` = 20) quand elle est détruite. Éteinte, elle disparaît ; ses
+   ennemis fouillent alentour. Statut : « Balise N ». G.balises = [{id, x, y, hp, t}]. */
+const baliseAt=(x,y)=>(G.balises||[]).find(q=>q.x===x&&q.y===y);
+function balisePose(x,y){const V=ITEM_VAL.balise;G.balises=G.balises||[];
+  let c=idx(x,y);if(blocks(G.t[c])||G.t[c]===DEEP||beastAt(x,y)||animalAt(x,y)||baliseAt(x,y)||(x===G.px&&y===G.py))c=caseSol(x,y,false);
+  const q={id:(G.baliseN=(G.baliseN||0)+1),x:c%W,y:(c/W)|0,hp:V.pv,t:V.duree};G.balises.push(q);
+  addFx({kind:'jet',ax:G.px,ay:G.py,bx:q.x,by:q.y,dur:280});addFx({kind:'shake',amp:4,dur:250});
+  return baliseAppel(q);}
+// les ennemis à portée, ou en chasse, passent sur la balise : ils oublient la foreuse
+function baliseAppel(q){const V=ITEM_VAL.balise;let n=0;
+  for(const e of G.beasts||[]){if(e.leurre===q.id){n++;continue;}if(e.stun>0)continue;
+    if(Math.max(Math.abs(e.x-q.x),Math.abs(e.y-q.y))<=V.rayon||e.hunt>0){e.leurre=q.id;e.hunt=0;forget(e);e.tient=0;n++;}}
+  return n;}
+const baliseDe=e=>e.leurre?(G.balises||[]).find(q=>q.id===e.leurre)||null:null;
+// une fois par battement, avant que les ennemis jouent
+const BAL_D=new Map();   // cartes de distance vers chaque balise, refaites à chaque battement (hors de G : rien de lourd dans la sauvegarde)
+function baliseTick(){BAL_D.clear();if(!G.balises||!G.balises.length)return;
+  for(const q of [...G.balises]){if(--q.t<=0){baliseFin(q,false);continue;}baliseAppel(q);}}
+// la balise s'éteint (ou explose) : ses ennemis viennent fouiller où elle était
+function baliseFin(q,boum){const k=G.balises.indexOf(q);if(k<0)return;G.balises.splice(k,1);
+  for(const e of G.beasts||[])if(e.leurre===q.id){e.leurre=0;e.hunt=1;e.mem=[q.x,q.y];e.search=SEARCH_T;}
+  const vu=vis[idx(q.x,q.y)];
+  if(boum)baliseBoom(q,vu);else if(vu)sayMore('La balise se tait.','info');}
+// un coup sur la balise (ennemi au contact ou tireur, explosion)
+function baliseCoup(q,dm,o){q.hp-=dm;if(vis[idx(q.x,q.y)])addFx({kind:'num',x:q.x,y:q.y,txt:'-'+dm,col:PAL['3'],dur:700});
+  if(q.hp<=0)baliseFin(q,true);}
+function baliseFrappe(e,sp,q,laser){const ch=hitChance(sp.pre,0);
+  if(laser){if(q.x!==e.x)e.dir=Math.sign(q.x-e.x);if(beastVisible(e)){SFX.laser();addFx({kind:'laser',o:e,x:q.x,y:q.y,ox:0,oy:0,dur:300});}}
+  else if(beastVisible(e))addFx({kind:'lunge',beast:e,dx:Math.sign(q.x-e.x),dy:Math.sign(q.y-e.y),dur:200});
+  if(!roll(ch))return;const cr=e.bers>0||roll(sp.crit||0);baliseCoup(q,Math.round(dmgDe(sp)*(cr?CRIT_X:1)*(1+.25*(e.pow||0))));}
+// l'explosion de la balise : celle d'une mine (3 × 3 et 5 cases autour), `degats` à tout ce qui s'y trouve, foreuse comprise
+function baliseBoom(q,vu){const dm=ITEM_VAL.balise.degats,zone=zoneBoom(q.x,q.y),dans=o=>dansZone(zone,o.x,o.y);
+  addFx({kind:'boom',x:q.x,y:q.y,cases:zone,dur:420});if(vu||cheb(q,G.px,G.py)<=10){addFx({kind:'shake',amp:9,dur:320});SFX.explode();}
+  for(const [liste,fiches] of [[G.beasts,BEASTS],[G.animals||[],SPECIES]])for(const o of [...liste])if(dans(o)){o.hp=(o.hp??pvDe(fiches[o.sp]))-dm;
+    addFx({kind:'num',x:o.x,y:o.y,txt:'-'+dm,col:PAL['3'],dur:750});if(o.hp<=0){liste.splice(liste.indexOf(o),1);bleed(o.x,o.y);if(liste===G.beasts)butinMort(o);}}
+  if(dans({x:G.px,y:G.py})){G.st.vie=Math.max(0,G.st.vie-dm);addFx({kind:'num',x:G.px,y:G.py,txt:'-'+dm,col:PAL['4'],dur:1000});sayMore(`La balise explose : −${dm} vie.`,'warn');if(G.st.vie<=0)G.over={dead:true};}
+  else if(vu)sayMore('La balise est détruite : elle explose.','warn');else if(cheb(q,G.px,G.py)<=10)sayMore('Une explosion, tout près.','warn');
+  for(const o of [...(G.balises||[])])if(dans(o))baliseCoup(o,dm);
+  let roches=0;for(const [zx,zy] of zone){if(zx<1||zy<1||zx>=W-1||zy>=H-1)continue;const j=idx(zx,zy),v=G.t[j];if(v!==ROCK&&v!==MOUNT)continue;G.t[j]=RUBBLE;if(G.dmg)delete G.dmg[j];roches++;
+    if(G.ore&&G.ore[j]&&!oreSol(G.ore[j]))G.ore[j]=(oreMat(G.ore[j])?'m':'')+'sol'+oreLv(G.ore[j]);}
+  if(roches)computeFOV();}
+/* Un ennemi qui suit une balise : il y court et l'attaque, au lieu de la foreuse. Rend true s'il a joué. */
+function baliseJoue(e,sp,boom){const q=baliseDe(e);if(!q){e.leurre=0;return false;}const d=cheb(e,q.x,q.y);
+  if(sp.mine){if(e.fuse>0){if(--e.fuse<=0)boom.push(e);return true;}if(d<=1){e.fuse=rnd(2,3);return true;}}
+  else if((sp.laser||sp.glu)&&d<=(sp.laser||sp.glu)&&d>1&&los(e.x,e.y,q.x,q.y)){if(sp.cadence){if((e.cd=(e.cd||0)-1)>0)return true;e.cd=sp.cadence;}baliseFrappe(e,sp,q,true);return true;}
+  else if(d<=1){baliseFrappe(e,sp,q,false);return true;}
+  e.mp=Math.min(2,e.mp+sp.v/5/slowOf(G.t[idx(e.x,e.y)],sp.swim));const m=mouilleOk(sp,e),kD=q.id+':'+(m?1:0);let D=BAL_D.get(kD);if(!D){D=distFrom(q.x,q.y,m);BAL_D.set(kD,D);}
+  while(e.mp>=1&&!G.over){e.mp-=1;if(cheb(e,q.x,q.y)<=1){e.mp=Math.min(e.mp,.99);break;}if(!chaseStep(e,D,(x,y)=>beastFits(e,x,y),q.x,q.y))break;}
+  return true;}
 /* F9 (23 novembre 2026, pour les essais) : un exemplaire de chaque consommable existant (capsules et clé) au sac, identifié ;
    ce qui ne tient pas dans les 20 places est laissé de côté. */
 function f9Consos(){const pris=[],laisses=[];

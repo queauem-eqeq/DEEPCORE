@@ -78,7 +78,7 @@ function side(){
   {const b=$('sprintBtn');b.textContent=G.sprint?'COURSE':'MARCHE';b.classList.toggle('on',!!G.sprint);b.setAttribute('aria-pressed',!!G.sprint);}
   // Le sous-menu Statistiques a été retiré le 15 novembre 2026 : les stats sont dans la fenêtre Équipement.
   sacDraw();
-  {const E=G.eff||{},l=[];if(E.poison>0)l.push(`<span style="color:var(--life)">Poison ${E.poison}</span>`);if(E.glu>0)l.push(`Englué ${E.glu}`);if(E.camo>0)l.push(`<span style="color:var(--c3)">Camouflé ${E.camo}</span>`);/* battements restants (22 novembre 2026) */{const f=G.fum&&G.fum[idx(G.px,G.py)];if(f)l.push(`<span style="color:var(--c1)">Dans la fumée ${f.v}</span>`);}$('effs').innerHTML=l.join(' · ');}
+  {const E=G.eff||{},l=[];if(E.poison>0)l.push(`<span style="color:var(--life)">Poison ${E.poison}</span>`);if(E.glu>0)l.push(`Englué ${E.glu}`);if(E.camo>0)l.push(`<span style="color:var(--c3)">Camouflé ${E.camo}</span>`);{const bt=Math.max(0,...(G.balises||[]).map(q=>q.t));if(bt>0)l.push(`<span style="color:var(--life)">Balise ${bt}</span>`);}/* battements restants (22 novembre 2026) */{const f=G.fum&&G.fum[idx(G.px,G.py)];if(f)l.push(`<span style="color:var(--c1)">Dans la fumée ${f.v}</span>`);}$('effs').innerHTML=l.join(' · ');}
   // le niveau est revenu le 21 novembre 2026 ; la taille de la carte se règle dans le menu Monde
   // Carte (22 novembre 2026) : niveau, profondeur (raccord avec le compteur des descentes) et taille, puis l'archétype monde et
   // l'archétype bâti, sans étiquette. Remplace la ligne du niveau qui était en haut de la colonne.

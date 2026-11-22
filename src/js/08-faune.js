@@ -256,7 +256,7 @@ function animalsAct(){
 /* ---------- Prédateurs ---------- */
 const FOOT=[[0,0]];
 const beastAt=(x,y)=>G.beasts&&G.beasts.find(b=>b.x===x&&b.y===y);
-function beastFits(b,x,y){const spB=BEASTS[b.sp],mB=mouilleOk(spB,b);
+function beastFits(b,x,y){const spB=BEASTS[b.sp],mB=mouilleOk(spB,b);if(G.balises&&G.balises.length&&FOOT.some(([dx,dy])=>baliseAt(x+dx,y+dy)))return false;   // une balise posée barre le passage
   for(const[dx,dy]of FOOT){const cx=x+dx,cy=y+dy;if(cx<1||cy<1||cx>=W-1||cy>=H-1)return false;const v=G.t[idx(cx,cy)];
   if(spB.aqua&&!isWater(v))return false;   // le brochon ne quitte jamais l'eau
   if(!(b.hunt>0)&&G.lz&&G.lz[idx(cx,cy)])return false;   // calme, il n'entre pas dans le champ d'un laser ; en chasse, il fonce (21 novembre 2026)
@@ -418,6 +418,7 @@ function explose(b){const sp=BEASTS[b.sp],k=G.beasts.indexOf(b);if(k>=0)G.beasts
     addFx({kind:'num',x:o.x,y:o.y,txt:'-'+dm,col:PAL['3'],dur:750});if(o.hp<=0){liste.splice(liste.indexOf(o),1);bleed(o.x,o.y);if(liste===G.beasts)butinMort(o);}}
   if(dans({x:G.px,y:G.py})){const dm=dmgDe(sp);G.st.vie=Math.max(0,G.st.vie-dm);addFx({kind:'num',x:G.px,y:G.py,txt:'-'+dm,col:PAL['4'],dur:1000});
     sayMore(`La mine explose : −${dm} vie.`,'warn');if(G.st.vie<=0)G.over={dead:true};}
+  for(const q of [...(G.balises||[])])if(dans(q))baliseCoup(q,dmgDe(sp));   // une balise posée dans la zone encaisse aussi
   else if(vu)sayMore('La mine explose.','warn');
   else if(cheb(b,G.px,G.py)<=10)sayMore('Une explosion, tout près.','warn');
   // l'explosion brise la roche et la montagne tendre de sa zone (22 novembre 2026) ; la roche dure, les murs et les machines
@@ -431,13 +432,14 @@ function explose(b){const sp=BEASTS[b.sp],k=G.beasts.indexOf(b);if(k>=0)G.beasts
    demande de l'utilisateur). Elle tire un laser jusqu'à sp.laser cases, en ligne de vue, une fois par battement : un jet
    pour toucher ordinaire, et le trait rouge se voit toujours — droit sur la foreuse s'il touche, à côté s'il rate.
    La clé interne de l'espèce reste `paralyzor`, pour que les groupes déjà réglés continuent de marcher. */
-const animVif=()=>!!(G&&G.beasts&&G.beasts.some(b=>b.fuse>0));   // une mine armée clignote : le rendu doit tourner
+const animVif=()=>!!(G&&((G.beasts&&G.beasts.some(b=>b.fuse>0))||(G.balises&&G.balises.length)));   // une mine armée clignote : le rendu doit tourner
 function beastsAct(){
   turnStealth();
-  if(!G.beasts||!G.beasts.length||G.over)return;const distSec=robotDist(false),distEau=robotDist(true),DC={};let charged=null,distVol=null;const alarms=[],boom=[];packTick();
+  if(!G.beasts||!G.beasts.length||G.over)return;baliseTick();const distSec=robotDist(false),distEau=robotDist(true),DC={};let charged=null,distVol=null;const alarms=[],boom=[];packTick();
   for(const b of G.beasts){if(G.over)break;if(b.skip){b.skip=0;continue;}const sp=BEASTS[b.sp];
     if(b.bers>0)b.bers--;if(b.camo>0)b.camo--;if(b.tient&&!nearRobot(b))b.tient=0;
     if(b.stun>0){b.stun--;continue;}                                                 // étourdi par une batterie : il ne fait rien
+    if(b.leurre&&baliseJoue(b,sp,boom))continue;                                    // attiré par une balise posée : il s'acharne sur elle (23 novembre 2026)
     b.mp=Math.min(2,b.mp+sp.v/5/slowOf(G.t[idx(b.x,b.y)],sp.swim));
     const d=Math.hypot(b.x-G.px,b.y-G.py),sees=voitForeuse(b,b.hunt>0);
     if(sees){if(!b.hunt&&sp.alarm)alarms.push(b);if(!b.hunt&&beastVisible(b))charged=charged||sp;if(!b.hunt)alerte(b);b.hunt=1;spot(b);if(G.px!==b.x)b.dir=Math.sign(G.px-b.x);

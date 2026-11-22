@@ -238,6 +238,10 @@ function render(){
   machDraw();
   drawPath();
   rayonsBloqueur();   // sous les créatures et la foreuse
+  // balises posées (23 novembre 2026) : la tuile de la balise, un point rouge qui clignote tant qu'elle hurle, sa barre de vie
+  if(G.balises)for(const q of G.balises){const i=idx(q.x,q.y);if(fog&&!vis[i])continue;const px=(q.x-camX)*S,py=(q.y-camY)*S;ctx.globalAlpha=1;
+    if(TL.o_balise)ctx.drawImage(TL.o_balise,px,py,S,S);if(Math.floor(performance.now()/300)%2){const u=S/16;ctx.fillStyle=PAL['4'];ctx.fillRect(px+7*u,py+u,2*u,2*u);}
+    const pv=ITEM_VAL.balise.pv;if(q.hp<pv){const w=S-6;ctx.fillStyle='#000';ctx.fillRect(px+3,py-4,w,3);ctx.fillStyle=PAL['4'];ctx.fillRect(px+3,py-4,Math.round(w*Math.max(0,q.hp)/pv),3);}}
   // barre de vie au-dessus d'une créature blessée (insectoïdes compris depuis le 16 novembre 2026 : ils en étaient privés)
   const barreVie=(px,py,hp,pv)=>{if(hp>=pv)return;const w=S-6;ctx.fillStyle='#000';ctx.fillRect(px+3,py-4,w,3);ctx.fillStyle=PAL['4'];ctx.fillRect(px+3,py-4,Math.round(w*Math.max(0,hp)/pv),3);};
   if(G.animals)for(const a of G.animals)if(!fog||vis[idx(a.x,a.y)]){const [lx,ly]=lungeOff(f=>f.kind==='lunge'&&f.beast===a);
@@ -283,6 +287,8 @@ function render(){
      // laser d'une sentinelle : le trait part d'elle ; touché, il finit sur la foreuse, raté, à côté. Il crépite puis s'éteint d'un coup.
      for(const f of FX)if(f.kind==='laser'&&G.beasts.includes(f.o)&&fxP(f)<.75)laser(cx(f.o),cy(f.o),(f.x+.5-camX)*16+f.ox,(f.y+.5-camY)*16+f.oy,f.ox*5.3+f.oy+f.t0,4);
      // boule de glu de l'englueur : la tuile « glu » file de l'ennemi à sa cible, calée sur les pixels de tuile
+     // balise lancée : sa tuile vole de la foreuse à la case visée (23 novembre 2026)
+     for(const f of FX)if(f.kind==='jet'&&TL.o_balise){const p=fxP(f),gx=Math.round((f.ax+(f.bx-f.ax)*p-camX)*16),gy=Math.round((f.ay+(f.by-f.ay)*p-camY)*16-Math.sin(p*Math.PI)*10);ctx.drawImage(TL.o_balise,gx*u,gy*u,S,S);}
      for(const f of FX)if(f.kind==='boule'&&TL.glu){const p=fxP(f),gx=Math.round((f.ax+(f.bx-f.ax)*p-camX)*16),gy=Math.round((f.ay+(f.by-f.ay)*p-camY)*16);ctx.drawImage(TL.glu,gx*u,gy*u,S,S);}}
    // Explosion (mine, charge sismique) : sur chaque case de sa zone (3 × 3 et 5 cases autour, f.cases), les tuiles boom0 (éclair), boom1 (damier), boom2
    // (braises), éditables dans le Tile editor (groupe FX, 22 novembre 2026) ; boom1 et boom2 alternent avec leur variante pour crépiter

@@ -177,6 +177,7 @@ function viseeOk(){if(!VISEE||G.over)return;const {i,x,y}=VISEE,o=G.inv[i];
     G.t[j]=RUBBLE;if(G.dmg)delete G.dmg[j];roches++;
     if(G.ore&&G.ore[j]&&!oreSol(G.ore[j])){const l=oreLv(G.ore[j]),mt=oreMat(G.ore[j]);G.ore[j]=(mt?'m':'')+'sol'+l;
       sayMore(mt?'De la Matière tombe au sol.':'Des éclats de métal tombent au sol.','good');}}
+  for(const q of [...(G.balises||[])])if(dansZone(zone,q.x,q.y))baliseCoup(q,VISEE_DM);   // une balise posée dans la zone encaisse aussi
   // comme la mine, la charge blesse la foreuse si elle est dans la zone (22 novembre 2026)
   if(dansZone(zone,G.px,G.py)){moi=VISEE_DM;G.st.vie=Math.max(0,G.st.vie-moi);addFx({kind:'num',x:G.px,y:G.py,txt:'-'+moi,col:PAL['4'],dur:1000});if(G.st.vie<=0)G.over={dead:true};}
   engage();invTake(i);sacFix();SAC_H='';

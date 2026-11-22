@@ -807,9 +807,19 @@ Modèle Brogue :
 | **Module de puissance** | **POW +1 pour toujours** ; chaque point de POW au-dessus du POW requis par l'arme donne **+5 % de dégâts** (+1,5 % avant ; 8 % essayé quelques heures le 22 novembre, baissé parce que la foreuse de série rattrapait le Trépan) | ses coups portent 25 % plus fort |
 | **Surrégime** | CRIT +50 pendant 10 battements ; la foreuse vire au rouge | ses coups sont tous critiques pendant 10 battements |
 | **Camouflage optique** | invisible 10 battements : vue seulement au contact, les poursuivants à distance lâchent ; **rompu par un coup ou un forage** ; « Camouflé N » sous les barres, comme « Englué N » (22 novembre 2026) | il disparaît 10 battements (visible au contact) |
-| **Balise** (néfaste) | une **sirène à deux tons** retentit (22 novembre 2026) ; **posée sur la foreuse, elle rompt son camouflage optique** — lancée au loin, non : on peut se camoufler puis attirer les ennemis ailleurs (23 novembre 2026) ; tous les ennemis à 20 cases savent où est la foreuse | lancée au loin, ils y courent : un leurre |
+| **Balise** (néfaste sur soi) | une **sirène à deux tons** retentit (22 novembre 2026) ; tous les ennemis à 20 cases savent où est la foreuse ; **elle rompt son camouflage optique** | **lancée ailleurs, c'est un leurre posé au sol** (23 novembre 2026, ci-dessous) |
 | **Court-circuit** (néfaste) | énergie à zéro | hors service 10 battements, sans dégât ; un Bloqueur lâche |
 | **Matière** (butin au sol) | +15 en réserve, dès qu'on marche dessus | – |
+
+**Balise posée** (23 novembre 2026). Lancée ailleurs que sur la foreuse, la balise **vole jusqu'à la case visée** et s'y
+pose (sur la case libre la plus proche si un obstacle ou une créature l'occupe). Elle **hurle 25 battements** — « Balise N »
+sous les barres — avec un point rouge qui clignote. Tant qu'elle hurle, **tout ennemi à 20 cases d'elle, ou qui chasse la
+foreuse, l'oublie et s'acharne sur la balise** : il y court et l'attaque au contact ; les tireurs (Sentinelle, Artilleur,
+Englueur) lui tirent dessus à portée ; les mines s'arment à côté d'elle. Elle a **40 PV**, barre le passage comme une
+créature, et **explose comme une mine** quand elle est détruite (3 × 3 et 5 cases autour, **20 dégâts**, foreuse comprise,
+roche tendre brisée). Mines et charges sismiques l'abîment aussi. Éteinte ou détruite, ses ennemis viennent fouiller là où
+elle était. Un ennemi que la foreuse frappe l'oublie et revient à elle. Elle ne rompt pas le camouflage. Valeurs réglables
+dans Lab → Items (rayon, durée, PV, dégâts de l'explosion).
 
 **Créature étourdie** (batterie, Court-circuit ; 22 novembre 2026) : elle ne fait plus rien, Puces comprises (elles n’en
 tenaient pas compte avant). Toute sa silhouette devient un **damier d'un pixel sur deux, couleur bio et couleur bâti en
