@@ -268,7 +268,7 @@ function forageFrame(now){const F=FORAGE;if(!F)return;
   for(const p of F.pt){p.age+=dt;p.vy+=p.g*dt;const k=Math.max(0,1-p.drag*dt);p.vx*=k;if(p.type==='sm')p.vy*=k;p.x+=p.vx*dt;p.y+=p.vy*dt;
     if(p.type==='ch'&&F.ph<3&&p.y>2&&p.y<F.D0-1){const c=fgTrace(F,p.y);if(Math.abs(p.x-c)>FG_R){p.x=c+Math.sign(p.x-c)*FG_R;p.vx*=-.5;}}}
   F.pt=F.pt.filter(p=>p.age<p.life);
-  const tgt=F.d-(F.ph>=2?.6:F.jeu?.3:.62)*F.R,tg0=-.62*F.R;   // mini-jeu : la foreuse est tenue en haut de l'écran, pour voir venir les mines
+  const tgt=F.d-(F.ph>=2?.6:.3)*F.R,tg0=-.62*F.R;   // pendant la descente, la foreuse est tenue en haut de l'écran pour voir venir (mines, amas) : aux deux descentes depuis le 23 novembre 2026 (la première était à .62)
   if(F.ph===0)F.camY=tg0;else F.camY+=((F.ph===1?Math.max(tgt,tg0):tgt)-F.camY)*Math.min(1,dt*(F.ph===1?3.4:4.8));
   F.camX+=(F.cx-F.camX)*Math.min(1,dt*2.6);
   if(F.snd){const sp=Math.min(1,F.vy/22),ig=Math.min(1,t/1.6);
@@ -332,8 +332,10 @@ const FG_ANN_GL='#%&$@/\\<>=+*?!;:-_|[]{}()0123456789ABCDEFGHJKLMNPQRSTUVWXYZabd
 const FG_ANN_FIN=.5;   // durée de la disparition, case après case
 function fgAnnonce(F,t){const x=F.x,{w,h}=F,[l1,l2]=F.jeu?['EXPLOSIFS DÉTECTÉS','ATTENTION SOUS-SOL PIÉGÉ !']:['MATIÈRE {µ} DÉTECTÉE','COLLECTE POSSIBLE'],col=F.jeu?'#ff3b30':F.pal.a,blanc=F.pal.w;
   const n=Math.max(l1.length,l2.length),cols=n+6,rows=FG_ANN===3?9:7;
-  // en haut de l'écran, à droite du tableau de bord et à gauche de la coupe : ni la foreuse ni le HUD ne sont couverts
-  const gauche=Math.round(w*.31),large=Math.round(w*.61),gw=Math.max(5,Math.floor(Math.min(large/(cols+2),h*.26/(rows+1)*.6))),gh=Math.round(gw/.6),W=cols*gw,H=rows*gh,x0=gauche+Math.round((large-W)/2),y0=Math.round(h*.03+gh*.5);
+  // alignée à gauche, juste sous le tableau de bord (23 novembre 2026 ; avant : en haut, au centre) ; pas plus large qu'un tiers d'écran,
+  // pour laisser la foreuse, au milieu, dégagée
+  const large=Math.round(w*.34),gw=Math.max(5,Math.floor(Math.min(large/(cols+2),h*.26/(rows+1)*.6))),gh=Math.round(gw/.6),W=cols*gw,H=rows*gh,
+    x0=(F.hudG??Math.round(w*.02))+gw,y0=(F.hudB??Math.round(h*.3))+Math.round(gh*1.1);
   const bloc=(c,r,nc,nr,coul)=>{x.fillStyle=coul;x.fillRect(x0+c*gw,y0+r*gh,nc*gw,nr*gh);};
   /* Affichage façon terminal (22 novembre 2026) : le cadre paraît à FG_ANN_T0 (1 s) ; chaque case fait défiler des caractères au hasard,
      puis se fige de gauche à droite ; tout le message est en place à FG_ANN_T1 (2 s) et disparaît à FG_ANNONCE (4,5 s). */
@@ -363,6 +365,7 @@ function fgHud(F,t){const x=F.x,{w,h,dpr}=F,fs=Math.round(12*dpr),lh=Math.round(
     [`DURETÉ     ${'▮'.repeat(nd)}${'▯'.repeat(5-nd)}`,F.pal.g],[`CAP        ${cap}`,F.pal.g],[`ROTATION   ${esp(rpm)} tr/min`,F.pal.g]];
   {const st=typeof G!=='undefined'&&G&&G.st;if(st){const v=Math.max(0,Math.round(st.vie)),mx=Math.max(1,Math.round(st.vieMax||100)),n=Math.max(0,Math.min(10,Math.ceil(v*10/mx)));   // la vie de la foreuse, à toutes les descentes
       L.push([`VIE        ${'▮'.repeat(n)}${'▯'.repeat(10-n)} ${v}/${mx}`,v*4<=mx?'#ff5a4a':v*2<=mx?F.pal.o:F.pal.w]);}}
+  F.hudN=L.length+(F.jeu||F.amasY?1:0);   // lignes fixes du tableau (MINES ou RÉCOLTE comprises), sans les alertes qui clignotent
   if(F.jeu){L.push([`MINES      ${F.touche} touchée${F.touche>1?'s':''}`,F.touche?F.pal.o:F.pal.g]);
     if(F.ph===1&&Math.floor(t*5)%2===0&&F.mines.some(m=>m.ok&&m.y>F.d&&m.y<F.d+F.R*.7&&Math.abs(m.x-F.cx-F.vx*(m.y-F.d)/Math.max(6,F.vy))<FG_R))L.push(['▲ MINE SUR LA ROUTE ▸ ÉCARTEZ-VOUS','#ff5a4a']);
     if(F.mort)L.push(['FOREUSE DÉTRUITE','#ff5a4a']);}
@@ -372,7 +375,8 @@ function fgHud(F,t){const x=F.x,{w,h,dpr}=F,fs=Math.round(12*dpr),lh=Math.round(
   if(F.ph===1&&F.evit>1.7&&Math.floor(t*4)%2===0)L.push(['▲ MASSE DURE DEVANT ▸ CONTOURNEMENT',F.pal.o]);
   if(F.ph===2&&Math.floor(t*5)%2===0)L.push(['ALERTE ▸ PERTE DE SUPPORT','#ff5a4a']);
   if(F.ph>=3)L.push(['IMPACT ▸ ARRIVÉE AU NIVEAU SUIVANT',F.pal.o]);
-  {let lg=0;for(const l of L)lg=Math.max(lg,x.measureText(l[0]).width);x.fillStyle='#000';x.fillRect(m-Math.round(8*dpr),m-Math.round(8*dpr),Math.round(lg)+Math.round(16*dpr),L.length*lh+Math.round(12*dpr));}   // fond noir plein : le texte reste lisible sur la roche
+  {let lg=0;for(const l of L)lg=Math.max(lg,x.measureText(l[0]).width);x.fillStyle='#000';x.fillRect(m-Math.round(8*dpr),m-Math.round(8*dpr),Math.round(lg)+Math.round(16*dpr),L.length*lh+Math.round(12*dpr));
+    F.hudG=m-Math.round(8*dpr);F.hudB=m-Math.round(8*dpr)+F.hudN*lh+Math.round(12*dpr);}   // bord gauche et bas du tableau (sans les alertes qui clignotent) : l'annonce se cale dessous   // fond noir plein : le texte reste lisible sur la roche
   L.forEach((l,i)=>{x.fillStyle='#000';x.fillText(l[0],m+1,m+i*lh+1);x.fillStyle=l[1];x.fillText(l[0],m,m+i*lh);});
   if(F.ph<=1){const aide=F.jeu?'◄ ►  Q D  4 6   ÉVITER LES MINES':'◄ ►  Q D  4 6   DIRIGER LA FOREUSE';x.fillStyle='#000';x.fillRect(m-Math.round(8*dpr),h-m-fs-Math.round(6*dpr),Math.round(x.measureText(aide).width)+Math.round(16*dpr),fs+Math.round(12*dpr));x.fillStyle=F.ph===0?F.pal.g:F.pal.d;x.fillText(aide,m,h-m-fs);}
   if(t>=FG_ANN_T0&&t<FG_ANNONCE)fgAnnonce(F,t);x.textAlign='left';x.textBaseline='top';x.font=`${fs}px ${FG_FONT}`;

@@ -1291,8 +1291,8 @@ l'essayer (F9 jusqu'au 23 novembre 2026). **Échap, Espace ou Entrée** la passe
   la route (9 à 14 cases à côté : il faut tourner), six loin à gauche et à droite, hors d'atteinte, pour que le sous-sol ait
   l'air d'exister aussi sur les côtés. Maximum 60 par descente ; mesuré : 6 sans piloter, 54 en visant (`test-forage.js`).
   Avant, le même jour : un seul amas de 7 × 3, +20 d'un bloc.
-- **Annonce en gros (22 novembre 2026)** : en haut de l'écran, entre le tableau de bord et la coupe (ni la foreuse ni le HUD ne
-  sont couverts), dans un cadre à fond noir, rebord plein et bandes de chantier (dessin n° 3 de quatre proposés, `FG_ANN`).
+- **Annonce en gros (22 novembre 2026)** : **alignée à gauche, juste sous le tableau de bord** (23 novembre 2026 ; avant, en haut
+  au centre), pas plus large qu'un tiers d'écran pour laisser la foreuse dégagée, dans un cadre à fond noir, rebord plein et bandes de chantier (dessin n° 3 de quatre proposés, `FG_ANN`).
   Le cadre paraît à 1 s ; les caractères défilent au hasard puis se figent de gauche à droite ; message complet à 2 s. De 4 s à 4,5 s il
   s'efface colonne par colonne, de gauche à droite, les caractères se remettant à défiler juste avant de partir. Le défilement
   n'emploie que des signes ASCII, des chiffres et des lettres ordinaires. Première descente : « MATIÈRE {µ} DÉTECTÉE / COLLECTE POSSIBLE » (couleur accent) ; seconde : « EXPLOSIFS DÉTECTÉS /
@@ -1304,7 +1304,7 @@ Du niveau 2 au niveau 3, la descente se joue. `playForage(suite, 2)` ; **NIV3** 
 
 - Caractères d'un 52ᵉ de la hauteur d'écran — **la même échelle aux deux descentes depuis le 22 novembre 2026** (la
   première, en 36ᵉ, était trop zoomée). La foreuse est tenue en haut de l'écran :
-  on voit 0,7 écran devant elle. La descente est plus longue que la première et la foreuse répond
+  on voit 0,7 écran devant elle — **aux deux descentes depuis le 23 novembre 2026** (à la première, elle était au milieu). La descente est plus longue que la première et la foreuse répond
   plus vite aux commandes.
 - Des **mines explosives** naissent juste sous le bas de l'écran, par rangées de plus en plus
   serrées. Sept sur dix sont visées sur la route de la foreuse ; une fois sur quatre, une seconde mine vient à côté.
