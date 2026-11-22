@@ -226,9 +226,9 @@ function render(){
   // la fumée se voit même là où elle coupe la vue : sinon on ne verrait que les neuf cases autour de la foreuse
   if(G.fum)for(const k in G.fum){const i=+k;if(fog&&!vis[i]&&!G.seen[i])continue;const c=G.fum[k],t=TL['nuage'+c.k];
     if(t)put(t,i%W,(i/W)|0,Math.min(1,c.v/4)*(c.k<2?.72:.5)*(vis[i]?1:.55));}
-  // zone visée d'une charge sismique : carré de 3 × 3 en « Bord croisé » rouge
+  // case visée d'un consommable : « Bord croisé » rouge, toujours sur une seule case, pour ne rien trahir (22 novembre 2026)
   if(VISEE){const t=viseeTuile();ctx.globalAlpha=1;
-    for(const [zx,zy] of viseeCases()){   // la zone dépend de l'objet : une case, 3 × 3, ou le disque du fumigène (22 novembre 2026)
+    for(const [zx,zy] of viseeCases()){
       if(zx<0||zy<0||zx>=W||zy>=H)continue;ctx.drawImage(t,(zx-camX)*S,(zy-camY)*S,S,S);}}
   const wreck=BOOM||(G.over&&G.over.dead);   // foreuse détruite : plus dessinée
   if(!wreck){const [lx,ly]=lungeOff(f=>f.kind==='lunge'&&f.robot);ctx.globalAlpha=1;ctx.drawImage(robotTuile(),(G.px-camX)*S+lx,(G.py-camY)*S+ly,S,S);}
@@ -265,10 +265,10 @@ function render(){
      for(const b of G.beasts||[])if(b.tient&&!(b.stun>0)&&beastVisible(b))laser(cx(b),cy(b),cx({x:G.px,y:G.py}),cy({x:G.px,y:G.py}),b.x*7+b.y,2);
      // boule de glu de l'englueur : la tuile « glu » file de l'ennemi à sa cible, calée sur les pixels de tuile
      for(const f of FX)if(f.kind==='boule'&&TL.glu){const p=fxP(f),gx=Math.round((f.ax+(f.bx-f.ax)*p-camX)*16),gy=Math.round((f.ay+(f.by-f.ay)*p-camY)*16);ctx.drawImage(TL.glu,gx*u,gy*u,S,S);}}
-   // Explosion (mine, charge sismique) : sur chaque case du carré de 3 × 3, les tuiles boom0 (éclair), boom1 (damier), boom2
+   // Explosion (mine, charge sismique) : sur chaque case de sa zone (3 × 3 et 5 cases autour, f.cases), les tuiles boom0 (éclair), boom1 (damier), boom2
    // (braises), éditables dans le Tile editor (groupe FX, 22 novembre 2026) ; boom1 et boom2 alternent avec leur variante pour crépiter
    for(const f of FX)if(f.kind==='boom'){const p=fxP(f),t=Math.floor(p*16),tl=p<.2?TL.boom0:p<.6?(t&1?TL.boom1b:TL.boom1):(t&1?TL.boom2b:TL.boom2);ctx.globalAlpha=1;
-     if(tl)for(let cy=-1;cy<=1;cy++)for(let cx=-1;cx<=1;cx++)ctx.drawImage(tl,(f.x+cx-camX)*S,(f.y+cy-camY)*S,S,S);}
+     if(tl)for(const [zx,zy] of f.cases||[[f.x,f.y]])ctx.drawImage(tl,(zx-camX)*S,(zy-camY)*S,S,S);}
    // « ! » d'un ennemi qui repère la foreuse : un trait d'un pixel de tuile, blanc cerné de noir, au-dessus de lui ; il monte de 2 pixels puis s'éteint d'un coup (affiné le 16 novembre 2026)
    for(const f of FX)if(f.kind==='alerte'&&(G.beasts.includes(f.o)||G.animals.includes(f.o))&&vis[idx(f.o.x,f.o.y)]){const p=fxP(f),px=Math.round((f.o.x-camX)*16)+7,py=Math.round((f.o.y-camY)*16)-10-(reduced?2:Math.min(2,Math.floor(p*12)));
      ctx.fillStyle='#000';ctx.fillRect((px-1)*u,(py-1)*u,3*u,9*u);ctx.fillStyle='#fff';ctx.fillRect(px*u,py*u,u,5*u);ctx.fillRect(px*u,(py+6)*u,u,u);ctx.fillStyle=PAL['1'];}

@@ -70,8 +70,8 @@ const ITEMS={
     use:st=>{fumPose();return 'le nuage se répand';},
     art:["       ▄       ", "     ┌───┐     ", "     │   │     ", "     │▒▒▒│     ", "     │▒▒▒│     ", "     └───┘     "],
     col:[".......w.......", ".....wwwww.....", ".....w...w.....", ".....w232w.....", ".....w323w.....", ".....wwwww....."]},
-  charge:{n:'Charge sismique',f:1,conso:1,eff:'30 dégâts, roche brisée, 3 × 3',
-    d:'Un carré de 3 × 3, jusqu’à 4 cases : 30 dégâts et roche brisée, même la roche dure. Très bruyante.',
+  charge:{n:'Charge sismique',f:1,conso:1,eff:'30 dégâts, roche brisée, 3 × 3 et plus',
+    d:'Explose jusqu’à 4 cases, comme une mine : un carré de 3 × 3 et 5 cases autour, au hasard. 30 dégâts, la foreuse comprise si elle est dedans, et roche brisée, même la roche dure. Très bruyante.',
     vise:1,plein:st=>false,non:'',
     use:st=>'',
     art:["          *    ", "        ┌─┘    ", "    ┌───┴──┐   ", "    │▓▓▓▓▓▓│   ", "    │▓▓ ▓▓▓│   ", "    └──────┘   "],
@@ -136,19 +136,21 @@ function invChanged(){robotTiles();computeFOV();turnStealth();render();}
 const ARME_FIXE='Il faut toujours une arme en main : équipez-en une autre pour la remplacer.';
 // consommables offensifs : ennemis à r cases ou moins, et onde de choc
 const invCibles=r=>[...(G.beasts||[]),...(G.animals||[])].filter(o=>Math.max(Math.abs(o.x-G.px),Math.abs(o.y-G.py))<=r);
-/* Charge sismique : visée d'une zone de 3 × 3 (16 novembre 2026).
-   Le carré s'ouvre une case devant la foreuse ; on le déplace à la souris ou aux touches de direction, dans un rayon de VISEE_R cases
-   autour d'elle ; Entrée ou un clic valide, Échap annule (la charge n'est pas consommée). Le carré est dessiné en rouge avec la tuile
-   « Bord croisé » (10-rendu.js). La validation frappe tout ce qui occupe une des neuf cases. */
+/* Visée d'un consommable (16 novembre 2026 pour la charge sismique, 22 novembre pour tous).
+   La visée montre toujours une seule case (22 novembre 2026), pour qu'une capsule inconnue ne se trahisse pas par sa zone.
+   Elle s'ouvre sur la foreuse si la capsule n'est pas identifiée, ou si l'objet connu sert la foreuse ; sinon une case devant
+   elle. On la déplace à la souris ou aux touches de direction, dans un rayon de VISEE_R cases ; Entrée ou un clic valide,
+   Échap annule (rien n'est consommé). La case est dessinée en rouge avec la tuile « Bord croisé » (10-rendu.js).
+   La charge sismique explose comme une mine (zoneBoom, 08-faune.js) : 3 × 3 et 5 cases autour, la foreuse comprise. */
 // Tout consommable prend un battement : les ennemis jouent, les effets durables se décomptent, l'énergie remonte (16 novembre 2026)
 // act : 'use' ne fait ni bruit ni discrétion ; la charge sismique passe 'dig', aussi bruyant qu'un coup de foreuse sur la roche
 function consoTemps(act){G.turn++;lastAct=act||'use';lastRun=false;pass(DUR.attente);computeFOV();if(G.over&&G.over.dead){render();dead();return true;}return false;}
 const VISEE_R=4,VISEE_DM=30;
 const DEVANT={u:[0,-1],r:[1,0],d:[0,1],l:[-1,0]};
-function viseeStart(i){const o=G.inv[i],c=CONSO[o.k]||{},[dx,dy]=c.soi?[0,0]:DEVANT[G.face||'u'];   // 22 novembre 2026 : tout consommable se vise ; ceux qui servent la foreuse s'ouvrent sur elle
+function viseeStart(i){const o=G.inv[i],c=CONSO[o.k]||{},soi=c.soi||!identifie(o.k),[dx,dy]=soi?[0,0]:DEVANT[G.face||'u'];   // 22 novembre 2026 : tout consommable se vise ; une capsule inconnue s'ouvre sur la foreuse, comme celles qui la servent
   VISEE={i,x:Math.max(1,Math.min(W-2,G.px+dx)),y:Math.max(1,Math.min(H-2,G.py+dy))};
   invOpen(false);SAC_NAV=false;SAC_H='';
-  say(`${ITEMS[o.k].n} : choisissez la cible (déplacement ou souris), Entrée ou clic pour valider, Échap pour annuler.${c.soi?' Entrée tout de suite : sur la foreuse.':''}`,'warn');render();}
+  say(`${ITEMS[o.k].n} : choisissez la cible (déplacement ou souris), Entrée ou clic pour valider, Échap pour annuler.${soi?' Entrée tout de suite : sur la foreuse.':''}`,'warn');render();}
 function viseeVers(x,y){if(!VISEE)return;
   const cx=Math.max(G.px-VISEE_R,Math.min(G.px+VISEE_R,Math.max(1,Math.min(W-2,x)))),
         cy=Math.max(G.py-VISEE_R,Math.min(G.py+VISEE_R,Math.max(1,Math.min(H-2,y))));
@@ -159,24 +161,26 @@ function viseeOk(){if(!VISEE||G.over)return;const {i,x,y}=VISEE,o=G.inv[i];
   if(o.k!=='charge'){consoCible(i,x,y);return;}
   const neufCh=identifier('charge'),VISEE_DM=ITEM_VAL.charge.degats;camoCasse();
   VISEE=null;lastAct='dig';
-  let n=0,k=0;
-  for(const c of [...(G.beasts||[]),...(G.animals||[])]){if(Math.abs(c.x-x)>1||Math.abs(c.y-y)>1)continue;
+  let n=0,k=0,moi=0;const zone=zoneBoom(x,y);
+  for(const c of [...(G.beasts||[]),...(G.animals||[])]){if(!dansZone(zone,c.x,c.y))continue;
     const isB=(G.beasts||[]).includes(c),sp=isB?BEASTS[c.sp]:SPECIES[c.sp];n++;
     c.hp=(c.hp??pvDe(sp))-VISEE_DM;addFx({kind:'num',x:c.x,y:c.y,txt:'-'+VISEE_DM,col:PAL['3'],dur:900});
     if(c.hp<=0){k++;(isB?G.beasts:G.animals).splice((isB?G.beasts:G.animals).indexOf(c),1);bleed(c.x,c.y);if(isB)butinMort(c);}
     else if(isB){c.hunt=1;spot(c);}else{c.aware=1;c.enraged=true;spot(c);}}
   // l'onde brise aussi la roche, la montagne et la roche dure (16 novembre 2026) : c'est le seul moyen d'entamer la roche dure
   let roches=0;
-  for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){const zx=x+dx,zy=y+dy;
+  for(const [zx,zy] of zone){
     if(zx<1||zy<1||zx>=W-1||zy>=H-1)continue;const j=idx(zx,zy),v=G.t[j];
     if(v!==ROCK&&v!==MOUNT&&v!==HARD&&v!==MACHINE&&!bati(v)&&!machCasse(v))continue;
     if(machCasse(v)&&G.art)delete G.art[j];
     G.t[j]=RUBBLE;if(G.dmg)delete G.dmg[j];roches++;
     if(G.ore&&G.ore[j]&&!oreSol(G.ore[j])){const l=oreLv(G.ore[j]),mt=oreMat(G.ore[j]);G.ore[j]=(mt?'m':'')+'sol'+l;
       sayMore(mt?'De la Matière tombe au sol.':'Des éclats de métal tombent au sol.','good');}}
+  // comme la mine, la charge blesse la foreuse si elle est dans la zone (22 novembre 2026)
+  if(dansZone(zone,G.px,G.py)){moi=VISEE_DM;G.st.vie=Math.max(0,G.st.vie-moi);addFx({kind:'num',x:G.px,y:G.py,txt:'-'+moi,col:PAL['4'],dur:1000});if(G.st.vie<=0)G.over={dead:true};}
   engage();invTake(i);sacFix();SAC_H='';
-  addFx({kind:'boom',x,y,dur:420});addFx({kind:'shake',amp:8,dur:300});SFX.explode();
-  say(`${neufCh?`Capsule ${savoir().codes.charge} : c’était une charge sismique. `:''}Charge sismique : ${n?`${n} ennemi${n>1?'s':''} touché${n>1?'s':''}${k?`, ${k} abattu${k>1?'s':''}`:''}`:'personne dans la zone'}${roches?`, ${roches} case${roches>1?'s':''} de roche pulvérisée${roches>1?'s':''}`:''}.`,n||roches?'good':'warn');
+  addFx({kind:'boom',x,y,cases:zone,dur:420});addFx({kind:'shake',amp:moi?10:8,dur:300});SFX.explode();
+  say(`${neufCh?`Capsule ${savoir().codes.charge} : c’était une charge sismique. `:''}${moi?`La foreuse est prise dans l’explosion : −${moi} vie. `:''}Charge sismique : ${n?`${n} ennemi${n>1?'s':''} touché${n>1?'s':''}${k?`, ${k} abattu${k>1?'s':''}`:''}`:'personne dans la zone'}${roches?`, ${roches} case${roches>1?'s':''} de roche pulvérisée${roches>1?'s':''}`:''}.`,moi||!(n||roches)?'warn':'good');
   if(consoTemps('dig'))return;
   render();}
 function invBoum(r,dm){let n=0,k=0;lastAct='dig';

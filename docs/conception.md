@@ -787,8 +787,11 @@ Modèle Brogue :
   tuile de capsule au sol. Le premier usage révèle ce que c'est, pour toute la partie ; trouver le plan aussi. La clé et la
   Matière sont toujours connues. Ce que la foreuse sait (plans, capsules identifiées, codes) est dans `G.st.savoir` et la
   suit d'un niveau à l'autre.
-- **Tout consommable se vise**, comme la charge sismique, jusqu'à 4 cases : une case, un carré de 3 × 3 (charge) ou le disque
-  du nuage (fumigène). La visée s'ouvre **sur la foreuse** pour les objets qui la servent : Entrée deux fois = sur soi.
+- **Tout consommable se vise**, comme la charge sismique, jusqu'à 4 cases. **La visée montre toujours une seule case**
+  (22 novembre 2026, avant : le carré de 3 × 3 de la charge, le disque du fumigène) : une capsule inconnue ne se trahit
+  pas par sa zone. La visée s'ouvre **sur la foreuse** pour les objets qui la servent **et pour toute capsule non
+  identifiée** : Entrée deux fois = sur soi, quitte à faire sauter une charge sismique sous ses pieds. La charge connue
+  s'ouvre une case devant.
   Sur un ennemi, l'objet sert l'ennemi ou le frappe ; dans le vide, il est perdu.
 
 | Consommable | Sur la foreuse | Sur un ennemi |
@@ -796,7 +799,7 @@ Modèle Brogue :
 | Réparobots | Vie +50 | le répare de 50 PV |
 | Batterie | Énergie +50 | décharge : 12 dégâts, **étourdi 6 battements** (un Bloqueur étourdi lâche prise) |
 | Fumigène | nuage là où on le lance ; **les ennemis ne perdent la trace que si la foreuse est dedans** | idem |
-| Charge sismique | 3 × 3, 30 dégâts, roche brisée | idem |
+| Charge sismique | explose comme une mine (3 × 3 et 5 cases autour), 30 dégâts **à la foreuse aussi**, roche brisée | idem |
 | **Module de puissance** | **POW +1 pour toujours** ; chaque point de POW au-dessus du POW requis par l'arme donne **+5 % de dégâts** (+1,5 % avant ; 8 % essayé quelques heures le 22 novembre, baissé parce que la foreuse de série rattrapait le Trépan) | ses coups portent 25 % plus fort |
 | **Surrégime** | CRIT +50 pendant 10 battements ; la foreuse vire au rouge | ses coups sont tous critiques pendant 10 battements |
 | **Camouflage optique** | invisible 10 battements : vue seulement au contact, les poursuivants à distance lâchent ; **rompu par un coup ou un forage** | il disparaît 10 battements (visible au contact) |
@@ -857,7 +860,7 @@ inconnue sur soi peut coûter cher, la lancer sur un ennemi peut le servir. Fabr
 | Réparobots (×2) | consommable | – | Vie +50 ; **croix rouges** autour de la foreuse |
 | Batterie (×2) | consommable | – | Énergie +50 ; **flèches bio** qui montent |
 | Fumigène (×2) | consommable | – | un **nuage de fumée** (ci-dessous) |
-| Charge sismique (×2) | consommable | – | **visée** : 3 × 3 à placer jusqu'à 4 cases, **30 dégâts** ; bruyante |
+| Charge sismique (×2) | consommable | – | **visée** d'une case jusqu'à 4 cases ; explosion de mine, **30 dégâts** ; bruyante |
 
 **Fumigène.** À la pose, une **galette ovale** autour de la foreuse : 7 cases de large et de haut, 5 en diagonale
 (37 cases). Chaque case tire sa durée entre **15 et 25 battements**. À chaque battement le nuage **gagne une à
@@ -871,10 +874,12 @@ s'efface case par case. Les ennemis qui chassaient **perdent aussitôt la trace*
   bien que le nuage a l'air de vivre. Elles pâlissent dans leurs quatre derniers battements.
 - Sous Statut, « Dans la fumée N » tant que la foreuse y est.
 
-**Charge sismique : une visée.** L'utiliser n'explose pas tout de suite : un **carré de 3 × 3 rouge** s'ouvre une
-case devant la foreuse. On le déplace à la souris ou aux touches de direction, sans que la foreuse bouge, dans un
-**rayon de 4 cases** (butée nette). **Entrée** ou un **clic** tire : **30 dégâts** à chaque créature des neuf
-cases, et **la roche vole en éclats** — rocher, montagne, **roche dure**, murs, piliers, portes verrouillées et
+**Charge sismique : une visée.** L'utiliser n'explose pas tout de suite : une **case rouge** s'ouvre une case devant
+la foreuse (sur elle tant que la capsule n'est pas identifiée). On la déplace à la souris ou aux touches de direction,
+sans que la foreuse bouge, dans un **rayon de 4 cases** (butée nette). **Entrée** ou un **clic** tire. **L'explosion est
+celle d'une mine** (22 novembre 2026) : le carré de 3 × 3 autour de la case visée **et 5 cases tirées au hasard parmi les
+12 qui le bordent par un côté**. **30 dégâts** à chaque créature de la zone, **la foreuse comprise** si elle y est, et
+**la roche vole en éclats** — rocher, montagne, **roche dure**, murs, piliers, portes verrouillées et
 machines ; les métaux tombent au sol. Le tir prend **un battement** et fait autant de bruit qu'un coup sur la roche
 (portée de discrétion ×1,5 ce battement-là) ; le combat est engagé. **Échap** annule sans rien consommer.
 
@@ -917,10 +922,11 @@ s au pluriel sur un nom qui en porte déjà un : « la puce », « la torpille �
   groupe ne sont pas alertées, et aucune autre espèce ne partage.
 - **Torpille** : ne quitte jamais l'eau ; invisible dès qu'elle plonge en eau profonde.
 - **Mine** : elle fonce dès qu'elle a repéré la foreuse. Arrivée **à une case**, elle **s'arme** : elle ne bouge
-  plus et **clignote**, puis **explose 2 à 3 battements plus tard** (1 à 3 jusqu'au 22 novembre 2026 : à 1, elle sautait au battement suivant) — **20 dégâts** dans un **carré de 3 × 3** à la
-  foreuse et à toute créature qui s'y trouve. Détruite avant, elle n'explose pas ; elle n'a pas d'autre attaque.
+  plus et **clignote**, puis **explose 2 à 3 battements plus tard** (1 à 3 jusqu'au 22 novembre 2026 : à 1, elle sautait au battement suivant) — **20 dégâts** dans un **carré de 3 × 3, plus 5 cases tirées
+  au hasard parmi les 12 qui le bordent par un côté** (les coins du 5 × 5 exclus ; 22 novembre 2026), à la foreuse et à
+  toute créature qui s'y trouve. Les flammes se dessinent sur toute la zone, si bien qu'aucune explosion n'a la même forme. Détruite avant, elle n'explose pas ; elle n'a pas d'autre attaque.
   **L'explosion brise la roche et la montagne tendre** du carré (22 novembre 2026) : elles deviennent des gravats, et le
-  métal ou la Matière qu'elles cachaient tombent au sol. La roche dure, les murs et les machines tiennent : seule la
+  métal ou la Matière qu'elles cachaient tombent au sol, sur toute la zone. La roche dure, les murs et les machines tiennent : seule la
   charge sismique en vient à bout.
   L'animation pose sur chaque case du carré les tuiles **boom0** (éclair blanc), **boom1** (damier accent) puis
   **boom2** (braises monde), qui alternent avec une variante décalée pour crépiter ; elles se retouchent au Tile

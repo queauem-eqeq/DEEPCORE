@@ -214,7 +214,7 @@ const BEASTS=[
      "....1...........",
      "................",
      "................"]},
-  {n:'Mine',fem:true,key:'mine',nb:4,role:'Fonce sur la foreuse, s’arme à une case, puis explose 1 à 3 battements plus tard sur un carré de 3 × 3',v:8,pv:12,dmin:20,dmax:20,pre:100,def:0,crit:0,mine:true,rows:["................",
+  {n:'Mine',fem:true,key:'mine',nb:4,role:'Fonce sur la foreuse, s’arme à une case, puis explose 2 à 3 battements plus tard sur un carré de 3 × 3 et 5 cases autour',v:8,pv:12,dmin:20,dmax:20,pre:100,def:0,crit:0,mine:true,rows:["................",
      "................",
      "................",
      ".......11.......",

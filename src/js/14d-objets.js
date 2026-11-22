@@ -3,7 +3,7 @@
       salles piégées, pièces secrètes) ou se fabrique.
    2. Consommables non identifiés : chaque sorte porte un nom de code tiré à chaque partie (« //KZ7-3FQ ») et la même
       tuile de capsule. Le premier usage, ou le plan de fabrication, révèle ce que c'est.
-   3. Tout consommable se vise, comme la charge sismique : une case (ou une zone) jusqu'à VISEE_R cases. Sur la foreuse,
+   3. Tout consommable se vise, comme la charge sismique : une case jusqu'à VISEE_R cases (jamais de zone dessinée). Sur la foreuse,
       il la sert ; sur un ennemi, il sert l'ennemi (réparé, surrégime…) ou le frappe (batterie : décharge et étourdissement).
    4. Plans : le fabricateur ne propose que les objets dont on a trouvé le plan.
    5. Matière au sol (butin d'exploration), Module de puissance (POW +1 pour toujours), Surrégime, Camouflage optique.
@@ -52,7 +52,8 @@ Object.assign(FAB_PRIX,{berserk:20,camo:24,balise:12,court:16});
 const FAB_PRIX_DEF=Object.assign({},FAB_PRIX);
 
 /* ----- Ce que la foreuse sait ----- */
-// zone d'un consommable : r = 0 une case, 1 un carré de 3 × 3, 'f' le disque du fumigène ; soi : la visée s'ouvre sur la foreuse
+// zone d'effet d'un consommable : r = 0 une case, 1 l'explosion (3 × 3 et 5 cases autour), 'f' le disque du fumigène ; la visée, elle,
+// ne montre toujours qu'une case. soi : la visée s'ouvre sur la foreuse (de même pour toute capsule non identifiée)
 const CONSO={repar:{r:0,soi:1},batterie:{r:0,soi:1},fumigene:{r:'f',soi:1},charge:{r:1,soi:0},puissance:{r:0,soi:1},berserk:{r:0,soi:1},camo:{r:0,soi:1},balise:{r:0,soi:1},court:{r:0,soi:1}};
 let SAV_GARDE=null;   // pendant la génération du niveau suivant, G.st est neuf : on garde la main sur le savoir de la foreuse
 const codeTire=()=>{const L='BDFGHJKLMNPQRSTVWXZ',H='0123456789ABCDEF',l=()=>L[rnd(0,L.length-1)],h=()=>H[rnd(0,15)];return `//${l()}${l()}${rnd(2,9)}-${h()}${h()}${l()}`;};
@@ -75,7 +76,7 @@ function itemTxt(){const V=ITEM_VAL,v=k=>ITEMS[k].vrai;
   v('repar').eff=`Vie +${V.repar.soin}`;v('repar').d=`Essaim de micro-robots réparateurs : rend ${V.repar.soin} points de vie à ce qu’il touche — la foreuse, ou un ennemi.`;
   v('batterie').eff=`Énergie +${V.batterie.energie}, ou décharge`;v('batterie').d=`Sur la foreuse : rend ${V.batterie.energie} points d’énergie. Lancée sur un ennemi : ${V.batterie.choc} dégâts, et il reste étourdi ${V.batterie.etourdi} battements.`;
   v('fumigene').d='Un nuage opaque là où on le lance : il cache la vue des deux côtés. Si la foreuse est dedans, les ennemis perdent sa trace.';
-  v('charge').eff=`${V.charge.degats} dégâts, roche brisée, 3 × 3`;v('charge').d=`Un carré de 3 × 3, jusqu’à 4 cases : ${V.charge.degats} dégâts et roche brisée, même la roche dure. Très bruyante.`;
+  v('charge').eff=`${V.charge.degats} dégâts, roche brisée, 3 × 3 et plus`;v('charge').d=`Explose jusqu’à 4 cases, comme une mine : un carré de 3 × 3 et 5 cases autour, au hasard. ${V.charge.degats} dégâts, la foreuse comprise si elle est dedans, et roche brisée, même la roche dure. Très bruyante.`;
   v('puissance').eff=`POW +${V.puissance.pow}, pour toujours`;
   v('berserk').eff=`CRIT +${V.berserk.crit} pendant ${V.berserk.duree} battements`;
   v('camo').eff=`Invisible ${V.camo.duree} battements`;
@@ -150,9 +151,8 @@ function butinPrend(c,more){const l=G.items&&G.items[c];if(!l)return;const dire=
 
 /* ----- Visée de tous les consommables ----- */
 const FUM_PORTEE=3;
-function viseeCases(){if(!VISEE)return [];const o=G.inv[VISEE.i],c=o&&CONSO[o.k],r=c?c.r:1,out=[];
-  if(r==='f'){for(let dy=-3;dy<=3;dy++)for(let dx=-3;dx<=3;dx++)if(dx*dx+dy*dy<=FUM_R2)out.push([VISEE.x+dx,VISEE.y+dy]);return out;}
-  for(let dy=-r;dy<=r;dy++)for(let dx=-r;dx<=r;dx++)out.push([VISEE.x+dx,VISEE.y+dy]);return out;}
+// la visée montre toujours une seule case (22 novembre 2026) : une zone dessinée trahirait la charge sismique ou le fumigène
+function viseeCases(){return VISEE?[[VISEE.x,VISEE.y]]:[];}
 function retire(c){const isB=(G.beasts||[]).includes(c);(isB?G.beasts:G.animals).splice((isB?G.beasts:G.animals).indexOf(c),1);bleed(c.x,c.y);if(isB)butinMort(c);}
 function consoCible(i,x,y){const o=G.inv[i];if(!o)return;const k=o.k,d=ITEMS[k],V=ITEM_VAL[k]||{},st=G.st,nom=d.vrai.n,connu=identifie(k);
   const moi=x===G.px&&y===G.py,b=beastAt(x,y),an=b?null:animalAt(x,y),c=b||an,sp=b?BEASTS[b.sp]:an?SPECIES[an.sp]:null;
