@@ -50,10 +50,13 @@ function fabOpen(i){if(TRAV)stopTravel();if(EXPL)stopExplore();FAB_CASE=i;FAB_SE
 function fabClose(){$('fabric').hidden=true;FAB_CASE=-1;render();}
 function fabFais(n){const l=fabListe(FAB_CASE),k=l[n];if(!k||G.over)return;FAB_SEL=n;const p=FAB_PRIX[k],m=G.st.matiere||0;
   if(m<p){$('fabMsg').textContent=`Matière insuffisante : ${ITEMS[k].n} en demande ${p}, la réserve est de ${m}.`;SFX.blocked();fabBuild();return;}
-  G.st.matiere=m-p;const c=idx(G.px,G.py);G.items=G.items||{};(G.items[c]=G.items[c]||[]).push(k);
-  G.turn++;G.msg=null;SFX.serrure();say(`Fabricateur : ${ITEMS[k].n} (−${p} Matière, réserve ${G.st.matiere}).`,'good');invPickup(true);
+  // l'objet sort sous la foreuse et va au sac ; sac plein, il reste au sol — sur une case libre, jamais sur un autre objet (22 novembre 2026)
+  G.st.matiere=m-p;const ici=idx(G.px,G.py),place=!ITEMS[k].conso||sacPlaces()<SAC_MAX,c=place?ici:caseSol(G.px,G.py,true);G.items=G.items||{};
+  G.turn++;G.msg=null;SFX.serrure();say(`Fabricateur : ${ITEMS[k].n} (−${p} Matière, réserve ${G.st.matiere}).`,'good');
+  if(place){const avant=G.items[ici];G.items[ici]=[k];invPickup(true);if(avant&&avant.length)G.items[ici]=avant;}   // seul l'objet fabriqué est ramassé
+  else (G.items[c]=G.items[c]||[]).push(k);
   sacFix();SAC_H='';INV_H='';pass(FAB_DUREE);computeFOV();
-  $('fabMsg').textContent=`${ITEMS[k].n} fabriqué${ITEMS[k].f?'e':''}${ITEMS[k].pl?'s':''}.`+((G.items[c]||[]).includes(k)?' Inventaire plein : l’objet est au sol, sous la foreuse.':'');
+  $('fabMsg').textContent=`${ITEMS[k].n} fabriqué${ITEMS[k].f?'e':''}${ITEMS[k].pl?'s':''}.`+(place?'':` Inventaire plein : l’objet est au sol${c===ici?', sous la foreuse':', à côté'}.`);
   if(G.over&&G.over.dead){fabClose();dead();return;}
   fabBuild();render();}
 /* Clavier : flèches, Z/S, ou le pavé numérique (8 et 2 montent et descendent, 5 ou Entrée fabrique, 22 novembre 2026).

@@ -109,7 +109,8 @@ function butinCoffre(q){const h=p=>Math.random()<p;
   return [consoTire(),'matiere',...(h(.5)?[planTire()]:[]),...(h(.25)?['puissance']:[])];}
 // un robot abattu lâche parfois un objet (les relais d'une salle piégée, jamais : b.nd)
 function butinMort(b){if(!b||b.nd)return;const sp=BEASTS[b.sp],p=DROPS[sp.key]||0;if(Math.random()*100>=p)return;
-  const i=idx(b.x,b.y);if(blocks(G.t[i])||G.t[i]===DEEP)return;const r=Math.random(),k=r<.4?'matiere':r<.75?consoTire():r<.93?planTire():equipTire();
+  const i0=idx(b.x,b.y);if(blocks(G.t[i0])||G.t[i0]===DEEP)return;const r=Math.random(),k=r<.4?'matiere':r<.75?consoTire():r<.93?planTire():equipTire();
+  const i=caseSol(b.x,b.y,true);   // un objet déjà là : celui-ci roule sur la case libre la plus proche (22 novembre 2026)
   G.items=G.items||{};(G.items[i]=G.items[i]||[]).push(k);if(typeof vis!=='undefined'&&vis[i])sayMore(`${LeNom(sp)} lâche quelque chose.`,'good');}
 /* Butin d'exploration : les pièces secrètes, puis les culs-de-sac et les coins reculés — les cases les plus loin du trajet
    arrivée → site, là où plus rien ne mène ailleurs. Le plus reculé porte un Module de puissance, le suivant un plan,
