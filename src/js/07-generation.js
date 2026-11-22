@@ -315,6 +315,7 @@ function niveauSuivant(hasard){   // hasard : un archétype monde et un archéty
   niveau();   // genPlanet refait l'objet G : tout ce que la foreuse garde est remis en place juste après
   SANS_VAISSEAU=false;genRemet(sauve);
   G.inv=inv;G.st=st;G.niv=niv;G.turn=tour;G.dist=dist;G.over=null;drilling=false;SAV_GARDE=null;
+  G.sonarAt=tour+(G.sonarAt||0);   // le délai du sonar (10 à 30 battements) part de l'arrivée : niveau() l'a compté depuis 0, avant qu'on remette le compteur de tours (22 novembre 2026 : il partait tout de suite)
   eboulis();
   say(G.arrivee==='base'?`Niveau ${G.niv}${G.amb?' — '+G.amb:''}. La foreuse a traversé le plafond d’une salle : elle est dans une base enfouie. Un site de forage est signalé plus loin.`:`Niveau ${G.niv}${G.amb?' — '+G.amb:''}. La foreuse a percé le plafond et s'est écrasée plus bas. Un nouveau site de forage est signalé.`,'info');}
 const B_PORTE=i=>!!(BATI_DER&&BATI_DER.B.porte[i])||D4.some(([dx,dy])=>{const v=G.t[idx(i%W+dx,((i/W)|0)+dy)];return v===DOOR||v===LOCK;});   // devant un passage : pas de débris
