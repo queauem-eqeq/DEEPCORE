@@ -1116,7 +1116,7 @@ pièce ils deviennent du sol, sous un mur du mur) ; seuls le vaisseau et le bord
   de bord sous la carte (5 lignes visibles, numéro de tour, ×N pour les répétitions). **Il défile** (22 novembre 2026) :
 molette ou fine barre pour remonter jusqu'aux 200 derniers messages ; un nouveau message le ramène tout en bas. Un message
   trop long passe à la ligne, aligné après le numéro de tour.
-- **Barres** (l'ancien Statut) : barres ASCII `█`/`░` — Vie en bio, Énergie en blanc (accent jusqu’au 22 novembre 2026 ; le « +N » d’énergie regagnée aussi) — suivies de leur valeur chiffrée. Le
+- **Barres** (l'ancien Statut) : barres ASCII `█`/`░` — Vie en bio, Énergie en blanc (accent jusqu’au 22 novembre 2026 ; le « +N » d’énergie regagnée aussi, éclats de métal comme batterie) — suivies de leur valeur chiffrée. Le
   remplissage est un **calque de `█` découpé à la largeur exacte** posé sur un fond de `░`, donc juste à toute
   largeur de colonne et à toute taille de police.
 - **En vue** (sous la Carte) : la fiche d'inspection de la case survolée, puis les créatures visibles (icône,

@@ -163,7 +163,8 @@ function consoCible(i,x,y){const o=G.inv[i];if(!o)return;const k=o.k,d=ITEMS[k],
   if(k==='repar'){if(moi){const a=st.vie;st.vie=Math.min(st.vieMax,st.vie+V.soin);txt=`+${Math.round(st.vie-a)} PV`;addFx({kind:'soin',x,y,dur:1000,gr:fxGrains(12)});}
     else if(c){const m=pvDe(sp),a=c.hp??m;c.hp=Math.min(m,a+V.soin);txt=`${leNom(sp)} est réparé (+${c.hp-a} PV)`;ton='warn';num('+'+(c.hp-a),PAL['2']);addFx({kind:'soin',x,y,dur:1000,gr:fxGrains(12)});}
     else{txt='les réparobots se dispersent sans rien trouver à réparer';ton='warn';}}
-  else if(k==='batterie'){if(moi){const a=st.energie;st.energie=Math.min(st.energieMax,st.energie+V.energie);txt=`+${Math.round(st.energie-a)} énergie`;addFx({kind:'ener',x,y,dur:1000,gr:fxGrains(12)});}
+  else if(k==='batterie'){if(moi){const a=st.energie;st.energie=Math.min(st.energieMax,st.energie+V.energie);txt=`+${Math.round(st.energie-a)} énergie`;num('+'+Math.round(st.energie-a),'#ffffff');   // l'énergie regagnée, en blanc comme sa barre (22 novembre 2026)
+addFx({kind:'ener',x,y,dur:1000,gr:fxGrains(12)});}
     else if(c){c.hp=(c.hp??pvDe(sp))-V.choc;num('-'+V.choc,PAL['3']);son='laser';addFx({kind:'flash',beast:c,dur:220});
       if(c.hp<=0){retire(c);txt=`la décharge détruit ${leNom(sp)}`;}
       else{c.stun=V.etourdi;if(b){b.hunt=1;spot(b);}else{an.aware=1;spot(an);}txt=`${leNom(sp)} est électrisé : −${V.choc} PV, étourdi ${V.etourdi} battements`;}engage();}
