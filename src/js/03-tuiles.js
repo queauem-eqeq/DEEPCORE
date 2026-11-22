@@ -249,7 +249,7 @@ const BEASTS=[
   /* Cinq espèces ajoutées le 21 novembre 2026, à la FIN de la liste (les tuiles sont numérotées par rang). Capacités nouvelles, lues par
      08-faune : vol (franchit gouffres et eau), cadence (un tir tous les N battements), recul (s'écarte quand la foreuse est à cette
      distance), soin + portee (répare un allié blessé), glu (portée du jet de glu). Dessins de départ, à retoucher dans le Tile editor. */
-  {n:'Bloqueur',key:'gardien',bk:'bloqueur',bloque:true,nb:2,role:'Rapide : il agrippe la foreuse, qui ne peut plus se déplacer tant qu’il vit. Frappe peu fort',v:8,pv:30,dmin:2,dmax:4,pre:75,def:15,crit:0,   // l'ancien Gardien (22 novembre 2026) ; la clé reste « gardien » pour les groupes déjà réglés, ses stats sont enregistrées sous « bloqueur »
+  {n:'Bloqueur',key:'gardien',bk:'bloqueur',bloque:true,nb:2,role:'Rapide : il agrippe la foreuse, qui ne peut plus se déplacer tant qu’il vit. Frappe peu fort',v:8,pv:30,dmin:2,dmax:4,pre:100,def:15,crit:0,   // l'ancien Gardien (22 novembre 2026) ; la clé reste « gardien » pour les groupes déjà réglés, ses stats sont enregistrées sous « bloqueur »
   
    rows:["................", "................", ".....1....1.....", ".....1....1.....", "...1111111111...", "..112222222211..", ".31123322332113.", ".33122222222133.", "..312223322213..", "..312233332213..", "...1122222211...", "...1111111111...", "...11......11...", "..111......111..", "................", "................"]},
   {n:'Artilleur',key:'artilleur',nb:2,role:'Tire un laser jusqu’à 5 cases, un battement sur deux, et recule quand on l’approche',v:5,pv:14,dmin:4,dmax:7,pre:65,def:5,crit:0,laser:5,cadence:2,recul:2,
