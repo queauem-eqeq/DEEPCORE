@@ -157,7 +157,7 @@ function tryMove(dx,dy){
     G.st.vie=Math.min(G.st.vieMax,G.st.vie+ORE_PV[l]);G.st.energie=Math.min(G.st.energieMax,G.st.energie+ORE_PV[l]);
     const dv=Math.round(G.st.vie-av),de=Math.round(G.st.energie-ae);
     addFx({kind:'num',x:G.px,y:G.py,txt:'+'+dv,col:PAL['2'],dur:750});   // affiché comme les dégâts, couleur des éclats
-    if(de)addFx({kind:'num',x:G.px,y:G.py,txt:'+'+de,col:PAL['1'],dur:750,stack:1});
+    if(de)addFx({kind:'num',x:G.px,y:G.py,txt:'+'+de,col:'#ffffff',dur:750,stack:1});   // l'énergie regagnée, en blanc comme sa barre (22 novembre 2026)
     sayMore(`Éclats de métal récupérés : +${dv} PV, +${de} d’énergie.`,'good');SFX.spot();
     if(dv)addFx({kind:'soin',x:G.px,y:G.py,dur:900,gr:fxGrains(9)});if(de)addFx({kind:'ener',x:G.px,y:G.py,dur:900,gr:fxGrains(9)});}}}
   invPickup(true);
