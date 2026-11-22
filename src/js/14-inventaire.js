@@ -70,7 +70,7 @@ const ITEMS={
     use:st=>{fumPose();return 'le nuage se répand';},
     art:["       ▄       ", "     ┌───┐     ", "     │   │     ", "     │▒▒▒│     ", "     │▒▒▒│     ", "     └───┘     "],
     col:[".......w.......", ".....wwwww.....", ".....w...w.....", ".....w232w.....", ".....w323w.....", ".....wwwww....."]},
-  charge:{n:'Charge sismique',f:1,conso:1,eff:'30 dégâts et roche brisée sur 3 × 3',
+  charge:{n:'Charge sismique',f:1,conso:1,eff:'30 dégâts, roche brisée, 3 × 3',
     d:'Un carré de 3 × 3, jusqu’à 4 cases : 30 dégâts et roche brisée, même la roche dure. Très bruyante.',
     vise:1,plein:st=>false,non:'',
     use:st=>'',
