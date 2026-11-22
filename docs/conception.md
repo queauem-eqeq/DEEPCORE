@@ -809,7 +809,9 @@ Modèle Brogue :
 
 **Créature étourdie** (batterie, Court-circuit ; 22 novembre 2026) : elle ne fait plus rien, Puces comprises (elles n’en
 tenaient pas compte avant). Toute sa silhouette devient un **damier d'un pixel sur deux, couleur bio et couleur bâti en
-quinconce** ; les deux couleurs **s'échangent à chaque battement**, pour qu'on voie d'un coup d'œil qu'elle est immobilisée.
+quinconce** ; les deux couleurs **s'échangent à chaque battement**, pour qu'on voie d'un coup d'œil qu'elle est immobilisée. **La foreuse prend le même damier
+quand elle est immobilisée**, c'est-à-dire tenue par un Bloqueur (22 novembre 2026) ; il prime sur ses autres allures
+(engluée, camouflée, en surrégime).
 
 Les deux capsules néfastes (22 novembre 2026, choix de l'utilisateur) font de l'identification un pari : essayer une capsule
 inconnue sur soi peut coûter cher, la lancer sur un ennemi peut le servir. Fabricables une fois le plan trouvé (12 et 16).

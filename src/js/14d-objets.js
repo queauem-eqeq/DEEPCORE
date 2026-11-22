@@ -187,9 +187,11 @@ function consoCible(i,x,y){const o=G.inv[i];if(!o)return;const k=o.k,d=ITEMS[k],
   if(consoTemps())return;invChanged();}
 const fumDedans=()=>!!(G.fum&&G.fum[idx(G.px,G.py)]);
 
-/* ----- La foreuse change d'allure : engluée (teinte bio), camouflée (trame), en surrégime (rouge) ----- */
+/* ----- La foreuse change d'allure : immobilisée (damier bio / bâti), engluée (teinte bio), camouflée (trame), en surrégime (rouge) ----- */
 const ROBOT_VAR=new WeakMap();
-function robotTuile(){const base=TL['robot_'+(G.face||'u')],E=G.eff||{},mode=E.camo>0?'camo':E.glu>0?'glu':E.berserk>0?'bers':null;if(!mode||!base)return base;
+function robotTuile(){const base=TL['robot_'+(G.face||'u')],E=G.eff||{};
+  if(base&&tenuPar())return tuileEtourdie(base);   // tenue par un Bloqueur, donc immobilisée : le même damier bio / bâti qu'un ennemi étourdi (22 novembre 2026)
+  const mode=E.camo>0?'camo':E.glu>0?'glu':E.berserk>0?'bers':null;if(!mode||!base)return base;
   const col=mode==='glu'?PAL['2']:mode==='camo'?PAL['3']:(PAL['4']||'#ff3b3b'),cle=mode+col;let m=ROBOT_VAR.get(base);if(!m){m={};ROBOT_VAR.set(base,m);}if(m[cle])return m[cle];
   const c=document.createElement('canvas');c.width=c.height=16;const x=c.getContext('2d');x.drawImage(base,0,0);
   try{const im=x.getImageData(0,0,16,16),p=im.data,n=parseInt(col.slice(1),16),R=n>>16&255,Gv=n>>8&255,B=n&255;
