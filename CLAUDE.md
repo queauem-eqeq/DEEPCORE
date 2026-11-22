@@ -140,7 +140,7 @@ modification, marquer la version actuelle. Dernière version à fichier unique :
   (`bz0`…`bz9`, dans l'ordre de la liste) et les retouches du joueur sont enregistrées sous ces numéros. Insérer une
   espèce décale toutes les suivantes et colle leurs retouches sur la mauvaise bête (16 novembre 2026 : le brochon,
   inséré avant le mastok, portait la tuile du mastok).
-- Tuiles : motifs 16×16 en texte. Codes : `.` transparent · `0` noir · `w` blanc · `r` danger (rouge) · `1` accent · `2` bio · `3` monde
+- Tuiles : motifs 16×16 en texte. Codes : `.` transparent · `0` noir · `w` blanc · `r` danger (rouge de la palette) · `R` rouge fixe (#d8180b, ne suit pas la palette) · `1` accent · `2` bio · `3` monde · `5` bâti (`5` et `R` : 22 novembre 2026)
   (lu « bâti » sur les tuiles de `BATI_TUILES`). Palettes à cinq couleurs, toutes tirées de LACKING64 (`02-palette.js`).
 - Pas de dépendance externe ni d'étape de compilation : ce qui est dans `src/` est ce qui est publié. Une bibliothèque
   ne peut venir que d'un des hôtes autorisés par l'artefact (cdnjs, jsdelivr, unpkg) ou être copiée dans `src/`.

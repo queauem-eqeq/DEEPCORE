@@ -1131,6 +1131,9 @@ molette ou fine barre pour remonter jusqu'aux 200 derniers messages ; un nouveau
 - **Mini-carte** pleine largeur ; ennemis en points rouges ; un clic recentre la vue ; bouton maintenu + glisser =
   défilement en temps réel. Saisie à l'intérieur, le cadre suit le pointeur sans sauter ; à l'extérieur, il se
   centre d'abord sous le pointeur.
+- **Tile editor** (Lab) : encres sur deux lignes (22 novembre 2026) — les cinq couleurs de la palette (Monde, Bio, Accent,
+  Danger, Bâti), puis Blanc, Noir, **Rouge fixe** (`R`, #d8180b, le même avec toutes les palettes) et Transparent.
+  Nouveaux codes de tuile : `5` (bâti) et `R` (rouge fixe). Le texte d'explication en tête de la fenêtre a été retiré.
 - Sous **REGEN · MONDE · LIFE**, une rangée **NIV1 · NIV2 · NIV3** (sortie du Lab le 22 novembre 2026), à 5 px.
 - Sous-menus repliables : **Inventaire**, **Carte**, **Lab**, **Palette**, **Contrôles** (Palette sous Lab depuis le 22 novembre 2026 ; Carte sous Inventaire et Palette sous Lab à 5 px, les autres à 20) (Bestiaire,
   Groupes, Artefacts, Items, Discrétion, Tile editor, **Combat** — un lien qui ouvre le banc de combat dans un autre onglet, 22 novembre 2026), puis **Contrôles** sous Palette (22 novembre 2026 : l'aide des touches, sortie du Lab, une commande par ligne — la touche, puis ce qu'elle fait en dessous — en trois groupes : Se déplacer, Objets, Voir).
