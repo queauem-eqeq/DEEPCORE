@@ -55,6 +55,17 @@ function smokeStep(now){const dt=Math.min(.05,(now-SMOKE.last)/1000);SMOKE.last=
     fctx.fillStyle=q.c;fctx.fillRect(Math.round((q.x-camX*S)/2)*2,Math.round((q.y-camY*S)/2)*2,q.sz,q.sz);}
   SMOKE.p.length=n;fctx.globalAlpha=1;if(landed)render();
   SMOKE.raf=(on||n)?requestAnimationFrame(smokeStep):0;if(!SMOKE.raf)fctx.clearRect(0,0,vw,vh);}
+/* Créature étourdie (batterie, court-circuit ; 22 novembre 2026) : toute sa silhouette devient un damier d'un pixel sur deux,
+   couleur bio et couleur bâti en quinconce ; les deux couleurs s'échangent à chaque battement, pour qu'on voie qu'elle ne
+   bouge plus. Les variantes sont gardées par tuile, couleurs et parité du battement. */
+const ETOURDI_VAR=new WeakMap();
+function tuileEtourdie(base){if(!base)return base;const ph=(G.turn||0)&1,a=PAL['2'],b=PAL['3'],cle=a+b+ph;
+  let m=ETOURDI_VAR.get(base);if(!m){m={};ETOURDI_VAR.set(base,m);}if(m[cle])return m[cle];
+  const c=document.createElement('canvas');c.width=c.height=16;const x=c.getContext('2d');x.drawImage(base,0,0,16,16);
+  try{const im=x.getImageData(0,0,16,16),p=im.data,rgb=h=>{const n=parseInt(h.slice(1),16);return [n>>16&255,n>>8&255,n&255];},A=rgb(a),B=rgb(b);
+    for(let j=0;j<16;j++)for(let i=0;i<16;i++){const q=(j*16+i)*4;if(!p[q+3])continue;const k=(i+j+ph)&1?A:B;p[q]=k[0];p[q+1]=k[1];p[q+2]=k[2];p[q+3]=255;}
+    x.putImageData(im,0,0);}catch(e){}
+  return m[cle]=c;}
 /* ---------- Explosion de la foreuse (mort) ----------
    Comme la poussière d'atterrissage : des centaines d'éclats (couleurs de la foreuse) projetés en l'air, qui retombent,
    rebondissent au sol, ricochent sur les obstacles, tombent dans les gouffres et disparaissent d'un coup, chacun à son
@@ -213,10 +224,10 @@ function render(){
   // barre de vie au-dessus d'une créature blessée (insectoïdes compris depuis le 16 novembre 2026 : ils en étaient privés)
   const barreVie=(px,py,hp,pv)=>{if(hp>=pv)return;const w=S-6;ctx.fillStyle='#000';ctx.fillRect(px+3,py-4,w,3);ctx.fillStyle=PAL['4'];ctx.fillRect(px+3,py-4,Math.round(w*Math.max(0,hp)/pv),3);};
   if(G.animals)for(const a of G.animals)if(!fog||vis[idx(a.x,a.y)]){const [lx,ly]=lungeOff(f=>f.kind==='lunge'&&f.beast===a);
-    const px=(a.x-camX)*S+lx,py=(a.y-camY)*S+ly;ctx.globalAlpha=1;ctx.drawImage(TL['an'+a.sp+(a.dir<0?'l':'r')],px,py,S,S);
+    const px=(a.x-camX)*S+lx,py=(a.y-camY)*S+ly;ctx.globalAlpha=1;{const t=TL['an'+a.sp+(a.dir<0?'l':'r')];ctx.drawImage(a.stun>0?tuileEtourdie(t):t,px,py,S,S);}
     const sp=SPECIES[a.sp];barreVie(px,py,a.hp??pvDe(sp),pvDe(sp));}
   if(G.beasts)for(const b of G.beasts){if(!beastVisible(b)||beastCache(b))continue;const [lx,ly]=lungeOff(f=>f.kind==='lunge'&&f.beast===b);
-    const px=(b.x-camX)*S+lx,py=(b.y-camY)*S+ly,img=b.fuse>0&&Math.floor(performance.now()/130)%2?TL.mineA:TL['bz'+b.sp+(b.dir<0?'l':'r')];   // mine armée : elle clignote
+    const px=(b.x-camX)*S+lx,py=(b.y-camY)*S+ly,img0=b.fuse>0&&Math.floor(performance.now()/130)%2?TL.mineA:TL['bz'+b.sp+(b.dir<0?'l':'r')],img=b.stun>0?tuileEtourdie(img0):img0;   // mine armée : elle clignote ; étourdie : damier bio / bâti
     ctx.globalAlpha=1;ctx.drawImage(img,px,py,S,S);
     const fl=FX.find(f=>f.kind==='flash'&&f.beast===b);if(fl){ctx.globalCompositeOperation='lighter';ctx.globalAlpha=1-fxP(fl);ctx.drawImage(img,px,py,S,S);ctx.drawImage(img,px,py,S,S);ctx.globalCompositeOperation='source-over';ctx.globalAlpha=1;}
     barreVie(px,py,b.hp,pvDe(BEASTS[b.sp]));}

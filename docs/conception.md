@@ -807,6 +807,10 @@ Modèle Brogue :
 | **Court-circuit** (néfaste) | énergie à zéro | hors service 10 battements, sans dégât ; un Bloqueur lâche |
 | **Matière** (butin au sol) | +15 en réserve, dès qu'on marche dessus | – |
 
+**Créature étourdie** (batterie, Court-circuit ; 22 novembre 2026) : elle ne fait plus rien, insectoïdes compris (ils n'en
+tenaient pas compte avant). Toute sa silhouette devient un **damier d'un pixel sur deux, couleur bio et couleur bâti en
+quinconce** ; les deux couleurs **s'échangent à chaque battement**, pour qu'on voie d'un coup d'œil qu'elle est immobilisée.
+
 Les deux capsules néfastes (22 novembre 2026, choix de l'utilisateur) font de l'identification un pari : essayer une capsule
 inconnue sur soi peut coûter cher, la lancer sur un ennemi peut le servir. Fabricables une fois le plan trouvé (12 et 16).
 
