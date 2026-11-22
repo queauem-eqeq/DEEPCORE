@@ -376,11 +376,11 @@ function hurtRobot(b,sp,o){sp=sp||BEASTS[b.sp];o=o||{};const le=LeNom(sp),nom=''
     if(!o.laser)SFX.whoosh();sayMore(`${le}${nom} ${verbe} et rate (${ch} %).`);return;}
   geste();
   const cr=o.sur||b.bers>0||roll(sp.crit||0),dm=Math.round(dmgDe(sp)*(cr?CRIT_X:1)*(1+.25*(b.pow||0)));   // surrégime : toujours critique ; module de puissance : +25 % par module   // coup critique de l'ennemi : selon sa stat CRIT
-  addFx({kind:'shake',amp:cr?9:5,dur:cr?320:220});G.st.vie=Math.max(0,G.st.vie-dm);addFx({kind:'num',x:G.px,y:G.py,txt:'-'+dm+(cr?'!':''),col:'#ff3b3b',dur:cr?1000:750});if(!o.laser)SFX.bite();sayMore(`${le}${nom} ${verbe}${o.sur?' par surprise':cr?' : coup critique':''} : −${dm} vie.`,'warn');
+  addFx({kind:'shake',amp:cr?9:5,dur:cr?320:220});G.st.vie=Math.max(0,G.st.vie-dm);addFx({kind:'num',x:G.px,y:G.py,txt:'-'+dm+(cr?'!':''),col:PAL['4'],dur:cr?1000:750});if(!o.laser)SFX.bite();sayMore(`${le}${nom} ${verbe}${o.sur?' par surprise':cr?' : coup critique':''} : −${dm} vie.`,'warn');
   if(G.st.vie<=0){G.over={dead:true};return;}}
 // Une fois par battement : effets durables sur la foreuse
 function effTick(){const E=G.eff;if(!E||G.over)return;
-  if(E.poison>0){E.poison--;const dm=Math.min(G.st.vie,E.pdmg||2);G.st.vie-=dm;addFx({kind:'num',x:G.px,y:G.py,txt:'-'+dm,col:'#ff3b3b',dur:750});
+  if(E.poison>0){E.poison--;const dm=Math.min(G.st.vie,E.pdmg||2);G.st.vie-=dm;addFx({kind:'num',x:G.px,y:G.py,txt:'-'+dm,col:PAL['4'],dur:750});
     if(G.st.vie<=0){G.over={dead:true};sayMore('Le poison achève la foreuse.','warn');return;}
     if(!E.poison)sayMore('Le poison est éliminé.','good');}
   if(E.glu>0&&--E.glu===0)sayMore('La glu se détache : la foreuse retrouve sa vitesse.','good');
@@ -402,7 +402,7 @@ function explose(b){const sp=BEASTS[b.sp],k=G.beasts.indexOf(b);if(k>=0)G.beasts
   addFx({kind:'boom',x:b.x,y:b.y,dur:420});if(vu||dans({x:G.px,y:G.py})||cheb(b,G.px,G.py)<=10){addFx({kind:'shake',amp:9,dur:320});SFX.explode();}
   for(const [liste,fiches] of [[G.beasts,BEASTS],[G.animals||[],SPECIES]])for(const o of [...liste])if(dans(o)){const dm=dmgDe(sp);o.hp=(o.hp??pvDe(fiches[o.sp]))-dm;
     addFx({kind:'num',x:o.x,y:o.y,txt:'-'+dm,col:PAL['3'],dur:750});if(o.hp<=0){liste.splice(liste.indexOf(o),1);bleed(o.x,o.y);if(liste===G.beasts)butinMort(o);}}
-  if(dans({x:G.px,y:G.py})){const dm=dmgDe(sp);G.st.vie=Math.max(0,G.st.vie-dm);addFx({kind:'num',x:G.px,y:G.py,txt:'-'+dm,col:'#ff3b3b',dur:1000});
+  if(dans({x:G.px,y:G.py})){const dm=dmgDe(sp);G.st.vie=Math.max(0,G.st.vie-dm);addFx({kind:'num',x:G.px,y:G.py,txt:'-'+dm,col:PAL['4'],dur:1000});
     sayMore(`La mine explose : −${dm} vie.`,'warn');if(G.st.vie<=0)G.over={dead:true};}
   else if(vu)sayMore('La mine explose.','warn');
   else if(cheb(b,G.px,G.py)<=10)sayMore('Une explosion, tout près.','warn');

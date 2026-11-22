@@ -117,7 +117,7 @@ function ensureChasmOv(){if(!G)return;const key=(G.seed||'')+'|'+PAL['3']+'|'+G.
 function hexRgb3(h){const n=parseInt(h.slice(1),16);return [(n>>16)&255,(n>>8)&255,n&255];}
 // la tuile « Bord croisé » teinte en rouge, refaite si elle est retouchée au Tile editor
 let VIS_T=null,VIS_K='';
-function viseeTuile(){const r=rowsOf('nuage3'),k=r.join('');if(!VIS_T||VIS_K!==k){VIS_T=curCanvas(r,'#b8242a');VIS_K=k;}return VIS_T;}
+function viseeTuile(){const r=rowsOf('nuage3'),k=r.join('');const k4=k+PAL['4'];if(!VIS_T||VIS_K!==k4){VIS_T=curCanvas(r,PAL['4']);VIS_K=k4;}return VIS_T;}
 /* Texture du sol (16 novembre 2026, variante « plaques rugueuses » choisie sur la planche planches/sol-grain.js) :
    chaque case prend une nuance de la couleur monde très légèrement décalée (grandes plages douces, teinte ±4°, saturation ±13 %),
    et un grain de 0 à 11 pixels par case dont la DENSITÉ varie par zones : des coins presque lisses, d'autres nettement granuleux.
@@ -210,7 +210,7 @@ function render(){
   machDraw();
   drawPath();
   // barre de vie au-dessus d'une créature blessée (insectoïdes compris depuis le 16 novembre 2026 : ils en étaient privés)
-  const barreVie=(px,py,hp,pv)=>{if(hp>=pv)return;const w=S-6;ctx.fillStyle='#000';ctx.fillRect(px+3,py-4,w,3);ctx.fillStyle='#ff3b3b';ctx.fillRect(px+3,py-4,Math.round(w*Math.max(0,hp)/pv),3);};
+  const barreVie=(px,py,hp,pv)=>{if(hp>=pv)return;const w=S-6;ctx.fillStyle='#000';ctx.fillRect(px+3,py-4,w,3);ctx.fillStyle=PAL['4'];ctx.fillRect(px+3,py-4,Math.round(w*Math.max(0,hp)/pv),3);};
   if(G.animals)for(const a of G.animals)if(!fog||vis[idx(a.x,a.y)]){const [lx,ly]=lungeOff(f=>f.kind==='lunge'&&f.beast===a);
     const px=(a.x-camX)*S+lx,py=(a.y-camY)*S+ly;ctx.globalAlpha=1;ctx.drawImage(TL['an'+a.sp+(a.dir<0?'l':'r')],px,py,S,S);
     const sp=SPECIES[a.sp];barreVie(px,py,a.hp??pvDe(sp),pvDe(sp));}
@@ -238,7 +238,7 @@ function render(){
   // Pixel art strict : taille fixe, opaques, calés sur la grille des pixels de tuile ; chaque grain apparaît à son heure et s'efface d'un coup.
   {const u=S/16;
    for(const f of FX){if(f.kind!=='soin'&&f.kind!=='ener')continue;const p=fxP(f),bx=(f.x-camX)*16,by=(f.y-camY)*16;
-     ctx.fillStyle=f.kind==='soin'?'#ff3b3b':PAL['2'];
+     ctx.fillStyle=f.kind==='soin'?PAL['4']:PAL['2'];
      const bas=f.kind==='ener'?7:0,mont=f.kind==='ener'?24:13;   // les flèches partent plus bas et montent plus haut : sinon elles se perdent dans la foreuse, de la même couleur
      for(const g of f.gr){const q=(p-g.d)*2.2;if(q<0||q>1)continue;const gx=Math.round(bx+g.x),gy=Math.round(by+g.y+bas-q*mont);
        if(f.kind==='soin'){ctx.fillRect(gx*u,(gy+1)*u,3*u,u);ctx.fillRect((gx+1)*u,gy*u,u,3*u);}           // une petite croix
@@ -251,7 +251,7 @@ function render(){
    {const laser=(ax,ay,bx,by,graine,etinc)=>{let x0=Math.round(ax),y0=Math.round(ay);const x1=Math.round(bx),y1=Math.round(by);
        const dx=Math.abs(x1-x0),dy=-Math.abs(y1-y0),sx=x0<x1?1:-1,sy=y0<y1?1:-1,pts=[];let e=dx+dy;
        for(let n=0;n<600;n++){pts.push([x0,y0]);if(x0===x1&&y0===y1)break;const e2=2*e;if(e2>=dy){e+=dy;x0+=sx;}if(e2<=dx){e+=dx;y0+=sy;}}
-       ctx.fillStyle='#ff3b3b';for(const [x,y] of pts)ctx.fillRect(x*u,y*u,u,u);
+       ctx.fillStyle=PAL['4'];for(const [x,y] of pts)ctx.fillRect(x*u,y*u,u,u);
        if(!reduced&&etinc){const T=Math.floor(performance.now()/85),h=n=>{const v=Math.sin(n*12.9898+T*78.233+graine)*43758.5453;return v-Math.floor(v);};
          for(let k=0;k<etinc;k++){const [x,y]=pts[Math.floor(h(k)*pts.length)],ox=Math.round(h(k+10)*4-2),oy=Math.round(h(k+20)*4-2);
            ctx.fillStyle=h(k+30)<.5?'#fff':PAL['1'];ctx.fillRect((x+ox)*u,(y+oy)*u,u,u);if(h(k+40)<.4)ctx.fillRect((x+ox+(h(k+50)<.5?1:-1))*u,(y+oy)*u,u,u);}}

@@ -73,21 +73,23 @@ PAT.boom1b=(x,y)=>TF('boom1')((x+2)%16,y);PAT.boom2b=(x,y)=>TF('boom2')(15-x,y);
 Object.assign(TILE_DEPS,{laserV:['laserV','laserV_','laserH_'],laserX:['laserX','laserX_'],boom1:['boom1','boom1b'],boom2:['boom2','boom2b']});
 let TL={},ANIMG=[],fog=true;
 try{fog=localStorage.getItem('np-fog')!=='off';}catch(e){}
-const inkCol=ch=>ch==='0'?'#020605':ch==='r'?'#b8242a':ch==='L'?'#ff2a2a':ch==='w'?'#ffffff':PAL[ch];
+const inkCol=ch=>ch==='0'?'#020605':ch==='r'||ch==='L'?PAL['4']:ch==='w'?'#ffffff':PAL[ch];
 function tileCanvas(src,w=16,h=16){const c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d');
   for(let j=0;j<h;j++)for(let i=0;i<w;i++){const ch=typeof src==='function'?src(i,j):src[j][i];const col=inkCol(ch);if(col){x.fillStyle=col;x.fillRect(i,j,1,1);}}return c;}
 // reconstruit une tuile retouchée et ses variantes
+const batiSrc=k=>{const f=PAT[k];return typeof f==='function'?(x,y)=>{const c=f(x,y);return c==='3'?'5':c;}:f.map(r=>r.replace(/3/g,'5'));};   // tuiles du bâti : encre monde -> couleur bâti (22 novembre 2026)
+const tuileSrc=k=>EAU_TUILES.includes(k)?eauSrc(k):BATI_TUILES.includes(k)?batiSrc(k):PAT[k];
 function eauSrc(k){const f=PAT[k];return typeof f==='function'?(x,y)=>{const c=f(x,y);return c==='2'?'e':c;}:f.map(r=>r.replace(/2/g,'e'));}   // tuiles d'eau : encre bio -> couleur eau
-function rebuildTile(k){for(const d of TILE_DEPS[k]||[k]){if(d==='ship')TL.ship=tileCanvas(TF('ship'),SGW*16,SGH*16);else if(PAT[d])TL[d]=tileCanvas(EAU_TUILES.includes(d)?eauSrc(d):PAT[d]);if(/^(an|bz)\d+r$|^robot_r$/.test(d)){try{ICON[d]=TL[d].toDataURL();}catch(e){}}}buildCursor();if(k==='robot_u')robotTiles();}
+function rebuildTile(k){for(const d of TILE_DEPS[k]||[k]){if(d==='ship')TL.ship=tileCanvas(TF('ship'),SGW*16,SGH*16);else if(PAT[d])TL[d]=tileCanvas(tuileSrc(d));if(/^(an|bz)\d+r$|^robot_r$/.test(d)){try{ICON[d]=TL[d].toDataURL();}catch(e){}}}buildCursor();if(k==='robot_u')robotTiles();}
 function buildTiles(){
-  TL={};for(const k in PAT)TL[k]=tileCanvas(EAU_TUILES.includes(k)?eauSrc(k):PAT[k]);
+  TL={};for(const k in PAT)TL[k]=tileCanvas(tuileSrc(k));
   // la Matière reprend les dessins des éclats de métal (retouches comprises), en couleur accent au lieu de bio
   for(const k of ['ore','ore1','ore2','oreSol','oreSol1','oreSol2']){const f=TF(k);TL[k.replace('ore','mat')]=tileCanvas((x,y)=>{const c=f(x,y);return c==='2'?'1':c;});}TL.ship=tileCanvas(TF('ship'),SGW*16,SGH*16);buildCursor();
   ICON={};for(const k in TL)if(/^(an|bz)\d+r$|^robot_r$/.test(k)){try{ICON[k]=TL[k].toDataURL();}catch(e){}}
   robotTiles();
   ANIMG=SPECIES.map((_,i)=>{try{return TL['an'+i+'r'].toDataURL();}catch(e){return '';}});
-  const r=document.documentElement.style;r.setProperty('--c1',PAL['1']);r.setProperty('--c2',PAL['2']);r.setProperty('--c3',PAL['3']);
-  ['1','2','3'].forEach(k=>{$('pc'+k).style.background=PAL_U[k];$('pc'+k).title=PAL_U[k];});
+  const r=document.documentElement.style;r.setProperty('--c1',PAL['1']);r.setProperty('--c2',PAL['2']);r.setProperty('--c3',PAL['3']);r.setProperty('--c4',PAL['4']);r.setProperty('--c5',PAL['5']);r.setProperty('--life',PAL['4']);
+  PAL_CLES.forEach(k=>{$('pc'+k).style.background=PAL_U[k];$('pc'+k).title=PAL_U[k];});
 }
 function setPal(p){PAL_U=p;try{localStorage.setItem('np-palette',JSON.stringify(PAL_U));}catch(e){}touchLocal();palBiome(TEINTE);buildTiles();render();}
 

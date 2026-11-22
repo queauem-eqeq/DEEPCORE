@@ -23,7 +23,7 @@
 const MACH_DM=10;
 const machTuile=v=>v>=TURRET&&v<=CHARGEUR;
 const machCasse=v=>v===TURRET||v===PYLON||v===GRILLE||v===STATION||v===FABRIC||v===LEVIER||v===CHARGEUR;   // ce qu'une charge sismique réduit en gravats
-const machCouleur=v=>v===TURRET||v===PYLON?'#ff2a2a':v===PILE?'#ffe14d':v===GRILLE?'#ff7ad1':v===FABRIC?'#c77dff':v===STATION?'#5aff8a':'#ff8c1a';
+const machCouleur=v=>v===TURRET||v===PYLON?PAL['4']:v===PILE?'#ffe14d':v===GRILLE?'#ff7ad1':v===FABRIC?'#c77dff':v===STATION?'#5aff8a':'#ff8c1a';
 const MACH_DIR=[[0,1],[0,-1],[1,0],[-1,0]],MACH_SENS=['d','u','r','l'];
 let BATI_DER=null;   // {B, strs} du dernier appel réussi à batiments() : les pièces, pour y poser les machines (génération seulement)
 
@@ -51,7 +51,7 @@ function machTick(){if(!G.las||!G.las.length||G.over)return;G.mt=(G.mt||0)+1;con
     const pieds=liste===G.beasts&&typeof FOOT!=='undefined'?FOOT:[[0,0]];if(!pieds.some(([dx,dy])=>lit[idx(o.x+dx,o.y+dy)]))continue;
     o.hp=(o.hp??pvDe(fiches[o.sp]))-MACH_DM;if(vis[idx(o.x,o.y)])addFx({kind:'num',x:o.x,y:o.y,txt:'-'+MACH_DM,col:PAL['3'],dur:750});
     if(o.hp<=0){liste.splice(liste.indexOf(o),1);bleed(o.x,o.y);if(liste===G.beasts&&typeof butinMort==='function')butinMort(o);if(vis[idx(o.x,o.y)])sayMore(`${LeNom(fiches[o.sp])} est détruit par un laser.`,'good');}}
-  if(lit[idx(G.px,G.py)]){G.st.vie=Math.max(0,G.st.vie-MACH_DM);addFx({kind:'num',x:G.px,y:G.py,txt:'-'+MACH_DM,col:'#ff3b3b',dur:900});addFx({kind:'shake',amp:5,dur:220});
+  if(lit[idx(G.px,G.py)]){G.st.vie=Math.max(0,G.st.vie-MACH_DM);addFx({kind:'num',x:G.px,y:G.py,txt:'-'+MACH_DM,col:PAL['4'],dur:900});addFx({kind:'shake',amp:5,dur:220});
     sayMore(`Laser : −${MACH_DM} vie.`,'warn');if(G.st.vie<=0)G.over={dead:true};}}
 // rendu des rayons allumés : cases pleines, sans transparence (consigne « pixel perfect »)
 // tuiles du Tile editor, groupe FX (22 novembre 2026) : laserV (vertical ; l'horizontal en est la rotation) et laserX (croix)
