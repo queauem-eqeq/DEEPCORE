@@ -1,0 +1,13 @@
+Captures de la nuit du 21 au 22 novembre 2026 (branche claude/machines-objets-2026-11-22).
+Rangées dans le dépôt : l'ordinateur n'était plus joignable (en veille) au moment de les archiver sur F:\WORK\IAZONE\DEEPCORE\captures\2026-11-22\.
+
+01-pont-levier-gouffre.png                  Pont à levier : le gouffre prend la salle, le levier est au pied du pont, la Matière attend sur l'autre rive.
+02-depot-grille-socle-pile.png              Dépôt : grille rouge, socle devant, pile et distributeur dans la pièce voisine.
+03-salle-piegee-avant.png                   Salle piégée avant : l'appât au milieu, les niches dans les murs.
+04-salle-piegee-relais.png                  Salle piégée après : l'appât ramassé, les relais sortent des niches.
+05-lab-items.png                            Lab -> Items : tous les objets et leurs valeurs modifiables.
+06-visee-fumigene-bloqueur-glu.png          Visée d'un fumigène ; foreuse engluée (teinte bio) et tenue par un Bloqueur (trait rouge) ; capsules à nom de code.
+07-palette-braise-5-couleurs.png            Palette Braise à cinq couleurs : le bâti se détache de la montagne ; lasers en couleur danger.
+08-palette-lagon.png                        Palette Lagon.
+09-palette-amethyste.png                    Palette Améthyste.
+10-vitrines-et-salle-laser-recompense.png   Vitrines (trois lots, un seul à prendre) en haut ; salle à lasers avec son butin.
