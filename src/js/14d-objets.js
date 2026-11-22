@@ -179,7 +179,7 @@ addFx({kind:'ener',x,y,dur:1000,gr:fxGrains(12)});}
   else if(k==='camo'){if(moi){G.eff.camo=V.duree;for(const e of G.beasts||[])if(e.hunt&&Math.max(Math.abs(e.x-G.px),Math.abs(e.y-G.py))>1){e.hunt=0;forget(e);}txt=`la foreuse disparaît pendant ${V.duree} battements`;}
     else if(b){b.camo=V.duree;txt=`${leNom(sp)} disparaît pendant ${V.duree} battements`;ton='warn';}
     else{txt='le voile se dissipe sans rien couvrir';ton='warn';}}
-  else if(k==='balise'){const camo=G.eff&&G.eff.camo>0;if(camo)G.eff.camo=0;let n=0;/* la balise rompt le camouflage optique de la foreuse, où qu'on la lance (23 novembre 2026) */
+  else if(k==='balise'){const camo=moi&&G.eff&&G.eff.camo>0;if(camo)G.eff.camo=0;let n=0;/* posée sur la foreuse, la balise rompt son camouflage optique ; lancée au loin, non (23 novembre 2026) */
     for(const e of G.beasts||[])if(Math.max(Math.abs(e.x-x),Math.abs(e.y-y))<=V.rayon&&!(e.stun>0)){e.hunt=1;e.mem=[x,y];if(moi)spot(e);n++;}
     addFx({kind:'shake',amp:4,dur:250});txt=moi?`la balise hurle sur la foreuse : ${n} ennemi${n>1?'s':''} alentour ${n>1?'savent':'sait'} où elle est`:`la balise hurle là-bas : ${n} ennemi${n>1?'s':''} y ${n>1?'courent':'court'}`;ton=moi?'warn':'good';if(camo){txt+=' ; le camouflage optique se rompt';ton='warn';}}
   else if(k==='court'){if(moi){st.energie=0;txt='surtension : l’énergie tombe à zéro';ton='warn';addFx({kind:'shake',amp:5,dur:250});}
