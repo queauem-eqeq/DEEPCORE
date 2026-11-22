@@ -11,10 +11,10 @@ const PRESETS=[
 ];
 // Les palettes prédéfinies sont modifiables : la palette sélectionnée suit les sélecteurs de couleur
 const PRESETS_DEF=PRESETS.map(p=>({n:p.n,c:p.c.slice()}));
-let PRESET_ACTIVE=7;   // Ambre : palette retenue le 16 novembre 2026
+let PRESET_ACTIVE=5;   // Rouille : palette du joueur, recopiée le 22 novembre 2026 (avant : Ambre, retenue le 16 novembre)
 try{const sv=JSON.parse(localStorage.getItem('np-presets')||'null');if(Array.isArray(sv))sv.forEach((c,i)=>{if(PRESETS[i]&&Array.isArray(c)&&c.length===3)PRESETS[i].c=c;});}catch(e){}
-try{const a=+localStorage.getItem('np-preset-active');if(PRESETS[a])PRESET_ACTIVE=a;}catch(e){}
-let PAL={'1':'#c23029','2':'#adcef5','3':'#307e67'};
+try{const s=localStorage.getItem('np-preset-active');if(s!==null&&PRESETS[+s])PRESET_ACTIVE=+s;}catch(e){}   // rien d'enregistré : la palette par défaut (avant le 22 novembre 2026, « null » donnait 0, soit Origine)
+let PAL={'1':PRESETS[PRESET_ACTIVE].c[0],'2':PRESETS[PRESET_ACTIVE].c[1],'3':PRESETS[PRESET_ACTIVE].c[2]};   // les couleurs de la palette par défaut
 try{const p=JSON.parse(localStorage.getItem('np-palette')||'null');if(p&&p['1'])PAL=p;}catch(e){}
 
 
