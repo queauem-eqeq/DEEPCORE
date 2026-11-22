@@ -180,11 +180,11 @@ function askDrill(){
 function drill(s){drilling=true;let k=0;const n=12;
   const step=()=>{$('card').innerHTML=`<div class="tag">Forage en cours · site ${s.id}</div><h2>FORAGE</h2><p class="prog">${'▮'.repeat(k)}${'·'.repeat(n-k)}</p>`;
     if(k<n){SFX.drill(k);k++;setTimeout(step,reduced?0:110);}else{SFX.done();end(s);}};step();}
-// Mort : la foreuse explose (voir explode, rendu), puis un seul bouton pour repartir
+// Mort : la foreuse explose (voir explode, rendu), puis « Déployer une nouvelle foreuse » : retour au niveau 1, intro comprise
 function dead(){if(G.over.boom)return;G.over.boom=true;if(TRAV)stopTravel();if(REST)stopRest();
   explode(()=>{$('card').innerHTML=`<h2 class="huge">FOREUSE<br>DÉTRUITE</h2>
-    <div class="upg one"><button id="again"><span>Nouvelle exploration</span><b>▶</b></button><button id="quit"><span>Quitter</span><b>■</b></button></div>`;
-    $('overlay').hidden=false;$('again').onclick=()=>{unlock();SFX.start();nouvellePartie();};$('quit').onclick=quitGame;$('again').focus();});
+    <div class="upg one"><button id="again"><span>Déployer une nouvelle foreuse</span><b>▶</b></button><button id="quit"><span>Quitter</span><b>■</b></button></div>`;
+    $('overlay').hidden=false;$('again').onclick=()=>{unlock();SFX.start();deployerForeuse();};$('quit').onclick=quitGame;$('again').focus();});
 }
 // Quitter : une page ne peut pas fermer son onglet ; tout s'éteint (écran noir, son coupé), un bouton discret rallume le jeu
 function quitGame(){$('overlay').hidden=true;$('off').hidden=false;try{if(AC)AC.suspend();}catch(e){}$('offOn').focus();}

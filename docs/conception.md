@@ -1034,7 +1034,10 @@ remplace la plus ancienne. **Enregistrer** écrit les valeurs dans la base de l'
 - **Mort** : à 0 PV la foreuse **explose** — éclair blanc, secousse, détonation, ~520 éclats (accent et bio,
   quelques blancs, 2 à 5 px) qui retombent, **rebondissent**, ricochent sur les obstacles, tombent dans les
   gouffres et disparaissent d'un coup chacun à son heure ; ils restent dans la zone visible. Puis **« FOREUSE
-  DÉTRUITE »** et deux boutons : **Nouvelle exploration** et **Quitter**.
+  DÉTRUITE »** et deux boutons : **Déployer une nouvelle foreuse** et **Quitter**.
+- **Déployer une nouvelle foreuse** (22 novembre 2026 ; avant « Nouvelle exploration », qui repartait sur la recette du
+  menu Monde) : on repart **toujours du niveau 1** (recette « atterrissage », vaisseau compris), **cinématique d'arrivée
+  comprise**, avec une foreuse neuve ; le menu Monde du joueur est remis tel qu'il était.
 - **Quitter** : l'écran devient noir avec « SIGNAL COUPÉ », le son est coupé, un bouton discret « Rallumer »
   relance une exploration.
 - **Aucune progression permanente** pour l'instant : c'est le grand chantier qui reste (§ 12).
@@ -1172,7 +1175,8 @@ recopier** la configuration d'essai que la base contient aussi (génération, é
 
 Vue de dessus du début à la fin, vaisseau nez vers le haut. Durée ≈ 11,6 s. Jouée au premier lancement
 (`np-intro`) et, depuis le 21 novembre 2026, **à chaque nouvelle partie lancée par le joueur** (`nouvellePartie`,
-appelée par les boutons « Nouvelle exploration » et par le rallumage) : elle marque l'arrivée au niveau 1, comme la
+appelée par « Nouvelle exploration » après la victoire et par le rallumage ; après la destruction de la foreuse,
+`deployerForeuse` force en plus le niveau 1) : elle marque l'arrivée au niveau 1, comme la
 cinématique de forage marque le passage au niveau suivant. Pas après une mise à jour de page en cours de partie,
 pas si l'utilisateur a demandé moins d'animations. **Lab → Niv1** rejoue la scène puis lance un niveau 1 (recette « atterrissage ») aux réglages tirés au hasard ; **Lab → Niv2** joue la cinématique de forage puis lance un niveau 2 (recette « cavernes ») aux réglages tirés au hasard, la foreuse gardant ce qu'elle a. Dans les deux cas le menu Monde du joueur est remis tel qu'il était ; seule la taille de carte en est reprise (21 novembre 2026 ; avant, un bouton « Intro » rejouait l'arrivée sur la carte du menu). REGEN ne joue aucune cinématique. **Échap,
 Espace ou Entrée** passe directement au posé.

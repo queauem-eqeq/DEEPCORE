@@ -283,6 +283,11 @@ function newGame(){SANS_VAISSEAU=false;NIV_GEN=NIV_RECETTE(GEN.recette);niveau()
   else say(`Niveau ${G.niv} : la foreuse a débouché dans un réseau de cavernes. Un site de forage plus bas est signalé.`,'info');}   // arrivée par un puits
 // Nouvelle partie lancée par le joueur : la cinématique d'arrivée se rejoue (21 novembre 2026)
 function nouvellePartie(){newGame();started=true;$('overlay').hidden=true;render();playIntro();}
+/* Foreuse détruite → « Déployer une nouvelle foreuse » (22 novembre 2026) : on repart toujours du niveau 1 (recette
+   « atterrissage », avec le vaisseau), quelle que soit la recette affichée dans le menu Monde, et la cinématique d'arrivée
+   se rejoue. La foreuse est neuve : rien n'est gardé de la précédente. Le menu Monde du joueur est remis en place après. */
+function deployerForeuse(){const sauve=JSON.parse(JSON.stringify(GEN));recRange();recPrend(RECETTE_NIV(1));
+  GEN.recette='atterrissage';newGame();genRemet(sauve);started=true;$('overlay').hidden=true;render();playIntro();}
 /* Niveau suivant (21 novembre 2026) : pas de vaisseau, on arrive par le puits. Le niveau 2 (et les suivants, tant qu'ils n'ont
    pas leur recette) est généré avec la recette « cavernes » et les réglages que le joueur lui a donnés dans le menu Monde,
    quelle que soit la recette affichée ; la case « Réglages au hasard » les tire d'abord, comme pour REGEN. Le menu Monde du
