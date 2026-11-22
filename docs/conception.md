@@ -503,7 +503,7 @@ Pris dans la montagne, il tombe quand on brise la paroi ; passer dessus ajoute *
 
 ### Sonar
 
-**10 à 20 tours après l'arrivée**, la foreuse émet une **onde circulaire** qui balaie toute la carte : un cercle
+**10 à 30 tours après l'arrivée** (10 à 20 jusqu'au 22 novembre 2026), la foreuse émet une **onde circulaire** qui balaie toute la carte : un cercle
 d'un pixel de tuile, calé sur la grille, opaque, couleur accent, à 38 cases par seconde et pendant 2,6 s au moins.
 L'onde se voit **aussi sur la mini-carte**, et un « blip blip » l'accompagne.
 

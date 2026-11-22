@@ -146,7 +146,7 @@ function ensureSolOv(){if(!G)return;const R=SOL_REG,key=(G.seed||'')+'|'+PAL['3'
 function voile(x,y,px,py,a,cx2,uni){const c=cx2||ctx;   // uni : couleur unie, sans la texture du sol (ponts des bâtiments)
   if(!uni&&SOL_OV&&SOL_OV._g===G){c.globalAlpha=a;c.drawImage(SOL_OV,x*16,y*16,16,16,px,py,S,S);return;}
   c.globalAlpha=.08*a;c.fillStyle=PAL['3'];c.fillRect(px,py,S,S);}
-/* Sonar (13 novembre 2026, revu le 15) : 10 à 20 tours après l'arrivée sur un niveau, la foreuse émet une onde circulaire qui balaie toute
+/* Sonar (13 novembre 2026, revu le 15) : 10 à 30 tours (10 à 20 jusqu’au 22 novembre 2026) après l'arrivée sur un niveau, la foreuse émet une onde circulaire qui balaie toute
    la carte et détecte les gisements (éclats de métal et Matière). G.sonar : 1 = à émettre (au tour G.sonarAt), 2 = émis.
    Ce qui est détecté s'affiche sur la carte et la mini-carte, même là où la foreuse n'a rien vu, au fur et à mesure que l'onde l'atteint.
    L'onde se dessine aussi sur la mini-carte ; un « blip blip » l'accompagne pendant tout le balayage. */

@@ -262,10 +262,10 @@ function niveau(refait){drilling=false;
   G.amb=ambDouble();   // « monde · bâti », les deux archétypes, affiché dans le Statut et à l'arrivée
   durcir();   // la roche dure avant les métaux : ils n'y apparaissent jamais
   {const a=W*H/(48*32);G.eff={};G.fum={};hideOre(Math.max(1,Math.round(GISEMENTS.metal*a)),Math.max(1,Math.round(GISEMENTS.mat*a)));}
-  G.sonar=1;   // sonar à émettre (voir sonarStart, 10-rendu) : il part 10 à 20 tours après l'arrivée
+  G.sonar=1;   // sonar à émettre (voir sonarStart, 10-rendu) : il part 10 à 30 tours après l’arrivée (22 novembre 2026 ; avant 10 à 20)
   G.items={};G.tracks={};G.lastDir=null;G.beasts=[];G.blood={};G.fv=2;
   G.inv=invTest();G.log=[];
-  G.st.matiere=G.st.matiere||0;G.sonarAt=(G.turn||0)+10+Math.floor(Math.random()*11);
+  G.st.matiere=G.st.matiere||0;G.sonarAt=(G.turn||0)+10+Math.floor(Math.random()*21);
   if(typeof baseFinir==='function'&&(RECETTES[GEN.recette]||{}).base)baseFinir();
   const PLANS_POSES_M=PLANS_POSES={};
   machines();
