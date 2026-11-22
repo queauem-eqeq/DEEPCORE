@@ -9,7 +9,7 @@ function batiTuile(t,x,y,put){
   put(TL.floor,.5);
   if(t===PILLAR)put(TL.pillar,.95);
   else if(t===MACHINE)put(TL['mach'+((G.art&&G.art[idx(x,y)])||0)],1);
-  else if(t===ANTENNA)put(G.art&&G.art[idx(x,y)]===1?TL.antenneOn:TL.antenne,1);
+  else if(t===ANTENNA)put(G.art&&(G.art[idx(x,y)]===1||G.art[idx(x,y)]===2)?TL.antenneOn:TL.antenne,1);
   else if(t===TERMINAL)put(TL.terminal,1);
   else if(t===FLOOR){if(G.soc&&G.soc[idx(x,y)]!=null)put(TL.socle,1);}
   else if(machTuile(t))machTuileRendu(t,x,y,put);

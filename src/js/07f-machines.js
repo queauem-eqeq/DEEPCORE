@@ -37,7 +37,7 @@ function machRayon(l){const out=[],t=G.t;
 const machVivant=l=>l.c.some(i=>G.t[i]===(l.k==='x'?PYLON:TURRET));
 // Un laser ne tire que si la foreuse le voit (22 novembre 2026) : la tourelle, le pylône ou une case de son rayon est en vue.
 // Sans témoin, il reste éteint : les ennemis en vadrouille ne s'y blessent plus. MACH_VUE=false rend l'ancien comportement (essais).
-let MACH_VUE=true;
+let MACH_VUE=true;const MACH_SON=5;
 const machVu=l=>!MACH_VUE||typeof vis==='undefined'||!vis||l.c.some(i=>vis[i])||machRayon(l).some(j=>vis[j]);
 const machTire=(l,t)=>!l.cut&&machVivant(l)&&((((t??G.mt)||0)+l.off)%l.per)<l.on&&machVu(l);
 // cases éclairées en ce moment : {case: 'v' | 'h' | 'x'}
@@ -45,7 +45,7 @@ function machLit(t){const m={};for(const l of G.las||[])if(machTire(l,t))for(con
 function machZone(){const z={};for(const l of G.las||[])if(!l.cut&&machVivant(l))for(const j of machRayon(l))z[j]=1;G.lz=z;}
 // un battement : les lasers avancent d'un cran, et tout ce qui se tient dans un rayon allumé prend MACH_DM
 function machTick(){if(!G.las||!G.las.length||G.over)return;G.mt=(G.mt||0)+1;const lit=machLit();let n=0,vu=false;
-  for(const k in lit){n++;if(vis[+k])vu=true;}if(!n)return;
+  for(const k in lit){n++;const j=+k;if(vis[j]&&Math.max(Math.abs(j%W-G.px),Math.abs(((j/W)|0)-G.py))<MACH_SON)vu=true;}if(!n)return;   // le tir ne s'entend qu'en vue et à moins de 5 cases (22 novembre 2026)
   if(vu&&typeof SFX!=='undefined')SFX.laser();
   for(const [liste,fiches] of [[G.beasts||[],BEASTS],[G.animals||[],SPECIES]])for(const o of [...liste]){
     const pieds=liste===G.beasts&&typeof FOOT!=='undefined'?FOOT:[[0,0]];if(!pieds.some(([dx,dy])=>lit[idx(o.x+dx,o.y+dy)]))continue;

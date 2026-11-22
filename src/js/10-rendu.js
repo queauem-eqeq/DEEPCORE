@@ -220,6 +220,8 @@ function render(){
     ctx.globalAlpha=1;ctx.drawImage(img,px,py,S,S);
     const fl=FX.find(f=>f.kind==='flash'&&f.beast===b);if(fl){ctx.globalCompositeOperation='lighter';ctx.globalAlpha=1-fxP(fl);ctx.drawImage(img,px,py,S,S);ctx.drawImage(img,px,py,S,S);ctx.globalCompositeOperation='source-over';ctx.globalAlpha=1;}
     barreVie(px,py,b.hp,pvDe(BEASTS[b.sp]));}
+  // antenne : un ennemi hors de vue dans le disque d'une antenne allumée se montre par un point en couleur danger (22 novembre 2026)
+  if(G.beasts&&fog)for(const b of G.beasts){if(vis[idx(b.x,b.y)]||!antDetecte(b))continue;const q=S/16;ctx.globalAlpha=1;ctx.fillStyle=PAL['4'];ctx.fillRect((b.x-camX)*S+6*q,(b.y-camY)*S+6*q,4*q,4*q);}
   // nuage d'un fumigène : les tuiles de nuage par-dessus le terrain et les créatures, sous la foreuse ; elles pâlissent en se dissipant
   // la fumée se voit même là où elle coupe la vue : sinon on ne verrait que les neuf cases autour de la foreuse
   if(G.fum)for(const k in G.fum){const i=+k;if(fog&&!vis[i]&&!G.seen[i])continue;const c=G.fum[k],t=TL['nuage'+c.k];

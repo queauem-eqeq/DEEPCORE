@@ -11,3 +11,4 @@ Rangées dans le dépôt : l'ordinateur n'était plus joignable (en veille) au m
 08-palette-lagon.png                        Palette Lagon.
 09-palette-amethyste.png                    Palette Améthyste.
 10-vitrines-et-salle-laser-recompense.png   Vitrines (trois lots, un seul à prendre) en haut ; salle à lasers avec son butin.
+11-antenne-points-rouges.png                 Antenne après 15 tours : le brouillard est revenu, les ennemis du disque restent signalés par un point rouge.

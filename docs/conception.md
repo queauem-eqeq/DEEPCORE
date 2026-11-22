@@ -577,7 +577,7 @@ Code : `07c-artefacts.js`, appelé à la fin de la génération des bâtiments.
 
 | Artefact | Ce qu'il fait | Fréquence − / = / + |
 |---|---|---|
-| **Antenne** | La foreuse l'active **en avançant dessus** (un battement) : elle **reste allumée** et tient en vue un **disque de 30 cases de large** autour d'elle, murs compris — le brouillard n'y revient pas, où que soit la foreuse, et les créatures qui s'y trouvent se voient. | une carte sur deux / 1 / 2 par carte **Allumage** (22 novembre 2026) : le disque se découvre en une seconde, anneau par anneau (cases à 1, puis 2, 3… jusqu'au bord), au rythme du cercle qui s'étend (`ANT_ANIM`, `ANT_DUR`) ; tout d'un coup si le mouvement est réduit. Le cercle d'une antenne ne détecte pas les gisements comme le sonar. |
+| **Antenne** | La foreuse l'active **en avançant dessus** (un battement). Depuis le 22 novembre 2026 elle ne lève le brouillard que **15 tours**, sur un **disque de 30 cases de large**, murs compris (découvert anneau par anneau) ; ensuite le brouillard revient, mais elle **continue de signaler les ennemis** du disque par un **point en couleur danger**, sur la carte et la mini-carte. Avant : le disque restait en vue pour toujours. |
 | **Pièces envahies d'herbe** | La pièce entière est couverte d'herbes hautes et basses mêlées par touffes (le site et les clés gardent leur sol). | 8 % / 18 % / 35 % des pièces |
 | **Machines** | Dix machines hors d'usage (tuyaux, serveur, caisses, ordinateur, établi, cuve, générateur, console, turbine, armoire électrique), posées en **obstacles** : une à cinq par pièce choisie. **Elles barrent le pas mais pas la vue**, au contraire des piliers. Une charge sismique les réduit en gravats. | 15 % / 35 % / 60 % des pièces |
 | **Terminal** | La foreuse l'active en avançant dessus : une fenêtre affiche **un texte** (huit fragments de journal, provisoires ; le temps ne passe pas). | 1 / 2 / 4 par carte |
@@ -615,6 +615,7 @@ retouchables dans le Tile editor (groupe « Machines »).
 - **Un laser ne tire que si la foreuse le voit** (22 novembre 2026) : sa tourelle, son pylône ou une case de son rayon est en
   vue (`machVu`). Sans témoin il reste éteint : les ennemis en vadrouille ne s'y blessent plus. Le rythme, lui, continue de
   tourner (`G.mt`). On peut toujours attirer un ennemi dans un rayon qu'on regarde.
+- **Le tir ne s'entend qu'en vue et à moins de 5 cases** (22 novembre 2026).
 - **Aucun avertissement avant un tir** (choix de l'utilisateur) : chaque laser a sa période et son décalage, tirés à la
   génération ; on apprend le rythme en regardant. L'état affiché est celui du battement en cours.
 - **Les lasers blessent tout le monde**, 10 points (`MACH_DM`) : la foreuse comme les ennemis. Un ennemi calme n'entre
