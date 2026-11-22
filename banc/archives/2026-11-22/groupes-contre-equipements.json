@@ -1,0 +1,7508 @@
+[
+ {
+  "cfg": {
+   "nomE": "4 crabots",
+   "nomK": "nu",
+   "carte": "arene",
+   "ennemis": {
+    "crabos": 4
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 66,
+   "v0": 100,
+   "perte": 34.1,
+   "ennemis": 4,
+   "tues": 4,
+   "parMonstre": 8.5,
+   "cons": 0,
+   "bat": 18
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "4 crabots",
+   "nomK": "2 réparobots",
+   "carte": "arene",
+   "ennemis": {
+    "crabos": 4
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "conso": {
+    "repar": 2
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 72,
+   "v0": 100,
+   "perte": 28.2,
+   "ennemis": 4,
+   "tues": 4,
+   "parMonstre": 7,
+   "cons": 0.14,
+   "bat": 19
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "4 crabots",
+   "nomK": "1 charge",
+   "carte": "arene",
+   "ennemis": {
+    "crabos": 4
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "conso": {
+    "charge": 1
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 64,
+   "v0": 100,
+   "perte": 35.6,
+   "ennemis": 4,
+   "tues": 4,
+   "parMonstre": 8.9,
+   "cons": 0.88,
+   "bat": 19
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "4 crabots",
+   "nomK": "1 batterie",
+   "carte": "arene",
+   "ennemis": {
+    "crabos": 4
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "conso": {
+    "batterie": 1
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 70,
+   "v0": 100,
+   "perte": 29.9,
+   "ennemis": 4,
+   "tues": 4,
+   "parMonstre": 7.5,
+   "cons": 0.79,
+   "bat": 18
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "4 crabots",
+   "nomK": "1 surrégime",
+   "carte": "arene",
+   "ennemis": {
+    "crabos": 4
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "conso": {
+    "berserk": 1
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 75,
+   "v0": 100,
+   "perte": 24.7,
+   "ennemis": 4,
+   "tues": 4,
+   "parMonstre": 6.2,
+   "cons": 1,
+   "bat": 17
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "4 crabots",
+   "nomK": "trousse complète",
+   "carte": "arene",
+   "ennemis": {
+    "crabos": 4
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "conso": {
+    "repar": 2,
+    "charge": 1,
+    "batterie": 1,
+    "berserk": 1
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 76,
+   "v0": 100,
+   "perte": 24.2,
+   "ennemis": 4,
+   "tues": 4,
+   "parMonstre": 6,
+   "cons": 2.63,
+   "bat": 18
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "4 crabots",
+   "nomK": "POW 11",
+   "carte": "arene",
+   "ennemis": {
+    "crabos": 4
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "pow": 11
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 69,
+   "v0": 100,
+   "perte": 30.9,
+   "ennemis": 4,
+   "tues": 4,
+   "parMonstre": 7.7,
+   "cons": 0,
+   "bat": 18
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "4 crabots",
+   "nomK": "POW 12",
+   "carte": "arene",
+   "ennemis": {
+    "crabos": 4
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "pow": 12
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 67,
+   "v0": 100,
+   "perte": 33.5,
+   "ennemis": 4,
+   "tues": 4,
+   "parMonstre": 8.4,
+   "cons": 0,
+   "bat": 18
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "4 crabots",
+   "nomK": "Trépan, POW 12",
+   "carte": "arene",
+   "ennemis": {
+    "crabos": 4
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "pow": 12,
+   "arme": "trepan"
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 70,
+   "v0": 100,
+   "perte": 29.5,
+   "ennemis": 4,
+   "tues": 4,
+   "parMonstre": 7.4,
+   "cons": 0,
+   "bat": 19
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "4 crabots",
+   "nomK": "Trépan, POW 10",
+   "carte": "arene",
+   "ennemis": {
+    "crabos": 4
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "arme": "trepan"
+  },
+  "res": {
+   "n": 200,
+   "vic": 86,
+   "mort": 15,
+   "inc": 0,
+   "vie": 40,
+   "v0": 100,
+   "perte": 65.4,
+   "ennemis": 4,
+   "tues": 3.8,
+   "parMonstre": 17.4,
+   "cons": 0,
+   "bat": 24
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "4 crabots",
+   "nomK": "Blindage, POW 12",
+   "carte": "arene",
+   "ennemis": {
+    "crabos": 4
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "pow": 12,
+   "armure": "blindage"
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 69,
+   "v0": 100,
+   "perte": 31.1,
+   "ennemis": 4,
+   "tues": 4,
+   "parMonstre": 7.8,
+   "cons": 0,
+   "bat": 19
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "4 crabots",
+   "nomK": "Vrille",
+   "carte": "arene",
+   "ennemis": {
+    "crabos": 4
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "arme": "vrille"
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 72,
+   "v0": 100,
+   "perte": 28.4,
+   "ennemis": 4,
+   "tues": 4,
+   "parMonstre": 7.1,
+   "cons": 0,
+   "bat": 17
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "4 crabots",
+   "nomK": "Carène",
+   "carte": "arene",
+   "ennemis": {
+    "crabos": 4
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "armure": "carene"
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 65,
+   "v0": 100,
+   "perte": 34.8,
+   "ennemis": 4,
+   "tues": 4,
+   "parMonstre": 8.7,
+   "cons": 0,
+   "bat": 18
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "4 crabots",
+   "nomK": "Viseur + stabilisateur + gyroscope",
+   "carte": "arene",
+   "ennemis": {
+    "crabos": 4
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "acc": [
+    "viseur",
+    "stabil",
+    "gyro"
+   ]
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 75,
+   "v0": 100,
+   "perte": 25.4,
+   "ennemis": 4,
+   "tues": 4,
+   "parMonstre": 6.3,
+   "cons": 0,
+   "bat": 18
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "6 crabots",
+   "nomK": "nu",
+   "carte": "arene",
+   "ennemis": {
+    "crabos": 6
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0
+  },
+  "res": {
+   "n": 200,
+   "vic": 87,
+   "mort": 14,
+   "inc": 0,
+   "vie": 33,
+   "v0": 100,
+   "perte": 71.6,
+   "ennemis": 6,
+   "tues": 5.8,
+   "parMonstre": 12.4,
+   "cons": 0,
+   "bat": 23
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "6 crabots",
+   "nomK": "2 réparobots",
+   "carte": "arene",
+   "ennemis": {
+    "crabos": 6
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "conso": {
+    "repar": 2
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 75,
+   "v0": 100,
+   "perte": 25.1,
+   "ennemis": 6,
+   "tues": 6,
+   "parMonstre": 4.2,
+   "cons": 0.99,
+   "bat": 24
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "6 crabots",
+   "nomK": "1 charge",
+   "carte": "arene",
+   "ennemis": {
+    "crabos": 6
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "conso": {
+    "charge": 1
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 81,
+   "mort": 20,
+   "inc": 0,
+   "vie": 35,
+   "v0": 100,
+   "perte": 71.9,
+   "ennemis": 6,
+   "tues": 5.6,
+   "parMonstre": 12.8,
+   "cons": 1,
+   "bat": 23
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "6 crabots",
+   "nomK": "1 batterie",
+   "carte": "arene",
+   "ennemis": {
+    "crabos": 6
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "conso": {
+    "batterie": 1
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 91,
+   "mort": 10,
+   "inc": 0,
+   "vie": 42,
+   "v0": 100,
+   "perte": 62.1,
+   "ennemis": 6,
+   "tues": 5.8,
+   "parMonstre": 10.7,
+   "cons": 1,
+   "bat": 23
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "6 crabots",
+   "nomK": "1 surrégime",
+   "carte": "arene",
+   "ennemis": {
+    "crabos": 6
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "conso": {
+    "berserk": 1
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 97,
+   "mort": 3,
+   "inc": 0,
+   "vie": 51,
+   "v0": 100,
+   "perte": 50.5,
+   "ennemis": 6,
+   "tues": 5.9,
+   "parMonstre": 8.5,
+   "cons": 1,
+   "bat": 21
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "6 crabots",
+   "nomK": "trousse complète",
+   "carte": "arene",
+   "ennemis": {
+    "crabos": 6
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "conso": {
+    "repar": 2,
+    "charge": 1,
+    "batterie": 1,
+    "berserk": 1
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 72,
+   "v0": 100,
+   "perte": 27.7,
+   "ennemis": 6,
+   "tues": 6,
+   "parMonstre": 4.6,
+   "cons": 3.58,
+   "bat": 23
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "6 crabots",
+   "nomK": "POW 11",
+   "carte": "arene",
+   "ennemis": {
+    "crabos": 6
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "pow": 11
+  },
+  "res": {
+   "n": 200,
+   "vic": 91,
+   "mort": 10,
+   "inc": 0,
+   "vie": 38,
+   "v0": 100,
+   "perte": 65.5,
+   "ennemis": 6,
+   "tues": 5.8,
+   "parMonstre": 11.3,
+   "cons": 0,
+   "bat": 23
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "6 crabots",
+   "nomK": "POW 12",
+   "carte": "arene",
+   "ennemis": {
+    "crabos": 6
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "pow": 12
+  },
+  "res": {
+   "n": 200,
+   "vic": 83,
+   "mort": 17,
+   "inc": 0,
+   "vie": 36,
+   "v0": 100,
+   "perte": 70,
+   "ennemis": 6,
+   "tues": 5.7,
+   "parMonstre": 12.3,
+   "cons": 0,
+   "bat": 22
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "6 crabots",
+   "nomK": "Trépan, POW 12",
+   "carte": "arene",
+   "ennemis": {
+    "crabos": 6
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "pow": 12,
+   "arme": "trepan"
+  },
+  "res": {
+   "n": 200,
+   "vic": 89,
+   "mort": 11,
+   "inc": 0,
+   "vie": 41,
+   "v0": 100,
+   "perte": 63.4,
+   "ennemis": 6,
+   "tues": 5.8,
+   "parMonstre": 11,
+   "cons": 0,
+   "bat": 23
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "6 crabots",
+   "nomK": "Trépan, POW 10",
+   "carte": "arene",
+   "ennemis": {
+    "crabos": 6
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "arme": "trepan"
+  },
+  "res": {
+   "n": 200,
+   "vic": 12,
+   "mort": 89,
+   "inc": 0,
+   "vie": 19,
+   "v0": 100,
+   "perte": 97.8,
+   "ennemis": 6,
+   "tues": 3.2,
+   "parMonstre": 30.4,
+   "cons": 0,
+   "bat": 22
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "6 crabots",
+   "nomK": "Blindage, POW 12",
+   "carte": "arene",
+   "ennemis": {
+    "crabos": 6
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "pow": 12,
+   "armure": "blindage"
+  },
+  "res": {
+   "n": 200,
+   "vic": 89,
+   "mort": 12,
+   "inc": 0,
+   "vie": 36,
+   "v0": 100,
+   "perte": 67.9,
+   "ennemis": 6,
+   "tues": 5.8,
+   "parMonstre": 11.7,
+   "cons": 0,
+   "bat": 24
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "6 crabots",
+   "nomK": "Vrille",
+   "carte": "arene",
+   "ennemis": {
+    "crabos": 6
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "arme": "vrille"
+  },
+  "res": {
+   "n": 200,
+   "vic": 97,
+   "mort": 3,
+   "inc": 0,
+   "vie": 47,
+   "v0": 100,
+   "perte": 54.4,
+   "ennemis": 6,
+   "tues": 6,
+   "parMonstre": 9.1,
+   "cons": 0,
+   "bat": 21
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "6 crabots",
+   "nomK": "Carène",
+   "carte": "arene",
+   "ennemis": {
+    "crabos": 6
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "armure": "carene"
+  },
+  "res": {
+   "n": 200,
+   "vic": 85,
+   "mort": 15,
+   "inc": 0,
+   "vie": 36,
+   "v0": 100,
+   "perte": 69.6,
+   "ennemis": 6,
+   "tues": 5.8,
+   "parMonstre": 12.1,
+   "cons": 0,
+   "bat": 22
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "6 crabots",
+   "nomK": "Viseur + stabilisateur + gyroscope",
+   "carte": "arene",
+   "ennemis": {
+    "crabos": 6
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "acc": [
+    "viseur",
+    "stabil",
+    "gyro"
+   ]
+  },
+  "res": {
+   "n": 200,
+   "vic": 96,
+   "mort": 5,
+   "inc": 0,
+   "vie": 49,
+   "v0": 100,
+   "perte": 53.4,
+   "ennemis": 6,
+   "tues": 5.9,
+   "parMonstre": 9,
+   "cons": 0,
+   "bat": 22
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "4 relais",
+   "nomK": "nu",
+   "carte": "arene",
+   "ennemis": {
+    "cafar": 4
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 79,
+   "v0": 100,
+   "perte": 20.5,
+   "ennemis": 4,
+   "tues": 4,
+   "parMonstre": 5.1,
+   "cons": 0,
+   "bat": 15
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "4 relais",
+   "nomK": "2 réparobots",
+   "carte": "arene",
+   "ennemis": {
+    "cafar": 4
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "conso": {
+    "repar": 2
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 78,
+   "v0": 100,
+   "perte": 21.7,
+   "ennemis": 4,
+   "tues": 4,
+   "parMonstre": 5.4,
+   "cons": 0.01,
+   "bat": 15
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "4 relais",
+   "nomK": "1 charge",
+   "carte": "arene",
+   "ennemis": {
+    "cafar": 4
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "conso": {
+    "charge": 1
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 79,
+   "v0": 100,
+   "perte": 21.3,
+   "ennemis": 4,
+   "tues": 4,
+   "parMonstre": 5.3,
+   "cons": 1,
+   "bat": 15
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "4 relais",
+   "nomK": "1 batterie",
+   "carte": "arene",
+   "ennemis": {
+    "cafar": 4
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "conso": {
+    "batterie": 1
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 80,
+   "v0": 100,
+   "perte": 20.2,
+   "ennemis": 4,
+   "tues": 4,
+   "parMonstre": 5,
+   "cons": 0.97,
+   "bat": 15
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "4 relais",
+   "nomK": "1 surrégime",
+   "carte": "arene",
+   "ennemis": {
+    "cafar": 4
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "conso": {
+    "berserk": 1
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 78,
+   "v0": 100,
+   "perte": 21.6,
+   "ennemis": 4,
+   "tues": 4,
+   "parMonstre": 5.4,
+   "cons": 0.01,
+   "bat": 15
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "4 relais",
+   "nomK": "trousse complète",
+   "carte": "arene",
+   "ennemis": {
+    "cafar": 4
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "conso": {
+    "repar": 2,
+    "charge": 1,
+    "batterie": 1,
+    "berserk": 1
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 81,
+   "v0": 100,
+   "perte": 18.7,
+   "ennemis": 4,
+   "tues": 4,
+   "parMonstre": 4.7,
+   "cons": 1.96,
+   "bat": 15
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "4 relais",
+   "nomK": "POW 11",
+   "carte": "arene",
+   "ennemis": {
+    "cafar": 4
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "pow": 11
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 78,
+   "v0": 100,
+   "perte": 22,
+   "ennemis": 4,
+   "tues": 4,
+   "parMonstre": 5.5,
+   "cons": 0,
+   "bat": 15
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "4 relais",
+   "nomK": "POW 12",
+   "carte": "arene",
+   "ennemis": {
+    "cafar": 4
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "pow": 12
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 80,
+   "v0": 100,
+   "perte": 20,
+   "ennemis": 4,
+   "tues": 4,
+   "parMonstre": 5,
+   "cons": 0,
+   "bat": 14
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "4 relais",
+   "nomK": "Trépan, POW 12",
+   "carte": "arene",
+   "ennemis": {
+    "cafar": 4
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "pow": 12,
+   "arme": "trepan"
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 78,
+   "v0": 100,
+   "perte": 22.1,
+   "ennemis": 4,
+   "tues": 4,
+   "parMonstre": 5.5,
+   "cons": 0,
+   "bat": 16
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "4 relais",
+   "nomK": "Trépan, POW 10",
+   "carte": "arene",
+   "ennemis": {
+    "cafar": 4
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "arme": "trepan"
+  },
+  "res": {
+   "n": 200,
+   "vic": 97,
+   "mort": 3,
+   "inc": 0,
+   "vie": 54,
+   "v0": 100,
+   "perte": 47.8,
+   "ennemis": 4,
+   "tues": 4,
+   "parMonstre": 12.1,
+   "cons": 0,
+   "bat": 22
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "4 relais",
+   "nomK": "Blindage, POW 12",
+   "carte": "arene",
+   "ennemis": {
+    "cafar": 4
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "pow": 12,
+   "armure": "blindage"
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 80,
+   "v0": 100,
+   "perte": 19.6,
+   "ennemis": 4,
+   "tues": 4,
+   "parMonstre": 4.9,
+   "cons": 0,
+   "bat": 15
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "4 relais",
+   "nomK": "Vrille",
+   "carte": "arene",
+   "ennemis": {
+    "cafar": 4
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "arme": "vrille"
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 82,
+   "v0": 100,
+   "perte": 17.7,
+   "ennemis": 4,
+   "tues": 4,
+   "parMonstre": 4.4,
+   "cons": 0,
+   "bat": 13
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "4 relais",
+   "nomK": "Carène",
+   "carte": "arene",
+   "ennemis": {
+    "cafar": 4
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "armure": "carene"
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 77,
+   "v0": 100,
+   "perte": 22.7,
+   "ennemis": 4,
+   "tues": 4,
+   "parMonstre": 5.7,
+   "cons": 0,
+   "bat": 14
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "4 relais",
+   "nomK": "Viseur + stabilisateur + gyroscope",
+   "carte": "arene",
+   "ennemis": {
+    "cafar": 4
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "acc": [
+    "viseur",
+    "stabil",
+    "gyro"
+   ]
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 85,
+   "v0": 100,
+   "perte": 14.7,
+   "ennemis": 4,
+   "tues": 4,
+   "parMonstre": 3.7,
+   "cons": 0,
+   "bat": 14
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "7 relais (salle piégée)",
+   "nomK": "nu",
+   "carte": "arene",
+   "ennemis": {
+    "cafar": 7
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0
+  },
+  "res": {
+   "n": 200,
+   "vic": 97,
+   "mort": 4,
+   "inc": 0,
+   "vie": 48,
+   "v0": 100,
+   "perte": 53.3,
+   "ennemis": 7,
+   "tues": 7,
+   "parMonstre": 7.7,
+   "cons": 0,
+   "bat": 21
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "7 relais (salle piégée)",
+   "nomK": "2 réparobots",
+   "carte": "arene",
+   "ennemis": {
+    "cafar": 7
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "conso": {
+    "repar": 2
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 73,
+   "v0": 100,
+   "perte": 27.2,
+   "ennemis": 7,
+   "tues": 7,
+   "parMonstre": 3.9,
+   "cons": 0.47,
+   "bat": 21
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "7 relais (salle piégée)",
+   "nomK": "1 charge",
+   "carte": "arene",
+   "ennemis": {
+    "cafar": 7
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "conso": {
+    "charge": 1
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 97,
+   "mort": 3,
+   "inc": 0,
+   "vie": 49,
+   "v0": 100,
+   "perte": 52.5,
+   "ennemis": 7,
+   "tues": 6.9,
+   "parMonstre": 7.6,
+   "cons": 1,
+   "bat": 21
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "7 relais (salle piégée)",
+   "nomK": "1 batterie",
+   "carte": "arene",
+   "ennemis": {
+    "cafar": 7
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "conso": {
+    "batterie": 1
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 99,
+   "mort": 2,
+   "inc": 0,
+   "vie": 49,
+   "v0": 100,
+   "perte": 52,
+   "ennemis": 7,
+   "tues": 7,
+   "parMonstre": 7.5,
+   "cons": 0.99,
+   "bat": 21
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "7 relais (salle piégée)",
+   "nomK": "1 surrégime",
+   "carte": "arene",
+   "ennemis": {
+    "cafar": 7
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "conso": {
+    "berserk": 1
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 96,
+   "mort": 5,
+   "inc": 0,
+   "vie": 51,
+   "v0": 100,
+   "perte": 51.4,
+   "ennemis": 7,
+   "tues": 6.9,
+   "parMonstre": 7.4,
+   "cons": 0.01,
+   "bat": 21
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "7 relais (salle piégée)",
+   "nomK": "trousse complète",
+   "carte": "arene",
+   "ennemis": {
+    "cafar": 7
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "conso": {
+    "repar": 2,
+    "charge": 1,
+    "batterie": 1,
+    "berserk": 1
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 75,
+   "v0": 100,
+   "perte": 25.5,
+   "ennemis": 7,
+   "tues": 7,
+   "parMonstre": 3.6,
+   "cons": 2.57,
+   "bat": 22
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "7 relais (salle piégée)",
+   "nomK": "POW 11",
+   "carte": "arene",
+   "ennemis": {
+    "cafar": 7
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "pow": 11
+  },
+  "res": {
+   "n": 200,
+   "vic": 97,
+   "mort": 3,
+   "inc": 0,
+   "vie": 54,
+   "v0": 100,
+   "perte": 47.9,
+   "ennemis": 7,
+   "tues": 6.9,
+   "parMonstre": 6.9,
+   "cons": 0,
+   "bat": 21
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "7 relais (salle piégée)",
+   "nomK": "POW 12",
+   "carte": "arene",
+   "ennemis": {
+    "cafar": 7
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "pow": 12
+  },
+  "res": {
+   "n": 200,
+   "vic": 98,
+   "mort": 3,
+   "inc": 0,
+   "vie": 54,
+   "v0": 100,
+   "perte": 47.2,
+   "ennemis": 7,
+   "tues": 7,
+   "parMonstre": 6.8,
+   "cons": 0,
+   "bat": 20
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "7 relais (salle piégée)",
+   "nomK": "Trépan, POW 12",
+   "carte": "arene",
+   "ennemis": {
+    "cafar": 7
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "pow": 12,
+   "arme": "trepan"
+  },
+  "res": {
+   "n": 200,
+   "vic": 96,
+   "mort": 5,
+   "inc": 0,
+   "vie": 48,
+   "v0": 100,
+   "perte": 53.9,
+   "ennemis": 7,
+   "tues": 6.9,
+   "parMonstre": 7.8,
+   "cons": 0,
+   "bat": 23
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "7 relais (salle piégée)",
+   "nomK": "Trépan, POW 10",
+   "carte": "arene",
+   "ennemis": {
+    "cafar": 7
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "arme": "trepan"
+  },
+  "res": {
+   "n": 200,
+   "vic": 29,
+   "mort": 72,
+   "inc": 0,
+   "vie": 21,
+   "v0": 100,
+   "perte": 93.9,
+   "ennemis": 7,
+   "tues": 4.5,
+   "parMonstre": 20.6,
+   "cons": 0,
+   "bat": 25
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "7 relais (salle piégée)",
+   "nomK": "Blindage, POW 12",
+   "carte": "arene",
+   "ennemis": {
+    "cafar": 7
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "pow": 12,
+   "armure": "blindage"
+  },
+  "res": {
+   "n": 200,
+   "vic": 98,
+   "mort": 2,
+   "inc": 0,
+   "vie": 55,
+   "v0": 100,
+   "perte": 46.6,
+   "ennemis": 7,
+   "tues": 7,
+   "parMonstre": 6.7,
+   "cons": 0,
+   "bat": 22
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "7 relais (salle piégée)",
+   "nomK": "Vrille",
+   "carte": "arene",
+   "ennemis": {
+    "cafar": 7
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "arme": "vrille"
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 61,
+   "v0": 100,
+   "perte": 38.7,
+   "ennemis": 7,
+   "tues": 7,
+   "parMonstre": 5.5,
+   "cons": 0,
+   "bat": 19
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "7 relais (salle piégée)",
+   "nomK": "Carène",
+   "carte": "arene",
+   "ennemis": {
+    "cafar": 7
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "armure": "carene"
+  },
+  "res": {
+   "n": 200,
+   "vic": 97,
+   "mort": 4,
+   "inc": 0,
+   "vie": 49,
+   "v0": 100,
+   "perte": 52.6,
+   "ennemis": 7,
+   "tues": 6.9,
+   "parMonstre": 7.6,
+   "cons": 0,
+   "bat": 21
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "7 relais (salle piégée)",
+   "nomK": "Viseur + stabilisateur + gyroscope",
+   "carte": "arene",
+   "ennemis": {
+    "cafar": 7
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "acc": [
+    "viseur",
+    "stabil",
+    "gyro"
+   ]
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 66,
+   "v0": 100,
+   "perte": 33.8,
+   "ennemis": 7,
+   "tues": 7,
+   "parMonstre": 4.8,
+   "cons": 0,
+   "bat": 19
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "Broyeur",
+   "nomK": "nu",
+   "carte": "arene",
+   "ennemis": {
+    "mastok": 1
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0
+  },
+  "res": {
+   "n": 200,
+   "vic": 98,
+   "mort": 3,
+   "inc": 0,
+   "vie": 50,
+   "v0": 100,
+   "perte": 51.1,
+   "ennemis": 1,
+   "tues": 1,
+   "parMonstre": 52.4,
+   "cons": 0,
+   "bat": 13
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "Broyeur",
+   "nomK": "2 réparobots",
+   "carte": "arene",
+   "ennemis": {
+    "mastok": 1
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "conso": {
+    "repar": 2
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 73,
+   "v0": 100,
+   "perte": 27.2,
+   "ennemis": 1,
+   "tues": 1,
+   "parMonstre": 27.2,
+   "cons": 0.57,
+   "bat": 14
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "Broyeur",
+   "nomK": "1 charge",
+   "carte": "arene",
+   "ennemis": {
+    "mastok": 1
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "conso": {
+    "charge": 1
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 99,
+   "mort": 2,
+   "inc": 0,
+   "vie": 51,
+   "v0": 100,
+   "perte": 49.8,
+   "ennemis": 1,
+   "tues": 1,
+   "parMonstre": 50.6,
+   "cons": 1,
+   "bat": 14
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "Broyeur",
+   "nomK": "1 batterie",
+   "carte": "arene",
+   "ennemis": {
+    "mastok": 1
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "conso": {
+    "batterie": 1
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 99,
+   "mort": 1,
+   "inc": 0,
+   "vie": 48,
+   "v0": 100,
+   "perte": 52.1,
+   "ennemis": 1,
+   "tues": 1,
+   "parMonstre": 52.6,
+   "cons": 0,
+   "bat": 14
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "Broyeur",
+   "nomK": "1 surrégime",
+   "carte": "arene",
+   "ennemis": {
+    "mastok": 1
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "conso": {
+    "berserk": 1
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 67,
+   "v0": 100,
+   "perte": 33.1,
+   "ennemis": 1,
+   "tues": 1,
+   "parMonstre": 33.1,
+   "cons": 1,
+   "bat": 11
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "Broyeur",
+   "nomK": "trousse complète",
+   "carte": "arene",
+   "ennemis": {
+    "mastok": 1
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "conso": {
+    "repar": 2,
+    "charge": 1,
+    "batterie": 1,
+    "berserk": 1
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 73,
+   "v0": 100,
+   "perte": 27.2,
+   "ennemis": 1,
+   "tues": 1,
+   "parMonstre": 27.2,
+   "cons": 2.19,
+   "bat": 12
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "Broyeur",
+   "nomK": "POW 11",
+   "carte": "arene",
+   "ennemis": {
+    "mastok": 1
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "pow": 11
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 1,
+   "inc": 0,
+   "vie": 50,
+   "v0": 100,
+   "perte": 50.6,
+   "ennemis": 1,
+   "tues": 1,
+   "parMonstre": 50.8,
+   "cons": 0,
+   "bat": 14
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "Broyeur",
+   "nomK": "POW 12",
+   "carte": "arene",
+   "ennemis": {
+    "mastok": 1
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "pow": 12
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 1,
+   "inc": 0,
+   "vie": 52,
+   "v0": 100,
+   "perte": 48.3,
+   "ennemis": 1,
+   "tues": 1,
+   "parMonstre": 48.5,
+   "cons": 0,
+   "bat": 14
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "Broyeur",
+   "nomK": "Trépan, POW 12",
+   "carte": "arene",
+   "ennemis": {
+    "mastok": 1
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "pow": 12,
+   "arme": "trepan"
+  },
+  "res": {
+   "n": 200,
+   "vic": 99,
+   "mort": 1,
+   "inc": 0,
+   "vie": 57,
+   "v0": 100,
+   "perte": 43.6,
+   "ennemis": 1,
+   "tues": 1,
+   "parMonstre": 44.1,
+   "cons": 0,
+   "bat": 13
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "Broyeur",
+   "nomK": "Trépan, POW 10",
+   "carte": "arene",
+   "ennemis": {
+    "mastok": 1
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "arme": "trepan"
+  },
+  "res": {
+   "n": 200,
+   "vic": 66,
+   "mort": 35,
+   "inc": 0,
+   "vie": 32,
+   "v0": 100,
+   "perte": 79.3,
+   "ennemis": 1,
+   "tues": 0.7,
+   "parMonstre": 121,
+   "cons": 0,
+   "bat": 18
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "Broyeur",
+   "nomK": "Blindage, POW 12",
+   "carte": "arene",
+   "ennemis": {
+    "mastok": 1
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "pow": 12,
+   "armure": "blindage"
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 1,
+   "inc": 0,
+   "vie": 58,
+   "v0": 100,
+   "perte": 42.2,
+   "ennemis": 1,
+   "tues": 1,
+   "parMonstre": 42.4,
+   "cons": 0,
+   "bat": 15
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "Broyeur",
+   "nomK": "Vrille",
+   "carte": "arene",
+   "ennemis": {
+    "mastok": 1
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "arme": "vrille"
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 1,
+   "inc": 0,
+   "vie": 61,
+   "v0": 100,
+   "perte": 39.5,
+   "ennemis": 1,
+   "tues": 1,
+   "parMonstre": 39.7,
+   "cons": 0,
+   "bat": 13
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "Broyeur",
+   "nomK": "Carène",
+   "carte": "arene",
+   "ennemis": {
+    "mastok": 1
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "armure": "carene"
+  },
+  "res": {
+   "n": 200,
+   "vic": 99,
+   "mort": 1,
+   "inc": 0,
+   "vie": 50,
+   "v0": 100,
+   "perte": 50.8,
+   "ennemis": 1,
+   "tues": 1,
+   "parMonstre": 51.3,
+   "cons": 0,
+   "bat": 13
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "Broyeur",
+   "nomK": "Viseur + stabilisateur + gyroscope",
+   "carte": "arene",
+   "ennemis": {
+    "mastok": 1
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "acc": [
+    "viseur",
+    "stabil",
+    "gyro"
+   ]
+  },
+  "res": {
+   "n": 200,
+   "vic": 99,
+   "mort": 1,
+   "inc": 0,
+   "vie": 64,
+   "v0": 100,
+   "perte": 36.7,
+   "ennemis": 1,
+   "tues": 1,
+   "parMonstre": 37,
+   "cons": 0,
+   "bat": 13
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "Broyeur + 2 crabots",
+   "nomK": "nu",
+   "carte": "arene",
+   "ennemis": {
+    "mastok": 1,
+    "crabos": 2
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0
+  },
+  "res": {
+   "n": 200,
+   "vic": 85,
+   "mort": 15,
+   "inc": 0,
+   "vie": 36,
+   "v0": 100,
+   "perte": 69.6,
+   "ennemis": 3,
+   "tues": 2.8,
+   "parMonstre": 24.7,
+   "cons": 0,
+   "bat": 20
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "Broyeur + 2 crabots",
+   "nomK": "2 réparobots",
+   "carte": "arene",
+   "ennemis": {
+    "mastok": 1,
+    "crabos": 2
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "conso": {
+    "repar": 2
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 70,
+   "v0": 100,
+   "perte": 29.9,
+   "ennemis": 3,
+   "tues": 3,
+   "parMonstre": 10,
+   "cons": 1.06,
+   "bat": 21
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "Broyeur + 2 crabots",
+   "nomK": "1 charge",
+   "carte": "arene",
+   "ennemis": {
+    "mastok": 1,
+    "crabos": 2
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "conso": {
+    "charge": 1
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 80,
+   "mort": 21,
+   "inc": 0,
+   "vie": 36,
+   "v0": 100,
+   "perte": 71.1,
+   "ennemis": 3,
+   "tues": 2.8,
+   "parMonstre": 25.7,
+   "cons": 1,
+   "bat": 20
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "Broyeur + 2 crabots",
+   "nomK": "1 batterie",
+   "carte": "arene",
+   "ennemis": {
+    "mastok": 1,
+    "crabos": 2
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "conso": {
+    "batterie": 1
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 89,
+   "mort": 11,
+   "inc": 0,
+   "vie": 41,
+   "v0": 100,
+   "perte": 63.6,
+   "ennemis": 3,
+   "tues": 2.9,
+   "parMonstre": 22.3,
+   "cons": 0.66,
+   "bat": 20
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "Broyeur + 2 crabots",
+   "nomK": "1 surrégime",
+   "carte": "arene",
+   "ennemis": {
+    "mastok": 1,
+    "crabos": 2
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "conso": {
+    "berserk": 1
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 96,
+   "mort": 5,
+   "inc": 0,
+   "vie": 46,
+   "v0": 100,
+   "perte": 56,
+   "ennemis": 3,
+   "tues": 3,
+   "parMonstre": 19,
+   "cons": 1,
+   "bat": 18
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "Broyeur + 2 crabots",
+   "nomK": "trousse complète",
+   "carte": "arene",
+   "ennemis": {
+    "mastok": 1,
+    "crabos": 2
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "conso": {
+    "repar": 2,
+    "charge": 1,
+    "batterie": 1,
+    "berserk": 1
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 74,
+   "v0": 100,
+   "perte": 25.9,
+   "ennemis": 3,
+   "tues": 3,
+   "parMonstre": 8.6,
+   "cons": 3.02,
+   "bat": 19
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "Broyeur + 2 crabots",
+   "nomK": "POW 11",
+   "carte": "arene",
+   "ennemis": {
+    "mastok": 1,
+    "crabos": 2
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "pow": 11
+  },
+  "res": {
+   "n": 200,
+   "vic": 82,
+   "mort": 19,
+   "inc": 0,
+   "vie": 35,
+   "v0": 100,
+   "perte": 71.2,
+   "ennemis": 3,
+   "tues": 2.8,
+   "parMonstre": 25.7,
+   "cons": 0,
+   "bat": 20
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "Broyeur + 2 crabots",
+   "nomK": "POW 12",
+   "carte": "arene",
+   "ennemis": {
+    "mastok": 1,
+    "crabos": 2
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "pow": 12
+  },
+  "res": {
+   "n": 200,
+   "vic": 88,
+   "mort": 13,
+   "inc": 0,
+   "vie": 36,
+   "v0": 100,
+   "perte": 68.1,
+   "ennemis": 3,
+   "tues": 2.9,
+   "parMonstre": 23.9,
+   "cons": 0,
+   "bat": 20
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "Broyeur + 2 crabots",
+   "nomK": "Trépan, POW 12",
+   "carte": "arene",
+   "ennemis": {
+    "mastok": 1,
+    "crabos": 2
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "pow": 12,
+   "arme": "trepan"
+  },
+  "res": {
+   "n": 200,
+   "vic": 94,
+   "mort": 7,
+   "inc": 0,
+   "vie": 40,
+   "v0": 100,
+   "perte": 62.1,
+   "ennemis": 3,
+   "tues": 2.9,
+   "parMonstre": 21.3,
+   "cons": 0,
+   "bat": 20
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "Broyeur + 2 crabots",
+   "nomK": "Trépan, POW 10",
+   "carte": "arene",
+   "ennemis": {
+    "mastok": 1,
+    "crabos": 2
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "arme": "trepan"
+  },
+  "res": {
+   "n": 200,
+   "vic": 22,
+   "mort": 78,
+   "inc": 0,
+   "vie": 24,
+   "v0": 100,
+   "perte": 94.7,
+   "ennemis": 3,
+   "tues": 1.9,
+   "parMonstre": 49.6,
+   "cons": 0,
+   "bat": 22
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "Broyeur + 2 crabots",
+   "nomK": "Blindage, POW 12",
+   "carte": "arene",
+   "ennemis": {
+    "mastok": 1,
+    "crabos": 2
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "pow": 12,
+   "armure": "blindage"
+  },
+  "res": {
+   "n": 200,
+   "vic": 84,
+   "mort": 17,
+   "inc": 0,
+   "vie": 38,
+   "v0": 100,
+   "perte": 67.9,
+   "ennemis": 3,
+   "tues": 2.8,
+   "parMonstre": 24.3,
+   "cons": 0,
+   "bat": 20
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "Broyeur + 2 crabots",
+   "nomK": "Vrille",
+   "carte": "arene",
+   "ennemis": {
+    "mastok": 1,
+    "crabos": 2
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "arme": "vrille"
+  },
+  "res": {
+   "n": 200,
+   "vic": 94,
+   "mort": 7,
+   "inc": 0,
+   "vie": 42,
+   "v0": 100,
+   "perte": 60.8,
+   "ennemis": 3,
+   "tues": 2.9,
+   "parMonstre": 20.8,
+   "cons": 0,
+   "bat": 18
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "Broyeur + 2 crabots",
+   "nomK": "Carène",
+   "carte": "arene",
+   "ennemis": {
+    "mastok": 1,
+    "crabos": 2
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "armure": "carene"
+  },
+  "res": {
+   "n": 200,
+   "vic": 82,
+   "mort": 18,
+   "inc": 0,
+   "vie": 34,
+   "v0": 100,
+   "perte": 72.4,
+   "ennemis": 3,
+   "tues": 2.8,
+   "parMonstre": 26,
+   "cons": 0,
+   "bat": 19
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "Broyeur + 2 crabots",
+   "nomK": "Viseur + stabilisateur + gyroscope",
+   "carte": "arene",
+   "ennemis": {
+    "mastok": 1,
+    "crabos": 2
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "acc": [
+    "viseur",
+    "stabil",
+    "gyro"
+   ]
+  },
+  "res": {
+   "n": 200,
+   "vic": 93,
+   "mort": 7,
+   "inc": 0,
+   "vie": 49,
+   "v0": 100,
+   "perte": 54.6,
+   "ennemis": 3,
+   "tues": 2.9,
+   "parMonstre": 18.8,
+   "cons": 0,
+   "bat": 18
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "Bloqueur seul",
+   "nomK": "nu",
+   "carte": "arene",
+   "ennemis": {
+    "gardien": 1
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 92,
+   "v0": 100,
+   "perte": 8,
+   "ennemis": 1,
+   "tues": 1,
+   "parMonstre": 8,
+   "cons": 0,
+   "bat": 9
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "Bloqueur seul",
+   "nomK": "2 réparobots",
+   "carte": "arene",
+   "ennemis": {
+    "gardien": 1
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "conso": {
+    "repar": 2
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 92,
+   "v0": 100,
+   "perte": 7.7,
+   "ennemis": 1,
+   "tues": 1,
+   "parMonstre": 7.7,
+   "cons": 0,
+   "bat": 9
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "Bloqueur seul",
+   "nomK": "1 charge",
+   "carte": "arene",
+   "ennemis": {
+    "gardien": 1
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "conso": {
+    "charge": 1
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 92,
+   "v0": 100,
+   "perte": 7.9,
+   "ennemis": 1,
+   "tues": 1,
+   "parMonstre": 7.9,
+   "cons": 1,
+   "bat": 10
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "Bloqueur seul",
+   "nomK": "1 batterie",
+   "carte": "arene",
+   "ennemis": {
+    "gardien": 1
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "conso": {
+    "batterie": 1
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 98,
+   "v0": 100,
+   "perte": 2.4,
+   "ennemis": 1,
+   "tues": 1,
+   "parMonstre": 2.4,
+   "cons": 0.98,
+   "bat": 10
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "Bloqueur seul",
+   "nomK": "1 surrégime",
+   "carte": "arene",
+   "ennemis": {
+    "gardien": 1
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "conso": {
+    "berserk": 1
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 94,
+   "v0": 100,
+   "perte": 6.3,
+   "ennemis": 1,
+   "tues": 1,
+   "parMonstre": 6.3,
+   "cons": 1,
+   "bat": 9
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "Bloqueur seul",
+   "nomK": "trousse complète",
+   "carte": "arene",
+   "ennemis": {
+    "gardien": 1
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "conso": {
+    "repar": 2,
+    "charge": 1,
+    "batterie": 1,
+    "berserk": 1
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 98,
+   "v0": 100,
+   "perte": 2.4,
+   "ennemis": 1,
+   "tues": 1,
+   "parMonstre": 2.4,
+   "cons": 3,
+   "bat": 9
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "Bloqueur seul",
+   "nomK": "POW 11",
+   "carte": "arene",
+   "ennemis": {
+    "gardien": 1
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "pow": 11
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 92,
+   "v0": 100,
+   "perte": 8,
+   "ennemis": 1,
+   "tues": 1,
+   "parMonstre": 8,
+   "cons": 0,
+   "bat": 9
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "Bloqueur seul",
+   "nomK": "POW 12",
+   "carte": "arene",
+   "ennemis": {
+    "gardien": 1
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "pow": 12
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 93,
+   "v0": 100,
+   "perte": 7.2,
+   "ennemis": 1,
+   "tues": 1,
+   "parMonstre": 7.2,
+   "cons": 0,
+   "bat": 9
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "Bloqueur seul",
+   "nomK": "Trépan, POW 12",
+   "carte": "arene",
+   "ennemis": {
+    "gardien": 1
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "pow": 12,
+   "arme": "trepan"
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 93,
+   "v0": 100,
+   "perte": 6.7,
+   "ennemis": 1,
+   "tues": 1,
+   "parMonstre": 6.7,
+   "cons": 0,
+   "bat": 9
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "Bloqueur seul",
+   "nomK": "Trépan, POW 10",
+   "carte": "arene",
+   "ennemis": {
+    "gardien": 1
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "arme": "trepan"
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 84,
+   "v0": 100,
+   "perte": 16,
+   "ennemis": 1,
+   "tues": 1,
+   "parMonstre": 16,
+   "cons": 0,
+   "bat": 14
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "Bloqueur seul",
+   "nomK": "Blindage, POW 12",
+   "carte": "arene",
+   "ennemis": {
+    "gardien": 1
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "pow": 12,
+   "armure": "blindage"
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 92,
+   "v0": 100,
+   "perte": 7.7,
+   "ennemis": 1,
+   "tues": 1,
+   "parMonstre": 7.7,
+   "cons": 0,
+   "bat": 10
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "Bloqueur seul",
+   "nomK": "Vrille",
+   "carte": "arene",
+   "ennemis": {
+    "gardien": 1
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "arme": "vrille"
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 94,
+   "v0": 100,
+   "perte": 5.8,
+   "ennemis": 1,
+   "tues": 1,
+   "parMonstre": 5.8,
+   "cons": 0,
+   "bat": 8
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "Bloqueur seul",
+   "nomK": "Carène",
+   "carte": "arene",
+   "ennemis": {
+    "gardien": 1
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "armure": "carene"
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 92,
+   "v0": 100,
+   "perte": 7.6,
+   "ennemis": 1,
+   "tues": 1,
+   "parMonstre": 7.6,
+   "cons": 0,
+   "bat": 9
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "Bloqueur seul",
+   "nomK": "Viseur + stabilisateur + gyroscope",
+   "carte": "arene",
+   "ennemis": {
+    "gardien": 1
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "acc": [
+    "viseur",
+    "stabil",
+    "gyro"
+   ]
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 95,
+   "v0": 100,
+   "perte": 5,
+   "ennemis": 1,
+   "tues": 1,
+   "parMonstre": 5,
+   "cons": 0,
+   "bat": 8
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "Bloqueur + 2 artilleurs",
+   "nomK": "nu",
+   "carte": "arene",
+   "ennemis": {
+    "gardien": 1,
+    "artilleur": 2
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 1,
+   "inc": 0,
+   "vie": 48,
+   "v0": 100,
+   "perte": 51.9,
+   "ennemis": 3,
+   "tues": 3,
+   "parMonstre": 17.3,
+   "cons": 0,
+   "bat": 55
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "Bloqueur + 2 artilleurs",
+   "nomK": "2 réparobots",
+   "carte": "arene",
+   "ennemis": {
+    "gardien": 1,
+    "artilleur": 2
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "conso": {
+    "repar": 2
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 74,
+   "v0": 100,
+   "perte": 26.1,
+   "ennemis": 3,
+   "tues": 3,
+   "parMonstre": 8.7,
+   "cons": 0.58,
+   "bat": 55
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "Bloqueur + 2 artilleurs",
+   "nomK": "1 charge",
+   "carte": "arene",
+   "ennemis": {
+    "gardien": 1,
+    "artilleur": 2
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "conso": {
+    "charge": 1
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 1,
+   "inc": 0,
+   "vie": 49,
+   "v0": 100,
+   "perte": 51.5,
+   "ennemis": 3,
+   "tues": 3,
+   "parMonstre": 17.2,
+   "cons": 1,
+   "bat": 55
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "Bloqueur + 2 artilleurs",
+   "nomK": "1 batterie",
+   "carte": "arene",
+   "ennemis": {
+    "gardien": 1,
+    "artilleur": 2
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "conso": {
+    "batterie": 1
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 53,
+   "v0": 100,
+   "perte": 46.6,
+   "ennemis": 3,
+   "tues": 3,
+   "parMonstre": 15.5,
+   "cons": 0.99,
+   "bat": 54
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "Bloqueur + 2 artilleurs",
+   "nomK": "1 surrégime",
+   "carte": "arene",
+   "ennemis": {
+    "gardien": 1,
+    "artilleur": 2
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "conso": {
+    "berserk": 1
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 1,
+   "inc": 0,
+   "vie": 51,
+   "v0": 100,
+   "perte": 49,
+   "ennemis": 3,
+   "tues": 3,
+   "parMonstre": 16.4,
+   "cons": 1,
+   "bat": 55
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "Bloqueur + 2 artilleurs",
+   "nomK": "trousse complète",
+   "carte": "arene",
+   "ennemis": {
+    "gardien": 1,
+    "artilleur": 2
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "conso": {
+    "repar": 2,
+    "charge": 1,
+    "batterie": 1,
+    "berserk": 1
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 74,
+   "v0": 100,
+   "perte": 25.8,
+   "ennemis": 3,
+   "tues": 3,
+   "parMonstre": 8.6,
+   "cons": 3.48,
+   "bat": 56
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "Bloqueur + 2 artilleurs",
+   "nomK": "POW 11",
+   "carte": "arene",
+   "ennemis": {
+    "gardien": 1,
+    "artilleur": 2
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "pow": 11
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 49,
+   "v0": 100,
+   "perte": 50.8,
+   "ennemis": 3,
+   "tues": 3,
+   "parMonstre": 16.9,
+   "cons": 0,
+   "bat": 55
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "Bloqueur + 2 artilleurs",
+   "nomK": "POW 12",
+   "carte": "arene",
+   "ennemis": {
+    "gardien": 1,
+    "artilleur": 2
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "pow": 12
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 48,
+   "v0": 100,
+   "perte": 52.4,
+   "ennemis": 3,
+   "tues": 3,
+   "parMonstre": 17.5,
+   "cons": 0,
+   "bat": 56
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "Bloqueur + 2 artilleurs",
+   "nomK": "Trépan, POW 12",
+   "carte": "arene",
+   "ennemis": {
+    "gardien": 1,
+    "artilleur": 2
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "pow": 12,
+   "arme": "trepan"
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 1,
+   "inc": 0,
+   "vie": 51,
+   "v0": 100,
+   "perte": 49.7,
+   "ennemis": 3,
+   "tues": 3,
+   "parMonstre": 16.6,
+   "cons": 0,
+   "bat": 56
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "Bloqueur + 2 artilleurs",
+   "nomK": "Trépan, POW 10",
+   "carte": "arene",
+   "ennemis": {
+    "gardien": 1,
+    "artilleur": 2
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "arme": "trepan"
+  },
+  "res": {
+   "n": 200,
+   "vic": 86,
+   "mort": 15,
+   "inc": 0,
+   "vie": 35,
+   "v0": 100,
+   "perte": 70.1,
+   "ennemis": 3,
+   "tues": 2.8,
+   "parMonstre": 25.3,
+   "cons": 0,
+   "bat": 58
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "Bloqueur + 2 artilleurs",
+   "nomK": "Blindage, POW 12",
+   "carte": "arene",
+   "ennemis": {
+    "gardien": 1,
+    "artilleur": 2
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "pow": 12,
+   "armure": "blindage"
+  },
+  "res": {
+   "n": 200,
+   "vic": 84,
+   "mort": 16,
+   "inc": 0,
+   "vie": 26,
+   "v0": 100,
+   "perte": 78.2,
+   "ennemis": 3,
+   "tues": 2.8,
+   "parMonstre": 27.6,
+   "cons": 0,
+   "bat": 64
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "Bloqueur + 2 artilleurs",
+   "nomK": "Vrille",
+   "carte": "arene",
+   "ennemis": {
+    "gardien": 1,
+    "artilleur": 2
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "arme": "vrille"
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 56,
+   "v0": 100,
+   "perte": 43.9,
+   "ennemis": 3,
+   "tues": 3,
+   "parMonstre": 14.6,
+   "cons": 0,
+   "bat": 53
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "Bloqueur + 2 artilleurs",
+   "nomK": "Carène",
+   "carte": "arene",
+   "ennemis": {
+    "gardien": 1,
+    "artilleur": 2
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "armure": "carene"
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 62,
+   "v0": 100,
+   "perte": 37.9,
+   "ennemis": 3,
+   "tues": 3,
+   "parMonstre": 12.6,
+   "cons": 0,
+   "bat": 40
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "Bloqueur + 2 artilleurs",
+   "nomK": "Viseur + stabilisateur + gyroscope",
+   "carte": "arene",
+   "ennemis": {
+    "gardien": 1,
+    "artilleur": 2
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "acc": [
+    "viseur",
+    "stabil",
+    "gyro"
+   ]
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 60,
+   "v0": 100,
+   "perte": 40.3,
+   "ennemis": 3,
+   "tues": 3,
+   "parMonstre": 13.4,
+   "cons": 0,
+   "bat": 54
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "Bloqueur + 2 mines",
+   "nomK": "nu",
+   "carte": "arene",
+   "ennemis": {
+    "gardien": 1,
+    "mine": 2
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 87,
+   "v0": 100,
+   "perte": 12.8,
+   "ennemis": 3,
+   "tues": 3,
+   "parMonstre": 4.3,
+   "cons": 0,
+   "bat": 13
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "Bloqueur + 2 mines",
+   "nomK": "2 réparobots",
+   "carte": "arene",
+   "ennemis": {
+    "gardien": 1,
+    "mine": 2
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "conso": {
+    "repar": 2
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 88,
+   "v0": 100,
+   "perte": 11.6,
+   "ennemis": 3,
+   "tues": 3,
+   "parMonstre": 3.9,
+   "cons": 0.01,
+   "bat": 13
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "Bloqueur + 2 mines",
+   "nomK": "1 charge",
+   "carte": "arene",
+   "ennemis": {
+    "gardien": 1,
+    "mine": 2
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "conso": {
+    "charge": 1
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 87,
+   "v0": 100,
+   "perte": 13.4,
+   "ennemis": 3,
+   "tues": 3,
+   "parMonstre": 4.5,
+   "cons": 1,
+   "bat": 13
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "Bloqueur + 2 mines",
+   "nomK": "1 batterie",
+   "carte": "arene",
+   "ennemis": {
+    "gardien": 1,
+    "mine": 2
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "conso": {
+    "batterie": 1
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 93,
+   "v0": 100,
+   "perte": 6.7,
+   "ennemis": 3,
+   "tues": 3,
+   "parMonstre": 2.2,
+   "cons": 1,
+   "bat": 13
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "Bloqueur + 2 mines",
+   "nomK": "1 surrégime",
+   "carte": "arene",
+   "ennemis": {
+    "gardien": 1,
+    "mine": 2
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "conso": {
+    "berserk": 1
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 90,
+   "v0": 100,
+   "perte": 9.8,
+   "ennemis": 3,
+   "tues": 3,
+   "parMonstre": 3.3,
+   "cons": 1,
+   "bat": 12
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "Bloqueur + 2 mines",
+   "nomK": "trousse complète",
+   "carte": "arene",
+   "ennemis": {
+    "gardien": 1,
+    "mine": 2
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "conso": {
+    "repar": 2,
+    "charge": 1,
+    "batterie": 1,
+    "berserk": 1
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 90,
+   "v0": 100,
+   "perte": 9.8,
+   "ennemis": 3,
+   "tues": 3,
+   "parMonstre": 3.3,
+   "cons": 2.95,
+   "bat": 12
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "Bloqueur + 2 mines",
+   "nomK": "POW 11",
+   "carte": "arene",
+   "ennemis": {
+    "gardien": 1,
+    "mine": 2
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "pow": 11
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 88,
+   "v0": 100,
+   "perte": 12.1,
+   "ennemis": 3,
+   "tues": 3,
+   "parMonstre": 4,
+   "cons": 0,
+   "bat": 13
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "Bloqueur + 2 mines",
+   "nomK": "POW 12",
+   "carte": "arene",
+   "ennemis": {
+    "gardien": 1,
+    "mine": 2
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "pow": 12
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 89,
+   "v0": 100,
+   "perte": 11.1,
+   "ennemis": 3,
+   "tues": 3,
+   "parMonstre": 3.7,
+   "cons": 0,
+   "bat": 13
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "Bloqueur + 2 mines",
+   "nomK": "Trépan, POW 12",
+   "carte": "arene",
+   "ennemis": {
+    "gardien": 1,
+    "mine": 2
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "pow": 12,
+   "arme": "trepan"
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 88,
+   "v0": 100,
+   "perte": 12,
+   "ennemis": 3,
+   "tues": 3,
+   "parMonstre": 4,
+   "cons": 0,
+   "bat": 13
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "Bloqueur + 2 mines",
+   "nomK": "Trépan, POW 10",
+   "carte": "arene",
+   "ennemis": {
+    "gardien": 1,
+    "mine": 2
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "arme": "trepan"
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 70,
+   "v0": 100,
+   "perte": 29.5,
+   "ennemis": 3,
+   "tues": 3,
+   "parMonstre": 9.8,
+   "cons": 0,
+   "bat": 17
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "Bloqueur + 2 mines",
+   "nomK": "Blindage, POW 12",
+   "carte": "arene",
+   "ennemis": {
+    "gardien": 1,
+    "mine": 2
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "pow": 12,
+   "armure": "blindage"
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 87,
+   "v0": 100,
+   "perte": 13.2,
+   "ennemis": 3,
+   "tues": 3,
+   "parMonstre": 4.4,
+   "cons": 0,
+   "bat": 14
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "Bloqueur + 2 mines",
+   "nomK": "Vrille",
+   "carte": "arene",
+   "ennemis": {
+    "gardien": 1,
+    "mine": 2
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "arme": "vrille"
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 91,
+   "v0": 100,
+   "perte": 9.2,
+   "ennemis": 3,
+   "tues": 3,
+   "parMonstre": 3.1,
+   "cons": 0,
+   "bat": 12
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "Bloqueur + 2 mines",
+   "nomK": "Carène",
+   "carte": "arene",
+   "ennemis": {
+    "gardien": 1,
+    "mine": 2
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "armure": "carene"
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 88,
+   "v0": 100,
+   "perte": 12.1,
+   "ennemis": 3,
+   "tues": 3,
+   "parMonstre": 4,
+   "cons": 0,
+   "bat": 13
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "Bloqueur + 2 mines",
+   "nomK": "Viseur + stabilisateur + gyroscope",
+   "carte": "arene",
+   "ennemis": {
+    "gardien": 1,
+    "mine": 2
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "acc": [
+    "viseur",
+    "stabil",
+    "gyro"
+   ]
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 92,
+   "v0": 100,
+   "perte": 7.7,
+   "ennemis": 3,
+   "tues": 3,
+   "parMonstre": 2.6,
+   "cons": 0,
+   "bat": 12
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "Bloqueur + 2 sentinelles",
+   "nomK": "nu",
+   "carte": "arene",
+   "ennemis": {
+    "gardien": 1,
+    "paralyzor": 2
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 80,
+   "v0": 100,
+   "perte": 20,
+   "ennemis": 3,
+   "tues": 3,
+   "parMonstre": 6.7,
+   "cons": 0,
+   "bat": 16
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "Bloqueur + 2 sentinelles",
+   "nomK": "2 réparobots",
+   "carte": "arene",
+   "ennemis": {
+    "gardien": 1,
+    "paralyzor": 2
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "conso": {
+    "repar": 2
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 79,
+   "v0": 100,
+   "perte": 20.6,
+   "ennemis": 3,
+   "tues": 3,
+   "parMonstre": 6.9,
+   "cons": 0.01,
+   "bat": 16
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "Bloqueur + 2 sentinelles",
+   "nomK": "1 charge",
+   "carte": "arene",
+   "ennemis": {
+    "gardien": 1,
+    "paralyzor": 2
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "conso": {
+    "charge": 1
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 79,
+   "v0": 100,
+   "perte": 21.2,
+   "ennemis": 3,
+   "tues": 3,
+   "parMonstre": 7.1,
+   "cons": 1,
+   "bat": 16
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "Bloqueur + 2 sentinelles",
+   "nomK": "1 batterie",
+   "carte": "arene",
+   "ennemis": {
+    "gardien": 1,
+    "paralyzor": 2
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "conso": {
+    "batterie": 1
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 86,
+   "v0": 100,
+   "perte": 14.4,
+   "ennemis": 3,
+   "tues": 3,
+   "parMonstre": 4.8,
+   "cons": 1.01,
+   "bat": 16
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "Bloqueur + 2 sentinelles",
+   "nomK": "1 surrégime",
+   "carte": "arene",
+   "ennemis": {
+    "gardien": 1,
+    "paralyzor": 2
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "conso": {
+    "berserk": 1
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 85,
+   "v0": 100,
+   "perte": 15.4,
+   "ennemis": 3,
+   "tues": 3,
+   "parMonstre": 5.1,
+   "cons": 1.01,
+   "bat": 14
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "Bloqueur + 2 sentinelles",
+   "nomK": "trousse complète",
+   "carte": "arene",
+   "ennemis": {
+    "gardien": 1,
+    "paralyzor": 2
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "conso": {
+    "repar": 2,
+    "charge": 1,
+    "batterie": 1,
+    "berserk": 1
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 88,
+   "v0": 100,
+   "perte": 12.1,
+   "ennemis": 3,
+   "tues": 3,
+   "parMonstre": 4,
+   "cons": 2.98,
+   "bat": 15
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "Bloqueur + 2 sentinelles",
+   "nomK": "POW 11",
+   "carte": "arene",
+   "ennemis": {
+    "gardien": 1,
+    "paralyzor": 2
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "pow": 11
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 81,
+   "v0": 100,
+   "perte": 19.4,
+   "ennemis": 3,
+   "tues": 3,
+   "parMonstre": 6.5,
+   "cons": 0,
+   "bat": 16
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "Bloqueur + 2 sentinelles",
+   "nomK": "POW 12",
+   "carte": "arene",
+   "ennemis": {
+    "gardien": 1,
+    "paralyzor": 2
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "pow": 12
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 80,
+   "v0": 100,
+   "perte": 19.7,
+   "ennemis": 3,
+   "tues": 3,
+   "parMonstre": 6.6,
+   "cons": 0,
+   "bat": 15
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "Bloqueur + 2 sentinelles",
+   "nomK": "Trépan, POW 12",
+   "carte": "arene",
+   "ennemis": {
+    "gardien": 1,
+    "paralyzor": 2
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "pow": 12,
+   "arme": "trepan"
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 82,
+   "v0": 100,
+   "perte": 18.5,
+   "ennemis": 3,
+   "tues": 3,
+   "parMonstre": 6.2,
+   "cons": 0,
+   "bat": 16
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "Bloqueur + 2 sentinelles",
+   "nomK": "Trépan, POW 10",
+   "carte": "arene",
+   "ennemis": {
+    "gardien": 1,
+    "paralyzor": 2
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "arme": "trepan"
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 60,
+   "v0": 100,
+   "perte": 40.3,
+   "ennemis": 3,
+   "tues": 3,
+   "parMonstre": 13.4,
+   "cons": 0,
+   "bat": 24
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "Bloqueur + 2 sentinelles",
+   "nomK": "Blindage, POW 12",
+   "carte": "arene",
+   "ennemis": {
+    "gardien": 1,
+    "paralyzor": 2
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "pow": 12,
+   "armure": "blindage"
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 80,
+   "v0": 100,
+   "perte": 19.6,
+   "ennemis": 3,
+   "tues": 3,
+   "parMonstre": 6.5,
+   "cons": 0,
+   "bat": 17
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "Bloqueur + 2 sentinelles",
+   "nomK": "Vrille",
+   "carte": "arene",
+   "ennemis": {
+    "gardien": 1,
+    "paralyzor": 2
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "arme": "vrille"
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 85,
+   "v0": 100,
+   "perte": 15.4,
+   "ennemis": 3,
+   "tues": 3,
+   "parMonstre": 5.1,
+   "cons": 0,
+   "bat": 14
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "Bloqueur + 2 sentinelles",
+   "nomK": "Carène",
+   "carte": "arene",
+   "ennemis": {
+    "gardien": 1,
+    "paralyzor": 2
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "armure": "carene"
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 80,
+   "v0": 100,
+   "perte": 20.4,
+   "ennemis": 3,
+   "tues": 3,
+   "parMonstre": 6.8,
+   "cons": 0,
+   "bat": 16
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "Bloqueur + 2 sentinelles",
+   "nomK": "Viseur + stabilisateur + gyroscope",
+   "carte": "arene",
+   "ennemis": {
+    "gardien": 1,
+    "paralyzor": 2
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "acc": [
+    "viseur",
+    "stabil",
+    "gyro"
+   ]
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 87,
+   "v0": 100,
+   "perte": 13.5,
+   "ennemis": 3,
+   "tues": 3,
+   "parMonstre": 4.5,
+   "cons": 0,
+   "bat": 15
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "2 Bloqueurs + 3 crabots",
+   "nomK": "nu",
+   "carte": "arene",
+   "ennemis": {
+    "gardien": 2,
+    "crabos": 3
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0
+  },
+  "res": {
+   "n": 200,
+   "vic": 97,
+   "mort": 4,
+   "inc": 0,
+   "vie": 44,
+   "v0": 100,
+   "perte": 57.9,
+   "ennemis": 5,
+   "tues": 5,
+   "parMonstre": 11.7,
+   "cons": 0,
+   "bat": 22
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "2 Bloqueurs + 3 crabots",
+   "nomK": "2 réparobots",
+   "carte": "arene",
+   "ennemis": {
+    "gardien": 2,
+    "crabos": 3
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "conso": {
+    "repar": 2
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 74,
+   "v0": 100,
+   "perte": 26,
+   "ennemis": 5,
+   "tues": 5,
+   "parMonstre": 5.2,
+   "cons": 0.77,
+   "bat": 23
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "2 Bloqueurs + 3 crabots",
+   "nomK": "1 charge",
+   "carte": "arene",
+   "ennemis": {
+    "gardien": 2,
+    "crabos": 3
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "conso": {
+    "charge": 1
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 95,
+   "mort": 5,
+   "inc": 0,
+   "vie": 41,
+   "v0": 100,
+   "perte": 61.4,
+   "ennemis": 5,
+   "tues": 4.9,
+   "parMonstre": 12.5,
+   "cons": 1.01,
+   "bat": 22
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "2 Bloqueurs + 3 crabots",
+   "nomK": "1 batterie",
+   "carte": "arene",
+   "ennemis": {
+    "gardien": 2,
+    "crabos": 3
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "conso": {
+    "batterie": 1
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 99,
+   "mort": 2,
+   "inc": 0,
+   "vie": 48,
+   "v0": 100,
+   "perte": 52.8,
+   "ennemis": 5,
+   "tues": 5,
+   "parMonstre": 10.6,
+   "cons": 1,
+   "bat": 22
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "2 Bloqueurs + 3 crabots",
+   "nomK": "1 surrégime",
+   "carte": "arene",
+   "ennemis": {
+    "gardien": 2,
+    "crabos": 3
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "conso": {
+    "berserk": 1
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 1,
+   "inc": 0,
+   "vie": 57,
+   "v0": 100,
+   "perte": 43.1,
+   "ennemis": 5,
+   "tues": 5,
+   "parMonstre": 8.6,
+   "cons": 1,
+   "bat": 20
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "2 Bloqueurs + 3 crabots",
+   "nomK": "trousse complète",
+   "carte": "arene",
+   "ennemis": {
+    "gardien": 2,
+    "crabos": 3
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "conso": {
+    "repar": 2,
+    "charge": 1,
+    "batterie": 1,
+    "berserk": 1
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 73,
+   "v0": 100,
+   "perte": 27.5,
+   "ennemis": 5,
+   "tues": 5,
+   "parMonstre": 5.5,
+   "cons": 3.38,
+   "bat": 21
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "2 Bloqueurs + 3 crabots",
+   "nomK": "POW 11",
+   "carte": "arene",
+   "ennemis": {
+    "gardien": 2,
+    "crabos": 3
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "pow": 11
+  },
+  "res": {
+   "n": 200,
+   "vic": 99,
+   "mort": 1,
+   "inc": 0,
+   "vie": 43,
+   "v0": 100,
+   "perte": 57.9,
+   "ennemis": 5,
+   "tues": 5,
+   "parMonstre": 11.6,
+   "cons": 0,
+   "bat": 22
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "2 Bloqueurs + 3 crabots",
+   "nomK": "POW 12",
+   "carte": "arene",
+   "ennemis": {
+    "gardien": 2,
+    "crabos": 3
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "pow": 12
+  },
+  "res": {
+   "n": 200,
+   "vic": 98,
+   "mort": 3,
+   "inc": 0,
+   "vie": 44,
+   "v0": 100,
+   "perte": 57.1,
+   "ennemis": 5,
+   "tues": 5,
+   "parMonstre": 11.5,
+   "cons": 0,
+   "bat": 22
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "2 Bloqueurs + 3 crabots",
+   "nomK": "Trépan, POW 12",
+   "carte": "arene",
+   "ennemis": {
+    "gardien": 2,
+    "crabos": 3
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "pow": 12,
+   "arme": "trepan"
+  },
+  "res": {
+   "n": 200,
+   "vic": 97,
+   "mort": 3,
+   "inc": 0,
+   "vie": 46,
+   "v0": 100,
+   "perte": 55,
+   "ennemis": 5,
+   "tues": 5,
+   "parMonstre": 11.1,
+   "cons": 0,
+   "bat": 23
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "2 Bloqueurs + 3 crabots",
+   "nomK": "Trépan, POW 10",
+   "carte": "arene",
+   "ennemis": {
+    "gardien": 2,
+    "crabos": 3
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "arme": "trepan"
+  },
+  "res": {
+   "n": 200,
+   "vic": 21,
+   "mort": 79,
+   "inc": 0,
+   "vie": 17,
+   "v0": 100,
+   "perte": 96.5,
+   "ennemis": 5,
+   "tues": 3.1,
+   "parMonstre": 31.3,
+   "cons": 0,
+   "bat": 25
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "2 Bloqueurs + 3 crabots",
+   "nomK": "Blindage, POW 12",
+   "carte": "arene",
+   "ennemis": {
+    "gardien": 2,
+    "crabos": 3
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "pow": 12,
+   "armure": "blindage"
+  },
+  "res": {
+   "n": 200,
+   "vic": 99,
+   "mort": 2,
+   "inc": 0,
+   "vie": 46,
+   "v0": 100,
+   "perte": 54.5,
+   "ennemis": 5,
+   "tues": 5,
+   "parMonstre": 10.9,
+   "cons": 0,
+   "bat": 23
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "2 Bloqueurs + 3 crabots",
+   "nomK": "Vrille",
+   "carte": "arene",
+   "ennemis": {
+    "gardien": 2,
+    "crabos": 3
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "arme": "vrille"
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 55,
+   "v0": 100,
+   "perte": 45.3,
+   "ennemis": 5,
+   "tues": 5,
+   "parMonstre": 9.1,
+   "cons": 0,
+   "bat": 20
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "2 Bloqueurs + 3 crabots",
+   "nomK": "Carène",
+   "carte": "arene",
+   "ennemis": {
+    "gardien": 2,
+    "crabos": 3
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "armure": "carene"
+  },
+  "res": {
+   "n": 200,
+   "vic": 95,
+   "mort": 5,
+   "inc": 0,
+   "vie": 43,
+   "v0": 100,
+   "perte": 59.5,
+   "ennemis": 5,
+   "tues": 4.9,
+   "parMonstre": 12.1,
+   "cons": 0,
+   "bat": 22
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "2 Bloqueurs + 3 crabots",
+   "nomK": "Viseur + stabilisateur + gyroscope",
+   "carte": "arene",
+   "ennemis": {
+    "gardien": 2,
+    "crabos": 3
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "acc": [
+    "viseur",
+    "stabil",
+    "gyro"
+   ]
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 60,
+   "v0": 100,
+   "perte": 40.3,
+   "ennemis": 5,
+   "tues": 5,
+   "parMonstre": 8.1,
+   "cons": 0,
+   "bat": 20
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "8 puces",
+   "nomK": "nu",
+   "carte": "arene",
+   "ennemis": {
+    "insectoide": 8
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0
+  },
+  "res": {
+   "n": 200,
+   "vic": 74,
+   "mort": 26,
+   "inc": 1,
+   "vie": 33,
+   "v0": 100,
+   "perte": 75.4,
+   "ennemis": 8,
+   "tues": 7.2,
+   "parMonstre": 10.5,
+   "cons": 0,
+   "bat": 63
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "8 puces",
+   "nomK": "2 réparobots",
+   "carte": "arene",
+   "ennemis": {
+    "insectoide": 8
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "conso": {
+    "repar": 2
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 99,
+   "mort": 0,
+   "inc": 1,
+   "vie": 71,
+   "v0": 100,
+   "perte": 28.6,
+   "ennemis": 8,
+   "tues": 7.9,
+   "parMonstre": 3.6,
+   "cons": 1.11,
+   "bat": 75
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "8 puces",
+   "nomK": "1 charge",
+   "carte": "arene",
+   "ennemis": {
+    "insectoide": 8
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "conso": {
+    "charge": 1
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 76,
+   "mort": 24,
+   "inc": 1,
+   "vie": 31,
+   "v0": 100,
+   "perte": 75.9,
+   "ennemis": 8,
+   "tues": 7.2,
+   "parMonstre": 10.5,
+   "cons": 1,
+   "bat": 70
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "8 puces",
+   "nomK": "1 batterie",
+   "carte": "arene",
+   "ennemis": {
+    "insectoide": 8
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "conso": {
+    "batterie": 1
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 79,
+   "mort": 21,
+   "inc": 1,
+   "vie": 33,
+   "v0": 100,
+   "perte": 72.9,
+   "ennemis": 8,
+   "tues": 7.3,
+   "parMonstre": 9.9,
+   "cons": 0.99,
+   "bat": 68
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "8 puces",
+   "nomK": "1 surrégime",
+   "carte": "arene",
+   "ennemis": {
+    "insectoide": 8
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "conso": {
+    "berserk": 1
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 78,
+   "mort": 22,
+   "inc": 1,
+   "vie": 32,
+   "v0": 100,
+   "perte": 74.4,
+   "ennemis": 8,
+   "tues": 7.3,
+   "parMonstre": 10.2,
+   "cons": 0,
+   "bat": 71
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "8 puces",
+   "nomK": "trousse complète",
+   "carte": "arene",
+   "ennemis": {
+    "insectoide": 8
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "conso": {
+    "repar": 2,
+    "charge": 1,
+    "batterie": 1,
+    "berserk": 1
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 70,
+   "v0": 100,
+   "perte": 30.1,
+   "ennemis": 8,
+   "tues": 8,
+   "parMonstre": 3.8,
+   "cons": 3.21,
+   "bat": 63
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "8 puces",
+   "nomK": "POW 11",
+   "carte": "arene",
+   "ennemis": {
+    "insectoide": 8
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "pow": 11
+  },
+  "res": {
+   "n": 200,
+   "vic": 80,
+   "mort": 20,
+   "inc": 1,
+   "vie": 35,
+   "v0": 100,
+   "perte": 71.3,
+   "ennemis": 8,
+   "tues": 7.4,
+   "parMonstre": 9.7,
+   "cons": 0,
+   "bat": 69
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "8 puces",
+   "nomK": "POW 12",
+   "carte": "arene",
+   "ennemis": {
+    "insectoide": 8
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "pow": 12
+  },
+  "res": {
+   "n": 200,
+   "vic": 87,
+   "mort": 13,
+   "inc": 0,
+   "vie": 36,
+   "v0": 100,
+   "perte": 68.8,
+   "ennemis": 8,
+   "tues": 7.7,
+   "parMonstre": 9,
+   "cons": 0,
+   "bat": 61
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "8 puces",
+   "nomK": "Trépan, POW 12",
+   "carte": "arene",
+   "ennemis": {
+    "insectoide": 8
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "pow": 12,
+   "arme": "trepan"
+  },
+  "res": {
+   "n": 200,
+   "vic": 83,
+   "mort": 17,
+   "inc": 1,
+   "vie": 42,
+   "v0": 100,
+   "perte": 64.6,
+   "ennemis": 8,
+   "tues": 7.4,
+   "parMonstre": 8.7,
+   "cons": 0,
+   "bat": 62
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "8 puces",
+   "nomK": "Trépan, POW 10",
+   "carte": "arene",
+   "ennemis": {
+    "insectoide": 8
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "arme": "trepan"
+  },
+  "res": {
+   "n": 200,
+   "vic": 8,
+   "mort": 92,
+   "inc": 0,
+   "vie": 24,
+   "v0": 100,
+   "perte": 98.1,
+   "ennemis": 8,
+   "tues": 3.5,
+   "parMonstre": 28.1,
+   "cons": 0,
+   "bat": 58
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "8 puces",
+   "nomK": "Blindage, POW 12",
+   "carte": "arene",
+   "ennemis": {
+    "insectoide": 8
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "pow": 12,
+   "armure": "blindage"
+  },
+  "res": {
+   "n": 200,
+   "vic": 89,
+   "mort": 11,
+   "inc": 0,
+   "vie": 38,
+   "v0": 100,
+   "perte": 66.4,
+   "ennemis": 8,
+   "tues": 7.7,
+   "parMonstre": 8.6,
+   "cons": 0,
+   "bat": 71
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "8 puces",
+   "nomK": "Vrille",
+   "carte": "arene",
+   "ennemis": {
+    "insectoide": 8
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "arme": "vrille"
+  },
+  "res": {
+   "n": 200,
+   "vic": 99,
+   "mort": 2,
+   "inc": 0,
+   "vie": 47,
+   "v0": 100,
+   "perte": 53.7,
+   "ennemis": 8,
+   "tues": 8,
+   "parMonstre": 6.7,
+   "cons": 0,
+   "bat": 51
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "8 puces",
+   "nomK": "Carène",
+   "carte": "arene",
+   "ennemis": {
+    "insectoide": 8
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "armure": "carene"
+  },
+  "res": {
+   "n": 200,
+   "vic": 85,
+   "mort": 15,
+   "inc": 0,
+   "vie": 45,
+   "v0": 100,
+   "perte": 61.6,
+   "ennemis": 8,
+   "tues": 7.6,
+   "parMonstre": 8.1,
+   "cons": 0,
+   "bat": 23
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "8 puces",
+   "nomK": "Viseur + stabilisateur + gyroscope",
+   "carte": "arene",
+   "ennemis": {
+    "insectoide": 8
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "acc": [
+    "viseur",
+    "stabil",
+    "gyro"
+   ]
+  },
+  "res": {
+   "n": 200,
+   "vic": 97,
+   "mort": 3,
+   "inc": 0,
+   "vie": 47,
+   "v0": 100,
+   "perte": 54.6,
+   "ennemis": 8,
+   "tues": 7.9,
+   "parMonstre": 6.9,
+   "cons": 0,
+   "bat": 55
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "Englueur + 4 relais",
+   "nomK": "nu",
+   "carte": "arene",
+   "ennemis": {
+    "englueur": 1,
+    "cafar": 4
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 75,
+   "v0": 100,
+   "perte": 24.6,
+   "ennemis": 5,
+   "tues": 5,
+   "parMonstre": 4.9,
+   "cons": 0,
+   "bat": 34
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "Englueur + 4 relais",
+   "nomK": "2 réparobots",
+   "carte": "arene",
+   "ennemis": {
+    "englueur": 1,
+    "cafar": 4
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "conso": {
+    "repar": 2
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 75,
+   "v0": 100,
+   "perte": 24.9,
+   "ennemis": 5,
+   "tues": 5,
+   "parMonstre": 5,
+   "cons": 0.06,
+   "bat": 34
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "Englueur + 4 relais",
+   "nomK": "1 charge",
+   "carte": "arene",
+   "ennemis": {
+    "englueur": 1,
+    "cafar": 4
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "conso": {
+    "charge": 1
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 75,
+   "v0": 100,
+   "perte": 25.3,
+   "ennemis": 5,
+   "tues": 5,
+   "parMonstre": 5.1,
+   "cons": 1,
+   "bat": 35
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "Englueur + 4 relais",
+   "nomK": "1 batterie",
+   "carte": "arene",
+   "ennemis": {
+    "englueur": 1,
+    "cafar": 4
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "conso": {
+    "batterie": 1
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 78,
+   "v0": 100,
+   "perte": 22.2,
+   "ennemis": 5,
+   "tues": 5,
+   "parMonstre": 4.4,
+   "cons": 0.94,
+   "bat": 34
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "Englueur + 4 relais",
+   "nomK": "1 surrégime",
+   "carte": "arene",
+   "ennemis": {
+    "englueur": 1,
+    "cafar": 4
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "conso": {
+    "berserk": 1
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 75,
+   "v0": 100,
+   "perte": 25,
+   "ennemis": 5,
+   "tues": 5,
+   "parMonstre": 5,
+   "cons": 1,
+   "bat": 34
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "Englueur + 4 relais",
+   "nomK": "trousse complète",
+   "carte": "arene",
+   "ennemis": {
+    "englueur": 1,
+    "cafar": 4
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "conso": {
+    "repar": 2,
+    "charge": 1,
+    "batterie": 1,
+    "berserk": 1
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 77,
+   "v0": 100,
+   "perte": 22.9,
+   "ennemis": 5,
+   "tues": 5,
+   "parMonstre": 4.6,
+   "cons": 2.99,
+   "bat": 35
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "Englueur + 4 relais",
+   "nomK": "POW 11",
+   "carte": "arene",
+   "ennemis": {
+    "englueur": 1,
+    "cafar": 4
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "pow": 11
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 76,
+   "v0": 100,
+   "perte": 23.6,
+   "ennemis": 5,
+   "tues": 5,
+   "parMonstre": 4.7,
+   "cons": 0,
+   "bat": 34
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "Englueur + 4 relais",
+   "nomK": "POW 12",
+   "carte": "arene",
+   "ennemis": {
+    "englueur": 1,
+    "cafar": 4
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "pow": 12
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 77,
+   "v0": 100,
+   "perte": 23.4,
+   "ennemis": 5,
+   "tues": 5,
+   "parMonstre": 4.7,
+   "cons": 0,
+   "bat": 34
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "Englueur + 4 relais",
+   "nomK": "Trépan, POW 12",
+   "carte": "arene",
+   "ennemis": {
+    "englueur": 1,
+    "cafar": 4
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "pow": 12,
+   "arme": "trepan"
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 77,
+   "v0": 100,
+   "perte": 23.5,
+   "ennemis": 5,
+   "tues": 5,
+   "parMonstre": 4.7,
+   "cons": 0,
+   "bat": 36
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "Englueur + 4 relais",
+   "nomK": "Trépan, POW 10",
+   "carte": "arene",
+   "ennemis": {
+    "englueur": 1,
+    "cafar": 4
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "arme": "trepan"
+  },
+  "res": {
+   "n": 200,
+   "vic": 97,
+   "mort": 4,
+   "inc": 0,
+   "vie": 48,
+   "v0": 100,
+   "perte": 53.5,
+   "ennemis": 5,
+   "tues": 4.9,
+   "parMonstre": 10.9,
+   "cons": 0,
+   "bat": 44
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "Englueur + 4 relais",
+   "nomK": "Blindage, POW 12",
+   "carte": "arene",
+   "ennemis": {
+    "englueur": 1,
+    "cafar": 4
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "pow": 12,
+   "armure": "blindage"
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 75,
+   "v0": 100,
+   "perte": 25.1,
+   "ennemis": 5,
+   "tues": 5,
+   "parMonstre": 5,
+   "cons": 0,
+   "bat": 41
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "Englueur + 4 relais",
+   "nomK": "Vrille",
+   "carte": "arene",
+   "ennemis": {
+    "englueur": 1,
+    "cafar": 4
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "arme": "vrille"
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 80,
+   "v0": 100,
+   "perte": 20.4,
+   "ennemis": 5,
+   "tues": 5,
+   "parMonstre": 4.1,
+   "cons": 0,
+   "bat": 33
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "Englueur + 4 relais",
+   "nomK": "Carène",
+   "carte": "arene",
+   "ennemis": {
+    "englueur": 1,
+    "cafar": 4
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "armure": "carene"
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 77,
+   "v0": 100,
+   "perte": 23,
+   "ennemis": 5,
+   "tues": 5,
+   "parMonstre": 4.6,
+   "cons": 0,
+   "bat": 31
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "Englueur + 4 relais",
+   "nomK": "Viseur + stabilisateur + gyroscope",
+   "carte": "arene",
+   "ennemis": {
+    "englueur": 1,
+    "cafar": 4
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "acc": [
+    "viseur",
+    "stabil",
+    "gyro"
+   ]
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 83,
+   "v0": 100,
+   "perte": 17.4,
+   "ennemis": 5,
+   "tues": 5,
+   "parMonstre": 3.5,
+   "cons": 0,
+   "bat": 33
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "2 englueurs + 2 mines",
+   "nomK": "nu",
+   "carte": "arene",
+   "ennemis": {
+    "englueur": 2,
+    "mine": 2
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 90,
+   "v0": 100,
+   "perte": 9.5,
+   "ennemis": 4,
+   "tues": 4,
+   "parMonstre": 2.4,
+   "cons": 0,
+   "bat": 63
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "2 englueurs + 2 mines",
+   "nomK": "2 réparobots",
+   "carte": "arene",
+   "ennemis": {
+    "englueur": 2,
+    "mine": 2
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "conso": {
+    "repar": 2
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 90,
+   "v0": 100,
+   "perte": 10.4,
+   "ennemis": 4,
+   "tues": 4,
+   "parMonstre": 2.6,
+   "cons": 0,
+   "bat": 62
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "2 englueurs + 2 mines",
+   "nomK": "1 charge",
+   "carte": "arene",
+   "ennemis": {
+    "englueur": 2,
+    "mine": 2
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "conso": {
+    "charge": 1
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 89,
+   "v0": 100,
+   "perte": 10.7,
+   "ennemis": 4,
+   "tues": 4,
+   "parMonstre": 2.7,
+   "cons": 0.8,
+   "bat": 63
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "2 englueurs + 2 mines",
+   "nomK": "1 batterie",
+   "carte": "arene",
+   "ennemis": {
+    "englueur": 2,
+    "mine": 2
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "conso": {
+    "batterie": 1
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 89,
+   "v0": 100,
+   "perte": 10.8,
+   "ennemis": 4,
+   "tues": 4,
+   "parMonstre": 2.7,
+   "cons": 0.23,
+   "bat": 63
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "2 englueurs + 2 mines",
+   "nomK": "1 surrégime",
+   "carte": "arene",
+   "ennemis": {
+    "englueur": 2,
+    "mine": 2
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "conso": {
+    "berserk": 1
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 91,
+   "v0": 100,
+   "perte": 9.3,
+   "ennemis": 4,
+   "tues": 4,
+   "parMonstre": 2.3,
+   "cons": 1,
+   "bat": 61
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "2 englueurs + 2 mines",
+   "nomK": "trousse complète",
+   "carte": "arene",
+   "ennemis": {
+    "englueur": 2,
+    "mine": 2
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "conso": {
+    "repar": 2,
+    "charge": 1,
+    "batterie": 1,
+    "berserk": 1
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 88,
+   "v0": 100,
+   "perte": 12.1,
+   "ennemis": 4,
+   "tues": 4,
+   "parMonstre": 3,
+   "cons": 2.04,
+   "bat": 63
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "2 englueurs + 2 mines",
+   "nomK": "POW 11",
+   "carte": "arene",
+   "ennemis": {
+    "englueur": 2,
+    "mine": 2
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "pow": 11
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 90,
+   "v0": 100,
+   "perte": 9.6,
+   "ennemis": 4,
+   "tues": 4,
+   "parMonstre": 2.4,
+   "cons": 0,
+   "bat": 62
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "2 englueurs + 2 mines",
+   "nomK": "POW 12",
+   "carte": "arene",
+   "ennemis": {
+    "englueur": 2,
+    "mine": 2
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "pow": 12
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 91,
+   "v0": 100,
+   "perte": 8.6,
+   "ennemis": 4,
+   "tues": 4,
+   "parMonstre": 2.2,
+   "cons": 0,
+   "bat": 64
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "2 englueurs + 2 mines",
+   "nomK": "Trépan, POW 12",
+   "carte": "arene",
+   "ennemis": {
+    "englueur": 2,
+    "mine": 2
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "pow": 12,
+   "arme": "trepan"
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 91,
+   "v0": 100,
+   "perte": 8.6,
+   "ennemis": 4,
+   "tues": 4,
+   "parMonstre": 2.2,
+   "cons": 0,
+   "bat": 63
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "2 englueurs + 2 mines",
+   "nomK": "Trépan, POW 10",
+   "carte": "arene",
+   "ennemis": {
+    "englueur": 2,
+    "mine": 2
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "arme": "trepan"
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 76,
+   "v0": 100,
+   "perte": 23.5,
+   "ennemis": 4,
+   "tues": 4,
+   "parMonstre": 5.9,
+   "cons": 0,
+   "bat": 70
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "2 englueurs + 2 mines",
+   "nomK": "Blindage, POW 12",
+   "carte": "arene",
+   "ennemis": {
+    "englueur": 2,
+    "mine": 2
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "pow": 12,
+   "armure": "blindage"
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 88,
+   "v0": 100,
+   "perte": 11.8,
+   "ennemis": 4,
+   "tues": 4,
+   "parMonstre": 3,
+   "cons": 0,
+   "bat": 84
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "2 englueurs + 2 mines",
+   "nomK": "Vrille",
+   "carte": "arene",
+   "ennemis": {
+    "englueur": 2,
+    "mine": 2
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "arme": "vrille"
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 93,
+   "v0": 100,
+   "perte": 7.4,
+   "ennemis": 4,
+   "tues": 4,
+   "parMonstre": 1.8,
+   "cons": 0,
+   "bat": 62
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "2 englueurs + 2 mines",
+   "nomK": "Carène",
+   "carte": "arene",
+   "ennemis": {
+    "englueur": 2,
+    "mine": 2
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "armure": "carene"
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 95,
+   "v0": 100,
+   "perte": 4.7,
+   "ennemis": 4,
+   "tues": 4,
+   "parMonstre": 1.2,
+   "cons": 0,
+   "bat": 48
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "2 englueurs + 2 mines",
+   "nomK": "Viseur + stabilisateur + gyroscope",
+   "carte": "arene",
+   "ennemis": {
+    "englueur": 2,
+    "mine": 2
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "acc": [
+    "viseur",
+    "stabil",
+    "gyro"
+   ]
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 93,
+   "v0": 100,
+   "perte": 7.1,
+   "ennemis": 4,
+   "tues": 4,
+   "parMonstre": 1.8,
+   "cons": 0,
+   "bat": 61
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "3 sentinelles + 3 mines",
+   "nomK": "nu",
+   "carte": "arene",
+   "ennemis": {
+    "paralyzor": 3,
+    "mine": 3
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 70,
+   "v0": 100,
+   "perte": 30.4,
+   "ennemis": 6,
+   "tues": 6,
+   "parMonstre": 5.1,
+   "cons": 0,
+   "bat": 19
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "3 sentinelles + 3 mines",
+   "nomK": "2 réparobots",
+   "carte": "arene",
+   "ennemis": {
+    "paralyzor": 3,
+    "mine": 3
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "conso": {
+    "repar": 2
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 72,
+   "v0": 100,
+   "perte": 28.2,
+   "ennemis": 6,
+   "tues": 6,
+   "parMonstre": 4.7,
+   "cons": 0.07,
+   "bat": 18
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "3 sentinelles + 3 mines",
+   "nomK": "1 charge",
+   "carte": "arene",
+   "ennemis": {
+    "paralyzor": 3,
+    "mine": 3
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "conso": {
+    "charge": 1
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 65,
+   "v0": 100,
+   "perte": 34.8,
+   "ennemis": 6,
+   "tues": 6,
+   "parMonstre": 5.8,
+   "cons": 1.01,
+   "bat": 19
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "3 sentinelles + 3 mines",
+   "nomK": "1 batterie",
+   "carte": "arene",
+   "ennemis": {
+    "paralyzor": 3,
+    "mine": 3
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "conso": {
+    "batterie": 1
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 68,
+   "v0": 100,
+   "perte": 31.5,
+   "ennemis": 6,
+   "tues": 6,
+   "parMonstre": 5.3,
+   "cons": 0.95,
+   "bat": 18
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "3 sentinelles + 3 mines",
+   "nomK": "1 surrégime",
+   "carte": "arene",
+   "ennemis": {
+    "paralyzor": 3,
+    "mine": 3
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "conso": {
+    "berserk": 1
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 74,
+   "v0": 100,
+   "perte": 25.8,
+   "ennemis": 6,
+   "tues": 6,
+   "parMonstre": 4.3,
+   "cons": 1,
+   "bat": 17
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "3 sentinelles + 3 mines",
+   "nomK": "trousse complète",
+   "carte": "arene",
+   "ennemis": {
+    "paralyzor": 3,
+    "mine": 3
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "conso": {
+    "repar": 2,
+    "charge": 1,
+    "batterie": 1,
+    "berserk": 1
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 72,
+   "v0": 100,
+   "perte": 28.1,
+   "ennemis": 6,
+   "tues": 6,
+   "parMonstre": 4.7,
+   "cons": 3.04,
+   "bat": 17
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "3 sentinelles + 3 mines",
+   "nomK": "POW 11",
+   "carte": "arene",
+   "ennemis": {
+    "paralyzor": 3,
+    "mine": 3
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "pow": 11
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 70,
+   "v0": 100,
+   "perte": 29.6,
+   "ennemis": 6,
+   "tues": 6,
+   "parMonstre": 4.9,
+   "cons": 0,
+   "bat": 19
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "3 sentinelles + 3 mines",
+   "nomK": "POW 12",
+   "carte": "arene",
+   "ennemis": {
+    "paralyzor": 3,
+    "mine": 3
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "pow": 12
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 71,
+   "v0": 100,
+   "perte": 29.5,
+   "ennemis": 6,
+   "tues": 6,
+   "parMonstre": 4.9,
+   "cons": 0,
+   "bat": 19
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "3 sentinelles + 3 mines",
+   "nomK": "Trépan, POW 12",
+   "carte": "arene",
+   "ennemis": {
+    "paralyzor": 3,
+    "mine": 3
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "pow": 12,
+   "arme": "trepan"
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 71,
+   "v0": 100,
+   "perte": 29,
+   "ennemis": 6,
+   "tues": 6,
+   "parMonstre": 4.8,
+   "cons": 0,
+   "bat": 19
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "3 sentinelles + 3 mines",
+   "nomK": "Trépan, POW 10",
+   "carte": "arene",
+   "ennemis": {
+    "paralyzor": 3,
+    "mine": 3
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "arme": "trepan"
+  },
+  "res": {
+   "n": 200,
+   "vic": 97,
+   "mort": 3,
+   "inc": 0,
+   "vie": 45,
+   "v0": 100,
+   "perte": 56.6,
+   "ennemis": 6,
+   "tues": 5.9,
+   "parMonstre": 9.5,
+   "cons": 0,
+   "bat": 23
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "3 sentinelles + 3 mines",
+   "nomK": "Blindage, POW 12",
+   "carte": "arene",
+   "ennemis": {
+    "paralyzor": 3,
+    "mine": 3
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "pow": 12,
+   "armure": "blindage"
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 67,
+   "v0": 100,
+   "perte": 33,
+   "ennemis": 6,
+   "tues": 6,
+   "parMonstre": 5.5,
+   "cons": 0,
+   "bat": 19
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "3 sentinelles + 3 mines",
+   "nomK": "Vrille",
+   "carte": "arene",
+   "ennemis": {
+    "paralyzor": 3,
+    "mine": 3
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "arme": "vrille"
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 79,
+   "v0": 100,
+   "perte": 21,
+   "ennemis": 6,
+   "tues": 6,
+   "parMonstre": 3.5,
+   "cons": 0,
+   "bat": 17
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "3 sentinelles + 3 mines",
+   "nomK": "Carène",
+   "carte": "arene",
+   "ennemis": {
+    "paralyzor": 3,
+    "mine": 3
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "armure": "carene"
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 69,
+   "v0": 100,
+   "perte": 31.5,
+   "ennemis": 6,
+   "tues": 6,
+   "parMonstre": 5.2,
+   "cons": 0,
+   "bat": 18
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "3 sentinelles + 3 mines",
+   "nomK": "Viseur + stabilisateur + gyroscope",
+   "carte": "arene",
+   "ennemis": {
+    "paralyzor": 3,
+    "mine": 3
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "acc": [
+    "viseur",
+    "stabil",
+    "gyro"
+   ]
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 77,
+   "v0": 100,
+   "perte": 23.2,
+   "ennemis": 6,
+   "tues": 6,
+   "parMonstre": 3.9,
+   "cons": 0,
+   "bat": 18
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "Soudeur + 2 crabots",
+   "nomK": "nu",
+   "carte": "arene",
+   "ennemis": {
+    "soudeur": 1,
+    "crabos": 2
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 78,
+   "v0": 100,
+   "perte": 22.2,
+   "ennemis": 3,
+   "tues": 3,
+   "parMonstre": 7.4,
+   "cons": 0,
+   "bat": 24
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "Soudeur + 2 crabots",
+   "nomK": "2 réparobots",
+   "carte": "arene",
+   "ennemis": {
+    "soudeur": 1,
+    "crabos": 2
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "conso": {
+    "repar": 2
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 80,
+   "v0": 100,
+   "perte": 20,
+   "ennemis": 3,
+   "tues": 3,
+   "parMonstre": 6.7,
+   "cons": 0.04,
+   "bat": 24
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "Soudeur + 2 crabots",
+   "nomK": "1 charge",
+   "carte": "arene",
+   "ennemis": {
+    "soudeur": 1,
+    "crabos": 2
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "conso": {
+    "charge": 1
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 75,
+   "v0": 100,
+   "perte": 25.3,
+   "ennemis": 3,
+   "tues": 3,
+   "parMonstre": 8.4,
+   "cons": 0.72,
+   "bat": 24
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "Soudeur + 2 crabots",
+   "nomK": "1 batterie",
+   "carte": "arene",
+   "ennemis": {
+    "soudeur": 1,
+    "crabos": 2
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "conso": {
+    "batterie": 1
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 79,
+   "v0": 100,
+   "perte": 20.6,
+   "ennemis": 3,
+   "tues": 3,
+   "parMonstre": 6.9,
+   "cons": 0.76,
+   "bat": 24
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "Soudeur + 2 crabots",
+   "nomK": "1 surrégime",
+   "carte": "arene",
+   "ennemis": {
+    "soudeur": 1,
+    "crabos": 2
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "conso": {
+    "berserk": 1
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 85,
+   "v0": 100,
+   "perte": 15.2,
+   "ennemis": 3,
+   "tues": 3,
+   "parMonstre": 5.1,
+   "cons": 1,
+   "bat": 23
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "Soudeur + 2 crabots",
+   "nomK": "trousse complète",
+   "carte": "arene",
+   "ennemis": {
+    "soudeur": 1,
+    "crabos": 2
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "conso": {
+    "repar": 2,
+    "charge": 1,
+    "batterie": 1,
+    "berserk": 1
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 85,
+   "v0": 100,
+   "perte": 15.1,
+   "ennemis": 3,
+   "tues": 3,
+   "parMonstre": 5,
+   "cons": 2.23,
+   "bat": 24
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "Soudeur + 2 crabots",
+   "nomK": "POW 11",
+   "carte": "arene",
+   "ennemis": {
+    "soudeur": 1,
+    "crabos": 2
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "pow": 11
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 78,
+   "v0": 100,
+   "perte": 22.3,
+   "ennemis": 3,
+   "tues": 3,
+   "parMonstre": 7.4,
+   "cons": 0,
+   "bat": 24
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "Soudeur + 2 crabots",
+   "nomK": "POW 12",
+   "carte": "arene",
+   "ennemis": {
+    "soudeur": 1,
+    "crabos": 2
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "pow": 12
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 79,
+   "v0": 100,
+   "perte": 20.8,
+   "ennemis": 3,
+   "tues": 3,
+   "parMonstre": 6.9,
+   "cons": 0,
+   "bat": 24
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "Soudeur + 2 crabots",
+   "nomK": "Trépan, POW 12",
+   "carte": "arene",
+   "ennemis": {
+    "soudeur": 1,
+    "crabos": 2
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "pow": 12,
+   "arme": "trepan"
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 82,
+   "v0": 100,
+   "perte": 17.8,
+   "ennemis": 3,
+   "tues": 3,
+   "parMonstre": 5.9,
+   "cons": 0,
+   "bat": 24
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "Soudeur + 2 crabots",
+   "nomK": "Trépan, POW 10",
+   "carte": "arene",
+   "ennemis": {
+    "soudeur": 1,
+    "crabos": 2
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "arme": "trepan"
+  },
+  "res": {
+   "n": 200,
+   "vic": 88,
+   "mort": 13,
+   "inc": 0,
+   "vie": 55,
+   "v0": 100,
+   "perte": 51.9,
+   "ennemis": 3,
+   "tues": 2.8,
+   "parMonstre": 18.8,
+   "cons": 0,
+   "bat": 28
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "Soudeur + 2 crabots",
+   "nomK": "Blindage, POW 12",
+   "carte": "arene",
+   "ennemis": {
+    "soudeur": 1,
+    "crabos": 2
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "pow": 12,
+   "armure": "blindage"
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 79,
+   "v0": 100,
+   "perte": 20.5,
+   "ennemis": 3,
+   "tues": 3,
+   "parMonstre": 6.8,
+   "cons": 0,
+   "bat": 21
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "Soudeur + 2 crabots",
+   "nomK": "Vrille",
+   "carte": "arene",
+   "ennemis": {
+    "soudeur": 1,
+    "crabos": 2
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "arme": "vrille"
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 83,
+   "v0": 100,
+   "perte": 16.8,
+   "ennemis": 3,
+   "tues": 3,
+   "parMonstre": 5.6,
+   "cons": 0,
+   "bat": 23
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "Soudeur + 2 crabots",
+   "nomK": "Carène",
+   "carte": "arene",
+   "ennemis": {
+    "soudeur": 1,
+    "crabos": 2
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "armure": "carene"
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 79,
+   "v0": 100,
+   "perte": 21.4,
+   "ennemis": 3,
+   "tues": 3,
+   "parMonstre": 7.1,
+   "cons": 0,
+   "bat": 20
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "Soudeur + 2 crabots",
+   "nomK": "Viseur + stabilisateur + gyroscope",
+   "carte": "arene",
+   "ennemis": {
+    "soudeur": 1,
+    "crabos": 2
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "acc": [
+    "viseur",
+    "stabil",
+    "gyro"
+   ]
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 84,
+   "v0": 100,
+   "perte": 16.4,
+   "ennemis": 3,
+   "tues": 3,
+   "parMonstre": 5.5,
+   "cons": 0,
+   "bat": 24
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "5 drones",
+   "nomK": "nu",
+   "carte": "arene",
+   "ennemis": {
+    "drone": 5
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 83,
+   "v0": 100,
+   "perte": 16.7,
+   "ennemis": 5,
+   "tues": 5,
+   "parMonstre": 3.3,
+   "cons": 0,
+   "bat": 11
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "5 drones",
+   "nomK": "2 réparobots",
+   "carte": "arene",
+   "ennemis": {
+    "drone": 5
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "conso": {
+    "repar": 2
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 83,
+   "v0": 100,
+   "perte": 17.1,
+   "ennemis": 5,
+   "tues": 5,
+   "parMonstre": 3.4,
+   "cons": 0.01,
+   "bat": 11
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "5 drones",
+   "nomK": "1 charge",
+   "carte": "arene",
+   "ennemis": {
+    "drone": 5
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "conso": {
+    "charge": 1
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 84,
+   "v0": 100,
+   "perte": 16.1,
+   "ennemis": 5,
+   "tues": 5,
+   "parMonstre": 3.2,
+   "cons": 1,
+   "bat": 12
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "5 drones",
+   "nomK": "1 batterie",
+   "carte": "arene",
+   "ennemis": {
+    "drone": 5
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "conso": {
+    "batterie": 1
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 86,
+   "v0": 100,
+   "perte": 14.2,
+   "ennemis": 5,
+   "tues": 5,
+   "parMonstre": 2.8,
+   "cons": 0.97,
+   "bat": 11
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "5 drones",
+   "nomK": "1 surrégime",
+   "carte": "arene",
+   "ennemis": {
+    "drone": 5
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "conso": {
+    "berserk": 1
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 84,
+   "v0": 100,
+   "perte": 16.3,
+   "ennemis": 5,
+   "tues": 5,
+   "parMonstre": 3.3,
+   "cons": 0.01,
+   "bat": 11
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "5 drones",
+   "nomK": "trousse complète",
+   "carte": "arene",
+   "ennemis": {
+    "drone": 5
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "conso": {
+    "repar": 2,
+    "charge": 1,
+    "batterie": 1,
+    "berserk": 1
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 86,
+   "v0": 100,
+   "perte": 13.9,
+   "ennemis": 5,
+   "tues": 5,
+   "parMonstre": 2.8,
+   "cons": 1.96,
+   "bat": 11
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "5 drones",
+   "nomK": "POW 11",
+   "carte": "arene",
+   "ennemis": {
+    "drone": 5
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "pow": 11
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 83,
+   "v0": 100,
+   "perte": 16.7,
+   "ennemis": 5,
+   "tues": 5,
+   "parMonstre": 3.3,
+   "cons": 0,
+   "bat": 11
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "5 drones",
+   "nomK": "POW 12",
+   "carte": "arene",
+   "ennemis": {
+    "drone": 5
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "pow": 12
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 85,
+   "v0": 100,
+   "perte": 14.6,
+   "ennemis": 5,
+   "tues": 5,
+   "parMonstre": 2.9,
+   "cons": 0,
+   "bat": 11
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "5 drones",
+   "nomK": "Trépan, POW 12",
+   "carte": "arene",
+   "ennemis": {
+    "drone": 5
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "pow": 12,
+   "arme": "trepan"
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 79,
+   "v0": 100,
+   "perte": 21.4,
+   "ennemis": 5,
+   "tues": 5,
+   "parMonstre": 4.3,
+   "cons": 0,
+   "bat": 13
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "5 drones",
+   "nomK": "Trépan, POW 10",
+   "carte": "arene",
+   "ennemis": {
+    "drone": 5
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "arme": "trepan"
+  },
+  "res": {
+   "n": 200,
+   "vic": 96,
+   "mort": 5,
+   "inc": 0,
+   "vie": 59,
+   "v0": 100,
+   "perte": 43.5,
+   "ennemis": 5,
+   "tues": 4.9,
+   "parMonstre": 8.9,
+   "cons": 0,
+   "bat": 17
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "5 drones",
+   "nomK": "Blindage, POW 12",
+   "carte": "arene",
+   "ennemis": {
+    "drone": 5
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "pow": 12,
+   "armure": "blindage"
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 85,
+   "v0": 100,
+   "perte": 15.4,
+   "ennemis": 5,
+   "tues": 5,
+   "parMonstre": 3.1,
+   "cons": 0,
+   "bat": 12
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "5 drones",
+   "nomK": "Vrille",
+   "carte": "arene",
+   "ennemis": {
+    "drone": 5
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "arme": "vrille"
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 87,
+   "v0": 100,
+   "perte": 13.4,
+   "ennemis": 5,
+   "tues": 5,
+   "parMonstre": 2.7,
+   "cons": 0,
+   "bat": 11
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "5 drones",
+   "nomK": "Carène",
+   "carte": "arene",
+   "ennemis": {
+    "drone": 5
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "armure": "carene"
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 82,
+   "v0": 100,
+   "perte": 18.4,
+   "ennemis": 5,
+   "tues": 5,
+   "parMonstre": 3.7,
+   "cons": 0,
+   "bat": 11
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "5 drones",
+   "nomK": "Viseur + stabilisateur + gyroscope",
+   "carte": "arene",
+   "ennemis": {
+    "drone": 5
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "acc": [
+    "viseur",
+    "stabil",
+    "gyro"
+   ]
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 88,
+   "v0": 100,
+   "perte": 11.8,
+   "ennemis": 5,
+   "tues": 5,
+   "parMonstre": 2.4,
+   "cons": 0,
+   "bat": 11
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "2 artilleurs",
+   "nomK": "nu",
+   "carte": "arene",
+   "ennemis": {
+    "artilleur": 2
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 68,
+   "v0": 100,
+   "perte": 32.3,
+   "ennemis": 2,
+   "tues": 2,
+   "parMonstre": 16.1,
+   "cons": 0,
+   "bat": 49
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "2 artilleurs",
+   "nomK": "2 réparobots",
+   "carte": "arene",
+   "ennemis": {
+    "artilleur": 2
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "conso": {
+    "repar": 2
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 74,
+   "v0": 100,
+   "perte": 26.3,
+   "ennemis": 2,
+   "tues": 2,
+   "parMonstre": 13.1,
+   "cons": 0.1,
+   "bat": 49
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "2 artilleurs",
+   "nomK": "1 charge",
+   "carte": "arene",
+   "ennemis": {
+    "artilleur": 2
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "conso": {
+    "charge": 1
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 68,
+   "v0": 100,
+   "perte": 32.1,
+   "ennemis": 2,
+   "tues": 2,
+   "parMonstre": 16,
+   "cons": 0.29,
+   "bat": 50
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "2 artilleurs",
+   "nomK": "1 batterie",
+   "carte": "arene",
+   "ennemis": {
+    "artilleur": 2
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "conso": {
+    "batterie": 1
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 68,
+   "v0": 100,
+   "perte": 31.6,
+   "ennemis": 2,
+   "tues": 2,
+   "parMonstre": 15.8,
+   "cons": 0.17,
+   "bat": 50
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "2 artilleurs",
+   "nomK": "1 surrégime",
+   "carte": "arene",
+   "ennemis": {
+    "artilleur": 2
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "conso": {
+    "berserk": 1
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 69,
+   "v0": 100,
+   "perte": 31,
+   "ennemis": 2,
+   "tues": 2,
+   "parMonstre": 15.5,
+   "cons": 0,
+   "bat": 49
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "2 artilleurs",
+   "nomK": "trousse complète",
+   "carte": "arene",
+   "ennemis": {
+    "artilleur": 2
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "conso": {
+    "repar": 2,
+    "charge": 1,
+    "batterie": 1,
+    "berserk": 1
+   }
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 73,
+   "v0": 100,
+   "perte": 26.6,
+   "ennemis": 2,
+   "tues": 2,
+   "parMonstre": 13.3,
+   "cons": 0.54,
+   "bat": 50
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "2 artilleurs",
+   "nomK": "POW 11",
+   "carte": "arene",
+   "ennemis": {
+    "artilleur": 2
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "pow": 11
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 70,
+   "v0": 100,
+   "perte": 30.3,
+   "ennemis": 2,
+   "tues": 2,
+   "parMonstre": 15.2,
+   "cons": 0,
+   "bat": 49
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "2 artilleurs",
+   "nomK": "POW 12",
+   "carte": "arene",
+   "ennemis": {
+    "artilleur": 2
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "pow": 12
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 70,
+   "v0": 100,
+   "perte": 30.2,
+   "ennemis": 2,
+   "tues": 2,
+   "parMonstre": 15.1,
+   "cons": 0,
+   "bat": 50
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "2 artilleurs",
+   "nomK": "Trépan, POW 12",
+   "carte": "arene",
+   "ennemis": {
+    "artilleur": 2
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "pow": 12,
+   "arme": "trepan"
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 70,
+   "v0": 100,
+   "perte": 30,
+   "ennemis": 2,
+   "tues": 2,
+   "parMonstre": 15,
+   "cons": 0,
+   "bat": 49
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "2 artilleurs",
+   "nomK": "Trépan, POW 10",
+   "carte": "arene",
+   "ennemis": {
+    "artilleur": 2
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "arme": "trepan"
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 65,
+   "v0": 100,
+   "perte": 35.4,
+   "ennemis": 2,
+   "tues": 2,
+   "parMonstre": 17.7,
+   "cons": 0,
+   "bat": 52
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "2 artilleurs",
+   "nomK": "Blindage, POW 12",
+   "carte": "arene",
+   "ennemis": {
+    "artilleur": 2
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "pow": 12,
+   "armure": "blindage"
+  },
+  "res": {
+   "n": 200,
+   "vic": 99,
+   "mort": 1,
+   "inc": 0,
+   "vie": 44,
+   "v0": 100,
+   "perte": 56.6,
+   "ennemis": 2,
+   "tues": 2,
+   "parMonstre": 28.4,
+   "cons": 0,
+   "bat": 59
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "2 artilleurs",
+   "nomK": "Vrille",
+   "carte": "arene",
+   "ennemis": {
+    "artilleur": 2
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "arme": "vrille"
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 71,
+   "v0": 100,
+   "perte": 28.8,
+   "ennemis": 2,
+   "tues": 2,
+   "parMonstre": 14.4,
+   "cons": 0,
+   "bat": 49
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "2 artilleurs",
+   "nomK": "Carène",
+   "carte": "arene",
+   "ennemis": {
+    "artilleur": 2
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "armure": "carene"
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 83,
+   "v0": 100,
+   "perte": 16.6,
+   "ennemis": 2,
+   "tues": 2,
+   "parMonstre": 8.3,
+   "cons": 0,
+   "bat": 33
+  }
+ },
+ {
+  "cfg": {
+   "nomE": "2 artilleurs",
+   "nomK": "Viseur + stabilisateur + gyroscope",
+   "carte": "arene",
+   "ennemis": {
+    "artilleur": 2
+   },
+   "pilote": "chasse",
+   "alerte": true,
+   "vie": 0,
+   "acc": [
+    "viseur",
+    "stabil",
+    "gyro"
+   ]
+  },
+  "res": {
+   "n": 200,
+   "vic": 100,
+   "mort": 0,
+   "inc": 0,
+   "vie": 75,
+   "v0": 100,
+   "perte": 25,
+   "ennemis": 2,
+   "tues": 2,
+   "parMonstre": 12.5,
+   "cons": 0,
+   "bat": 48
+  }
+ }
+]

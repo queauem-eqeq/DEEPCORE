@@ -92,23 +92,24 @@ function tryMove(dx,dy){
   G.face=dx>0?'r':dx<0?'l':dy>0?'d':'u';
   if(!diagOk(G.px,G.py,dx,dy)){say('Coin de paroi : pas de passage en diagonale.');SFX.blocked();render();return;}
   const bz=beastAt(nx,ny);
-  if(bz){const sp=BEASTS[bz.sp];G.turn++;G.msg=null;engage();const sur=!(bz.hunt>0),cr=sur||roll(G.st.crit??5);   // surprise : ne vous a pas repéré
+  if(bz){const sp=BEASTS[bz.sp];G.turn++;G.msg=null;engage();camoCasse();const sur=!(bz.hunt>0),cr=sur||roll((G.st.crit??5)+critBonus());   // surprise : ne vous a pas repéré
     {const ch=hitChance(robotPre(),sp.def+terrMod(nx,ny));if(!sur&&!roll(ch)){if(!bz.hunt)alerte(bz);bz.hunt=1;spot(bz);addFx({kind:'lunge',robot:true,dx,dy,dur:180});addFx({kind:'num',x:nx,y:ny,txt:'0',col:'#8aa9a2',dur:750});
       say(`La foreuse rate ${leNom(sp)} (${ch} %).`);SFX.whoosh();pass(coupDur());computeFOV();render();if(G.over&&G.over.dead)dead();return;}}
     const dm=robotDeg()*(cr?CRIT_X:1);bz.hp-=dm;if(!bz.hunt&&bz.hp>0)alerte(bz);bz.hunt=1;spot(bz);addFx({kind:'num',x:nx,y:ny,txt:'-'+dm+(cr?'!':''),col:cr?PAL['1']:PAL['3'],dur:cr?1000:750});if(cr){addFx({kind:'shake',amp:6,dur:220});SFX.crit();}
     addFx({kind:'lunge',robot:true,dx,dy,dur:180});addFx({kind:'flash',beast:bz,dur:180});if(bz.hp<=0)addFx({kind:'shake',amp:4,dur:200});
     const tag=sur?'Coup par surprise ! ':cr?'Coup critique ! ':'';
-    if(bz.hp<=0){G.beasts.splice(G.beasts.indexOf(bz),1);bleed(bz.x,bz.y);say(`${tag}La foreuse abat ${leNom(sp)}.`,'good');SFX.break();}
+    if(bz.hp<=0){G.beasts.splice(G.beasts.indexOf(bz),1);bleed(bz.x,bz.y);butinMort(bz);say(`${tag}La foreuse abat ${leNom(sp)}.`,'good');SFX.break();}
     else{say(`${tag}La foreuse percute ${leNom(sp)} : −${dm} PV (${bz.hp}/${pvDe(sp)}).`,'warn');SFX.crack();}
     pass(coupDur());computeFOV();render();if(G.over&&G.over.dead)dead();return;}
   const an=animalAt(nx,ny);
-  if(an){const sp=SPECIES[an.sp];G.turn++;G.msg=null;engage();const sur=!an.aware,cr=sur||roll(G.st.crit??5);
+  if(an){const sp=SPECIES[an.sp];G.turn++;G.msg=null;engage();camoCasse();const sur=!an.aware,cr=sur||roll((G.st.crit??5)+critBonus());
     {const ch=hitChance(robotPre(),sp.def+terrMod(nx,ny));if(!sur&&!roll(ch)){an.aware=1;an.enraged=true;spot(an);addFx({kind:'lunge',robot:true,dx,dy,dur:180});addFx({kind:'num',x:nx,y:ny,txt:'0',col:'#8aa9a2',dur:750});
       say(`La foreuse rate ${leNom(sp)} (${ch} %).`);SFX.whoosh();pass(coupDur());computeFOV();render();if(G.over&&G.over.dead)dead();return;}}
     const dm=robotDeg()*(cr?CRIT_X:1),tag=sur?'Coup par surprise ! ':cr?'Coup critique ! ':'';an.hp=(an.hp??pvDe(sp))-dm;addFx({kind:'num',x:nx,y:ny,txt:'-'+dm+(cr?'!':''),col:cr?PAL['1']:PAL['3'],dur:cr?1000:750});if(cr){addFx({kind:'shake',amp:6,dur:220});SFX.crit();}addFx({kind:'lunge',robot:true,dx,dy,dur:180});
     if(an.hp<=0){G.animals.splice(G.animals.indexOf(an),1);bleed(an.x,an.y);say(`${tag}La foreuse écrase ${leNom(sp)}.`,'warn');SFX.squish();}
     else{if(!an.aware)alerte(an);an.aware=1;an.enraged=true;spot(an);say(`${tag}La foreuse heurte ${leNom(sp)}.`);SFX.crack();}
    pass(coupDur());computeFOV();render();if(G.over&&G.over.dead)dead();return;}
+  {const bl=tenuPar();if(bl){say(`${LeNom(BEASTS[bl.sp])} tient la foreuse : impossible de bouger tant qu’il n’est pas détruit ou étourdi.`,'warn');SFX.blocked();render();return;}}   // Bloqueur (22 novembre 2026)
   if(v===CHASM){say('Gouffre : passage impossible.');SFX.blocked();render();return;}
   if(v===SHIP){say('Coque du vaisseau : indestructible.');SFX.blocked();render();return;}
   if(v===HARD){say('Roche dure : la foreuse ne l’entame pas. Seule une charge sismique en vient à bout.');SFX.blocked();render();return;}
@@ -123,7 +124,7 @@ function tryMove(dx,dy){
   if(v===ROCK||v===MOUNT){
     if(nx===0||ny===0||nx===W-1||ny===H-1){say('Bord de la carte : roche impossible à briser.');SFX.blocked();render();return;}
     if(!spend())return;
-    lastAct='dig';                                   // briser une paroi fait du bruit : portée de discrétion ×1,5
+    lastAct='dig';camoCasse();                       // briser une paroi fait du bruit : portée de discrétion ×1,5
     const i=idx(nx,ny),hp=2;G.dmg=G.dmg||{};const hits=(G.dmg[i]||0)+1;G.turn++;G.msg=null;
     {const brk=hits>=hp;addFx({kind:'lunge',robot:true,dx,dy,dur:180});}
     if(hits>=hp){delete G.dmg[i];G.t[i]=RUBBLE;SFX.break();say(v===ROCK?'Rocher brisé : il ne reste que des gravats.':'La paroi cède : passage ouvert.','good');

@@ -57,7 +57,8 @@ const SEARCH_T=20,SEARCH_R=10,SEARCH_VAR=3;
    dernière position connue et s'y rend, mais ne vous suit plus de loin : il lui faut vous remarquer de nouveau
    (NOTICE) à l'intérieur du rayon. Dans le rayon, elle ne vous perd jamais. */
 function voitForeuse(o,chasse){
-  if(G.eff&&G.eff.fum>0)return false;                                    // fumigène : personne ne voit la foreuse
+  if(G.eff&&G.eff.fum>0)return false;
+  if(G.eff&&G.eff.camo>0&&Math.max(Math.abs(o.x-G.px),Math.abs(o.y-G.py))>1)return false;   // camouflage optique : vue seulement au contact (22 novembre 2026)                                    // fumigène : personne ne voit la foreuse
   const d=Math.hypot(o.x-G.px,o.y-G.py);
   const bruit=lastAct==='dig';                                          // briser une paroi s'entend à travers les parois
   if(!bruit&&!los(o.x,o.y,G.px,G.py))return false;
@@ -105,11 +106,12 @@ function engage(){for(const a of (G.animals||[]))if(a.aware)a.enraged=true;}
    Chaque case vit FUM_VIE battements, tirés un par un ; à chaque battement le nuage gagne une à trois cases voisines, au hasard,
    avec une vie plus courte — il s'étend donc de travers, puis s'efface case par case. Une case de fumée est opaque (voir `opaque`). */
 const FUM_R2=10,FUM_VIE=[15,25],FUM_MAX=90;
-function fumPose(){const F=G.fum=G.fum||{};
+function fumPose(cx,cy){const F=G.fum=G.fum||{};if(cx==null){cx=G.px;cy=G.py;}   // 22 novembre 2026 : le nuage se lance où l'on vise
   for(let dy=-3;dy<=3;dy++)for(let dx=-3;dx<=3;dx++){const d2=dx*dx+dy*dy;if(d2>FUM_R2)continue;
-    const x=G.px+dx,y=G.py+dy;if(x<1||y<1||x>=W-1||y>=H-1)continue;const i=idx(x,y);if(blocks(G.t[i])&&G.t[i]!==CHASM)continue;   // la fumée passe au-dessus des gouffres
+    const x=cx+dx,y=cy+dy;if(x<1||y<1||x>=W-1||y>=H-1)continue;const i=idx(x,y);if(blocks(G.t[i])&&G.t[i]!==CHASM)continue;   // la fumée passe au-dessus des gouffres
     const v=rnd(FUM_VIE[0],FUM_VIE[1]);
     F[i]={v:F[i]?Math.max(F[i].v,v):v,k:d2<=2?rnd(0,1):2+rnd(0,3)};}   // cœur : nuage plein ou texturé ; pourtour : les quatre bords
+  if(!F[idx(G.px,G.py)])return;   // la foreuse est hors du nuage : il coupe la vue, mais personne ne perd sa trace
   for(const b of G.beasts||[])if(b.hunt){b.hunt=0;forget(b);}
   for(const a of G.animals||[]){a.aware=0;a.enraged=false;forget(a);}}
 function fumTick(){const F=G.fum;if(!F)return;let ks=Object.keys(F);if(!ks.length)return;
@@ -259,7 +261,7 @@ function beastFits(b,x,y){const spB=BEASTS[b.sp],mB=mouilleOk(spB,b);
   if(!(b.hunt>0)&&G.lz&&G.lz[idx(cx,cy)])return false;   // calme, il n'entre pas dans le champ d'un laser ; en chasse, il fonce (21 novembre 2026)
   if(!(spB.vol&&v===CHASM)&&!canWalk(v,mB)||(cx===G.px&&cy===G.py)||animalAt(cx,cy))return false;const o=beastAt(cx,cy);if(o&&o!==b)return false;}return true;}
 const beastCache=b=>!!BEASTS[b.sp].cache&&G.t[idx(b.x,b.y)]===DEEP;   // le brochon en eau profonde : invisible, même à côté
-const beastVisible=b=>!beastCache(b)&&(!fog||FOOT.some(([dx,dy])=>vis[idx(b.x+dx,b.y+dy)]));
+const beastVisible=b=>!beastCache(b)&&!(b.camo>0&&Math.max(Math.abs(b.x-G.px),Math.abs(b.y-G.py))>1)&&(!fog||FOOT.some(([dx,dy])=>vis[idx(b.x+dx,b.y+dy)]));
 function spawnBeasts(){G.beasts=[];G.beastSeen={};G.packs={};let packId=0;
   const tryPut=(sp,x,y,pack)=>{const b=newBeast(sp,x,y,pack,-1);if(!beastFits(b,x,y))return false;G.beasts.push(b);return true;};
   BEASTS.forEach((sp,i)=>{let left=LIFE[sp.key]||0;
@@ -347,7 +349,10 @@ const armeFact=(st,d)=>{const e=powEcart(d,st);return e<0?Math.pow(POW_MANQUE,-e
 const armureDef=(st,d)=>{const e=powEcart(d,st);return e<0?POW_DEF_MANQUE*e:POW_DEF_EXCES*e;};
 // stats de combat de la foreuse telles qu'elles comptent ; st, arme, armure : pour simuler un autre équipement (fenêtre Équipement)
 const robotPre=(st,d)=>{st=st||G.st;return Math.round(st.pre*armeFact(st,d===undefined?eqDe('arme'):d));};
-const robotDegs=(st,d)=>{st=st||G.st;const a=d===undefined?eqDe('arme'):d,de=armeDe(a),k=armeFact(st,a),b=st.degats||0;
+// 22 novembre 2026 : chaque point de POW au-dessus du POW requis par l'arme ajoute 5 % de dégâts (8 % d'abord, baissé le jour même : les armes légères en profitaient trop) (réglable, Lab → Items → Module de
+// puissance) ; avant, +1,5 % seulement, comme pour la précision : un Module de puissance ne se sentait pas.
+const degFact=(st,d)=>{const e=powEcart(d,st);return e<0?Math.pow(POW_MANQUE,-e):Math.pow(1+(typeof ITEM_VAL!=='undefined'?ITEM_VAL.puissance.deg:5)/100,e);};
+const robotDegs=(st,d)=>{st=st||G.st;const a=d===undefined?eqDe('arme'):d,de=armeDe(a),k=degFact(st,a),b=st.degats||0;
   return [Math.max(1,Math.round((de.n+de.p+b)*k)),Math.max(1,Math.round((de.n*de.f+de.p+b)*k))];};
 const robotDeg=()=>{const a=eqDe('arme');return Math.max(1,Math.round((deTire(armeDe(a))+(G.st.degats||0))*armeFact(G.st,a)));};
 const robotDefNu=(st,d)=>{st=st||G.st;return st.def+armureDef(st,d===undefined?eqDe('armure'):d);};
@@ -373,15 +378,17 @@ function hurtRobot(b,sp,o){sp=sp||BEASTS[b.sp];o=o||{};const le=LeNom(sp),nom=''
   if(!o.sur&&!roll(ch)){geste(true);addFx({kind:'num',x:G.px,y:G.py,txt:'0',col:'#8aa9a2',dur:750});
     if(!o.laser)SFX.whoosh();sayMore(`${le}${nom} ${verbe} et rate (${ch} %).`);return;}
   geste();
-  const cr=o.sur||roll(sp.crit||0),dm=dmgDe(sp)*(cr?CRIT_X:1);   // coup critique de l'ennemi : selon sa stat CRIT
-  addFx({kind:'shake',amp:cr?9:5,dur:cr?320:220});G.st.vie=Math.max(0,G.st.vie-dm);addFx({kind:'num',x:G.px,y:G.py,txt:'-'+dm+(cr?'!':''),col:'#ff3b3b',dur:cr?1000:750});if(!o.laser)SFX.bite();sayMore(`${le}${nom} ${verbe}${o.sur?' par surprise':cr?' : coup critique':''} : −${dm} vie.`,'warn');
+  const cr=o.sur||b.bers>0||roll(sp.crit||0),dm=Math.round(dmgDe(sp)*(cr?CRIT_X:1)*(1+.25*(b.pow||0)));   // surrégime : toujours critique ; module de puissance : +25 % par module   // coup critique de l'ennemi : selon sa stat CRIT
+  addFx({kind:'shake',amp:cr?9:5,dur:cr?320:220});G.st.vie=Math.max(0,G.st.vie-dm);addFx({kind:'num',x:G.px,y:G.py,txt:'-'+dm+(cr?'!':''),col:PAL['4'],dur:cr?1000:750});if(!o.laser)SFX.bite();sayMore(`${le}${nom} ${verbe}${o.sur?' par surprise':cr?' : coup critique':''} : −${dm} vie.`,'warn');
   if(G.st.vie<=0){G.over={dead:true};return;}}
 // Une fois par battement : effets durables sur la foreuse
 function effTick(){const E=G.eff;if(!E||G.over)return;
-  if(E.poison>0){E.poison--;const dm=Math.min(G.st.vie,E.pdmg||2);G.st.vie-=dm;addFx({kind:'num',x:G.px,y:G.py,txt:'-'+dm,col:'#ff3b3b',dur:750});
+  if(E.poison>0){E.poison--;const dm=Math.min(G.st.vie,E.pdmg||2);G.st.vie-=dm;addFx({kind:'num',x:G.px,y:G.py,txt:'-'+dm,col:PAL['4'],dur:750});
     if(G.st.vie<=0){G.over={dead:true};sayMore('Le poison achève la foreuse.','warn');return;}
     if(!E.poison)sayMore('Le poison est éliminé.','good');}
   if(E.glu>0&&--E.glu===0)sayMore('La glu se détache : la foreuse retrouve sa vitesse.','good');
+  if(E.berserk>0&&--E.berserk===0)sayMore('Le surrégime retombe.','info');
+  if(E.camo>0&&--E.camo===0)sayMore('Le camouflage optique s’éteint.','info');
   fumTick();}
 /* Mine (19 novembre 2026) : elle fonce sur la foreuse ; arrivée à une case, elle s'arme (elle clignote) et ne bouge plus,
    puis explose 2 à 3 battements plus tard (22 novembre 2026 ; avant 1 à 3 : à 1, elle sautait au battement suivant, sans
@@ -390,15 +397,15 @@ function effTick(){const E=G.eff;if(!E||G.over)return;
 /* Englueur (21 novembre 2026) : un jet de glu à distance. S'il touche, la foreuse est engluée 3 battements (pas deux fois plus
    longs, voir stepDur) ; le jet lui-même ne blesse pas. */
 function glue(b,sp){const ch=hitChance(sp.pre,robotDef());engage();if(G.px!==b.x)b.dir=Math.sign(G.px-b.x);SFX.drift();
-  const rate=!roll(ch),an=Math.random()*Math.PI*2,r=rate?12:0;addFx({kind:'laser',o:b,x:G.px,y:G.py,ox:Math.round(Math.cos(an)*r),oy:Math.round(Math.sin(an)*r),dur:320});
+  const rate=!roll(ch),an=Math.random()*Math.PI*2,r=rate?.8:0;addFx({kind:'boule',ax:b.x,ay:b.y,bx:G.px+Math.cos(an)*r,by:G.py+Math.sin(an)*r,dur:320});   // une boule de glu, plus un trait de laser (22 novembre 2026)
   if(rate){sayMore(`${LeNom(sp)} crache sa glu et rate (${ch} %).`);return;}
   G.eff=G.eff||{};G.eff.glu=Math.max(G.eff.glu||0,3);addFx({kind:'num',x:G.px,y:G.py,txt:'glu',col:PAL['2'],dur:900});sayMore(`${LeNom(sp)} englue la foreuse : elle avance deux fois moins vite pendant 3 battements.`,'warn');}
 function explose(b){const sp=BEASTS[b.sp],k=G.beasts.indexOf(b);if(k>=0)G.beasts.splice(k,1);
   const dans=o=>Math.max(Math.abs(o.x-b.x),Math.abs(o.y-b.y))<=1,vu=vis[idx(b.x,b.y)];
   addFx({kind:'boom',x:b.x,y:b.y,dur:420});if(vu||dans({x:G.px,y:G.py})||cheb(b,G.px,G.py)<=10){addFx({kind:'shake',amp:9,dur:320});SFX.explode();}
   for(const [liste,fiches] of [[G.beasts,BEASTS],[G.animals||[],SPECIES]])for(const o of [...liste])if(dans(o)){const dm=dmgDe(sp);o.hp=(o.hp??pvDe(fiches[o.sp]))-dm;
-    addFx({kind:'num',x:o.x,y:o.y,txt:'-'+dm,col:PAL['3'],dur:750});if(o.hp<=0){liste.splice(liste.indexOf(o),1);bleed(o.x,o.y);}}
-  if(dans({x:G.px,y:G.py})){const dm=dmgDe(sp);G.st.vie=Math.max(0,G.st.vie-dm);addFx({kind:'num',x:G.px,y:G.py,txt:'-'+dm,col:'#ff3b3b',dur:1000});
+    addFx({kind:'num',x:o.x,y:o.y,txt:'-'+dm,col:PAL['3'],dur:750});if(o.hp<=0){liste.splice(liste.indexOf(o),1);bleed(o.x,o.y);if(liste===G.beasts)butinMort(o);}}
+  if(dans({x:G.px,y:G.py})){const dm=dmgDe(sp);G.st.vie=Math.max(0,G.st.vie-dm);addFx({kind:'num',x:G.px,y:G.py,txt:'-'+dm,col:PAL['4'],dur:1000});
     sayMore(`La mine explose : −${dm} vie.`,'warn');if(G.st.vie<=0)G.over={dead:true};}
   else if(vu)sayMore('La mine explose.','warn');
   else if(cheb(b,G.px,G.py)<=10)sayMore('Une explosion, tout près.','warn');
@@ -417,7 +424,10 @@ const animVif=()=>!!(G&&G.beasts&&G.beasts.some(b=>b.fuse>0));   // une mine arm
 function beastsAct(){
   turnStealth();
   if(!G.beasts||!G.beasts.length||G.over)return;const distSec=robotDist(false),distEau=robotDist(true),DC={};let charged=null,distVol=null;const alarms=[],boom=[];packTick();
-  for(const b of G.beasts){if(G.over)break;if(b.skip){b.skip=0;continue;}const sp=BEASTS[b.sp];b.mp=Math.min(2,b.mp+sp.v/5/slowOf(G.t[idx(b.x,b.y)],sp.swim));
+  for(const b of G.beasts){if(G.over)break;if(b.skip){b.skip=0;continue;}const sp=BEASTS[b.sp];
+    if(b.bers>0)b.bers--;if(b.camo>0)b.camo--;if(b.tient&&!nearRobot(b))b.tient=0;
+    if(b.stun>0){b.stun--;continue;}                                                 // étourdi par une batterie : il ne fait rien
+    b.mp=Math.min(2,b.mp+sp.v/5/slowOf(G.t[idx(b.x,b.y)],sp.swim));
     const d=Math.hypot(b.x-G.px,b.y-G.py),sees=voitForeuse(b,b.hunt>0);
     if(sees){if(!b.hunt&&sp.alarm)alarms.push(b);if(!b.hunt&&beastVisible(b))charged=charged||sp;if(!b.hunt)alerte(b);b.hunt=1;spot(b);if(G.px!==b.x)b.dir=Math.sign(G.px-b.x);
       if(sp.pack)for(const o of mates(b))if(BEASTS[o.sp].pack){if(!o.hunt)alerte(o);o.hunt=1;spot(o);}}   // seuls les relais partagent ce qu'un des leurs voit — pas les autres espèces de leur groupe (20 novembre 2026)
@@ -433,7 +443,7 @@ function beastsAct(){
     if(sp.recul&&b.hunt>0&&sees&&cheb(b,G.px,G.py)<=sp.recul){const x0=b.x,y0=b.y;stepAway(b,(x,y)=>beastFits(b,x,y));if(b.x!==x0||b.y!==y0){b.mp=Math.min(b.mp,.99);if(b.cd>0)b.cd--;continue;}}   // il s'écarte ; acculé, il se bat
     if(sp.glu&&b.hunt>0&&sees&&cheb(b,G.px,G.py)<=sp.glu&&cheb(b,G.px,G.py)>1&&los(b.x,b.y,G.px,G.py)){if((b.cd=(b.cd||0)-1)<=0){b.cd=sp.cadence||3;glue(b,sp);}continue;}   // entre deux jets, il tient sa distance
     if(sp.laser&&b.hunt>0&&sees&&cheb(b,G.px,G.py)<=sp.laser&&los(b.x,b.y,G.px,G.py)){if(sp.cadence){if((b.cd=(b.cd||0)-1)>0)continue;b.cd=sp.cadence;}hurtRobot(b,sp,{laser:1});continue;}   // sentinelle : elle tire dès qu'elle est à portée
-    if(b.hunt>0&&nearRobot(b)){hurtRobot(b);continue;}
+    if(b.hunt>0&&nearRobot(b)){if(sp.bloque&&!b.tient){b.tient=1;if(beastVisible(b)){sayMore(`${LeNom(sp)} agrippe la foreuse : elle ne peut plus se déplacer tant qu’il tient.`,'warn');SFX.blocked();}}hurtRobot(b);continue;}
     while(b.mp>=1&&!G.over){b.mp-=1;
       if(b.hunt>0&&sees){
         if(nearRobot(b)){b.mp=Math.min(b.mp,.99);break;}

@@ -14,8 +14,10 @@
    une mine coûte FG_MINE_DM points de vie, de la vraie vie de la foreuse (G.st.vie) : à zéro, elle explose et la partie est
    perdue. Les mines apparaissent juste sous le bas de l'écran, visées sur la trajectoire du moment : il faut les voir venir et
    s'écarter. Passer la scène (Échap) coûte FG_PASSE_DM points de vie, sans jamais tuer.
-   La vie restante est affichée pendant toutes les descentes, la première comprise. */
-const FG_MINE_DM=12,FG_PASSE_DM=30;
+   La vie restante est affichée pendant toutes les descentes, la première comprise.
+   AMAS DE MATIÈRE (première descente, 22 novembre 2026) : un amas de Matière, couleur accent, se montre une fois au bas de l'écran,
+   un peu à côté de la route ; la foreuse qui passe dessus le récolte, +FG_AMAS_MAT dans la réserve (G.st.matiere). */
+const FG_MINE_DM=12,FG_PASSE_DM=30,FG_AMAS_MAT=20;
 const FG_ART=[
   "   ▄▄▄▄▄   ",
   "  ▐█▀▀▀█▌  ",
@@ -142,11 +144,12 @@ function playForage(suite,niv){
   fgCv.width=w;fgCv.height=h;
   FORAGE={x:fgx,w,h,dpr,cw,chh,font:`${size}px ${FG_FONT}`,R:Math.ceil(h/chh)+1,C:Math.ceil(w/cw)+3,
     P:FG_NIV[Math.max(0,Math.min(FG_NIV.length-1,(niv||1)-1))],niv:niv||1,
-    jeu,mines:[],mNext:30,touche:0,perdu:0,stun:0,
+    jeu,mines:[],mNext:30,touche:0,perdu:0,stun:0,amas:null,amasY:0,recolte:0,
     seed:(Math.random()*1e9)|0,atl:{},pt:[],t0:performance.now(),last:performance.now(),t:0,ph:0,d:0,cx:0,vx:0,hs:0,evit:0,
     th:90,nx:0,ny:-FG_POSE,side:1,camX:0,camY:0,imp:0,flash:0,matPrev:-1,kl:0,kr:0,man:0,
     snd:fgSound(),acc:{ex:0,dust:0,chip:0,spark:0,roc:0},vy:0};
   fgStart();FG_CB=suite||null;
+  if(!jeu)FORAGE.amasY=Math.round(FORAGE.D0*fgRnd(.35,.65));   // première descente : la profondeur de l'amas de Matière
   FORAGE.camY=-FORAGE.R*.62;
   fgCv.hidden=false;$('forageSkip').hidden=false;$('forageSkip').textContent=jeu?`Échap : passer (−${FG_PASSE_DM} vie)`:'Échap : passer';fgBoom(FORAGE,'start');
   requestAnimationFrame(forageFrame);}
@@ -165,9 +168,19 @@ function fgMines(F,dt){const bas=F.R*.7;
     if(typeof G!=='undefined'&&G&&G.st){const dm=Math.min(FG_MINE_DM,G.st.vie);G.st.vie-=dm;F.perdu+=dm;
       if(G.st.vie<=0&&!F.mort){F.mort=1;F.ph=4;F.tFade=F.t;F.fadeLen=1.3;F.flash=.9;F.imp=2;fgBoom(F,'perce');for(let i=0;i<40;i++)fgSmoke(F,F.cx+fgRnd(-8,8),F.d-fgRnd(0,12),fgRnd(-14,14),fgRnd(-12,6),fgRnd(1.5,2.6),1.2,3);fgSparks(F,90,F.cx,F.d-6,30);}}}
   F.stun=Math.max(0,F.stun-dt);}
+/* L’amas naît juste sous le bas de l’écran quand la foreuse approche de sa profondeur, de 9 à 13 cases à côté de là où elle va (côté au hasard) :
+   il faut tourner un peu pour passer dessus. Il est récolté si le puits le touche (moitié de largeur du puits + 2 cases). */
+function fgAmas(F){
+  if(!F.amas&&F.amasY&&F.d+F.R*.6>=F.amasY){const sd=Math.random()<.5?-1:1;F.amas={x:Math.round(F.cx+F.vx*.6+sd*fgRnd(9,13)),y:F.amasY,ok:1};}
+  const A=F.amas;if(!A||!A.ok||Math.abs(A.y-F.d)>1.6||Math.abs(A.x-F.cx)>FG_R+2)return;
+  A.ok=0;F.recolte=FG_AMAS_MAT;F.tRec=F.t;F.imp=Math.max(F.imp,.4);
+  if(typeof G!=='undefined'&&G&&G.st)G.st.matiere=(G.st.matiere||0)+FG_AMAS_MAT;
+  try{SFX.spot();}catch(e){}
+  for(let i=0;i<46;i++)fgEmit(F,{type:'ch',x:A.x+fgRnd(-3,3),y:A.y+fgRnd(-1,1),vx:fgRnd(-16,16),vy:-fgRnd(4,16),g:26,life:fgRnd(.5,1.2),ch:'◆◇*·'[(Math.random()*4)|0],col:Math.random()<.35?F.pal.w:F.pal.a});}
 function endForage(){const F=FORAGE;if(F&&F.snd)F.snd.stop();FORAGE=null;fgCv.hidden=true;$('forageSkip').hidden=true;const cb=FG_CB;FG_CB=null;
   if(F&&F.mort){G.over={dead:true};try{say('Une mine de trop : la foreuse explose dans le puits.','warn');render();}catch(e){}dead();return;}   // détruite pendant la descente : pas de niveau suivant
   try{render();}catch(e){}if(cb)cb();
+  if(F&&F.recolte&&typeof G!=='undefined'&&G&&!G.over){try{sayMore(`Amas de Matière récolté pendant la descente : +${F.recolte} (réserve : ${G.st.matiere}).`,'good');render();}catch(e){}}
   if(F&&F.jeu&&typeof G!=='undefined'&&G&&!G.over){try{sayMore(F.passe?`Descente à l’aveugle : −${F.perdu} vie.`:F.touche?`Descente : ${F.touche} mine${F.touche>1?'s':''} touchée${F.touche>1?'s':''}, −${F.perdu} vie.`:'Descente sans une égratignure : aucune mine touchée.',F.perdu?'warn':'good');render();}catch(e){}}}
 // diriger : flèches, Q et D, 4 et 6 du pavé numérique
 function fgKey(e,v){const F=FORAGE;if(!F)return;const k=(e.key||'').toLowerCase(),c=e.code||'';
@@ -199,7 +212,7 @@ function forageFrame(now){const F=FORAGE;if(!F)return;
     if(dc>1.5)F.vx+=(dl<dr?-1:1)*Math.min(3,dc-1.5)*24*dt;
     F.man+=((F.kr-F.kl)-F.man)*Math.min(1,dt*8);F.vx+=F.man*(F.jeu?52:28)*dt;   // mini-jeu : la foreuse répond plus vite
     F.vx*=Math.exp(-dt*2.4);F.vx=Math.max(F.jeu?-24:-16,Math.min(F.jeu?24:16,F.vx));F.cx+=F.vx*dt;
-    if(F.jeu)fgMines(F,dt);
+    if(F.jeu)fgMines(F,dt);else fgAmas(F);
     for(let y=Math.floor(dPrev);y<=Math.floor(F.d);y++)fgCreuse(F,y);
     F.nx=F.cx;F.ny=F.d;
     if(F.d>=F.D0){F.d=F.D0;F.ny=F.d;F.ph=2;F.tF=t;F.vy=Math.max(7,(F.d-dPrev)/dt);F.side=F.vx<-1?-1:1;F.vx*=.3;fgBoom(F,'perce');F.flash=.35;F.imp=.5;
@@ -277,6 +290,10 @@ function fgDraw(F,t){const x=F.x,{w,h,cw,chh,dpr}=F;
     const px=Math.round((m.x-3-F.camX)*cw+w/2),on=Math.floor(t*6+m.x)&1,A=on?'#ffffff':'#ff3b30',B=on?'#ff3b30':'#ffffff';
     x.fillStyle='#000';x.fillRect(px-cw,py-2*chh,cw*9,chh*5);x.fillStyle=A;x.fillRect(px,py-chh,cw*7,chh*3);x.fillStyle='#000';x.fillRect(px+cw,py,cw*5,chh);
     fgPut(F,m.x-1,m.y,'▓',B);fgPut(F,m.x,m.y,'●',B);fgPut(F,m.x+1,m.y,'▓',B);}
+  {const A=F.amas;if(A&&A.ok){const py=Math.round((A.y-F.camY)*chh);if(py>-2*chh&&py<h+chh){   // amas de Matière : 7 × 3 caractères, couleur accent, éclats blancs qui scintillent
+    const px=Math.round((A.x-3-F.camX)*cw+w/2);x.fillStyle='#000';x.fillRect(px-cw,py-2*chh,cw*9,chh*5);
+    const M=['  ▄◆▄  ','▐◆▓◆▓◆▌','  ▀◆▀  '];
+    for(let j=0;j<3;j++)for(let i=0;i<7;i++){const ch=M[j][i];if(ch===' ')continue;const br=ch==='◆'&&((Math.floor(t*5)+i+j*3)%5===0);fgPut(F,A.x-3+i,A.y-1+j,ch,br?F.pal.w:F.pal.a);}}}}
   fgDrill(F,t);
   for(const p of F.pt){const a=p.age/p.life;
     if(p.type==='sm'){const rad=p.r0+p.age*p.gr,rx=Math.ceil(rad*1.9),ry=Math.ceil(rad),col=FG_SMOKE[Math.min(4,Math.floor(a*5))],px=Math.round(p.x),py=Math.round(p.y);
@@ -300,6 +317,9 @@ function fgHud(F,t){const x=F.x,{w,h,dpr}=F,fs=Math.round(12*dpr),lh=Math.round(
   if(F.jeu){L.push([`MINES      ${F.touche} touchée${F.touche>1?'s':''}`,F.touche?F.pal.o:F.pal.g]);
     if(F.ph===1&&Math.floor(t*5)%2===0&&F.mines.some(m=>m.ok&&m.y>F.d&&m.y<F.d+F.R*.7&&Math.abs(m.x-F.cx-F.vx*(m.y-F.d)/Math.max(6,F.vy))<FG_R))L.push(['▲ MINE SUR LA ROUTE ▸ ÉCARTEZ-VOUS','#ff5a4a']);
     if(F.mort)L.push(['FOREUSE DÉTRUITE','#ff5a4a']);}
+  if(!F.jeu&&F.amasY){const A=F.amas;L.push([`RÉCOLTE    ${F.recolte?'+'+F.recolte+' matière':'0'}`,F.recolte?F.pal.a:F.pal.g]);
+    if(F.recolte&&F.t-F.tRec<1.6&&Math.floor(t*6)%2===0)L.push([`◆ AMAS DE MATIÈRE RÉCOLTÉ ▸ +${F.recolte}`,F.pal.a]);
+    else if(F.ph===1&&A&&A.ok&&A.y>F.d&&Math.floor(t*4)%2===0)L.push(['◆ AMAS DE MATIÈRE EN VUE ▸ PASSEZ DESSUS',F.pal.a]);}
   if(F.ph===1&&F.evit>1.7&&Math.floor(t*4)%2===0)L.push(['▲ MASSE DURE DEVANT ▸ CONTOURNEMENT',F.pal.o]);
   if(F.ph===2&&Math.floor(t*5)%2===0)L.push(['ALERTE ▸ PERTE DE SUPPORT','#ff5a4a']);
   if(F.ph>=3)L.push(['IMPACT ▸ ARRIVÉE AU NIVEAU SUIVANT',F.pal.o]);

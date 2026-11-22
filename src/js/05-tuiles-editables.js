@@ -8,10 +8,10 @@ const TILE_LIST=[
   ['Viseur',[['cursor','Viseur']]],
   ['Foreuse et faune',[['robot_u','Foreuse'],['an0r',SPECIES[0].n],...BEASTS.map((b,i)=>['bz'+i+'r',b.n])]],
   ['Terrain',[['ground0','Sol'],['rock','Rocher'],['rock2','Rocher 2'],['mtTop','Crête'],['mtBody','Montagne'],['wall','Mur'],['wallFace','Mur (face)'],['floor','Sol bâti'],['door','Porte'],['doorOpen','Porte ouverte'],['doorOpenV','Porte ouverte (côté)'],['pillar','Pilier'],['lock','Porte verrouillée'],['cle','Clé'],['liq0','Eau A'],['liq1','Eau B'],['deep0','Eau profonde'],['grass0','Herbes hautes'],['flat0','Herbes basses'],['rubble','Gravats'],['crackH','Fissures'],['wade','Remous'],['wadeDeep','Remous profond']]],
-  ['Objets au sol',[['o_foreuse','Foreuse'],['o_usine','Coque d’usine'],['o_servo','Servomoteur'],['o_optique','Téléobjectif'],['o_viseur','Viseur laser'],['o_conden','Condensateur'],['o_gyro','Gyroscope'],['o_stabil','Stabilisateur'],['o_accu','Accumulateur'],['o_repar','Réparobots'],['o_batterie','Batterie'],['o_fumigene','Fumigène'],['o_charge','Charge sismique'],['o_vrille','Vrille rapide'],['o_trepan','Trépan lourd'],['o_carene','Carène légère'],['o_blindage','Blindage composite']]],
+  ['Objets au sol',[['o_foreuse','Foreuse'],['o_usine','Coque d’usine'],['o_servo','Servomoteur'],['o_optique','Téléobjectif'],['o_viseur','Viseur laser'],['o_conden','Condensateur'],['o_gyro','Gyroscope'],['o_stabil','Stabilisateur'],['o_accu','Accumulateur'],['o_repar','Réparobots'],['o_batterie','Batterie'],['o_fumigene','Fumigène'],['o_charge','Charge sismique'],['o_vrille','Vrille rapide'],['o_trepan','Trépan lourd'],['o_carene','Carène légère'],['o_blindage','Blindage composite'],['o_capsule','Consommable non identifié'],['o_matiere','Matière (butin)'],['o_puissance','Module de puissance'],['o_berserk','Surrégime'],['o_camo','Camouflage optique'],['o_balise','Balise'],['o_court','Court-circuit'],['o_plan','Plan de fabrication']]],
   ['Objets',[['siteUnknown','Site'],['objet','Objet au sol (générique)'],['ore1','Éclats petits (montagne)'],['ore2','Éclats moyens (montagne)'],['ore','Éclats gros (montagne)'],['oreSol1','Éclats petits (sol)'],['oreSol2','Éclats moyens (sol)'],['oreSol','Éclats gros (sol)']]],
   ['Artefacts',[['antenne','Antenne'],['antenneOn','Antenne allumée'],['terminal','Terminal'],['mach0','Tuyaux'],['mach1','Serveur'],['mach2','Caisses'],['mach3','Ordinateur'],['mach4','Établi'],['mach5','Cuve'],['mach6','Générateur'],['mach7','Console'],['mach8','Turbine'],['mach9','Armoire électrique']]],
-  ['Machines',[['tourelle','Tourelle laser'],['tourelleOn','Tourelle laser (tir)'],['pylone','Croix laser'],['pyloneOn','Croix laser (allumée)'],['pile','Pile énergétique'],['socle','Socle'],['socleOn','Socle alimenté'],['levier','Levier'],['levierOn','Levier (actionné)'],['grille','Grille d’énergie'],['station','Station de réparation'],['stationOff','Station (vide)'],['chargeur','Chargeur de pile'],['fabric','Fabricateur']]],
+  ['Machines',[['tourelle','Tourelle laser'],['tourelleOn','Tourelle laser (tir)'],['pylone','Croix laser'],['pyloneOn','Croix laser (allumée)'],['pile','Pile énergétique'],['socle','Socle'],['socleOn','Socle alimenté'],['levier','Levier'],['levierOn','Levier (actionné)'],['grille','Grille d’énergie'],['station','Station de réparation'],['stationOff','Station (vide)'],['chargeur','Distributeur de pile'],['fabric','Fabricateur'],['niche','Niche (salle piégée)'],['nicheOuverte','Niche ouverte'],['glu','Boule de glu'],['vitrine','Vitrine'],['vitrineOff','Vitrine verrouillée']]],
   ['Vaisseau',[['ship','Cargo']]],
   ['FX',[['boom0','Explosion 1 (éclair)'],['boom1','Explosion 2 (damier)'],['boom2','Explosion 3 (braises)'],['laserV','Laser (rayon)'],['laserX','Laser (croix)'],['nuage0','Nuage plein'],['nuage1','Nuage texturé'],['nuage2','Bord diagonal'],['nuage3','Bord croisé'],['nuage4','Bord rayé'],['nuage5','Bord tramé']]]];
 const TILE_DEPS={robot_u:['robot_u','robot_r','robot_d','robot_l'],an0r:['an0r','an0l'],bz0r:['bz0r','bz0l'],bz1r:['bz1r','bz1l'],deep0:['deep0','deep1'],grass0:['grass0'],gem:['gem','gemDim','gemHole'],ship:['ship',...SHIP_KEYS]};
@@ -73,21 +73,23 @@ PAT.boom1b=(x,y)=>TF('boom1')((x+2)%16,y);PAT.boom2b=(x,y)=>TF('boom2')(15-x,y);
 Object.assign(TILE_DEPS,{laserV:['laserV','laserV_','laserH_'],laserX:['laserX','laserX_'],boom1:['boom1','boom1b'],boom2:['boom2','boom2b']});
 let TL={},ANIMG=[],fog=true;
 try{fog=localStorage.getItem('np-fog')!=='off';}catch(e){}
-const inkCol=ch=>ch==='0'?'#020605':ch==='r'?'#b8242a':ch==='L'?'#ff2a2a':ch==='w'?'#ffffff':PAL[ch];
+const inkCol=ch=>ch==='0'?'#020605':ch==='r'||ch==='L'?PAL['4']:ch==='w'?'#ffffff':PAL[ch];
 function tileCanvas(src,w=16,h=16){const c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d');
   for(let j=0;j<h;j++)for(let i=0;i<w;i++){const ch=typeof src==='function'?src(i,j):src[j][i];const col=inkCol(ch);if(col){x.fillStyle=col;x.fillRect(i,j,1,1);}}return c;}
 // reconstruit une tuile retouchée et ses variantes
+const batiSrc=k=>{const f=PAT[k];return typeof f==='function'?(x,y)=>{const c=f(x,y);return c==='3'?'5':c;}:f.map(r=>r.replace(/3/g,'5'));};   // tuiles du bâti : encre monde -> couleur bâti (22 novembre 2026)
+const tuileSrc=k=>EAU_TUILES.includes(k)?eauSrc(k):BATI_TUILES.includes(k)?batiSrc(k):PAT[k];
 function eauSrc(k){const f=PAT[k];return typeof f==='function'?(x,y)=>{const c=f(x,y);return c==='2'?'e':c;}:f.map(r=>r.replace(/2/g,'e'));}   // tuiles d'eau : encre bio -> couleur eau
-function rebuildTile(k){for(const d of TILE_DEPS[k]||[k]){if(d==='ship')TL.ship=tileCanvas(TF('ship'),SGW*16,SGH*16);else if(PAT[d])TL[d]=tileCanvas(EAU_TUILES.includes(d)?eauSrc(d):PAT[d]);if(/^(an|bz)\d+r$|^robot_r$/.test(d)){try{ICON[d]=TL[d].toDataURL();}catch(e){}}}buildCursor();if(k==='robot_u')robotTiles();}
+function rebuildTile(k){for(const d of TILE_DEPS[k]||[k]){if(d==='ship')TL.ship=tileCanvas(TF('ship'),SGW*16,SGH*16);else if(PAT[d])TL[d]=tileCanvas(tuileSrc(d));if(/^(an|bz)\d+r$|^robot_r$/.test(d)){try{ICON[d]=TL[d].toDataURL();}catch(e){}}}buildCursor();if(k==='robot_u')robotTiles();}
 function buildTiles(){
-  TL={};for(const k in PAT)TL[k]=tileCanvas(EAU_TUILES.includes(k)?eauSrc(k):PAT[k]);
+  TL={};for(const k in PAT)TL[k]=tileCanvas(tuileSrc(k));
   // la Matière reprend les dessins des éclats de métal (retouches comprises), en couleur accent au lieu de bio
   for(const k of ['ore','ore1','ore2','oreSol','oreSol1','oreSol2']){const f=TF(k);TL[k.replace('ore','mat')]=tileCanvas((x,y)=>{const c=f(x,y);return c==='2'?'1':c;});}TL.ship=tileCanvas(TF('ship'),SGW*16,SGH*16);buildCursor();
   ICON={};for(const k in TL)if(/^(an|bz)\d+r$|^robot_r$/.test(k)){try{ICON[k]=TL[k].toDataURL();}catch(e){}}
   robotTiles();
   ANIMG=SPECIES.map((_,i)=>{try{return TL['an'+i+'r'].toDataURL();}catch(e){return '';}});
-  const r=document.documentElement.style;r.setProperty('--c1',PAL['1']);r.setProperty('--c2',PAL['2']);r.setProperty('--c3',PAL['3']);
-  ['1','2','3'].forEach(k=>{$('pc'+k).style.background=PAL_U[k];$('pc'+k).title=PAL_U[k];});
+  const r=document.documentElement.style;r.setProperty('--c1',PAL['1']);r.setProperty('--c2',PAL['2']);r.setProperty('--c3',PAL['3']);r.setProperty('--c4',PAL['4']);r.setProperty('--c5',PAL['5']);r.setProperty('--life',PAL['4']);
+  PAL_CLES.forEach(k=>{$('pc'+k).style.background=PAL_U[k];$('pc'+k).title=PAL_U[k];});
 }
 function setPal(p){PAL_U=p;try{localStorage.setItem('np-palette',JSON.stringify(PAL_U));}catch(e){}touchLocal();palBiome(TEINTE);buildTiles();render();}
 

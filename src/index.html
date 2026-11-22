@@ -54,6 +54,14 @@
     <div class="mdcols"><section><h3>Monde</h3><div class="gen" id="gen"></div></section><section><h3 id="genSTitre">Structures</h3><div class="gen" id="genS"></div></section></div>
   </div>
 </div>
+<!-- Fenêtre Items (Lab, 22 novembre 2026) : tous les objets, leurs valeurs modifiables, et le butin des robots. -->
+<div class="modal" id="items" role="dialog" aria-modal="true" aria-labelledby="itTitle" hidden>
+  <div class="mcard wide" tabindex="-1">
+    <div class="mhead"><h2 id="itTitle">Items</h2><span class="saved" id="itMsg" role="status"></span><button id="itReset" title="Rétablir toutes les valeurs d’origine">Rétablir</button><button id="itSave">Enregistrer</button><button id="itClose" aria-label="Fermer les items">Fermer</button></div>
+    <p class="mnote">Tout ce qui existe : prix de fabrication, effets, équipement, et la chance qu’un robot abattu lâche un objet. Une valeur modifiée vaut tout de suite ; « Enregistrer » l’envoie dans la base de l’artefact.</p>
+    <div class="itliste" id="itList"></div>
+  </div>
+</div>
 <!-- Fenêtre Artefacts (Lab, 20 novembre 2026) : les systèmes greffés sur chaque carte, avec leur fréquence. -->
 <div class="modal" id="artefacts" role="dialog" aria-modal="true" aria-labelledby="artTitle" hidden>
   <div class="mcard" tabindex="-1">
@@ -158,7 +166,9 @@
         <label for="pc3">#1 Monde <button class="swb" id="pc3" data-k="3" aria-expanded="false" aria-label="Couleur 1 : monde"></button></label>
         <label for="pc2">#2 Bio <button class="swb" id="pc2" data-k="2" aria-expanded="false" aria-label="Couleur 2 : bio"></button></label>
         <label for="pc1">#3 Accent <button class="swb" id="pc1" data-k="1" aria-expanded="false" aria-label="Couleur 3 : accent"></button></label>
-        <div class="cgrid" id="cgrid" role="listbox" aria-label="Palette de 64 couleurs" hidden></div>
+        <label for="pc4">#4 Danger <button class="swb" id="pc4" data-k="4" aria-expanded="false" aria-label="Couleur 4 : danger"></button></label>
+        <label for="pc5">#5 Bâti <button class="swb" id="pc5" data-k="5" aria-expanded="false" aria-label="Couleur 5 : bâti"></button></label>
+        <div class="cgrid" id="cgrid" role="listbox" aria-label="Nuancier LACKING64, 64 couleurs" hidden></div>
         <div class="pnm"><span id="palName">Origine</span><button id="palReset" title="Rétablir les couleurs d’origine de cette palette">Rétablir</button></div>
         <div class="presets" id="presets"></div>
       </div>
@@ -170,6 +180,7 @@
           <button id="bestBtn">Bestiaire</button>
           <button id="grBtn" aria-haspopup="dialog" title="Créer et régler les groupes d’ennemis">Groupes</button>
           <button id="artBtn" aria-haspopup="dialog" title="Antennes, pièces d’herbe, machines, terminaux">Artefacts</button>
+          <button id="itBtn" aria-haspopup="dialog" title="Tous les objets : prix, effets, butin des robots">Items</button>
           <button id="discBtn">Discrétion</button>
           <button id="curBtn">Tile editor</button>
           <button id="niv1Btn" title="Rejouer la cinématique d’arrivée, puis un niveau 1 aux réglages tirés au hasard">Niv1</button>
@@ -206,5 +217,6 @@
 <script src="js/13-editeur-tuiles.js"></script>
 <script src="js/14-inventaire.js"></script>
 <script src="js/14c-fabricateur.js"></script>
+<script src="js/14d-objets.js"></script>
 <script src="js/14b-forage.js"></script>
 <script src="js/15-intro.js"></script>

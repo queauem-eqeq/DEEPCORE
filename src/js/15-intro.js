@@ -237,21 +237,19 @@ $('niv2Btn').onclick=()=>{unlock();if(TRAV)stopTravel();$('overlay').hidden=true
 $('niv3Btn').onclick=()=>{unlock();if(TRAV)stopTravel();$('overlay').hidden=true;started=true;
   playForage(()=>{G.niv=2;niveauSuivant(true);render();},2);};
 function savePresets(){try{localStorage.setItem('np-presets',JSON.stringify(PRESETS.map(p=>p.c)));localStorage.setItem('np-preset-active',PRESET_ACTIVE);}catch(e){}touchLocal();}
-function drawPresets(){$('presets').innerHTML=PRESETS.map((p,i)=>`<button data-p="${i}" title="${p.n}" aria-label="Palette ${p.n}" aria-pressed="${i===PRESET_ACTIVE}">${[2,1,0].map(j=>`<i style="background:${p.c[j]}"></i>`).join('')}</button>`).join('');
+function drawPresets(){$('presets').innerHTML=PRESETS.map((p,i)=>`<button data-p="${i}" title="${p.n}" aria-label="Palette ${p.n}" aria-pressed="${i===PRESET_ACTIVE}">${[2,4,1,0,3].map(j=>`<i style="background:${p.c[j]}"></i>`).join('')}</button>`).join('');
   $('palName').textContent=PRESETS[PRESET_ACTIVE].n;}
-function usePreset(i){closePick();PRESET_ACTIVE=i;const c=PRESETS[i].c;savePresets();drawPresets();setPal({'1':c[0],'2':c[1],'3':c[2]});}
-// Sélecteur à 64 couleurs : 8 familles (neutre, turquoise, bleu, violet, magenta, rouge, ambre, vert)
-// en rampes de 8 nuances du clair au sombre ; les couleurs d'origine du jeu y figurent.
-const COLORS64=["#e9ebec","#cdd3d5","#abb5ba","#89989f","#687a83","#4c5a61","#333d42","#1d2226","#e0f5f2","#b4efe3","#8fe6cf","#4bdcba","#30ba96","#307e67","#245143","#142e25","#dee9f8","#adcef5","#4fb8ff","#3c97ec","#227dc9","#285e86","#1f4056","#122531","#ebe1f5","#d1b6ed","#af81e4","#8b51d7","#6935b5","#4d337b","#342650","#1c152d","#f6e0ec","#f0b3d7","#e97cc0","#df49ab","#bc2e8f","#7f2f67","#522346","#2e1428","#f7dfe0","#f2b0b2","#ee7777","#e54743","#c23029","#82312b","#542621","#2f1613","#f9e8dc","#f9cba9","#ffa53a","#f69131","#d37818","#8b5b22","#593f1c","#322510","#e6f4e1","#c4ebb7","#98e283","#6bd454","#4bb238","#3c7934","#2a4f27","#172c16"];
+function usePreset(i){closePick();PRESET_ACTIVE=i;const c=PRESETS[i].c;savePresets();drawPresets();setPal(palDe(c));}
+// Sélecteur de teinte : les 64 couleurs de LACKING64 (02-palette), depuis le 22 novembre 2026.
 let pickKey=null;
 function openPick(k){const grid=$('cgrid');if(pickKey===k){closePick();return;}pickKey=k;
-  ['1','2','3'].forEach(x=>$('pc'+x).setAttribute('aria-expanded',x===k));
+  PAL_CLES.forEach(x=>$('pc'+x).setAttribute('aria-expanded',x===k));
   $('pc'+k).closest('label').after(grid);
-  grid.innerHTML=COLORS64.map(c=>`<button role="option" data-c="${c}" style="background:${c}" title="${c}" aria-label="${c}" aria-selected="${c.toLowerCase()===String(PAL_U[k]).toLowerCase()}"></button>`).join('');
+  grid.innerHTML=LACKING64.map(c=>`<button role="option" data-c="${c}" style="background:${c}" title="${c}" aria-label="${c}" aria-selected="${c.toLowerCase()===String(PAL_U[k]).toLowerCase()}"></button>`).join('');
   grid.hidden=false;}
-function closePick(){pickKey=null;$('cgrid').hidden=true;['1','2','3'].forEach(x=>$('pc'+x).setAttribute('aria-expanded','false'));}
+function closePick(){pickKey=null;$('cgrid').hidden=true;PAL_CLES.forEach(x=>$('pc'+x).setAttribute('aria-expanded','false'));}
 function applyColor(k,c){const j=+k-1;PRESETS[PRESET_ACTIVE].c[j]=c;savePresets();drawPresets();setPal(Object.assign({},PAL_U,{[k]:c}));}
-['1','2','3'].forEach(k=>$('pc'+k).addEventListener('click',e=>{e.preventDefault();openPick(k);}));
+PAL_CLES.forEach(k=>$('pc'+k).addEventListener('click',e=>{e.preventDefault();openPick(k);}));
 $('cgrid').addEventListener('click',e=>{const b=e.target.closest('button[data-c]');if(!b||!pickKey)return;const k=pickKey;applyColor(k,b.dataset.c);   // la palette reste ouverte pour essayer d'autres couleurs (21 novembre 2026) ; on la ferme en recliquant sur la pastille ou avec Échap
   $('cgrid').querySelectorAll('button[data-c]').forEach(x=>x.setAttribute('aria-selected',x===b));});
 addEventListener('keydown',e=>{if(e.key==='Escape'&&pickKey)closePick();});

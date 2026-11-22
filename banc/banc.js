@@ -30,7 +30,12 @@ function carte(cfg){const g0=GEN,gen=cfg.carte==='arene'?{eau:0,montagne:0,gouff
   Object.assign(G,{w:W,h:H,eff:{},ore:{},items:{},tracks:{},lastDir:null,beasts:[],amb:[],blood:{},fv:2,inv:invTest(),log:[],sonar:2,over:null,time:0,debt:0,sprint:false});
   G.st.matiere=0;for(const k in LIFE)LIFE[k]=Math.max(0,Math.round(+(cfg.ennemis||{})[k]||0));
   spawnAnimals();spawnBeasts();
-  for(const k of [cfg.arme,cfg.armure,...(cfg.acc||[])])if(k&&k!=='foreuse'){const i=G.inv.findIndex(o=>o.k===k);if(i>=0&&!G.inv[i].eq)invEquip(i);}
+  itemsApplique(JSON.parse(JSON.stringify(ITEMS_DEF)));if(cfg.items)itemsApplique(cfg.items);   // variantes d'objets à l'essai (mêmes champs que Lab → Items)
+  if(cfg.pow>0)G.st.power=Math.round(cfg.pow);   // POW d'essai (modules de puissance), avant d'équiper
+  // 22 novembre 2026 : le sac est vide au départ ; le banc y met le kit demandé, puis les consommables (cfg.conso = {repar:2, charge:1…}), tous identifiés
+  for(const k of [cfg.arme,cfg.armure,...(cfg.acc||[])])if(k&&k!=='foreuse'&&ITEMS[k]){let i=G.inv.findIndex(o=>o.k===k);if(i<0){G.inv.push({k,eq:0});i=G.inv.length-1;}if(!G.inv[i].eq)invEquip(i);}
+  G.st.savoir={plans:{},ident:{},codes:{}};for(const k in CONSO)savoir().ident[k]=1;CONS_N=0;
+  for(const k in cfg.conso||{})if(CONSO[k]&&cfg.conso[k]>0)G.inv.push({k,eq:0,n:Math.round(cfg.conso[k])});
   if(cfg.alerte){for(const b of G.beasts){b.hunt=1;spot(b);}for(const a of G.animals){a.aware=1;spot(a);}}   // assaut : tout le monde sait où est la foreuse et vient
   if(cfg.vie>0)G.st.vieMax=Math.round(cfg.vie);   // vie d'essai (voir l'interface)
   G.st.vie=G.st.vieMax;G.st.energie=G.st.energieMax;lastAct='move';if(typeof robotTiles==='function')robotTiles();turnStealth();computeFOV();}
@@ -42,7 +47,22 @@ function versCase(tx,ty){const dt=distFrom(tx,ty,true),c=dt[idx(G.px,G.py)];if(c
     if(v>=0&&v<bv){bv=v;best=[dx,dy];}}
   if(!best)return false;const t0=G.time,tr=G.turn;tryMove(best[0],best[1]);if(G.time===t0&&G.turn===tr)waitTurn();return true;}
 function frappe(e){tryMove(Math.sign(e.x-G.px),Math.sign(e.y-G.py));}
+/* Pilote avec consommables (22 novembre 2026) : réparobots sous la moitié de la vie ; charge sismique sur deux ennemis groupés
+   (ou un gros) à portée ; batterie sur le Bloqueur qui tient la foreuse, sinon sur le plus dangereux au contact quand ils sont
+   plusieurs ; surrégime au contact d'un ennemi solide. Un seul objet par geste. */
+let CONS_N=0;
+function consoPilote(){const a=k=>G.inv.findIndex(o=>o.k===k),V=vivants(),pv=e=>e.hp??pvDe((G.beasts.includes(e)?BEASTS:SPECIES)[e.sp]);
+  const use=(k,x,y)=>{const i=a(k);if(i<0)return false;if(k==='charge'){VISEE={i,x,y};viseeOk();}else consoCible(i,x,y);CONS_N++;return true;};
+  if(a('repar')>=0&&G.st.vie<=G.st.vieMax/2&&G.st.vie<=G.st.vieMax-ITEM_VAL.repar.soin)return use('repar',G.px,G.py);
+  const adj=V.filter(e=>cheb(e,G.px,G.py)<=1);
+  if(a('batterie')>=0){const t=adj.find(e=>e.tient&&!(e.stun>0))||(adj.length>=2?adj.filter(e=>!(e.stun>0)).sort((x,y)=>pv(y)-pv(x))[0]:null);if(t)return use('batterie',t.x,t.y);}
+  if(a('charge')>=0){let best=null,bn=0;for(let y=G.py-VISEE_R;y<=G.py+VISEE_R;y++)for(let x=G.px-VISEE_R;x<=G.px+VISEE_R;x++){if(x<1||y<1||x>=W-1||y>=H-1||cheb({x,y},G.px,G.py)<=1)continue;
+      const l=V.filter(e=>Math.abs(e.x-x)<=1&&Math.abs(e.y-y)<=1),n=l.length+(l.some(e=>pv(e)>=25)?1:0);if(n>bn){bn=n;best=[x,y];}}
+    if(bn>=2)return use('charge',best[0],best[1]);}
+  if(a('berserk')>=0&&!(G.eff.berserk>0)&&adj.some(e=>pv(e)>=18))return use('berserk',G.px,G.py);
+  return false;}
 function pas(cfg){if(G.over)return false;
+  if(cfg.conso&&consoPilote())return !G.over;
   const adj=vivants().filter(e=>cheb(e,G.px,G.py)<=1&&diagOk(G.px,G.py,Math.sign(e.x-G.px),Math.sign(e.y-G.py)));
   if(cfg.pilote==='traversee'){const s=G.sites[0];if(!s||(s.x===G.px&&s.y===G.py))return false;
     const host=adj.filter(e=>e.hunt>0||e.mode==='attack'||e.aware);
@@ -60,13 +80,13 @@ const LIMITE=900;
 function fin(cfg,n0,v0){const reste=vivants().length,mort=!!(G.over&&G.over.dead),E=G.eff||{};
   const vie=mort?0:Math.max(0,G.st.vie-(E.poison>0?E.poison*(E.pdmg||0):0));
   const ok=cfg.pilote==='traversee'?!!(G.sites[0]&&G.sites[0].x===G.px&&G.sites[0].y===G.py):!reste;
-  return {issue:mort?'mort':ok?'victoire':'incomplet',vie,v0,tues:n0-reste,n0,bat:(G.time||0)/100};}
+  return {issue:mort?'mort':ok?'victoire':'incomplet',vie,v0,tues:n0-reste,n0,bat:(G.time||0)/100,cons:CONS_N};}
 function essai(cfg){muet(true);const son=SND.on;SND.on=false;try{carte(cfg);const n0=vivants().length,v0=G.st.vie;let n=0;while(n++<LIMITE&&pas(cfg)){}return fin(cfg,n0,v0);}finally{SND.on=son;muet(false);}}
 function bilan(cfg,l){const N=l.length,v=l.filter(r=>r.issue==='victoire'),m=l.filter(r=>r.issue==='mort'),som=(a,f)=>a.reduce((t,r)=>t+f(r),0);
   const perte=som(l,r=>r.v0-r.vie),tues=som(l,r=>r.tues);
   return {n:N,vic:Math.round(100*v.length/N),mort:Math.round(100*m.length/N),inc:Math.round(100*(N-v.length-m.length)/N),
     vie:v.length?Math.round(som(v,r=>r.vie)/v.length):null,v0:l[0].v0,perte:+(perte/N).toFixed(1),ennemis:+(som(l,r=>r.n0)/N).toFixed(1),tues:+(tues/N).toFixed(1),
-    parMonstre:tues?+(perte/tues).toFixed(1):null,bat:Math.round(som(l,r=>r.bat)/N)};}
+    parMonstre:tues?+(perte/tues).toFixed(1):null,cons:+(som(l,r=>r.cons||0)/N).toFixed(2),bat:Math.round(som(l,r=>r.bat)/N)};}
 function serie(cfg,n){const l=[];for(let i=0;i<n;i++)l.push(essai(cfg));return bilan(cfg,l);}
 
 /* --- description d'une configuration --- */

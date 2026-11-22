@@ -23,7 +23,7 @@ function mini(){
   if(mv.width!==pw||mv.height!==ph){mv.width=pw;mv.height=ph;mv.style.height=Math.round(cw*H/W)+'px';}
   const k=pw/W,X=x=>Math.floor(x*k),Y=y=>Math.floor(y*k),cell=(x,y,w,h)=>mctx.fillRect(X(x),Y(y),X(x+(w||1))-X(x),Y(y+(h||1))-Y(y));
   mctx.setTransform(1,0,0,1,0,0);mctx.globalAlpha=1;mctx.fillStyle='#020605';mctx.fillRect(0,0,pw,ph);
-  const C=[[PAL['3'],.14],[PAL['3'],.55],[PAL['3'],.85],[PAL['2'],.6],[PAL['1'],.55],[PAL['1'],.22],[PAL['2'],.22],['#000',1],[PAL['3'],.3],[PAL['3'],.3],[PAL['1'],.35],[PAL['1'],.9],[PAL['2'],.35],[PAL['3'],1],[PAL['3'],.95],[PAL['3'],.05],[PAL['1'],1],[PAL['3'],.7],['#ffffff',1],[PAL['3'],.95]];   // 13 = roche dure : la plus marquée de la mini-carte ; 14 à 17 = mur, sol bâti, porte, pilier
+  const C=[[PAL['3'],.14],[PAL['3'],.55],[PAL['3'],.85],[PAL['2'],.6],[PAL['1'],.55],[PAL['1'],.22],[PAL['2'],.22],['#000',1],[PAL['3'],.3],[PAL['3'],.3],[PAL['1'],.35],[PAL['1'],.9],[PAL['2'],.35],[PAL['3'],1],[PAL['5'],.95],[PAL['5'],.05],[PAL['1'],1],[PAL['5'],.7],['#ffffff',1],[PAL['5'],.95]];   // 13 = roche dure : la plus marquée de la mini-carte ; 14 à 17 = mur, sol bâti, porte, pilier
   for(let y=0;y<H;y++)for(let x=0;x<W;x++){const i=idx(x,y);if(fog&&!G.seen[i])continue;const [c,a]=C[G.t[i]]||C[0];mctx.globalAlpha=a;mctx.fillStyle=c;cell(x,y);}
   mctx.globalAlpha=1;
   for(const s of G.sites){if(fog&&!s.seen)continue;mctx.fillStyle=s.known?PAL['3']:PAL['2'];cell(s.x-1,s.y-1,3,3);}
@@ -33,8 +33,8 @@ function mini(){
      const dot=(px,py)=>{if(px>=0&&py>=0&&px<w&&py<h)mctx.fillRect(px*u,py*u,u,u);};
      for(let e=-Math.ceil(q);e<=Math.ceil(q);e++){const g=Math.round(Math.sqrt(Math.max(0,R*R-e*e)));dot(cx+e,cy-g);dot(cx+e,cy+g);dot(cx-g,cy+e);dot(cx+g,cy+e);}}}   // gisements détectés par le sonar
   // ennemis : points rouges (dans le champ de vision, ou partout sans brouillard)
-  {const d=Math.max(2,Math.round(k*1.2));mctx.fillStyle='#ff3b3b';
-   for(const e of [...(G.beasts||[]),...(G.animals||[])]){if(fog&&!vis[idx(e.x,e.y)])continue;mctx.fillRect(Math.round((e.x+.5)*k-d/2),Math.round((e.y+.5)*k-d/2),d,d);}}
+  {const d=Math.max(2,Math.round(k*1.2));mctx.fillStyle=PAL['4'];
+   for(const e of [...(G.beasts||[]),...(G.animals||[])]){if(fog&&!vis[idx(e.x,e.y)]&&!(G.beasts.includes(e)&&antDetecte(e)))continue;mctx.fillRect(Math.round((e.x+.5)*k-d/2),Math.round((e.y+.5)*k-d/2),d,d);}}
   mctx.strokeStyle=PAL['1'];mctx.globalAlpha=.5;mctx.lineWidth=Math.max(1,Math.round(dpr));
   mctx.strokeRect(X(camX)+.5,Y(camY)+.5,X(camX+Math.min(W,Math.ceil(vw/S)))-X(camX)-1,Y(camY+Math.min(H,Math.ceil(vh/S)))-Y(camY)-1);
   mctx.globalAlpha=1;mctx.fillStyle='#ffffff';const pr=Math.max(2,Math.round(k*1.5));mctx.fillRect(Math.round((G.px+.5)*k-pr/2),Math.round((G.py+.5)*k-pr/2),pr,pr);
@@ -149,13 +149,14 @@ function applySaved(d){
   if(d.bestiaire)BEST_LIST().forEach(e=>{const b=d.bestiaire[e.key];if(b)BFIELDS.forEach(([f])=>{if(num(b[f]))e.o[f]=b[f];});});saveBest();
   if(num(d.discretion))setStealthBase(d.discretion);
   if(d.artefacts){ARTEFACTS=artefactsSains(d.artefacts);saveArtefacts();}
+  if(d.items&&typeof itemsApplique==='function'){itemsApplique(d.items);saveItems();}
   if(d.groupes){const g=groupesSains(d.groupes);if(g){GROUPES=groupesV2(g);saveGroupes();}}   // les anciennes intensités par espèce (d.intensite) ne sont plus lues
   if(d.mondes&&typeof d.mondes==='object'&&Date.parse(d.enregistreLe)>Date.parse('2026-11-21T05:00:00Z')){   // les archétypes d'avant cette date ont été effacés
     MONDES=Object.assign({},MONDES,d.mondes);saveMondes();}
   if(d.generation){const g=d.generation;GEN_LBL.forEach(([k])=>{if(num(g[k]))GEN[k]=0;});GEN_LBL.forEach(([k])=>{if(num(g[k]))setGen(k,g[k],true);});
     if(METHODS.some(m=>m[0]===g.methode)){GEN.methode=g.methode;$('gm').value=g.methode;}
     if(num(g.remplissage))setCA('remplissage',g.remplissage,35,70);if(num(g.iterations))setCA('iterations',g.iterations,1,10);caState();saveGen();}
-  if(d.palette&&Array.isArray(d.palette.palettes)){d.palette.palettes.forEach(pp=>{const t=PRESETS.find(x=>x.n===pp.nom);if(t&&Array.isArray(pp.couleurs)&&pp.couleurs.length===3)t.c=pp.couleurs.slice();});
+  if(d.palette&&Array.isArray(d.palette.palettes)){d.palette.palettes.forEach(pp=>{const t=PRESETS.find(x=>x.n===pp.nom);if(t&&Array.isArray(pp.couleurs)&&pp.couleurs.length===PAL_N)t.c=pp.couleurs.slice();});
     const ai=PRESETS.findIndex(x=>x.n===d.palette.active);usePreset(ai>=0?ai:PRESET_ACTIVE);}
   if(d.tuiles&&typeof d.tuiles==='object'){TILE_OV={};for(const k in d.tuiles)if(PAT_ORIG[k]&&validTile(d.tuiles[k],k))TILE_OV[k]=d.tuiles[k].slice();saveTiles();commitTileBase();buildTiles();}
 }
@@ -170,7 +171,7 @@ function applySaved(d){
 async function saveSettings(b,m){b=b instanceof HTMLElement?b:$('saveBtn');m=m||$('saveMsg');
   if(!DB||!b)return;b.disabled=true;b.textContent='Enregistrement…';m.className='saved';m.textContent='';
   const best={};BEST_LIST().forEach(e=>{best[e.key]={nom:e.o.n};BFIELDS.forEach(([f])=>best[e.key][f]=e.o[f]);});
-  const data={enregistreLe:new Date().toISOString(),bestiaire:best,discretion:STEALTH_BASE,groupes:JSON.parse(JSON.stringify(GROUPES)),artefacts:JSON.parse(JSON.stringify(ARTEFACTS)),generation:Object.assign({},GEN),mondes:JSON.parse(JSON.stringify(MONDES)),
+  const data={enregistreLe:new Date().toISOString(),bestiaire:best,discretion:STEALTH_BASE,groupes:JSON.parse(JSON.stringify(GROUPES)),artefacts:JSON.parse(JSON.stringify(ARTEFACTS)),items:itemsEtat(),generation:Object.assign({},GEN),mondes:JSON.parse(JSON.stringify(MONDES)),
     planete:{largeur:W,hauteur:H},robot:G&&G.st?Object.assign({},G.st):null,
     palette:{active:PRESETS[PRESET_ACTIVE].n,palettes:PRESETS.map(p=>({nom:p.n,couleurs:p.c.slice()}))},
     tuiles:Object.assign({},TILE_OV)};

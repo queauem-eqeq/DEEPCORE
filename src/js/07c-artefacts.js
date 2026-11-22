@@ -9,21 +9,23 @@
    4. Terminal  : la foreuse l'active en avançant dessus ; il affiche un texte.
    Terrains : MACHINE, ANTENNA, TERMINAL (00-base). G.art[case] : la variante d'une machine, l'état d'une antenne (1 = allumée),
    le texte d'un terminal. Posés par artefacts(), appelé à la fin de la génération des bâtiments. */
-const ART_LISTE=[['antenne','Antenne','Activée par la foreuse, elle reste allumée et tient en vue un disque de 30 cases de large.',[.5,1,2]],
+const ART_LISTE=[['antenne','Antenne','Activée par la foreuse, elle lève le brouillard 15 tours sur un disque de 30 cases, puis y signale les ennemis par un point rouge.',[.5,1,2]],
   ['herbe','Pièces envahies d’herbe','Des pièces remplies d’herbes hautes et basses mêlées.',[.08,.18,.35]],
   ['machines','Machines','Dix machines hors d’usage posées en obstacles : elles barrent le pas, pas la vue.',[.15,.35,.6]],
   ['terminal','Terminal','Activé par la foreuse, il affiche un texte.',[1,2,4]],
   // machines (21 novembre 2026, 07f-machines) : nombre de salles par carte dans la grande base ; un tiers ailleurs (le fabricateur : partout pareil)
   ['lasers','Tourelles laser','Des tourelles encastrées dans un mur balaient la pièce par bandes. Aucun avertissement : chaque bande a son rythme.',[1,2,4]],
   ['croix','Croix laser','Un champ de pylônes qui éclairent leurs quatre cases voisines, chacun à son rythme.',[1,2,3]],
-  ['ponts','Ponts à levier','Un fossé coupe une salle ; un levier, ailleurs, déploie le pont.',[.5,1.5,3]],
-  ['piles','Piles, socles et dépôts','Une grille d’énergie garde un dépôt. Poussez la pile sur son socle pour l’ouvrir.',[.5,1.5,3]],
+  ['ponts','Ponts à levier','Un gouffre prend presque toute la salle ; le levier, au pied du pont, le déploie. Passage obligé, ou cul-de-sac avec butin.',[.5,1.5,3]],
+  ['piles','Piles, socles et dépôts','Une grille d’énergie garde un dépôt ; son socle est devant. La pile attend près de son distributeur, dans la pièce voisine.',[.5,1.5,3]],
+  ['pieges','Salles piégées','Un butin au milieu de la pièce, des relais cachés dans les murs : ils surgissent quand on le ramasse.',[.5,1,2]],
+  ['vitrines','Vitrines','Une petite pièce en cul-de-sac, trois lots sous vitrine : on n’en emporte qu’un.',[.4,1,2]],
   ['station','Station de réparation','Vie et énergie au maximum, une seule fois. Le bruit attire les ennemis proches.',[.3,.7,1.2]],
   ['fabric','Fabricateur','Fabrique des objets contre de la Matière.',[.5,1,2]]];
-const ARTEFACTS_DEF=()=>({antenne:{on:1,f:1},herbe:{on:1,f:1},machines:{on:1,f:1},terminal:{on:1,f:1},lasers:{on:1,f:1},croix:{on:0,f:1},ponts:{on:1,f:1},piles:{on:1,f:1},station:{on:1,f:1},fabric:{on:1,f:1}});   // réglage du joueur, relu le 21 novembre 2026 à 23 h 39 (croix laser désactivée, machines en fréquence normale)
+const ARTEFACTS_DEF=()=>({antenne:{on:1,f:1},herbe:{on:1,f:1},machines:{on:1,f:1},terminal:{on:1,f:1},lasers:{on:1,f:1},croix:{on:0,f:1},ponts:{on:1,f:1},piles:{on:1,f:1},pieges:{on:1,f:1},vitrines:{on:1,f:1},station:{on:1,f:1},fabric:{on:1,f:1}});   // réglage du joueur, relu le 21 novembre 2026 à 23 h 39 (croix laser désactivée, machines en fréquence normale)
 /* Niveaux de profondeur où un artefact peut apparaître (21 novembre 2026, réglé dans la fenêtre LIFE). Départ : les lasers à partir
    du niveau 2, les croix au niveau 3, les piles à partir du niveau 2, tout le reste partout. */
-const ART_NIV_DEF={lasers:[2,3],croix:[3],piles:[2,3],fabric:[2,3],ponts:[3],station:[3]},ART_NIVS=[1,2,3];
+const ART_NIV_DEF={lasers:[2,3],croix:[3],piles:[2,3],pieges:[2,3],fabric:[2,3],ponts:[3],station:[3]},ART_NIVS=[1,2,3];
 function artefactsSains(d){const o=ARTEFACTS_DEF();for(const [k] of ART_LISTE)o[k].niv=(ART_NIV_DEF[k]||ART_NIVS).slice();
   if(d&&typeof d==='object')for(const [k] of ART_LISTE)if(d[k]){o[k].on=d[k].on?1:0;o[k].f=[0,1,2].includes(+d[k].f)?+d[k].f:1;if(Array.isArray(d[k].niv))o[k].niv=ART_NIVS.filter(n=>d[k].niv.includes(n));}return o;}
 // l'artefact est-il permis sur la carte en cours de génération ? (actif dans le Lab, et permis à ce niveau)
@@ -61,7 +63,7 @@ function artefacts(B,strs){G.art={};const A=ARTEFACTS,t=G.t,site=G.sites&&G.site
   // 2. herbe : la pièce entière, hautes et basses mêlées par petites touffes (le site et les clés gardent leur sol)
   if(artOn('herbe')){const pris=mel().filter(p=>!p.c.includes(site)).slice(0,compte(pieces.length*fq('herbe')));
     for(const p of pris){const g=Math.random()*10,h=Math.random()*10;p.herbe=1;G.artN.herbe++;
-      for(const i of p.c)if(t[i]===FLOOR&&i!==site&&!G.cles[i]){const x=i%W,y=(i/W)|0;t[i]=Math.sin(x*.9+g)+Math.cos(y*1.1+h)+Math.random()*.9>.45?GRASS:FLAT;}}}
+      for(const i of p.c)if(t[i]===FLOOR&&i!==site){const x=i%W,y=(i/W)|0;t[i]=G.cles[i]?FLAT:Math.sin(x*.9+g)+Math.cos(y*1.1+h)+Math.random()*.9>.45?GRASS:FLAT;}}}   // sous une clé : de la terre nue, pas la dalle du bâtiment (22 novembre 2026)
   const libres=()=>mel().filter(p=>!p.herbe);
   // 1. antenne et 4. terminal : un par pièce, contre un mur si possible
   if(artOn('antenne')){let n=compte(fq('antenne'));for(const p of libres()){if(n<=0)break;if(pose(p,ANTENNA,0,true)>=0){n--;p.ant=1;G.artN.antenne++;}}}
@@ -77,16 +79,21 @@ const ANT_R=15;
    (fxLoop rappelle antVis à chaque image). Mouvement réduit : tout d'un coup, comme avant. */
 const ANT_DUR=1000,ANT_ANIM={};
 const antAnime=()=>{for(const k in ANT_ANIM)return true;return false;};
-// Tant qu'une antenne est allumée, tout son disque reste en vue : le brouillard n'y revient pas (appelé par computeFOV).
+/* 22 novembre 2026 (choix de l'utilisateur) : l'antenne ne lève le brouillard que ANT_TOURS tours (G.antFin[case] = tour de fin).
+   Ensuite le brouillard revient sur son disque, mais elle continue de détecter : tout ennemi dans le disque se montre par un
+   point en couleur danger, sur la carte et la mini-carte (antDetecte). G.art[case] : 1 = disque en vue, 2 = détection seule. */
+const ANT_TOURS=15;
+const antDetecte=o=>{if(!G.art)return false;for(const k in G.art){const i=+k,e=G.art[k];if((e!==1&&e!==2)||G.t[i]!==ANTENNA)continue;const dx=o.x-i%W,dy=o.y-((i/W)|0);if(dx*dx+dy*dy<=ANT_R*ANT_R+ANT_R)return true;}return false;};
 function antVis(){if(!G.art)return;const now=performance.now();for(const k in G.art){const i=+k;if(G.art[k]!==1||G.t[i]!==ANTENNA)continue;const x=i%W,y=(i/W)|0;
+  if(G.antFin&&G.antFin[i]!=null&&G.turn>=G.antFin[i]){G.art[k]=2;delete G.antFin[i];sayMore('L’antenne cesse d’éclairer la zone : le brouillard revient, mais elle signale toujours les ennemis (points rouges).','info');continue;}
   let R2=ANT_R*ANT_R+ANT_R;if(ANT_ANIM[i]!=null){const p=(now-ANT_ANIM[i])/ANT_DUR;if(p>=1||reduced)delete ANT_ANIM[i];else{const r=Math.floor(p*(ANT_R+1))+1;R2=Math.min(R2,r*r);}}   // anneau r : les cases à moins de r de distance
   for(let dy=-ANT_R;dy<=ANT_R;dy++)for(let dx=-ANT_R;dx<=ANT_R;dx++){const a=x+dx,b=y+dy;if(a<0||b<0||a>=W||b>=H||dx*dx+dy*dy>R2)continue;const j=idx(a,b);vis[j]=1;G.seen[j]=1;}}}
 function antenneUse(i){G.art=G.art||{};const x=i%W,y=(i/W)|0;
-  if(G.art[i]===1){say('Antenne : déjà en service.');SFX.blocked();render();return;}
-  G.art[i]=1;let n=0;for(let dy=-ANT_R;dy<=ANT_R;dy++)for(let dx=-ANT_R;dx<=ANT_R;dx++){const a=x+dx,b=y+dy;if(a<0||b<0||a>=W||b>=H||dx*dx+dy*dy>ANT_R*ANT_R+ANT_R)continue;if(!G.seen[idx(a,b)])n++;}   // compté ici, découvert par antVis
+  if(G.art[i]===1||G.art[i]===2){say('Antenne : déjà en service.');SFX.blocked();render();return;}
+  G.art[i]=1;(G.antFin=G.antFin||{})[i]=G.turn+1+ANT_TOURS;let n=0;for(let dy=-ANT_R;dy<=ANT_R;dy++)for(let dx=-ANT_R;dx<=ANT_R;dx++){const a=x+dx,b=y+dy;if(a<0||b<0||a>=W||b>=H||dx*dx+dy*dy>ANT_R*ANT_R+ANT_R)continue;if(!G.seen[idx(a,b)])n++;}   // compté ici, découvert par antVis
   if(!reduced)ANT_ANIM[i]=performance.now();
   G.turn++;G.msg=null;addFx({kind:'sonar',ant:1,x,y,r:ANT_R+1,dur:reduced?1:ANT_DUR});SFX.sonar(.7);
-  say(`L’antenne s’allume : ${n?`${n} cases apparaissent sur la carte, et la zone restera en vue`:'la zone alentour restera en vue'}.`,'good');pass(DUR.wait||100);computeFOV();render();}
+  say(`L’antenne s’allume : ${n?`${n} cases apparaissent sur la carte`:'la zone alentour est en vue'} pendant ${ANT_TOURS} tours. Ensuite elle signalera encore les ennemis.`,'good');pass(DUR.wait||100);computeFOV();render();}
 // la foreuse avance sur un terminal : il affiche son texte (le temps ne passe pas)
 function terminalUse(i){const [titre,txt]=TERM_TXT[((G.art&&G.art[i])||0)%TERM_TXT.length];
   if(TRAV)stopTravel();if(EXPL)stopExplore();$('termTitre').textContent=titre;$('termTxt').textContent=txt;$('terminal').hidden=false;$('termClose').focus();SFX.spot();}

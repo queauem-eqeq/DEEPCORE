@@ -18,6 +18,12 @@
   // la première descente : pas de mine, la vie ne bouge pas
   {G.over=null;G.st.vie=77;FORAGE=null;let fin=0;playForage(()=>{fin=1;},1);const F=FORAGE;F.sansRendu=1;let now=F.t0,n=0;while(FORAGE&&n++<1500){now+=33;forageFrame(now);}
     out.push(`première descente : ${F.mines.length} mine, vie ${G.st.vie}/100, arrivée ${fin?'oui':'NON'}, ${F.t.toFixed(1)} s`);}
+  // l'amas de Matière de la première descente : sans pilote, puis avec un pilote qui va dessus dès qu'il le voit (kr pousse la foreuse à droite)
+  for(const [nom,vise] of [['sans pilote',0],['pilote qui vise',1]]){let pris=0,vus=0;
+    for(let k=0;k<K;k++){G.over=null;G.st.vie=100;G.st.matiere=0;FORAGE=null;playForage(()=>{},1);const F=FORAGE;F.sansRendu=1;let now=F.t0,n=0;
+      while(FORAGE&&n++<1500){now+=33;F.kl=F.kr=0;if(vise&&F.ph===1&&F.amas&&F.amas.ok&&F.amas.y>F.d){const dx=F.amas.x-(F.cx+F.vx*.3);if(dx>1)F.kr=1;else if(dx<-1)F.kl=1;}forageFrame(now);}
+      if(F.amas)vus++;if(G.st.matiere===FG_AMAS_MAT)pris++;$('overlay').hidden=true;}
+    out.push(`première descente, amas de matière, ${nom} : ${vus}/${K} amas apparus, ${pris}/${K} récoltés (+${FG_AMAS_MAT})`);}
   // arriver blessée et ne pas diriger : la foreuse peut exploser, et alors il n'y a pas de niveau suivant
   {let morts=0,suites=0;for(let k=0;k<K;k++){G.over=null;G.st.vie=25;FORAGE=null;let fin=0;playForage(()=>{fin=1;},2);const F=FORAGE;F.sansRendu=1;let now=F.t0,n=0;while(FORAGE&&n++<1500){now+=33;forageFrame(now);}
       if(F.mort){morts++;if(fin)suites++;}$('overlay').hidden=true;if(typeof BOOM!=='undefined')BOOM=null;}
