@@ -256,3 +256,7 @@ Les chiffres mesurés sont dans `mesures.md`.
   tous les curseurs). Ceux déjà enregistrés restent lisibles, sans recette.
 - **Bug corrigé : baisser les PV d'une espèce au Bestiaire ramenait TOUTES les créatures de la carte à ce maximum**
   (passer le drone à 6 PV mettait les broyeurs à 6). Seule l'espèce modifiée est désormais concernée.
+- **Réglages du joueur recopiés dans le code** (22 novembre 2026, 2 h) : relus dans la base de l'artefact (enregistrés à
+  0 h 31). Stats, palettes, groupes, artefacts et discrétion étaient déjà identiques ; deux dessins différaient (le site
+  de forage et le Gardien) et la palette par défaut devient **Rouille**. Bug corrigé au passage : sans réglage
+  enregistré dans le navigateur, le jeu prenait la palette n° 0 (Origine) au lieu de la palette par défaut.
