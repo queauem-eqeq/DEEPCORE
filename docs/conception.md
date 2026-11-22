@@ -1006,6 +1006,8 @@ remplace la plus ancienne. **Enregistrer** écrit les valeurs dans la base de l'
 - **Un seul site de forage par carte**. Son marqueur (tuile « Site ») **reste le même une fois trouvé** (21 novembre 2026 : il ne se change plus en anneau chiffré, et la profondeur n'est plus affichée) ; en posant la foreuse dessus : « Site de forage détecté. [F] pour forer. ». Il est **dans la
   pièce la plus profonde** du complexe, la plus éloignée des entrées : traverser le bâtiment est l'objectif.
 - **Forer** : touche F sur le site (ou clic sur la foreuse posée dessus) → barre « Forage en cours » d'une seconde,
+  **Depuis le 22 novembre 2026, plus d'écran « FORAGE » intermédiaire entre les niveaux** : la descente en ASCII part tout de
+  suite ; la barre ne reste que pour le dernier forage (le noyau) et en mouvement réduit.
   puis l'écran **« NOYAU ATTEINT »** (bilan en tours, cases parcourues, Matière) et **Nouvelle exploration**.
 - **Éclats de métal** : **10 % des cases de montagne** (hors rangée extérieure ; réglage `ORE_PCT`) en contiennent.
   Briser la paroi les fait **tomber au sol** ; passer dessus les ramasse et regagne **autant de vie que d'énergie**
@@ -1229,12 +1231,13 @@ l'essayer. **Échap, Espace ou Entrée** la passent. Pas jouée si l'utilisateur
 - **Son** : synthétisé, sans fichier (moteur, grincement haché par la rotation, grondement ; plongeon, impacts de roche,
   changement de matière, fracas du plafond, de l'impact et de la machine qui se couche).
 - **Vérification** : `python3 outils/forage.py DOSSIER [t1 t2 …]`. Mesuré le 21 novembre 2026 : 52 images par seconde.
-- **Amas de Matière (22 novembre 2026, demande de l'utilisateur)** : à la première descente, un amas de Matière (7 × 3
-  caractères couleur accent, éclats blancs qui scintillent, sur fond noir) se montre une fois, entre 35 et 65 % de la
-  profondeur, juste sous le bas de l'écran et **9 à 13 cases à côté de la route** (côté au hasard). Passer dessus le récolte :
-  **+20 Matière** (`FG_AMAS_MAT`) dans la réserve, gerbe d'éclats et bip. Le bandeau ajoute une ligne « Récolte » et les
-  alertes « amas en vue » puis « amas récolté » ; le journal le confirme à l'arrivée. Mesuré (`test-forage.js`, 20 descentes) :
-  sans diriger, 0 récolté sur 20 ; en allant dessus dès qu'il paraît, 20 sur 20.
+- **Amas de Matière (22 novembre 2026, demande de l'utilisateur)** : à la première descente, **plusieurs amas irréguliers de
+  20 caractères**, couleur accent. **Chaque caractère touché par le puits rapporte 1 de Matière.** Trois amas naissent près de
+  la route (9 à 14 cases à côté : il faut tourner), six loin à gauche et à droite, hors d'atteinte, pour que le sous-sol ait
+  l'air d'exister aussi sur les côtés. Maximum 60 par descente ; mesuré : 6 sans piloter, 54 en visant (`test-forage.js`).
+  Avant, le même jour : un seul amas de 7 × 3, +20 d'un bloc.
+- **Annonce en gros (22 novembre 2026)** : les trois premières secondes, deux lignes au milieu de l'écran. Première descente :
+  « MATIÈRE {µ} DÉTECTÉE / COLLECTE POSSIBLE » (couleur accent) ; seconde : « EXPLOSIFS DÉTECTÉS / ATTENTION SOUS-SOL PIÉGÉ ! » (rouge).
 
 ### Seconde descente : le mini-jeu des mines (21 novembre 2026)
 

@@ -174,6 +174,7 @@ function waitTurn(){
 function askDrill(){
   if(G.over||drilling||!$('overlay').hidden)return;const s=siteAt(G.px,G.py);if(!s)return;
   if(TRAV)stopTravel();if(REST)stopRest();
+  if((G.niv||1)<NIV_MAX&&!reduced){drilling=true;end(s);return;}   // 22 novembre 2026 : plus d'écran « FORAGE » intermédiaire, la descente en ASCII part tout de suite (il reste pour le dernier niveau, et en mouvement réduit)
   $('overlay').hidden=false;drill(s);   // pas de confirmation (15 novembre 2026) : F fore tout de suite
 }
 function drill(s){drilling=true;let k=0;const n=12;

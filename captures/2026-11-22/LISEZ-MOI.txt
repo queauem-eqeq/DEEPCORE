@@ -12,3 +12,6 @@ Rangées dans le dépôt : l'ordinateur n'était plus joignable (en veille) au m
 09-palette-amethyste.png                    Palette Améthyste.
 10-vitrines-et-salle-laser-recompense.png   Vitrines (trois lots, un seul à prendre) en haut ; salle à lasers avec son butin.
 11-antenne-points-rouges.png                 Antenne après 15 tours : le brouillard est revenu, les ennemis du disque restent signalés par un point rouge.
+12-descente1-annonce-matiere.png            Première descente : l'annonce en gros « MATIÈRE {µ} DÉTECTÉE / COLLECTE POSSIBLE ».
+13-descente1-amas-irreguliers.png           Première descente : amas irréguliers de Matière, un près de la route (entamé), un loin à droite.
+14-descente2-annonce-explosifs.png          Seconde descente : l'annonce « EXPLOSIFS DÉTECTÉS / ATTENTION SOUS-SOL PIÉGÉ ! ».
