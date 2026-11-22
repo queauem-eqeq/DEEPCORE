@@ -1078,7 +1078,8 @@ Codes des motifs : `.` transparent · `0` noir · `w` blanc · `r` rouge · `1` 
 ZQSD / flèches / pavé numérique : déplacer · A E W C : diagonales · Souris : survol = inspection, clic = y aller ·
 X : inspection au clavier · R : courir / marcher · T : équipement · I : inventaire · O : exploration automatique ·
 F : forer · Espace / 5 : attendre · P : repos · V : portée de discrétion · B : brouillard · ! : son · M : mode
-carte (déplacements = défilement, Maj = plus vite, Échap ou M pour revenir).
+carte (déplacements = défilement, Maj = plus vite, Échap ou M pour revenir ; Espace / 5 y attendent toujours, pour les
+essais, sans bouger la vue — 22 novembre 2026).
 
 ## 10. Sauvegarde des réglages
 
