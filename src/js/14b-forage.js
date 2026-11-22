@@ -69,7 +69,7 @@ const FG_NIV=[
   {D0:150,b:[[0,0],[.05,1],[.17,2]],dur:3,seuil:p=>.665-.05*p,des:.15,mel:(m,n)=>m===2&&n>.70?1:m===1&&n<.30?2:m},
   {D0:390,b:[[0,2],[.22,4],[.5,2]],dur:5,seuil:p=>.6-.05*p,des:.05,mel:(m,n)=>m===2&&n>.68?4:m},
   {D0:190,b:[[0,5],[.3,6],[.62,5],[.84,7]],dur:7,seuil:p=>.6-.07*p,des:.05,mel:(m,n)=>m===5&&n>.72?6:m}];
-const FG_ANNONCE=3.2,FG_T0=2.5,FG_PLG=1.3,FG_CAV=34,FG_R=6,FG_POSE=3.2,FG_FONT='"JetBrains Mono", ui-monospace, Menlo, Consolas, monospace';
+const FG_ANN_T0=1,FG_ANN_T1=2,FG_ANNONCE=4.5,FG_T0=2.5,FG_PLG=1.3,FG_CAV=34,FG_R=6,FG_POSE=3.2,FG_FONT='"JetBrains Mono", ui-monospace, Menlo, Consolas, monospace';
 const FG_SMOKE=['#c4cdd0','#9aa5a9','#737f84','#4d585d','#2e373b'];
 let FORAGE=null,FG_CB=null;
 const fgCv=$('forageCv'),fgx=fgCv.getContext('2d');
@@ -321,20 +321,27 @@ function fgDraw(F,t){const x=F.x,{w,h,cw,chh,dpr}=F;
   if(F.flash>0){x.globalAlpha=Math.min(.7,F.flash);x.fillStyle='#fff';x.fillRect(0,0,w,h);x.globalAlpha=1;}
   if(F.ph===4){x.globalAlpha=Math.min(1,(t-F.tFade)/F.fadeLen);x.fillStyle='#000';x.fillRect(0,0,w,h);x.globalAlpha=1;}}
 /* Annonce en gros au début de la séquence (22 novembre 2026) : un cadre à fond noir et à rebord plein, sur une grille de gros caractères
-   (la police du jeu). FG_ANN choisit le dessin : 1 rebord plein · 2 rebord plein et filet intérieur · 3 bandes de chantier · 4 titre en réserve. */
-let FG_ANN=1;
+   (la police du jeu). Dessin retenu : 3, les bandes de chantier. FG_ANN choisit le dessin : 1 rebord plein · 2 rebord plein et filet intérieur · 3 bandes de chantier · 4 titre en réserve. */
+let FG_ANN=3;   // choix de l'utilisateur : les bandes de chantier
+const FG_ANN_GL='█▓▒░#%&$@/\\<>=+*01234567ABCDEFXZKµ{}';
 function fgAnnonce(F,t){const x=F.x,{w,h}=F,[l1,l2]=F.jeu?['EXPLOSIFS DÉTECTÉS','ATTENTION SOUS-SOL PIÉGÉ !']:['MATIÈRE {µ} DÉTECTÉE','COLLECTE POSSIBLE'],col=F.jeu?'#ff3b30':F.pal.a,blanc=F.pal.w;
-  const on=t<.25||Math.floor(t*4)%2===0||t>1.2,n=Math.max(l1.length,l2.length),cols=n+6,rows=FG_ANN===3?9:7;
+  const n=Math.max(l1.length,l2.length),cols=n+6,rows=FG_ANN===3?9:7;
   // en haut de l'écran, à droite du tableau de bord et à gauche de la coupe : ni la foreuse ni le HUD ne sont couverts
   const gauche=Math.round(w*.31),large=Math.round(w*.61),gw=Math.max(5,Math.floor(Math.min(large/(cols+2),h*.26/(rows+1)*.6))),gh=Math.round(gw/.6),W=cols*gw,H=rows*gh,x0=gauche+Math.round((large-W)/2),y0=Math.round(h*.03+gh*.5);
   const bloc=(c,r,nc,nr,coul)=>{x.fillStyle=coul;x.fillRect(x0+c*gw,y0+r*gh,nc*gw,nr*gh);};
-  const txt=(l,r,coul)=>{x.font=`700 ${gh}px ${FG_FONT}`;x.textAlign='center';x.textBaseline='middle';x.fillStyle=coul;const d=Math.floor((cols-l.length)/2);for(let i=0;i<l.length;i++)x.fillText(l[i],x0+(d+i+.5)*gw,y0+(r+.5)*gh);};
+  /* Affichage façon terminal (22 novembre 2026) : le cadre paraît à FG_ANN_T0 (1 s) ; chaque case fait défiler des caractères au hasard,
+     puis se fige de gauche à droite ; tout le message est en place à FG_ANN_T1 (2 s) et disparaît à FG_ANNONCE (4,5 s). */
+  const p=Math.max(0,Math.min(1,(t-FG_ANN_T0)/(FG_ANN_T1-FG_ANN_T0))),tic=Math.floor(t*24);
+  const txt=(l,r,coul)=>{x.font=`700 ${gh}px ${FG_FONT}`;x.textAlign='center';x.textBaseline='middle';const d=Math.floor((cols-l.length)/2);
+    for(let i=0;i<l.length;i++){const fige=p>=1||p*1.25>(i+1)/l.length+.2*((i*7+r*3)%5)/5;let ch=l[i];
+      if(!fige){if(p*1.6<i/l.length)continue;ch=FG_ANN_GL[((i*31+r*17+tic*13)%FG_ANN_GL.length+FG_ANN_GL.length)%FG_ANN_GL.length];}
+      x.fillStyle=fige?coul:F.cRock2;x.fillText(ch,x0+(d+i+.5)*gw,y0+(r+.5)*gh);}};
   bloc(-1,-.5,cols+2,rows+1,'#000');                                   // fond noir, un peu plus large que le cadre
   bloc(0,0,cols,1,col);bloc(0,rows-1,cols,1,col);bloc(0,0,1,rows,col);bloc(cols-1,0,1,rows,col);   // rebord plein, un caractère d'épaisseur
   if(FG_ANN===2){const u=Math.max(2,Math.round(gw/5));x.fillStyle=col;x.fillRect(x0+2*gw,y0+Math.round(1.5*gh),W-4*gw,u);x.fillRect(x0+2*gw,y0+H-Math.round(1.5*gh)-u,W-4*gw,u);x.fillRect(x0+2*gw,y0+Math.round(1.5*gh),u,H-3*gh);x.fillRect(x0+W-2*gw-u,y0+Math.round(1.5*gh),u,H-3*gh);}
   if(FG_ANN===3){for(const r of [1,rows-2])for(let c=1;c<cols-1;c++)if((c+(r===1?0:1))%2)bloc(c,r,1,1,col);}   // bandes de chantier : un caractère sur deux
   if(FG_ANN===4)bloc(1,1,cols-2,Math.floor(rows/2)-.5,col);            // la première ligne en réserve : texte noir sur bandeau plein
-  if(!on)return;const r1=FG_ANN===3?3:2,r2=FG_ANN===3?5:4;
+  const r1=FG_ANN===3?3:2,r2=FG_ANN===3?5:4;
   txt(l1,r1,FG_ANN===4?'#000':col);txt(l2,r2,blanc);}
 function fgHud(F,t){const x=F.x,{w,h,dpr}=F,fs=Math.round(12*dpr),lh=Math.round(17*dpr),m=Math.round(20*dpr),fall=F.ph>=2,M=FG_MAT[fgIci(F)];
   x.font=`${fs}px ${FG_FONT}`;x.textAlign='left';x.textBaseline='top';
@@ -358,7 +365,7 @@ function fgHud(F,t){const x=F.x,{w,h,dpr}=F,fs=Math.round(12*dpr),lh=Math.round(
   {let lg=0;for(const l of L)lg=Math.max(lg,x.measureText(l[0]).width);x.fillStyle='#000';x.fillRect(m-Math.round(8*dpr),m-Math.round(8*dpr),Math.round(lg)+Math.round(16*dpr),L.length*lh+Math.round(12*dpr));}   // fond noir plein : le texte reste lisible sur la roche
   L.forEach((l,i)=>{x.fillStyle='#000';x.fillText(l[0],m+1,m+i*lh+1);x.fillStyle=l[1];x.fillText(l[0],m,m+i*lh);});
   if(F.ph<=1){const aide=F.jeu?'◄ ►  Q D  4 6   ÉVITER LES MINES':'◄ ►  Q D  4 6   DIRIGER LA FOREUSE';x.fillStyle='#000';x.fillRect(m-Math.round(8*dpr),h-m-fs-Math.round(6*dpr),Math.round(x.measureText(aide).width)+Math.round(16*dpr),fs+Math.round(12*dpr));x.fillStyle=F.ph===0?F.pal.g:F.pal.d;x.fillText(aide,m,h-m-fs);}
-  if(t<FG_ANNONCE)fgAnnonce(F,t);x.textAlign='left';x.textBaseline='top';x.font=`${fs}px ${FG_FONT}`;
+  if(t>=FG_ANN_T0&&t<FG_ANNONCE)fgAnnonce(F,t);x.textAlign='left';x.textBaseline='top';x.font=`${fs}px ${FG_FONT}`;
   // coupe : les matières de fond du niveau, et le repère de profondeur
   const sw=Math.round(8*dpr),sx=w-m-sw,st=Math.round(h*.22),sh=Math.round(h*.5),B=F.P.b;
   B.forEach((e,i)=>{const y0=st+sh*e[0],y1=st+sh*(i+1<B.length?B[i+1][0]:1);x.fillStyle=F.mc[e[1]][1];x.fillRect(sx,Math.round(y0),sw,Math.max(1,Math.round(y1-y0)));});

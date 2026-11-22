@@ -16,3 +16,4 @@ Rangées dans le dépôt : l'ordinateur n'était plus joignable (en veille) au m
 13-descente1-amas-irreguliers.png           Première descente : amas irréguliers de Matière, un près de la route (entamé), un loin à droite.
 14-descente2-annonce-explosifs.png          Seconde descente : l'annonce « EXPLOSIFS DÉTECTÉS / ATTENTION SOUS-SOL PIÉGÉ ! ».
 15-annonces-quatre-propositions.png         Annonce du forage, en haut de l'écran : quatre dessins de cadre proposés (à gauche la première descente, à droite la seconde).
+16-annonce-animation-defilement.png         Annonce retenue (cadre n° 3) : défilement de caractères à 1,3 s et 1,7 s, message complet à 3 s, parti à 4,6 s.

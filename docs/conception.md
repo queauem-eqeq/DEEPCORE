@@ -1236,8 +1236,11 @@ l'essayer. **Échap, Espace ou Entrée** la passent. Pas jouée si l'utilisateur
   la route (9 à 14 cases à côté : il faut tourner), six loin à gauche et à droite, hors d'atteinte, pour que le sous-sol ait
   l'air d'exister aussi sur les côtés. Maximum 60 par descente ; mesuré : 6 sans piloter, 54 en visant (`test-forage.js`).
   Avant, le même jour : un seul amas de 7 × 3, +20 d'un bloc.
-- **Annonce en gros (22 novembre 2026)** : les trois premières secondes, deux lignes au milieu de l'écran. Première descente :
-  « MATIÈRE {µ} DÉTECTÉE / COLLECTE POSSIBLE » (couleur accent) ; seconde : « EXPLOSIFS DÉTECTÉS / ATTENTION SOUS-SOL PIÉGÉ ! » (rouge).
+- **Annonce en gros (22 novembre 2026)** : en haut de l'écran, entre le tableau de bord et la coupe (ni la foreuse ni le HUD ne
+  sont couverts), dans un cadre à fond noir, rebord plein et bandes de chantier (dessin n° 3 de quatre proposés, `FG_ANN`).
+  Le cadre paraît à 1 s ; les caractères défilent au hasard puis se figent de gauche à droite ; message complet à 2 s, parti à
+  4,5 s. Première descente : « MATIÈRE {µ} DÉTECTÉE / COLLECTE POSSIBLE » (couleur accent) ; seconde : « EXPLOSIFS DÉTECTÉS /
+  ATTENTION SOUS-SOL PIÉGÉ ! » (rouge).
 
 ### Seconde descente : le mini-jeu des mines (21 novembre 2026)
 
