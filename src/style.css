@@ -39,8 +39,8 @@ body{margin:0;background:var(--black);color:var(--fg);font:13px/1.45 var(--mono)
 .ctrl dt{color:var(--fg);margin-top:5px}.ctrl dt:first-child{margin-top:0}
 .ctrl dd{margin:0 0 0 10px;color:var(--dim)}   /* la touche sur sa ligne, ce qu'elle fait en dessous */
 .ctrl kbd{margin-right:2px}   /* défilement à la molette ou au doigt, sans barre qui déforme la colonne */
-/* sous la mini-carte : niveau, profondeur et taille, puis les deux archétypes, en capitales couleur monde */
-.carteinfo{margin-top:8px;display:grid;gap:3px;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--c3)}
+/* en tête de colonne, au-dessus de Vie : niveau, profondeur et taille, puis les deux archétypes, en capitales couleur monde */
+.carteinfo{margin:0 0 12px;display:grid;gap:3px;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--c3)}
 .col h2{font-family:var(--display);font-size:11px;font-weight:500;letter-spacing:.22em;text-transform:uppercase;color:var(--dim);margin:0 0 8px}
 .rows{display:grid;gap:5px}
 .eye{display:flex;align-items:center;gap:8px}.eyeic{color:var(--c3);flex:none}

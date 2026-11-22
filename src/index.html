@@ -134,9 +134,11 @@
   </div>
   <aside class="col">
     <!-- 22 novembre 2026 : le haut de la colonne (barres, boutons, inventaire) reste fixe ; seul ce qui suit défile.
-         Le titre « Statut » et la ligne du niveau ont été retirés : le niveau est sous la mini-carte. -->
+         Le titre « Statut » a été retiré ; le niveau et les archétypes sont en tête. -->
     <div class="colfixe">
     <div>
+      <!-- niveau · profondeur · taille, puis les deux archétypes (22 novembre 2026 : d'abord sous la mini-carte, remontés au-dessus de Vie) -->
+      <div class="carteinfo"><div id="cProf"></div><div id="cMonde"></div><div id="cBati"></div></div>
       <div class="rows">
         <div class="bar2"><span>Vie</span><span class="abar life" role="meter" aria-label="Vie" id="lifeT"></span><span class="bnum" id="lifeN"></span></div>
         <div class="bar2"><span>Énergie</span><span class="abar energy" role="meter" aria-label="Énergie" id="enT"></span><span class="bnum" id="enN"></span></div>
@@ -152,11 +154,10 @@
     </details>
     </div>
     <div class="coldefil">
-    <!-- Carte (22 novembre 2026) : la mini-carte et la fiche du niveau. Elle s'ouvre d'elle-même en mode carte (M). -->
+    <!-- Carte (22 novembre 2026) : la mini-carte. Elle s'ouvre d'elle-même en mode carte (M). -->
     <details class="fold" id="fd-carte">
       <summary><h2>Carte</h2></summary>
       <canvas id="mini" aria-label="Mini-carte des zones explorées"></canvas>
-      <div class="carteinfo"><div id="cProf"></div><div id="cMonde"></div><div id="cBati"></div></div>
     </details>
     <div class="pad" id="pad">
       <div class="dpad">
