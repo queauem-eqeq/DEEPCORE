@@ -816,7 +816,7 @@ pose (sur la case libre la plus proche si un obstacle ou une créature l'occupe)
 sous les barres — avec un point rouge qui clignote. Tant qu'elle hurle, **tout ennemi à 20 cases d'elle, ou qui chasse la
 foreuse, la délaisse pour s'acharner sur la balise** : il y court et l'attaque au contact ; les tireurs (Sentinelle,
 Artilleur, Englueur) lui tirent dessus à portée ; les mines s'arment à côté d'elle. **Chaque coup la touche** (100 %), le
-critique reste possible, et chaque attaque fait son bruit (morsure ou laser). Elle a **40 PV** et barre le passage comme
+critique reste possible ; les attaques font du bruit (morsure ou laser), **un seul bruit par battement** quel que soit le nombre d'attaquants. Elle a **40 PV** et barre le passage comme
 une créature ; **détruite, elle explose sur sa seule case**, sans dégâts alentour. Mines et charges sismiques l'abîment aussi.
 Les ennemis attirés **restent en chasse** : **pas de coup par surprise** sur eux, et ils gardent le souvenir de la foreuse.
 Balise éteinte ou détruite, ils reprennent la chasse — sur la foreuse s'ils la voient, sinon là où ils l'ont vue (autour de

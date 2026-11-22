@@ -212,7 +212,8 @@ function baliseAppel(q){const V=ITEM_VAL.balise;let n=0;
 const baliseDe=e=>e.leurre?(G.balises||[]).find(q=>q.id===e.leurre)||null:null;
 // une fois par battement, avant que les ennemis jouent
 const BAL_D=new Map();   // cartes de distance vers chaque balise, refaites à chaque battement (hors de G : rien de lourd dans la sauvegarde)
-function baliseTick(){BAL_D.clear();if(!G.balises||!G.balises.length)return;
+let BAL_SON=false;   // un seul bruit d'attaque sur les balises par battement, quel que soit le nombre d'attaquants (23 novembre 2026)
+function baliseTick(){BAL_D.clear();BAL_SON=false;if(!G.balises||!G.balises.length)return;
   for(const q of [...G.balises]){if(--q.t<=0){baliseFin(q,false);continue;}baliseAppel(q);}}
 // la balise s'éteint (ou explose) : ses ennemis viennent fouiller où elle était
 function baliseFin(q,boum){const k=G.balises.indexOf(q);if(k<0)return;G.balises.splice(k,1);
@@ -222,7 +223,7 @@ function baliseFin(q,boum){const k=G.balises.indexOf(q);if(k<0)return;G.balises.
 // un coup sur la balise (ennemi au contact ou tireur, explosion)
 function baliseCoup(q,dm,o){q.hp-=dm;if(vis[idx(q.x,q.y)])addFx({kind:'num',x:q.x,y:q.y,txt:'-'+dm,col:PAL['3'],dur:700});
   if(q.hp<=0)baliseFin(q,true);}
-function baliseFrappe(e,sp,q,laser){const vu=beastVisible(e)||vis[idx(q.x,q.y)],proche=vu||cheb(e,G.px,G.py)<=10;   // la balise ne se dérobe pas : chaque coup la touche
+function baliseFrappe(e,sp,q,laser){const vu=beastVisible(e)||vis[idx(q.x,q.y)],proche=!BAL_SON&&(vu||cheb(e,G.px,G.py)<=10);if(proche)BAL_SON=true;   // la balise ne se dérobe pas : chaque coup la touche
   if(laser){if(q.x!==e.x)e.dir=Math.sign(q.x-e.x);if(vu)addFx({kind:'laser',o:e,x:q.x,y:q.y,ox:0,oy:0,dur:300});if(proche)SFX.laser();}
   else{if(vu)addFx({kind:'lunge',beast:e,dx:Math.sign(q.x-e.x),dy:Math.sign(q.y-e.y),dur:200});if(proche)SFX.bite();}
   const cr=e.bers>0||roll(sp.crit||0);baliseCoup(q,Math.round(dmgDe(sp)*(cr?CRIT_X:1)*(1+.25*(e.pow||0))));}
