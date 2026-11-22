@@ -125,7 +125,8 @@ function invApply(o,sg){const m=ITEMS[o.k].mod||{},st=G.st,v0=st.vieMax,e0=st.en
 const invCount=s=>G.inv.filter(o=>o.eq&&ITEMS[o.k].slot===s).length;
 /* Deux endroits depuis le 15 novembre 2026 : la fenêtre Équipement (armes, armures, accessoires) et le sous-menu « Inventaire »
    de la colonne (consommables). Un seul sac derrière, G.inv ; INV_SEL est l'indice RÉEL dans G.inv de l'objet choisi dans la fenêtre. */
-const SAC_MAX=10;   // places du sous-menu Inventaire : une SORTE de consommable par place, les exemplaires s'empilent
+const SAC_MAX=20;   // places du sous-menu Inventaire (22 novembre 2026 ; avant 10) : les exemplaires s'empilent à l'affichage, mais CHACUN prend une place
+const sacPlaces=()=>G.inv.reduce((t,o)=>t+(ITEMS[o.k]&&ITEMS[o.k].conso?(o.n||1):0),0);   // places occupées : un par exemplaire
 const invEquipables=()=>G.inv.map((o,i)=>i).filter(i=>!ITEMS[G.inv[i].k].conso);
 const invConsos=()=>G.inv.map((o,i)=>i).filter(i=>ITEMS[G.inv[i].k].conso);
 function invFix(){const l=invEquipables();if(!l.length){INV_SEL=-1;return;}if(!l.includes(INV_SEL))INV_SEL=l[0];}
@@ -231,9 +232,9 @@ function invDrop(i){const o=G.inv[i];if(!o||G.over)return;const d=ITEMS[o.k];
 function invPickup(more){const c=idx(G.px,G.py);if(G.items&&G.items[c]&&G.items[c].length){choixTest(c);piegeTest(c);butinPrend(c,more);}   // appât d'une salle piégée ; Matière et plans ne vont pas au sac
   const l=G.items&&G.items[c];if(!l||!l.length)return false;
   const pris=[],laisses=[];
-  for(const k of l){const pile=ITEMS[k].conso&&G.inv.find(o=>o.k===k);
+  for(const k of l){if(ITEMS[k].conso&&sacPlaces()>=SAC_MAX){laisses.push(k);continue;}   // inventaire plein : l'objet reste au sol
+    const pile=ITEMS[k].conso&&G.inv.find(o=>o.k===k);
     if(pile){pile.n=(pile.n||1)+1;pris.push(k);continue;}
-    if(ITEMS[k].conso&&invConsos().length>=SAC_MAX){laisses.push(k);continue;}   // inventaire plein : l'objet reste au sol
     G.inv.push(ITEMS[k].conso?{k,eq:0,n:1}:{k,eq:0});pris.push(k);}
   if(laisses.length)G.items[c]=laisses;else delete G.items[c];
   const dire=more?sayMore:invSay;
@@ -312,11 +313,11 @@ function sacHTML(){const l=invConsos();
       `<button class="pace del" data-x="${i}" title="Jeter un exemplaire au sol${(o.n||1)>1?' (il en restera '+((o.n||1)-1)+')':''}">[X]</button></div>`;}).join('');}
 function sacDraw(){const el=$('sac');if(!el||!G||!G.inv)return;
   const l=invConsos(),h=sacHTML();if(h!==SAC_H){el.innerHTML=h;SAC_H=h;}
-  const n=$('sacN');if(n){const txt=`[${l.length}/${SAC_MAX}]`;if(n.textContent!==txt)n.textContent=txt;n.classList.toggle('full',l.length>=SAC_MAX);}}
+  const n=$('sacN');if(n){const p=sacPlaces(),txt=`[${p}/${SAC_MAX}]`;if(n.textContent!==txt)n.textContent=txt;n.classList.toggle('full',p>=SAC_MAX);}}
 // [X] : un exemplaire du consommable tombe au sol, sur une case libre voisine (caseJet) (21 novembre 2026 ; avant, [X] détruisait toute la pile)
 function sacJeter(i){const o=G.inv[i];if(!o||G.over||!ITEMS[o.k].conso)return;const d=ITEMS[o.k],n=o.n||1;
   invTake(i);const c=caseJet();G.items=G.items||{};(G.items[c]=G.items[c]||[]).push(o.k);
-  say(`${d.n} jeté${accord(d)} au sol${n>1?` (il en reste ${n-1})`:` : une place libérée (${invConsos().length}/${SAC_MAX})`}.`);SFX.thud();
+  say(`${d.n} jeté${accord(d)} au sol${n>1?` (il en reste ${n-1})`:''} : inventaire ${sacPlaces()}/${SAC_MAX}.`);SFX.thud();
   sacFix();SAC_H='';invChanged();}
 /* Navigation au clavier (touche I) : ouvre le sous-menu s'il est replié et choisit le premier consommable.
    Ensuite ↑ ↓ pour parcourir, Entrée pour utiliser, X, Suppr ou J pour jeter un exemplaire au sol, Échap ou I pour sortir. */

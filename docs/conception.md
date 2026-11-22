@@ -533,9 +533,13 @@ Artefact à part (https://claude.ai/artifact/9BKRaoB4hzgdWhzYFx5A6q) : la page d
 la colonne. On y choisit une carte de taille 1 (arène nue ou l'un des six reliefs d'essai), des ennemis, un
 équipement, une consigne de pilote automatique (chasse ou traversée), et l'on lance une **série** sans affichage
 (moyennes : victoires, vie restante, points perdus, points perdus par ennemi tué, durée) ou **un combat à l'écran**.
-Options : ennemis en alerte, vie d'essai. Onglets « Mes résultats » (gardés dans le navigateur) et « Archives »
-(un clic sur une ligne reprend la configuration). Il sert à régler les coûts de menace ; **à republier quand le
-moteur change**, sinon il mesure l'ancien jeu.
+Options : ennemis en alerte, vie d'essai. Onglet « Mes résultats » (gardés dans le navigateur ; un clic sur une ligne
+reprend la configuration). L'onglet « Archives » et ses données ont été **effacés le 22 novembre 2026**.
+**Générer** (22 novembre 2026) : pose la même arène et ses ennemis, puis **on joue soi-même**, au clavier et à la souris ;
+le haut de la colonne du jeu revient à côté du panneau (barres, boutons, Inventaire ouvert). Inventaire **plein au
+départ : 2 exemplaires de chaque consommable**, tous identifiés (18 places sur 20), plus l'équipement choisi. Foreuse
+détruite : « Déployer une nouvelle foreuse » relance la même arène. Le Lab du jeu ouvre le banc par son bouton **Combat**.
+Il sert à régler les coûts de menace ; **à republier quand le moteur change**, sinon il mesure l'ancien jeu.
 
 ### La grande base (`07g-base.js`, 21 novembre 2026)
 
@@ -828,9 +832,10 @@ inconnue sur soi peut coûter cher, la lancer sur un ennemi peut le servir. Fabr
   combat et le visuel.
 - **Deux endroits, un seul sac** : la fenêtre **Équipement** (armes, armures, accessoires) et le sous-menu
   repliable **Inventaire** de la colonne (les consommables : nom, nombre, **USE**, **[X]**).
-- **Dix places** dans l'inventaire, **une par sorte** quel que soit le nombre d'exemplaires. Ramasser une sorte
-  nouvelle quand les 10 places sont prises est refusé et **l'objet reste au sol**. **[X] jette UN exemplaire au sol**,
-  sur une case libre voisine (21 novembre 2026 ; avant, il détruisait la pile) : la place se libère quand le dernier exemplaire est jeté.
+- **Vingt places** dans l'inventaire, **une par exemplaire** (22 novembre 2026 ; avant, dix places, une par sorte) :
+  les exemplaires s'empilent à l'affichage (×3), mais trois batteries prennent trois places. Le compteur affiche
+  `[places/20]`. Ramasser quand les 20 places sont prises est refusé et **l'objet reste au sol**. **[X] jette UN
+  exemplaire au sol**, sur une case libre voisine (21 novembre 2026 ; avant, il détruisait la pile), et libère une place.
   La **clé** est un consommable comme les autres (voir § portes verrouillées) : elle s'empile, se jette, se ramasse.
 - **Touche I** : ouvre le sous-menu et choisit le premier consommable ; **↑ ↓** parcourir, **Entrée** utiliser,
   **X**, **Suppr** ou **J** jeter un exemplaire au sol, **Échap** ou **I** sortir.

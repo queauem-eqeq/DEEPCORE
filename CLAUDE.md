@@ -47,7 +47,7 @@ Le jeu est une page web en plusieurs fichiers (`src/`), **sans étape d'assembla
 
 ## Banc de combat
 Artefact à part (https://claude.ai/artifact/9BKRaoB4hzgdWhzYFx5A6q) qui rejoue des combats dans le vrai moteur, sur carte de taille 1.
-- `banc/banc.js`, `banc/banc.css` : le panneau ; `banc/resultats.js` : les archives affichées ; `banc/archives/` : les données brutes.
+- `banc/banc.js`, `banc/banc.css` : le panneau. Les archives (`banc/resultats.js`, `banc/archives/`) ont été **effacées le 22 novembre 2026** à la demande de l'utilisateur ; elles restent dans l'historique git. Le bouton **Générer** pose l'arène et laisse jouer soi-même, inventaire plein (2 de chaque consommable). Le Lab du jeu a un bouton **Combat** qui ouvre ce banc.
 - `python3 outils/banc.py` assemble `banc/site/` (non versionné) à partir de `src/` : c'est ce dossier qu'on publie sur l'artefact du banc
   (`publish_files`, mêmes chemins). **À republier quand le moteur change**, sinon le banc mesure l'ancien jeu.
 - `python3 outils/banc_series.py CONFIGS.json SORTIE.json [essais] [processus]` lance des séries en lot.

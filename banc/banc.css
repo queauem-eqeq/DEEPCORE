@@ -1,6 +1,10 @@
 /* Banc de combat : le panneau remplace la colonne du jeu */
 body.surbanc .col{display:none}
 body.surbanc .game{grid-template-columns:minmax(0,1fr) 480px}
+/* Générer (22 novembre 2026) : on joue soi-même ; le haut de la colonne du jeu revient (barres, boutons, inventaire), le reste non */
+body.surbanc.joue .col{display:flex}
+body.surbanc.joue .coldefil{display:none}
+body.surbanc.joue .game{grid-template-columns:minmax(0,1fr) 260px 480px}
 .banc{border-left:1px solid var(--line);padding:16px 16px 40px;overflow-y:auto;display:grid;gap:12px;align-content:start;font-size:12px;min-width:0;scrollbar-width:thin}
 .banc h1{font-family:var(--display);font-size:18px;letter-spacing:.2em;text-transform:uppercase;color:var(--c1);margin:0}
 .banc h4{font-family:var(--display);font-size:11px;font-weight:500;letter-spacing:.22em;text-transform:uppercase;color:var(--dim);margin:8px 0 0;display:flex;justify-content:space-between;align-items:center}

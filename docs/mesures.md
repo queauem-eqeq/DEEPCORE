@@ -199,7 +199,7 @@ Mesures faites sur le **banc de combat** (`outils/banc.py` l'assemble, `outils/b
 https://claude.ai/artifact/9BKRaoB4hzgdWhzYFx5A6q). Le vrai moteur tourne sur une **carte de taille 1** (32 × 22) générée à chaque essai ;
 un pilote automatique va tuer tout ce qui vit, en frappant le plus proche. Sauf mention, la foreuse est **sans équipement** et reçoit une
 vie d'essai très haute : on mesure les **dégâts encaissés**, sans que la mort n'arrête le combat. Environ 60 000 combats en tout,
-120 à 200 par configuration ; données brutes dans `banc/archives/2026-11-15/`, tableaux complets dans l'onglet Archives du banc.
+120 à 200 par configuration ; données brutes dans `banc/archives/2026-11-15/` (effacées du dépôt le 22 novembre 2026, toujours dans l'historique git).
 
 ### Ce que coûte un ennemi
 
@@ -620,7 +620,7 @@ toutes les machines en service pour ses essais (la croix laser est désactivée 
 
 ## Nuit du 22 novembre 2026 : machines lisibles, objets, équilibrage
 
-Branche `claude/machines-objets-2026-11-22`. Données brutes : `banc/archives/2026-11-22/`.
+Branche `claude/machines-objets-2026-11-22`. Données brutes : `banc/archives/2026-11-22/` (effacées du dépôt le 22 novembre 2026, toujours dans l'historique git).
 
 ### Machines et butin (`outils/scripts/test-machines.js`, 30 cartes de la grande base, toutes machines actives)
 
