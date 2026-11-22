@@ -12,7 +12,7 @@
       if(e<2){if(!FORAGE){bon=false;l.push('pas de scène de forage');break;}const F=FORAGE;F.sansRendu=1;let now=F.t0,n=0;
         while(FORAGE&&n++<1500){now+=33;if(F.jeu){F.kl=F.kr=0;for(const m of F.mines)if(m.ok&&m.y>F.d&&m.y<F.d+F.R*.6&&Math.abs(m.x-F.cx)<8){if(m.x>=F.cx)F.kl=1;else F.kr=1;break;}}forageFrame(now);}
         if(G.over){l.push('foreuse détruite pendant la descente (vie '+vie0+')');break;}
-        if((G.st.matiere!==37&&G.st.matiere!==57)||G.inv.length!==inv0)bon=false;   // 57 : l'amas de Matière de la première descente (+20) a été récolté
+        if(G.st.matiere<37||G.st.matiere>37+FG_AMAS_PRES*FG_AMAS_MAT||G.inv.length!==inv0)bon=false;   // la première descente peut rapporter jusqu'à 60 de Matière (trois amas à portée)
         l.push(`   descente ${F.jeu?'mini-jeu : '+F.touche+' mine(s), −'+F.perdu+' vie':'cinématique'} → vie ${Math.round(G.st.vie)}`);}
       else{if(!(G.over&&G.over.win))bon=false;l.push('   noyau atteint : '+(G.over&&G.over.win?'oui':'NON'));}}
     if(bon)ok++;out.push(`— partie ${k+1} ${bon?'ok':'ÉCHEC'}\n`+l.join('\n'));$('overlay').hidden=true;}
