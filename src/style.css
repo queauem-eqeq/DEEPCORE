@@ -448,3 +448,18 @@ kbd{font-family:var(--mono);color:var(--fg);border:1px solid var(--line);padding
 ::-webkit-scrollbar-track,::-webkit-scrollbar-corner{background:transparent}
 ::-webkit-scrollbar-thumb{background:var(--dim)}
 ::-webkit-scrollbar-thumb:hover{background:var(--fg)}
+
+/* Fenêtre Items (Lab, 22 novembre 2026) */
+#items .mcard{width:min(940px,100%);max-height:calc(100vh - 40px);max-height:calc(100dvh - 40px);display:flex;flex-direction:column;overflow:hidden}
+#items .mcard>*{flex:0 0 auto}
+#items .mhead{display:flex;gap:8px;align-items:center}
+#items .mhead h2{margin-right:auto}
+.itliste{flex:1 1 auto!important;min-height:0;overflow-y:auto;display:grid;gap:6px;padding-right:6px}
+.itliste h3{color:var(--c3);margin:8px 0 0;font-size:inherit}
+.itl{display:grid;grid-template-columns:32px minmax(140px,220px) 1fr;gap:10px;align-items:center;border-top:1px solid var(--line);padding-top:6px}
+.itl img{image-rendering:pixelated}
+.itl b{color:var(--c1);display:block}
+.itl small{color:var(--dim);display:block}
+.itfs{display:flex;flex-wrap:wrap;gap:6px 12px}
+.itf{display:flex;align-items:center;gap:6px;color:var(--dim)}
+.itf input{width:64px;background:var(--black);color:var(--text,#fff);border:1px solid var(--line);font:inherit;padding:2px 4px}

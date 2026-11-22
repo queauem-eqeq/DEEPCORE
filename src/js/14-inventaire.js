@@ -85,18 +85,18 @@ const ITEMS={
 };
 // Objets donnés au départ, non équipés (phase d'essai : plus tard ils se trouveront au sol ou sur les ennemis).
 // Le second terme est le nombre d'exemplaires d'un consommable : ils s'empilent sur une seule ligne (« ×2 »).
-const INV_TEST=[['foreuse'],['usine'],['servo'],['optique'],['viseur'],['conden'],['gyro'],['stabil'],['accu'],
-  ['repar',2],['batterie',2],['fumigene',2],['charge',2]];
+// 22 novembre 2026 : plus rien n'est donné au départ, sauf l'outil et la coque. Tout se trouve ou se fabrique (14d-objets).
+const INV_TEST=[['foreuse'],['usine']];
 // la foreuse est l'arme de départ, déjà équipée (ses modificateurs sont nuls : ce sont les stats de base) ;
 // la Coque d'usine est l'armure de départ, déjà équipée elle aussi : sa DEF +10 est comprise dans le def:10 de départ (07-generation)
 const invTest=()=>INV_TEST.map(([k,n])=>n?{k,eq:0,n}:{k,eq:k==='foreuse'||k==='usine'?1:0});
 // partie commencée avant un ajout d'objets : on complète le sac, et il y a toujours une arme en main
 // Les armes et armures retirées le 16 novembre 2026 n'ont plus aucune trace dans le code (19 novembre 2026) : ni dessin, ni modificateur.
 const nbCles=()=>{const o=(G.inv||[]).find(o=>o.k==='cle');return o?(o.n||1):0;};   // les clés sont des objets du sac (21 novembre 2026), plus un compteur
-const itemTile=k=>k==='cle'?TL.cle:(TL['o_'+k]||TL.objet);   // tuile d'un objet posé au sol
+const itemTile=k=>k==='cle'?TL.cle:ITEMS[k]&&ITEMS[k].plan?(TL.o_plan||TL.objet):typeof identifie==='function'&&!identifie(k)?(TL.o_capsule||TL.objet):(TL['o_'+k]||TL.objet);   // tuile d'un objet posé au sol
 function invMigre(){if(G.st&&G.st.cles>0){const o=G.inv.find(o=>o.k==='cle');if(o)o.n=(o.n||1)+G.st.cles;else G.inv.push({k:'cle',eq:0,n:G.st.cles});}if(G.st)delete G.st.cles;   // ancien compteur de clés -> objet
   for(const [k,n] of INV_TEST)if(!G.inv.some(o=>o.k===k))G.inv.push(n?{k,eq:0,n}:{k,eq:0});
-  G.inv=G.inv.filter(o=>ITEMS[o.k]);G.inv.sort((a,b)=>INV_TEST.findIndex(t=>t[0]===a.k)-INV_TEST.findIndex(t=>t[0]===b.k));
+  G.inv=G.inv.filter(o=>ITEMS[o.k]&&!ITEMS[o.k].plan&&!ITEMS[o.k].mat);
   if(!G.inv.some(o=>o.eq&&ITEMS[o.k].slot==='arme'))G.inv.find(o=>o.k==='foreuse').eq=1;
   // la Coque d'usine est portée d'origine : son DEF +10 est déjà compris dans les stats de départ, donc on la marque équipée sans appliquer son effet
   if(!G.inv.some(o=>o.eq&&ITEMS[o.k].slot==='armure'))G.inv.find(o=>o.k==='usine').eq=1;
@@ -145,10 +145,10 @@ const invCibles=r=>[...(G.beasts||[]),...(G.animals||[])].filter(o=>Math.max(Mat
 function consoTemps(act){G.turn++;lastAct=act||'use';lastRun=false;pass(DUR.attente);computeFOV();if(G.over&&G.over.dead){render();dead();return true;}return false;}
 const VISEE_R=4,VISEE_DM=30;
 const DEVANT={u:[0,-1],r:[1,0],d:[0,1],l:[-1,0]};
-function viseeStart(i){const [dx,dy]=DEVANT[G.face||'u'];
+function viseeStart(i){const o=G.inv[i],c=CONSO[o.k]||{},[dx,dy]=c.soi?[0,0]:DEVANT[G.face||'u'];   // 22 novembre 2026 : tout consommable se vise ; ceux qui servent la foreuse s'ouvrent sur elle
   VISEE={i,x:Math.max(1,Math.min(W-2,G.px+dx)),y:Math.max(1,Math.min(H-2,G.py+dy))};
   invOpen(false);SAC_NAV=false;SAC_H='';
-  say('Charge sismique : placez la zone (déplacement ou souris), Entrée ou clic pour tirer, Échap pour annuler.','warn');render();}
+  say(`${ITEMS[o.k].n} : choisissez la cible (déplacement ou souris), Entrée ou clic pour valider, Échap pour annuler.${c.soi?' Entrée tout de suite : sur la foreuse.':''}`,'warn');render();}
 function viseeVers(x,y){if(!VISEE)return;
   const cx=Math.max(G.px-VISEE_R,Math.min(G.px+VISEE_R,Math.max(1,Math.min(W-2,x)))),
         cy=Math.max(G.py-VISEE_R,Math.min(G.py+VISEE_R,Math.max(1,Math.min(H-2,y))));
@@ -156,12 +156,14 @@ function viseeVers(x,y){if(!VISEE)return;
 const viseeStop=m=>{VISEE=null;if(m)say(m);render();};
 function viseeOk(){if(!VISEE||G.over)return;const {i,x,y}=VISEE,o=G.inv[i];
   if(!o||!ITEMS[o.k]||!ITEMS[o.k].vise){viseeStop();return;}
+  if(o.k!=='charge'){consoCible(i,x,y);return;}
+  const neufCh=identifier('charge'),VISEE_DM=ITEM_VAL.charge.degats;camoCasse();
   VISEE=null;lastAct='dig';
   let n=0,k=0;
   for(const c of [...(G.beasts||[]),...(G.animals||[])]){if(Math.abs(c.x-x)>1||Math.abs(c.y-y)>1)continue;
     const isB=(G.beasts||[]).includes(c),sp=isB?BEASTS[c.sp]:SPECIES[c.sp];n++;
     c.hp=(c.hp??pvDe(sp))-VISEE_DM;addFx({kind:'num',x:c.x,y:c.y,txt:'-'+VISEE_DM,col:PAL['3'],dur:900});
-    if(c.hp<=0){k++;(isB?G.beasts:G.animals).splice((isB?G.beasts:G.animals).indexOf(c),1);bleed(c.x,c.y);}
+    if(c.hp<=0){k++;(isB?G.beasts:G.animals).splice((isB?G.beasts:G.animals).indexOf(c),1);bleed(c.x,c.y);if(isB)butinMort(c);}
     else if(isB){c.hunt=1;spot(c);}else{c.aware=1;c.enraged=true;spot(c);}}
   // l'onde brise aussi la roche, la montagne et la roche dure (16 novembre 2026) : c'est le seul moyen d'entamer la roche dure
   let roches=0;
@@ -174,13 +176,13 @@ function viseeOk(){if(!VISEE||G.over)return;const {i,x,y}=VISEE,o=G.inv[i];
       sayMore(mt?'De la Matière tombe au sol.':'Des éclats de métal tombent au sol.','good');}}
   engage();invTake(i);sacFix();SAC_H='';
   addFx({kind:'boom',x,y,dur:420});addFx({kind:'shake',amp:8,dur:300});SFX.explode();
-  say(`Charge sismique : ${n?`${n} ennemi${n>1?'s':''} touché${n>1?'s':''}${k?`, ${k} abattu${k>1?'s':''}`:''}`:'personne dans la zone'}${roches?`, ${roches} case${roches>1?'s':''} de roche pulvérisée${roches>1?'s':''}`:''}.`,n||roches?'good':'warn');
+  say(`${neufCh?`Capsule ${savoir().codes.charge} : c’était une charge sismique. `:''}Charge sismique : ${n?`${n} ennemi${n>1?'s':''} touché${n>1?'s':''}${k?`, ${k} abattu${k>1?'s':''}`:''}`:'personne dans la zone'}${roches?`, ${roches} case${roches>1?'s':''} de roche pulvérisée${roches>1?'s':''}`:''}.`,n||roches?'good':'warn');
   if(consoTemps('dig'))return;
   render();}
 function invBoum(r,dm){let n=0,k=0;lastAct='dig';
   for(const o of invCibles(r)){n++;const isB=G.beasts.includes(o),sp=isB?BEASTS[o.sp]:SPECIES[o.sp];o.hp=(o.hp??pvDe(sp))-dm;
     addFx({kind:'num',x:o.x,y:o.y,txt:'-'+dm,col:PAL['3'],dur:900});
-    if(o.hp<=0){k++;(isB?G.beasts:G.animals).splice((isB?G.beasts:G.animals).indexOf(o),1);bleed(o.x,o.y);}
+    if(o.hp<=0){k++;(isB?G.beasts:G.animals).splice((isB?G.beasts:G.animals).indexOf(o),1);bleed(o.x,o.y);if(isB)butinMort(o);}
     else if(isB){o.hunt=1;spot(o);}else{o.aware=1;spot(o);}}
   if(n)engage();addFx({kind:'shake',amp:8,dur:300});SFX.explode();return `${n} ennemi${n>1?'s':''} touché${n>1?'s':''}${k?`, ${k} abattu${k>1?'s':''}`:''}`;}
 /* Visuel de la foreuse selon l'équipement : l'arme dessine la moitié avant (lignes 0 à 7, pointe en haut), l'armure la moitié arrière
@@ -222,7 +224,8 @@ function invDrop(i){const o=G.inv[i];if(!o||G.over)return;const d=ITEMS[o.k];
   const c=caseJet();G.items=G.items||{};(G.items[c]=G.items[c]||[]).push(o.k);
   invSay(`${d.n} jeté${accord(d)} au sol.`);SFX.thud();invChanged();}
 // ramasse tout ce qui est posé sous la foreuse ; more : à la suite d'un déplacement (complète le message du pas)
-function invPickup(more){const c=idx(G.px,G.py),l=G.items&&G.items[c];if(!l||!l.length)return false;
+function invPickup(more){const c=idx(G.px,G.py);if(G.items&&G.items[c]&&G.items[c].length){piegeTest(c);butinPrend(c,more);}   // appât d'une salle piégée ; Matière et plans ne vont pas au sac
+  const l=G.items&&G.items[c];if(!l||!l.length)return false;
   const pris=[],laisses=[];
   for(const k of l){const pile=ITEMS[k].conso&&G.inv.find(o=>o.k===k);
     if(pile){pile.n=(pile.n||1)+1;pris.push(k);continue;}

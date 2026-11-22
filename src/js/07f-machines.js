@@ -35,7 +35,11 @@ function machRayon(l){const out=[],t=G.t;
     while(x>0&&y>0&&x<W-1&&y<H-1){const j=idx(x,y),v=t[j];if(blocks(v)&&v!==CHASM||v===DOOR)break;out.push(j);x+=l.d[0];y+=l.d[1];}}
   return out;}
 const machVivant=l=>l.c.some(i=>G.t[i]===(l.k==='x'?PYLON:TURRET));
-const machTire=(l,t)=>!l.cut&&machVivant(l)&&((((t??G.mt)||0)+l.off)%l.per)<l.on;
+// Un laser ne tire que si la foreuse le voit (22 novembre 2026) : la tourelle, le pylône ou une case de son rayon est en vue.
+// Sans témoin, il reste éteint : les ennemis en vadrouille ne s'y blessent plus. MACH_VUE=false rend l'ancien comportement (essais).
+let MACH_VUE=true;
+const machVu=l=>!MACH_VUE||typeof vis==='undefined'||!vis||l.c.some(i=>vis[i])||machRayon(l).some(j=>vis[j]);
+const machTire=(l,t)=>!l.cut&&machVivant(l)&&((((t??G.mt)||0)+l.off)%l.per)<l.on&&machVu(l);
 // cases éclairées en ce moment : {case: 'v' | 'h' | 'x'}
 function machLit(t){const m={};for(const l of G.las||[])if(machTire(l,t))for(const j of machRayon(l))m[j]=l.k==='x'?'x':l.d[0]?'h':'v';return m;}
 function machZone(){const z={};for(const l of G.las||[])if(!l.cut&&machVivant(l))for(const j of machRayon(l))z[j]=1;G.lz=z;}
@@ -46,7 +50,7 @@ function machTick(){if(!G.las||!G.las.length||G.over)return;G.mt=(G.mt||0)+1;con
   for(const [liste,fiches] of [[G.beasts||[],BEASTS],[G.animals||[],SPECIES]])for(const o of [...liste]){
     const pieds=liste===G.beasts&&typeof FOOT!=='undefined'?FOOT:[[0,0]];if(!pieds.some(([dx,dy])=>lit[idx(o.x+dx,o.y+dy)]))continue;
     o.hp=(o.hp??pvDe(fiches[o.sp]))-MACH_DM;if(vis[idx(o.x,o.y)])addFx({kind:'num',x:o.x,y:o.y,txt:'-'+MACH_DM,col:PAL['3'],dur:750});
-    if(o.hp<=0){liste.splice(liste.indexOf(o),1);bleed(o.x,o.y);if(vis[idx(o.x,o.y)])sayMore(`${LeNom(fiches[o.sp])} est détruit par un laser.`,'good');}}
+    if(o.hp<=0){liste.splice(liste.indexOf(o),1);bleed(o.x,o.y);if(liste===G.beasts&&typeof butinMort==='function')butinMort(o);if(vis[idx(o.x,o.y)])sayMore(`${LeNom(fiches[o.sp])} est détruit par un laser.`,'good');}}
   if(lit[idx(G.px,G.py)]){G.st.vie=Math.max(0,G.st.vie-MACH_DM);addFx({kind:'num',x:G.px,y:G.py,txt:'-'+MACH_DM,col:'#ff3b3b',dur:900});addFx({kind:'shake',amp:5,dur:220});
     sayMore(`Laser : −${MACH_DM} vie.`,'warn');if(G.st.vie<=0)G.over={dead:true};}}
 // rendu des rayons allumés : cases pleines, sans transparence (consigne « pixel perfect »)
@@ -85,21 +89,21 @@ function machBump(nx,ny,dx,dy){const i=idx(nx,ny),v=G.t[i],fin=d=>{G.turn++;G.ms
     if(!pileLibre(j)){say('Pile énergétique : quelque chose l’empêche d’avancer.');SFX.blocked();render();return 'stop';}
     const p=G.piles[i];delete G.piles[i];G.t[i]=p.sous;p.sous=w;G.piles[j]=p;G.t[j]=PILE;SFX.thud();
     say(G.soc&&G.soc[j]!=null?'La pile s’enclenche sur le socle.':'La foreuse pousse la pile énergétique.','info');socMaj();machZone();return 'go';}
-  if(v===CHARGEUR){const e=Object.entries(G.piles||{}).find(([,p])=>p.ch===i);if(!e){say('Chargeur de pile : vide.');SFX.blocked();render();return 'stop';}
-    const [k,p]=e,de=+k;if(de===p.home){say('Chargeur de pile : la pile est déjà à sa place.');SFX.blocked();render();return 'stop';}
-    if(!pileLibre(p.home)){say('Chargeur de pile : la place de la pile est occupée.');SFX.blocked();render();return 'stop';}
-    delete G.piles[de];G.t[de]=p.sous;p.sous=G.t[p.home];G.piles[p.home]=p;G.t[p.home]=PILE;SFX.serrure();say('Le chargeur rappelle la pile à son point de départ.','info');socMaj();machZone();return fin();}
+  if(v===CHARGEUR){const e=Object.entries(G.piles||{}).find(([,p])=>p.ch===i);if(!e){say('Distributeur de pile : vide.');SFX.blocked();render();return 'stop';}
+    const [k,p]=e,de=+k;if(de===p.home){say('Distributeur de pile : la pile est déjà à côté de lui.');SFX.blocked();render();return 'stop';}
+    if(!pileLibre(p.home)){say('Distributeur de pile : la place de la pile est occupée.');SFX.blocked();render();return 'stop';}
+    delete G.piles[de];G.t[de]=p.sous;p.sous=G.t[p.home];G.piles[p.home]=p;G.t[p.home]=PILE;SFX.serrure();say('Le distributeur rappelle la pile à côté de lui.','info');socMaj();machZone();return fin();}
   if(v===STATION){if(G.art[i]){say('Station de réparation : vide.');SFX.blocked();render();return 'stop';}
     G.art[i]=1;const dv=Math.round(G.st.vieMax-G.st.vie),de=Math.round(G.st.energieMax-G.st.energie);G.st.vie=G.st.vieMax;G.st.energie=G.st.energieMax;
     addFx({kind:'num',x:G.px,y:G.py,txt:'+'+dv,col:PAL['2'],dur:900});addFx({kind:'soin',x:G.px,y:G.py,dur:900,gr:fxGrains(9)});SFX.analyse();
     let n=0;for(const b of G.beasts||[])if(!b.hunt&&Math.hypot(b.x-G.px,b.y-G.py)<=12&&!BEASTS[b.sp].mine){b.hunt=1;spot(b);n++;}
     say(`Station de réparation : +${dv} vie, +${de} énergie. Le vacarme s’entend de loin${n?` : ${n} ennemi${n>1?'s':''} vien${n>1?'nent':'t'} voir`:''}.`,'good');return fin(200);}
   if(v===FABRIC){if(typeof fabOpen==='function')fabOpen(i);else{say('Fabricateur.');render();}return 'stop';}
-  if(v===GRILLE){say('Grille d’énergie : fermée. Un socle, quelque part, attend sa pile.');SFX.blocked();render();return 'stop';}
+  if(v===GRILLE){say('Grille d’énergie : fermée. Son socle, tout près, attend une pile.');SFX.blocked();render();return 'stop';}
   if(v===TURRET||v===PYLON){say((v===TURRET?'Tourelle laser':'Croix laser')+' : la foreuse ne l’entame pas. Une charge sismique la détruit.');SFX.blocked();render();return 'stop';}
   return 'stop';}
 // une pile peut-elle venir sur cette case ? sol bâti ou naturel, libre de toute créature, d'objet, de clé et de site
-function pileLibre(j){const x=j%W,y=(j/W)|0,v=G.t[j];return (v===FLOOR||v===GROUND||v===RUBBLE||v===FLAT)&&!beastAt(x,y)&&!animalAt(x,y)&&!(G.px===x&&G.py===y)&&!(G.items&&G.items[j]&&G.items[j].length)&&!(G.cles&&G.cles[j])&&!G.sites.some(s=>s.x===x&&s.y===y)&&!(G.ore&&G.ore[j]);}
+function pileLibre(j){const x=j%W,y=(j/W)|0,v=G.t[j];return (v===FLOOR||v===GROUND||v===RUBBLE||v===FLAT||v===DOOR)&&!beastAt(x,y)&&!animalAt(x,y)&&!(G.px===x&&G.py===y)&&!(G.items&&G.items[j]&&G.items[j].length)&&!(G.cles&&G.cles[j])&&!G.sites.some(s=>s.x===x&&s.y===y)&&!(G.ore&&G.ore[j]);}
 
 /* ----- Accessibilité : le site reste-t-il atteignable, leviers et socles compris ? -----
    Parcours depuis la foreuse ; un levier ou une pile touchés ouvrent ce qu'ils commandent, et on recommence jusqu'à stabilité.
@@ -117,9 +121,8 @@ function accesSite(depuis){const N=W*H,t=G.t,ouvert=new Set();let d;
   for(const c of G.circ||[])delete c._vu;
   const s=G.sites[0];return s?d[idx(s.x,s.y)]:-1;}
 /* ----- Génération ----- */
-const BUTIN_DEPOT=()=>{const c=Object.keys(ITEMS).filter(k=>ITEMS[k].conso&&k!=='cle'),e=Object.keys(ITEMS).filter(k=>!ITEMS[k].conso&&!ITEMS[k].base&&k!=='cle'&&ITEMS[k].slot);
-  const l=[c[rnd(0,c.length-1)],c[rnd(0,c.length-1)]];if(e.length&&Math.random()<.6)l.push(e[rnd(0,e.length-1)]);return l;};
-function machines(){G.las=[];G.lz={};G.circ=[];G.soc={};G.piles={};G.mt=0;G.machN={};
+const BUTIN_DEPOT=()=>typeof butinCoffre==='function'?butinCoffre('depot'):['matiere','matiere'];
+function machines(){G.las=[];G.lz={};G.circ=[];G.soc={};G.piles={};G.mt=0;G.machN={};G.pieges=[];G.niche={};
   if(!BATI_DER||!G.batis||!G.batis.length)return;const {B,strs}=BATI_DER,t=G.t,N=W*H,A=ARTEFACTS,site=G.sites&&G.sites[0]?idx(G.sites[0].x,G.sites[0].y):-1,dep=idx(G.px,G.py);
   const base=!!(RECETTES[GEN.recette]||{}).base,fac=base?(GEN.bsMachines??100)/100:.35,compte=n=>Math.floor(n)+(Math.random()<n-Math.floor(n)?1:0);
   const fq=(k,f)=>{const a=A[k];if(!a||!artOn(k))return 0;return compte(ART_LISTE.find(m=>m[0]===k)[3][a.f]*(f??fac));};
@@ -156,55 +159,85 @@ function machines(){G.las=[];G.lz={};G.circ=[];G.soc={};G.piles={};G.mt=0;G.mach
   // -- levier coupe-circuit, au fond de la salle : la traversée une fois réussie, le retour est sûr
   const coupe=(p,g)=>{machZone();const d=dist(),c=p.c.filter(i=>libre(i)&&artLibre(B,i,site)&&d[i]>=0).sort((a,b)=>d[b]-d[a]);if(!c.length)return;
     const i=c[rnd(0,Math.min(2,c.length-1))];t[i]=LEVIER;G.art[i]=0;G.circ.push({k:'levier',c:i,on:0,perm:0,cib:[{t:'lasers',g}]});};
-  // -- pont à levier : un fossé de deux cases coupe la pièce ; le levier est posé du côté d'où l'on vient
-  const pont=p=>{const P=new Set(p.c),xs=p.c.map(i=>i%W),ys=p.c.map(i=>(i/W)|0),x0=Math.min(...xs),x1=Math.max(...xs),y0=Math.min(...ys),y1=Math.max(...ys);
-    for(const vert of mel(x1-x0>=y1-y0?[true,true,false]:[false,false,true])){const a0=vert?x0:y0,a1=vert?x1:y1;if(a1-a0<6)continue;
-      for(const c of mel(Array.from({length:a1-a0-5},(_,k)=>a0+3+k))){
-        const fosse=p.c.filter(i=>{const v=vert?i%W:(i/W)|0;return v===c||v===c+1;});if(fosse.length<4||fosse.length>16||fosse.some(i=>t[i]!==FLOOR||pres(i)||i===site||i===dep||G.lz[i]))continue;
-        // le fossé doit couper la pièce d'un bord à l'autre : ses voisins hors de la pièce, sur les côtés, sont des murs
-        if(fosse.some(i=>{const x=i%W,y=(i/W)|0;return (vert?[[0,1],[0,-1]]:[[1,0],[-1,0]]).some(([dx,dy])=>{const j=idx(x+dx,y+dy);return !P.has(j)&&!blocks(t[j]);});}))continue;
-        const lignes=[...new Set(fosse.map(i=>vert?(i/W)|0:i%W))],lg=lignes[rnd(0,lignes.length-1)],pt=fosse.filter(i=>(vert?(i/W)|0:i%W)===lg);if(pt.length!==2)continue;
-        const sv=fosse.map(i=>t[i]);for(const i of fosse)t[i]=CHASM;
-        const d=dist(),pres1=p.c.filter(i=>d[i]>=0&&libre(i)&&artLibre(B,i,site)),loin=p.c.some(i=>t[i]===FLOOR&&d[i]<0);
-        // le levier : dans cette pièce du côté accessible, ou ailleurs dans la partie accessible de la carte
-        let cand=pres1;if(!loin||Math.random()<.5){const autres=[];for(const q of pieces)if(q!==p&&!q.mach)for(const i of q.c)if(d[i]>=0&&libre(i)&&artLibre(B,i,site)&&murV(i))autres.push(i);if(autres.length)cand=autres;}
-        if(!cand.length){fosse.forEach((i,n)=>t[i]=sv[n]);continue;}
-        if(Math.random()<.35){const q=alimente([{t:'pont',c:pt}],p);   // une fois sur trois, le pont est alimenté par une pile sur son socle
-          if(q){if(accesSite()>=0){p.mach='pont';inc('piles');return true;}annule(q);}}
-        const lv=cand[rnd(0,cand.length-1)];t[lv]=LEVIER;G.art[lv]=0;G.circ.push({k:'levier',c:lv,on:0,perm:1,cib:[{t:'pont',c:pt}]});
-        if(accesSite()<0){G.circ.pop();t[lv]=FLOOR;delete G.art[lv];fosse.forEach((i,n)=>t[i]=sv[n]);continue;}
-        p.mach='pont';return true;}}
-    return false;};
-  // -- dépôt : une pièce à une seule entrée, fermée par une grille ; la pile, son socle et son chargeur sont dans une autre pièce
-  const sokoban=(q,a,s)=>{   // peut-on pousser la pile de a jusqu'à s, en restant dans la pièce q ? (parcours des états pile + côté de la foreuse)
-    const Q=new Set(q.c.filter(i=>t[i]===FLOOR)),lib=(i,pile)=>Q.has(i)&&i!==pile,vu=new Set(),file=[];
-    const zone=(de,pile)=>{const z=new Set([de]),f=[de];for(let k=0;k<f.length;k++){const x=f[k]%W,y=(f[k]/W)|0;for(const [dx,dy] of D4){const j=idx(x+dx,y+dy);if(lib(j,pile)&&!z.has(j)){z.add(j);f.push(j);}}}return z;};
-    const e0=q.c.find(i=>lib(i,a)&&pres(i))??q.c.find(i=>lib(i,a));if(e0==null)return -1;
-    file.push([a,e0,0]);vu.add(a+'|'+e0);
-    for(let k=0;k<file.length&&k<4000;k++){const [pl,jo,n]=file[k];if(pl===s)return n;const z=zone(jo,pl),x=pl%W,y=(pl/W)|0;
-      for(const [dx,dy] of D4){const der=idx(x-dx,y-dy),dev=idx(x+dx,y+dy);if(!z.has(der)||!Q.has(dev))continue;const cle=dev+'|'+pl;if(vu.has(cle))continue;vu.add(cle);file.push([dev,pl,n+1]);}}
+  /* ----- Machines lisibles (22 novembre 2026) : le mécanisme est à côté de ce qu'il commande -----
+     Pont à levier : le gouffre prend presque toute la salle, d'un mur à l'autre ; il ne reste qu'une bande de sol à chaque bout.
+       Le levier (ou le socle) est au pied du pont, du côté d'où l'on vient. Deux cas seulement : le pont est le seul chemin
+       vers le site, ou l'autre rive est un cul-de-sac et porte un butin (Matière).
+     Pile et socle : le socle est près de ce qu'il alimente ; la pile attend à côté de son distributeur, dans une pièce
+       voisine, et se pousse jusqu'au socle (elle passe les portes). Le distributeur la rappelle à côté de lui. */
+  const piece=new Int32Array(N).fill(-1);pieces.forEach((p,n)=>{for(const i of p.c)piece[i]=n;});
+  const sol=v=>v===FLOOR||v===DOOR,v4=i=>D4.map(([dx,dy])=>idx(i%W+dx,((i/W)|0)+dy));
+  const pas=(a,b)=>Math.abs(a%W-b%W)+Math.abs(((a/W)|0)-((b/W)|0));
+  // peut-on pousser la pile de a jusqu'à s dans la région Q ? (parcours des états pile + côté de la foreuse) ; nombre de poussées, ou -1
+  const sokoban=(Q,a,s)=>{const lib=(i,pile)=>Q.has(i)&&i!==pile&&sol(t[i]),vu=new Set(),file=[];
+    const zone=(de,pile)=>{const z=new Set([de]),f=[de];for(let k=0;k<f.length;k++)for(const j of v4(f[k]))if(lib(j,pile)&&!z.has(j)){z.add(j);f.push(j);}return z;};
+    const vo=v4(a).filter(j=>lib(j,a));if(!vo.length)return -1;
+    const z0=zone(vo[0],a);if(vo.some(j=>!z0.has(j)))return -1;   // posée à sa place, la pile ne coupe aucun passage
+    file.push([a,vo[0],0]);vu.add(a+'|'+vo[0]);
+    for(let k=0;k<file.length&&k<2500;k++){const [pl,jo,n]=file[k];if(pl===s)return n;const z=zone(jo,pl),x=pl%W,y=(pl/W)|0;
+      for(const [dx,dy] of D4){const der=idx(x-dx,y-dy),dev=idx(x+dx,y+dy);if(!z.has(der)||!lib(dev,pl))continue;const cle=dev+'|'+pl;if(vu.has(cle))continue;vu.add(cle);file.push([dev,pl,n+1]);}}
     return -1;};
-  // pose une pile, son socle et son chargeur dans une pièce accessible, et relie le socle à « cib ». exclu : pièce à ne pas prendre.
-  const alimente=(cib,exclu)=>{const d2=dist();
-    for(const q of mel(pieces)){if(q===exclu||q.mach||q.c.length<16||q.c.some(i=>d2[i]<0||t[i]!==FLOOR))continue;
-      for(let k=0;k<25;k++){const c=q.c.filter(i=>libre(i)&&!pres(i)),a=c[rnd(0,c.length-1)],s=c[rnd(0,c.length-1)];if(a==null||a===s||Math.hypot(a%W-s%W,((a/W)|0)-((s/W)|0))<3||!artLibre(B,a,site))continue;
-        const n=sokoban(q,a,s);if(n<2)continue;
-        t[a]=PILE;const ch=pose(q,CHARGEUR,0,true);if(ch<0){t[a]=FLOOR;break;}
-        t[a]=FLOOR;const n2=sokoban(q,a,s);t[a]=PILE;if(n2<2){t[a]=FLOOR;t[ch]=FLOOR;delete G.art[ch];continue;}
-        G.piles[a]={home:a,sous:FLOOR,ch,soc:s};G.soc[s]=G.circ.length;G.circ.push({k:'socle',c:s,on:0,perm:0,cib});q.mach='pile';return q;}}
+  // le socle s est déjà choisi, près de ce qu'il alimente : on pose la pile et son distributeur à 6-18 pas de là, dans une autre pièce si possible
+  const alimente=(cib,s)=>{const dR=new Map([[s,0]]),f=[s];
+    for(let k=0;k<f.length;k++){const c=f[k],n=dR.get(c);if(n>=18)continue;for(const j of v4(c))if(!dR.has(j)&&sol(t[j])&&j!==site){dR.set(j,n+1);f.push(j);}}
+    const Q=new Set(f),d2=dist();
+    const cand=f.filter(a=>dR.get(a)>=6&&d2[a]>=0&&libre(a)&&!pres(a)&&artLibre(B,a,site)&&piece[a]>=0&&!pieces[piece[a]].mach);
+    const autre=cand.filter(a=>piece[a]!==piece[s]),l=mel(autre.length?autre:cand);
+    for(const a of l.slice(0,12)){const chs=mel(v4(a).filter(j=>libre(j)&&!pres(j)&&j!==s&&artLibre(B,j,site))),ch=chs.find(murV)??chs[0];if(ch==null)continue;
+      t[ch]=CHARGEUR;const n=sokoban(Q,a,s);if(n<3){t[ch]=FLOOR;continue;}
+      G.art[ch]=0;t[a]=PILE;G.piles[a]={home:a,sous:FLOOR,ch,soc:s};G.soc[s]=G.circ.length;G.circ.push({k:'socle',c:s,on:0,perm:0,cib});
+      const q=pieces[piece[a]];q.mach='pile';return q;}
     return null;};
   const annule=q=>{const c=G.circ.pop(),s=c.c;delete G.soc[s];for(const k in G.piles)if(G.piles[k].soc===s){t[+k]=FLOOR;t[G.piles[k].ch]=FLOOR;delete G.art[G.piles[k].ch];delete G.piles[k];}q.mach=null;};
+  const pont=p=>{if(p.c.length<20)return false;const P=new Set(p.c),xs=p.c.map(i=>i%W),ys=p.c.map(i=>(i/W)|0),x0=Math.min(...xs),x1=Math.max(...xs),y0=Math.min(...ys),y1=Math.max(...ys);
+    for(const vert of mel([true,false])){const a0=vert?x0:y0,a1=vert?x1:y1,co=i=>vert?i%W:(i/W)|0,li=i=>vert?(i/W)|0:i%W;
+      for(const m of a1-a0>=8?[2,1]:[1]){if(a1-a0-2*m+1<3)continue;   // m : largeur de la bande de sol gardée à chaque bout
+        const fosse=p.c.filter(i=>co(i)>=a0+m&&co(i)<=a1-m);
+        if(fosse.length<6||fosse.some(i=>t[i]!==FLOOR||pres(i)||i===site||i===dep||G.lz[i]||G.cles[i]||(G.items[i]&&G.items[i].length)||G.soc[i]!=null))continue;
+        // le gouffre va d'un mur à l'autre : sur ses côtés, hors de la pièce, il n'y a que des obstacles
+        if(fosse.some(i=>{const x=i%W,y=(i/W)|0;return (vert?[[0,1],[0,-1]]:[[1,0],[-1,0]]).some(([dx,dy])=>{const j=idx(x+dx,y+dy);return !P.has(j)&&!blocks(t[j]);});}))continue;
+        const large=a1-a0-2*m+1,bout=(lg,c)=>p.c.find(i=>li(i)===lg&&co(i)===c);
+        const lignes=mel([...new Set(fosse.map(li))]).filter(lg=>fosse.filter(i=>li(i)===lg).length===large&&bout(lg,a0+m-1)!=null&&bout(lg,a1-m+1)!=null&&t[bout(lg,a0+m-1)]===FLOOR&&t[bout(lg,a1-m+1)]===FLOOR);
+        if(!lignes.length)continue;const lg=lignes[0],pt=fosse.filter(i=>li(i)===lg).sort((a,b)=>co(a)-co(b));
+        const sv=fosse.map(i=>t[i]),defait=()=>fosse.forEach((i,n)=>t[i]=sv[n]);for(const i of fosse)t[i]=CHASM;
+        const d=dist(),pres1=p.c.filter(i=>t[i]===FLOOR&&d[i]>=0),loin=p.c.filter(i=>t[i]===FLOOR&&d[i]<0);
+        if(!pres1.length||!loin.length){defait();continue;}   // les deux rives se rejoignent par ailleurs : ni passage obligé, ni cul-de-sac
+        const pied=[bout(lg,a0+m-1),bout(lg,a1-m+1)].find(i=>d[i]>=0);if(pied==null){defait();continue;}
+        const cand=pres1.filter(i=>i!==pied&&libre(i)&&!pres(i)&&artLibre(B,i,site)).sort((a,b)=>pas(a,pied)-pas(b,pied));
+        if(!cand.length||pas(cand[0],pied)>3){defait();continue;}const mec=cand[0];
+        let fait=false;
+        if(Math.random()<.35){const q=alimente([{t:'pont',c:pt}],mec);if(q){if(accesSite()>=0){fait=true;inc('piles');}else annule(q);}}
+        if(!fait){t[mec]=LEVIER;G.art[mec]=0;G.circ.push({k:'levier',c:mec,on:0,perm:1,cib:[{t:'pont',c:pt}]});
+          if(accesSite()<0){G.circ.pop();t[mec]=FLOOR;delete G.art[mec];defait();continue;}}
+        // l'autre rive est un cul-de-sac : un butin y attend, au plus loin du pont
+        if(d[site]>=0||site<0){const c=loin.filter(i=>libre(i)).sort((a,b)=>pas(b,pied)-pas(a,pied))[0];if(c!=null){(G.items[c]=G.items[c]||[]).push('matiere');p.butin=1;}}
+        p.mach='pont';CHASM_OV=null;return true;}}
+    return false;};
+  // -- dépôt : une pièce à une seule entrée, fermée par une grille ; le socle est devant, à deux ou trois pas ; la pile vient de la pièce voisine
   const depot=p=>{const P=new Set(p.c),ent=[];if(p.c.length>60)return false;
-    for(const i of p.c){const x=i%W,y=(i/W)|0;for(const [dx,dy] of D4){const j=idx(x+dx,y+dy);if(!P.has(j)&&!blocks(t[j])&&!ent.includes(j))ent.push(j);}}
+    for(const i of p.c)for(const j of v4(i))if(!P.has(j)&&!blocks(t[j])&&!ent.includes(j))ent.push(j);
     if(ent.length!==1||(t[ent[0]]!==DOOR&&t[ent[0]]!==FLOOR)||G.lz[ent[0]])return false;const e=ent[0],sous=t[e];
     t[e]=GRILLE;const d=dist(true);if(d[site]<0||p.c.some(i=>d[i]>=0)){t[e]=sous;return false;}   // la grille ne doit enfermer que ce dépôt, jamais le site
-    if(!alimente([{t:'grille',c:[e],sous:[sous]}],p)){t[e]=sous;return false;}
+    const socs=[];{const vu=new Map([[e,0]]),f=[e];for(let k=0;k<f.length;k++){const c=f[k],n=vu.get(c);if(n>=4)continue;for(const j of v4(c))if(!vu.has(j)&&!P.has(j)&&d[j]>=0&&sol(t[j])){vu.set(j,n+1);f.push(j);if(n+1>=2&&libre(j)&&!pres(j)&&artLibre(B,j,site))socs.push(j);}}}
+    let q=null;for(const s of mel(socs).slice(0,4)){q=alimente([{t:'grille',c:[e],sous:[sous]}],s);if(q){if(piece[s]>=0&&!pieces[piece[s]].mach)pieces[piece[s]].mach='socle';break;}}
+    if(!q){t[e]=sous;return false;}
     const but=BUTIN_DEPOT(),cs=mel(p.c.filter(i=>t[i]===FLOOR));but.forEach((o,n)=>{if(cs[n]!=null)(G.items[cs[n]]=G.items[cs[n]]||[]).push(o);});
     p.mach='depot';return true;};
+  /* -- salle piégée (22 novembre 2026) : un butin au milieu de la pièce, des relais cachés dans les murs. Les niches se voient
+     (tuile « niche ») : un joueur attentif lit le piège avant de prendre l'appât. Ramasser l'appât fait surgir la bande. */
+  const piege=p=>{if(p.c.length<20||p.c.length>140)return false;const P=new Set(p.c),niches=[],vuM=new Set(),vuS=new Set();
+    const cx=p.c.reduce((a,i)=>a+i%W,0)/p.c.length,cy=p.c.reduce((a,i)=>a+((i/W)|0),0)/p.c.length;
+    const app=p.c.filter(i=>libre(i)&&!pres(i)).sort((a,b)=>Math.hypot(a%W-cx,((a/W)|0)-cy)-Math.hypot(b%W-cx,((b/W)|0)-cy))[0];if(app==null)return false;
+    for(const i of mel(p.c)){if(i===app||!libre(i)||pres(i)||vuS.has(i))continue;const j=v4(i).find(j=>t[j]===WALL&&!P.has(j)&&!vuM.has(j)&&!pres(j));if(j==null)continue;vuM.add(j);vuS.add(i);niches.push([j,i]);}
+    const n=Math.max(4,Math.min(8,Math.round(p.c.length/9)));if(niches.length<4)return false;const sel=niches.slice(0,n);
+    G.pieges.push({c:app,n:sel.map(a=>a[0]),f:sel.map(a=>a[1]),on:1});for(const [j] of sel)G.niche[j]=1;
+    const but=typeof butinCoffre==='function'?butinCoffre('piege'):['matiere','matiere'];for(const o of but)(G.items[app]=G.items[app]||[]).push(o);
+    p.mach='piege';return true;};
   // ----- répartition -----
   const essaie=(n,f)=>{let fait=0;for(const p of mel(pieces)){if(fait>=n)break;if(p.mach||p.herbe)continue;if(f(p))fait++;}return fait;};
   for(let k=essaie(fq('ponts'),pont);k>0;k--)inc('ponts');
   for(let k=essaie(fq('piles'),depot);k>0;k--)inc('piles');
+  for(let k=essaie(fq('pieges'),piege);k>0;k--)inc('pieges');
   essaie(fq('lasers'),p=>{const g=tourelles(p);if(!g)return false;inc('lasers');if(Math.random()<.6)coupe(p,g);return true;});
   essaie(fq('croix'),p=>{const g=croix(p);if(!g)return false;inc('croix');if(Math.random()<.4)coupe(p,g);return true;});
   for(let k=fq('station');k>0;k--)for(const p of mel(pieces)){if(p.mach==='lasers'||p.mach==='croix')continue;if(pose(p,STATION,0,true)>=0){inc('station');break;}}
@@ -216,3 +249,12 @@ function machines(){G.las=[];G.lz={};G.circ=[];G.soc={};G.piles={};G.mt=0;G.mach
   // garde-fou : si malgré tout le site n'est plus atteignable, tous les circuits sont ouverts d'office
   if(accesSite()<0){for(const c of G.circ){c.on=1;c.perm=1;if(c.k==='levier')G.art[c.c]=1;circApplique(c,true);}}
 }
+
+/* ----- Salle piégée : l'appât ramassé, les relais sortent des murs (22 novembre 2026) -----
+   G.pieges [{c:case de l'appât, n:[murs-niches], f:[cases de sol devant chaque niche], on}] ; G.niche {mur: 1 fermée | 2 ouverte}. */
+function piegeTest(c){const p=(G.pieges||[]).find(p=>p.on&&p.c===c);if(!p)return;p.on=0;
+  const s=BEASTS.findIndex(b=>b.key==='cafar');let n=0;const bande=9000+((Math.random()*900)|0);
+  p.f.forEach((i,k)=>{const x=i%W,y=(i/W)|0;G.niche[p.n[k]]=2;if(s<0||blocks(G.t[i])||beastAt(x,y)||animalAt(x,y)||(G.px===x&&G.py===y))return;
+    const b=newBeast(s,x,y,bande,-1);b.hunt=1;b.mp=0;b.nd=1;spot(b);G.beasts.push(b);n++;addFx({kind:'alerte',o:b,dur:900});});
+  if(!n)return;addFx({kind:'shake',amp:7,dur:300});if(typeof SFX!=='undefined')SFX.explode();
+  sayMore(`Piège ! ${n} relais surgissent des murs.`,'warn');}

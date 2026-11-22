@@ -267,7 +267,9 @@ function niveau(refait){drilling=false;
   G.inv=invTest();G.log=[];
   G.st.matiere=G.st.matiere||0;G.sonarAt=(G.turn||0)+10+Math.floor(Math.random()*11);
   if(typeof baseFinir==='function'&&(RECETTES[GEN.recette]||{}).base)baseFinir();
+  const PLANS_POSES_M=PLANS_POSES={};
   machines();
+  PLANS_POSES=PLANS_POSES_M;butinExplo();   // butin des pièces secrètes, des culs-de-sac et des coins reculés (22 novembre 2026)
   if(G.sites[0]&&accesSite()<0&&(refait||0)<3)return niveau((refait||0)+1);   // garde-fou : un site inatteignable, la carte est refaite (trois fois au plus)
   spawnGroupes();lastAct='move';palBiome(null);buildTiles();turnStealth();computeFOV();}
 const fauneTxt=()=>[...new Set([...(G.animals||[]).map(a=>SPECIES[a.sp].n),...(G.beasts||[]).map(b=>BEASTS[b.sp].n)])].join(', ')||'aucune';
@@ -303,18 +305,18 @@ function eboulis(){
 function genRemet(sauve){for(const k in GEN)if(!(k in sauve))delete GEN[k];Object.assign(GEN,sauve);saveGen();buildGen();}
 const RECETTE_NIV=n=>n<=1?'atterrissage':n===2?'cavernes':'base';   // la recette de chaque niveau de la descente (le niveau 1 suit le menu Monde)
 function niveauSuivant(hasard){   // hasard : un archétype monde et un archétype bâti tirés au hasard (Lab → Niv2, Niv3)
-  const sauve=JSON.parse(JSON.stringify(GEN)),inv=G.inv,st=G.st,tour=G.turn,dist=G.dist,niv=(G.niv||1)+1;
+  const sauve=JSON.parse(JSON.stringify(GEN)),inv=G.inv,st=G.st,tour=G.turn,dist=G.dist,niv=(G.niv||1)+1;SAV_GARDE=st.savoir||null;   // la génération tire les plans d'après ce que la foreuse sait déjà
   recRange();recPrend(RECETTE_NIV(niv));if(hasard)hasardReglages();SANS_VAISSEAU=true;NIV_GEN=niv;   // sans hasard : les réglages en cours du menu Monde pour cette recette
   niveau();   // genPlanet refait l'objet G : tout ce que la foreuse garde est remis en place juste après
   SANS_VAISSEAU=false;genRemet(sauve);
-  G.inv=inv;G.st=st;G.niv=niv;G.turn=tour;G.dist=dist;G.over=null;drilling=false;
+  G.inv=inv;G.st=st;G.niv=niv;G.turn=tour;G.dist=dist;G.over=null;drilling=false;SAV_GARDE=null;
   eboulis();
   say(G.arrivee==='base'?`Niveau ${G.niv}${G.amb?' — '+G.amb:''}. La foreuse a traversé le plafond d’une salle : elle est dans une base enfouie. Un site de forage est signalé plus loin.`:`Niveau ${G.niv}${G.amb?' — '+G.amb:''}. La foreuse a percé le plafond et s'est écrasée plus bas. Un nouveau site de forage est signalé.`,'info');}
 const B_PORTE=i=>!!(BATI_DER&&BATI_DER.B.porte[i])||D4.some(([dx,dy])=>{const v=G.t[idx(i%W+dx,((i/W)|0)+dy)];return v===DOOR||v===LOCK;});   // devant un passage : pas de débris
 
 /* ---------- Bestiaire : édition des statistiques ---------- */
 const BFIELDS=[['v','Vitesse',1,10],['pv','PV',1,200],['dmin','Dégâts min',0,100],['dmax','Dégâts max',0,100],['pre','Précision',0,250],['def','Défense',0,150],['crit','Crit %',0,100]];
-const BEST_LIST=()=>[{key:'insectoide',o:SPECIES[0],ic:'an0r',role:'Suit à distance et recule ; attaque dès qu’un coup est tenté, par vous ou contre vous'},...BEASTS.map((o,i)=>({key:o.key,o,ic:'bz'+i+'r',role:o.role}))];
+const BEST_LIST=()=>[{key:'insectoide',o:SPECIES[0],ic:'an0r',role:'Suit à distance et recule ; attaque dès qu’un coup est tenté, par vous ou contre vous'},...BEASTS.map((o,i)=>({key:o.bk||o.key,o,ic:'bz'+i+'r',role:o.role}))];
 const BEST_DEF={};BEST_LIST().forEach(e=>{BEST_DEF[e.key]={};BFIELDS.forEach(([f])=>BEST_DEF[e.key][f]=e.o[f]);});
 try{const b=JSON.parse(localStorage.getItem('np-best')||'null');if(b)BEST_LIST().forEach(e=>{if(b[e.key])BFIELDS.forEach(([f])=>{if(typeof b[e.key][f]==='number')e.o[f]=b[e.key][f];});});}catch(e){}
 function saveBest(){const o={};BEST_LIST().forEach(e=>{o[e.key]={};BFIELDS.forEach(([f])=>o[e.key][f]=e.o[f]);});try{localStorage.setItem('np-best',JSON.stringify(o));}catch(e){}touchLocal();}

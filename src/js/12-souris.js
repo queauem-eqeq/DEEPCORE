@@ -178,7 +178,7 @@ const TDESC={[GROUND]:['Sol rocheux','Praticable. Les points au sol se densifien
   [LEVIER]:['Levier','Avancer dessus l’actionne : il déploie un pont ou coupe les lasers de sa salle.'],
   [GRILLE]:['Grille d’énergie','Infranchissable tant que son socle n’est pas alimenté par une pile. On voit au travers. Une charge sismique la détruit.'],
   [STATION]:['Station de réparation','Avancer dessus remet la vie et l’énergie au maximum, une seule fois. Le bruit attire les ennemis à 12 cases.'],
-  [CHARGEUR]:['Chargeur de pile','Avancer dessus rappelle la pile à son point de départ : utile si elle est coincée.'],
+  [CHARGEUR]:['Distributeur de pile','Sa pile attend à côté de lui. Avancer dessus la rappelle : utile si elle est coincée.'],
   [FABRIC]:['Fabricateur','Avancer dessus ouvre la liste de fabrication : des objets contre de la Matière.'],
   [PILLAR]:['Pilier','Infranchissable et opaque : il coupe la ligne de vue. Compte comme une paroi pour la discrétion.'],
   [LIQ]:['Eau peu profonde','Praticable par tous. Défense −20 pour qui s’y trouve ; pas deux fois plus lent, sauf pour les crabos qui nagent.'],

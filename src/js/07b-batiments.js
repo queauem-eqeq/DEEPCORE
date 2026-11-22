@@ -5,7 +5,7 @@
 // dessin d'une case bâtie ; put(tuile, opacité) vient du rendu de la partie ou de celui de l'intro
 function batiTuile(t,x,y,put){
   if(t===LOCK){put(TL.floor,.5);put(TL.lock,1);return;}
-  if(t===WALL||t===SECRET){const b=y<H-1?G.t[idx(x,y+1)]:WALL;put(b===WALL||b===SECRET?TL.wall:TL.wallFace,.95);return;}
+  if(t===WALL||t===SECRET){const b=y<H-1?G.t[idx(x,y+1)]:WALL;put(b===WALL||b===SECRET?TL.wall:TL.wallFace,.95);{const nc=G.niche&&G.niche[idx(x,y)];if(nc)put(nc===2?TL.nicheOuverte:TL.niche,1);}return;}
   put(TL.floor,.5);
   if(t===PILLAR)put(TL.pillar,.95);
   else if(t===MACHINE)put(TL['mach'+((G.art&&G.art[idx(x,y)])||0)],1);
