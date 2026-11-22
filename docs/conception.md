@@ -799,7 +799,12 @@ Modèle Brogue :
 | **Module de puissance** | **POW +1 pour toujours** ; chaque point de POW au-dessus du POW requis par l'arme donne +8 % de dégâts (+1,5 % avant) | ses coups portent 25 % plus fort |
 | **Surrégime** | CRIT +50 pendant 10 battements ; la foreuse vire au rouge | ses coups sont tous critiques pendant 10 battements |
 | **Camouflage optique** | invisible 10 battements : vue seulement au contact, les poursuivants à distance lâchent ; **rompu par un coup ou un forage** | il disparaît 10 battements (visible au contact) |
+| **Balise** (néfaste) | tous les ennemis à 20 cases savent où est la foreuse | lancée au loin, ils y courent : un leurre |
+| **Court-circuit** (néfaste) | énergie à zéro | hors service 10 battements, sans dégât ; un Bloqueur lâche |
 | **Matière** (butin au sol) | +15 en réserve, dès qu'on marche dessus | – |
+
+Les deux capsules néfastes (22 novembre 2026, choix de l'utilisateur) font de l'identification un pari : essayer une capsule
+inconnue sur soi peut coûter cher, la lancer sur un ennemi peut le servir. Fabricables une fois le plan trouvé (12 et 16).
 
 - **Butin des robots** : un robot abattu lâche parfois un objet (Broyeur 90 %, Bloqueur 60 %, Soudeur 45 %, Artilleur et
   Englueur 35 %, Sentinelle 25 %, Torpille 10 %, Crabot 8 %, Relais 6 %, Drone 5 %, Mine 0) : Matière 40 %, capsule 35 %,

@@ -63,7 +63,7 @@ function artefacts(B,strs){G.art={};const A=ARTEFACTS,t=G.t,site=G.sites&&G.site
   // 2. herbe : la pièce entière, hautes et basses mêlées par petites touffes (le site et les clés gardent leur sol)
   if(artOn('herbe')){const pris=mel().filter(p=>!p.c.includes(site)).slice(0,compte(pieces.length*fq('herbe')));
     for(const p of pris){const g=Math.random()*10,h=Math.random()*10;p.herbe=1;G.artN.herbe++;
-      for(const i of p.c)if(t[i]===FLOOR&&i!==site&&!G.cles[i]){const x=i%W,y=(i/W)|0;t[i]=Math.sin(x*.9+g)+Math.cos(y*1.1+h)+Math.random()*.9>.45?GRASS:FLAT;}}}
+      for(const i of p.c)if(t[i]===FLOOR&&i!==site){const x=i%W,y=(i/W)|0;t[i]=G.cles[i]?FLAT:Math.sin(x*.9+g)+Math.cos(y*1.1+h)+Math.random()*.9>.45?GRASS:FLAT;}}}   // sous une clé : de la terre nue, pas la dalle du bâtiment (22 novembre 2026)
   const libres=()=>mel().filter(p=>!p.herbe);
   // 1. antenne et 4. terminal : un par pièce, contre un mur si possible
   if(artOn('antenne')){let n=compte(fq('antenne'));for(const p of libres()){if(n<=0)break;if(pose(p,ANTENNA,0,true)>=0){n--;p.ant=1;G.artN.antenne++;}}}

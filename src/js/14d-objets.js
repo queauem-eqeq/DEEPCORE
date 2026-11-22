@@ -10,8 +10,8 @@
    Ce que la foreuse sait (plans, capsules identifiées, noms de code) vit dans G.st.savoir : G.st suit la foreuse d'un niveau
    à l'autre. Valeurs réglables : Lab → Items (np-items). */
 const ITEM_VAL_DEF={repar:{soin:50},batterie:{energie:50,choc:12,etourdi:6},charge:{degats:30},puissance:{pow:1,deg:8},
-  berserk:{crit:50,duree:10},camo:{duree:10},matiere:{mat:15}};
-const ITEM_VAL_LIB={soin:'Vie rendue',energie:'Énergie rendue',choc:'Dégâts de la décharge',etourdi:'Étourdissement (battements)',degats:'Dégâts',pow:'POW gagné',deg:'Dégâts par point de POW en trop (%)',crit:'CRIT en plus (points)',duree:'Durée (battements)',mat:'Matière rendue'};
+  berserk:{crit:50,duree:10},camo:{duree:10},balise:{rayon:20},court:{etourdi:10},matiere:{mat:15}};
+const ITEM_VAL_LIB={soin:'Vie rendue',energie:'Énergie rendue',choc:'Dégâts de la décharge',etourdi:'Étourdissement (battements)',degats:'Dégâts',pow:'POW gagné',deg:'Dégâts par point de POW en trop (%)',crit:'CRIT en plus (points)',duree:'Durée (battements)',rayon:'Rayon de l’appel (cases)',mat:'Matière rendue'};
 let ITEM_VAL=JSON.parse(JSON.stringify(ITEM_VAL_DEF));
 // chance qu'un robot abattu lâche un objet, par espèce (clé du Bestiaire)
 const DROPS_DEF={crabos:8,cafar:6,mastok:90,brochon:10,mine:0,paralyzor:25,gardien:60,artilleur:35,drone:5,soudeur:45,englueur:35};
@@ -34,15 +34,26 @@ Object.assign(ITEMS,{
     plein:st=>false,non:'',use:st=>'',
     art:["   ·  ·  ·  ·  ", "  ·  ▄▄▄▄▄  ·  ", "  · █░▒█▒░█ ·  ", "  ·  ▀▀▀▀▀  ·  ", "   ·  ·  ·  ·  "],
     col:["...3..3..3..3..", "..3..wwwww..3..", "..3.w33w33w.3..", "..3..wwwww..3..", "...3..3..3..3.."]},
+  // Capsules néfastes (22 novembre 2026) : mauvaises sur la foreuse, utiles lancées ailleurs. C'est ce qui fait de l'identification un pari.
+  balise:{n:'Balise',conso:1,son:'spot',eff:'Appelle les ennemis à 20 cases',
+    d:'Un émetteur qui hurle : tous les ennemis alentour convergent vers lui. Sur la foreuse, c’est une catastrophe ; lancée au loin, c’est un leurre.',
+    plein:st=>false,non:'',use:st=>'',
+    art:["      ) ) )    ", "     ▄▄█▄▄     ", "     █ ● █     ", "     ▀▀█▀▀     ", "    ▄▄▄█▄▄▄    "],
+    col:["......r.r.r....", ".....wwwww.....", ".....w.r.w.....", ".....wwwww.....", "....wwwwwww...."]},
+  court:{n:'Court-circuit',conso:1,son:'laser',eff:'Énergie à zéro, ou ennemi hors service',
+    d:'Une surtension brutale. Sur la foreuse : l’énergie tombe à zéro. Lancé sur un ennemi : il reste hors service 10 battements, sans dégât.',
+    plein:st=>false,non:'',use:st=>'',
+    art:["     ▄▄▄▄▄     ", "    █  ▄▀ █    ", "    █ ▀▄  █    ", "    █  ▄▀ █    ", "     ▀▀▀▀▀     "],
+    col:[".....wwwww.....", "....w..11.w....", "....w.11..w....", "....w..11.w....", ".....wwwww....."]},
   matiere:{n:'Matière',mat:1,eff:'Matière +15',d:'Un bloc de Matière brute : il rejoint la réserve dès qu’on le ramasse.',
     art:["     ▄▄        ", "   ▄████▄  ▄▄  ", "  ████████████ ", "   ▀████████▀  ", "      ▀▀▀▀     "],
     col:[".....11........", "...11w111..11..", "..111111111w11.", "...1111111111..", "......1111....."]}});
-Object.assign(FAB_PRIX,{berserk:20,camo:24});
+Object.assign(FAB_PRIX,{berserk:20,camo:24,balise:12,court:16});
 const FAB_PRIX_DEF=Object.assign({},FAB_PRIX);
 
 /* ----- Ce que la foreuse sait ----- */
 // zone d'un consommable : r = 0 une case, 1 un carré de 3 × 3, 'f' le disque du fumigène ; soi : la visée s'ouvre sur la foreuse
-const CONSO={repar:{r:0,soi:1},batterie:{r:0,soi:1},fumigene:{r:'f',soi:1},charge:{r:1,soi:0},puissance:{r:0,soi:1},berserk:{r:0,soi:1},camo:{r:0,soi:1}};
+const CONSO={repar:{r:0,soi:1},batterie:{r:0,soi:1},fumigene:{r:'f',soi:1},charge:{r:1,soi:0},puissance:{r:0,soi:1},berserk:{r:0,soi:1},camo:{r:0,soi:1},balise:{r:0,soi:1},court:{r:0,soi:1}};
 let SAV_GARDE=null;   // pendant la génération du niveau suivant, G.st est neuf : on garde la main sur le savoir de la foreuse
 const codeTire=()=>{const L='BDFGHJKLMNPQRSTVWXZ',H='0123456789ABCDEF',l=()=>L[rnd(0,L.length-1)],h=()=>H[rnd(0,15)];return `//${l()}${l()}${rnd(2,9)}-${h()}${h()}${l()}`;};
 function savoir(){const st=typeof G!=='undefined'&&G&&G.st;if(!st)return SAV_GARDE||{plans:{},ident:{},codes:{}};
@@ -68,6 +79,7 @@ function itemTxt(){const V=ITEM_VAL,v=k=>ITEMS[k].vrai;
   v('puissance').eff=`POW +${V.puissance.pow}, pour toujours`;
   v('berserk').eff=`CRIT +${V.berserk.crit} pendant ${V.berserk.duree} battements`;
   v('camo').eff=`Invisible ${V.camo.duree} battements`;
+  v('balise').eff=`Appelle les ennemis à ${V.balise.rayon} cases`;v('court').eff=`Énergie à zéro, ou ennemi hors service ${V.court.etourdi} battements`;
   ITEMS.matiere.eff=`Matière +${V.matiere.mat}`;}
 // plans de fabrication : un objet « plan_<clé> » par objet fabricable ; jamais dans le sac, il s'apprend en le ramassant
 const ART_PLAN={art:["  ┌─────────┐  ", "  │ ┌──┐ ── │  ", "  │ │  │ ── │  ", "  │ └──┘ ── │  ", "  └─────────┘  "],col:["..wwwwwwwwwww..", "..w.2222.22.w..", "..w.2..2.22.w..", "..w.2222.22.w..", "..wwwwwwwwwww.."]};
@@ -80,13 +92,13 @@ function camoCasse(){if(G&&G.eff&&G.eff.camo>0){G.eff.camo=0;sayMore('Le camoufl
 const tenuPar=()=>(G.beasts||[]).find(b=>b.tient&&!(b.stun>0)&&Math.max(Math.abs(b.x-G.px),Math.abs(b.y-G.py))<=1);
 
 /* ----- Butin ----- */
-const PLAN_RANG=k=>{const d=ITEMS[k];return ['repar','batterie','fumigene','cle'].includes(k)?1:d.conso||d.slot==='acc'?2:3;};   // objets simples d'abord, les meilleurs plus bas
+const PLAN_RANG=k=>{const d=ITEMS[k];return ['repar','batterie','fumigene','cle','balise'].includes(k)?1:d.conso||d.slot==='acc'?2:3;};   // objets simples d'abord, les meilleurs plus bas
 const nivCarte=()=>Math.max(1,Math.min(3,(typeof G!=='undefined'&&G&&G.niv)||(typeof NIV_GEN==='number'?NIV_GEN:1)));
 let PLANS_POSES={};   // plans déjà posés sur la carte en cours de génération : pas deux fois le même
 function planTire(){const s=savoir(),niv=nivCarte(),lib=Object.keys(FAB_PRIX).filter(k=>ITEMS[k]&&!s.plans[k]&&!PLANS_POSES[k]);
   let l=lib.filter(k=>PLAN_RANG(k)<=niv);if(!l.length)l=lib.filter(k=>PLAN_RANG(k)<=niv+1);if(!l.length)return 'matiere';
   const k=l[rnd(0,l.length-1)];PLANS_POSES[k]=1;return 'plan_'+k;}
-const CONSO_POIDS=[['repar',5],['batterie',4],['fumigene',3],['charge',3],['berserk',2],['camo',2]];
+const CONSO_POIDS=[['repar',5],['batterie',4],['fumigene',3],['charge',3],['berserk',2],['camo',2],['balise',2],['court',2]];
 function consoTire(){let t=CONSO_POIDS.reduce((a,c)=>a+c[1],0),r=Math.random()*t;for(const [k,p] of CONSO_POIDS){if((r-=p)<0)return k;}return 'repar';}
 function equipTire(){const l=Object.keys(ITEMS).filter(k=>ITEMS[k].slot&&!ITEMS[k].base&&k!=='usine'&&PLAN_RANG(k)<=nivCarte()+1);return l.length?l[rnd(0,l.length-1)]:'matiere';}
 // contenu d'un coffre : dépôt derrière une grille, appât d'une salle piégée, pièce secrète
@@ -165,6 +177,11 @@ function consoCible(i,x,y){const o=G.inv[i];if(!o)return;const k=o.k,d=ITEMS[k],
   else if(k==='camo'){if(moi){G.eff.camo=V.duree;for(const e of G.beasts||[])if(e.hunt&&Math.max(Math.abs(e.x-G.px),Math.abs(e.y-G.py))>1){e.hunt=0;forget(e);}txt=`la foreuse disparaît pendant ${V.duree} battements`;}
     else if(b){b.camo=V.duree;txt=`${leNom(sp)} disparaît pendant ${V.duree} battements`;ton='warn';}
     else{txt='le voile se dissipe sans rien couvrir';ton='warn';}}
+  else if(k==='balise'){let n=0;for(const e of G.beasts||[])if(Math.max(Math.abs(e.x-x),Math.abs(e.y-y))<=V.rayon&&!(e.stun>0)){e.hunt=1;e.mem=[x,y];if(moi)spot(e);n++;}
+    addFx({kind:'shake',amp:4,dur:250});txt=moi?`la balise hurle sur la foreuse : ${n} ennemi${n>1?'s':''} alentour ${n>1?'savent':'sait'} où elle est`:`la balise hurle là-bas : ${n} ennemi${n>1?'s':''} y ${n>1?'courent':'court'}`;ton=moi?'warn':'good';}
+  else if(k==='court'){if(moi){st.energie=0;txt='surtension : l’énergie tombe à zéro';ton='warn';addFx({kind:'shake',amp:5,dur:250});}
+    else if(b){b.stun=V.etourdi;b.tient=0;txt=`${leNom(sp)} est hors service pendant ${V.etourdi} battements`;num('HS',PAL['3']);addFx({kind:'flash',beast:b,dur:220});}
+    else{txt='la surtension se perd dans le sol';ton='warn';}}
   const neuf=identifier(k);invTake(i);sacFix();SAC_H='';
   say(`${neuf?`Capsule ${savoir().codes[k]} : c’était ${nom}. `:''}${nom} : ${txt}.`,ton);(son&&SFX[son]?SFX[son]:SFX.spot)();
   if(consoTemps())return;invChanged();}
