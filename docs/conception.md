@@ -858,8 +858,12 @@ s au pluriel sur un nom qui en porte déjà un : « la puce », « la torpille �
 - **Mine** : elle fonce dès qu'elle a repéré la foreuse. Arrivée **à une case**, elle **s'arme** : elle ne bouge
   plus et **clignote**, puis **explose 2 à 3 battements plus tard** (1 à 3 jusqu'au 22 novembre 2026 : à 1, elle sautait au battement suivant) — **20 dégâts** dans un **carré de 3 × 3** à la
   foreuse et à toute créature qui s'y trouve. Détruite avant, elle n'explose pas ; elle n'a pas d'autre attaque.
-  L'animation est un carré de 3 × 3 en pavés fins de 2 pixels (blanc plein, damier accent, braises couleur monde) ;
-  **la charge sismique montre la même**.
+  **L'explosion brise la roche et la montagne tendre** du carré (22 novembre 2026) : elles deviennent des gravats, et le
+  métal ou la Matière qu'elles cachaient tombent au sol. La roche dure, les murs et les machines tiennent : seule la
+  charge sismique en vient à bout.
+  L'animation pose sur chaque case du carré les tuiles **boom0** (éclair blanc), **boom1** (damier accent) puis
+  **boom2** (braises monde), qui alternent avec une variante décalée pour crépiter ; elles se retouchent au Tile
+  editor, groupe FX (22 novembre 2026 ; avant, un dessin en code). **La charge sismique montre la même**.
 - **Sentinelle** : **tire un laser jusqu'à 2 cases**, en ligne de vue, une fois par battement, jet pour toucher
   ordinaire. **Le trait rouge se voit toujours** : droit sur la foreuse s'il touche, à côté s'il rate ; il crépite
   puis s'éteint. Attention : « Sentinelle » est aussi le nom d'un style de patrouille.
@@ -1015,6 +1019,9 @@ pièce ils deviennent du sol, sous un mur du mur) ; seuls le vaisseau et le bord
 
 - **Pas d'écran d'accueil** : la partie commence directement, foreuse dans la soute. Le son s'active à la première
   touche ou au premier clic.
+- **Barres de défilement** (22 novembre 2026) : 4 pixels, sans fond, couleur du texte secondaire (`--dim`), plus
+  claires au survol ; « thin » sous Firefox. Ne pas poser `scrollbar-width` ou `scrollbar-color` sur un élément :
+  Chrome les préférerait et rendrait la barre épaisse.
 - Plein écran ; colonne noire à droite, défilable à la molette ou au doigt mais sans barre de défilement ; journal
   de bord sous la carte (5 lignes visibles, numéro de tour, ×N pour les répétitions). **Il défile** (22 novembre 2026) :
 molette ou fine barre pour remonter jusqu'aux 200 derniers messages ; un nouveau message le ramène tout en bas.
@@ -1051,8 +1058,11 @@ molette ou fine barre pour remonter jusqu'aux 200 derniers messages ; un nouveau
 
 ### Tile editor (Lab → Tile editor)
 
-Liste des tuiles éditables par groupe : Viseur ; Foreuse et faune ; Terrain ; Objets ; Artefacts ; Intro ;
-Vaisseau (édité d'un bloc, 80 × 96 pixels). Les variantes suivent la tuile de base (4 orientations de la foreuse,
+Liste des tuiles éditables par groupe : Viseur ; Foreuse et faune ; Terrain ; Objets au sol ; Objets ; Artefacts ;
+Machines ; Vaisseau (édité d'un bloc, 80 × 96 pixels) ; **FX** (22 novembre 2026, avant « Intro ») : les trois temps de
+l'explosion (`boom0`, `boom1`, `boom2`), le rayon laser (`laserV`, l'horizontal en est la rotation), la case d'une croix
+laser (`laserX`), puis les nuages de l'intro. Le rouge `r` des rayons s'affiche en jeu en rouge vif `#ff2a2a`, comme
+avant. Le trait du laser des sentinelles, en biais, reste dessiné en code. Pas de barre de défilement horizontale. Les variantes suivent la tuile de base (4 orientations de la foreuse,
 animaux tournés à gauche, 2ᵉ image de l'eau profonde).
 
 Éditeur 16 × 16 : encres en pastilles — **Monde, Bio, Accent** (suivent la palette active), **Blanc**, **Noir**,

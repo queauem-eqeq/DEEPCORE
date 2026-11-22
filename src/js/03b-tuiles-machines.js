@@ -16,3 +16,13 @@ PAT.station=["................",".33333333333333.",".3w0000000000w3.",".30000000
 PAT.stationOff=["................",".33333333333333.",".3w0000000000w3.",".30000000000003.",".30000033000003.",".30000033000003.",".30000033000003.",".30033333333003.",".30033333333003.",".30000033000003.",".30000033000003.",".30000033000003.",".30000000000003.",".3w0000000000w3.",".33333333333333.","................"];
 PAT.chargeur=["................","................","..333333333333..","..300000000003..","..300000110003..","..300001100003..","..300011000003..","..300011110003..","..300000100003..","..300001100003..","..300011000003..","..300110000003..","..300000000003..","..333333333333..","......3333......","......3333......"];
 PAT.fabric=["......1111......","......1111......",".11111111111111.",".10000000000001.",".10333333333301.",".10300000000301.",".1030w0w0w00301.",".10300000000301.",".10333333333301.",".10000000000001.",".100wwwwwwww001.",".100w000000w001.",".100wwwwwwww001.",".10000000000001.",".11111111111111.","................"];
+/* Effets (22 novembre 2026) : tuiles éditables, groupe « FX » du Tile editor.
+   Rayons des tourelles et des croix : laserV (vertical ; l'horizontal en est la rotation), laserX (case d'une croix). Leur
+   rouge 'r' est rendu en rouge vif (encre 'L', voir 05-tuiles-editables), comme le dessin d'avant.
+   Explosion (mine, charge sismique) : posée sur chacune des 9 cases du carré, en trois temps — boom0 éclair blanc, boom1
+   damier accent, boom2 braises monde ; boom1 et boom2 alternent avec une variante décalée pour crépiter. */
+PAT.laserV=Array.from({length:16},()=>"......rwwr......");
+PAT.laserX=Array.from({length:16},(_,y)=>y<2||y>13?"................":y>=6&&y<=9?"..rrrrwwwwrrrr..":"..rrrrrrrrrrrr..");
+PAT.boom0=Array.from({length:16},()=>"wwwwwwwwwwwwwwww");
+PAT.boom1=Array.from({length:16},(_,y)=>Array.from({length:16},(_,x)=>((x>>1)+(y>>1))&1?'.':'1').join(''));
+PAT.boom2=Array.from({length:16},(_,y)=>Array.from({length:16},(_,x)=>((x>>1)*3+(y>>1)*5+(x>>1)*(y>>1))%7<=1?'3':'.').join(''));

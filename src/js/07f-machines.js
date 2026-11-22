@@ -50,11 +50,9 @@ function machTick(){if(!G.las||!G.las.length||G.over)return;G.mt=(G.mt||0)+1;con
   if(lit[idx(G.px,G.py)]){G.st.vie=Math.max(0,G.st.vie-MACH_DM);addFx({kind:'num',x:G.px,y:G.py,txt:'-'+MACH_DM,col:'#ff3b3b',dur:900});addFx({kind:'shake',amp:5,dur:220});
     sayMore(`Laser : −${MACH_DM} vie.`,'warn');if(G.st.vie<=0)G.over={dead:true};}}
 // rendu des rayons allumés : cases pleines, sans transparence (consigne « pixel perfect »)
-function machDraw(){if(!G.las||!G.las.length)return;const lit=machLit(),R='#ff2a2a',B='#ffffff',a=Math.round(S*3/8),b=Math.round(S/4),c=Math.round(S*7/16),e=Math.round(S/8);
-  for(const k in lit){const i=+k;if(fog&&!vis[i])continue;const px=(i%W-camX)*S,py=(((i/W)|0)-camY)*S,o=lit[k];ctx.globalAlpha=1;
-    if(o==='v'){ctx.fillStyle=R;ctx.fillRect(px+a,py,b,S);ctx.fillStyle=B;ctx.fillRect(px+c,py,e,S);}
-    else if(o==='h'){ctx.fillStyle=R;ctx.fillRect(px,py+a,S,b);ctx.fillStyle=B;ctx.fillRect(px,py+c,S,e);}
-    else{ctx.fillStyle=R;ctx.fillRect(px+e,py+e,S-2*e,S-2*e);ctx.fillStyle=B;ctx.fillRect(px+a,py+a,b,b);}}}
+// tuiles du Tile editor, groupe FX (22 novembre 2026) : laserV (vertical ; l'horizontal en est la rotation) et laserX (croix)
+function machDraw(){if(!G.las||!G.las.length)return;const lit=machLit(),T={v:TL.laserV_,h:TL.laserH_,x:TL.laserX_};ctx.globalAlpha=1;
+  for(const k in lit){const i=+k;if(fog&&!vis[i])continue;const t=T[lit[k]];if(t)ctx.drawImage(t,(i%W-camX)*S,(((i/W)|0)-camY)*S,S,S);}}
 // tuile d'un terrain de machine (appelé par batiTuile, le sol est déjà posé)
 function machTuileRendu(t,x,y,put){const i=idx(x,y),a=G.art&&G.art[i];
   if(t===TURRET){put(TL.wall,.95);const l=(G.las||[]).find(l=>l.c.includes(i));put(TL[(l&&machTire(l)?'tourelleOn_':'tourelle_')+MACH_SENS[a||0]],1);}

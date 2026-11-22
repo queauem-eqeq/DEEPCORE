@@ -401,7 +401,14 @@ function explose(b){const sp=BEASTS[b.sp],k=G.beasts.indexOf(b);if(k>=0)G.beasts
   if(dans({x:G.px,y:G.py})){const dm=dmgDe(sp);G.st.vie=Math.max(0,G.st.vie-dm);addFx({kind:'num',x:G.px,y:G.py,txt:'-'+dm,col:'#ff3b3b',dur:1000});
     sayMore(`La mine explose : −${dm} vie.`,'warn');if(G.st.vie<=0)G.over={dead:true};}
   else if(vu)sayMore('La mine explose.','warn');
-  else if(cheb(b,G.px,G.py)<=10)sayMore('Une explosion, tout près.','warn');}
+  else if(cheb(b,G.px,G.py)<=10)sayMore('Une explosion, tout près.','warn');
+  // l'explosion brise la roche et la montagne tendre du carré (22 novembre 2026) ; la roche dure, les murs et les machines
+  // tiennent : seule la charge sismique en vient à bout. Le métal et la Matière qu'elles cachaient tombent au sol.
+  let roches=0;
+  for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){const zx=b.x+dx,zy=b.y+dy;if(zx<1||zy<1||zx>=W-1||zy>=H-1)continue;
+    const j=idx(zx,zy),v=G.t[j];if(v!==ROCK&&v!==MOUNT)continue;G.t[j]=RUBBLE;if(G.dmg)delete G.dmg[j];roches++;
+    if(G.ore&&G.ore[j]&&!oreSol(G.ore[j]))G.ore[j]=(oreMat(G.ore[j])?'m':'')+'sol'+oreLv(G.ore[j]);}
+  if(roches){computeFOV();if(vu)sayMore(`L’explosion pulvérise ${roches} case${roches>1?'s':''} de roche.`);}}
 /* Sentinelle (19 novembre 2026 ; d'abord « Paralyzor », qui accrochait la foreuse et la paralysait — retiré le soir même à la
    demande de l'utilisateur). Elle tire un laser jusqu'à sp.laser cases, en ligne de vue, une fois par battement : un jet
    pour toucher ordinaire, et le trait rouge se voit toujours — droit sur la foreuse s'il touche, à côté s'il rate.

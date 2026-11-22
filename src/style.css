@@ -13,7 +13,7 @@ body{margin:0;background:var(--black);color:var(--fg);font:13px/1.45 var(--mono)
 .game{display:grid;grid-template-columns:minmax(0,1fr) 260px;height:100%}
 .left{display:grid;grid-template-rows:minmax(0,1fr) auto;min-width:0;min-height:0}
 .log{background:var(--black);border-top:1px solid var(--line);padding-block:6px 8px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:16px;font-size:12px;line-height:1.5;height:calc(5 * 1.5em + 14px);overflow:hidden}
-.log ul{list-style:none;margin:0;padding:0 6px 0 0;display:flex;flex-direction:column;height:100%;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--c3) transparent}
+.log ul{list-style:none;margin:0;padding:0 6px 0 0;display:flex;flex-direction:column;height:100%;overflow-y:auto}
 .log li:first-child{margin-top:auto}   /* peu de messages : collés en bas, comme avant */
 .log li{flex:none;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;opacity:.75}
 .log li:last-child{opacity:1}
@@ -104,7 +104,7 @@ body{margin:0;background:var(--black);color:var(--fg);font:13px/1.45 var(--mono)
 .insp .act{color:var(--c3)}
 .mcard.wide{width:min(820px,100%)}
 .cur-wrap{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px;align-items:start}
-.cur-groups{display:grid;gap:14px;max-height:min(62vh,560px);overflow-y:auto;padding-right:4px;min-width:0}
+.cur-groups{display:grid;gap:14px;max-height:min(62vh,560px);overflow-y:auto;overflow-x:hidden;padding-right:4px;min-width:0}
 .tgrp h3{font-family:var(--display);font-size:10px;font-weight:500;letter-spacing:.2em;text-transform:uppercase;color:var(--dim);margin:0 0 6px}
 .cur-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(76px,1fr));gap:6px}
 .ed-name{font-family:var(--display);font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--c1)}
@@ -132,7 +132,7 @@ body{margin:0;background:var(--black);color:var(--fg);font:13px/1.45 var(--mono)
 .mhead h2{font-family:var(--display);font-size:18px;letter-spacing:.2em;color:var(--c1);margin:0;text-transform:uppercase}
 .mhead button,.mfoot button{padding:6px 12px;border-color:var(--line)}
 .mnote{margin:0;color:var(--dim);font-size:12px}
-.beasts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--line) transparent;padding:1px}
+.beasts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;overflow-y:auto;padding:1px}
 #bestiary .mcard{width:min(940px,100%)}
 @media (max-width:760px){.beasts{grid-template-columns:1fr}}
 .bcard{border:1px solid var(--line);padding:12px;display:grid;gap:10px;min-width:0}
@@ -236,7 +236,7 @@ kbd{font-family:var(--mono);color:var(--fg);border:1px solid var(--line);padding
 .ileft{display:grid;gap:10px;min-width:0}
 .islots{display:flex;gap:18px;font-size:12px;color:var(--dim)}
 .islots b{font-weight:400;color:var(--fg);font-variant-numeric:tabular-nums}
-.ilist{display:grid;max-height:min(66vh,640px);overflow-y:auto;scrollbar-width:thin}
+.ilist{display:grid;max-height:min(66vh,640px);overflow-y:auto}
 .ilist .it{display:grid;grid-template-columns:1.2em minmax(0,1fr) 7.5em 4.5em;gap:8px;align-items:baseline;text-align:left;padding:2px 8px;border:0;border-left:2px solid transparent;
   font-size:13px;letter-spacing:0;text-transform:none;color:var(--fg)}
 .ilist .it i{font-style:normal;color:var(--dim)}
@@ -310,7 +310,7 @@ kbd{font-family:var(--mono);color:var(--fg);border:1px solid var(--line);padding
 #monde .mcard>*{flex:0 0 auto}
 #monde .mdcols{flex:1 1 auto;min-height:0;grid-template-rows:minmax(0,1fr);align-items:stretch}
 #monde .mdcols section{display:flex;flex-direction:column;min-height:0}
-#monde .mdcols .gen{flex:1 1 auto;min-height:0;overflow-y:auto;align-content:start;padding-right:8px;scrollbar-width:thin;scrollbar-color:var(--c3) transparent}
+#monde .mdcols .gen{flex:1 1 auto;min-height:0;overflow-y:auto;align-content:start;padding-right:8px}
 @media (max-width:720px){.mdcols{grid-template-columns:1fr}
   #monde .mdcols{display:block;overflow-y:auto}#monde .mdcols section{display:block;margin-bottom:18px}#monde .mdcols .gen{overflow:visible}}
 .mdcols .gen .g2{grid-template-columns:minmax(0,1fr) 190px}
@@ -359,7 +359,7 @@ kbd{font-family:var(--mono);color:var(--fg);border:1px solid var(--line);padding
 .gbas{display:flex;flex-wrap:wrap;gap:6px}.gbas button{padding:3px 9px;font-size:11px;border-color:var(--line)}
 .gbas .gdel{margin-left:auto;color:var(--life);border-color:var(--life)}
 .grside{display:grid;gap:10px;min-width:0}
-.grliste{display:grid;gap:4px;max-height:min(52vh,460px);overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--line) transparent;padding:1px}
+.grliste{display:grid;gap:4px;max-height:min(52vh,460px);overflow-y:auto;padding:1px}
 .grl{display:grid;grid-template-columns:auto auto minmax(0,1fr) 24px 24px;gap:6px;align-items:center;border:1px solid var(--line);padding:4px 6px}
 .grl.sel{border-color:var(--c1)}.grl.cible{border-style:dashed;border-color:var(--fg)}
 .grl .grip{cursor:grab;color:var(--dim);line-height:1}
@@ -377,7 +377,7 @@ kbd{font-family:var(--mono);color:var(--fg);border:1px solid var(--line);padding
 .bcols{display:grid;grid-template-columns:minmax(0,1fr) 190px;gap:16px;align-items:start}
 @media (max-width:720px){.bcols{grid-template-columns:1fr}}
 .bedit{border:1px solid var(--line);padding:10px;min-width:0;overflow-x:auto}
-.bside{display:grid;gap:4px;max-height:min(60vh,520px);overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--line) transparent;padding:1px}
+.bside{display:grid;gap:4px;max-height:min(60vh,520px);overflow-y:auto;padding:1px}
 .bli{display:grid;grid-template-columns:28px minmax(0,1fr) 14px;gap:8px;align-items:center;text-align:left;padding:4px 6px;border:1px solid var(--line);background:none;color:var(--dim);font:inherit;text-transform:none;letter-spacing:0}
 .bli img,.btab thead img{width:28px;height:28px;image-rendering:pixelated;background:var(--void);outline:1px solid var(--line)}
 .bli.sel{border-color:var(--c1);color:var(--fg)}.bli b{font-weight:400;overflow:hidden;text-overflow:ellipsis}.bli.sel b{font-weight:700}
@@ -438,3 +438,12 @@ kbd{font-family:var(--mono);color:var(--fg);border:1px solid var(--line);padding
 #fabVue p{margin:0 0 6px;font-size:12px;color:var(--dim);text-align:left}
 @media (max-width:720px){.fabwrap{grid-template-columns:1fr}#fabVue{height:auto}#fabList{height:auto;max-height:40vh}}
 #fabMsg{min-height:1.5em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* Barres de défilement (22 novembre 2026) : fines (4 px), sans fond, couleur du texte secondaire, plus claires au survol.
+   Chrome, Edge, Safari : ::-webkit-scrollbar (ne pas poser scrollbar-width/scrollbar-color sur un élément : Chrome les
+   préférerait et rendrait la barre épaisse). Firefox, qui ne connaît pas ::-webkit-scrollbar : barre « thin ». */
+@supports not selector(::-webkit-scrollbar){*{scrollbar-width:thin;scrollbar-color:var(--dim) transparent}}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track,::-webkit-scrollbar-corner{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--dim)}
+::-webkit-scrollbar-thumb:hover{background:var(--fg)}

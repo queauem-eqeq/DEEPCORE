@@ -258,14 +258,10 @@ function render(){
        ctx.fillStyle=PAL['1'];},cx=o=>(o.x+.5-camX)*16,cy=o=>(o.y+.5-camY)*16;
      // laser d'une sentinelle : le trait part d'elle ; touché, il finit sur la foreuse, raté, à côté. Il crépite puis s'éteint d'un coup.
      for(const f of FX)if(f.kind==='laser'&&G.beasts.includes(f.o)&&fxP(f)<.75)laser(cx(f.o),cy(f.o),(f.x+.5-camX)*16+f.ox,(f.y+.5-camY)*16+f.oy,f.ox*5.3+f.oy+f.t0,4);}
-   // Explosion (mine, charge sismique) : le carré de 3 × 3 en pavés fins de 2 pixels de tuile — blanc plein, puis damier accent, puis braises monde éparses
-   for(const f of FX)if(f.kind==='boom'){const p=fxP(f),ph=p<.2?0:p<.6?1:2,t=Math.floor(p*16);ctx.fillStyle=ph===0?'#fff':ph===1?PAL['1']:PAL['3'];
-     for(let cy=-1;cy<=1;cy++)for(let cx=-1;cx<=1;cx++){const bx=Math.round((f.x+cx-camX)*16),by=Math.round((f.y+cy-camY)*16);
-       for(let gy=0;gy<8;gy++)for(let gx=0;gx<8;gx++){
-         if(ph===1&&((gx+gy+t)&1))continue;
-         if(ph===2&&((gx*7+gy*13+cx*5+cy*3+t*3)%7)>(p<.8?1:0))continue;
-         ctx.fillRect((bx+gx*2)*u,(by+gy*2)*u,2*u,2*u);}}
-     ctx.fillStyle=PAL['1'];}
+   // Explosion (mine, charge sismique) : sur chaque case du carré de 3 × 3, les tuiles boom0 (éclair), boom1 (damier), boom2
+   // (braises), éditables dans le Tile editor (groupe FX, 22 novembre 2026) ; boom1 et boom2 alternent avec leur variante pour crépiter
+   for(const f of FX)if(f.kind==='boom'){const p=fxP(f),t=Math.floor(p*16),tl=p<.2?TL.boom0:p<.6?(t&1?TL.boom1b:TL.boom1):(t&1?TL.boom2b:TL.boom2);ctx.globalAlpha=1;
+     if(tl)for(let cy=-1;cy<=1;cy++)for(let cx=-1;cx<=1;cx++)ctx.drawImage(tl,(f.x+cx-camX)*S,(f.y+cy-camY)*S,S,S);}
    // « ! » d'un ennemi qui repère la foreuse : un trait d'un pixel de tuile, blanc cerné de noir, au-dessus de lui ; il monte de 2 pixels puis s'éteint d'un coup (affiné le 16 novembre 2026)
    for(const f of FX)if(f.kind==='alerte'&&(G.beasts.includes(f.o)||G.animals.includes(f.o))&&vis[idx(f.o.x,f.o.y)]){const p=fxP(f),px=Math.round((f.o.x-camX)*16)+7,py=Math.round((f.o.y-camY)*16)-10-(reduced?2:Math.min(2,Math.floor(p*12)));
      ctx.fillStyle='#000';ctx.fillRect((px-1)*u,(py-1)*u,3*u,9*u);ctx.fillStyle='#fff';ctx.fillRect(px*u,py*u,u,5*u);ctx.fillRect(px*u,(py+6)*u,u,u);ctx.fillStyle=PAL['1'];}
