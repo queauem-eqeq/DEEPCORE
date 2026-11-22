@@ -183,7 +183,6 @@
           <button id="niv3Btn" title="Jouer la seconde descente (le mini-jeu des mines), puis un niveau 3 aux réglages tirés au hasard">Niv3</button>
           <a class="labbtn" id="combatBtn" href="https://claude.ai/artifact/9BKRaoB4hzgdWhzYFx5A6q" target="_blank" rel="noopener" title="Ouvrir le banc de combat (un autre onglet) : il rejoue des combats dans le moteur du jeu, republié à jour">Combat</a>
         </div>
-        <p class="keys"><kbd>ZQSD</kbd> <kbd>↑↓←→</kbd> pavé num. · <kbd>A</kbd><kbd>E</kbd><kbd>W</kbd><kbd>C</kbd> diagonales · Souris : survol = inspection, clic = y aller · <kbd>X</kbd> inspection au clavier (<kbd>Entrée</kbd> pour y aller) · <kbd>R</kbd> courir / marcher · <kbd>T</kbd> équipement · <kbd>I</kbd> inventaire · <kbd>O</kbd> exploration automatique (s’arrête au moindre événement) · <kbd>F</kbd> forer · <kbd>Espace</kbd> <kbd>5</kbd> attendre un tour · <kbd>P</kbd> repos jusqu’à l’énergie pleine · <kbd>B</kbd> brouillard de guerre · <kbd>V</kbd> champs de vision des ennemis · <kbd>!</kbd> son · <kbd>M</kbd> mode carte (déplacements = défilement, <kbd>Maj</kbd> pour aller plus vite, mini-carte : clic pour recentrer, glisser le cadre pour défiler)</p>
       </div>
     </details>
     <details class="fold" id="fd-pal">
@@ -197,6 +196,38 @@
         <div class="cgrid" id="cgrid" role="listbox" aria-label="Nuancier LACKING64, 64 couleurs" hidden></div>
         <div class="pnm"><span id="palName">Origine</span><button id="palReset" title="Rétablir les couleurs d’origine de cette palette">Rétablir</button></div>
         <div class="presets" id="presets"></div>
+      </div>
+    </details>
+    <!-- Contrôles (22 novembre 2026) : l'aide des touches, sortie du Lab, une commande par ligne -->
+    <details class="fold" id="fd-ctrl">
+      <summary><h2>Contrôles</h2></summary>
+      <div class="ctrl">
+        <h3>Se déplacer</h3>
+        <dl>
+          <dt><kbd>Z</kbd><kbd>Q</kbd><kbd>S</kbd><kbd>D</kbd> <kbd>↑</kbd><kbd>↓</kbd><kbd>←</kbd><kbd>→</kbd></dt><dd>avancer (ou le pavé numérique)</dd>
+          <dt><kbd>A</kbd><kbd>E</kbd><kbd>W</kbd><kbd>C</kbd></dt><dd>diagonales</dd>
+          <dt><kbd>Espace</kbd> <kbd>5</kbd></dt><dd>attendre un battement</dd>
+          <dt><kbd>R</kbd></dt><dd>courir / marcher</dd>
+          <dt><kbd>O</kbd></dt><dd>exploration automatique (s’arrête au moindre événement)</dd>
+          <dt><kbd>P</kbd></dt><dd>repos jusqu’à l’énergie pleine</dd>
+          <dt><kbd>F</kbd></dt><dd>forer</dd>
+        </dl>
+        <h3>Objets</h3>
+        <dl>
+          <dt><kbd>I</kbd></dt><dd>inventaire : <kbd>↑</kbd><kbd>↓</kbd> choisir, <kbd>Entrée</kbd> utiliser, <kbd>J</kbd> jeter</dd>
+          <dt><kbd>T</kbd></dt><dd>équipement</dd>
+          <dt>Visée</dt><dd>déplacements ou souris, <kbd>Entrée</kbd> ou clic pour valider, <kbd>Échap</kbd> pour annuler</dd>
+        </dl>
+        <h3>Voir</h3>
+        <dl>
+          <dt>Souris</dt><dd>survol = inspection ; clic = y aller</dd>
+          <dt><kbd>X</kbd></dt><dd>inspection au clavier ; <kbd>Entrée</kbd> pour y aller</dd>
+          <dt><kbd>M</kbd></dt><dd>mode carte : déplacements = défilement, <kbd>Maj</kbd> plus vite</dd>
+          <dt>Mini-carte</dt><dd>clic pour recentrer, glisser le cadre pour défiler</dd>
+          <dt><kbd>B</kbd></dt><dd>brouillard de guerre</dd>
+          <dt><kbd>V</kbd></dt><dd>champs de vision des ennemis</dd>
+          <dt><kbd>!</kbd></dt><dd>son</dd>
+        </dl>
       </div>
     </details>
     </div>
