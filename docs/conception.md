@@ -1223,6 +1223,12 @@ l'essayer. **Échap, Espace ou Entrée** la passent. Pas jouée si l'utilisateur
 - **Son** : synthétisé, sans fichier (moteur, grincement haché par la rotation, grondement ; plongeon, impacts de roche,
   changement de matière, fracas du plafond, de l'impact et de la machine qui se couche).
 - **Vérification** : `python3 outils/forage.py DOSSIER [t1 t2 …]`. Mesuré le 21 novembre 2026 : 52 images par seconde.
+- **Amas de Matière (22 novembre 2026, demande de l'utilisateur)** : à la première descente, un amas de Matière (7 × 3
+  caractères couleur accent, éclats blancs qui scintillent, sur fond noir) se montre une fois, entre 35 et 65 % de la
+  profondeur, juste sous le bas de l'écran et **9 à 13 cases à côté de la route** (côté au hasard). Passer dessus le récolte :
+  **+20 Matière** (`FG_AMAS_MAT`) dans la réserve, gerbe d'éclats et bip. Le bandeau ajoute une ligne « Récolte » et les
+  alertes « amas en vue » puis « amas récolté » ; le journal le confirme à l'arrivée. Mesuré (`test-forage.js`, 20 descentes) :
+  sans diriger, 0 récolté sur 20 ; en allant dessus dès qu'il paraît, 20 sur 20.
 
 ### Seconde descente : le mini-jeu des mines (21 novembre 2026)
 
