@@ -10,8 +10,8 @@
    Ce que la foreuse sait (plans, capsules identifiées, noms de code) vit dans G.st.savoir : G.st suit la foreuse d'un niveau
    à l'autre. Valeurs réglables : Lab → Items (np-items). */
 const ITEM_VAL_DEF={repar:{soin:50},batterie:{energie:50,choc:12,etourdi:6},charge:{degats:30},puissance:{pow:1,deg:5},
-  berserk:{crit:50,duree:10},camo:{duree:10},balise:{rayon:20,duree:25,pv:40,degats:20},court:{etourdi:10},matiere:{mat:15}};
-const ITEM_VAL_LIB={soin:'Vie rendue',energie:'Énergie rendue',choc:'Dégâts de la décharge',etourdi:'Étourdissement (battements)',degats:'Dégâts',pow:'POW gagné',deg:'Dégâts par point de POW en trop (%)',crit:'CRIT en plus (points)',duree:'Durée (battements)',rayon:'Rayon de l’appel (cases)',pv:'PV de la balise posée',degats:'Dégâts de son explosion',mat:'Matière rendue'};
+  berserk:{crit:50,duree:10},camo:{duree:10},balise:{rayon:20,duree:25,pv:40},court:{etourdi:10},matiere:{mat:15}};
+const ITEM_VAL_LIB={soin:'Vie rendue',energie:'Énergie rendue',choc:'Dégâts de la décharge',etourdi:'Étourdissement (battements)',degats:'Dégâts',pow:'POW gagné',deg:'Dégâts par point de POW en trop (%)',crit:'CRIT en plus (points)',duree:'Durée (battements)',rayon:'Rayon de l’appel (cases)',pv:'PV de la balise posée',mat:'Matière rendue'};
 let ITEM_VAL=JSON.parse(JSON.stringify(ITEM_VAL_DEF));
 // chance qu'un robot abattu lâche un objet, par espèce (clé du Bestiaire)
 const DROPS_DEF={crabos:8,cafar:6,mastok:90,brochon:10,mine:0,paralyzor:25,gardien:60,artilleur:35,drone:5,soudeur:45,englueur:35};
@@ -36,7 +36,7 @@ Object.assign(ITEMS,{
     col:["...3..3..3..3..", "..3..wwwww..3..", "..3.w33w33w.3..", "..3..wwwww..3..", "...3..3..3..3.."]},
   // Capsules néfastes (22 novembre 2026) : mauvaises sur la foreuse, utiles lancées ailleurs. C'est ce qui fait de l'identification un pari.
   balise:{n:'Balise',conso:1,son:'alarme',eff:'Leurre : attire les ennemis 25 battements',
-    d:'Un émetteur qui hurle. Lancée au loin, elle reste au sol 25 battements : les ennemis à 20 cases, et tous ceux qui chassent la foreuse, l’oublient et s’acharnent sur la balise (40 PV) ; détruite, elle explose. Sur la foreuse, c’est une catastrophe : tous savent où elle est.',
+    d:'Un émetteur qui hurle. Lancée au loin, elle reste au sol 25 battements : les ennemis à 20 cases, et tous ceux qui chassent la foreuse, l’oublient et s’acharnent sur la balise (40 PV) ; détruite, elle explose. Ils restent en chasse : pas de coup par surprise, et ensuite ils cherchent la foreuse. Sur la foreuse, c’est une catastrophe : tous savent où elle est.',
     plein:st=>false,non:'',use:st=>'',
     art:["      ) ) )    ", "     ▄▄█▄▄     ", "     █ ● █     ", "     ▀▀█▀▀     ", "    ▄▄▄█▄▄▄    "],
     col:["......r.r.r....", ".....wwwww.....", ".....w.r.w.....", ".....wwwww.....", "....wwwwwww...."]},
@@ -193,9 +193,11 @@ addFx({kind:'ener',x,y,dur:1000,gr:fxGrains(12)});}
 /* Balise posée (23 novembre 2026). Lancée ailleurs que sur la foreuse, la balise vole jusqu'à la case visée (sur la case libre
    la plus proche si un obstacle ou une créature l'occupe), s'y pose et hurle pendant `duree` battements (25). Tant qu'elle hurle,
    tout ennemi à `rayon` cases d'elle (20), ou qui chasse la foreuse, l'oublie et s'acharne sur la balise : il y court et
-   l'attaque (les tireurs à portée lui tirent dessus, les mines s'arment à côté). Elle a `pv` PV (40), barre les passages comme
-   une créature, et explose comme une mine (zoneBoom, `degats` = 20) quand elle est détruite. Éteinte, elle disparaît ; ses
-   ennemis fouillent alentour. Statut : « Balise N ». G.balises = [{id, x, y, hp, t}]. */
+   l'attaque (les tireurs à portée lui tirent dessus, les mines s'arment à côté) ; chaque coup la touche. Elle a `pv` PV (40),
+   barre les passages comme une créature, et explose sur sa seule case quand elle est détruite (sans dégâts alentour).
+   Les ennemis attirés restent EN CHASSE (pas de coup par surprise possible) et gardent le souvenir de la foreuse : la balise
+   éteinte ou détruite, ils la cherchent là où ils l'ont vue (ou, s'ils ne l'avaient jamais vue, autour de la balise).
+   Statut : « Balise N ». G.balises = [{id, x, y, hp, t}]. Correctifs du 23 novembre 2026, 0 h 40. */
 const baliseAt=(x,y)=>(G.balises||[]).find(q=>q.x===x&&q.y===y);
 function balisePose(x,y){const V=ITEM_VAL.balise;G.balises=G.balises||[];
   let c=idx(x,y);if(blocks(G.t[c])||G.t[c]===DEEP||beastAt(x,y)||animalAt(x,y)||baliseAt(x,y)||(x===G.px&&y===G.py))c=caseSol(x,y,false);
@@ -205,7 +207,7 @@ function balisePose(x,y){const V=ITEM_VAL.balise;G.balises=G.balises||[];
 // les ennemis à portée, ou en chasse, passent sur la balise : ils oublient la foreuse
 function baliseAppel(q){const V=ITEM_VAL.balise;let n=0;
   for(const e of G.beasts||[]){if(e.leurre===q.id){n++;continue;}if(e.stun>0)continue;
-    if(Math.max(Math.abs(e.x-q.x),Math.abs(e.y-q.y))<=V.rayon||e.hunt>0){e.leurre=q.id;e.hunt=0;forget(e);e.tient=0;n++;}}
+    if(Math.max(Math.abs(e.x-q.x),Math.abs(e.y-q.y))<=V.rayon||e.hunt>0){e.leurre=q.id;e.hunt=1;e.search=0;e.tient=0;n++;}}   // en chasse, souvenir gardé
   return n;}
 const baliseDe=e=>e.leurre?(G.balises||[]).find(q=>q.id===e.leurre)||null:null;
 // une fois par battement, avant que les ennemis jouent
@@ -214,27 +216,20 @@ function baliseTick(){BAL_D.clear();if(!G.balises||!G.balises.length)return;
   for(const q of [...G.balises]){if(--q.t<=0){baliseFin(q,false);continue;}baliseAppel(q);}}
 // la balise s'éteint (ou explose) : ses ennemis viennent fouiller où elle était
 function baliseFin(q,boum){const k=G.balises.indexOf(q);if(k<0)return;G.balises.splice(k,1);
-  for(const e of G.beasts||[])if(e.leurre===q.id){e.leurre=0;e.hunt=1;e.mem=[q.x,q.y];e.search=SEARCH_T;}
+  for(const e of G.beasts||[])if(e.leurre===q.id){e.leurre=0;e.hunt=1;if(!e.mem)e.mem=[q.x,q.y];e.search=0;e.stuck=0;}   // ils reprennent la chasse : vers la foreuse s'ils la voient, sinon là où ils l'ont vue
   const vu=vis[idx(q.x,q.y)];
   if(boum)baliseBoom(q,vu);else if(vu)sayMore('La balise se tait.','info');}
 // un coup sur la balise (ennemi au contact ou tireur, explosion)
 function baliseCoup(q,dm,o){q.hp-=dm;if(vis[idx(q.x,q.y)])addFx({kind:'num',x:q.x,y:q.y,txt:'-'+dm,col:PAL['3'],dur:700});
   if(q.hp<=0)baliseFin(q,true);}
-function baliseFrappe(e,sp,q,laser){const ch=hitChance(sp.pre,0);
-  if(laser){if(q.x!==e.x)e.dir=Math.sign(q.x-e.x);if(beastVisible(e)){SFX.laser();addFx({kind:'laser',o:e,x:q.x,y:q.y,ox:0,oy:0,dur:300});}}
-  else if(beastVisible(e))addFx({kind:'lunge',beast:e,dx:Math.sign(q.x-e.x),dy:Math.sign(q.y-e.y),dur:200});
-  if(!roll(ch))return;const cr=e.bers>0||roll(sp.crit||0);baliseCoup(q,Math.round(dmgDe(sp)*(cr?CRIT_X:1)*(1+.25*(e.pow||0))));}
-// l'explosion de la balise : celle d'une mine (3 × 3 et 5 cases autour), `degats` à tout ce qui s'y trouve, foreuse comprise
-function baliseBoom(q,vu){const dm=ITEM_VAL.balise.degats,zone=zoneBoom(q.x,q.y),dans=o=>dansZone(zone,o.x,o.y);
-  addFx({kind:'boom',x:q.x,y:q.y,cases:zone,dur:420});if(vu||cheb(q,G.px,G.py)<=10){addFx({kind:'shake',amp:9,dur:320});SFX.explode();}
-  for(const [liste,fiches] of [[G.beasts,BEASTS],[G.animals||[],SPECIES]])for(const o of [...liste])if(dans(o)){o.hp=(o.hp??pvDe(fiches[o.sp]))-dm;
-    addFx({kind:'num',x:o.x,y:o.y,txt:'-'+dm,col:PAL['3'],dur:750});if(o.hp<=0){liste.splice(liste.indexOf(o),1);bleed(o.x,o.y);if(liste===G.beasts)butinMort(o);}}
-  if(dans({x:G.px,y:G.py})){G.st.vie=Math.max(0,G.st.vie-dm);addFx({kind:'num',x:G.px,y:G.py,txt:'-'+dm,col:PAL['4'],dur:1000});sayMore(`La balise explose : −${dm} vie.`,'warn');if(G.st.vie<=0)G.over={dead:true};}
-  else if(vu)sayMore('La balise est détruite : elle explose.','warn');else if(cheb(q,G.px,G.py)<=10)sayMore('Une explosion, tout près.','warn');
-  for(const o of [...(G.balises||[])])if(dans(o))baliseCoup(o,dm);
-  let roches=0;for(const [zx,zy] of zone){if(zx<1||zy<1||zx>=W-1||zy>=H-1)continue;const j=idx(zx,zy),v=G.t[j];if(v!==ROCK&&v!==MOUNT)continue;G.t[j]=RUBBLE;if(G.dmg)delete G.dmg[j];roches++;
-    if(G.ore&&G.ore[j]&&!oreSol(G.ore[j]))G.ore[j]=(oreMat(G.ore[j])?'m':'')+'sol'+oreLv(G.ore[j]);}
-  if(roches)computeFOV();}
+function baliseFrappe(e,sp,q,laser){const vu=beastVisible(e)||vis[idx(q.x,q.y)],proche=vu||cheb(e,G.px,G.py)<=10;   // la balise ne se dérobe pas : chaque coup la touche
+  if(laser){if(q.x!==e.x)e.dir=Math.sign(q.x-e.x);if(vu)addFx({kind:'laser',o:e,x:q.x,y:q.y,ox:0,oy:0,dur:300});if(proche)SFX.laser();}
+  else{if(vu)addFx({kind:'lunge',beast:e,dx:Math.sign(q.x-e.x),dy:Math.sign(q.y-e.y),dur:200});if(proche)SFX.bite();}
+  const cr=e.bers>0||roll(sp.crit||0);baliseCoup(q,Math.round(dmgDe(sp)*(cr?CRIT_X:1)*(1+.25*(e.pow||0))));}
+// l'explosion de la balise : sur sa seule case, sans dégâts alentour (23 novembre 2026)
+function baliseBoom(q,vu){addFx({kind:'boom',x:q.x,y:q.y,cases:[[q.x,q.y]],dur:420});
+  if(vu||cheb(q,G.px,G.py)<=10){addFx({kind:'shake',amp:5,dur:250});SFX.explode();}
+  if(vu)sayMore('La balise est détruite : elle explose.','warn');else if(cheb(q,G.px,G.py)<=10)sayMore('Une explosion, tout près.','warn');}
 /* Un ennemi qui suit une balise : il y court et l'attaque, au lieu de la foreuse. Rend true s'il a joué. */
 function baliseJoue(e,sp,boom){const q=baliseDe(e);if(!q){e.leurre=0;return false;}const d=cheb(e,q.x,q.y);
   if(sp.mine){if(e.fuse>0){if(--e.fuse<=0)boom.push(e);return true;}if(d<=1){e.fuse=rnd(2,3);return true;}}

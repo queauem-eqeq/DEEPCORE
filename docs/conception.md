@@ -814,12 +814,15 @@ Modèle Brogue :
 **Balise posée** (23 novembre 2026). Lancée ailleurs que sur la foreuse, la balise **vole jusqu'à la case visée** et s'y
 pose (sur la case libre la plus proche si un obstacle ou une créature l'occupe). Elle **hurle 25 battements** — « Balise N »
 sous les barres — avec un point rouge qui clignote. Tant qu'elle hurle, **tout ennemi à 20 cases d'elle, ou qui chasse la
-foreuse, l'oublie et s'acharne sur la balise** : il y court et l'attaque au contact ; les tireurs (Sentinelle, Artilleur,
-Englueur) lui tirent dessus à portée ; les mines s'arment à côté d'elle. Elle a **40 PV**, barre le passage comme une
-créature, et **explose comme une mine** quand elle est détruite (3 × 3 et 5 cases autour, **20 dégâts**, foreuse comprise,
-roche tendre brisée). Mines et charges sismiques l'abîment aussi. Éteinte ou détruite, ses ennemis viennent fouiller là où
-elle était. Un ennemi que la foreuse frappe l'oublie et revient à elle. Elle ne rompt pas le camouflage. Valeurs réglables
-dans Lab → Items (rayon, durée, PV, dégâts de l'explosion).
+foreuse, la délaisse pour s'acharner sur la balise** : il y court et l'attaque au contact ; les tireurs (Sentinelle,
+Artilleur, Englueur) lui tirent dessus à portée ; les mines s'arment à côté d'elle. **Chaque coup la touche** (100 %), le
+critique reste possible, et chaque attaque fait son bruit (morsure ou laser). Elle a **40 PV** et barre le passage comme
+une créature ; **détruite, elle explose sur sa seule case**, sans dégâts alentour. Mines et charges sismiques l'abîment aussi.
+Les ennemis attirés **restent en chasse** : **pas de coup par surprise** sur eux, et ils gardent le souvenir de la foreuse.
+Balise éteinte ou détruite, ils reprennent la chasse — sur la foreuse s'ils la voient, sinon là où ils l'ont vue (autour de
+la balise s'ils ne l'avaient jamais vue). Un ennemi que la foreuse frappe délaisse la balise et revient à elle. La balise
+posée ne rompt pas le camouflage. Valeurs réglables dans Lab → Items (rayon, durée, PV). Correctifs du 23 novembre, 0 h 40 :
+explosion ramenée à sa case (d'abord celle d'une mine, 20 dégâts), coups toujours portés, ennemis gardés en chasse.
 
 **Créature étourdie** (batterie, Court-circuit ; 22 novembre 2026) : elle ne fait plus rien, Puces comprises (elles n’en
 tenaient pas compte avant). Toute sa silhouette devient un **damier d'un pixel sur deux, couleur bio et couleur bâti en
