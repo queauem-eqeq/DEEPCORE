@@ -807,7 +807,7 @@ Modèle Brogue :
 | **Module de puissance** | **POW +1 pour toujours** ; chaque point de POW au-dessus du POW requis par l'arme donne **+5 % de dégâts** (+1,5 % avant ; 8 % essayé quelques heures le 22 novembre, baissé parce que la foreuse de série rattrapait le Trépan) | ses coups portent 25 % plus fort |
 | **Surrégime** | CRIT +50 pendant 10 battements ; la foreuse vire au rouge | ses coups sont tous critiques pendant 10 battements |
 | **Camouflage optique** | invisible 10 battements : vue seulement au contact, les poursuivants à distance lâchent ; **rompu par un coup ou un forage** ; « Camouflé N » sous les barres, comme « Englué N » (22 novembre 2026) | il disparaît 10 battements (visible au contact) |
-| **Balise** (néfaste) | une **sirène à deux tons** retentit (22 novembre 2026) ; tous les ennemis à 20 cases savent où est la foreuse | lancée au loin, ils y courent : un leurre |
+| **Balise** (néfaste) | une **sirène à deux tons** retentit (22 novembre 2026) ; **elle rompt le camouflage optique** de la foreuse, où qu’on la lance (23 novembre 2026) ; tous les ennemis à 20 cases savent où est la foreuse | lancée au loin, ils y courent : un leurre |
 | **Court-circuit** (néfaste) | énergie à zéro | hors service 10 battements, sans dégât ; un Bloqueur lâche |
 | **Matière** (butin au sol) | +15 en réserve, dès qu'on marche dessus | – |
 
