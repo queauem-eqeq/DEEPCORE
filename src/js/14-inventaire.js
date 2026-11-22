@@ -245,12 +245,13 @@ function invDelta(o){const d=ITEMS[o.k],m={};if(d.conso)return m;const add=(mm,s
   const sl=SLOTS[d.slot];if(invCount(d.slot)>=sl.n){if(sl.n>1)return m;add(ITEMS[G.inv.find(p=>p.eq&&ITEMS[p.k].slot===d.slot).k].mod,-1);}
   add(d.mod,1);return m;}
 // Dés de dégâts d'une arme, et la fourchette qu'ils donnent une fois le POW requis pris en compte
-function deHTML(d){if(d.slot!=='arme'||!d.de)return '';const [a,b]=robotDegs(G.st,d);
-  return `<p class="imods"><span>Dégâts ${deTxt(d.de)}${G.st.degats?` ${G.st.degats>0?'+':''}${G.st.degats} (DEG)`:''} → ${a===b?a:a+' à '+b}</span></p>`;}
+// 22 novembre 2026 : le calcul est écrit en entier — les dés, ce qu'ils donnent seuls, le multiplicateur de POW, le résultat.
+function deHTML(d){if(d.slot!=='arme'||!d.de)return '';const [a,b]=robotDegs(G.st,d),k=degFact(G.st,d),bn=G.st.degats||0,m0=d.de.n+d.de.p+bn,m1=d.de.n*d.de.f+d.de.p+bn,f=(x,y)=>x===y?x:x+' à '+y;
+  return `<p class="imods"><span>Dégâts : ${deTxt(d.de)}${bn?` ${bn>0?'+':''}${bn} (DEG)`:''} = ${f(m0,m1)}${Math.abs(k-1)>.001?`, ${fois(k)} (POW) = <b>${f(a,b)}</b>`:''}</span></p>`;}
 // POW requis par une arme ou une armure, et ce que l'écart coûte ou rapporte avec le POW actuel
 const fois=x=>'× '+x.toFixed(2).replace('.',',');
 function reqHTML(d){if(!d.req)return '';const e=G.st.power-d.req,arme=d.slot==='arme';
-  const eff=e===0?'':arme?` : précision et dégâts ${fois(armeFact(G.st,d))}`:` : défense ${signe(armureDef(G.st,d))}`;
+  const pt=Math.abs(e)>1?'s':'',eff=e===0?'':arme?(e>0?` : ${e} point${pt} en trop → dégâts ${fois(degFact(G.st,d))}, précision ${fois(armeFact(G.st,d))}`:` : ${-e} point${pt} manquant${pt} → dégâts et précision ${fois(armeFact(G.st,d))}`):` : défense ${signe(armureDef(G.st,d))}`;
   return `<p class="imods"><span style="color:${e<0?'var(--life)':e>0?'var(--c1)':'var(--dim)'}">POW requis ${d.req} (vous : ${G.st.power})${eff}</span></p>`;}
 // ce que donnerait Entrée sur l'objet choisi : stats, arme et armure
 function invHyp(o){const st=Object.assign({},G.st),m=o?invDelta(o):{};for(const k in m)st[k]=(st[k]||0)+m[k];

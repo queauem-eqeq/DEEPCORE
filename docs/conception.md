@@ -605,7 +605,7 @@ retouchables dans le Tile editor (groupe « Machines »).
 | **Distributeur de pile** (l'ancien chargeur) | **La pile attend à côté de lui.** Avancer dessus la rappelle à cette place : une pile coincée ne bloque rien pour de bon. |
 | **Socle** | Posé **près de ce qu'il alimente** : devant la grille (2 à 4 pas), ou au pied du pont. La pile et son distributeur sont à 6-18 pas, dans une pièce voisine quand il y en a une. |
 | **Grille d'énergie** | Ferme l'unique entrée d'un **dépôt** (un plan, deux capsules ou une capsule et un équipement, de la Matière). Elle ne garde jamais le chemin du site. |
-| **Salle piégée** | Un butin au milieu de la pièce (plan ou équipement, capsule, Matière) ; 4 à 8 **relais cachés dans des niches** des murs (tuile « niche », visible : le piège se lit). Ramasser l'appât les fait surgir, déjà en chasse. Ils ne lâchent rien. L'exploration automatique ne touche pas à l'appât. |
+| **Salle piégée** | Un butin au milieu de la pièce (plan ou équipement, capsule, Matière) ; 8 à 16 **relais cachés dans des niches** (doublé le 22 novembre 2026 ; moins si les murs manquent de place) des murs (tuile « niche », visible : le piège se lit). Ramasser l'appât les fait surgir, déjà en chasse. Ils ne lâchent rien. L'exploration automatique ne touche pas à l'appât. |
 | **Vitrines** | Une petite pièce en cul-de-sac, trois lots sous vitrine (un plan, un équipement, deux capsules) : **on n'en emporte qu'un**, les deux autres se verrouillent. Idée des coffres de Brogue. |
 | **Station de réparation** | Une fois : vie et énergie au maximum. Le bruit met en chasse les ennemis à 12 cases. |
 | **Fabricateur** | Voir « Fabricateur ». Un par niveau, garanti. |

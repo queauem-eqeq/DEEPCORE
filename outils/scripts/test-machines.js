@@ -55,7 +55,7 @@
     G.px=ou[0];G.py=ou[1];v('site toujours accessible, grille fermée',accesSite()>=0);}   // mesuré depuis la place de la foreuse, pas depuis la case d'essaielse v('pile trouvée',false);
   // F bis. salle piégée
   if(trouve(()=>G.pieges.length>0)){const pg=G.pieges[0];G.beasts=[];G.px=pg.c%W;G.py=(pg.c/W)|0;const nb=pg.n.length;
-    v('salle piégée : des niches dans les murs, un appât au milieu',nb>=4&&(G.items[pg.c]||[]).length>0,`${nb} niches, appât : ${(G.items[pg.c]||[]).join(', ')}`);
+    v('salle piégée : des niches dans les murs, un appât au milieu',nb>=6&&(G.items[pg.c]||[]).length>0,`${nb} niches, appât : ${(G.items[pg.c]||[]).join(', ')}`);
     invPickup(true);v('appât ramassé : les relais surgissent, déjà en chasse',G.beasts.length>=nb-1&&G.beasts.every(b=>b.hunt&&BEASTS[b.sp].key==='cafar')&&!pg.on,`${G.beasts.length} relais`);
     v('les niches sont ouvertes',pg.n.every(j=>G.niche[j]===2));G.beasts=[];}else v('salle piégée trouvée',false);
   // F ter. butin d'exploration

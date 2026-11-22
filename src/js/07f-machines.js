@@ -229,7 +229,7 @@ function machines(){G.las=[];G.lz={};G.circ=[];G.soc={};G.piles={};G.mt=0;G.mach
     const cx=p.c.reduce((a,i)=>a+i%W,0)/p.c.length,cy=p.c.reduce((a,i)=>a+((i/W)|0),0)/p.c.length;
     const app=p.c.filter(i=>libre(i)&&!pres(i)).sort((a,b)=>Math.hypot(a%W-cx,((a/W)|0)-cy)-Math.hypot(b%W-cx,((b/W)|0)-cy))[0];if(app==null)return false;
     for(const i of mel(p.c)){if(i===app||!libre(i)||pres(i)||vuS.has(i))continue;const j=v4(i).find(j=>t[j]===WALL&&!P.has(j)&&!vuM.has(j)&&!pres(j));if(j==null)continue;vuM.add(j);vuS.add(i);niches.push([j,i]);}
-    const n=Math.max(4,Math.min(8,Math.round(p.c.length/9)));if(niches.length<4)return false;const sel=niches.slice(0,n);
+    const n=Math.max(8,Math.min(16,Math.round(p.c.length/4.5)));if(niches.length<6)return false;const sel=niches.slice(0,n);   // deux fois plus de relais (22 novembre 2026, choix de l'utilisateur) : 8 à 16, autant que les murs le permettent
     G.pieges.push({c:app,n:sel.map(a=>a[0]),f:sel.map(a=>a[1]),on:1});for(const [j] of sel)G.niche[j]=1;
     const but=typeof butinCoffre==='function'?butinCoffre('piege'):['matiere','matiere'];for(const o of but)(G.items[app]=G.items[app]||[]).push(o);
     p.mach='piege';return true;};
