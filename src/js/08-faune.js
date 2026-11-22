@@ -223,7 +223,7 @@ function animalsAct(){
   turnStealth();
   if(G&&!G.over)patTick();
   if(!G.animals||G.over)return;let fled=null,swarm=null;const distSec=robotDist(false),distEau=robotDist(true),DC={};
-  for(const a of G.animals){if(G.over)break;if(a.stun>0){a.stun--;continue;}   // étourdi par une batterie : comme les robots, il ne fait rien (22 novembre 2026 ; avant, il n'en tenait pas compte)
+  for(const a of G.animals){if(G.over)break;if(a.stun>0){a.stun--;continue;}   // Puce étourdie par une batterie : comme les autres robots, elle ne fait rien (22 novembre 2026 ; avant, elle n’en tenait pas compte)
     const sp=SPECIES[a.sp];a.mp=Math.min(2,a.mp+sp.v/5/slowOf(G.t[idx(a.x,a.y)],sp.swim));
     const mA=mouilleOk(sp,a),okA=(x,y)=>animalOk(x,y,mA),dist=mA?distEau:distSec;
     const d=Math.hypot(a.x-G.px,a.y-G.py),sees=voitForeuse(a,!!a.aware);
