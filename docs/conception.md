@@ -1238,8 +1238,9 @@ l'essayer. **Échap, Espace ou Entrée** la passent. Pas jouée si l'utilisateur
   Avant, le même jour : un seul amas de 7 × 3, +20 d'un bloc.
 - **Annonce en gros (22 novembre 2026)** : en haut de l'écran, entre le tableau de bord et la coupe (ni la foreuse ni le HUD ne
   sont couverts), dans un cadre à fond noir, rebord plein et bandes de chantier (dessin n° 3 de quatre proposés, `FG_ANN`).
-  Le cadre paraît à 1 s ; les caractères défilent au hasard puis se figent de gauche à droite ; message complet à 2 s, parti à
-  4,5 s. Première descente : « MATIÈRE {µ} DÉTECTÉE / COLLECTE POSSIBLE » (couleur accent) ; seconde : « EXPLOSIFS DÉTECTÉS /
+  Le cadre paraît à 1 s ; les caractères défilent au hasard puis se figent de gauche à droite ; message complet à 2 s. De 4 s à 4,5 s il
+  s'efface colonne par colonne, de gauche à droite, les caractères se remettant à défiler juste avant de partir. Le défilement
+  n'emploie que des signes ASCII, des chiffres et des lettres ordinaires. Première descente : « MATIÈRE {µ} DÉTECTÉE / COLLECTE POSSIBLE » (couleur accent) ; seconde : « EXPLOSIFS DÉTECTÉS /
   ATTENTION SOUS-SOL PIÉGÉ ! » (rouge).
 
 ### Seconde descente : le mini-jeu des mines (21 novembre 2026)

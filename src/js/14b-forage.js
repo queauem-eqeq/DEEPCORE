@@ -323,7 +323,8 @@ function fgDraw(F,t){const x=F.x,{w,h,cw,chh,dpr}=F;
 /* Annonce en gros au début de la séquence (22 novembre 2026) : un cadre à fond noir et à rebord plein, sur une grille de gros caractères
    (la police du jeu). Dessin retenu : 3, les bandes de chantier. FG_ANN choisit le dessin : 1 rebord plein · 2 rebord plein et filet intérieur · 3 bandes de chantier · 4 titre en réserve. */
 let FG_ANN=3;   // choix de l'utilisateur : les bandes de chantier
-const FG_ANN_GL='█▓▒░#%&$@/\\<>=+*01234567ABCDEFXZKµ{}';
+const FG_ANN_GL='#%&$@/\\<>=+*?!;:-_|[]{}()0123456789ABCDEFGHJKLMNPQRSTUVWXYZabdefghkmnqrtxyz';   // défilement : signes ASCII, chiffres et lettres ordinaires
+const FG_ANN_FIN=.5;   // durée de la disparition, case après case
 function fgAnnonce(F,t){const x=F.x,{w,h}=F,[l1,l2]=F.jeu?['EXPLOSIFS DÉTECTÉS','ATTENTION SOUS-SOL PIÉGÉ !']:['MATIÈRE {µ} DÉTECTÉE','COLLECTE POSSIBLE'],col=F.jeu?'#ff3b30':F.pal.a,blanc=F.pal.w;
   const n=Math.max(l1.length,l2.length),cols=n+6,rows=FG_ANN===3?9:7;
   // en haut de l'écran, à droite du tableau de bord et à gauche de la coupe : ni la foreuse ni le HUD ne sont couverts
@@ -332,17 +333,21 @@ function fgAnnonce(F,t){const x=F.x,{w,h}=F,[l1,l2]=F.jeu?['EXPLOSIFS DÉTECTÉS
   /* Affichage façon terminal (22 novembre 2026) : le cadre paraît à FG_ANN_T0 (1 s) ; chaque case fait défiler des caractères au hasard,
      puis se fige de gauche à droite ; tout le message est en place à FG_ANN_T1 (2 s) et disparaît à FG_ANNONCE (4,5 s). */
   const p=Math.max(0,Math.min(1,(t-FG_ANN_T0)/(FG_ANN_T1-FG_ANN_T0))),tic=Math.floor(t*24);
+  // disparition : pendant la dernière demi-seconde, les colonnes s'effacent une à une de gauche à droite ; juste devant, les caractères se remettent à défiler
+  const q=Math.max(0,Math.min(1,(t-(FG_ANNONCE-FG_ANN_FIN))/FG_ANN_FIN)),parti=Math.floor(q*(cols+3))-1;
   const txt=(l,r,coul)=>{x.font=`700 ${gh}px ${FG_FONT}`;x.textAlign='center';x.textBaseline='middle';const d=Math.floor((cols-l.length)/2);
-    for(let i=0;i<l.length;i++){const fige=p>=1||p*1.25>(i+1)/l.length+.2*((i*7+r*3)%5)/5;let ch=l[i];
-      if(!fige){if(p*1.6<i/l.length)continue;ch=FG_ANN_GL[((i*31+r*17+tic*13)%FG_ANN_GL.length+FG_ANN_GL.length)%FG_ANN_GL.length];}
+    for(let i=0;i<l.length;i++){const c=d+i;if(c<=parti)continue;const fige=(p>=1||p*1.25>(i+1)/l.length+.2*((i*7+r*3)%5)/5)&&!(q>0&&c<=parti+4);let ch=l[i];
+      if(!fige){if(q===0&&p*1.6<i/l.length)continue;ch=FG_ANN_GL[((i*31+r*17+tic*13)%FG_ANN_GL.length+FG_ANN_GL.length)%FG_ANN_GL.length];}
       x.fillStyle=fige?coul:F.cRock2;x.fillText(ch,x0+(d+i+.5)*gw,y0+(r+.5)*gh);}};
+  if(parti>=cols)return;if(parti>=0){x.save();x.beginPath();x.rect(x0+(parti+1)*gw,0,w,h);x.clip();}   // les colonnes parties ne sont plus dessinées du tout : la roche reparaît derrière
   bloc(-1,-.5,cols+2,rows+1,'#000');                                   // fond noir, un peu plus large que le cadre
   bloc(0,0,cols,1,col);bloc(0,rows-1,cols,1,col);bloc(0,0,1,rows,col);bloc(cols-1,0,1,rows,col);   // rebord plein, un caractère d'épaisseur
   if(FG_ANN===2){const u=Math.max(2,Math.round(gw/5));x.fillStyle=col;x.fillRect(x0+2*gw,y0+Math.round(1.5*gh),W-4*gw,u);x.fillRect(x0+2*gw,y0+H-Math.round(1.5*gh)-u,W-4*gw,u);x.fillRect(x0+2*gw,y0+Math.round(1.5*gh),u,H-3*gh);x.fillRect(x0+W-2*gw-u,y0+Math.round(1.5*gh),u,H-3*gh);}
   if(FG_ANN===3){for(const r of [1,rows-2])for(let c=1;c<cols-1;c++)if((c+(r===1?0:1))%2)bloc(c,r,1,1,col);}   // bandes de chantier : un caractère sur deux
   if(FG_ANN===4)bloc(1,1,cols-2,Math.floor(rows/2)-.5,col);            // la première ligne en réserve : texte noir sur bandeau plein
   const r1=FG_ANN===3?3:2,r2=FG_ANN===3?5:4;
-  txt(l1,r1,FG_ANN===4?'#000':col);txt(l2,r2,blanc);}
+  txt(l1,r1,FG_ANN===4?'#000':col);txt(l2,r2,blanc);
+  if(parti>=0)x.restore();}
 function fgHud(F,t){const x=F.x,{w,h,dpr}=F,fs=Math.round(12*dpr),lh=Math.round(17*dpr),m=Math.round(20*dpr),fall=F.ph>=2,M=FG_MAT[fgIci(F)];
   x.font=`${fs}px ${FG_FONT}`;x.textAlign='left';x.textBaseline='top';
   const nd=Math.max(0,Math.min(5,Math.round(F.hs*5))),esp=v=>String(v).replace(/\B(?=(\d{3})+$)/g,' '),
