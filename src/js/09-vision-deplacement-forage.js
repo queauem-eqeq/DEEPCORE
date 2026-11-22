@@ -93,7 +93,7 @@ function tryMove(dx,dy){
   if(!diagOk(G.px,G.py,dx,dy)){say('Coin de paroi : pas de passage en diagonale.');SFX.blocked();render();return;}
   if(G.balises&&baliseAt(nx,ny)){say('Une balise posée barre le passage.');SFX.blocked();render();return;}   // 23 novembre 2026
   const bz=beastAt(nx,ny);
-  if(bz){const sp=BEASTS[bz.sp];G.turn++;G.msg=null;engage();camoCasse();bz.leurre=0;   // frappé, il oublie la baliseconst sur=!(bz.hunt>0),cr=sur||roll((G.st.crit??5)+critBonus());   // surprise : ne vous a pas repéré
+  if(bz){const sp=BEASTS[bz.sp];G.turn++;G.msg=null;engage();camoCasse();bz.leurre=0;/* frappé, il oublie la balise */const sur=!(bz.hunt>0),cr=sur||roll((G.st.crit??5)+critBonus());   // surprise : ne vous a pas repéré
     {const ch=hitChance(robotPre(),sp.def+terrMod(nx,ny));if(!sur&&!roll(ch)){if(!bz.hunt)alerte(bz);bz.hunt=1;spot(bz);addFx({kind:'lunge',robot:true,dx,dy,dur:180});addFx({kind:'num',x:nx,y:ny,txt:'0',col:'#8aa9a2',dur:750});
       say(`La foreuse rate ${leNom(sp)} (${ch} %).`);SFX.whoosh();pass(coupDur());computeFOV();render();if(G.over&&G.over.dead)dead();return;}}
     const dm=robotDeg()*(cr?CRIT_X:1);bz.hp-=dm;if(!bz.hunt&&bz.hp>0)alerte(bz);bz.hunt=1;spot(bz);addFx({kind:'num',x:nx,y:ny,txt:'-'+dm+(cr?'!':''),col:cr?PAL['1']:PAL['3'],dur:cr?1000:750});if(cr){addFx({kind:'shake',amp:6,dur:220});SFX.crit();}
