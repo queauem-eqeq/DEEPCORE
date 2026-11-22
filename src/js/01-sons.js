@@ -61,6 +61,8 @@ const SFX={
     tone(430,1.3,'sine',.018,120,.07);},
   squish(){noiz(.18,.25,900,'lowpass',0,250);tone(160,.12,'square',.07,60);},
   screech(){tone(2600,.09,'sawtooth',.06,3800);tone(3400,.12,'square',.04,2200,.08);noiz(.15,.08,5000,'highpass',.02);},
+  // alarme de la balise (22 novembre 2026) : sirène à deux tons, six alternances en un peu moins d'une seconde et demie
+  alarme(){for(let i=0;i<6;i++){const f=i%2?740:988;tone(f,.22,'square',.05,null,i*.24);tone(f*2,.2,'sawtooth',.014,null,i*.24);}},
   chirp(){tone(1900,.05,'square',.035,2700);tone(2300,.05,'square',.03,1600,.07);},
   // porte de bâtiment (19 novembre 2026) : loquet qui claque, panneau lourd qui glisse en grinçant, butée sourde
   porte(k=1){SFX.door(k);},   // toutes les portes font le bruit de celle du vaisseau (19 novembre 2026) ; k : volume (0,6 pour une créature)

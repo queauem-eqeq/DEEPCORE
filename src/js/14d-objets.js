@@ -35,7 +35,7 @@ Object.assign(ITEMS,{
     art:["   ·  ·  ·  ·  ", "  ·  ▄▄▄▄▄  ·  ", "  · █░▒█▒░█ ·  ", "  ·  ▀▀▀▀▀  ·  ", "   ·  ·  ·  ·  "],
     col:["...3..3..3..3..", "..3..wwwww..3..", "..3.w33w33w.3..", "..3..wwwww..3..", "...3..3..3..3.."]},
   // Capsules néfastes (22 novembre 2026) : mauvaises sur la foreuse, utiles lancées ailleurs. C'est ce qui fait de l'identification un pari.
-  balise:{n:'Balise',conso:1,son:'spot',eff:'Appelle les ennemis à 20 cases',
+  balise:{n:'Balise',conso:1,son:'alarme',eff:'Appelle les ennemis à 20 cases',
     d:'Un émetteur qui hurle : tous les ennemis alentour convergent vers lui. Sur la foreuse, c’est une catastrophe ; lancée au loin, c’est un leurre.',
     plein:st=>false,non:'',use:st=>'',
     art:["      ) ) )    ", "     ▄▄█▄▄     ", "     █ ● █     ", "     ▀▀█▀▀     ", "    ▄▄▄█▄▄▄    "],
