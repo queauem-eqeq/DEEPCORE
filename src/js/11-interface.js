@@ -191,7 +191,9 @@ $('bestiary').addEventListener('click',e=>{if(e.target===$('bestiary'))closeBest
 $('bestList').addEventListener('change',e=>{const t=e.target;
   if(!t.dataset||!t.dataset.f)return;const ent=BEST_LIST().find(x=>x.key===t.dataset.k),fd=BFIELDS.find(x=>x[0]===t.dataset.f);
   const v=Math.max(fd[2],Math.min(fd[3],Math.round(+t.value||0)));t.value=v;ent.o[t.dataset.f]=v;
-  if(t.dataset.f==='pv'){for(const a of [...(G.animals||[]),...(G.beasts||[])])if(a.hp>v)a.hp=v;}
+  // PV baissés : seules les créatures de CETTE espèce sur la carte sont ramenées au nouveau maximum (22 novembre 2026 ; avant,
+  // toutes les créatures l'étaient — baisser les PV du drone à 6 mettait les broyeurs à 6)
+  if(t.dataset.f==='pv'&&G){for(const a of G.animals||[])if(SPECIES[a.sp]===ent.o&&a.hp>v)a.hp=v;for(const b of G.beasts||[])if(BEASTS[b.sp]===ent.o&&b.hp>v)b.hp=v;}
   saveBest();});
 $('bestReset').onclick=()=>{BEST_LIST().forEach(e=>Object.assign(e.o,BEST_DEF[e.key]));saveBest();buildBest();};
 const saveSnd=()=>{try{localStorage.setItem('np-son',JSON.stringify(SND));}catch(e){}};

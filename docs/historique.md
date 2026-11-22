@@ -254,3 +254,5 @@ Les chiffres mesurés sont dans `mesures.md`.
   pour la colonne Monde, commun.
 - **Archétypes de monde** enregistrés (relief seul) : deviennent les **presets de niveau** (recette, deux archétypes,
   tous les curseurs). Ceux déjà enregistrés restent lisibles, sans recette.
+- **Bug corrigé : baisser les PV d'une espèce au Bestiaire ramenait TOUTES les créatures de la carte à ce maximum**
+  (passer le drone à 6 PV mettait les broyeurs à 6). Seule l'espèce modifiée est désormais concernée.
