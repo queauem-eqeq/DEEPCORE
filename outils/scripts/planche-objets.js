@@ -12,7 +12,7 @@
     const t = document.createElement('canvas'); t.width = t.height = 80;
     const x = t.getContext('2d'); x.imageSmoothingEnabled = false; x.drawImage(itemTile(k), 0, 0, 80, 80);
     c.appendChild(t); d.appendChild(c);
-    if (k !== 'cle' && !TL['o_' + k]) sans.push(k);
+    if (k !== 'cle' && k !== 'matiere' && !TL['o_' + k]) sans.push(k);   // la Matière prend les éclats moyens (mat2)
   }
   document.body.appendChild(d);
   return 'sans tuile propre : ' + (sans.join(', ') || 'aucun');

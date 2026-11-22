@@ -809,7 +809,7 @@ Modèle Brogue :
 | **Camouflage optique** | invisible 10 battements : vue seulement au contact, les poursuivants à distance lâchent ; **rompu par un coup ou un forage** ; « Camouflé N » sous les barres, comme « Englué N » (22 novembre 2026) | il disparaît 10 battements (visible au contact) |
 | **Balise** (néfaste sur soi) | une **sirène à deux tons** retentit (22 novembre 2026) ; tous les ennemis à 20 cases savent où est la foreuse ; **elle rompt son camouflage optique** | **lancée ailleurs, c'est un leurre posé au sol** (23 novembre 2026, ci-dessous) |
 | **Court-circuit** (néfaste) | énergie à zéro | hors service 10 battements, sans dégât ; un Bloqueur lâche |
-| **Matière** (butin au sol) | +15 en réserve, dès qu'on marche dessus | – |
+| **Matière** (butin au sol) | +15 en réserve, dès qu'on marche dessus ; au sol, elle a le dessin des **éclats moyens** en couleur Matière (23 novembre 2026 : sa tuile propre « Matière (butin) » est retirée du Tile editor) | – |
 
 **Balise posée** (23 novembre 2026). Lancée ailleurs que sur la foreuse, la balise **vole jusqu'à la case visée** et s'y
 pose (sur la case libre la plus proche si un obstacle ou une créature l'occupe). Elle **hurle 25 battements** — « Balise N »

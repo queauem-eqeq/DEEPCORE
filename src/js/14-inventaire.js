@@ -93,7 +93,7 @@ const invTest=()=>INV_TEST.map(([k,n])=>n?{k,eq:0,n}:{k,eq:k==='foreuse'||k==='u
 // partie commencée avant un ajout d'objets : on complète le sac, et il y a toujours une arme en main
 // Les armes et armures retirées le 16 novembre 2026 n'ont plus aucune trace dans le code (19 novembre 2026) : ni dessin, ni modificateur.
 const nbCles=()=>{const o=(G.inv||[]).find(o=>o.k==='cle');return o?(o.n||1):0;};   // les clés sont des objets du sac (21 novembre 2026), plus un compteur
-const itemTile=k=>k==='cle'?TL.cle:ITEMS[k]&&ITEMS[k].plan?(TL.o_plan||TL.objet):typeof identifie==='function'&&!identifie(k)?(TL.o_capsule||TL.objet):(TL['o_'+k]||TL.objet);   // tuile d'un objet posé au sol
+const itemTile=k=>k==='cle'?TL.cle:k==='matiere'?(TL.mat2||TL.objet):ITEMS[k]&&ITEMS[k].plan?(TL.o_plan||TL.objet):typeof identifie==='function'&&!identifie(k)?(TL.o_capsule||TL.objet):(TL['o_'+k]||TL.objet);   // tuile d'un objet posé au sol ; la Matière (butin) prend le dessin des éclats moyens, couleur Matière (23 novembre 2026 ; sa tuile propre est retirée)
 function invMigre(){if(G.st&&G.st.cles>0){const o=G.inv.find(o=>o.k==='cle');if(o)o.n=(o.n||1)+G.st.cles;else G.inv.push({k:'cle',eq:0,n:G.st.cles});}if(G.st)delete G.st.cles;   // ancien compteur de clés -> objet
   for(const [k,n] of INV_TEST)if(!G.inv.some(o=>o.k===k))G.inv.push(n?{k,eq:0,n}:{k,eq:0});
   G.inv=G.inv.filter(o=>ITEMS[o.k]&&!ITEMS[o.k].plan&&!ITEMS[o.k].mat);

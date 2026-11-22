@@ -292,7 +292,7 @@ function buildItems(){TOUT_CONNU=true;const champ=(lib,chemin,v,min,max)=>`<labe
       if(d.req!=null)f.push(champ('POW requis',`req.${k}`,d.req,0,30));
       if(d.de){f.push(champ('Dés',`de.${k}.n`,d.de.n,1,9));f.push(champ('Faces',`de.${k}.f`,d.de.f,1,30));f.push(champ('Bonus',`de.${k}.p`,d.de.p,0,60));}
       for(const m in d.mod||{})f.push(champ(MODS[m]?MODS[m][0]:m,`mod.${k}.${m}`,d.mod[m],-200,200));
-      const tu=TL[k==='cle'?'cle':'o_'+k]||TL.objet;let ic='';try{ic=tu.toDataURL();}catch(e){}
+      const tu=(k==='matiere'?TL.mat2:TL[k==='cle'?'cle':'o_'+k])||TL.objet;let ic='';try{ic=tu.toDataURL();}catch(e){}
       h+=`<div class="itl"><img src="${ic}" alt="" width="32" height="32"><div><b>${(d.vrai||d).n}</b><small>${k in FAB_PRIX?'fabricable (plan)':k==='puissance'?'se trouve, ne se fabrique pas':k==='matiere'?'butin':d.base?'équipement de départ':'se trouve'} · ${(d.vrai||d).eff||(d.slot?fabEffet(k):'')}</small></div><div class="itfs">${f.join('')||'<i>rien à régler</i>'}</div></div>`;}}
   h+=`<h3>Butin des robots abattus (chance en %)</h3><div class="itl"><div></div><div><small>Ce qu’un robot lâche : Matière 40 %, capsule 35 %, plan 18 %, équipement 7 %.</small></div><div class="itfs">${BEASTS.map(b=>champ(b.n,`drops.${b.key}`,DROPS[b.key]||0,0,100)).join('')}</div></div>`;
   $('itList').innerHTML=h;TOUT_CONNU=false;}
