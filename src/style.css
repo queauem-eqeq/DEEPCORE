@@ -83,7 +83,7 @@ body{margin:0;background:var(--black);color:var(--fg);font:13px/1.45 var(--mono)
 .seen .ter b{font-weight:400;color:var(--fg)}
 .seen .none{color:var(--dim)}
 .pal{display:grid;gap:8px}
-#mini{display:block;width:100%;image-rendering:pixelated;outline:1px solid var(--line)}
+#mini{display:block;width:100%;image-rendering:pixelated;outline:1px solid var(--line);outline-offset:-1px}   /* cadre tracé en dedans : sinon la zone qui défile rognait les côtés (22 novembre 2026) */
 .gen{display:grid;gap:8px;margin-bottom:10px}
 .gen .g{display:grid;grid-template-columns:minmax(0,1fr) 72px 58px;gap:8px;align-items:center}
 .gen label{color:var(--dim)}
