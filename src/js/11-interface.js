@@ -82,7 +82,7 @@ function side(){
   // le niveau est revenu le 21 novembre 2026 ; la taille de la carte se règle dans le menu Monde
   // Carte (22 novembre 2026) : niveau, profondeur (raccord avec le compteur des descentes) et taille, puis l'archétype monde et
   // l'archétype bâti, sans étiquette. Remplace la ligne du niveau qui était en haut de la colonne.
-  {const n=G.niv||1,p=profNiv(n),[am,ab]=G.archM?[G.archM,G.archB]:(G.amb||'').split(' · ');
+  {const n=G.niv||1,p=profNiv(n),[am,ab]=G.archM?[G.archM,G.archB]:typeof G.amb==='string'?G.amb.split(' · '):[];   // G.amb n'est pas toujours un texte (banc de combat)
     $('cProf').textContent=`Niveau ${n} · ${p?'−'+p:0} m · ${W}×${H}`;$('cMonde').textContent=am||'Personnalisé';$('cBati').textContent=ab||'Personnalisé';}
   $('matN').textContent=G.st.matiere||0;   // avalée par le commentaire depuis le 16 novembre 2026 : la matière ne s'affichait plus
   if(!$('inventaire').hidden)invDraw();

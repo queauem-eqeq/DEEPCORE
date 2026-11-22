@@ -97,7 +97,10 @@ body{margin:0;background:var(--black);color:var(--fg);font:13px/1.45 var(--mono)
 .modal .mcard h3{color:var(--c3)}
 .gen .sum{font-size:11px;color:var(--dim)}
 .labbtns{display:flex;flex-wrap:wrap;gap:6px}
-.labbtns button{padding:2px 8px;font-size:11px;letter-spacing:.14em;border-color:var(--c3);color:var(--c3)}
+.labbtns button,.labbtns .labbtn{padding:2px 8px;font-size:11px;letter-spacing:.14em;border-color:var(--c3);color:var(--c3)}
+/* Combat : un lien vers l'artefact du banc, habillé comme les boutons du Lab (22 novembre 2026) */
+.labbtns .labbtn{border:1px solid var(--c3);text-decoration:none;text-transform:uppercase;font-family:inherit;line-height:inherit;display:inline-flex;align-items:center}
+.labbtns .labbtn:hover,.labbtns .labbtn:focus-visible{color:var(--fg);border-color:var(--fg)}
 .labbtns button:disabled{border-color:var(--line);color:var(--dim)}
 .insp{display:grid;gap:5px;border:1px solid var(--line);padding:8px;font-size:12px}
 .insp .ih{display:flex;align-items:center;gap:8px;color:var(--fg)}
