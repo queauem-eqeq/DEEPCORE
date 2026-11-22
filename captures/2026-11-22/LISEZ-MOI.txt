@@ -15,3 +15,4 @@ Rangées dans le dépôt : l'ordinateur n'était plus joignable (en veille) au m
 12-descente1-annonce-matiere.png            Première descente : l'annonce en gros « MATIÈRE {µ} DÉTECTÉE / COLLECTE POSSIBLE ».
 13-descente1-amas-irreguliers.png           Première descente : amas irréguliers de Matière, un près de la route (entamé), un loin à droite.
 14-descente2-annonce-explosifs.png          Seconde descente : l'annonce « EXPLOSIFS DÉTECTÉS / ATTENTION SOUS-SOL PIÉGÉ ! ».
+15-annonces-quatre-propositions.png         Annonce du forage, en haut de l'écran : quatre dessins de cadre proposés (à gauche la première descente, à droite la seconde).
