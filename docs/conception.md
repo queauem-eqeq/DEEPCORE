@@ -517,7 +517,8 @@ Deux fenêtres, ouvertes par deux boutons sous la mini-carte, à côté de **REG
 - **Monde** : en haut la recette, les archétypes monde et bâti, le preset de niveau et **GÉNÉRER LA CARTE** (ferme
   la fenêtre et génère aussitôt) ; dessous, à gauche le monde (taille, terrain, relief), à droite les réglages de la
   recette. Voir « Menu Monde par recette ».
-- **Life** : budget de menace et groupes actifs. Ces réglages **ne font partie d'aucun archétype** : ils valent
+- **Life** : budget de menace et groupes actifs. Sous le budget, tout défile (22 novembre 2026) : la fenêtre ne dépasse
+  jamais l'écran ; la fenêtre Artefacts du Lab aussi. Ces réglages **ne font partie d'aucun archétype** : ils valent
   pour toutes les cartes jusqu'à ce qu'on les change.
 - **Presets de niveau** : un champ **Nom** et **Enregistrer** gardent la recette, les deux archétypes et tous les
   réglages de génération sous ce nom ; la liste les recharge ; **Supprimer** retire le preset choisi. Enregistrer

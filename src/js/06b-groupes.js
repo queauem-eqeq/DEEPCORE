@@ -110,11 +110,11 @@ function buildGroupes(){const E=ESPECES(),ic=k=>ICON[k==='insectoide'?'an0r':'bz
    de menace, les groupes qui peuvent y apparaître et les artefacts (machines comprises) qui peuvent y apparaître. Les deux listes
    se règlent comme les patrouilles d'un groupe : des étiquettes qu'on retire, un menu déroulant pour en ajouter. */
 let LIFE_NIV=1;
-function buildLife(){const N=LIFE_NIV,L=nivDe(N),puce=(a,v,l,t)=>`<span class="gpat${t?' inactif':''}">${grEsc(l)}<button class="gx" data-a="${a}" data-v="${grEsc(v)}" aria-label="Retirer ${grEsc(l)} du niveau ${N}" title="Retirer">×</button></span>`;
+function buildLife(){const LS=document.querySelector('#life .lfscroll'),haut=LS?LS.scrollTop:0,N=LIFE_NIV,L=nivDe(N),puce=(a,v,l,t)=>`<span class="gpat${t?' inactif':''}">${grEsc(l)}<button class="gx" data-a="${a}" data-v="${grEsc(v)}" aria-label="Retirer ${grEsc(l)} du niveau ${N}" title="Retirer">×</button></span>`;
   const grHors=GROUPES.liste.filter(g=>!L.gr.includes(g.n)),arts=ART_LISTE.filter(([k])=>(ARTEFACTS[k].niv||ART_NIVS).includes(N)),artHors=ART_LISTE.filter(([k])=>!(ARTEFACTS[k].niv||ART_NIVS).includes(N));
   $('life').innerHTML=`<div class="lfniv" role="group" aria-label="Niveau de profondeur"><span>Niveau</span>${GR_NIVS.map(n=>`<button data-niv="${n}" aria-pressed="${n===N}"${n===N?' class="on"':''}>${n}</button>`).join('')}</div>`
     +`<div class="g2"><label for="lfBudget">Budget de menace du niveau ${N}</label><input type="number" id="lfBudget" min="0" max="2000" step="5" value="${L.budget}"></div>`
-    +`<div class="sub">Groupes possibles au niveau ${N} <span>${L.gr.length} sur ${GROUPES.liste.length}</span></div>`
+    +`<div class="lfscroll"><div class="sub">Groupes possibles au niveau ${N} <span>${L.gr.length} sur ${GROUPES.liste.length}</span></div>`
     +`<div class="gpats">${L.gr.map(x=>{const g=GROUPES.liste.find(g=>g.n===x);return puce('delgn',x,x+(g&&!g.on?' (inactif)':''),g&&!g.on);}).join('')||'<span class="mnote">Aucun : ce niveau sera vide.</span>'}
       ${grHors.length?`<select data-f="addgn" aria-label="Ajouter un groupe au niveau ${N}"><option value="">+ Ajouter…</option>${grHors.map(g=>`<option value="${grEsc(g.n)}">${grEsc(g.n)} (valeur ${g.cout})</option>`).join('')}</select>`:''}</div>`
     +`<div class="sub">Artefacts et machines possibles au niveau ${N} <span>${arts.length} sur ${ART_LISTE.length}</span></div>`
@@ -123,7 +123,8 @@ function buildLife(){const N=LIFE_NIV,L=nivDe(N),puce=(a,v,l,t)=>`<span class="g
     +`<div class="sub">Répartition des ennemis au niveau ${N} <span>% du budget</span></div>`+LIEUX.map(([k,l])=>`<div class="g2"><label for="lfD-${k}">${l}</label><input type="number" id="lfD-${k}" data-d="${k}" min="0" max="100" step="5" value="${L.part[k]}"></div>`).join('')
     +(()=>{const s=LIEUX.reduce((a,[k])=>a+L.part[k],0);return s===100?'':`<div class="mnote">Total ${s} % : ${s?'les trois parts sont ramenées à 100 ('+LIEUX.map(([k,l])=>l.toLowerCase()+' '+Math.round(L.part[k]*100/s)).join(', ')+').':'aucun ennemi à ce niveau.'}</div>`;})()
     +(G&&G.menace&&G.menace.lieux?`<div class="sum">Carte en cours (niveau ${G.niv||1}) : ${LIEUX.map(([k,l])=>l.toLowerCase()+' '+(G.menace.lieux[k]?G.menace.lieux[k].dep+' / '+G.menace.lieux[k].b:'0')).join(' · ')}.</div>`:'')
-    +`<div class="sum">Le budget vaut pour une carte de 96 × 64 et suit la surface de la carte (ici ${Math.round(L.budget*W*H/(96*64))}). Il achète au hasard des groupes de la liste, jusqu’à épuisement. Un lieu absent de la carte rend sa part aux autres ; un lieu très petit est plafonné à trois fois sa part de surface. Créer, régler ou désactiver un groupe : Lab → Groupes. Fréquence d’un artefact : Lab → Artefacts.</div>`;}
+    +`<div class="sum">Le budget vaut pour une carte de 96 × 64 et suit la surface de la carte (ici ${Math.round(L.budget*W*H/(96*64))}). Il achète au hasard des groupes de la liste, jusqu’à épuisement. Un lieu absent de la carte rend sa part aux autres ; un lieu très petit est plafonné à trois fois sa part de surface. Créer, régler ou désactiver un groupe : Lab → Groupes. Fréquence d’un artefact : Lab → Artefacts.</div></div>`;   // sous le budget, tout défile (22 novembre 2026) : la fenêtre ne dépasse plus l'écran
+  {const s=document.querySelector('#life .lfscroll');if(s)s.scrollTop=haut;}}
 $('life').addEventListener('change',e=>{const t=e.target,L=nivDe(LIFE_NIV);
   if(t.dataset.d){L.part[t.dataset.d]=Math.max(0,Math.min(100,Math.round(+t.value||0)));saveGroupes();buildLife();return;}
   if(t.id==='lfBudget'){L.budget=Math.max(0,Math.min(2000,Math.round(+t.value||0)));saveGroupes();buildLife();return;}
