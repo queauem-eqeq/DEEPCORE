@@ -76,13 +76,19 @@ function side(){
   sacDraw();
   {const E=G.eff||{},l=[];if(E.poison>0)l.push(`<span style="color:var(--life)">Poison ${E.poison}</span>`);if(E.glu>0)l.push(`Englué ${E.glu}`);{const f=G.fum&&G.fum[idx(G.px,G.py)];if(f)l.push(`<span style="color:var(--c1)">Dans la fumée ${f.v}</span>`);}$('effs').innerHTML=l.join(' · ');}
   // le niveau est revenu le 21 novembre 2026 ; la taille de la carte se règle dans le menu Monde
-  $('lvl').textContent=`Niveau ${G.niv||1} · ${W} × ${H}`;
+  $('lvl').textContent=`Niveau ${G.niv||1}${G.amb?' · '+G.amb:''} · ${W} × ${H}`;
   $('matN').textContent=G.st.matiere||0;   // avalée par le commentaire depuis le 16 novembre 2026 : la matière ne s'affichait plus
   if(!$('inventaire').hidden)invDraw();
   $('msg').innerHTML=seenHTML();
-  const lg=(G.log||[]).slice(-5);
-  $('log').innerHTML=lg.map(e=>`<li class="${e.c||''}${e.t===G.turn&&!e.c?' new':''}"><span class="t">T${String(e.t).padStart(3,'0')}</span>${e.m}${e.n>1?`<span class="x">×${e.n}</span>`:''}</li>`).join('');
+  logDraw();
 }
+/* Journal du bas (22 novembre 2026) : il défile (molette, barre) pour relire les messages plus anciens. Il n'est refait que
+   quand il change ; un nouveau message le ramène tout en bas, sinon on reste là où on lisait. */
+let LOG_SIG='';
+function logDraw(){const lg=G.log||[],L=lg[lg.length-1],nouveau=`${lg.length}|${L?L.m+L.n+L.t:''}`,sig=nouveau+'|'+G.turn;if(sig===LOG_SIG)return;
+  const el=$('log'),bas=!LOG_SIG||LOG_SIG.slice(0,LOG_SIG.lastIndexOf('|'))!==nouveau,top=el.scrollTop;LOG_SIG=sig;
+  el.innerHTML=lg.map(e=>`<li class="${e.c||''}${e.t===G.turn&&!e.c?' new':''}"><span class="t">T${String(e.t).padStart(3,'0')}</span>${e.m}${e.n>1?`<span class="x">×${e.n}</span>`:''}</li>`).join('');
+  el.scrollTop=bas?el.scrollHeight:top;}
 
 
 /* ---------- Commandes ---------- */
@@ -91,12 +97,13 @@ const KEYS={arrowup:[0,-1],arrowdown:[0,1],arrowleft:[-1,0],arrowright:[1,0],z:[
   '8':[0,-1],'2':[0,1],'4':[-1,0],'6':[1,0],'7':[-1,-1],'9':[1,-1],'1':[-1,1],'3':[1,1]};
 addEventListener('keydown',ev=>{
   if(INTRO){ev.preventDefault();if(ev.key==='Escape'||ev.key===' '||ev.key==='Enter')skipIntro();return;}
-  if(FORAGE){ev.preventDefault();if(ev.key==='Escape'||ev.key===' '||ev.key==='Enter')skipForage();return;}
-  if(ev.key==='F9'){ev.preventDefault();playForage();return;}   // essai de la cinématique de forage (21 novembre 2026)
+  if(FORAGE){ev.preventDefault();if(ev.key==='Escape'||(!FORAGE.jeu&&(ev.key===' '||ev.key==='Enter')))skipForage();return;}   // mini-jeu : seul Échap passe (cela coûte de la vie)
+  if(ev.key==='F9'){ev.preventDefault();playForage(null,ev.shiftKey?2:1);return;}   // Maj + F9 : la seconde descente, le mini-jeu des mines   // essai de la cinématique de forage (21 novembre 2026)
   if(!$('inventaire').hidden){invKey(ev);return;}
   if(SAC_NAV&&$('overlay').hidden&&ev.target.tagName!=='INPUT'){if(sacKey(ev))return;}   // navigation au clavier dans le sous-menu Inventaire
   if(!$('monde').hidden){if(ev.key==='Escape'){ev.preventDefault();mondeClose();}return;}
   if(!$('faune').hidden){if(ev.key==='Escape'){ev.preventDefault();lifeClose();}return;}
+  if(!$('fabric').hidden){fabKey(ev);return;}
   if(!$('terminal').hidden){if(ev.key==='Escape'||ev.key==='Enter'||ev.key===' '){ev.preventDefault();closeTerminal();}return;}
   if(!$('artefacts').hidden){if(ev.key==='Escape'){ev.preventDefault();closeArtefacts();}return;}
   if(!$('groupes').hidden){if(ev.key==='Escape'){ev.preventDefault();closeGroupes();}return;}
@@ -122,6 +129,7 @@ addEventListener('keydown',ev=>{
   if(HOV&&!['shift','control','alt','meta'].includes(k)){HOV=null;render();}
   if(k==='m'){ev.preventDefault();setFreeCam(!freeCam);return;}
   if(ev.key==='!'){ev.preventDefault();toggleSound();return;}
+  if(freeCam&&(k===' '||ev.code==='Numpad5'||(k==='5'&&!ev.code.startsWith('Numpad'))||k==='.')){ev.preventDefault();waitTurn();return;}   // attendre reste possible en mode carte (22 novembre 2026, pour les essais) : la vue ne bouge pas
   if(freeCam){if(KEYS[k]){ev.preventDefault();const st=ev.shiftKey?5:2;panCam(KEYS[k][0]*st,KEYS[k][1]*st);}else if(k==='escape'){ev.preventDefault();setFreeCam(false);}else if(k==='b'){ev.preventDefault();toggleFog();}return;}
   if(KEYS[k]){ev.preventDefault();tryMove(...KEYS[k]);}else if(k==='f'){ev.preventDefault();askDrill();}else if(k==='b'){ev.preventDefault();toggleFog();}else if(k==='r'){ev.preventDefault();toggleSprint();}else if(k==='p'){ev.preventDefault();startRest();}else if(k==='t'){ev.preventDefault();invToggle();}else if(k==='i'){ev.preventDefault();sacNav(true);}else if(k==='o'){ev.preventDefault();startExplore();}else if(k===' '||k==='5'||k==='.'||ev.code==='Numpad5'){ev.preventDefault();waitTurn();}
 });
@@ -141,9 +149,10 @@ function applySaved(d){
   if(d.bestiaire)BEST_LIST().forEach(e=>{const b=d.bestiaire[e.key];if(b)BFIELDS.forEach(([f])=>{if(num(b[f]))e.o[f]=b[f];});});saveBest();
   if(num(d.discretion))setStealthBase(d.discretion);
   if(d.artefacts){ARTEFACTS=artefactsSains(d.artefacts);saveArtefacts();}
-  if(d.groupes){const g=groupesSains(d.groupes);if(g){GROUPES=g;saveGroupes();}}   // les anciennes intensités par espèce (d.intensite) ne sont plus lues
-  if(d.mondes&&typeof d.mondes==='object'){MONDES=Object.assign({},MONDES,d.mondes);saveMondes();}
-  if(d.generation){const g=d.generation;GEN_LBL.forEach(([k])=>{if(num(g[k]))GEN[k]=0;});GEN_LBL.forEach(([k])=>{if(num(g[k]))setGen(k,g[k]);});
+  if(d.groupes){const g=groupesSains(d.groupes);if(g){GROUPES=groupesV2(g);saveGroupes();}}   // les anciennes intensités par espèce (d.intensite) ne sont plus lues
+  if(d.mondes&&typeof d.mondes==='object'&&Date.parse(d.enregistreLe)>Date.parse('2026-11-21T05:00:00Z')){   // les archétypes d'avant cette date ont été effacés
+    MONDES=Object.assign({},MONDES,d.mondes);saveMondes();}
+  if(d.generation){const g=d.generation;GEN_LBL.forEach(([k])=>{if(num(g[k]))GEN[k]=0;});GEN_LBL.forEach(([k])=>{if(num(g[k]))setGen(k,g[k],true);});
     if(METHODS.some(m=>m[0]===g.methode)){GEN.methode=g.methode;$('gm').value=g.methode;}
     if(num(g.remplissage))setCA('remplissage',g.remplissage,35,70);if(num(g.iterations))setCA('iterations',g.iterations,1,10);caState();saveGen();}
   if(d.palette&&Array.isArray(d.palette.palettes)){d.palette.palettes.forEach(pp=>{const t=PRESETS.find(x=>x.n===pp.nom);if(t&&Array.isArray(pp.couleurs)&&pp.couleurs.length===3)t.c=pp.couleurs.slice();});
@@ -171,6 +180,7 @@ async function saveSettings(b,m){b=b instanceof HTMLElement?b:$('saveBtn');m=m||
 $('saveBtn').onclick=()=>saveSettings();
 $('bestSave').onclick=()=>saveSettings($('bestSave'),$('bestMsg'));
 $('grSave').onclick=()=>saveSettings($('grSave'),$('grMsg'));
+$('lfSave').onclick=()=>saveSettings($('lfSave'),$('lfMsg'));   // même enregistrement, depuis la fenêtre LIFE (21 novembre 2026)
 $('bestClose').onclick=closeBest;
 $('discClose').onclick=closeDisc;
 $('discretion').addEventListener('click',e=>{if(e.target===$('discretion'))closeDisc();});
@@ -181,7 +191,9 @@ $('bestiary').addEventListener('click',e=>{if(e.target===$('bestiary'))closeBest
 $('bestList').addEventListener('change',e=>{const t=e.target;
   if(!t.dataset||!t.dataset.f)return;const ent=BEST_LIST().find(x=>x.key===t.dataset.k),fd=BFIELDS.find(x=>x[0]===t.dataset.f);
   const v=Math.max(fd[2],Math.min(fd[3],Math.round(+t.value||0)));t.value=v;ent.o[t.dataset.f]=v;
-  if(t.dataset.f==='pv'){for(const a of [...(G.animals||[]),...(G.beasts||[])])if(a.hp>v)a.hp=v;}
+  // PV baissés : seules les créatures de CETTE espèce sur la carte sont ramenées au nouveau maximum (22 novembre 2026 ; avant,
+  // toutes les créatures l'étaient — baisser les PV du drone à 6 mettait les broyeurs à 6)
+  if(t.dataset.f==='pv'&&G){for(const a of G.animals||[])if(SPECIES[a.sp]===ent.o&&a.hp>v)a.hp=v;for(const b of G.beasts||[])if(BEASTS[b.sp]===ent.o&&b.hp>v)b.hp=v;}
   saveBest();});
 $('bestReset').onclick=()=>{BEST_LIST().forEach(e=>Object.assign(e.o,BEST_DEF[e.key]));saveBest();buildBest();};
 const saveSnd=()=>{try{localStorage.setItem('np-son',JSON.stringify(SND));}catch(e){}};
@@ -190,6 +202,4 @@ function toggleVision(){SHOWVIS=!SHOWVIS;say(SHOWVIS?'Portée de discrétion aff
 function toggleFog(){fog=!fog;try{localStorage.setItem('np-fog',fog?'on':'off');}catch(e){}say(fog?'Brouillard de guerre activé.':'Brouillard de guerre désactivé.','info');render();}
 ['fd-sac','fd-pal','fd-lab'].forEach(id=>{const d=$(id);try{d.open=localStorage.getItem('np-'+id)==='open';}catch(e){}
   d.addEventListener('toggle',()=>{try{localStorage.setItem('np-'+id,d.open?'open':'closed');}catch(e){}});});
-$('rndChk').checked=!!GEN.hasard;
-$('rndChk').addEventListener('change',e=>{GEN.hasard=e.target.checked;saveGen();});
-$('restart').onclick=e=>{e.preventDefault();e.stopPropagation();unlock();SFX.start();if(GEN.hasard)hasardReglages();newGame();started=true;$('overlay').hidden=true;render();};
+$('restart').onclick=e=>{e.preventDefault();e.stopPropagation();unlock();SFX.start();newGame();started=true;$('overlay').hidden=true;render();};

@@ -225,3 +225,34 @@ Les chiffres mesurés sont dans `mesures.md`.
 - **Premier essai de forme** (automate cellulaire semé plus dense au centre) : des cavernes en pavés serrés, comme
   des pâtés de maisons. Remplacé par un disque déformé par un bruit, et un complément qui pousse en lobes.
 - **Couloir de service entre deux bâtiments** : proposé, refusé par l'utilisateur.
+
+## 21 novembre 2026 (nuit) : ce qui a été remplacé
+
+- **Relief semé en petites taches partout** : remplacé par le grain et le regroupement par régions. En taille 3, toutes
+  les cartes se ressemblaient.
+- **« Réglages au hasard » tirait chaque curseur séparément** : il tire maintenant une ambiance, puis fait varier le
+  reste. Le tirage curseur par curseur donnait une moyenne de tout, sans caractère.
+- **Archétypes de monde enregistrés** : effacés à la demande de l'utilisateur. Les ambiances les remplacent ; la
+  fonction d'enregistrement reste.
+- **Couloir de sentinelles** (proposé le 20 novembre) : écarté par l'utilisateur au profit des tourelles à rythme
+  prévisible. **Avertissement avant le tir** : essayé en maquette, retiré, il aidait trop.
+- **Valeurs de groupe réglées à la main** : remplacées par des valeurs mesurées au banc. Budget de 110 ramené à 80.
+- **Seconde descente en simple cinématique** : remplacée par le mini-jeu des mines. Espace et Entrée ne passent plus
+  cette scène, pour qu'on ne perde pas 30 points de vie par mégarde.
+
+## 22 novembre 2026 : archétypes monde et bâti séparés
+
+- **Ambiances mêlant monde et bâti** (21 novembre, 41 ambiances) : une seule liste par recette réglait à la fois la
+  colonne de gauche (terrain, relief) et celle de droite (massif, tunnels, bâti). Remplacée par deux listes
+  indépendantes : 14 archétypes monde communs à toutes les recettes, une dizaine d'archétypes bâtis par recette. Les
+  ambiances surtout « de terrain » (Grande prairie, Rives du grand lac, Désert de pierre, Lac souterrain, Jardins
+  engloutis, Abîmes, Serres, Réservoirs, Station lacustre, Plateau désert, Cols…) sont devenues des mondes ou ont été
+  refaites en bâti.
+- **Case « Réglages au hasard »** sous REGEN : retirée. REGEN relance les réglages en cours ; seuls les boutons Lab →
+  Niv1/Niv2/Niv3 tirent au hasard (un monde et un bâti).
+- **Sol des cavernes et des poches** (montagne, gouffre, rochers) : sorti de la colonne de droite, rangé par recette,
+  pour la colonne Monde, commun.
+- **Archétypes de monde** enregistrés (relief seul) : deviennent les **presets de niveau** (recette, deux archétypes,
+  tous les curseurs). Ceux déjà enregistrés restent lisibles, sans recette.
+- **Bug corrigé : baisser les PV d'une espèce au Bestiaire ramenait TOUTES les créatures de la carte à ce maximum**
+  (passer le drone à 6 PV mettait les broyeurs à 6). Seule l'espèce modifiée est désormais concernée.

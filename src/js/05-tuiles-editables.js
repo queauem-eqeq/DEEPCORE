@@ -8,11 +8,12 @@ const TILE_LIST=[
   ['Viseur',[['cursor','Viseur']]],
   ['Foreuse et faune',[['robot_u','Foreuse'],['an0r',SPECIES[0].n],...BEASTS.map((b,i)=>['bz'+i+'r',b.n])]],
   ['Terrain',[['ground0','Sol'],['rock','Rocher'],['rock2','Rocher 2'],['mtTop','Crête'],['mtBody','Montagne'],['wall','Mur'],['wallFace','Mur (face)'],['floor','Sol bâti'],['door','Porte'],['doorOpen','Porte ouverte'],['doorOpenV','Porte ouverte (côté)'],['pillar','Pilier'],['lock','Porte verrouillée'],['cle','Clé'],['liq0','Eau A'],['liq1','Eau B'],['deep0','Eau profonde'],['grass0','Herbes hautes'],['flat0','Herbes basses'],['rubble','Gravats'],['crackH','Fissures'],['wade','Remous'],['wadeDeep','Remous profond']]],
-  ['Objets au sol',[['o_foreuse','Foreuse'],['o_usine','Coque d’usine'],['o_servo','Servomoteur'],['o_optique','Téléobjectif'],['o_viseur','Viseur laser'],['o_conden','Condensateur'],['o_gyro','Gyroscope'],['o_stabil','Stabilisateur'],['o_accu','Accumulateur'],['o_repar','Réparobots'],['o_batterie','Batterie'],['o_fumigene','Fumigène'],['o_charge','Charge sismique']]],
+  ['Objets au sol',[['o_foreuse','Foreuse'],['o_usine','Coque d’usine'],['o_servo','Servomoteur'],['o_optique','Téléobjectif'],['o_viseur','Viseur laser'],['o_conden','Condensateur'],['o_gyro','Gyroscope'],['o_stabil','Stabilisateur'],['o_accu','Accumulateur'],['o_repar','Réparobots'],['o_batterie','Batterie'],['o_fumigene','Fumigène'],['o_charge','Charge sismique'],['o_vrille','Vrille rapide'],['o_trepan','Trépan lourd'],['o_carene','Carène légère'],['o_blindage','Blindage composite']]],
   ['Objets',[['siteUnknown','Site'],['objet','Objet au sol (générique)'],['ore1','Éclats petits (montagne)'],['ore2','Éclats moyens (montagne)'],['ore','Éclats gros (montagne)'],['oreSol1','Éclats petits (sol)'],['oreSol2','Éclats moyens (sol)'],['oreSol','Éclats gros (sol)']]],
-  ['Artefacts',[['antenne','Antenne'],['antenneOn','Antenne allumée'],['terminal','Terminal'],['mach0','Machine : Tuyaux'],['mach1','Machine : Serveur'],['mach2','Machine : Caisses'],['mach3','Machine : Ordinateur'],['mach4','Machine : Établi'],['mach5','Machine : Cuve'],['mach6','Machine : Générateur'],['mach7','Machine : Console'],['mach8','Machine : Turbine'],['mach9','Machine : Armoire électrique']]],
+  ['Artefacts',[['antenne','Antenne'],['antenneOn','Antenne allumée'],['terminal','Terminal'],['mach0','Tuyaux'],['mach1','Serveur'],['mach2','Caisses'],['mach3','Ordinateur'],['mach4','Établi'],['mach5','Cuve'],['mach6','Générateur'],['mach7','Console'],['mach8','Turbine'],['mach9','Armoire électrique']]],
+  ['Machines',[['tourelle','Tourelle laser'],['tourelleOn','Tourelle laser (tir)'],['pylone','Croix laser'],['pyloneOn','Croix laser (allumée)'],['pile','Pile énergétique'],['socle','Socle'],['socleOn','Socle alimenté'],['levier','Levier'],['levierOn','Levier (actionné)'],['grille','Grille d’énergie'],['station','Station de réparation'],['stationOff','Station (vide)'],['chargeur','Chargeur de pile'],['fabric','Fabricateur']]],
   ['Vaisseau',[['ship','Cargo']]],
-  ['Intro',[['nuage0','Nuage plein'],['nuage1','Nuage texturé'],['nuage2','Bord diagonal'],['nuage3','Bord croisé'],['nuage4','Bord rayé'],['nuage5','Bord tramé']]]];
+  ['FX',[['boom0','Explosion 1 (éclair)'],['boom1','Explosion 2 (damier)'],['boom2','Explosion 3 (braises)'],['laserV','Laser (rayon)'],['laserX','Laser (croix)'],['nuage0','Nuage plein'],['nuage1','Nuage texturé'],['nuage2','Bord diagonal'],['nuage3','Bord croisé'],['nuage4','Bord rayé'],['nuage5','Bord tramé']]]];
 const TILE_DEPS={robot_u:['robot_u','robot_r','robot_d','robot_l'],an0r:['an0r','an0l'],bz0r:['bz0r','bz0l'],bz1r:['bz1r','bz1l'],deep0:['deep0','deep1'],grass0:['grass0'],gem:['gem','gemDim','gemHole'],ship:['ship',...SHIP_KEYS]};
 // dimensions en pixels : 16 x 16, sauf le vaisseau édité d'un bloc (5 x 6 tuiles)
 BEASTS.forEach((_,i)=>{TILE_DEPS['bz'+i+'r']=['bz'+i+'r','bz'+i+'l'];});
@@ -52,6 +53,7 @@ for(const [,l] of TILE_LIST)for(const [k] of l)PAT_ORIG[k]=k==='cursor'?CURSOR_D
 for(const k in PAT_ORIG)if(k!=='cursor'&&k!=='ship')PAT[k]=(x,y)=>TF(k)(x,y);
 // tuiles du vaisseau posées case par case sur la carte, découpées dans l'image d'ensemble
 for(const k of SHIP_KEYS){const [,cx,cy]=k.split('_').map(Number);PAT[k]=(x,y)=>TF('ship')(cx*16+x,cy*16+y);}
+for(const k of ['tourelle','tourelleOn']){PAT[k+'_d']=(x,y)=>TF(k)(x,y);PAT[k+'_u']=(x,y)=>TF(k)(15-x,15-y);PAT[k+'_l']=(x,y)=>TF(k)(y,15-x);PAT[k+'_r']=(x,y)=>TF(k)(15-y,x);TILE_DEPS[k]=[k,k+'_d',k+'_u',k+'_r',k+'_l'];}   // tourelle : quatre sens de tir
 PAT.robot_r=(x,y)=>TF('robot_u')(y,15-x);PAT.robot_d=(x,y)=>TF('robot_u')(15-x,15-y);PAT.robot_l=(x,y)=>TF('robot_u')(15-y,x);
 for(const k of ['an0',...BEASTS.map((_,i)=>'bz'+i)])PAT[k+'l']=(x,y)=>TF(k+'r')(15-x,y);
 // mine armée : la tuile de la mine, bio en rouge et accent en blanc ; elle alterne avec la tuile normale (clignotement)
@@ -64,9 +66,14 @@ PAT.softTopBg=(x,y)=>{const f=TF('mtTop');return y<crestY(f,x)&&TF('mtBody')(x,y
 TILE_DEPS.mtBody=['mtBody','hardBody','hardTopBg','softTopBg'];TILE_DEPS.mtTop=['mtTop','hardTop','hardTopBg','softTopBg'];
 PAT.mineA=(x,y)=>{const c=TF('bz'+MINE_I+'r')(x,y);return c==='2'?'r':c==='1'?'w':c==='r'?'w':c;};TILE_DEPS['bz'+MINE_I+'r'].push('mineA');
 PAT.deep1=(x,y)=>TF('deep0')((x+14)%16,y);
+// FX (22 novembre 2026) : rayons en rouge vif ('L'), l'horizontal tourné du vertical ; variantes décalées des explosions pour le crépitement
+const laserL=k=>(x,y)=>{const c=TF(k)(x,y);return c==='r'?'L':c;};
+PAT.laserV_=laserL('laserV');PAT.laserH_=(x,y)=>laserL('laserV')(y,15-x);PAT.laserX_=laserL('laserX');
+PAT.boom1b=(x,y)=>TF('boom1')((x+2)%16,y);PAT.boom2b=(x,y)=>TF('boom2')(15-x,y);
+Object.assign(TILE_DEPS,{laserV:['laserV','laserV_','laserH_'],laserX:['laserX','laserX_'],boom1:['boom1','boom1b'],boom2:['boom2','boom2b']});
 let TL={},ANIMG=[],fog=true;
 try{fog=localStorage.getItem('np-fog')!=='off';}catch(e){}
-const inkCol=ch=>ch==='0'?'#020605':ch==='r'?'#b8242a':ch==='w'?'#ffffff':PAL[ch];
+const inkCol=ch=>ch==='0'?'#020605':ch==='r'?'#b8242a':ch==='L'?'#ff2a2a':ch==='w'?'#ffffff':PAL[ch];
 function tileCanvas(src,w=16,h=16){const c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d');
   for(let j=0;j<h;j++)for(let i=0;i<w;i++){const ch=typeof src==='function'?src(i,j):src[j][i];const col=inkCol(ch);if(col){x.fillStyle=col;x.fillRect(i,j,1,1);}}return c;}
 // reconstruit une tuile retouchée et ses variantes

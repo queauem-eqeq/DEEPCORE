@@ -70,8 +70,9 @@ function bilan(cfg,l){const N=l.length,v=l.filter(r=>r.issue==='victoire'),m=l.f
 function serie(cfg,n){const l=[];for(let i=0;i<n;i++)l.push(essai(cfg));return bilan(cfg,l);}
 
 /* --- description d'une configuration --- */
+const nomObj=k=>(ITEMS[k]||{n:k+' (retiré)'}).n;   // une archive peut citer un objet retiré depuis
 function titre(cfg){const e=ESP().filter(s=>(cfg.ennemis||{})[s.key]>0).map(s=>cfg.ennemis[s.key]+' '+s.n).join(' + ')||'aucun ennemi';
-  const k=[cfg.arme&&cfg.arme!=='foreuse'?ITEMS[cfg.arme].n:null,cfg.armure?ITEMS[cfg.armure].n:null,...(cfg.acc||[]).map(a=>ITEMS[a].n)].filter(Boolean);
+  const k=[cfg.arme&&cfg.arme!=='foreuse'?nomObj(cfg.arme):null,cfg.armure?nomObj(cfg.armure):null,...(cfg.acc||[]).map(nomObj)].filter(Boolean);
   return {e,carte:(CARTES().find(c=>c[0]===cfg.carte)||['','?'])[1],kit:(k.length?k.join(', '):'foreuse nue')+(cfg.vie>0?` · vie d’essai ${cfg.vie}`:''),pilote:(cfg.pilote==='traversee'?'traversée':'chasse')+(cfg.alerte?', ennemis en alerte':'')};}
 
 /* ---------- Interface ---------- */

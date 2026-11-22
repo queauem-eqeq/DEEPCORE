@@ -13,12 +13,13 @@ body{margin:0;background:var(--black);color:var(--fg);font:13px/1.45 var(--mono)
 .game{display:grid;grid-template-columns:minmax(0,1fr) 260px;height:100%}
 .left{display:grid;grid-template-rows:minmax(0,1fr) auto;min-width:0;min-height:0}
 .log{background:var(--black);border-top:1px solid var(--line);padding-block:6px 8px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:16px;font-size:12px;line-height:1.5;height:calc(5 * 1.5em + 14px);overflow:hidden}
-.log ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;justify-content:flex-end;height:100%}
-.log li{color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;opacity:.75}
+.log ul{list-style:none;margin:0;padding:0 6px 0 0;display:flex;flex-direction:column;height:100%;overflow-y:auto}
+.log li:first-child{margin-top:auto}   /* peu de messages : collés en bas, comme avant */
+.log li{flex:none;color:var(--dim);white-space:normal;overflow-wrap:anywhere;padding-left:calc(4ch + 10px);text-indent:calc(-4ch - 10px);opacity:.75}   /* un message trop long passe à la ligne, aligné après le numéro de tour (22 novembre 2026) */
 .log li:last-child{opacity:1}
 .log li.new{color:var(--fg)}
 .log li.warn{color:var(--c3)}.log li.info{color:var(--c2)}.log li.good{color:var(--c1)}
-.log .t{color:var(--dim);margin-right:10px;font-variant-numeric:tabular-nums}
+.log .t{display:inline-block;min-width:4ch;text-indent:0;color:var(--dim);margin-right:10px;font-variant-numeric:tabular-nums}
 .log .x{color:var(--dim);margin-left:6px}
 .view{position:relative;min-width:0;min-height:0;overflow:hidden;background:var(--void);padding-left:env(safe-area-inset-left,0px)}
 #view{position:absolute;inset:0;width:100%;height:100%;image-rendering:pixelated;cursor:none;touch-action:manipulation}
@@ -103,15 +104,15 @@ body{margin:0;background:var(--black);color:var(--fg);font:13px/1.45 var(--mono)
 .insp .act{color:var(--c3)}
 .mcard.wide{width:min(820px,100%)}
 .cur-wrap{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px;align-items:start}
-.cur-groups{display:grid;gap:14px;max-height:min(62vh,560px);overflow-y:auto;padding-right:4px;min-width:0}
+.cur-groups{display:grid;gap:14px;max-height:min(62vh,560px);overflow-y:auto;overflow-x:hidden;padding-right:4px;min-width:0}
 .tgrp h3{font-family:var(--display);font-size:10px;font-weight:500;letter-spacing:.2em;text-transform:uppercase;color:var(--dim);margin:0 0 6px}
-.cur-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(76px,1fr));gap:6px}
+.cur-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:6px}
 .ed-name{font-family:var(--display);font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--c1)}
 .cur-tools button i{display:inline-block;width:10px;height:10px;margin-right:6px;vertical-align:-1px;outline:1px solid var(--line)}
 .cur-tools button.ink{padding:3px}
 .cur-tools button.ink i{display:block;width:22px;height:22px;margin:0;vertical-align:0}
 .cur-tools button i.er{background:repeating-linear-gradient(45deg,#0b1714 0 2px,#22332f 2px 4px)}
-.cur-list button{padding:6px;display:grid;gap:4px;justify-items:center;border-color:var(--line);text-transform:none;letter-spacing:0;font-size:11px;color:var(--dim)}
+.cur-list button{padding:6px 4px;display:grid;gap:4px;justify-items:center;align-content:start;min-width:0;border-color:var(--line);text-transform:none;letter-spacing:0;font-size:11px;line-height:1.3;color:var(--dim);overflow-wrap:anywhere;hyphens:auto}   /* les noms longs passent à la ligne au lieu de déborder (22 novembre 2026) */
 .cur-list button[aria-pressed="true"]{border-color:var(--fg);color:var(--fg)}
 .cur-list canvas{width:40px;height:40px;image-rendering:pixelated}
 .cur-ed{display:grid;gap:8px;justify-items:start}
@@ -131,7 +132,7 @@ body{margin:0;background:var(--black);color:var(--fg);font:13px/1.45 var(--mono)
 .mhead h2{font-family:var(--display);font-size:18px;letter-spacing:.2em;color:var(--c1);margin:0;text-transform:uppercase}
 .mhead button,.mfoot button{padding:6px 12px;border-color:var(--line)}
 .mnote{margin:0;color:var(--dim);font-size:12px}
-.beasts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--line) transparent;padding:1px}
+.beasts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;overflow-y:auto;padding:1px}
 #bestiary .mcard{width:min(940px,100%)}
 @media (max-width:760px){.beasts{grid-template-columns:1fr}}
 .bcard{border:1px solid var(--line);padding:12px;display:grid;gap:10px;min-width:0}
@@ -227,9 +228,6 @@ kbd{font-family:var(--mono);color:var(--fg);border:1px solid var(--line);padding
 
 /* Inventaire (14-inventaire.js) : fenêtre plein écran, la liste à gauche, la fiche de l'objet choisi (dessin ASCII coloré) à droite */
 .btnrow{display:flex;gap:8px}
-.rndrow{display:flex;align-items:center;gap:7px;margin-top:7px;font-family:var(--display);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--dim);cursor:pointer}
-.rndrow input{accent-color:var(--c3);width:auto;cursor:pointer}
-.rndrow:hover{color:var(--fg)}
 .btnrow .pace{flex:1 1 0;min-width:0}
 #inventaire .mcard:focus{outline:none}
 .inv{display:grid;gap:10px}
@@ -238,7 +236,7 @@ kbd{font-family:var(--mono);color:var(--fg);border:1px solid var(--line);padding
 .ileft{display:grid;gap:10px;min-width:0}
 .islots{display:flex;gap:18px;font-size:12px;color:var(--dim)}
 .islots b{font-weight:400;color:var(--fg);font-variant-numeric:tabular-nums}
-.ilist{display:grid;max-height:min(66vh,640px);overflow-y:auto;scrollbar-width:thin}
+.ilist{display:grid;max-height:min(66vh,640px);overflow-y:auto}
 .ilist .it{display:grid;grid-template-columns:1.2em minmax(0,1fr) 7.5em 4.5em;gap:8px;align-items:baseline;text-align:left;padding:2px 8px;border:0;border-left:2px solid transparent;
   font-size:13px;letter-spacing:0;text-transform:none;color:var(--fg)}
 .ilist .it i{font-style:normal;color:var(--dim)}
@@ -289,12 +287,18 @@ kbd{font-family:var(--mono);color:var(--fg);border:1px solid var(--line);padding
 .bnum.mat{color:var(--c1)}
 /* Menu Monde : archétypes en tête, Génération et Faune côte à côte */
 #monde .mcard:focus{outline:none}
-.mdarch{display:flex;flex-wrap:wrap;gap:8px 10px;align-items:center;margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid var(--line);font-size:12px}
+.mdarch{display:flex;flex-wrap:wrap;gap:8px 10px;align-items:center;margin-bottom:10px;font-size:12px}
 .mdarch label{color:var(--dim);font-size:11px;letter-spacing:.14em;text-transform:uppercase}
 .mdarch select,.mdarch input{font:inherit;color:var(--fg);background:var(--void);border:1px solid var(--line);padding:4px 6px;min-width:0}
 .mdarch select{flex:1 1 180px;max-width:260px}.mdarch input{flex:1 1 140px;max-width:220px}
-.mdarch .saved{flex:1 1 100%;min-height:1.4em}.mdarch .saved.err{color:var(--life)}
-.mdrec{display:flex;gap:10px;align-items:center;margin-bottom:14px;font-size:12px}
+.mdarch .saved{flex:1 1 100%;min-height:1.4em}.mdarch .saved:empty{display:none}.mdarch .saved.err{color:var(--life)}
+.mdrec{display:flex;gap:10px;align-items:center;margin-bottom:10px;font-size:12px}
+/* les deux archétypes, monde et bâti, côte à côte sous la recette (22 novembre 2026) */
+.mdamb{display:grid;grid-template-columns:auto minmax(0,1fr) auto minmax(0,1fr);gap:8px 10px;align-items:center;margin-bottom:12px;font-size:12px}
+.mdamb label{color:var(--fg);font-size:11px;letter-spacing:.14em;text-transform:uppercase;white-space:nowrap}
+.mdamb select{min-width:0;font:inherit;color:var(--fg);background:var(--void);border:1px solid var(--c3);padding:5px 6px}
+.mdgo{margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid var(--line)}.mdgo .go{width:100%}
+@media (max-width:720px){.mdamb{grid-template-columns:auto minmax(0,1fr)}}
 .mdrec label{color:var(--fg);font-size:11px;letter-spacing:.14em;text-transform:uppercase;white-space:nowrap}
 .mdrec select{flex:1 1 auto;min-width:0;font:inherit;color:var(--fg);background:var(--void);border:1px solid var(--c3);padding:5px 6px}
 .mdcols{display:grid;grid-template-columns:1fr 1fr;gap:28px;align-items:start}
@@ -306,7 +310,7 @@ kbd{font-family:var(--mono);color:var(--fg);border:1px solid var(--line);padding
 #monde .mcard>*{flex:0 0 auto}
 #monde .mdcols{flex:1 1 auto;min-height:0;grid-template-rows:minmax(0,1fr);align-items:stretch}
 #monde .mdcols section{display:flex;flex-direction:column;min-height:0}
-#monde .mdcols .gen{flex:1 1 auto;min-height:0;overflow-y:auto;align-content:start;padding-right:8px;scrollbar-width:thin;scrollbar-color:var(--c3) transparent}
+#monde .mdcols .gen{flex:1 1 auto;min-height:0;overflow-y:auto;align-content:start;padding-right:8px}
 @media (max-width:720px){.mdcols{grid-template-columns:1fr}
   #monde .mdcols{display:block;overflow-y:auto}#monde .mdcols section{display:block;margin-bottom:18px}#monde .mdcols .gen{overflow:visible}}
 .mdcols .gen .g2{grid-template-columns:minmax(0,1fr) 190px}
@@ -334,15 +338,13 @@ kbd{font-family:var(--mono);color:var(--fg);border:1px solid var(--line);padding
 
 /* Fenêtre Groupes (Lab) : fiche du groupe à gauche, liste en colonne à droite (19 novembre 2026) */
 #groupes .mcard{width:min(900px,100%)}
-.grtop{display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px;font-size:12px;color:var(--dim)}
-.grtop label{display:flex;align-items:center;gap:8px;color:var(--fg)}
 .grcols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,340px);gap:16px;align-items:start}
 @media (max-width:720px){.grcols{grid-template-columns:1fr}}
 .gredit{border:1px solid var(--line);padding:12px;display:grid;gap:10px;min-width:0}
 .gredit h3{margin:4px 0 0;font-size:12px;display:flex;justify-content:space-between;align-items:baseline;border-top:1px solid var(--line);padding-top:10px}
 .gredit h3 span{font-weight:400;color:var(--dim);font-size:11px}
-.gredit input,.gredit select,.grtop input{font:inherit;color:var(--fg);background:var(--void);border:1px solid var(--line);padding:2px 4px;min-width:0}
-.gredit input[type=number],.grtop input{width:56px;text-align:right}
+.gredit input,.gredit select{font:inherit;color:var(--fg);background:var(--void);border:1px solid var(--line);padding:2px 4px;min-width:0}
+.gredit input[type=number]{width:56px;text-align:right}
 .gredit .gl{display:grid;grid-template-columns:auto minmax(0,1fr);gap:8px;align-items:center;color:var(--dim);font-size:12px}
 .gredit .gnom{font-weight:700}
 .grow{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center}
@@ -357,7 +359,7 @@ kbd{font-family:var(--mono);color:var(--fg);border:1px solid var(--line);padding
 .gbas{display:flex;flex-wrap:wrap;gap:6px}.gbas button{padding:3px 9px;font-size:11px;border-color:var(--line)}
 .gbas .gdel{margin-left:auto;color:var(--life);border-color:var(--life)}
 .grside{display:grid;gap:10px;min-width:0}
-.grliste{display:grid;gap:4px;max-height:min(52vh,460px);overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--line) transparent;padding:1px}
+.grliste{display:grid;gap:4px;max-height:min(52vh,460px);overflow-y:auto;padding:1px}
 .grl{display:grid;grid-template-columns:auto auto minmax(0,1fr) 24px 24px;gap:6px;align-items:center;border:1px solid var(--line);padding:4px 6px}
 .grl.sel{border-color:var(--c1)}.grl.cible{border-style:dashed;border-color:var(--fg)}
 .grl .grip{cursor:grab;color:var(--dim);line-height:1}
@@ -375,7 +377,7 @@ kbd{font-family:var(--mono);color:var(--fg);border:1px solid var(--line);padding
 .bcols{display:grid;grid-template-columns:minmax(0,1fr) 190px;gap:16px;align-items:start}
 @media (max-width:720px){.bcols{grid-template-columns:1fr}}
 .bedit{border:1px solid var(--line);padding:10px;min-width:0;overflow-x:auto}
-.bside{display:grid;gap:4px;max-height:min(60vh,520px);overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--line) transparent;padding:1px}
+.bside{display:grid;gap:4px;max-height:min(60vh,520px);overflow-y:auto;padding:1px}
 .bli{display:grid;grid-template-columns:28px minmax(0,1fr) 14px;gap:8px;align-items:center;text-align:left;padding:4px 6px;border:1px solid var(--line);background:none;color:var(--dim);font:inherit;text-transform:none;letter-spacing:0}
 .bli img,.btab thead img{width:28px;height:28px;image-rendering:pixelated;background:var(--void);outline:1px solid var(--line)}
 .bli.sel{border-color:var(--c1);color:var(--fg)}.bli b{font-weight:400;overflow:hidden;text-overflow:ellipsis}.bli.sel b{font-weight:700}
@@ -392,7 +394,8 @@ kbd{font-family:var(--mono);color:var(--fg);border:1px solid var(--line);padding
 
 /* Artefacts, terminal et sélecteur de fréquence [− = +] (20 novembre 2026) */
 #artefacts .mcard{width:min(640px,100%)}#terminal .mcard{width:min(520px,100%)}
-.artliste{display:grid;gap:6px}
+.artliste{display:grid;gap:6px;max-height:max(200px,calc(100vh - 260px));overflow-y:auto;padding-right:8px}   /* défile (22 novembre 2026) */
+#life .lfscroll{max-height:max(160px,calc(100vh - 300px));overflow-y:auto;padding-right:8px;display:grid;gap:inherit;align-content:start}   /* LIFE : tout ce qui suit le budget défile */
 .artl{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:center;border:1px solid var(--line);padding:8px 10px}
 .artl input{accent-color:var(--c3)}
 .artl label{display:grid;gap:2px;cursor:pointer}.artl label span{font-size:11px;color:var(--dim)}
@@ -403,3 +406,45 @@ kbd{font-family:var(--mono);color:var(--fg);border:1px solid var(--line);padding
 .freq button[aria-pressed=true]{color:var(--void);background:var(--c1);border-color:var(--c1)}
 .gfq{display:flex;align-items:center;gap:6px;color:var(--dim);font-size:12px}
 .termtxt{font-size:13px;line-height:1.6;color:var(--fg);margin:0;white-space:pre-wrap;max-width:60ch}
+
+/* Fabricateur (21 novembre 2026) */
+#fabList{display:grid;gap:4px;align-content:start;height:min(52vh,400px);overflow-y:auto}
+.fabl{display:grid;grid-template-columns:minmax(0,13fr) minmax(0,18fr) 40px;gap:10px;align-items:baseline;text-align:left;padding:7px 10px;background:transparent;border:1px solid var(--line);color:var(--fg);font:inherit;cursor:pointer}
+.fabl b{color:var(--c3);font-weight:normal;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fabl b u{text-decoration:none;color:var(--dim);margin-right:8px}
+.fabl span{font-size:12px;color:var(--dim,#8aa9a2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* couleur du nom par famille (22 novembre 2026) : consommable bio, accessoire monde, arme et armure accent */
+.fabl.f-conso b,#fabVue.f-conso b{color:var(--c2)}.fabl.f-acc b,#fabVue.f-acc b{color:var(--c3)}.fabl.f-eq b,#fabVue.f-eq b{color:var(--c1)}
+.fabl.cher b{color:var(--dim,#5f7a74)}
+.fabl i{font-style:normal;text-align:right;color:var(--c1)}
+.fabl.sel{border-color:var(--c1)}
+.fabl.cher{cursor:default}
+.fabl.cher b,.fabl.cher i{color:var(--dim,#5f7a74)}
+
+/* Fenêtre LIFE : sélecteur de niveau et listes par niveau (21 novembre 2026) */
+.lfniv{display:flex;align-items:center;gap:8px;margin:0 0 10px}
+.lfniv span{color:var(--c3)}
+.lfniv button{min-width:40px;padding:5px 0}
+.lfniv button.on{border-color:var(--c1);color:var(--c1)}
+#life .sub span{float:right;font-size:11px;color:var(--dim)}
+#life .gpats{margin:0 0 10px}
+.gpat.inactif{border-color:var(--line);color:var(--dim)}
+
+/* Fabricateur : la liste à gauche, l'illustration de l'objet sélectionné à droite (21 novembre 2026) */
+#fabric .mcard{width:min(940px,100%)}
+.fabwrap{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:16px;align-items:start}
+#fabVue{border:1px solid var(--line);padding:12px;text-align:center;height:min(52vh,400px);overflow:hidden;box-sizing:border-box}
+#fabVue .iart{font-size:24px;display:inline-block;text-align:left}
+#fabVue b{display:block;color:var(--c3);font-weight:normal;margin:0 0 6px}
+#fabVue p{margin:0 0 6px;font-size:12px;color:var(--dim);text-align:left}
+@media (max-width:720px){.fabwrap{grid-template-columns:1fr}#fabVue{height:auto}#fabList{height:auto;max-height:40vh}}
+#fabMsg{min-height:1.5em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* Barres de défilement (22 novembre 2026) : fines (4 px), sans fond, couleur du texte secondaire, plus claires au survol.
+   Chrome, Edge, Safari : ::-webkit-scrollbar (ne pas poser scrollbar-width/scrollbar-color sur un élément : Chrome les
+   préférerait et rendrait la barre épaisse). Firefox, qui ne connaît pas ::-webkit-scrollbar : barre « thin ». */
+@supports not selector(::-webkit-scrollbar){*{scrollbar-width:thin;scrollbar-color:var(--dim) transparent}}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track,::-webkit-scrollbar-corner{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--dim)}
+::-webkit-scrollbar-thumb:hover{background:var(--fg)}

@@ -84,7 +84,7 @@ function drawBoom(){const fl=1-(performance.now()-BOOM.t0)/180;
 function addFx(f){f.t0=performance.now();if(f.kind==='num')f.stack=FX.filter(o=>o.kind==='num'&&o.x===f.x&&o.y===f.y&&fxP(o)<.5).length;FX.push(f);if(!fxRaf)fxRaf=requestAnimationFrame(fxLoop);}
 // grains d'un effet de consommable : position dans la case et instant d'apparition, tirés une fois pour toutes
 const fxGrains=n=>Array.from({length:n},()=>({x:rnd(0,13),y:rnd(3,14),d:Math.random()*.55}));
-function fxLoop(){const now=performance.now();FX=FX.filter(f=>now-f.t0<f.dur);render();fxRaf=(FX.length||animVif())?requestAnimationFrame(fxLoop):0;}   // une mine armée ou un paralyzor accroché gardent le rendu en marche
+function fxLoop(){const now=performance.now();FX=FX.filter(f=>now-f.t0<f.dur);if(antAnime())antVis();render();fxRaf=(FX.length||animVif())?requestAnimationFrame(fxLoop):0;}   // une mine armée ou un paralyzor accroché gardent le rendu en marche
 const fxP=f=>Math.min(1,(performance.now()-f.t0)/f.dur);
 function lungeOff(match){if(reduced)return [0,0];const f=FX.find(match);if(!f)return [0,0];const k=Math.sin(Math.PI*fxP(f))*.4*S;return [f.dx*k,f.dy*k];}
 
@@ -155,7 +155,7 @@ function sonarStart(){G.sonar=2;G.sonX=G.px;G.sonY=G.py;const r=Math.hypot(Math.
   addFx({kind:'sonar',x:G.px,y:G.py,r,dur});SFX.sonar(dur/1000);
   const l=Object.values(G.ore||{}),m=l.filter(oreMat).length,n=l.length-m;
   sayMore(`Sonar : ${n} gisement${n>1?'s':''} de métal et ${m} de Matière détecté${l.length>1?'s':''}.`,'info');}
-function sonarR(){if(!G||G.sonar===1)return -1;const f=FX.find(f=>f.kind==='sonar');return f?fxP(f)*f.r:Infinity;}
+function sonarR(){if(!G||G.sonar===1)return -1;const f=FX.find(f=>f.kind==='sonar'&&!f.ant);return f?fxP(f)*f.r:Infinity;}   // f.ant : le cercle d'une antenne ne détecte pas les gisements
 const sonarVu=(i,sr)=>Math.hypot(i%W-(G.sonX??G.px),((i/W)|0)-(G.sonY??G.py))<=sr;
 function render(){
   if(!fxRaf&&animVif())fxRaf=requestAnimationFrame(fxLoop);
@@ -200,13 +200,14 @@ function render(){
     ctx.globalAlpha=fog&&!vis[i]?.3:1;ctx.fillStyle=c;ctx.fillRect(px-camX*S,py-camY*S,sz,sz);}
   ctx.globalAlpha=1;
   // (les taches de sang ne sont plus dessinées depuis le 19 novembre 2026 : les ennemis laissent des débris)
-  for(const s of G.sites){if(fog&&!G.seen[idx(s.x,s.y)])continue;put(s.known?(TL['site'+s.depth]||TL.site10):TL.siteUnknown,s.x,s.y,!fog||vis[idx(s.x,s.y)]?1:.35);}
+  for(const s of G.sites){if(fog&&!G.seen[idx(s.x,s.y)])continue;put(TL.siteUnknown,s.x,s.y,!fog||vis[idx(s.x,s.y)]?1:.35);}
   // touche V : portée de discrétion de la foreuse — les cases d'où un ennemi peut vous remarquer, entourées d'un pointillé
   if(SHOWVIS&&!G.over){
     const r=G.stealth||STEALTH_BASE,cells=new Set();
     for(let y=Math.max(0,G.py-r);y<=Math.min(H-1,G.py+r);y++)for(let x=Math.max(0,G.px-r);x<=Math.min(W-1,G.px+r);x++){
       const i=idx(x,y);if(Math.hypot(x-G.px,y-G.py)>r)continue;if(lastAct==='dig'||los(G.px,G.py,x,y))cells.add(i);}
     drawVisCells(cells,'#ffffff');}
+  machDraw();
   drawPath();
   // barre de vie au-dessus d'une créature blessée (insectoïdes compris depuis le 16 novembre 2026 : ils en étaient privés)
   const barreVie=(px,py,hp,pv)=>{if(hp>=pv)return;const w=S-6;ctx.fillStyle='#000';ctx.fillRect(px+3,py-4,w,3);ctx.fillStyle='#ff3b3b';ctx.fillRect(px+3,py-4,Math.round(w*Math.max(0,hp)/pv),3);};
@@ -257,14 +258,10 @@ function render(){
        ctx.fillStyle=PAL['1'];},cx=o=>(o.x+.5-camX)*16,cy=o=>(o.y+.5-camY)*16;
      // laser d'une sentinelle : le trait part d'elle ; touché, il finit sur la foreuse, raté, à côté. Il crépite puis s'éteint d'un coup.
      for(const f of FX)if(f.kind==='laser'&&G.beasts.includes(f.o)&&fxP(f)<.75)laser(cx(f.o),cy(f.o),(f.x+.5-camX)*16+f.ox,(f.y+.5-camY)*16+f.oy,f.ox*5.3+f.oy+f.t0,4);}
-   // Explosion (mine, charge sismique) : le carré de 3 × 3 en pavés fins de 2 pixels de tuile — blanc plein, puis damier accent, puis braises monde éparses
-   for(const f of FX)if(f.kind==='boom'){const p=fxP(f),ph=p<.2?0:p<.6?1:2,t=Math.floor(p*16);ctx.fillStyle=ph===0?'#fff':ph===1?PAL['1']:PAL['3'];
-     for(let cy=-1;cy<=1;cy++)for(let cx=-1;cx<=1;cx++){const bx=Math.round((f.x+cx-camX)*16),by=Math.round((f.y+cy-camY)*16);
-       for(let gy=0;gy<8;gy++)for(let gx=0;gx<8;gx++){
-         if(ph===1&&((gx+gy+t)&1))continue;
-         if(ph===2&&((gx*7+gy*13+cx*5+cy*3+t*3)%7)>(p<.8?1:0))continue;
-         ctx.fillRect((bx+gx*2)*u,(by+gy*2)*u,2*u,2*u);}}
-     ctx.fillStyle=PAL['1'];}
+   // Explosion (mine, charge sismique) : sur chaque case du carré de 3 × 3, les tuiles boom0 (éclair), boom1 (damier), boom2
+   // (braises), éditables dans le Tile editor (groupe FX, 22 novembre 2026) ; boom1 et boom2 alternent avec leur variante pour crépiter
+   for(const f of FX)if(f.kind==='boom'){const p=fxP(f),t=Math.floor(p*16),tl=p<.2?TL.boom0:p<.6?(t&1?TL.boom1b:TL.boom1):(t&1?TL.boom2b:TL.boom2);ctx.globalAlpha=1;
+     if(tl)for(let cy=-1;cy<=1;cy++)for(let cx=-1;cx<=1;cx++)ctx.drawImage(tl,(f.x+cx-camX)*S,(f.y+cy-camY)*S,S,S);}
    // « ! » d'un ennemi qui repère la foreuse : un trait d'un pixel de tuile, blanc cerné de noir, au-dessus de lui ; il monte de 2 pixels puis s'éteint d'un coup (affiné le 16 novembre 2026)
    for(const f of FX)if(f.kind==='alerte'&&(G.beasts.includes(f.o)||G.animals.includes(f.o))&&vis[idx(f.o.x,f.o.y)]){const p=fxP(f),px=Math.round((f.o.x-camX)*16)+7,py=Math.round((f.o.y-camY)*16)-10-(reduced?2:Math.min(2,Math.floor(p*12)));
      ctx.fillStyle='#000';ctx.fillRect((px-1)*u,(py-1)*u,3*u,9*u);ctx.fillStyle='#fff';ctx.fillRect(px*u,py*u,u,5*u);ctx.fillRect(px*u,(py+6)*u,u,u);ctx.fillStyle=PAL['1'];}

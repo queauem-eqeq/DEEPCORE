@@ -172,6 +172,14 @@ const TDESC={[GROUND]:['Sol rocheux','Praticable. Les points au sol se densifien
   [MACHINE]:['Machine hors d’usage','Infranchissable, mais on voit par-dessus. Une charge sismique la réduit en gravats.'],
   [ANTENNA]:['Antenne','Avancer dessus l’allume : elle reste allumée et tient en vue un disque de 30 cases de large. Infranchissable, ne coupe pas la vue.'],
   [TERMINAL]:['Terminal','Avancer dessus affiche son texte. Infranchissable, ne coupe pas la vue.'],
+  [TURRET]:['Tourelle laser','Encastrée dans le mur, elle tire un rayon droit à travers la pièce, à son propre rythme, sans prévenir. Le rayon touche toujours : 10 dégâts, pour la foreuse comme pour les ennemis. Une pile énergétique l’arrête. Une charge sismique la détruit.'],
+  [PYLON]:['Croix laser','Ce pylône éclaire ses quatre cases voisines, à son propre rythme, sans prévenir : 10 dégâts pour qui s’y tient. Les cases en diagonale sont sûres. Une charge sismique le détruit.'],
+  [PILE]:['Pile énergétique','La foreuse la pousse en avançant dessus (jamais en diagonale). Posée sur un socle, elle alimente ce qui y est relié. Elle arrête les lasers.'],
+  [LEVIER]:['Levier','Avancer dessus l’actionne : il déploie un pont ou coupe les lasers de sa salle.'],
+  [GRILLE]:['Grille d’énergie','Infranchissable tant que son socle n’est pas alimenté par une pile. On voit au travers. Une charge sismique la détruit.'],
+  [STATION]:['Station de réparation','Avancer dessus remet la vie et l’énergie au maximum, une seule fois. Le bruit attire les ennemis à 12 cases.'],
+  [CHARGEUR]:['Chargeur de pile','Avancer dessus rappelle la pile à son point de départ : utile si elle est coincée.'],
+  [FABRIC]:['Fabricateur','Avancer dessus ouvre la liste de fabrication : des objets contre de la Matière.'],
   [PILLAR]:['Pilier','Infranchissable et opaque : il coupe la ligne de vue. Compte comme une paroi pour la discrétion.'],
   [LIQ]:['Eau peu profonde','Praticable par tous. Défense −20 pour qui s’y trouve ; pas deux fois plus lent, sauf pour les crabos qui nagent.'],
   [DEEP]:['Eau profonde','Praticable par tous. Défense −20, pas deux fois plus lent (sauf crabos), et le courant fait dévier la foreuse. Les créatures, elles, nagent droit.'],
@@ -205,7 +213,7 @@ function inspectHTML(){const {x,y}=HOV;if(x<0||y<0||x>=W||y>=H)return '';
       `<p>${BEHAV[key]}</p>`);}
   else out.push(head('',tn,dt));
   const s=siteAt(x,y);
-  if(s)out.push(`<p><b>Site de forage</b> · ${s.known?`profondeur ${s.depth}. [F] pour forer.`:'non analysé : placez la foreuse dessus.'}</p>`);
+  if(s)out.push(`<p><b>Site de forage</b> · ${s.known?'détecté. [F] pour forer.':'non analysé : placez la foreuse dessus.'}</p>`);
   const om=G.ore&&G.ore[i];
   if(om&&oreMat(om))out.push(oreSol(om)?`<p><b>Matière</b> · placez la foreuse dessus pour la ramasser : +${ORE_PV[oreLv(om)]} en réserve.</p>`:`<p><b>Matière prise dans la montagne</b> · brisez la paroi pour la faire tomber (+${ORE_PV[oreLv(om)]}).</p>`);
   else if(om&&oreSol(om))out.push(`<p><b>Éclats de métal ${ORE_NOM[oreLv(om)]}</b> · placez la foreuse dessus pour les ramasser : +${ORE_PV[oreLv(om)]} PV.</p>`);
