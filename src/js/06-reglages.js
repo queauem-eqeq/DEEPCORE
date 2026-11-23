@@ -191,7 +191,6 @@ function setS(k,v){const l=recLignes(GEN.recette).find(l=>l[1]===k);if(!l)return
 function persoAmb(k){if(k==='amb'||k==='ambM'||APPLYING_AMB)return;const m=MONDE_KEYS.includes(k),c=m?'ambM':'amb';
   if(GEN[c]){GEN[c]='';setv('gs-'+c,'');}const o=$('genObt');if(o)o.textContent=obtenuTxt();}
 let APPLYING_AMB=false;
-function setStruct(v){setS('structure',v);}
 const ligneNum=(k,lb,mn,mx,v)=>`<div class="g"><label for="gn-${k}">${lb}</label><input type="range" id="gr-${k}" min="${mn}" max="${mx}" step="1" value="${v}" aria-label="${lb}"><input type="number" id="gn-${k}" min="${mn}" max="${mx}" step="1" value="${v}"></div>`;
 /* Haut du menu Monde (22 novembre 2026) : la recette, puis les deux archétypes (monde, bâti) côte à côte. Viennent ensuite,
    dans le balisage, le preset de niveau (enregistrement), le bouton GÉNÉRER LA CARTE, puis les deux colonnes de réglages. */

@@ -49,7 +49,6 @@ Object.assign(ITEMS,{
     art:["     ▄▄        ", "   ▄████▄  ▄▄  ", "  ████████████ ", "   ▀████████▀  ", "      ▀▀▀▀     "],
     col:[".....11........", "...11w111..11..", "..111111111w11.", "...1111111111..", "......1111....."]}});
 Object.assign(FAB_PRIX,{berserk:20,camo:24,balise:12,court:16});
-const FAB_PRIX_DEF=Object.assign({},FAB_PRIX);
 
 /* ----- Ce que la foreuse sait ----- */
 // zone d'effet d'un consommable : r = 0 une case, 1 l'explosion (3 × 3 et 5 cases autour), 'f' le disque du fumigène ; la visée, elle,
@@ -151,7 +150,6 @@ function butinPrend(c,more){const l=G.items&&G.items[c];if(!l)return;const dire=
   if(reste.length)G.items[c]=reste;else delete G.items[c];}
 
 /* ----- Visée de tous les consommables ----- */
-const FUM_PORTEE=3;
 // la visée montre toujours une seule case (22 novembre 2026) : une zone dessinée trahirait la charge sismique ou le fumigène
 function viseeCases(){return VISEE?[[VISEE.x,VISEE.y]]:[];}
 function retire(c){const isB=(G.beasts||[]).includes(c);(isB?G.beasts:G.animals).splice((isB?G.beasts:G.animals).indexOf(c),1);bleed(c.x,c.y);if(isB)butinMort(c);}

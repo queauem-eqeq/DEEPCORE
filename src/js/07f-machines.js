@@ -23,7 +23,6 @@
 const MACH_DM=10;
 const machTuile=v=>v>=TURRET&&v<=CHARGEUR;
 const machCasse=v=>v===TURRET||v===PYLON||v===GRILLE||v===STATION||v===FABRIC||v===LEVIER||v===CHARGEUR;   // ce qu'une charge sismique réduit en gravats
-const machCouleur=v=>v===TURRET||v===PYLON?PAL['4']:v===PILE?'#ffe14d':v===GRILLE?'#ff7ad1':v===FABRIC?'#c77dff':v===STATION?'#5aff8a':'#ff8c1a';
 const MACH_DIR=[[0,1],[0,-1],[1,0],[-1,0]],MACH_SENS=['d','u','r','l'];
 let BATI_DER=null;   // {B, strs} du dernier appel réussi à batiments() : les pièces, pour y poser les machines (génération seulement)
 

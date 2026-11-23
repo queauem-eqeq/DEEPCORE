@@ -357,7 +357,6 @@ const flatF=(x,y)=>{if((x===12&&y===8)||(x===3&&y===12))return '3';if((x===11&&y
 const GT=[[grassA,flatA],[grassB,flatB],[grassC,flatC],[grassD,flatD],[grassE,flatE],[grassF,flatF]];
 GT.forEach(([g,f],i)=>{PAT['grass'+i]=g;PAT['flat'+i]=f;});
 }
-const NGRASS=6;
 {const D10=['3.333','3.3.3','3.3.3','3.3.3','3.333'];PAT.site10=(x,y)=>(x>=5&&x<=9&&y>=4&&y<=8)?(D10[y-4][x-5]==='3'?'3':'.'):RING[y][x];}   // profondeur 10, la seule depuis le 13 novembre 2026
 for(let d=1;d<=5;d++)PAT['site'+d]=(x,y)=>{const g=DIGITS[d];if(x>=6&&x<=8&&y>=4&&y<=8)return g[y-4][x-6]==='3'?'3':'.';return RING[y][x];};
 // Nuages de l'intro : 4 variantes de tuiles opaques (blanc, ombre bio)

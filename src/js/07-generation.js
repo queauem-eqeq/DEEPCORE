@@ -244,7 +244,7 @@ function genPlanet(){
 // pvDe / dmgDe : points de vie et dégâts d'une espèce tels que le jeu les lit. Aujourd'hui ce sont les valeurs du Bestiaire, sans modification ;
 // ces deux fonctions restent le seul endroit à changer si l'on veut un jour les faire varier.
 // dégâts d'une créature : tirés à chaque coup entre dmin et dmax (16 novembre 2026 ; une valeur fixe avant)
-const pvDe=sp=>sp.pv,dmgDe=sp=>sp.dmin+Math.floor(Math.random()*(sp.dmax-sp.dmin+1)),dmgTxt=sp=>sp.dmin===sp.dmax?''+sp.dmin:sp.dmin+'-'+sp.dmax,dmgMoy=sp=>(sp.dmin+sp.dmax)/2;
+const pvDe=sp=>sp.pv,dmgDe=sp=>sp.dmin+Math.floor(Math.random()*(sp.dmax-sp.dmin+1)),dmgTxt=sp=>sp.dmin===sp.dmax?''+sp.dmin:sp.dmin+'-'+sp.dmax;
 // Gisements pour une carte de taille 2 ; les autres tailles en proportion de leur surface.
 const GISEMENTS={metal:3,mat:1};
 let SANS_VAISSEAU=false;
@@ -272,7 +272,6 @@ function niveau(refait){drilling=false;
   PLANS_POSES=PLANS_POSES_M;butinExplo();   // butin des pièces secrètes, des culs-de-sac et des coins reculés (22 novembre 2026)
   if(G.sites[0]&&accesSite()<0&&(refait||0)<3)return niveau((refait||0)+1);   // garde-fou : un site inatteignable, la carte est refaite (trois fois au plus)
   spawnGroupes();lastAct='move';palBiome(null);buildTiles();turnStealth();computeFOV();}
-const fauneTxt=()=>[...new Set([...(G.animals||[]).map(a=>SPECIES[a.sp].n),...(G.beasts||[]).map(b=>BEASTS[b.sp].n)])].join(', ')||'aucune';
 /* Le niveau d'une carte générée depuis le menu (REGEN, GÉNÉRER LA CARTE) est celui de sa recette (22 novembre 2026 ; avant,
    toujours 1) : une carte « cavernes » est un niveau 2, une « base » un niveau 3, et prend la faune (fenêtre LIFE) et les
    artefacts de ce niveau. La descente reprend de là. */

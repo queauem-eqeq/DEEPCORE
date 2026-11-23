@@ -11,7 +11,6 @@ const bati=v=>v===WALL||v===PILLAR||v===LOCK||v===SECRET;
 // HARD = roche dure (16 novembre 2026) : au cœur des massifs, impossible à creuser ; seule la charge sismique en vient à bout.
 // FLAT = herbes basses (13 novembre 2026 : les herbes couchées et les herbes basses n'en font plus qu'une).
 // LOW n'est plus produit ; il ne sert qu'à convertir une partie commencée avant ce changement.
-const TNAME=['sol rocheux','rocher','montagne','liquide','herbes hautes','herbes basses','eau profonde','gouffre','pont','gravats','(inutilisé)','coque du vaisseau','soute du vaisseau','roche dure','mur','sol bâti','porte','pilier','porte verrouillée','mur'];
 const DIRN=['est','ouest','sud','nord','sud-est','nord-est','sud-ouest','nord-ouest'];
 // (la table STATS de la colonne a disparu avec le sous-menu Statistiques, le 15 novembre 2026)
 let VISEE=null;   // visée d'une charge sismique en cours : {i, x, y} — voir 14-inventaire.js
