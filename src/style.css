@@ -219,6 +219,8 @@ button:disabled{border-color:var(--line);color:var(--dim);cursor:not-allowed}
 .upg button b{color:var(--c3)}
 .upg.one{grid-template-columns:1fr}
 .card h2.huge{font-size:clamp(40px,9vw,84px);letter-spacing:.1em}
+.card h2.mort{color:#ff3b30}   /* FOREUSE DÉTRUITE : rouge, quelle que soit la palette (23 novembre 2026) */
+.overlay.noir{background:#000}   /* mort pendant une descente : le niveau ne se voit pas derrière */
 .off{position:fixed;inset:0;z-index:50;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px}
 .off[hidden]{display:none}
 .off p{margin:0;font-family:var(--display);letter-spacing:.3em;color:var(--dim);font-size:13px}

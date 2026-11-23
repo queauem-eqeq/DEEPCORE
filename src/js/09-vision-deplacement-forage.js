@@ -182,10 +182,13 @@ function drill(s){drilling=true;let k=0;const n=12;
   const step=()=>{$('card').innerHTML=`<div class="tag">Forage en cours · site ${s.id}</div><h2>FORAGE</h2><p class="prog">${'▮'.repeat(k)}${'·'.repeat(n-k)}</p>`;
     if(k<n){SFX.drill(k);k++;setTimeout(step,reduced?0:110);}else{SFX.done();end(s);}};step();}
 // Mort : la foreuse explose (voir explode, rendu), puis « Déployer une nouvelle foreuse » : retour au niveau 1, intro comprise
+// « FOREUSE DÉTRUITE » toujours en rouge, quelle que soit la palette (23 novembre 2026). Détruite pendant une descente (G.over.forage),
+// l'explosion s'est jouée dans le puits : pas d'explosion sur la carte, et un fond noir plein cache le niveau.
 function dead(){if(G.over.boom)return;G.over.boom=true;if(TRAV)stopTravel();if(REST)stopRest();
-  explode(()=>{$('card').innerHTML=`<h2 class="huge">FOREUSE<br>DÉTRUITE</h2>
+  const carte=()=>{$('card').innerHTML=`<h2 class="huge mort">FOREUSE<br>DÉTRUITE</h2>
     <div class="upg one"><button id="again"><span>Déployer une nouvelle foreuse</span><b>▶</b></button><button id="quit"><span>Quitter</span><b>■</b></button></div>`;
-    $('overlay').hidden=false;$('again').onclick=()=>{unlock();SFX.start();deployerForeuse();};$('quit').onclick=quitGame;$('again').focus();});
+    $('overlay').classList.toggle('noir',!!G.over.forage);$('overlay').hidden=false;$('again').onclick=()=>{unlock();SFX.start();$('overlay').classList.remove('noir');deployerForeuse();};$('quit').onclick=()=>{$('overlay').classList.remove('noir');quitGame();};$('again').focus();};
+  if(G.over.forage)carte();else explode(carte);
 }
 // Quitter : une page ne peut pas fermer son onglet ; tout s'éteint (écran noir, son coupé), un bouton discret rallume le jeu
 function quitGame(){$('overlay').hidden=true;$('off').hidden=false;try{if(AC)AC.suspend();}catch(e){}$('offOn').focus();}
