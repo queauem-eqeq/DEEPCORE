@@ -185,7 +185,7 @@ function fgMines(F,dt){const bas=F.R*.7;
   for(const m of F.mines){if(!m.ok||Math.abs(m.y-F.d)>1.4||Math.abs(m.x-F.cx)>FG_R-1)continue;m.ok=0;F.touche++;F.stun=.45;F.flash=.5;F.imp=1.1;fgBoom(F,'impact');
     fgSparks(F,40,m.x,m.y,22);fgChips(F,50,m.x,m.y,18,-14,30);for(let i=0;i<14;i++)fgSmoke(F,m.x+fgRnd(-4,4),m.y+fgRnd(-2,2),fgRnd(-9,9),fgRnd(-6,3),fgRnd(1.2,2),1,2.4);
     if(typeof G!=='undefined'&&G&&G.st){const dm=Math.min(FG_MINE_DM,G.st.vie);G.st.vie-=dm;F.perdu+=dm;
-      if(G.st.vie<=0&&!F.mort){F.mort=1;F.ph=5;F.tMort=F.t;F.flash=0;F.imp=2;F.pt.length=0;fgBoom(F,'perce');}}}
+      if(G.st.vie<=0&&!F.mort){F.mort=1;F.ph=5;F.tMort=F.t;F.flash=0;F.imp=2.6;F.pt.length=0;fgExplose(F);fgBoom(F,'perce');}}}
   F.stun=Math.max(0,F.stun-dt);}
 /* L’amas naît juste sous le bas de l’écran quand la foreuse approche de sa profondeur, de 9 à 13 cases à côté de là où elle va (côté au hasard) :
    il faut tourner un peu pour passer dessus. Il est récolté si le puits le touche (moitié de largeur du puits + 2 cases). */
@@ -284,32 +284,57 @@ const fgGlyph=(F,ch,col)=>{let A=F.atl[col];if(!A)A=F.atl[col]={};let g=A[ch];
 const fgPut=(F,xw,yw,ch,col)=>F.x.drawImage(fgGlyph(F,ch,col),Math.round((xw-F.camX)*F.cw+F.w/2),Math.round((yw-F.camY)*F.chh));
 /* Mort pendant la descente (23 novembre 2026) : la foreuse explose en ASCII dans le puits, puis l'écran passe au noir et le jeu
    montre aussitôt « FOREUSE DÉTRUITE » sur fond noir (sans l'explosion du jeu, ni la carte du niveau en dessous).
-   Explosion revue le même jour, d'après la référence REF/explosion.gif : une grille de caractères DOS de tracé de cadres
-   (« ╬ ═ ║ ┼ ┐ ░ … »), chaque case opaque sur fond noir (aucune transparence), en couleurs vives qui changent à chaque
-   instant. Le front part en losange, s'arrondit et couvre tout l'écran en 1,25 s, chauffé à blanc ; puis les cases
-   s'éteignent une à une, en passant de caractères pleins à des traits fins, jusqu'au noir. Durée : FG_MORT. */
-const FG_MORT=3.4,
-  FG_X_LOURD='█▓╬╪╫╬▓█▒╬',FG_X_MOYEN='═║╦╩╠╣┼╤╧╟╢▒',FG_X_LEGER='─│┐└┘┌├┤┬┴╒╕╘╛░',   /* du plus dense au plus clair */
-  FG_X_TEINTES=['#ffe680','#ffd23f','#ffa53a','#ff7a3d','#ff5a6e','#e04cd0','#a65cff','#4cc3ff','#5cff9a'],FG_X_FROID=['#e04cd0','#a65cff','#4cc3ff','#5cff9a'];
-function fgXCase(F,c,col,p){const k=c+col+p;let g=(F.xat||(F.xat={}))[k];   /* case opaque : fond noir plein, caractère DOS 8 × 16 grossi p fois */
-  if(!g){g=document.createElement('canvas');g.width=8*p;g.height=16*p;dosCar(g.getContext('2d'),c,0,0,p,col,'#000');F.xat[k]=g;}return g;}
-function fgExplosion(F,u){const x=F.x,{w,h}=F,p=Math.max(2,Math.round(h/270)),CW=8*p,CH=16*p,C=Math.ceil(w/CW),R=Math.ceil(h/CH),
-    sx=(F.nx-F.camX)*F.cw+w/2,sy=(F.ny-7-F.camY)*F.chh,U=CW,gx=sx/CW,gy=sy/CH,   /* distances comptées en largeurs de case */
-    Rmax=Math.hypot(Math.max(gx,C-gx)*CW,Math.max(gy,R-gy)*CH)/U+3,
-    e=Math.min(1,u/1.3),Ray=1+Rmax*(1-Math.pow(1-e,2.2)),   /* le front avance vite puis ralentit, jusqu'à couvrir l'écran */
-    m=Math.min(1,u/1),froid=Math.min(1,u/3);
-  x.fillStyle='#000';
-  for(let j=0;j<R;j++)for(let i=0;i<C;i++){const dx=Math.abs((i+.5)*CW-sx)/U,dy=Math.abs((j+.5)*CH-sy)/U,
-      d=(dx+dy)*.75*(1-m)+Math.hypot(dx,dy)*m+fgH(F,i,j,1)*1.2;   /* losange au départ (comme la référence), puis rond, bord effiloché */
-    if(d>Ray)continue;const X=i*CW,Y=j*CH,fin=1.6+fgH(F,i,j,2)*1.45+Math.min(1,d/Rmax)*.25;   /* chaque case s'éteint à son heure */
-    const tic=Math.floor(u*7+fgH(F,i,j,3)*7);   /* chaque case change de caractère à son rythme, pas toutes ensemble */
-    if(u>=fin){if(u<fin+.8&&fgH(F,i,j,tic+5)<.05)x.drawImage(fgXCase(F,fgH(F,i,j,tic)<.5?'·':'░',FG_X_FROID[(i+j)&3],p),X,Y);else x.fillRect(X,Y,CW,CH);continue;}
-    const front=Ray-d,reste=(fin-u)/.7,r=fgH(F,i,j,tic),q=fgH(F,i,j,tic+7);let c,col;
-    if(front<1.6&&u<1.5){c=r<.5?'█':'▓';col=r<.4?'#ffffff':'#fff6b0';}   /* le front, chauffé à blanc */
-    else{const set=reste<.45?FG_X_LEGER:reste<1?FG_X_MOYEN:(q<.7?FG_X_LOURD:FG_X_MOYEN);c=set[Math.floor(r*set.length)];
-      const k=Math.min(.999,Math.max(0,d/Math.max(1,Ray)*.75+froid*.55+(q-.5)*.35));   /* du centre au bord, et en refroidissant : jaune, orange, rose, puis violet, bleu, vert */
-      col=FG_X_TEINTES[Math.floor(k*FG_X_TEINTES.length)];}
-    x.drawImage(fgXCase(F,c,col,p),X,Y);}}
+   Explosion revue le même jour : tout reste sur la grille de la descente, chaque case dessinée est opaque. Coup très
+   fort : cratère au bout du trou (roche détruite au centre, abîmée autour, bord déchiqueté), et chaque caractère de la
+   foreuse est projeté dans tous les sens ; en traversant la roche, il la creuse et abîme les cases voisines, de moins en
+   moins loin. Les cases détruites passent par « █ ▓ ▒ ░ · », les abîmées changent de caractère ; tout brûle (blanc,
+   jaune, orange, rouge) puis refroidit en cendre ; des braises et les débris restent. Enfin tout l'écran s'éteint,
+   case par case, par « ▒ ░ · ». Durée : FG_MORT. */
+const FG_MORT=3.6,FG_NOIR0=2.55,   /* à FG_NOIR0, tout l'écran commence à s'éteindre */
+  FG_FEU=['#ffffff','#fff3a0','#ffd23f','#ffb020','#ff6a1f','#e8240f','#a8180c','#5a1410'],
+  FG_DENSE='█▓▒░·',FG_ABIME=['▓╬█▒╫▓','▒╪┼═║╠╣╬','░┐└┘┌╒╛─│┤├'];   /* caractères abîmés, du plus dense au plus clair */
+const fgK=(x,y)=>(y+30000)*60000+(x+30000);
+/* Une case touchée : d = dégâts cumulés (1 = détruite), q = chaleur reçue ; elle garde sa roche d'origine. */
+function fgExDegat(F,x,y,v,u){if(v<=.02)return;const E=F.ex,k=fgK(x,y);let c=E.c.get(k);
+  if(!c){const roc=fgCell(F,x,y);c={x,y,roc,ch:roc?F.oc:' ',col:roc?F.ok:'#000',d:0,q:0,tq:u,t0:u};E.c.set(k,c);}
+  if(c.d<1&&c.d+v>=1)c.tD=u;c.d+=v;c.q=Math.min(1.3,c.q*Math.exp(-(u-c.tq)/1.1)+v);c.tq=u;}
+const fgExRoc=(F,x,y)=>{const c=F.ex.c.get(fgK(x,y));return c?c.roc&&c.d<1:fgCell(F,x,y);};
+const fgExFeu=q=>FG_FEU[q>.9?0:q>.75?1:q>.6?2:q>.47?3:q>.34?4:q>.22?5:q>.11?6:7];
+function fgExplose(F){const E=F.ex={c:new Map(),p:[],tl:0},cx=Math.round(F.nx),cy=Math.round(F.ny-3);
+  for(let j=-13;j<=13;j++)for(let i=-22;i<=22;i++){const d=Math.hypot(i*.6,j),b=fgH(F,cx+i,cy+j,22),r=6+b*4;   /* le cratère : bord déchiqueté */
+    const v=1.8*Math.pow(Math.max(0,1-d/r),1.1)+(d<r+3?(fgH(F,cx+i,cy+j,23)-.6)*.5:0);if(v>.03)fgExDegat(F,cx+i,cy+j,v,0);}
+  for(let j=-24;j<=24;j++)for(let i=-40;i<=40;i++){const d=Math.hypot(i*.6,j);if(d<8||d>24)continue;   /* l'onde de choc : dégâts épars, forts près du cratère, de plus en plus rares et légers au loin */
+    const f=1-(d-8)/16,b=fgH(F,cx+i,cy+j,28);if(b<f*f*.55)fgExDegat(F,cx+i,cy+j,(.08+.5*f*fgH(F,cx+i,cy+j,29))*f,(d-6)*.018);}
+  for(let r=0;r<FG_ART.length;r++)for(let c=0;c<FG_ART[r].length;c++){const ch=FG_ART[r][c];if(ch===' ')continue;   /* chaque caractère de la foreuse part, très vite, dans tous les sens */
+    const x0=F.nx+c-5,y0=F.ny+r-14,a=Math.atan2(y0-(F.ny-7),(x0-F.nx)*.6)+fgRnd(-1.4,1.4),v=fgRnd(30,95);
+    E.p.push({x:x0,y:y0,vx:Math.cos(a)*v/.6,vy:Math.sin(a)*v,ch,col:F.pal[FG_MSK[r][c]]||'#fff',e:fgRnd(.6,1.25),gx:Math.round(x0),gy:Math.round(y0)});}}
+function fgExAvance(F,u){const E=F.ex,dt=Math.min(.05,Math.max(0,u-E.tl));E.tl=u;if(!dt)return;
+  for(const p of E.p){if(p.tS!==undefined)continue;const sp=Math.hypot(p.vx*.6,p.vy);if(sp<2.5||u>1.6){p.tS=u;continue;}
+    const n=Math.ceil(sp*dt/.45);
+    for(let s=0;s<n;s++){p.x+=p.vx*dt/n;p.y+=p.vy*dt/n;const gx=Math.round(p.x),gy=Math.round(p.y);if(gx===p.gx&&gy===p.gy)continue;p.gx=gx;p.gy=gy;
+      const roc=fgExRoc(F,gx,gy);fgExDegat(F,gx,gy,p.e*(roc?.6:.2),u);   /* il creuse la case qu'il traverse… */
+      for(let b=-1;b<=1;b++)for(let a=-1;a<=1;a++)if((a||b)&&fgH(F,gx+a,gy+b,7+(u*40|0))<.45)fgExDegat(F,gx+a,gy+b,p.e*.22*fgH(F,gx+a,gy+b,9),u);   /* …et abîme ses voisines */
+      if(roc){p.vx*=.93;p.vy*=.93;}p.e*=.95;}
+    const fr=Math.exp(-dt*1.9);p.vx*=fr;p.vy=p.vy*fr+dt*5;}}
+function fgExplosion(F,u){fgExAvance(F,u);const E=F.ex,x=F.x,{w,h,cw,chh}=F,tic=Math.floor(u*12),vu=new Map();
+  const put=(xw,yw,ch,col)=>{const X=Math.round((xw-F.camX)*cw+w/2),Y=Math.round((yw-F.camY)*chh);if(X<-cw||X>w||Y<-chh||Y>h)return;
+    x.fillStyle='#000';x.fillRect(X,Y,cw,chh);if(ch!==' '){x.drawImage(fgGlyph(F,ch,col),X,Y);vu.set(fgK(xw,yw),col);}else vu.set(fgK(xw,yw),null);};   /* case opaque, sur la grille */
+  for(const c of E.c.values()){if(u<c.t0)continue;const q=c.q*Math.exp(-(u-c.tq)/1.1)*(.8+.4*fgH(F,c.x,c.y,tic)),chaud=q>.06;
+    if(!c.roc){if(chaud&&q>.25&&fgH(F,c.x,c.y,24)<.3)put(c.x,c.y,'·',fgExFeu(q));continue;}
+    if(c.d>=1){const k=Math.floor((u-c.tD)/.07);   /* détruite : elle passe par des caractères de moins en moins denses */
+      if(k<FG_DENSE.length)put(c.x,c.y,FG_DENSE[k],fgExFeu(Math.max(q,.5)));
+      else if(chaud&&fgH(F,c.x,c.y,25)<.24)put(c.x,c.y,fgH(F,c.x,c.y,tic+3)<.5?'·':'°',fgExFeu(q));   /* braises au fond du cratère */
+      else put(c.x,c.y,' ');continue;}
+    const l=c.d>.6?0:c.d>.3?1:c.d>.1?2:-1,set=FG_ABIME[l];   /* abîmée : autre caractère, couleur de braise puis de cendre */
+    const ch=l<0?c.ch:set[Math.floor(fgH(F,c.x,c.y,26+(q>.5?tic:0))*set.length)];
+    put(c.x,c.y,ch,chaud?fgExFeu(q):l<0?c.col:'#4a403c');}
+  for(const p of E.p){const q=p.tS===undefined?.75+.25*p.e:.7*Math.exp(-(u-p.tS)/1.3)*(.8+.4*fgH(F,p.gx,p.gy,tic));   /* les débris brûlent, puis restent */
+    put(p.gx,p.gy,p.ch,q>.08?fgExFeu(q):'#55504c');}
+  if(u<FG_NOIR0)return;
+  const r0=Math.floor(F.camY),c0=Math.floor(F.camX)-((F.C/2)|0);   /* enfin tout s'éteint, case par case, par des caractères de moins en moins denses */
+  for(let r=-1;r<=F.R;r++)for(let c=0;c<F.C;c++){const xw=c0+c,yw=r0+r,tf=FG_NOIR0+fgH(F,xw,yw,27)*.6;if(u<tf)continue;
+    const k=Math.floor((u-tf)/.09),K=fgK(xw,yw);let col=vu.has(K)?vu.get(K):fgCell(F,xw,yw)?F.ok:null;
+    put(xw,yw,col&&k<3?'▒░·'[k]:' ',col);}}
 /* La foreuse, tournée d'un angle quelconque : on balaie les cases de l'écran autour du nez et, pour chacune, on
    remonte à la case du dessin par la rotation inverse (donc jamais de trou). Au-delà de 45 degrés, chaque
    caractère est remplacé par son équivalent tourné d'un quart de tour. */
@@ -350,8 +375,8 @@ function fgDraw(F,t){const x=F.x,{w,h,cw,chh,dpr}=F;
       for(let j=-ry;j<=ry;j++)for(let i=-rx;i<=rx;i++){const d=Math.hypot(i/1.9,j)/rad;if(d>1)continue;if(d>.55&&fgH(F,i+px,j+py,p.sd)<.22+a*.4)continue;
         fgPut(F,px+i,py+j,d<.4&&a<.55?'▓':d<.75&&a<.8?'▒':'░',col);}}
     else fgPut(F,Math.round(p.x),Math.round(p.y),p.ch,p.col);}
-  x.restore();
   if(F.mort)fgExplosion(F,t-F.tMort);
+  x.restore();
   fgHud(F,t);
   if(F.flash>0){x.globalAlpha=Math.min(.7,F.flash);x.fillStyle='#fff';x.fillRect(0,0,w,h);x.globalAlpha=1;}
   if(F.ph===4){x.globalAlpha=Math.min(1,(t-F.tFade)/F.fadeLen);x.fillStyle='#000';x.fillRect(0,0,w,h);x.globalAlpha=1;}}

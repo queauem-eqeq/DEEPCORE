@@ -1308,12 +1308,15 @@ l'essayer (F9 jusqu'au 23 novembre 2026). **Échap, Espace ou Entrée** la passe
   l'apparition dure **2 s** (1 → 3 s), le message reste **4 s**, la disparition dure **1 s** (7 → 8 s) ; deux lignes sont
   réservées sous le tableau de bord pour ses alertes qui clignotent, que l'annonce ne cache pas.
 
-**Foreuse détruite pendant une descente** (23 novembre 2026, explosion revue le même jour d'après `REF/explosion.gif`).
-Elle explose dans le puits en une grille de **caractères DOS de tracé de cadres** (« █ ▓ ╬ ═ ║ ┼ ┐ ░ … », police de
-l'annonce, cases 8 × 16 grossies), **chaque case opaque sur fond noir — aucune transparence** —, en couleurs vives qui
-changent case par case : jaune et orange au centre, rose, puis violet, bleu, vert vers le bord et en refroidissant. Le front,
-chauffé à blanc, part en losange, s'arrondit et couvre tout l'écran en 1,3 s ; puis les cases s'éteignent une à une,
-de caractères pleins à des traits fins, jusqu'au noir. L'annonce disparaît dès l'explosion. Après 3,4 s, le jeu montre
+**Foreuse détruite pendant une descente** (23 novembre 2026, explosion revue deux fois le même jour). Tout se joue
+**sur la grille de la descente** (elle ne change pas), **chaque case dessinée opaque** (aucune transparence). Un coup très
+fort, d'un seul coup : l'écran tremble, le bout du trou devient un **cratère** (roche détruite au centre, abîmée autour,
+bord déchiqueté), chauffé à blanc ; une onde de choc abîme la roche alentour par endroits, **fort près du cratère, de plus
+en plus rarement et légèrement au loin**. Chaque **caractère de la foreuse est projeté** dans tous les sens : en traversant
+la roche, il la **creuse** et abîme ses voisines, puis ralentit et s'arrête. Une case détruite passe par « █ ▓ ▒ ░ · »
+puis disparaît ; une case abîmée prend un autre caractère (« ╬ ╪ ═ ║ ┼ ┐ ░ … », plus clair si moins touchée). Tout **brûle**
+(blanc, jaune, orange, rouge) puis refroidit en cendre ; des braises restent au fond du cratère et **les débris de la foreuse
+restent** là où ils sont tombés. À 2,55 s, tout l'écran s'éteint case par case, par « ▒ ░ · », et à 3,6 s le jeu montre
 aussitôt **« FOREUSE DÉTRUITE »** sur fond **noir plein** : ni la carte du niveau, ni une seconde explosion sur la carte.
 Partout, mort en descente ou non, « FOREUSE DÉTRUITE » est **toujours rouge**, quelle que soit la palette.
 
