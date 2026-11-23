@@ -241,7 +241,7 @@ $('offOn').onclick=()=>{$('off').hidden=true;try{if(AC)AC.resume();}catch(e){}un
    cinématique de forage se joue et le niveau suivant commence. */
 function end(s){
   drilling=false;
-  if((G.niv||1)<NIV_MAX){$('overlay').hidden=true;playForage(()=>{niveauSuivant();render();},G.niv||1);return;
+  if((G.niv||1)<NIV_MAX){$('overlay').hidden=true;descendre(G.niv||1);return;
     }const bilan=`<div class="stats"><span>${G.turn} tours · ${G.dist} cases parcourues</span><span>Matière {µ} en réserve : ${G.st.matiere||0}</span></div>`;
   G.over={site:s.id,win:true};
   $('card').innerHTML=`<div class="tag">Site ${s.id} foré</div><h2>NOYAU<br>ATTEINT</h2>${bilan}<p>La foreuse a percé jusqu’au noyau de la planète.</p><button class="go" id="again">Nouvelle exploration</button>`;

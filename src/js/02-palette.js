@@ -32,6 +32,12 @@ try{const p=JSON.parse(localStorage.getItem('np-palette')||'null');if(p&&p['1']&
 /* PAL : les couleurs affichées. PAL_U : la palette choisie par le joueur (celle des sélecteurs, celle qui est mémorisée).
    Chaque biome applique à PAL_U une petite variation : TEINTE = [rotation de teinte accent, bio, monde (degrés), clarté monde, saturation monde (points)]. */
 let PAL_U=PAL,TEINTE=[0,0,0,0,0];
+/* Palette du niveau (23 novembre 2026) : à chaque niveau, la foreuse change de palette, tirée au hasard parmi les palettes prédéfinies,
+   jamais deux fois la même de suite. Elle ne touche pas à la palette choisie par le joueur (PAL_U, mémorisée) : le niveau 1 la reprend. */
+let PAL_NIV=null,PAL_NIV_I=-1;
+function palNiveauSuivant(){const exclu=PAL_NIV_I>=0?PAL_NIV_I:PRESET_ACTIVE,l=PRESETS.map((_,i)=>i).filter(i=>i!==exclu);
+  PAL_NIV_I=l[Math.floor(Math.random()*l.length)];PAL_NIV=palDe(PRESETS[PAL_NIV_I].c);}
+function palNiveauRaz(){PAL_NIV=null;PAL_NIV_I=-1;}
 function teinter(hex,dh,dl,ds){if(!dh&&!dl&&!ds)return hex;
   const n=parseInt(hex.slice(1),16),r=(n>>16&255)/255,g=(n>>8&255)/255,b=(n&255)/255,mx=Math.max(r,g,b),mn=Math.min(r,g,b),d=mx-mn;
   let h=0,l=(mx+mn)/2,s=d?d/(1-Math.abs(2*l-1)):0;if(d){h=mx===r?((g-b)/d)%6:mx===g?(b-r)/d+2:(r-g)/d+4;h*=60;}
@@ -46,7 +52,7 @@ const HARD_CLAIR=16;   // la roche dure : la couleur monde en plus sombre (clart
 const EAU_TUILES=['liq0','liq1','deep0','deep1','wade','wadeDeep'];
 // dessinées en couleur bâti : l'encre '3' y est lue '5'
 const BATI_TUILES=['wall','wallFace','floor','door','doorOpen','doorOpenV','pillar','lock','niche','nicheOuverte'];
-function palBiome(t){TEINTE=t||[0,0,0,0,0];
-  PAL={'1':teinter(PAL_U['1'],TEINTE[0]),'2':teinter(PAL_U['2'],TEINTE[1]),'3':teinter(PAL_U['3'],TEINTE[2],TEINTE[3],TEINTE[4]),
-  '4':PAL_U['4']||'#d8180b','5':PAL_U['5']||PAL_U['3']};PAL['e']=teinter(PAL['3'],EAU[0],EAU[1],EAU[2]);
+function palBiome(t){TEINTE=t||[0,0,0,0,0];const U=PAL_NIV||PAL_U;
+  PAL={'1':teinter(U['1'],TEINTE[0]),'2':teinter(U['2'],TEINTE[1]),'3':teinter(U['3'],TEINTE[2],TEINTE[3],TEINTE[4]),
+  '4':U['4']||'#d8180b','5':U['5']||U['3']};PAL['e']=teinter(PAL['3'],EAU[0],EAU[1],EAU[2]);
   PAL['d']=teinter(PAL['3'],0,-HARD_CLAIR,0);}

@@ -12,6 +12,8 @@ Partie du document de conception (sommaire et règles à ne pas casser : `concep
   portes et piliers des bâtiments, pour que l'intérieur ne se confonde plus avec la montagne). Le blanc reste fixe. Dans le
   code les clés sont `3` monde, `2` bio, `1` accent, `4` danger, `5` bâti ; les encres `r` et `L` des tuiles se lisent en
   couleur danger, et l'encre `3` se lit en couleur bâti sur les tuiles de `BATI_TUILES` (`02-palette.js`).
+- **Une palette par niveau** (23 novembre 2026) : à chaque niveau suivant, la palette est tirée au hasard parmi les prédéfinies (jamais la
+  même deux fois de suite) ; la palette choisie par le joueur n'est pas modifiée et revient au niveau 1. Voir `conception-descente.md`.
 - **Toutes les couleurs viennent de LACKING64** (lospec.com/palette-list/lacking64) : 8 palettes neuves, toutes modifiables
   (Braise, Lagon, Désert, Jungle, Améthyste, Cendre, Glacier, Magma ; Braise par défaut, la plus proche de l'ancienne
   Rouille), et le **sélecteur de teinte montre les 64 couleurs de LACKING64**. Il reste ouvert après un choix ; on le ferme

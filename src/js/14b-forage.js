@@ -23,7 +23,7 @@ const FG_MINE_DM=12,FG_PASSE_DM=30,FG_AMAS_MAT=20;
    puits rapporte 1 de Matière. FG_AMAS_PRES amas naissent près de la route (9 à 14 cases à côté : il faut tourner), FG_AMAS_LOIN
    loin à gauche et à droite, hors d'atteinte : le sous-sol a l'air d'exister aussi sur les côtés. F.amasL : la liste, dans l'ordre
    des profondeurs ; un amas {y, loin, c:[{x,y,ok}]} prend forme (fgAmasForme) quand il arrive au bas de l'écran. */
-const FG_AMAS_PRES=3,FG_AMAS_LOIN=6;
+const FG_AMAS_PRES=3,FG_AMAS_LOIN=16;
 // une tache irrégulière de n cases autour de (x,y) : on part d'une case et on ajoute au hasard une voisine libre, plus souvent sur les côtés
 function fgAmasForme(x,y,n){const c=[{x,y,ok:1}],vu=new Set([x+','+y]);let g=0;
   while(c.length<n&&g++<900){const b=c[(Math.random()*c.length)|0],r=Math.random(),dx=r<.35?-1:r<.7?1:0,dy=dx?0:(Math.random()<.5?-1:1),
@@ -70,7 +70,7 @@ const FG_NIV=[
   {D0:150,b:[[0,0],[.05,1],[.17,2]],dur:3,seuil:p=>.665-.05*p,des:.15,mel:(m,n)=>m===2&&n>.70?1:m===1&&n<.30?2:m},
   {D0:390,b:[[0,2],[.22,4],[.5,2]],dur:5,seuil:p=>.6-.05*p,des:.05,mel:(m,n)=>m===2&&n>.68?4:m},
   {D0:190,b:[[0,5],[.3,6],[.62,5],[.84,7]],dur:7,seuil:p=>.6-.07*p,des:.05,mel:(m,n)=>m===5&&n>.72?6:m}];
-const FG_ANN_T0=1,FG_ANN_T1=3,FG_ANNONCE=8,FG_T0=2.5,FG_PLG=1.3,FG_CAV=34,FG_R=6,FG_POSE=3.2,
+const FG_ENT=.8,FG_ANN_T0=1,FG_ANN_T1=3,FG_ANNONCE=8,FG_T0=2.5,FG_PLG=1.3,FG_CAV=34,FG_R=6,FG_POSE=3.2,
   FG_FONT='"JetBrains Mono", ui-monospace, Menlo, Consolas, monospace';
 const FG_SMOKE=['#c4cdd0','#9aa5a9','#737f84','#4d585d','#2e373b'];
 let FORAGE=null,FG_CB=null;
@@ -100,12 +100,22 @@ function fgMat(F,x,y){const P=F.P;
 const fgDur=(F,x,y)=>FG_MAT[fgMat(F,Math.round(x),Math.round(y))].d;
 // dureté moyenne d'une plaque, pour sonder ce qui vient
 function fgSonde(F,x,y){let s=0;for(let j=0;j<3;j++)for(let i=-3;i<=3;i+=3)s+=fgDur(F,x+i,y+j*3);return s/9;}
-function fgStart(){const F=FORAGE,pal=k=>(PAL&&PAL[k])||'#b5c2c6',base={'1':pal('1'),'2':pal('2'),'3':pal('3'),g:'#b5c2c6'};
-  F.mc=FG_MAT.map(M=>[fgMix(base[M.k[0]],M.k[1]*.74),fgMix(base[M.k[0]],M.k[1]),fgMix(base[M.k[0]],Math.min(1.3,M.k[1]*1.25))]);
-  F.D0=F.P.D0;F.fl=F.D0+FG_CAV;F.oreCol=fgMix(base['1'],1.35);F.cDim=fgMix('#b5c2c6',.26);F.cRock=fgMix('#b5c2c6',.24);
-    F.cRock2=fgMix('#b5c2c6',.42);
-  F.pal={a:fgMix(base['1'],1.15),b:fgMix(base['2'],1.1),d:'#6b7a80',g:'#a9b6ba',w:'#f2f7f8',o:'#ffb347'};
+/* Palettes (23 novembre 2026) : les roches passent de la palette du départ (F.palA) à celle du niveau d'arrivée (F.palB) pendant la
+   descente. FG_PS paliers de profondeur, une table de couleurs par palier. La foreuse garde les couleurs du départ. */
+const FG_PS=14;
+function fgLerp(a,b,u){const p=h=>{const m=/^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i.exec(h)||['','b5','c2','c6'];return [1,2,3].map(i=>parseInt(m[i],16));},
+  A=p(a),B=p(b);return '#'+A.map((v,i)=>Math.round(v+(B[i]-v)*u).toString(16).padStart(2,'0')).join('');}
+// le gris des roches prend un peu de la couleur monde de la palette
+const fgGris=pal=>fgLerp('#b5c2c6',pal['3']||'#b5c2c6',.38);
+function fgStart(){const F=FORAGE,pa=F.palA,pb=F.palB,bas=(p,k)=>({'1':p['1'],'2':p['2'],'3':p['3'],g:fgGris(p)}[k]);
+  F.mcT=[];for(let s=0;s<FG_PS;s++){const u=s/(FG_PS-1),base={};for(const k of ['1','2','3','g'])base[k]=fgLerp(bas(pa,k),bas(pb,k),u);
+    F.mcT.push(FG_MAT.map(M=>[fgMix(base[M.k[0]],M.k[1]*.74),fgMix(base[M.k[0]],M.k[1]),fgMix(base[M.k[0]],Math.min(1.3,M.k[1]*1.25))]));}
+  F.mc=F.mcT[0];
+  F.D0=F.P.D0;F.fl=F.D0+FG_CAV;F.oreCol=fgMix(pa['1'],1.35);F.cDim=fgMix(fgGris(pa),.26);F.cRock=fgMix(fgGris(pb),.24);
+    F.cRock2=fgMix(fgGris(pb),.42);
+  F.pal={a:fgMix(pa['1'],1.15),b:fgMix(pa['2'],1.1),d:'#6b7a80',g:'#a9b6ba',w:'#f2f7f8',o:'#ffb347'};
   F.tr=new Float32Array(F.D0+4).fill(NaN);F.tr[0]=F.cx;}
+const fgMC=(F,y)=>F.mcT[Math.max(0,Math.min(FG_PS-1,Math.floor(y/F.D0*FG_PS)))];
 // le centre du puits à la ligne y (interpolé), ou la position actuelle si rien n'est encore creusé
 function fgTrace(F,y){if(y<=0)return F.tr[0];if(y>=F.d)return F.cx;
   const i=Math.floor(y),a=F.tr[Math.min(i,F.D0)],b=F.tr[Math.min(i+1,F.D0)];
@@ -124,12 +134,12 @@ function fgCell(F,x,y){
     if(fgH(F,x,y,10)<.012){F.oc='·';F.ok=F.cDim;return true;}return false;}
   if(y>=F.fl){const k=y-F.fl;F.oc=k===0?(fgH(F,x,y,11)<.5?'▓':'█'):['█','▓','█','▒'][Math.floor(fgH(F,x,y,12)*4)];
     F.ok=k===0?F.cRock2:F.cRock;return true;}
-  if(y<2){if(fgH(F,x,y,14)>.85)return false;F.oc=y?'▒':['"',';',"'",'^'][Math.floor(fgH(F,x,y,15)*4)];F.ok=F.mc[0][2];return true;}
+  if(y<2){if(fgH(F,x,y,14)>.85)return false;F.oc=y?'▒':['"',';',"'",'^'][Math.floor(fgH(F,x,y,15)*4)];F.ok=F.mcT[0][0][2];return true;}
   const c=F.tr[Math.min(F.D0,y)];if(!F.sansTrou&&!isNaN(c)&&Math.abs(x-c)<=FG_R-(fgH(F,x,y,5)<.3?1:0))return false;
   const mi=fgMat(F,x,y),M=FG_MAT[mi];
   if(fgH(F,x,y,2)>M.dn)return false;
   F.oc=M.ch[Math.floor(fgH(F,x,y,4)*M.ch.length)];
-  F.ok=F.mc[mi][fgMat(F,x,y-1)!==mi?2:Math.floor(fgH(F,x,y,6)*3)];
+  F.ok=fgMC(F,y)[mi][fgMat(F,x,y-1)!==mi?2:Math.floor(fgH(F,x,y,6)*3)];
   if(M.ore&&fgH(F,x,y,16)<M.ore){F.oc=M.oreCh;F.ok=(Math.floor(F.t*4+fgH(F,x,y,17)*5)%5===0)?'#fff':F.oreCol;}
   return true;}
 function fgEmit(F,o){if(F.pt.length<420)F.pt.push(Object.assign({age:0,g:0,drag:0,sd:(Math.random()*999)|0},o));}
@@ -138,7 +148,7 @@ function fgSmoke(F,x,y,vx,vy,life,r0,gr){fgEmit(F,{type:'sm',x,y,vx,vy,life,r0,g
 const fgIci=F=>fgMat(F,Math.round(F.cx),Math.max(0,Math.min(F.D0-1,Math.round(F.d))));
 function fgChips(F,n,x,y,spread,up,g,mi,col){const k=mi==null?fgIci(F):mi,M=FG_MAT[k];
   for(let i=0;i<n;i++)fgEmit(F,{type:'ch',x:x+fgRnd(-spread,spread)*.5,y:y+fgRnd(-1,1),vx:fgRnd(-spread,spread),vy:up<0?fgRnd(up,up*.35):fgRnd(up*.2,up),g,life:fgRnd(.7,1.5),
-    ch:M.ch[(Math.random()*M.ch.length)|0],col:col||F.mc[k][(Math.random()*3)|0]});}
+    ch:M.ch[(Math.random()*M.ch.length)|0],col:col||fgMC(F,y)[k][(Math.random()*3)|0]});}
 function fgSparks(F,n,x,y,s){for(let i=0;i<n;i++)fgEmit(F,{type:'ch',x:x+fgRnd(-3,3),y,vx:fgRnd(-s,s),vy:-fgRnd(5,15),g:22,life:fgRnd(.25,.6),ch:'*+·'[(Math.random()*3)|0],col:Math.random()<.5?'#ffe9a8':'#ffffff'});}
 /* ---- son : synthèse Web Audio (moteur, grincement, grondement) ---- */
 function fgSound(){const a=audio();if(!a)return null;
@@ -167,7 +177,53 @@ function fgBoom(F,k){
     for(let i=0;i<7;i++)noiz(.05,.09,3000,'highpass',.3+Math.random()*1.2);}
   else if(k==='couche'){noiz(1.1,.45,420,'lowpass',0,60);tone(85,.5,'sine',.32,38);noiz(.3,.14,2200,'highpass',.05);}
   else if(k==='petit'){noiz(.5,.25,500,'lowpass',0,60);tone(95,.3,'sine',.25,40);}}
-function playForage(suite,niv){
+/* Décor du plancher (23 novembre 2026). En haut de la descente, le plancher montre l'endroit où l'on fore ; en bas, celui du niveau
+   d'arrivée. La carte (vue de dessus) est lue en coupe, sur une bande de cinq rangées autour de la foreuse, puis dressée de côté :
+   une case de carte = FG_TW colonnes, un mur = FG_HM rangées. Murs et toit du bâtiment en couleur bâti, machines et roches en couleur
+   monde, la porte percée dans le mur. fgCoupe rend des cellules {x (colonnes depuis la foreuse), h (rangées au-dessus du sol), ch, c}. */
+const FG_TW=4,FG_HM=14,FG_DM=22;
+const FG_MACH=new Set([MACHINE,ANTENNA,TERMINAL,TURRET,PYLON,PILE,FABRIC,LEVIER,GRILLE,STATION,CHARGEUR]);
+function fgCoupe(cx,cy){
+  const T=(x,y)=>x<0||y<0||x>=W||y>=H?GROUND:G.t[idx(x,y)],col=[],cells=[],vu=new Set();
+  const put=(x,h,ch,c)=>{const k=x+','+h;if(vu.has(k))return;vu.add(k);cells.push({x,h,ch,c});};
+  const hs=(a,b)=>{let v=(a*374761393+b*668265263)|0;v=Math.imul(v^(v>>>13),1274126177);return ((v^(v>>>16))>>>0)/4294967296;};
+  for(let d=-FG_DM;d<=FG_DM;d++){const k={b:0,porte:0,sol:0,m:0,ant:0,r:0};
+    for(let j=-2;j<=2;j++){const v=T(cx+d,cy+j),c=j===0;   // murs, portes et sol : la rangée de la foreuse seule ; machines : une rangée de chaque côté
+      if(c&&bati(v))k.b=1;else if(c&&v===DOOR)k.porte=1;else if(c&&v===FLOOR)k.sol=1;
+      else if(Math.abs(j)<=1&&(v===ANTENNA||v===PYLON))k.ant=1;else if(Math.abs(j)<=1&&FG_MACH.has(v))k.m=1;
+      else if(v===HARD)k.r=Math.max(k.r,7);else if(v===MOUNT)k.r=Math.max(k.r,5);else if(v===ROCK)k.r=Math.max(k.r,3);}
+    col.push(k);}
+  const K=d=>col[d+FG_DM];let L=null,R=null;
+  for(let d=0;d>=-FG_DM;d--)if(K(d).b){L=d;break;}
+  for(let d=0;d<=FG_DM;d++)if(K(d).b){R=d;break;}
+  const dedans=L!==null&&R!==null&&R-L>=3,x0=d=>d*FG_TW-(FG_TW>>1);
+  // murs, porte et toit
+  for(let d=-FG_DM;d<=FG_DM;d++){const k=K(d);
+    if(k.b||(dedans&&d>=L&&d<=R&&k.porte)){const bas=dedans&&d>=L&&d<=R?FG_HM:7,
+        porte=k.porte&&(!dedans||(d>=L&&d<=R));
+      for(let i=0;i<FG_TW;i++)for(let h=1;h<=bas;h++){
+        if(porte&&h<=4){if(i===0||i===FG_TW-1)put(x0(d)+i,h,'▌▐'[i?1:0],'b');else put(x0(d)+i,h,'▒','b');continue;}
+        if(porte&&h===5){put(x0(d)+i,h,'▀','b');continue;}
+        put(x0(d)+i,h,(h+i)&1?'▓':'█','b');}}}
+  if(dedans)for(let x=x0(L)-1;x<=x0(R)+FG_TW;x++){put(x,FG_HM+1,'█','b');put(x,FG_HM+2,'▀','b');}
+  // machines : au plus deux ensembles, les plus proches (pas sous la foreuse)
+  const gr=[];for(let d=-FG_DM;d<=FG_DM;d++){const k=K(d);if(Math.abs(d)<=2||!(k.m||k.ant))continue;
+    const g=gr[gr.length-1];if(g&&g.f===d-1&&!!g.ant===!!k.ant&&!(g.n>=2))g.f=d,g.n++;else gr.push({d0:d,f:d,n:1,ant:k.ant});}
+  gr.sort((a,b)=>Math.abs(a.d0)-Math.abs(b.d0));
+  for(const g of gr.slice(0,2)){const xa=x0(g.d0),xb=x0(g.f)+FG_TW-1;
+    if(g.ant){const xm=(xa+xb)>>1;for(let h=1;h<=8;h++)put(xm,h,h===8?'╤':'│','m');put(xm-1,5,'─','m');put(xm+1,5,'─','m');
+      for(let x=xa;x<=xb;x++)put(x,1,'▄','m');}
+    else for(let x=xa;x<=xb;x++)for(let h=1;h<=5;h++)put(x,h,h===5?'▄':(x+h)&1?'▓':'█','m');}
+  // roches alentour, en silhouette
+  for(let d=-FG_DM;d<=FG_DM;d++){const k=K(d);if(!k.r||k.b||(dedans&&d>=L&&d<=R))continue;
+    for(let i=0;i<FG_TW;i++){const x=x0(d)+i,hh=k.r+Math.floor(hs(x,7)*3)-1;
+      for(let h=1;h<=hh;h++)put(x,h,h===hh?'▀':'▒','m');}}
+  return {cells,cb:PAL['5'],cm:PAL['3']};}
+function fgDecor(F,D,gy,ox){if(!D)return;const {w,h,cw,chh}=F;
+  for(const c of D.cells){const py=Math.round((gy-c.h-F.camY)*chh);if(py<-chh||py>h)continue;
+    const px=Math.round((ox+c.x-F.camX)*cw+w/2);if(px<-cw||px>w)continue;
+    F.x.fillStyle='#000';F.x.fillRect(px,py,cw,chh);F.x.drawImage(fgGlyph(F,c.ch,c.c==='b'?D.cb:D.cm),px,py);}}
+function playForage(suite,niv,opt){
   if(reduced||FORAGE){suite&&suite();return;}
   unlock();if(typeof TRAV!=='undefined'&&TRAV)stopTravel();
   // même échelle aux deux descentes (22 novembre 2026 ; la première était plus zoomée, h ÷ 36)
@@ -179,7 +235,8 @@ function playForage(suite,niv){
     jeu,mines:[],mNext:30,touche:0,perdu:0,stun:0,amas:null,amasY:0,amasL:[],recolte:0,
     seed:(Math.random()*1e9)|0,atl:{},pt:[],t0:performance.now(),last:performance.now(),t:0,ph:0,d:0,cx:0,vx:0,hs:0,evit:0,
     th:90,nx:0,ny:-FG_POSE,side:1,camX:0,camY:0,imp:0,flash:0,matPrev:-1,kl:0,kr:0,man:0,
-    snd:fgSound(),acc:{ex:0,dust:0,chip:0,spark:0,roc:0},vy:0};
+    snd:fgSound(),acc:{ex:0,dust:0,chip:0,spark:0,roc:0},vy:0,ox:null};
+  {const o=opt||{},pa=o.palA||Object.assign({},PAL);FORAGE.palA=pa;FORAGE.palB=o.palB||pa;FORAGE.decD=o.decD||null;FORAGE.decA=o.decA||null;}
   fgStart();FG_CB=suite||null;
   // première descente : les profondeurs des amas, proches et lointains, étalées sur toute la descente
   if(!jeu){const F=FORAGE,D=F.D0,l=[];
@@ -190,6 +247,14 @@ function playForage(suite,niv){
   fgCv.hidden=false;$('forageSkip').hidden=false;$('forageSkip').textContent=jeu?`Échap : passer (−${FG_PASSE_DM} vie)`:'Échap : passer';
     fgBoom(FORAGE,'start');
   requestAnimationFrame(forageFrame);}
+/* Descente complète (23 novembre 2026) : le décor du départ est lu sur la carte actuelle, le niveau d'arrivée est généré (palette tirée) AVANT la
+   scène pour qu'on en voie le décor sur le plancher d'arrivée, puis la scène se joue par-dessus la partie déjà changée. prep : Lab (niveau forcé). */
+function descendre(niv,hasard,prep){
+  const A=Object.assign({},PAL),dep=fgCoupe(G.px,G.py);
+  if(reduced||FORAGE){if(prep)prep();niveauSuivant(hasard);render();return;}
+  if(prep)prep();niveauSuivant(hasard);
+  const arr=fgCoupe(G.px,G.py);
+  playForage(()=>{render();},niv,{palA:A,palB:Object.assign({},PAL),decD:dep,decA:arr});}
 function skipForage(){const F=FORAGE;if(!F||F.ph>=4)return;
   // descente en aveugle : elle coûte, sans jamais tuer
   if(F.jeu&&F.ph<2&&typeof G!=='undefined'&&G&&G.st){const dm=Math.max(0,Math.min(FG_PASSE_DM,Math.floor(G.st.vie)-1));G.st.vie-=dm;
@@ -203,6 +268,9 @@ function fgMines(F,dt){const bas=F.R*.7;
     x=Math.round(F.cx+F.vx*.9+(vise?fgRnd(-4,4):(Math.random()<.5?-1:1)*fgRnd(12,26)));
     F.mines.push({x,y:F.mNext,ok:1});
       if(Math.random()<.25)F.mines.push({x:x+(Math.random()<.5?-1:1)*Math.round(fgRnd(15,19)),y:F.mNext+Math.round(fgRnd(-2,2)),ok:1});
+    // plus loin sur les côtés, sur toute la largeur de l'écran : des mines qui ne dépendent pas de la route de la foreuse (23 novembre 2026)
+    for(let i=0,n=Math.random()<.5?1:2;i<n;i++){const sd=Math.random()<.5?-1:1,xf=Math.round(F.camX+sd*fgRnd(14,F.C*.5));
+      if(Math.abs(xf-F.cx)<12||Math.abs(xf-x)<6)continue;F.mines.push({x:xf,y:F.mNext+Math.round(fgRnd(-4,4)),ok:1});}
     // rangées espacées quand la descente a été allongée de 5 secondes, pour ne pas doubler les dégâts
     F.mNext+=Math.round(fgRnd(17,25)*(1-.3*p));}
   for(const m of F.mines){if(!m.ok||Math.abs(m.y-F.d)>1.4||Math.abs(m.x-F.cx)>FG_R-1)continue;m.ok=0;F.touche++;F.stun=.45;F.imp=1.6;
@@ -215,7 +283,7 @@ function fgMines(F,dt){const bas=F.R*.7;
    il faut tourner un peu pour passer dessus. Il est récolté si le puits le touche (moitié de largeur du puits + 2 cases). */
 function fgAmas(F){
   for(const A of F.amasL){
-    if(!A.c){if(F.d+F.R*.6<A.y)continue;const sd=A.loin||(Math.random()<.5?-1:1),ec=A.loin?fgRnd(26,Math.max(30,F.C*.42)):fgRnd(9,14);
+    if(!A.c){if(F.d+F.R*.6<A.y)continue;const sd=A.loin||(Math.random()<.5?-1:1),ec=A.loin?fgRnd(26,Math.max(30,F.C*.48)):fgRnd(9,14);
       A.c=fgAmasForme(Math.round(F.cx+F.vx*.6+sd*ec),A.y,FG_AMAS_MAT);if(!A.loin)F.amas={x:A.c[0].x,y:A.y,ok:1,A};}
     if(Math.abs(A.y-F.d)>5)continue;
     for(const c of A.c){if(!c.ok||Math.abs(c.y-F.d)>1.3||Math.abs(c.x-F.cx)>FG_R+1)continue;   // le puits touche ce caractère : +1
@@ -266,7 +334,7 @@ function forageFrame(now){const F=FORAGE;if(!F)return;
     if(F.jeu)fgMines(F,dt);else fgAmas(F);
     for(let y=Math.floor(dPrev);y<=Math.floor(F.d);y++)fgCreuse(F,y);
     F.nx=F.cx;F.ny=F.d;
-    if(F.d>=F.D0){F.d=F.D0;F.ny=F.d;F.ph=2;F.tF=t;F.vy=Math.max(7,(F.d-dPrev)/dt);F.side=F.vx<-1?-1:1;F.vx*=.3;fgBoom(F,'perce');
+    if(F.d>=F.D0){F.d=F.D0;F.ny=F.d;F.ph=2;F.ox=Math.round(F.cx);F.tF=t;F.vy=Math.max(7,(F.d-dPrev)/dt);F.side=F.vx<-1?-1:1;F.vx*=.3;fgBoom(F,'perce');
       F.flash=.35;F.imp=.5;
       fgChips(F,70,F.cx,F.D0+1,9,4,34);
         for(let i=0;i<10;i++)fgSmoke(F,F.cx+fgRnd(-5,5),F.D0+fgRnd(0,3),fgRnd(-6,6),fgRnd(-1,5),fgRnd(1.4,2.2),1.1,2.2);}}
@@ -446,6 +514,7 @@ function fgDraw(F,t){const x=F.x,{w,h,cw,chh,dpr}=F;
   const r0=Math.floor(F.camY),c0=Math.floor(F.camX)-((F.C/2)|0);
   for(let r=-1;r<=F.R;r++){const y=r0+r,py=Math.round((y-F.camY)*chh);
     for(let c=0;c<F.C;c++){const xw=c0+c;if(fgCell(F,xw,y))x.drawImage(fgGlyph(F,F.oc,F.ok),Math.round((xw-F.camX)*cw+w/2),py);}}
+  fgDecor(F,F.decD,0,0);if(F.ox!=null)fgDecor(F,F.decA,F.fl,F.ox);   /* le plancher du départ et celui de l'arrivée */
   fgExCases(F,t);   /* roche qui fond sous le cône, cratères des mines (et de la foreuse) */
   // mine : un pavé plein de 7 × 3 caractères, rouge et blanc en alternance, bien plus gros que les filons de la roche
   for(const m of F.mines){if(!m.ok)continue;const py=Math.round((m.y-F.camY)*chh);if(py<-2*chh||py>h+chh)continue;
@@ -469,7 +538,8 @@ function fgDraw(F,t){const x=F.x,{w,h,cw,chh,dpr}=F;
   fgExDebris(F,t);if(F.mort)fgExNoir(F,t-F.tMort);
   x.restore();
   fgHud(F,t);
-  if(F.ph===4)fgEteint(F,Math.min(1,(t-F.tFade)/F.fadeLen));}   /* jamais de transparence dans les descentes : ni éclair blanc, ni fondu */
+  if(F.ph===4)fgEteint(F,Math.min(1,(t-F.tFade)/F.fadeLen));
+  else if(t<FG_ENT)fgEteint(F,1-t/FG_ENT);}   /* entrée : le noir se rallume case par case, comme la sortie s'éteint */   /* jamais de transparence dans les descentes : ni éclair blanc, ni fondu */
 /* Annonce au début de la séquence (22 novembre 2026, revue le 23). La forme reste celle choisie le 22 : un cadre plein à fond noir,
    avec deux bandes de chantier (un caractère sur deux) au-dessus et au-dessous du message. Depuis le 23 novembre 2026, tout est
    écrit en police DOS (02b-police-dos.js : Modern DOS 8x16, CP437), case par case, pixel de police calé sur des pixels d'écran,

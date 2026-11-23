@@ -322,7 +322,7 @@ function niveau(refait){drilling=false;
 /* Le niveau d'une carte générée depuis le menu (REGEN, GÉNÉRER LA CARTE) est celui de sa recette (22 novembre 2026 ; avant,
    toujours 1) : une carte « cavernes » est un niveau 2, une « base » un niveau 3, et prend la faune (fenêtre LIFE) et les
    artefacts de ce niveau. La descente reprend de là. */
-function newGame(){SANS_VAISSEAU=false;NIV_GEN=NIV_RECETTE(GEN.recette);niveau();G.niv=NIV_GEN;   // G n'existe qu'une fois la carte générée
+function newGame(){palNiveauRaz();SANS_VAISSEAU=false;NIV_GEN=NIV_RECETTE(GEN.recette);niveau();G.niv=NIV_GEN;   // G n'existe qu'une fois la carte générée
   if(G.ship)say('Atterrissage confirmé. Un site de forage signalé par l’orbiteur. La foreuse est dans la soute ; la porte est à l’arrière.','info');
   else if(G.arrivee==='base')say(`Niveau ${G.niv} : la foreuse a traversé le plafond d’une salle, dans une base enfouie. Un site de forage est signalé plus loin.`,'info');
   // arrivée par un puits
@@ -362,7 +362,7 @@ function niveauSuivant(hasard){   // hasard : un archétype monde et un archéty
   // la génération tire les plans d'après ce que la foreuse sait déjà
   const sauve=JSON.parse(JSON.stringify(GEN)),inv=G.inv,st=G.st,tour=G.turn,dist=G.dist,niv=(G.niv||1)+1;SAV_GARDE=st.savoir||null;
   // sans hasard : les réglages en cours du menu Monde pour cette recette
-  recRange();recPrend(RECETTE_NIV(niv));if(hasard)hasardReglages();SANS_VAISSEAU=true;NIV_GEN=niv;
+  palNiveauSuivant();recRange();recPrend(RECETTE_NIV(niv));if(hasard)hasardReglages();SANS_VAISSEAU=true;NIV_GEN=niv;
   niveau();   // genPlanet refait l'objet G : tout ce que la foreuse garde est remis en place juste après
   SANS_VAISSEAU=false;genRemet(sauve);
   G.inv=inv;G.st=st;G.niv=niv;G.turn=tour;G.dist=dist;G.over=null;drilling=false;SAV_GARDE=null;

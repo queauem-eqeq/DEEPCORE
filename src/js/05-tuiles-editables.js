@@ -88,6 +88,6 @@ function buildTiles(){
     r.setProperty('--c4',PAL['4']);r.setProperty('--c5',PAL['5']);r.setProperty('--life',PAL['4']);
   PAL_CLES.forEach(k=>{$('pc'+k).style.background=PAL_U[k];$('pc'+k).title=PAL_U[k];});
 }
-function setPal(p){PAL_U=p;try{localStorage.setItem('np-palette',JSON.stringify(PAL_U));}catch(e){}touchLocal();palBiome(TEINTE);
+function setPal(p){PAL_U=p;palNiveauRaz();try{localStorage.setItem('np-palette',JSON.stringify(PAL_U));}catch(e){}touchLocal();palBiome(TEINTE);
   buildTiles();render();}
 

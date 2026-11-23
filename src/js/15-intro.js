@@ -270,10 +270,10 @@ $('niv1Btn').onclick=()=>{unlock();if(TRAV)stopTravel();
   const sauve=JSON.parse(JSON.stringify(GEN));recRange();recPrend(RECETTE_NIV(1));hasardReglages();newGame();
   genRemet(sauve);started=true;$('overlay').hidden=true;render();playIntro();};
 $('niv2Btn').onclick=()=>{unlock();if(TRAV)stopTravel();$('overlay').hidden=true;started=true;
-  playForage(()=>{G.niv=1;niveauSuivant(true);render();},1);};
+  descendre(1,true,()=>{G.niv=1;});};
 // Niv3 : la seconde descente (mini-jeu des mines), puis une grande base aux réglages tirés au hasard
 $('niv3Btn').onclick=()=>{unlock();if(TRAV)stopTravel();$('overlay').hidden=true;started=true;
-  playForage(()=>{G.niv=2;niveauSuivant(true);render();},2);};
+  descendre(2,true,()=>{G.niv=2;});};
 function savePresets(){try{localStorage.setItem('np-presets',JSON.stringify(PRESETS.map(p=>p.c)));
   localStorage.setItem('np-preset-active',PRESET_ACTIVE);}catch(e){}touchLocal();}
 function drawPresets(){$('presets').innerHTML=PRESETS.map((p,i)=>`<button data-p="${i}" title="${p.n}" aria-label="Palette ${p.n}" aria-pressed="${i===PRESET_ACTIVE}">${[2,4,1,0,3].map(j=>`<i style="background:${p.c[j]}"></i>`).join('')}</button>`).join('');
