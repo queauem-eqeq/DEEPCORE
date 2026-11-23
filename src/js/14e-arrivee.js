@@ -67,12 +67,13 @@ const NEF=(()=>{const g=SHIP_GRID,NWc=g[0].length*4,NHc=g.length*2,on=(c,r)=>c>=
     const u=on(c,r-1),d=on(c,r+1),gc=on(c-1,r),dr=on(c+1,r);
     if(!u&&!gc)l+='╔';else if(!u&&!dr)l+='╗';else if(!d&&!gc)l+='╚';else if(!d&&!dr)l+='╝';else if(!u||!d)l+='═';else if(!gc||!dr)l+='║';
     else if(r<2)l+='▲';   // le nez
-    else if(k==='I')l+=r===6&&(c%4===1||c%4===2)?'◆':'░';   // le couloir, la foreuse dans la soute
+    else if(k==='I')l+=r===4?(c%4===0?'▐':c%4===3?'▌':'█'):r===5?(c%4===1?'◥':c%4===2?'◤':'░'):'░';   // le couloir ; la foreuse dans la soute, à sa place du jeu (case 2,2) : un cube et un triangle
     else if(k==='D')l+='▬';   // la porte
     else l+=c%4===0?'│':'▒';}
     rows.push(l);}
   return rows;})(),NW=NEF[0].length,NH=NEF.length;
-const nefCol=c=>c==='▲'?['W',1]:c==='◆'?['B',1.35]:c==='▒'?['T',.55]:c==='░'?['B',.4]:c==='│'?['B',.45]:c==='▬'?['A',1]:'█▀'.includes(c)?['A',.8]:['B',1];
+const FOREUSE_NEF=(c,r)=>(r===4||r===5)&&c>=8&&c<=11;   /* les cases de la foreuse dans le dessin du vaisseau */
+const nefCol=(c,r,x)=>FOREUSE_NEF(x,r)&&c!=='░'?(c==='█'||c==='◥'||c==='◤'?['B',1.15]:['A',1]):c==='▲'?['W',1]:c==='◆'?['B',1.35]:c==='▒'?['T',.55]:c==='░'?['B',.4]:c==='│'?['B',.45]:c==='▬'?['A',1]:'█▀'.includes(c)?['A',.8]:['A',1];   /* le contour en couleur accent, comme le vaisseau en pixels */
 const REACT=[5,6,13,14];
 const NU_CH=['··:','·:░','░░:','░▒░','▒░▒','▒▒▓','▒▓▒','▓▒▓'],NU_GRIS=['#4d585d','#737f84','#9aa5a9','#c4cdd0','#eef2f3'];   /* nuages : du plus clairsemé au plus dense, et cinq gris */   // colonnes des flammes, sous les réacteurs
 
@@ -150,8 +151,8 @@ function frame(now){if(!S||INTRO!==S)return;setup();const t=(now-S.t0)/1000+S.sa
   // le vaisseau et ses réacteurs
   const flam=t<T_POSE?(t<T_HYP?7:2+Math.round(hsh(1,(t*14)|0,3)*2)):0;
   for(const ec of REACT)for(let q=1;q<=flam;q++)put(sc+ec,sr+NH-1+q,q===1?'▼':q<flam?'║':'¦',feu(.95-q*.12));
-  NEF.forEach((l,r)=>{for(let c=0;c<l.length;c++){const ch=l[c];if(ch===' ')continue;const[k0,f]=nefCol(ch);
-    put(sc+c,sr+r,ch,ch==='◆'&&((t*3)|0)%2?P.W:col(k0,f));}});
+  NEF.forEach((l,r)=>{for(let c=0;c<l.length;c++){const ch=l[c];if(ch===' ')continue;const[k0,f]=nefCol(ch,r,c);
+    put(sc+c,sr+r,ch,col(k0,f));}});
   // entrée dans l'atmosphère : un arc de plasma devant le nez, des traînées de feu de part et d'autre
   if(hc>.03){const ra=7.5+hc*1.6,ci=sc+NW/2,cj=sr+NH*.45,tic=(t*14)|0;
     for(let j=Math.floor(cj-ra-3);j<=cj;j++)for(let i=ci-30;i<=ci+30;i++){const dx=(i-ci)*cw/chh,dy=j-cj,d=Math.hypot(dx,dy),an=Math.atan2(dx,-dy);

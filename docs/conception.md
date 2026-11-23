@@ -1231,7 +1231,7 @@ caractères, **chaque case opaque, jamais d'alpha ni de transparence**, rien ne 
   globe (bords courbés, plus clairs) avec un anneau d'atmosphère ; elle tourne un peu en arrivant.
 - **2,2-10,6 s, la descente** : le disque grandit jusqu'à couvrir l'écran et finit **exactement à l'échelle du jeu en
   pixels** : cases de 8 × 16 px, une tuile de 32 px = 4 caractères × 2 rangées, grille calée sur celle des tuiles, même
-  cadrage que le jeu (caméra bornée au bord de la carte : la foreuse n'est pas toujours au centre) ; le vaisseau ASCII, tiré de la grille du vaisseau (`SHIP_GRID`, 20 × 12 caractères),
+  cadrage que le jeu (caméra bornée au bord de la carte : la foreuse n'est pas toujours au centre) ; le vaisseau ASCII, tiré de la grille du vaisseau (`SHIP_GRID`, 20 × 12 caractères, la foreuse dans la soute en cube « ▐██▌ » et triangle « ◥◤ », à sa place du jeu ; contour en couleur accent comme le vaisseau en pixels),
   se pose **à la place exacte du vaisseau en pixels**. **La planète ne répète jamais la carte** (choix du 23 novembre 2026, plutôt
   qu'une répétition en miroir) : la vraie carte est posée dans un **relief inventé plus large**. Tout autour (et à la
   place de son mur de roche dure du bord), un **massif de roche dure** au bord déchiqueté, dans la continuité du mur de roche dure
