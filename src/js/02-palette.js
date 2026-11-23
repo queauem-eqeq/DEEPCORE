@@ -10,10 +10,10 @@ const PRESETS=[   // c : accent, bio, monde, danger, bâti
   {n:'Braise',c:['#c99acf','#6de6e7','#ca614e','#d8180b','#7c85c5']},
   {n:'Lagon',c:['#f7f688','#3ab99d','#116bb5','#d8180b','#75a3a8']},
   {n:'Désert',c:['#6de6e7','#947e31','#dfae65','#a91d18','#966949']},
-  {n:'Jungle',c:['#ebbf4a','#e09f9d','#1a946c','#d8180b','#4d858d']},
+  {n:'Jungle',c:['#2e9adc','#ebbf4a','#1a946c','#d8180b','#4d858d']},
   {n:'Améthyste',c:['#6de6e7','#e8bfe2','#7f65bb','#d8180b','#30626d']},
   {n:'Cendre',c:['#e38d18','#3ab99d','#6f6f6e','#d8180b','#af8568']},
-  {n:'Glacier',c:['#ebbf4a','#2e9adc','#b5c8ea','#ca614e','#7c85c5']},
+  {n:'Glacier',c:['#ebbf4a','#2e9adc','#073a31','#ca614e','#7c85c5']},
   {n:'Magma',c:['#f7f688','#e38d18','#833e11','#d8180b','#6f6f6e']}
 ];
 // Les palettes prédéfinies sont modifiables : la palette sélectionnée suit les sélecteurs de couleur
