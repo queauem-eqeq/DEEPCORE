@@ -172,7 +172,7 @@ function hud(t,o){const fs=Math.round(12*dpr),lh=Math.round(17*dpr),m=Math.round
 /* ---------- l'alerte, en police DOS (même cadre que les descentes), couleur monde ---------- */
 const GL='#%&$@/\\<>=+*?!;:-_|[]{}()0123456789ABCDEFGHJKLMNPQRSTUVWXYZ£¥§¶«»±÷≈∙√ⁿ²■ΣΩδ∞φε∩≡',RAMPE='.i0',BLOC='░▒▓';
 function annonce(t){const cols=30,rows=9,c0=P.M,blanc=P.W,gris=P.K,{l1,l2}=ANN;
-  const p=Math.max(1,Math.floor(w*.41/((cols+2)*8))),aw=8*p,ah=16*p,x0=HUDG+aw,y0=HUDB+ah+Math.round(6*dpr);
+  const p=fgAnnP(w),aw=8*p,ah=16*p,x0=HUDG+aw,y0=HUDB+ah+Math.round(6*dpr);
   const pa=cl((t-ANN.t0)/(ANN.t1-ANN.t0)),q=cl((t-(ANN.fin-ANN.sortie))/ANN.sortie),tic=Math.floor(t*20);
   const Hh=(a,b,k)=>{let v=(a*73856093)^(b*19349663)^(k*83492791);v^=v<<13;v^=v>>>17;v^=v<<5;return (v>>>0)/4294967296;};
   const d1=Math.floor((cols-l1.length)/2),d2=Math.floor((cols-l2.length)/2);

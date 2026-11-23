@@ -1344,7 +1344,8 @@ l'essayer (F9 jusqu'au 23 novembre 2026). **Échap, Espace ou Entrée** la passe
   avant de se figer ; le rebord et les bandes montent en « ░ ▒ ▓ █ ». **Disparition**
   colonne par colonne de gauche à droite, à rebours : pavés, « 0 → i → . », plus rien ; la roche reparaît derrière. Première descente :
   « MATIÈRE {µ} DÉTECTÉE / COLLECTE POSSIBLE » (couleur accent) ; seconde : « EXPLOSIFS DÉTECTÉS / ATTENTION SOUS-SOL PIÉGÉ ! » (rouge).
-  Le cadre a **la même taille aux deux descentes** (30 cases de large, mêmes caractères). Depuis le 23 novembre 2026 (soir),
+  Le cadre a **la même taille aux deux descentes et à l'arrivée** (30 cases de large, mêmes caractères, une seule règle `fgAnnP` :
+  il tient dans **30 % de la largeur de l'écran**, 41 % jusqu'au 23 novembre 2026, jugé trop gros). Depuis le 23 novembre 2026 (soir),
   l'apparition dure **2 s** (1 → 3 s), le message reste **4 s**, la disparition dure **1 s** (7 → 8 s) ; deux lignes sont
   réservées sous le tableau de bord pour ses alertes qui clignotent, que l'annonce ne cache pas.
 
