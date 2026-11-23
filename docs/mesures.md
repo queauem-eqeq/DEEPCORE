@@ -752,3 +752,12 @@ Ce que les chiffres disent, et ce qui a été réglé en conséquence :
 
 Relancé après les changements : valeurs inchangées (perd la trace à 13 cases : 100 % en 36 tours ; terrain dégagé, 12 cases
 d'avance : 50 % semée ; herbes hautes en zigzag : 100 %).
+
+### Réseau de cavernes (21 novembre 2026)
+
+25 cartes par réglage (`outils/scripts/mesure-cavernes.js`), taille 4 sauf mention : part de cavernes obtenue à moins de
+2 points de la part visée dans tous les cas (15, 32, 45 et 55 %) ; nombre de cavernes 8,1 pour 8,1 visées au départ, 4,6
+pour 4,7 avec des cavernes de 400 cases, 24 pour 30 avec des cavernes de 50 cases ; surface bâtie 12,7 % pour 13,9 visés au
+départ, 28,8 pour 29,5 en « Cité enfouie » ; toutes les cartes sont entièrement reliées. Avant la refonte : une seule
+caverne faisait 82 à 87 % de la surface quel que soit le nombre demandé, et 14 % de surface bâtie demandés en donnaient
+9 à 10.
