@@ -191,7 +191,7 @@ Les écarts qui restent (60 à 70 au niveau 1) viennent des arrondis et du minim
 « que des mastoks » et « tout infesté », tombent eux aussi sur le budget (60 à 72 au niveau 1, 316 au niveau 5).
 
 > **Note du 16 novembre 2026** : les mesures de coût et de pression ci-dessous servaient au budget de menace par niveau,
-> retiré ce jour-là avec la descente (`conception.md` § 3 bis). Elles restent utiles pour comparer la dangerosité des espèces.
+> retiré ce jour-là avec la descente (`conception-carte.md` § 3 bis). Elles restent utiles pour comparer la dangerosité des espèces.
 
 ## Banc de combat : coût et pression par espèce (15 novembre 2026)
 
@@ -299,7 +299,7 @@ les stats bougeant encore.
 
 ## Passage au modèle Brogue (16 novembre 2026)
 
-Défense multiplicative, dégâts en fourchette, POW requis (voir `conception.md` § 6). Conversion voulue **à puissance
+Défense multiplicative, dégâts en fourchette, POW requis (voir `conception-joueur.md` § 6). Conversion voulue **à puissance
 égale** : un duel contre un seul ennemi, foreuse sans équipement, pilote « chasse », 300 essais (1 000 pour le mastok).
 
 | Ennemi | Vie perdue avant | Vie perdue après | Battements avant → après |

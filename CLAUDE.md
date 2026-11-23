@@ -18,8 +18,7 @@ Le jeu est une page web en plusieurs fichiers (`src/`), **sans étape d'assembla
    Avant de publier, vérifier que l'artefact n'a pas bougé (`get_artifact` donne la version en cours).
 
 ## Documents
-- `docs/conception.md` : **source de vérité** des règles du jeu, telles qu'elles sont aujourd'hui. Le lire avant de
-  modifier une mécanique, en cherchant la section utile, jamais en entier.
+- `docs/conception.md` : sommaire et règles à ne pas casser ; **source de vérité** des règles du jeu, telles qu'elles sont aujourd'hui, découpée en `conception-carte.md`, `-faune.md`, `-joueur.md` (foreuse, combat, objets, machines), `-descente.md`, `-interface.md`. Lire le sommaire, puis chercher la section utile dans le fichier du thème, jamais en entier.
 - `docs/historique.md` : ce qui a été essayé, retiré, et pourquoi, par date. **À consulter avant de reproposer une
   idée** : beaucoup ont déjà été écartées après avoir été codées.
 - `docs/mesures.md` : les chiffres mesurés (détection, fuite) et la date de leur mesure. À comparer après
@@ -84,7 +83,7 @@ Artefact à part (https://claude.ai/artifact/9BKRaoB4hzgdWhzYFx5A6q) qui rejoue 
 1. Syntaxe : `for f in src/js/*.js; do node --check "$f"; done`.
 2. Vérifier le rendu quand c'est visuel, avec les outils ci-dessus (le jeu est lu directement dans `src/`).
    Après un changement d'équilibrage, relancer `outils/simul.py` et mettre `docs/mesures.md` à jour.
-3. **Mettre à jour `docs/conception.md`** (section concernée) pour décrire le nouveau comportement.
+3. **Mettre à jour `docs/conception-*.md`** (le fichier du thème, section concernée) pour décrire le nouveau comportement.
 4. **Commit** en français (message court décrivant le changement pour un joueur), puis **push sur la branche
    `claude/NOM-COURT`** (la session ne peut pousser que sur des branches `claude/…`, jamais sur `main` ni sur des tags :
    erreur 403 sinon). L'utilisateur fusionne dans `main` par pull request (lien affiché par git, ou `gh pr create` s'il le demande).
