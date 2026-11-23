@@ -149,7 +149,8 @@ Modèle Brogue :
 - **Consommables non identifiés.** Chaque sorte porte un **nom de code** tiré à chaque partie (« Capsule //KZ7-3FQ ») et la même
   tuile de capsule au sol. Le premier usage révèle ce que c'est, pour toute la partie ; trouver le plan aussi. La clé et la
   Matière sont toujours connues. Ce que la foreuse sait (plans, capsules identifiées, codes) est dans `G.st.savoir` et la
-  suit d'un niveau à l'autre.
+  suit d'un niveau à l'autre. **À la mort de la foreuse, toutes les capsules se dévoilent** dans l'inventaire (message dans
+  le journal) ; la partie suivante repart avec de nouveaux codes.
 - **Tout consommable se vise**, comme la charge sismique, jusqu'à 4 cases. **La visée montre toujours une seule case**
    : une capsule inconnue ne se trahit
   pas par sa zone. La visée s'ouvre **sur la foreuse** pour les objets qui la servent **et pour toute capsule non
