@@ -60,7 +60,7 @@ body{margin:0;background:var(--black);color:var(--fg);font:13px/1.45 var(--mono)
 /* Barre ASCII : le calque plein est posé sur le fond et découpé à la largeur exacte (voir asciiBar, 11-interface) */
 .abar,.seen .an .hp{position:relative}
 .abar .af,.seen .an .hp .af{position:absolute;left:0;top:0;bottom:0;overflow:hidden}
-.abar.life{color:var(--c2)}.abar.energy{color:#ffffff}   /* énergie en blanc depuis le 22 novembre 2026 (avant : accent) */
+.abar.life{color:var(--c2)}.abar.energy{color:#ffffff}.abar.fuel{color:var(--c1)}   /* énergie en blanc depuis le 22 novembre 2026 (avant : accent) */
 .track{position:relative;height:9px;overflow:hidden}
 .track::before{content:"";position:absolute;inset:0;background:currentColor;opacity:.2}
 .track i{position:absolute;left:0;top:0;bottom:0;width:100%;background:currentColor;transition:width .2s}

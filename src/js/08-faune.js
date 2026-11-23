@@ -298,7 +298,7 @@ function poseGroupe(g,gi,id,cases){{const l=g.pats&&g.pats.length?g.pats:g.pat?[
 let NIV_GEN=1;   // niveau de la descente en cours de génération (posé par newGame et niveauSuivant) : la menace monte avec lui
 const lieuDe=i=>{const v=G.t[i];return G.tun&&G.tun[i]?'tunnel':(v===FLOOR||v===DOOR||(v===BRIDGE&&G.pb&&G.pb[i]))?'bati':'ext';};
 function spawnGroupes(){G.animals=[];G.fauna=[];G.pool=[0];G.beasts=[];G.beastSeen={};G.packs={};G.patr={};
-  const NV=nivDe(NIV_GEN),total=Math.round(NV.budget*W*H/(96*64));let id=0;const rate={},pose={};   // budget et groupes du niveau de profondeur (fenêtre LIFE)
+  const NV=nivDe(NIV_GEN),total=Math.round(NV.budget*REGLES.ennemisBudget*W*H/(96*64));let id=0;const rate={},pose={};   // budget et groupes du niveau de profondeur (fenêtre LIFE)
   // cases praticables de chaque lieu, et part du budget qui lui revient : la répartition du niveau (fenêtre LIFE), ramenée à 100 sur les
   // lieux présents ; un lieu ne dépasse pas PART_PLAFOND fois sa part de surface, le surplus va aux autres à proportion de leur part
   const cases={ext:[],bati:[],tunnel:[]};for(let i=0;i<W*H;i++)if(canWalk(G.t[i],true))cases[lieuDe(i)].push(i);
@@ -315,7 +315,7 @@ function spawnGroupes(){G.animals=[];G.fauna=[];G.pool=[0];G.beasts=[];G.beastSe
       const [g,gi]=ok[ki],r=poseGroupe(g,gi,id,cases[l]);
       if(r===true){const c=Math.max(1,g.cout);reste-=c;lieux[l].dep+=c;depense+=c;id++;pose[g.n]=(pose[g.n]||0)+1;}else if(r!=='vide')rate[gi+l]=(rate[gi+l]||0)+1;}
     report=Math.min(reste,4);}   // un petit reste passe au lieu suivant ; un gros reste (aucun groupe ne convient à ce lieu) est perdu
-  G.menace={total,reste:total-depense,pose,lieux};}
+  G.menace={total,reste:total-depense,pose,lieux};G.grN=id;}
 function robotDist(m){return distFrom(G.px,G.py,m);}
 // distance pour qui vole : l'eau et les gouffres se franchissent
 function distFromVol(tx,ty){const d=new Int16Array(W*H).fill(-1),q=[idx(tx,ty)];d[q[0]]=0;
@@ -471,7 +471,27 @@ function beastsAct(){
 }
 // Plus de réparation automatique : seule l'énergie se recharge à chaque battement.
 // Attendre sur place la recharge WAIT_REGEN fois plus vite (13 novembre 2026) : 2/t au lieu de 1/t à POW 1.
-function regen(wait){if(G.over)return;G.st.energie=Math.min(G.st.energieMax,G.st.energie+G.st.power/POW_BASE*(wait?WAIT_REGEN:1));}
+/* Un battement de la foreuse (23 novembre 2026). Le fuel s'écoule tout le temps ; attendre en brûle REGLES.fuelRepos et répare
+   REGLES.reposVie de vie. À sec : plus de réparation, et l'énergie ne remonte plus. */
+function regen(wait){if(G.over)return;const st=G.st;if(st.fuel==null)st.fuel=REGLES.fuelMax;
+  const sec=st.fuel<=0,repare=wait&&!sec&&st.vie<st.vieMax;
+  st.fuel=Math.max(0,st.fuel-(repare?REGLES.fuelRepos:1));
+  if(sec)return;
+  if(st.fuel<=0){sayMore('Réservoir vide : plus de réparation ni de recharge. Il faut du fuel (éclats de métal) ou descendre.','warn');SFX.blocked();}
+  if(repare)st.vie=Math.min(st.vieMax,st.vie+REGLES.reposVie);
+  st.energie=Math.min(st.energieMax,st.energie+st.power/POW_BASE*(wait?WAIT_REGEN:1));}
+function fuelPlus(v){const st=G.st,av=st.fuel==null?REGLES.fuelMax:st.fuel;st.fuel=Math.min(REGLES.fuelMax,av+v);return Math.round(st.fuel-av);}
+/* Renforts (23 novembre 2026, comme les monstres errants de Brogue) : passé REGLES.vagueDebut battements sur un niveau, un groupe
+   de plus entre par un bord de la carte, hors de vue, et patrouille ; le délai raccourcit et la valeur permise monte à chaque arrivée. */
+function vagueTick(){const V=G.vague=G.vague||{bt:0,n:0,dans:REGLES.vagueDebut};V.bt++;if(--V.dans>0)return;
+  V.dans=Math.max(REGLES.vagueMin,Math.round(REGLES.vagueEcart*Math.pow(REGLES.vagueAccel,V.n)));
+  const NV=nivDe(G.niv||1),plafond=REGLES.vagueCout+2*V.n,bord=[];
+  for(let i=0;i<W*H;i++){const x=i%W,y=(i/W)|0;if((x<6||y<6||x>=W-6||y>=H-6)&&canWalk(G.t[i],true)&&!vis[i]&&Math.hypot(x-G.px,y-G.py)>=15)bord.push(i);}
+  if(!bord.length)return;
+  const ok=GROUPES.liste.map((g,i)=>[g,i]).filter(([g])=>g.on&&NV.gr.includes(g.n)&&g.m.length&&Math.max(1,g.cout)<=plafond);if(!ok.length)return;
+  for(let t=0;t<6;t++){const [g,gi]=ok[rnd(0,ok.length-1)],c=bord[rnd(0,bord.length-1)],l=lieuDe(c);
+    if(g.lieux&&g.lieux.length&&!g.lieux.includes(l))continue;
+    const id=G.grN=(G.grN||0)+1;if(poseGroupe(g,gi,id,bord.filter(i=>lieuDe(i)===l&&Math.hypot(i%W-c%W,((i/W)|0)-((c/W)|0))<=8))===true){V.n++;sayMore('Signal lointain : un groupe vient d’entrer dans le secteur.','warn');return;}}}
 // Coup de foreuse : consomme de l'énergie ; refusé si la réserve est insuffisante
 function spend(){if(G.st.energie<G.st.cout){say(`Énergie insuffisante pour frapper (${Math.floor(G.st.energie)}/${G.st.cout}). Attendez qu’elle se recharge.`,'warn');SFX.blocked();render();return false;}G.st.energie-=G.st.cout;return true;}
 const TRACK_LIFE=5;

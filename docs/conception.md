@@ -109,6 +109,20 @@ suivent l'échelle.
 | 4 | 96 × 64 | **défaut** |
 | 5 | 144 × 96 | |
 
+### Règles d'ensemble (`REGLES`, `00-base.js`, 23 novembre 2026)
+
+Une seule table porte ce qui donne sa tension à la partie ; elle s'applique **par-dessus** les réglages du joueur (bestiaire,
+budgets de LIFE) sans les modifier.
+
+- **Moitié moins d'ennemis** (`ennemisBudget` 0,5) : la génération ne dépense que la moitié du budget de menace du niveau.
+- **Deux fois plus dangereux** (`ennemisDegats` 2) : tous les dégâts des créatures sont doublés. Les fiches en jeu montrent
+  les dégâts réels ; le Bestiaire du Lab garde les valeurs de base.
+- **Fuel** : voir § 5. **Éclats de métal** : fuel et énergie, plus de vie. **Réparobots** deux fois et demie plus rares dans le butin.
+- **Renforts** (`vagueTick`, `08-faune.js`), comme les monstres errants de Brogue : après 500 battements sur un niveau, un
+  groupe du niveau entre par un bord de la carte, hors de vue et à 15 cases au moins, et patrouille ; le suivant arrive
+  350 battements plus tard, puis le délai est multiplié par 0,85 à chaque fois (150 au moins) et la valeur permise du
+  groupe monte de 2 (6 au départ). Message : « Signal lointain : un groupe vient d'entrer dans le secteur. »
+
 ### Faune : groupes et budget de menace
 
 La carte est peuplée par **groupes**. Un groupe réunit une ou plusieurs espèces, chacune avec un effectif minimal
@@ -723,7 +737,8 @@ toutes les portes**, celles des bâtiments comprises, à volume réduit quand un
 
 | Stat | Valeur | Rôle |
 |---|---|---|
-| Vie | 100 | **pas de réparation automatique** |
+| Vie | 100 | pas de réparation automatique ; **attendre répare** (+0,5 par battement) tant qu'il reste du fuel |
+| Fuel | 1 500 | **s'écoule de 1 par battement** ; 4 par battement d'attente qui répare. À sec : plus de réparation, l'énergie ne remonte plus. Rendu par les éclats de métal (100, 150, 200) et par chaque descente (400) |
 | Énergie | 100 | se recharge de POW par battement, **× 2 en attendant sur place** ; se déplacer ne coûte rien, un coup sur la roche 10, frapper un animal rien |
 | VIT | 5 | **vitesse de déplacement** : un pas dure 100 × 5 ÷ VIT. À 5, un pas = un battement. Ne joue ni sur les coups ni sur le forage |
 | EYE | 10 | rayon de vision |
@@ -738,9 +753,9 @@ toutes les portes**, celles des bâtiments comprises, à volume réduit quand un
   vue (montagne, herbes hautes) est aperçue en **mode souvenir**, sans les créatures. Une seule case ; un obstacle
   de 2 cases d'épaisseur cache toujours la suite. Ne marche pas derrière un mur ou une porte. Les ennemis ne voient
   pas à travers les obstacles.
-- **Attendre** (Espace ou 5) : la recharge d'énergie est doublée. C'est la façon de refaire le plein après avoir
-  couru ou foré.
-- **Repos** (P) : enchaîne des attentes **jusqu'à l'énergie pleine**. Chaque battement est une attente ordinaire
+- **Attendre** (Espace ou 5) : la recharge d'énergie est doublée, et **la foreuse se répare** (23 novembre 2026) :
+  +0,5 de vie par battement, au prix de 4 de fuel au lieu de 1. Le temps de repos est la ressource à gérer.
+- **Repos** (P) : enchaîne des attentes **jusqu'à la vie et l'énergie pleines** (ou le réservoir vide). Chaque battement est une attente ordinaire
   (recharge doublée, portée de discrétion ÷ 2) ; le journal n'en garde que le début et la fin. S'arrête net si une
   créature **entre dans le champ de vision**, si un ennemi déjà visible **repère** la foreuse, si elle est
   **touchée**, ou à la moindre touche. Refusé si l'énergie est pleine ou si un ennemi visible vous chasse.
@@ -1046,8 +1061,8 @@ remplace la plus ancienne. **Enregistrer** écrit les valeurs dans la base de l'
   suite ; la barre ne reste que pour le dernier forage (le noyau) et en mouvement réduit.
   puis l'écran **« NOYAU ATTEINT »** (bilan en tours, cases parcourues, Matière) et **Nouvelle exploration**.
 - **Éclats de métal** : **10 % des cases de montagne** (hors rangée extérieure ; réglage `ORE_PCT`) en contiennent.
-  Briser la paroi les fait **tomber au sol** ; passer dessus les ramasse et regagne **autant de vie que d'énergie**
-  selon la densité — **petits +10** (50 %), **moyens +15** (30 %), **gros +20** (20 %), sans dépasser les maximums.
+  Briser la paroi les fait **tomber au sol** ; passer dessus les ramasse et regagne **du fuel et de l'énergie, plus de vie** (23 novembre 2026)
+  selon la densité — fuel **+100 / +150 / +200**, énergie +30 / +40 / +50. Quatre gisements par carte de taille 3 (sept avant).
   Deux chiffres flottants, et les deux effets visuels (croix rouges et flèches bio) partent ensemble.
 - **Destruction d'un ennemi** : une **gerbe d'étincelles** (35 à 50) qui filent droit, très vite, avec une courte
   traîne, éteintes en un quart de seconde, et **14 à 22 débris de carcasse** projetés en l'air qui retombent,

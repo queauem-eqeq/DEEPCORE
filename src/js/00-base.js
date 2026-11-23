@@ -21,6 +21,22 @@ const NIVEAUX=[null,
 const NIV_MAX=NIVEAUX.length-1,NIVS=NIVEAUX.map((_,i)=>i).slice(1),nivBorne=n=>Math.max(1,Math.min(NIV_MAX,n||1));
 const RECETTE_NIV=n=>NIVEAUX[nivBorne(n)].recette,   // la recette de chaque niveau de la descente
   NIV_RECETTE=r=>Math.max(1,NIVEAUX.findIndex(v=>v&&v.recette===r));   // et l'inverse (recette « classique » : niveau 1)
+/* RÈGLES D'ENSEMBLE (23 novembre 2026) : les réglages qui donnent sa tension à la partie, tous au même endroit.
+   Ils s'appliquent PAR-DESSUS les réglages du joueur (bestiaire, budgets de LIFE), sans les modifier. */
+const REGLES={
+  ennemisBudget:.5,    // part du budget de menace de LIFE réellement dépensée à la génération : moitié moins de groupes
+  ennemisDegats:2,     // multiplicateur des dégâts de toutes les créatures (fiches et bestiaire affichent les dégâts réels)
+  fuelMax:1500,        // réservoir de la foreuse, en battements d'exploration
+  fuelRepos:4,         // fuel brûlé par battement d'attente sur place (1 en temps normal)
+  reposVie:.5,         // vie réparée par battement d'attente, tant qu'il reste du fuel
+  fuelNiveau:400,      // fuel rendu par chaque descente
+  fuelEclats:[0,100,150,200],   // fuel rendu par un gisement d'éclats de métal (petit, moyen, gros) ; ils ne rendent plus de vie
+  eclats:.6,           // part des gisements de métal gardée (7 par carte avant, 4 maintenant)
+  vagueDebut:500,      // battements passés sur un niveau avant l'arrivée du premier groupe de renfort
+  vagueEcart:350,      // délai avant le suivant…
+  vagueAccel:.85,      // …multiplié par ce facteur à chaque arrivée (jamais moins de vagueMin)
+  vagueMin:150,
+  vagueCout:6};        // valeur maximale du premier groupe de renfort ; + 2 à chaque arrivée
 const DIRN=['est','ouest','sud','nord','sud-est','nord-est','sud-ouest','nord-ouest'];
 // (la table STATS de la colonne a disparu avec le sous-menu Statistiques, le 15 novembre 2026)
 let VISEE=null;   // visée d'une charge sismique en cours : {i, x, y} — voir 14-inventaire.js

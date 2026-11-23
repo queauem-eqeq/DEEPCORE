@@ -98,7 +98,7 @@ let PLANS_POSES={};   // plans déjà posés sur la carte en cours de générati
 function planTire(){const s=savoir(),niv=nivCarte(),lib=Object.keys(FAB_PRIX).filter(k=>ITEMS[k]&&!s.plans[k]&&!PLANS_POSES[k]);
   let l=lib.filter(k=>PLAN_RANG(k)<=niv);if(!l.length)l=lib.filter(k=>PLAN_RANG(k)<=niv+1);if(!l.length)return 'matiere';
   const k=l[rnd(0,l.length-1)];PLANS_POSES[k]=1;return 'plan_'+k;}
-const CONSO_POIDS=[['repar',5],['batterie',4],['fumigene',3],['charge',3],['berserk',2],['camo',2],['balise',2],['court',2]];
+const CONSO_POIDS=[['repar',2],['batterie',4],['fumigene',3],['charge',3],['berserk',2],['camo',2],['balise',2],['court',2]];
 function consoTire(){let t=CONSO_POIDS.reduce((a,c)=>a+c[1],0),r=Math.random()*t;for(const [k,p] of CONSO_POIDS){if((r-=p)<0)return k;}return 'repar';}
 function equipTire(){const l=Object.keys(ITEMS).filter(k=>ITEMS[k].slot&&!ITEMS[k].base&&k!=='usine'&&PLAN_RANG(k)<=nivCarte()+1);return l.length?l[rnd(0,l.length-1)]:'matiere';}
 // contenu d'un coffre : dépôt derrière une grille, appât d'une salle piégée, pièce secrète

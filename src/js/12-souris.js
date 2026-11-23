@@ -126,7 +126,8 @@ function restEvent(T){
   return null;}
 function startRest(){
   if(busy()||TRAV||EXPL)return;
-  if(G.st.energie>=G.st.energieMax){say('Énergie déjà au maximum : repos inutile.');SFX.blocked();render();return;}
+  if(G.st.fuel<=0){say('Réservoir vide : le repos ne répare plus rien.','warn');SFX.blocked();render();return;}
+  if(G.st.energie>=G.st.energieMax&&G.st.vie>=G.st.vieMax){say('Vie et énergie déjà au maximum : repos inutile.');SFX.blocked();render();return;}
   const T={seen:visibles(),vie:G.st.vie,n:0,tm:0},why=restEvent(T);
   if(why){say(`Repos impossible : ${why}.`,'warn');SFX.blocked();render();return;}
   REST=T;say('La foreuse se met au repos.');restStep();}
@@ -138,7 +139,8 @@ function restStep(){const T=REST;if(!T)return;if(busy()){stopRest();return;}
   T.n++;
   const why=restEvent(T);
   if(why){stopRest(`Repos interrompu (${T.n} tour${T.n>1?'s':''}) : ${why}.`);return;}
-  if(G.st.energie>=G.st.energieMax){stopRest(`Repos terminé : énergie au maximum, en ${T.n} tour${T.n>1?'s':''}.`,'good');SFX.spot();return;}
+  if(G.st.energie>=G.st.energieMax&&G.st.vie>=G.st.vieMax){stopRest(`Repos terminé : vie et énergie au maximum, en ${T.n} tour${T.n>1?'s':''}.`,'good');SFX.spot();return;}
+  if(G.st.fuel<=0){stopRest('Repos interrompu : réservoir vide.');return;}
   if(T.n>=REST_MAX){stopRest('Repos interrompu : trop long.');return;}
   T.tm=setTimeout(restStep,reduced?0:45);}
 
@@ -196,7 +198,7 @@ const BEHAV={insectoide:'Suit la foreuse à 2 ou 3 cases et recule au contact. D
 function inspectHTML(){const {x,y}=HOV;if(x<0||y<0||x>=W||y>=H)return '';
   const i=idx(x,y),seen=!fog||G.seen[i],see=!fog||vis[i],d=Math.max(Math.abs(x-G.px),Math.abs(y-G.py)),dt=d?`${d} case${d>1?'s':''}`:'ici';
   const head=(ic,n,ex)=>`<div class="ih">${ic?`<img src="${ic}" alt="">`:''}<b>${n}</b><span>${ex||''}</span></div>`;
-  if(!seen&&G.ore&&G.ore[i]&&sonarVu(i,sonarR())){const o=G.ore[i];return `<div class="insp">${head('','Gisement détecté',dt)}<p><b>${oreMat(o)?'Matière {µ}':'Éclats de métal'}</b> · repéré par le sonar : ${oreMat(o)?`+${ORE_PV[oreLv(o)]} en réserve`:`+${ORE_PV[oreLv(o)]} PV`}. ${oreSol(o)?'Au sol.':'Pris dans la roche : il faudra forer.'}</p></div>`;}
+  if(!seen&&G.ore&&G.ore[i]&&sonarVu(i,sonarR())){const o=G.ore[i];return `<div class="insp">${head('','Gisement détecté',dt)}<p><b>${oreMat(o)?'Matière {µ}':'Éclats de métal'}</b> · repéré par le sonar : ${oreMat(o)?`+${ORE_PV[oreLv(o)]} en réserve`:`+${REGLES.fuelEclats[oreLv(o)]} de fuel`}. ${oreSol(o)?'Au sol.':'Pris dans la roche : il faudra forer.'}</p></div>`;}
   if(!seen)return `<div class="insp">${head('','Zone inexplorée',dt)}<p>Aucune donnée : la foreuse n’est jamais passée à portée de ce secteur.</p></div>`;
   const out=[],t=G.t[i],[tn,td]=TDESC[t]||['Terrain',''],border=x===0||y===0||x===W-1||y===H-1;
   const occ=see?occupant(x,y):null;
@@ -216,8 +218,8 @@ function inspectHTML(){const {x,y}=HOV;if(x<0||y<0||x>=W||y>=H)return '';
   if(s)out.push(`<p><b>Site de forage</b> · ${s.known?'détecté. [F] pour forer.':'non analysé : placez la foreuse dessus.'}</p>`);
   const om=G.ore&&G.ore[i];
   if(om&&oreMat(om))out.push(oreSol(om)?`<p><b>Matière {µ}</b> · placez la foreuse dessus pour la ramasser : +${ORE_PV[oreLv(om)]} en réserve.</p>`:`<p><b>Matière {µ} prise dans la montagne</b> · brisez la paroi pour la faire tomber (+${ORE_PV[oreLv(om)]}).</p>`);
-  else if(om&&oreSol(om))out.push(`<p><b>Éclats de métal ${ORE_NOM[oreLv(om)]}</b> · placez la foreuse dessus pour les ramasser : +${ORE_PV[oreLv(om)]} PV.</p>`);
-  else if(om)out.push('<p><b>Éclats de métal '+ORE_NOM[oreLv(om)]+' pris dans la montagne</b> · brisez la paroi pour les faire tomber (+'+ORE_PV[oreLv(om)]+' PV).</p>');
+  else if(om&&oreSol(om))out.push(`<p><b>Éclats de métal ${ORE_NOM[oreLv(om)]}</b> · placez la foreuse dessus pour les ramasser : +${REGLES.fuelEclats[oreLv(om)]} de fuel, +${ORE_PV[oreLv(om)]} d’énergie.</p>`);
+  else if(om)out.push('<p><b>Éclats de métal '+ORE_NOM[oreLv(om)]+' pris dans la montagne</b> · brisez la paroi pour les faire tomber (+'+REGLES.fuelEclats[oreLv(om)]+' de fuel).</p>');
   if(G.cles&&G.cles[i])out.push('<p>Une clé : passer dessus pour la ramasser.</p>');
   const sol=G.items&&G.items[i];
   if(sol&&sol.length)out.push(`<p><b>${sol.length>1?'Objets au sol':'Objet au sol'}</b> · ${sol.map(k=>ITEMS[k].n).join(', ')} · placez la foreuse dessus pour ramasser.</p>`);

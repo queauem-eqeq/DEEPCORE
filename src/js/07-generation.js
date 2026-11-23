@@ -231,7 +231,7 @@ function genPlanet(){
       if(sites.some(s=>Math.abs(s.x-x)+Math.abs(s.y-y)<(last?4:gap)))continue;sites.push({x,y});}
     if(sites.length<NSITES&&!last)continue;
     G={t,recette:ZONE?GEN.recette:'classique',seen:new Array(N).fill(0),px:sx,py:sy,turn:0,dist:0,over:null,msg:null,ship,face:'d',
-      st:{detec:5,vie:100,vieMax:100,energie:100,energieMax:100,repar:0,power:10,vitesse:5,degats:0,capteur:10,cout:10,pre:100,def:10,crit:5},
+      st:{detec:5,fuel:REGLES.fuelMax,vie:100,vieMax:100,energie:100,energieMax:100,repar:0,power:10,vitesse:5,degats:0,capteur:10,cout:10,pre:100,def:10,crit:5},
       sites:sites.map((s,i)=>({x:s.x,y:s.y,depth:10,id:LETTERS[i],seen:false,known:false}))};
     return;
   }
@@ -244,7 +244,7 @@ function genPlanet(){
 // pvDe / dmgDe : points de vie et dégâts d'une espèce tels que le jeu les lit. Aujourd'hui ce sont les valeurs du Bestiaire, sans modification ;
 // ces deux fonctions restent le seul endroit à changer si l'on veut un jour les faire varier.
 // dégâts d'une créature : tirés à chaque coup entre dmin et dmax (16 novembre 2026 ; une valeur fixe avant)
-const pvDe=sp=>sp.pv,dmgDe=sp=>sp.dmin+Math.floor(Math.random()*(sp.dmax-sp.dmin+1)),dmgTxt=sp=>sp.dmin===sp.dmax?''+sp.dmin:sp.dmin+'-'+sp.dmax;
+const pvDe=sp=>sp.pv,dmgDe=sp=>Math.round((sp.dmin+Math.floor(Math.random()*(sp.dmax-sp.dmin+1)))*REGLES.ennemisDegats),dmgTxt=sp=>{const a=Math.round(sp.dmin*REGLES.ennemisDegats),b=Math.round(sp.dmax*REGLES.ennemisDegats);return a===b?''+a:a+'-'+b;};
 // Gisements pour une carte de taille 2 ; les autres tailles en proportion de leur surface.
 const GISEMENTS={metal:3,mat:1};
 let SANS_VAISSEAU=false;
@@ -260,7 +260,7 @@ function niveau(refait){drilling=false;
   {const o=cv&&typeof document!=='undefined'&&document.getElementById('genObt');if(o)o.textContent=obtenuTxt();}
   G.amb=ambDouble();G.archM=ambMNom(GEN.ambM)||'Personnalisé';G.archB=ambNom(GEN.recette,GEN.amb)||'Personnalisé';   // les deux archétypes, un par un, pour la Carte de la colonne   // « monde · bâti », les deux archétypes, affiché dans le Statut et à l'arrivée
   durcir();   // la roche dure avant les métaux : ils n'y apparaissent jamais
-  {const a=W*H/(48*32);G.eff={};G.fum={};hideOre(Math.max(1,Math.round(GISEMENTS.metal*a)),Math.max(1,Math.round(GISEMENTS.mat*a)));}
+  {const a=W*H/(48*32);G.eff={};G.fum={};hideOre(Math.max(1,Math.round(GISEMENTS.metal*a*REGLES.eclats)),Math.max(1,Math.round(GISEMENTS.mat*a)));}
   G.sonar=1;   // sonar à émettre (voir sonarStart, 10-rendu) : il part 10 à 30 tours après l’arrivée (22 novembre 2026 ; avant 10 à 20)
   G.items={};G.tracks={};G.lastDir=null;G.beasts=[];G.blood={};G.fv=2;
   G.inv=invTest();G.log=[];
@@ -310,7 +310,7 @@ function niveauSuivant(hasard){   // hasard : un archétype monde et un archéty
   recRange();recPrend(RECETTE_NIV(niv));if(hasard)hasardReglages();SANS_VAISSEAU=true;NIV_GEN=niv;   // sans hasard : les réglages en cours du menu Monde pour cette recette
   niveau();   // genPlanet refait l'objet G : tout ce que la foreuse garde est remis en place juste après
   SANS_VAISSEAU=false;genRemet(sauve);
-  G.inv=inv;G.st=st;G.niv=niv;G.turn=tour;G.dist=dist;G.over=null;drilling=false;SAV_GARDE=null;
+  G.inv=inv;G.st=st;G.niv=niv;G.turn=tour;G.dist=dist;G.over=null;drilling=false;SAV_GARDE=null;fuelPlus(REGLES.fuelNiveau);
   G.sonarAt=tour+(G.sonarAt||0);   // le délai du sonar (10 à 30 battements) part de l'arrivée : niveau() l'a compté depuis 0, avant qu'on remette le compteur de tours (22 novembre 2026 : il partait tout de suite)
   eboulis();
   say(G.arrivee==='base'?`Niveau ${G.niv}${G.amb?' — '+G.amb:''}. La foreuse a traversé le plafond d’une salle : elle est dans une base enfouie. Un site de forage est signalé plus loin.`:`Niveau ${G.niv}${G.amb?' — '+G.amb:''}. La foreuse a percé le plafond et s'est écrasée plus bas. Un nouveau site de forage est signalé.`,'info');}

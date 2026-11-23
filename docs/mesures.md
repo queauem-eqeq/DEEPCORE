@@ -752,3 +752,54 @@ Ce que les chiffres disent, et ce qui a été réglé en conséquence :
 
 Relancé après les changements : valeurs inchangées (perd la trace à 13 cases : 100 % en 36 tours ; terrain dégagé, 12 cases
 d'avance : 50 % semée ; herbes hautes en zigzag : 100 %).
+
+## Nuit du 23 novembre 2026 : économie de la vie, danger des ennemis, fuel
+
+### Avant : ce que chaque niveau coûtait et rendait (`outils/scripts/mesure-economie.js`, 20 cartes par niveau)
+
+| Niveau | Groupes | Créatures | Vie perdue si tout est affronté | Gisements de métal | Vie rendue par les éclats |
+|---|---|---|---|---|---|
+| 1 atterrissage | 11,1 | 26,6 | ≈ 176 | 7 | 260 PV |
+| 2 cavernes | 10,4 | 31,6 | ≈ 213 | 7 | 255 PV |
+| 3 base | 12,8 | 37,5 | ≈ 251 | 7 | 258 PV |
+
+Lecture : les éclats rendaient à eux seuls **plus de deux barres et demie de vie par niveau**, plus que ce que coûtait le niveau
+entier affronté de face, sans compter les réparobots (le consommable le plus fréquent). La vie n'était jamais une contrainte,
+et un groupe moyen (coût 5) n'enlevait qu'une vingtaine de points : beaucoup d'ennemis, peu de danger.
+
+### Après (règles `REGLES`, `00-base.js`)
+
+| Niveau | Groupes | Créatures | Vie perdue si tout est affronté | Gisements | Fuel rendu par les éclats |
+|---|---|---|---|---|---|
+| 1 | 6,0 | 13,0 | ≈ 89 × 2 = 178 | 4 | ≈ 540 |
+| 2 | 6,4 | 19,0 | ≈ 108 × 2 = 216 | 4 | ≈ 540 |
+| 3 | 7,5 | 21,8 | ≈ 128 × 2 = 256 | 4 | ≈ 540 |
+
+(« × 2 » : la valeur des groupes a été mesurée avec les anciens dégâts ; ils sont doublés.) Le niveau coûte autant qu'avant
+s'il est affronté de face, mais en **moitié moins de rencontres, deux fois plus graves**, et la vie ne revient plus toute seule :
+100 PV réparés au repos coûtent 800 de fuel, plus de la moitié du réservoir (1 500).
+
+Combats seul à seul, foreuse de série, 100 de vie (`outils/simul.py tout`, 23 novembre 2026) :
+
+| Adversaires | Victoires | Vie restante |
+|---|---|---|
+| 1 Crabot | 100 % | 84 |
+| 1 Relais | 100 % | 92 |
+| 1 Torpille | 100 % | 82 |
+| 1 Bloqueur | 100 % | 80 |
+| 1 Artilleur | 97 % | 72 |
+| 2 Crabots | 99 % | 56 |
+| 3 Relais | 100 % | 59 |
+| 4 Relais | 87 % | 37 |
+| 1 Broyeur | 52 à 61 % | 35 |
+| Broyeur + 2 Crabots | 7 % | 18 |
+
+Lecture : un petit groupe coûte un tiers à la moitié de la vie, quatre relais peuvent tuer, le Broyeur ne s'affronte plus de
+face sans objet ni coup par surprise. C'est le dosage demandé (« moitié moins, deux fois plus dangereux »).
+
+Renforts (`test-regles.js`) : arrivées aux battements 500, 850, 1 148, 1 401 d'un même niveau, hors de vue, à plus de 15 cases.
+Exploration automatique d'un niveau sans ennemi : de 100 à 550 battements avant le premier arrêt ; un niveau joué demande de
+l'ordre de 500 à 1 000 battements, soit un demi à deux tiers du réservoir. À régler en jouant.
+
+Non mesuré : une partie entière jouée par un pilote automatique (il n'en existe pas). Les valeurs de `REGLES` sont un premier
+jet raisonné, pas un équilibrage vérifié.

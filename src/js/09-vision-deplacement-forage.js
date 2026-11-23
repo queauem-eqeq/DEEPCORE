@@ -69,7 +69,7 @@ function stepDur(v,run){return DUR.pas*5/robotVit()*slowOf(v)*(run?SPRINT_MULT:1
 function portesPrises(){const s=new Set();for(const l of [G.animals,G.beasts])for(const o of l||[]){const i=idx(o.x,o.y);if(G.t[i]===DOOR)s.add(i);}return s;}
 function portesBruit(av){for(const i of portesPrises())if(!av.has(i)&&vis[i]){SFX.porte(.6);return;}}
 function pass(d,wait){G.time=(G.time||0)+d;G.debt=(G.debt||0)+d;
-  while(G.debt>=TICK-1e-6&&!G.over){G.debt-=TICK;if(wait)drift(true);const av=portesPrises();animalsAct();beastsAct();machTick();portesBruit(av);effTick();regen(wait);}
+  while(G.debt>=TICK-1e-6&&!G.over){G.debt-=TICK;if(wait)drift(true);const av=portesPrises();animalsAct();beastsAct();machTick();portesBruit(av);effTick();regen(wait);vagueTick();}
   if(!G.over)turnStealth();}                            // une action rapide peut ne faire battre personne : la portée affichée reste juste
 function toggleSprint(){if(!G||G.over)return;
   if(!G.sprint&&G.st.energie<SPRINT_COST){say(`Énergie insuffisante pour courir (${Math.floor(G.st.energie)}/${SPRINT_COST}).`,'warn');SFX.blocked();render();return;}
@@ -154,12 +154,12 @@ function tryMove(dx,dy){
   {const ci=idx(G.px,G.py);if(G.cles&&G.cles[ci]){delete G.cles[ci];G.items=G.items||{};(G.items[ci]=G.items[ci]||[]).push('cle');addFx({kind:'num',x:G.px,y:G.py,txt:'clé',col:PAL['1'],dur:900});/* la clé est un objet : elle est ramassée avec les autres, juste après (invPickup) */}}
   {const oi=idx(G.px,G.py);if(G.ore&&G.ore[oi]&&oreSol(G.ore[oi])){const l=oreLv(G.ore[oi]),mt=oreMat(G.ore[oi]);delete G.ore[oi];
     if(mt){G.st.matiere=(G.st.matiere||0)+ORE_PV[l];addFx({kind:'num',x:G.px,y:G.py,txt:'+'+ORE_PV[l],col:PAL['1'],dur:750});sayMore(`Matière {µ} récupérée : +${ORE_PV[l]} (réserve : ${G.st.matiere}).`,'good');SFX.spot();}
-    else{const av=G.st.vie,ae=G.st.energie;   // les éclats refont le plein de vie ET d'énergie (16 novembre 2026)
-    G.st.vie=Math.min(G.st.vieMax,G.st.vie+ORE_PV[l]);G.st.energie=Math.min(G.st.energieMax,G.st.energie+ORE_PV[l]);
-    const dv=Math.round(G.st.vie-av),de=Math.round(G.st.energie-ae);
+    else{const ae=G.st.energie;   // les éclats rendent du fuel et de l'énergie, plus de vie (23 novembre 2026)
+    const dv=fuelPlus(REGLES.fuelEclats[l]);G.st.energie=Math.min(G.st.energieMax,G.st.energie+ORE_PV[l]);
+    const de=Math.round(G.st.energie-ae);
     addFx({kind:'num',x:G.px,y:G.py,txt:'+'+dv,col:PAL['2'],dur:750});   // affiché comme les dégâts, couleur des éclats
     if(de)addFx({kind:'num',x:G.px,y:G.py,txt:'+'+de,col:'#ffffff',dur:750,stack:1});   // l'énergie regagnée, en blanc comme sa barre (22 novembre 2026)
-    sayMore(`Éclats de métal récupérés : +${dv} PV, +${de} d’énergie.`,'good');SFX.spot();
+    sayMore(`Éclats de métal récupérés : +${dv} de fuel, +${de} d’énergie.`,'good');SFX.spot();
     if(dv)addFx({kind:'soin',x:G.px,y:G.py,dur:900,gr:fxGrains(9)});if(de)addFx({kind:'ener',x:G.px,y:G.py,dur:900,gr:fxGrains(9)});}}}
   invPickup(true);
   const s=siteAt(G.px,G.py);
@@ -169,7 +169,7 @@ function tryMove(dx,dy){
 
 /* ---------- Forage ---------- */
 function waitTurn(){
-  if(G.over||drilling||!$('overlay').hidden)return;lastAct='wait';lastRun=false;G.turn++;G.msg=null;if(!REST)say(`Le robot attend : recharge ${WAIT_REGEN} fois plus vite (${+(G.st.power/POW_BASE*WAIT_REGEN).toFixed(1)}/t).`);
+  if(G.over||drilling||!$('overlay').hidden)return;lastAct='wait';lastRun=false;G.turn++;G.msg=null;if(!REST)say(G.st.fuel<=0?'Le robot attend. Réservoir vide : ni réparation ni recharge.':`Le robot attend : recharge ${WAIT_REGEN} fois plus vite${G.st.vie<G.st.vieMax?`, réparation +${REGLES.reposVie} PV pour ${REGLES.fuelRepos} de fuel`:''}.`);
   pass(DUR.attente,true);chercheSecrets();computeFOV();render();if(G.over&&G.over.dead)dead();
 }
 function askDrill(){
