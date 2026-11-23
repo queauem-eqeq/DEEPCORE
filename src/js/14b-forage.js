@@ -185,7 +185,7 @@ function fgMines(F,dt){const bas=F.R*.7;
   for(const m of F.mines){if(!m.ok||Math.abs(m.y-F.d)>1.4||Math.abs(m.x-F.cx)>FG_R-1)continue;m.ok=0;F.touche++;F.stun=.45;F.flash=.5;F.imp=1.1;fgBoom(F,'impact');
     fgSparks(F,40,m.x,m.y,22);fgChips(F,50,m.x,m.y,18,-14,30);for(let i=0;i<14;i++)fgSmoke(F,m.x+fgRnd(-4,4),m.y+fgRnd(-2,2),fgRnd(-9,9),fgRnd(-6,3),fgRnd(1.2,2),1,2.4);
     if(typeof G!=='undefined'&&G&&G.st){const dm=Math.min(FG_MINE_DM,G.st.vie);G.st.vie-=dm;F.perdu+=dm;
-      if(G.st.vie<=0&&!F.mort){F.mort=1;F.ph=5;F.tMort=F.t;F.flash=.9;F.imp=2;fgBoom(F,'perce');fgEclats(F);for(let i=0;i<40;i++)fgSmoke(F,F.cx+fgRnd(-8,8),F.d-fgRnd(0,12),fgRnd(-14,14),fgRnd(-12,6),fgRnd(1.5,2.6),1.2,3);fgSparks(F,90,F.cx,F.d-6,30);}}}
+      if(G.st.vie<=0&&!F.mort){F.mort=1;F.ph=5;F.tMort=F.t;F.flash=0;F.imp=2;F.pt.length=0;fgBoom(F,'perce');}}}
   F.stun=Math.max(0,F.stun-dt);}
 /* L’amas naît juste sous le bas de l’écran quand la foreuse approche de sa profondeur, de 9 à 13 cases à côté de là où elle va (côté au hasard) :
    il faut tourner un peu pour passer dessus. Il est récolté si le puits le touche (moitié de largeur du puits + 2 cases). */
@@ -252,7 +252,7 @@ function forageFrame(now){const F=FORAGE;if(!F)return;
       const bx=F.cx-F.side*7;fgChips(F,34,bx,F.fl-1,11,-10,30,2,F.cRock2);
       for(let i=0;i<12;i++)fgSmoke(F,bx+fgRnd(-7,7),F.fl-fgRnd(.2,1.6),fgRnd(-8,8),-fgRnd(.3,1.8),fgRnd(1,1.7),.8,1.9);}
     if(u>=2.1){F.ph=4;F.tFade=t;F.fadeLen=.75;}}
-  else if(F.ph===5){if(t-F.tMort>=FG_MORT){F.ph=4;F.tFade=t;F.fadeLen=.6;}}   // la foreuse a explosé : l'explosion se joue, puis le noir
+  else if(F.ph===5){if(t-F.tMort>=FG_MORT){F.ph=4;F.tFade=t;F.fadeLen=.25;}}   // la foreuse a explosé : l'explosion se joue, puis le noir
   else if(F.ph===4&&F.tFade==null){F.tFade=t;F.fadeLen=.75;}
   const mi=fgIci(F),M=FG_MAT[mi],hT=F.ph===1?Math.min(1,(M.d-.5)/3):0;
   F.hs+=(hT-F.hs)*Math.min(1,dt*5);
@@ -284,24 +284,32 @@ const fgGlyph=(F,ch,col)=>{let A=F.atl[col];if(!A)A=F.atl[col]={};let g=A[ch];
 const fgPut=(F,xw,yw,ch,col)=>F.x.drawImage(fgGlyph(F,ch,col),Math.round((xw-F.camX)*F.cw+F.w/2),Math.round((yw-F.camY)*F.chh));
 /* Mort pendant la descente (23 novembre 2026) : la foreuse explose en ASCII dans le puits, puis l'écran passe au noir et le jeu
    montre aussitôt « FOREUSE DÉTRUITE » sur fond noir (sans l'explosion du jeu, ni la carte du niveau en dessous).
-   fgEclats : la foreuse se défait en ses propres caractères, projetés autour d'elle. fgExplosion : boule de feu en dégradé
-   « █ ▓ ▒ ░ » (blanc, jaune, orange, rouge), onde de choc en « * # + », puis fumée grise qui se défait. Durée : FG_MORT. */
-const FG_MORT=2.4,FG_FEU=['#ffffff','#fff3a0','#ffb020','#ff6a1f','#e8240f','#8a1c10'];
-function fgEclats(F){for(let r=0;r<FG_ART.length;r++)for(let c=0;c<FG_ART[r].length;c++){const ch=FG_ART[r][c];if(ch===' ')continue;
-  const x0=F.nx+c-5,y0=F.ny+r-14,dx=x0-F.nx,dy=y0-(F.ny-7),n=Math.hypot(dx*.6,dy)||1,v=fgRnd(14,34);
-  fgEmit(F,{type:'ch',x:x0,y:y0,vx:dx/n*v/.6+fgRnd(-6,6),vy:dy/n*v+fgRnd(-10,4),g:30,life:fgRnd(.9,1.8),ch,col:F.pal[FG_MSK[r][c]]||'#fff'});}}
-function fgExplosion(F,u){const cx=F.nx,cy=F.ny-7,H=(a,b,k)=>fgH(F,a,b,k);
-  const k=Math.min(1,u/.45),R=3+13*Math.sqrt(k),vie=Math.max(0,1-Math.max(0,u-.5)/1.6),tic=Math.floor(u*14);   // la boule grandit en 0,45 s, puis se défait
-  const ry=Math.ceil(R),rx=Math.ceil(R/.6);
-  for(let j=-ry;j<=ry;j++)for(let i=-rx;i<=rx;i++){const d=Math.hypot(i*.6,j)/R;if(d>1)continue;
-    const bruit=H(i+cx|0,j+cy|0,tic)*.35;if(d+bruit*.6>vie+.15)continue;   // les bords s'effilochent, et la boule fond en refroidissant
-    const e=d+(1-vie)*.9+bruit*.4;let ch,col;
-    if(vie>.25&&e<1.05){const n=Math.min(5,Math.floor(e*5.2));ch='█▓▓▒▒░'[n];col=FG_FEU[n];}
-    else{ch=H(i,j,tic+3)<.5?'░':'▒';col=F.cRock2;if(H(i,j,tic+9)<.35)continue;}   // fumée grise
-    fgPut(F,cx+i,cy+j,ch,col);}
-  if(u<1.1){const rc=6+u*42,ep=1.4;   // onde de choc
-    for(let a=0;a<360;a+=2.2){const rr=rc+(H(a|0,tic,5)-.5)*ep,x=cx+Math.cos(a*Math.PI/180)*rr/.6,y=cy+Math.sin(a*Math.PI/180)*rr;
-      if(H(a|0,tic,11)<u*.7)continue;fgPut(F,Math.round(x),Math.round(y),'*#+·'[(a*7+tic)&3],u<.4?'#fff3a0':u<.8?'#ff6a1f':'#8a1c10');}}}
+   Explosion revue le même jour, d'après la référence REF/explosion.gif : une grille de caractères DOS de tracé de cadres
+   (« ╬ ═ ║ ┼ ┐ ░ … »), chaque case opaque sur fond noir (aucune transparence), en couleurs vives qui changent à chaque
+   instant. Le front part en losange, s'arrondit et couvre tout l'écran en 1,25 s, chauffé à blanc ; puis les cases
+   s'éteignent une à une, en passant de caractères pleins à des traits fins, jusqu'au noir. Durée : FG_MORT. */
+const FG_MORT=3.4,
+  FG_X_LOURD='█▓╬╪╫╬▓█▒╬',FG_X_MOYEN='═║╦╩╠╣┼╤╧╟╢▒',FG_X_LEGER='─│┐└┘┌├┤┬┴╒╕╘╛░',   /* du plus dense au plus clair */
+  FG_X_TEINTES=['#ffe680','#ffd23f','#ffa53a','#ff7a3d','#ff5a6e','#e04cd0','#a65cff','#4cc3ff','#5cff9a'],FG_X_FROID=['#e04cd0','#a65cff','#4cc3ff','#5cff9a'];
+function fgXCase(F,c,col,p){const k=c+col+p;let g=(F.xat||(F.xat={}))[k];   /* case opaque : fond noir plein, caractère DOS 8 × 16 grossi p fois */
+  if(!g){g=document.createElement('canvas');g.width=8*p;g.height=16*p;dosCar(g.getContext('2d'),c,0,0,p,col,'#000');F.xat[k]=g;}return g;}
+function fgExplosion(F,u){const x=F.x,{w,h}=F,p=Math.max(2,Math.round(h/270)),CW=8*p,CH=16*p,C=Math.ceil(w/CW),R=Math.ceil(h/CH),
+    sx=(F.nx-F.camX)*F.cw+w/2,sy=(F.ny-7-F.camY)*F.chh,U=CW,gx=sx/CW,gy=sy/CH,   /* distances comptées en largeurs de case */
+    Rmax=Math.hypot(Math.max(gx,C-gx)*CW,Math.max(gy,R-gy)*CH)/U+3,
+    e=Math.min(1,u/1.3),Ray=1+Rmax*(1-Math.pow(1-e,2.2)),   /* le front avance vite puis ralentit, jusqu'à couvrir l'écran */
+    m=Math.min(1,u/1),froid=Math.min(1,u/3);
+  x.fillStyle='#000';
+  for(let j=0;j<R;j++)for(let i=0;i<C;i++){const dx=Math.abs((i+.5)*CW-sx)/U,dy=Math.abs((j+.5)*CH-sy)/U,
+      d=(dx+dy)*.75*(1-m)+Math.hypot(dx,dy)*m+fgH(F,i,j,1)*1.2;   /* losange au départ (comme la référence), puis rond, bord effiloché */
+    if(d>Ray)continue;const X=i*CW,Y=j*CH,fin=1.6+fgH(F,i,j,2)*1.45+Math.min(1,d/Rmax)*.25;   /* chaque case s'éteint à son heure */
+    const tic=Math.floor(u*7+fgH(F,i,j,3)*7);   /* chaque case change de caractère à son rythme, pas toutes ensemble */
+    if(u>=fin){if(u<fin+.8&&fgH(F,i,j,tic+5)<.05)x.drawImage(fgXCase(F,fgH(F,i,j,tic)<.5?'·':'░',FG_X_FROID[(i+j)&3],p),X,Y);else x.fillRect(X,Y,CW,CH);continue;}
+    const front=Ray-d,reste=(fin-u)/.7,r=fgH(F,i,j,tic),q=fgH(F,i,j,tic+7);let c,col;
+    if(front<1.6&&u<1.5){c=r<.5?'█':'▓';col=r<.4?'#ffffff':'#fff6b0';}   /* le front, chauffé à blanc */
+    else{const set=reste<.45?FG_X_LEGER:reste<1?FG_X_MOYEN:(q<.7?FG_X_LOURD:FG_X_MOYEN);c=set[Math.floor(r*set.length)];
+      const k=Math.min(.999,Math.max(0,d/Math.max(1,Ray)*.75+froid*.55+(q-.5)*.35));   /* du centre au bord, et en refroidissant : jaune, orange, rose, puis violet, bleu, vert */
+      col=FG_X_TEINTES[Math.floor(k*FG_X_TEINTES.length)];}
+    x.drawImage(fgXCase(F,c,col,p),X,Y);}}
 /* La foreuse, tournée d'un angle quelconque : on balaie les cases de l'écran autour du nez et, pour chacune, on
    remonte à la case du dessin par la rotation inverse (donc jamais de trou). Au-delà de 45 degrés, chaque
    caractère est remplacé par son équivalent tourné d'un quart de tour. */
@@ -342,8 +350,8 @@ function fgDraw(F,t){const x=F.x,{w,h,cw,chh,dpr}=F;
       for(let j=-ry;j<=ry;j++)for(let i=-rx;i<=rx;i++){const d=Math.hypot(i/1.9,j)/rad;if(d>1)continue;if(d>.55&&fgH(F,i+px,j+py,p.sd)<.22+a*.4)continue;
         fgPut(F,px+i,py+j,d<.4&&a<.55?'▓':d<.75&&a<.8?'▒':'░',col);}}
     else fgPut(F,Math.round(p.x),Math.round(p.y),p.ch,p.col);}
-  if(F.mort)fgExplosion(F,t-F.tMort);
   x.restore();
+  if(F.mort)fgExplosion(F,t-F.tMort);
   fgHud(F,t);
   if(F.flash>0){x.globalAlpha=Math.min(.7,F.flash);x.fillStyle='#fff';x.fillRect(0,0,w,h);x.globalAlpha=1;}
   if(F.ph===4){x.globalAlpha=Math.min(1,(t-F.tFade)/F.fadeLen);x.fillStyle='#000';x.fillRect(0,0,w,h);x.globalAlpha=1;}}
@@ -406,7 +414,7 @@ function fgHud(F,t){const x=F.x,{w,h,dpr}=F,fs=Math.round(12*dpr),lh=Math.round(
     F.hudG=m-Math.round(8*dpr);F.hudB=m-Math.round(8*dpr)+(F.hudN+2)*lh+Math.round(12*dpr);}   /* deux lignes réservées aux alertes qui clignotent, que l'annonce ne doit pas cacher */   // bord gauche et bas du tableau (sans les alertes qui clignotent) : l'annonce se cale dessous   // fond noir plein : le texte reste lisible sur la roche
   L.forEach((l,i)=>{x.fillStyle='#000';x.fillText(l[0],m+1,m+i*lh+1);x.fillStyle=l[1];x.fillText(l[0],m,m+i*lh);});
   if(F.ph<=1){const aide=F.jeu?'◄ ►  Q D  4 6   ÉVITER LES MINES':'◄ ►  Q D  4 6   DIRIGER LA FOREUSE';x.fillStyle='#000';x.fillRect(m-Math.round(8*dpr),h-m-fs-Math.round(6*dpr),Math.round(x.measureText(aide).width)+Math.round(16*dpr),fs+Math.round(12*dpr));x.fillStyle=F.ph===0?F.pal.g:F.pal.d;x.fillText(aide,m,h-m-fs);}
-  if(t>=FG_ANN_T0&&t<FG_ANNONCE)fgAnnonce(F,t);x.textAlign='left';x.textBaseline='top';x.font=`${fs}px ${FG_FONT}`;
+  if(t>=FG_ANN_T0&&t<FG_ANNONCE&&!F.mort)fgAnnonce(F,t);x.textAlign='left';x.textBaseline='top';x.font=`${fs}px ${FG_FONT}`;
   // coupe : les matières de fond du niveau, et le repère de profondeur
   const sw=Math.round(8*dpr),sx=w-m-sw,st=Math.round(h*.22),sh=Math.round(h*.5),B=F.P.b;
   B.forEach((e,i)=>{const y0=st+sh*e[0],y1=st+sh*(i+1<B.length?B[i+1][0]:1);x.fillStyle=F.mc[e[1]][1];x.fillRect(sx,Math.round(y0),sw,Math.max(1,Math.round(y1-y0)));});
