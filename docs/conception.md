@@ -1218,17 +1218,23 @@ recopier** la configuration d'essai que la base contient aussi (génération, é
 **Depuis le 23 novembre 2026, l'arrivée est en ASCII** (`src/js/14e-arrivee.js`, lancée par `playIntro`) ; l'intro en
 pixels décrite plus bas n'est plus jouée (son code reste dans `15-intro.js`). Mêmes règles que les descentes : grille de
 caractères, **chaque case opaque, jamais d'alpha ni de transparence**, rien ne s'efface en fondu. Vue de dessus, ≈ 14 s :
-- **0-1,3 s, hyperespace** : les étoiles filent en traînées « │ ¦ », puis ralentissent en points qui défilent lentement.
+- **0-1,3 s, hyperespace** : les étoiles filent en traînées « │ ¦ », puis **ralentissent en douceur** (ralenti amorti, jamais
+  de recul) en points qui défilent lentement.
 - **0,85-3 s, la planète entre par le haut** : la **vraie carte du niveau 1**, en caractères (roche « ▒ ▓ », montagne
   « ▲ █ » et roche dure en couleur monde, eau « ≈ », herbe « w », bâtiments en couleur bâti, sol nu « · . o »), enroulée en
   globe (bords courbés, plus clairs) avec un anneau d'atmosphère ; elle tourne un peu en arrivant.
-- **2,2-10,6 s, la descente** : le disque grandit jusqu'à couvrir l'écran ; au sol, une case de carte fait deux rangées, et
-  le vaisseau se pose **à sa place sur la carte**. Nuages en « ░ ▒ ▓ █ » (blanc et gris), clairsemés vus de l'espace, qui
-  grossissent et s'effilochent en passant le vaisseau. **Entrée dans l'atmosphère** : arc de plasma devant le nez, traînées
+- **2,2-10,6 s, la descente** : le disque grandit jusqu'à couvrir l'écran et finit **exactement à l'échelle du jeu en
+  pixels** : cases de 8 × 16 px, une tuile de 32 px = 4 caractères × 2 rangées, grille calée sur celle des tuiles, même
+  cadrage que le jeu (caméra bornée) ; le vaisseau ASCII, tiré de la grille du vaisseau (`SHIP_GRID`, 20 × 12 caractères),
+  se pose **à la place exacte du vaisseau en pixels**. **Au-delà de la carte**, et à la place de son mur de roche dure du
+  bord, un **terrain inventé** (montagnes, gouffres, herbe, sol nu, plus montagneux près de la carte) : le vaisseau ne se
+  pose jamais au bord d'un plateau. Rendu du sol comme dans l'essai (roche « ▒ » au bord, « ▓ █ » au cœur, sans triangles). Nuages en « ░ ▒ ▓ » (gris et blanc, jamais de pavé plein), clairsemés vus de l'espace, qui
+  **apparaissent peu à peu**, grossissent et s'effilochent en passant le vaisseau. **Entrée dans l'atmosphère** : arc de plasma devant le nez, traînées
   de feu, coque qui chauffe (jusqu'à environ 1 700 °C), écran qui tremble. **Éclairs** en zigzag « ╱ │ ╲ » qui illuminent
   les nuages autour.
 - **11,4 s, posé** : l'ombre du vaisseau l'a rejoint, un anneau de poussière s'éloigne en perdant sa densité.
-- **12,7-13,8 s** : l'écran s'éteint case par case (« ▒ ░ · »), puis le jeu.
+- **12,7-13,8 s** : l'écran s'éteint case par case (« ▒ ░ · ») et chaque case éteinte **laisse voir le jeu en pixels**, à la
+  même échelle et à la même place : un fondu entre les deux styles, sans transparence.
 - **Alerte** en police DOS, même cadre que les descentes, **couleur monde** : « PLANÈTE EN VUE / ATTERRISSAGE IMMINENT »
   (apparition 1,2-3,2 s, affichée 4 s, disparition 1 s).
 - **Tableau de bord** repris des descentes : ARRIVÉE ▸ SÉQUENCE D'ATTERRISSAGE, cible, altitude, vitesse, atmosphère (vide,
