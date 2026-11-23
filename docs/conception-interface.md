@@ -20,6 +20,12 @@ Partie du document de conception (sommaire et règles à ne pas casser : `concep
   (`PRESET_ACTIVE`). La recopie **fusionne** : les tuiles déjà adoptées et absentes de la base sont gardées telles quelles.
 - **Une palette par niveau** (23 novembre 2026) : à chaque niveau suivant, la palette est tirée au hasard parmi les prédéfinies (jamais la
   même deux fois de suite) ; la palette choisie par le joueur n'est pas modifiée et revient au niveau 1. Voir `conception-descente.md`.
+- **Menu Palette** (24 novembre 2026, de haut en bas) : le **nuancier** sous le titre, les cinq teintes, le **nom de la palette en
+  cours** dans un champ modifiable, puis **Rétablir** et **Enregistrer**, enfin la liste des palettes. Cliquer une teinte (Bio, par
+  exemple) ouvre le nuancier à sa place fixe sous le titre ; choisir une couleur l'applique aussitôt ; recliquer la même teinte le
+  referme (Échap aussi). Le nuancier fait **4 rangées de 16 cases**, deux fois plus petites qu'avant.
+- **Le nom d'une palette se modifie** : il est enregistré avec ses couleurs (`np-presets`, `{n, c}`), et les palettes relues depuis
+  l'artefact sont retrouvées **par rang** et non par nom, qui n'est plus fixe.
 - **Toutes les couleurs viennent de LACKING64** (lospec.com/palette-list/lacking64) : 8 palettes neuves, toutes modifiables
   (Braise, Lagon, Désert, Jungle, Améthyste, Cendre, Glacier, Magma ; Braise par défaut, la plus proche de l'ancienne
   Rouille), et le **sélecteur de teinte montre les 64 couleurs de LACKING64**. Il reste ouvert après un choix ; on le ferme
@@ -128,6 +134,10 @@ X : inspection au clavier · R : courir / marcher · T : équipement · I : inve
 F : forer · Espace / 5 : attendre · P : repos · V : portée de discrétion · B : brouillard · ! : son · M : mode
 carte (déplacements = défilement, Maj = plus vite, Échap ou M pour revenir ; Espace / 5 y attendent toujours, pour les
 essais, sans bouger la vue ).
+
+**F6** : enregistre **tout** dans la base de l'artefact (bestiaire, tuiles, palettes, stats de la foreuse, LIFE, Monde, objets,
+artefacts, groupes) — le même enregistrement que les boutons « Enregistrer » du Lab (24 novembre 2026). **F9** : un exemplaire de
+chaque consommable dans l'inventaire.
 
 ## 10. Sauvegarde des réglages
 

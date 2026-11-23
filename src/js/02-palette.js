@@ -21,7 +21,10 @@ const PRESETS_DEF=PRESETS.map(p=>({n:p.n,c:p.c.slice()}));
 const palDe=c=>({'1':c[0],'2':c[1],'3':c[2],'4':c[3],'5':c[4]});
 let PRESET_ACTIVE=2;   // Désert, la palette choisie par le joueur (23 novembre 2026)
 try{const sv=JSON.parse(localStorage.getItem('np-presets')||'null');
-  if(Array.isArray(sv))sv.forEach((c,i)=>{if(PRESETS[i]&&Array.isArray(c)&&c.length===PAL_N)PRESETS[i].c=c;});}catch(e){}
+  // une entrée est soit les cinq couleurs (ancien format), soit {n, c} : le nom de la palette est modifiable depuis le 24 novembre 2026
+  if(Array.isArray(sv))sv.forEach((e,i)=>{if(!PRESETS[i])return;const c=Array.isArray(e)?e:e&&e.c;
+    if(Array.isArray(c)&&c.length===PAL_N)PRESETS[i].c=c;
+    if(e&&!Array.isArray(e)&&typeof e.n==='string'&&e.n.trim())PRESETS[i].n=e.n;});}catch(e){}
 // premier lancement à cinq couleurs : on repart de Braise
 try{if(localStorage.getItem('np-pal5')){const s=localStorage.getItem('np-preset-active');if(s!==null&&PRESETS[+s])PRESET_ACTIVE=+s;
   }else localStorage.setItem('np-pal5','1');}catch(e){}

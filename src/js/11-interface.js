@@ -131,6 +131,8 @@ addEventListener('keydown',ev=>{
   // F9 (23 novembre 2026 ; avant, la cinématique de forage, qu'on lance aussi par NIV2 et NIV3) : un exemplaire de chaque
   // consommable dans l'inventaire, déjà identifié, dans la limite des 20 places
   if(ev.key==='F9'){ev.preventDefault();if(G&&!G.over)f9Consos();return;}
+  // F6 (24 novembre 2026) : enregistre tout dans l'artefact — bestiaire, tuiles, palettes, stats, LIFE, Monde, objets, artefacts
+  if(ev.key==='F6'){ev.preventDefault();saveSettings($('palSave'),$('palMsg'),true);return;}
   if(!$('inventaire').hidden){invKey(ev);return;}
   // navigation au clavier dans le sous-menu Inventaire
   if(SAC_NAV&&$('overlay').hidden&&ev.target.tagName!=='INPUT'){if(sacKey(ev))return;}
@@ -200,8 +202,11 @@ function applySaved(d){
     if(METHODS.some(m=>m[0]===g.methode)){GEN.methode=g.methode;$('gm').value=g.methode;}
     if(num(g.remplissage))setCA('remplissage',g.remplissage,35,70);if(num(g.iterations))setCA('iterations',g.iterations,1,10);
       caState();saveGen();}
-  if(d.palette&&Array.isArray(d.palette.palettes)){d.palette.palettes.forEach(pp=>{const t=PRESETS.find(x=>x.n===pp.nom);if(t&&Array.isArray(pp.couleurs)&&pp.couleurs.length===PAL_N)t.c=pp.couleurs.slice();});
-    const ai=PRESETS.findIndex(x=>x.n===d.palette.active);usePreset(ai>=0?ai:PRESET_ACTIVE);}
+  // par rang et non par nom : le nom d'une palette est modifiable depuis le 24 novembre 2026
+  if(d.palette&&Array.isArray(d.palette.palettes)){d.palette.palettes.forEach((pp,k)=>{const t=PRESETS[k]||PRESETS.find(x=>x.n===pp.nom);if(!t)return;
+      if(Array.isArray(pp.couleurs)&&pp.couleurs.length===PAL_N)t.c=pp.couleurs.slice();
+      if(typeof pp.nom==='string'&&pp.nom.trim())t.n=pp.nom;});
+    savePresets();const ai=PRESETS.findIndex(x=>x.n===d.palette.active);usePreset(ai>=0?ai:PRESET_ACTIVE);}
   if(d.tuiles&&typeof d.tuiles==='object'){TILE_OV={};
     for(const k in d.tuiles)if(PAT_ORIG[k]&&validTile(d.tuiles[k],k))TILE_OV[k]=d.tuiles[k].slice();saveTiles();
     commitTileBase();buildTiles();}
@@ -215,7 +220,7 @@ function applySaved(d){
   catch(e){}}).catch(()=>{});
 // Bouton « Enregistrer » du Tile editor : envoie tuiles et réglages dans la base de l'artefact (Claude peut ensuite les lire et les adopter)
 // b, m : bouton et zone de message (Tile editor par défaut, ou Bestiaire)
-async function saveSettings(b,m){b=b instanceof HTMLElement?b:$('saveBtn');m=m||$('saveMsg');
+async function saveSettings(b,m,journal){b=b instanceof HTMLElement?b:$('saveBtn');m=m||$('saveMsg');
   if(!DB||!b)return;b.disabled=true;b.textContent='Enregistrement…';m.className='saved';m.textContent='';
   const best={};BEST_LIST().forEach(e=>{best[e.key]={nom:e.o.n};BFIELDS.forEach(([f])=>best[e.key][f]=e.o[f]);});
   const data={enregistreLe:new Date().toISOString(),bestiaire:best,discretion:STEALTH_BASE,groupes:JSON.parse(JSON.stringify(GROUPES)),
@@ -226,8 +231,10 @@ async function saveSettings(b,m){b=b instanceof HTMLElement?b:$('saveBtn');m=m||
     tuiles:Object.assign({},TILE_OV)};
   try{await DB.doc('reglages/courant').set(data);commitTileBase();try{localStorage.setItem('np-maj',String(Date.parse(data.enregistreLe)));
     }catch(e){}if(!$('viseurs').hidden)drawCurEd();const t=new Date();m.className='saved ok';
-    m.textContent=`Réglages enregistrés à ${String(t.getHours()).padStart(2,'0')}:${String(t.getMinutes()).padStart(2,'0')}.`;}
+    m.textContent=`Réglages enregistrés à ${String(t.getHours()).padStart(2,'0')}:${String(t.getMinutes()).padStart(2,'0')}.`;
+    if(journal)try{sayMore(m.textContent,'good');render();}catch(e){}}
   catch(e){m.className='saved err';m.textContent=e&&e.code==='invalid_argument'?'Vous n’avez pas le droit d’enregistrer sur cette page.':'Échec de l’enregistrement. Réessayez dans un instant.';}
+  if(journal&&/err/.test(m.className))try{sayMore(m.textContent,'warn');render();}catch(e){}
   b.disabled=false;b.textContent='Enregistrer';}
 $('saveBtn').onclick=()=>saveSettings();
 $('bestSave').onclick=()=>saveSettings($('bestSave'),$('bestMsg'));
