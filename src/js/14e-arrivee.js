@@ -169,7 +169,7 @@ function frame(now){if(!S||INTRO!==S)return;setup();const t=(now-S.t0)/1000+S.sa
   const fini=(i,j)=>t-(T_NOIR+hsh(i,j,33)*.6);   /* extinction : depuis combien de temps la case s'éteint */
   if(t<=T_NOIR){x.fillStyle='#000';x.fillRect(0,0,w,h);for(let j=0;j<R;j++)for(let i=0;i<C;i++){const ch=CH[j*C+i];if(ch!==' ')x.drawImage(glyph(ch,CO[j*C+i]),i*cw+GX0+ox,j*chh+GY0+oy);}}
   else{x.clearRect(0,0,w,h);x.fillStyle='#000';for(let j=0;j<R;j++)for(let i=0;i<C;i++){if(fini(i,j)>=0)continue;const ch=CH[j*C+i],X=i*cw+GX0,Y=j*chh+GY0;x.fillRect(X,Y,cw,chh);if(ch!==' ')x.drawImage(glyph(ch,CO[j*C+i]),X,Y);}}
-  hud(t,{k,Z,Rs,hc,orage});
+  /* plus de tableau de bord à l'arrivée (retiré le 23 novembre 2026, à la demande) ; hud() reste pour mémoire */
   // extinction : chaque case, à son tour, passe par « ▒ ░ · » dans sa couleur, puis s'efface et laisse voir le jeu en pixels,
   // à la même échelle et à la même place (le tableau de bord s'efface avec les cases qu'il couvre)
   if(t>T_NOIR)for(let j=0;j<R;j++)for(let i=0;i<C;i++){const f=fini(i,j);if(f<0)continue;const st=Math.floor(f/.1),q=j*C+i,X=i*cw+GX0,Y=j*chh+GY0;

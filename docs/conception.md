@@ -1244,9 +1244,7 @@ caractères, **chaque case opaque, jamais d'alpha ni de transparence**, rien ne 
 - **12,7-13,8 s** : l'écran s'éteint case par case (« ▒ ░ · ») et chaque case éteinte **laisse voir le jeu en pixels**, à la
   même échelle et à la même place : un fondu entre les deux styles, sans transparence.
 - **Pas d'alerte** (« Planète en vue / Atterrissage imminent » retirée le 23 novembre 2026).
-- **Tableau de bord** repris des descentes : ARRIVÉE ▸ SÉQUENCE D'ATTERRISSAGE, cible, altitude, vitesse, atmosphère (vide,
-  haute, dense, basse, sol), coque (barre et température), cap, soute (foreuse arrimée) ; alertes qui clignotent
-  (hyperespace, chaleur critique, orage, contact) ; jauge d'altitude à droite.
+- **Pas de tableau de bord** (retiré le 23 novembre 2026) : l'écran ne montre que la scène.
 - **Bruitages** : ceux de l'intro en pixels (hyperespace, ronronnement, approche, rentrée, tonnerre à chaque éclair,
   poussée, contact au sol).
 - **Échap, Espace, Entrée** : passer (on saute à l'extinction). Essai d'origine, avec palette et carte de démonstration :
