@@ -190,14 +190,12 @@ function render(){
   if(!G||!TL.robot)return;ensureChasmOv();ensureSolOv();
   const vc=vw/S,vr=vh/S;
   const fx0=freeCam?camCX:G.px,fy0=freeCam?camCY:G.py;
-  camX=fx0-Math.floor(vc/2);camY=fy0-Math.floor(vr/2);   /* la foreuse toujours au centre, même au bord de la carte (23 novembre 2026) : au-delà, de la montagne */
+  camX=Math.max(0,Math.min(W-Math.floor(vc),fx0-Math.floor(vc/2)));camY=Math.max(0,Math.min(H-Math.floor(vr),fy0-Math.floor(vr/2)));
   ox=0;oy=0;
   ctx.globalAlpha=1;ctx.imageSmoothingEnabled=false;ctx.fillStyle='#020605';ctx.fillRect(0,0,vw,vh);
   const sh=reduced?null:FX.find(f=>f.kind==='shake');ctx.save();
   if(sh){const a=(1-fxP(sh))*sh.amp;ctx.translate(Math.round((Math.random()*2-1)*a),Math.round((Math.random()*2-1)*a));}
-  for(let y=camY;y<camY+rows+1;y++)for(let x=camX;x<camX+cols+1;x++){
-    if(x<0||y<0||x>=W||y>=H){const kh=x+','+y,v=!fog||HORS_VIS.has(kh);if(!v&&!(G.horsVu&&G.horsVu[kh]))continue;   /* hors de la carte : de la roche dure, comme le bord de la carte, sous le brouillard */
-      const k=v?1:.28;put(TL.ground0,x,y,.6*k);put(TL.hardBody,x,y,.9*k);continue;}
+  for(let y=camY;y<Math.min(H,camY+rows+1);y++)for(let x=camX;x<Math.min(W,camX+cols+1);x++){
     const i=idx(x,y),v=fog?vis[i]:1;if(!v&&!G.seen[i])continue;const t=G.t[i],h=hash(x,y),k=v?1:.28;
     const pb=t===BRIDGE&&G.pb&&G.pb[i];   // pont d'un bâtiment : couleur unie et tuile du sol bâti (19 novembre 2026)
     if(t!==CHASM)voile(x,y,(x-camX)*S,(y-camY)*S,k,null,pb||t>=WALL);   // rien de bâti ne porte la texture du sol naturel
@@ -205,8 +203,8 @@ function render(){
     if(t>=WALL)batiTuile(t,x,y,(tl,a)=>put(tl,x,y,a*k));else
     if(t!==BRIDGE)put(TL.ground0,x,y,.6*k);   // sol uniforme : plus de variations près des sites (13 novembre 2026)
     if(t===ROCK)put(h%3?TL.rock:TL.rock2,x,y,.95*k);
-    else if(t===MOUNT){const up=y>0?G.t[idx(x,y-1)]:HARD;if(up===MOUNT)put(TL.mtBody,x,y,.9*k);else{if(up===HARD)put(TL.softTopBg,x,y,.9*k);put(TL.mtTop,x,y,.9*k);}}   // sous de la roche dure, la crête se pose sur un fond de roche dure
-    else if(t===HARD){const up=y>0?G.t[idx(x,y-1)]:HARD;   /* au-dessus du bord : la roche dure continue, pas de crête */   // comme la montagne : crête irrégulière en haut, posée sur de la roche tendre
+    else if(t===MOUNT){const up=y>0?G.t[idx(x,y-1)]:-1;if(up===MOUNT)put(TL.mtBody,x,y,.9*k);else{if(up===HARD)put(TL.softTopBg,x,y,.9*k);put(TL.mtTop,x,y,.9*k);}}   // sous de la roche dure, la crête se pose sur un fond de roche dure
+    else if(t===HARD){const up=y>0?G.t[idx(x,y-1)]:-1;   // comme la montagne : crête irrégulière en haut, posée sur de la roche tendre
       if(up!==HARD){if(up===MOUNT||up===ROCK)put(TL.hardTopBg,x,y,.9*k);put(TL.hardTop,x,y,.9*k);}else put(TL.hardBody,x,y,.9*k);}
     else if((t===SHIP||t===DECK)&&G.ship){const sk=TL['ship_'+(x-G.ship.x)+'_'+(y-G.ship.y)];if(sk)put(sk,x,y,k);}
     if(t===MOUNT&&G.ore&&G.ore[i]&&!oreSol(G.ore[i]))put(oreTile(G.ore[i],false),x,y,k);

@@ -22,10 +22,6 @@ revient sur **3 niveaux** ; elle n'est pas encore codée, et forer termine la pa
 ## 2. Direction visuelle
 
 - Tuiles pixel art 16 × 16, affichées en 32 × 32 ; fond quasi noir. Pas d'effet d'écran.
-- **La foreuse est toujours au centre de la vue** (23 novembre 2026 ; avant, la caméra s'arrêtait au bord de la carte) : au-delà
-  de la carte, de la **roche dure**, comme le mur du bord (sans crête au bord haut de la carte). Elle suit le brouillard
-  comme toute roche : on n'en voit que la face (deux cases au plus derrière le bord), là où le bord est vu, et on s'en
-  souvient ensuite (`G.horsVu`).
 - **Un objet sous une créature** (23 novembre 2026) : la créature le cache, mais sa tuile s'affiche en petit (moitié de case,
   sur fond noir) dans le coin bas droit de la case, tant que la créature est dessus.
 - **Palette à cinq couleurs** (22 novembre 2026 ; trois avant), dans cet ordre dans le menu : **#1 Monde** (sol, rochers,
@@ -1235,11 +1231,11 @@ caractères, **chaque case opaque, jamais d'alpha ni de transparence**, rien ne 
   globe (bords courbés, plus clairs) avec un anneau d'atmosphère ; elle tourne un peu en arrivant.
 - **2,2-10,6 s, la descente** : le disque grandit jusqu'à couvrir l'écran et finit **exactement à l'échelle du jeu en
   pixels** : cases de 8 × 16 px, une tuile de 32 px = 4 caractères × 2 rangées, grille calée sur celle des tuiles, même
-  cadrage que le jeu (la foreuse au centre) ; le vaisseau ASCII, tiré de la grille du vaisseau (`SHIP_GRID`, 20 × 12 caractères),
+  cadrage que le jeu (caméra bornée au bord de la carte : la foreuse n'est pas toujours au centre) ; le vaisseau ASCII, tiré de la grille du vaisseau (`SHIP_GRID`, 20 × 12 caractères),
   se pose **à la place exacte du vaisseau en pixels**. **La planète ne répète jamais la carte** (choix du 23 novembre 2026, plutôt
   qu'une répétition en miroir) : la vraie carte est posée dans un **relief inventé plus large**. Tout autour (et à la
-  place de son mur de roche dure du bord), un **massif de roche dure** au bord déchiqueté, qui rejoint au sol la roche dure que
-  le jeu en pixels dessine au-delà de la carte ; plus loin, un relief libre (montagnes, gouffres, herbe, sol nu). Rendu du sol comme dans l'essai (roche « ▒ » au bord, « ▓ █ » au cœur, sans triangles). Nuages en « · : ░ ▒ ▓ » (cinq gris, jamais de pavé plein ; du grain dans la matière : caractère et gris varient d'une case
+  place de son mur de roche dure du bord), un **massif de roche dure** au bord déchiqueté, dans la continuité du mur de roche dure
+  du bord de carte ; plus loin, un relief libre (montagnes, gouffres, herbe, sol nu). Rendu du sol comme dans l'essai (roche « ▒ » au bord, « ▓ █ » au cœur, sans triangles). Nuages en « · : ░ ▒ ▓ » (cinq gris, jamais de pavé plein ; du grain dans la matière : caractère et gris varient d'une case
   à l'autre et bougent lentement), clairsemés vus de l'espace, qui
   **apparaissent peu à peu**, grossissent et s'effilochent en passant le vaisseau. **Entrée dans l'atmosphère** : arc de plasma devant le nez, traînées
   de feu, coque qui chauffe (jusqu'à environ 1 700 °C), écran qui tremble. **Éclairs** en zigzag « ╱ │ ╲ » qui illuminent

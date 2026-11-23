@@ -292,3 +292,6 @@ Ce qui a été remplacé, et pourquoi (demandes de l'utilisateur, « chaque mach
 ## 23 novembre 2026 — l'arrivée en ASCII
 - **L'intro en pixels** (tuiles de la carte, nuages en tuiles, fondu final) n'est plus jouée : l'arrivée au niveau 1 est
   refaite en ASCII (`14e-arrivee.js`), comme les descentes, sans aucune transparence. Son code reste dans `15-intro.js`.
+- **La foreuse toujours au centre de la vue, avec de la roche dure dessinée au-delà de la carte** (essayé le 23 novembre
+  2026, retiré le même jour à la demande : « map trafiquée »). La caméra reste bornée au bord de la carte ; à l'arrivée,
+  c'est le glissement amorti vers la place du vaisseau, commencé dès la descente, qui absorbe le décalage.

@@ -49,7 +49,7 @@ const FICT=new Map();
 function fict(a,b){const K=(b+5000)*20000+(a+5000);let e=FICT.get(K);if(e)return e;
   const F=(s,f)=>.55*vn(a/f,b/f,1e4,1e4,s)+.3*vn(a/(f/2),b/(f/2),1e4,1e4,s+1)+.15*vn(a/(f/4),b/(f/4),1e4,1e4,s+2);
   const d=Math.max(0,-a,a-W+1,-b,b-H+1),m=F(SEED+31,14)+.1*Math.exp(-d/7),v=F(SEED+41,12),c=F(SEED+51,13),h=hsh(a,b,9);
-  if(d<6+12*F(SEED+61,8)){const bd=d>=4+11*F(SEED+61,8);e=bd?['▒','H',.85]:[h<.6?'▓':'█','H',.65+.25*h];}   /* le massif de roche dure qui entoure la carte, au bord déchiqueté : au sol, il rejoint la roche dure que le jeu en pixels dessine au-delà du bord */
+  if(d<6+12*F(SEED+61,8)){const bd=d>=4+11*F(SEED+61,8);e=bd?['▒','H',.85]:[h<.6?'▓':'█','H',.65+.25*h];}   /* le massif de roche dure qui entoure la carte, au bord déchiqueté, comme le mur de roche dure du bord de carte */
   else if(m>.6){const k=m-.6;e=k<.025?['▒','M',.75]:k<.08?['▓','M',.62+.25*h]:['█','M',.5+.3*h];}
   else if(c<.27)e=c<.24?[' ','K',1]:['░','M',.35];
   else if(v>.62)e=[h<.5?'w':h<.8?'ʷ':'"','A',.55+.3*h];
@@ -102,7 +102,7 @@ function chaleur(t){const u=(t-T_D0)/(T_D1-T_D0);return u<.08?0:u<S.pic?s3((u-.0
 
 /* cadrage final : celui du jeu (foreuse au centre, caméra bornée), pour finir à l'échelle et à la place exactes des pixels */
 function cadreJeu(){const el=$('mapwrap'),mr=el?el.getBoundingClientRect():{left:0,top:0,width:innerWidth,height:innerHeight},vc=Math.floor(mr.width)/S_TUILE,vr=Math.floor(mr.height)/S_TUILE;
-  const camX=G.px-Math.floor(vc/2),camY=G.py-Math.floor(vr/2);   /* comme le jeu : la foreuse au centre, sans bornes */
+  const camX=Math.max(0,Math.min(W-Math.floor(vc),G.px-Math.floor(vc/2))),camY=Math.max(0,Math.min(H-Math.floor(vr),G.py-Math.floor(vr/2)));   /* comme le jeu : caméra bornée au bord de la carte */
   return {gx:(((mr.left*dpr)%cw)+cw)%cw-cw,gy:(((mr.top*dpr)%chh)+chh)%chh-chh,
     px:(mr.left+(G.ship.x+SGW/2-camX)*S_TUILE)*dpr,py:(mr.top+(G.ship.y+SGH/2-camY)*S_TUILE)*dpr};}
 const S_TUILE=32;
