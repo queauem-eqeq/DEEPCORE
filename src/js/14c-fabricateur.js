@@ -37,7 +37,7 @@ const fabEffet=k=>{const d=ITEMS[k];if(d.conso)return d.eff||'';const l=[];if(d.
 // famille d'un objet, pour la couleur de son nom (22 novembre 2026) : consommable, accessoire, arme ou armure
 const fabFam=k=>{const d=ITEMS[k];return d.conso?'conso':d.slot==='acc'?'acc':'eq';};
 function fabBuild(){const l=fabListe(FAB_CASE),m=G.st.matiere||0;FAB_SEL=Math.max(0,Math.min(l.length-1,FAB_SEL));
-  $('fabMat').textContent=`Matière en réserve : ${m}`;
+  $('fabMat').textContent=`Matière {µ} en réserve : ${m}`;
   $('fabList').innerHTML=l.map((k,n)=>{const p=FAB_PRIX[k],ok=m>=p;
     return `<button class="fabl f-${fabFam(k)}${n===FAB_SEL?' sel':''}${ok?'':' cher'}" data-n="${n}" aria-disabled="${ok?'false':'true'}"><b><u>${n+1}</u>${ITEMS[k].n}</b><span>${fabEffet(k)}</span><i>${p}</i></button>`;}).join('');
   const b=$('fabList').querySelector('.sel');if(b)b.scrollIntoView({block:'nearest'});fabVue();}
@@ -49,10 +49,10 @@ function fabSel(n){if(n===FAB_SEL)return;FAB_SEL=n;for(const b of $('fabList').c
 function fabOpen(i){if(TRAV)stopTravel();if(EXPL)stopExplore();FAB_CASE=i;FAB_SEL=0;$('fabMsg').textContent=fabListe(i).length?'Choisissez un objet : Entrée ou clic pour le fabriquer.':'Aucun plan connu : le fabricateur ne sait rien produire. Les plans se trouvent au sol, dans les dépôts et sur les robots abattus.';fabBuild();$('fabric').hidden=false;$('fabric').querySelector('.mcard').focus();SFX.spot();}
 function fabClose(){$('fabric').hidden=true;FAB_CASE=-1;render();}
 function fabFais(n){const l=fabListe(FAB_CASE),k=l[n];if(!k||G.over)return;FAB_SEL=n;const p=FAB_PRIX[k],m=G.st.matiere||0;
-  if(m<p){$('fabMsg').textContent=`Matière insuffisante : ${ITEMS[k].n} en demande ${p}, la réserve est de ${m}.`;SFX.blocked();fabBuild();return;}
+  if(m<p){$('fabMsg').textContent=`Matière {µ} insuffisante : ${ITEMS[k].n} en demande ${p}, la réserve est de ${m}.`;SFX.blocked();fabBuild();return;}
   // l'objet sort sous la foreuse et va au sac ; sac plein, il reste au sol — sur une case libre, jamais sur un autre objet (22 novembre 2026)
   G.st.matiere=m-p;const ici=idx(G.px,G.py),place=!ITEMS[k].conso||sacPlaces()<SAC_MAX,c=place?ici:caseSol(G.px,G.py,true);G.items=G.items||{};
-  G.turn++;G.msg=null;SFX.serrure();say(`Fabricateur : ${ITEMS[k].n} (−${p} Matière, réserve ${G.st.matiere}).`,'good');
+  G.turn++;G.msg=null;SFX.serrure();say(`Fabricateur : ${ITEMS[k].n} (−${p} Matière {µ}, réserve ${G.st.matiere}).`,'good');
   if(place){const avant=G.items[ici];G.items[ici]=[k];invPickup(true);if(avant&&avant.length)G.items[ici]=avant;}   // seul l'objet fabriqué est ramassé
   else (G.items[c]=G.items[c]||[]).push(k);
   sacFix();SAC_H='';INV_H='';pass(FAB_DUREE);computeFOV();

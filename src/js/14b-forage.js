@@ -202,7 +202,7 @@ function fgAmas(F){
 function endForage(){const F=FORAGE;if(F&&F.snd)F.snd.stop();FORAGE=null;fgCv.hidden=true;$('forageSkip').hidden=true;const cb=FG_CB;FG_CB=null;
   if(F&&F.mort){G.over={dead:true};try{say('Une mine de trop : la foreuse explose dans le puits.','warn');render();}catch(e){}dead();return;}   // détruite pendant la descente : pas de niveau suivant
   try{render();}catch(e){}if(cb)cb();
-  if(F&&F.recolte&&typeof G!=='undefined'&&G&&!G.over){try{sayMore(`Amas de Matière récolté pendant la descente : +${F.recolte} (réserve : ${G.st.matiere}).`,'good');render();}catch(e){}}
+  if(F&&F.recolte&&typeof G!=='undefined'&&G&&!G.over){try{sayMore(`Amas de Matière {µ} récolté pendant la descente : +${F.recolte} (réserve : ${G.st.matiere}).`,'good');render();}catch(e){}}
   if(F&&F.jeu&&typeof G!=='undefined'&&G&&!G.over){try{sayMore(F.passe?`Descente à l’aveugle : −${F.perdu} vie.`:F.touche?`Descente : ${F.touche} mine${F.touche>1?'s':''} touchée${F.touche>1?'s':''}, −${F.perdu} vie.`:'Descente sans une égratignure : aucune mine touchée.',F.perdu?'warn':'good');render();}catch(e){}}}
 // diriger : flèches, Q et D, 4 et 6 du pavé numérique
 function fgKey(e,v){const F=FORAGE;if(!F)return;const k=(e.key||'').toLowerCase(),c=e.code||'';
@@ -325,36 +325,40 @@ function fgDraw(F,t){const x=F.x,{w,h,cw,chh,dpr}=F;
   fgHud(F,t);
   if(F.flash>0){x.globalAlpha=Math.min(.7,F.flash);x.fillStyle='#fff';x.fillRect(0,0,w,h);x.globalAlpha=1;}
   if(F.ph===4){x.globalAlpha=Math.min(1,(t-F.tFade)/F.fadeLen);x.fillStyle='#000';x.fillRect(0,0,w,h);x.globalAlpha=1;}}
-/* Annonce en gros au début de la séquence (22 novembre 2026) : un cadre à fond noir et à rebord plein, sur une grille de gros caractères
-   (la police du jeu). Dessin retenu : 3, les bandes de chantier. FG_ANN choisit le dessin : 1 rebord plein · 2 rebord plein et filet intérieur · 3 bandes de chantier · 4 titre en réserve. */
-let FG_ANN=3;   // choix de l'utilisateur : les bandes de chantier
-const FG_ANN_GL='#%&$@/\\<>=+*?!;:-_|[]{}()0123456789ABCDEFGHJKLMNPQRSTUVWXYZabdefghkmnqrtxyz';   // défilement : signes ASCII, chiffres et lettres ordinaires
-const FG_ANN_FIN=.5;   // durée de la disparition, case après case
-function fgAnnonce(F,t){const x=F.x,{w,h}=F,[l1,l2]=F.jeu?['EXPLOSIFS DÉTECTÉS','ATTENTION SOUS-SOL PIÉGÉ !']:['MATIÈRE {µ} DÉTECTÉE','COLLECTE POSSIBLE'],col=F.jeu?'#ff3b30':F.pal.a,blanc=F.pal.w;
-  const n=Math.max(l1.length,l2.length),cols=n+6,rows=FG_ANN===3?9:7;
-  // alignée à gauche, juste sous le tableau de bord (23 novembre 2026 ; avant : en haut, au centre) ; pas plus large qu'un tiers d'écran,
-  // pour laisser la foreuse, au milieu, dégagée
-  const large=Math.round(w*.34),gw=Math.max(5,Math.floor(Math.min(large/(cols+2),h*.26/(rows+1)*.6))),gh=Math.round(gw/.6),W=cols*gw,H=rows*gh,
-    x0=(F.hudG??Math.round(w*.02))+gw,y0=(F.hudB??Math.round(h*.3))+Math.round(gh*1.1);
-  const bloc=(c,r,nc,nr,coul)=>{x.fillStyle=coul;x.fillRect(x0+c*gw,y0+r*gh,nc*gw,nr*gh);};
-  /* Affichage façon terminal (22 novembre 2026) : le cadre paraît à FG_ANN_T0 (1 s) ; chaque case fait défiler des caractères au hasard,
-     puis se fige de gauche à droite ; tout le message est en place à FG_ANN_T1 (2 s) et disparaît à FG_ANNONCE (4,5 s). */
-  const p=Math.max(0,Math.min(1,(t-FG_ANN_T0)/(FG_ANN_T1-FG_ANN_T0))),tic=Math.floor(t*24);
-  // disparition : pendant la dernière demi-seconde, les colonnes s'effacent une à une de gauche à droite ; juste devant, les caractères se remettent à défiler
-  const q=Math.max(0,Math.min(1,(t-(FG_ANNONCE-FG_ANN_FIN))/FG_ANN_FIN)),parti=Math.floor(q*(cols+3))-1;
-  const txt=(l,r,coul)=>{x.font=`700 ${gh}px ${FG_FONT}`;x.textAlign='center';x.textBaseline='middle';const d=Math.floor((cols-l.length)/2);
-    for(let i=0;i<l.length;i++){const c=d+i;if(c<=parti)continue;const fige=(p>=1||p*1.25>(i+1)/l.length+.2*((i*7+r*3)%5)/5)&&!(q>0&&c<=parti+4);let ch=l[i];
-      if(!fige){if(q===0&&p*1.6<i/l.length)continue;ch=FG_ANN_GL[((i*31+r*17+tic*13)%FG_ANN_GL.length+FG_ANN_GL.length)%FG_ANN_GL.length];}
-      x.fillStyle=fige?coul:F.cRock2;x.fillText(ch,x0+(d+i+.5)*gw,y0+(r+.5)*gh);}};
-  if(parti>=cols)return;if(parti>=0){x.save();x.beginPath();x.rect(x0+(parti+1)*gw,0,w,h);x.clip();}   // les colonnes parties ne sont plus dessinées du tout : la roche reparaît derrière
-  bloc(-1,-.5,cols+2,rows+1,'#000');                                   // fond noir, un peu plus large que le cadre
-  bloc(0,0,cols,1,col);bloc(0,rows-1,cols,1,col);bloc(0,0,1,rows,col);bloc(cols-1,0,1,rows,col);   // rebord plein, un caractère d'épaisseur
-  if(FG_ANN===2){const u=Math.max(2,Math.round(gw/5));x.fillStyle=col;x.fillRect(x0+2*gw,y0+Math.round(1.5*gh),W-4*gw,u);x.fillRect(x0+2*gw,y0+H-Math.round(1.5*gh)-u,W-4*gw,u);x.fillRect(x0+2*gw,y0+Math.round(1.5*gh),u,H-3*gh);x.fillRect(x0+W-2*gw-u,y0+Math.round(1.5*gh),u,H-3*gh);}
-  if(FG_ANN===3){for(const r of [1,rows-2])for(let c=1;c<cols-1;c++)if((c+(r===1?0:1))%2)bloc(c,r,1,1,col);}   // bandes de chantier : un caractère sur deux
-  if(FG_ANN===4)bloc(1,1,cols-2,Math.floor(rows/2)-.5,col);            // la première ligne en réserve : texte noir sur bandeau plein
-  const r1=FG_ANN===3?3:2,r2=FG_ANN===3?5:4;
-  txt(l1,r1,FG_ANN===4?'#000':col);txt(l2,r2,blanc);
-  if(parti>=0)x.restore();}
+/* Annonce au début de la séquence (22 novembre 2026, revue le 23). La forme reste celle choisie le 22 : un cadre plein à fond noir,
+   avec deux bandes de chantier (un caractère sur deux) au-dessus et au-dessous du message. Depuis le 23 novembre 2026, tout est
+   écrit en police DOS (02b-police-dos.js : Modern DOS 8x16, CP437), case par case, pixel de police calé sur des pixels d'écran,
+   et l'apparition reprend les références de l'utilisateur (dossier REF) :
+   - chaque case passe par une montée de densité « . → i → 0 », puis un caractère au hasard sur un pavé de couleur (inverse
+     vidéo : couleur de l'alerte ou gris), avant de se figer ; le rebord et les bandes montent en « ░ ▒ ▓ █ » ;
+   - le cadre se forme de gauche à droite avec du désordre, de FG_ANN_T0 (1 s) à FG_ANN_T1 (2 s) ;
+   - la disparition (dernière demi-seconde avant FG_ANNONCE, 4,5 s) défait les cases dans l'ordre inverse, colonne par colonne,
+     de gauche à droite : pavé de couleur, « 0 → i → . », puis plus rien. */
+const FG_ANN_GL='#%&$@/\\<>=+*?!;:-_|[]{}()0123456789ABCDEFGHJKLMNPQRSTUVWXYZ£¥§¶«»±÷≈∙√ⁿ²■ΣΩδ∞φε∩≡';   // caractères tirés au hasard (CP437)
+const FG_ANN_FIN=.5;   // durée de la disparition
+const FG_ANN_RAMPE='.i0',FG_ANN_BLOC='░▒▓';
+function fgAnnonce(F,t){const x=F.x,{w,h}=F,[l1,l2]=F.jeu?['EXPLOSIFS DÉTECTÉS','ATTENTION SOUS-SOL PIÉGÉ !']:['MATIÈRE {µ} DÉTECTÉE','COLLECTE POSSIBLE'],col=F.jeu?'#ff3b30':F.pal.a,blanc=F.pal.w,gris=F.cRock2;
+  const n=Math.max(l1.length,l2.length),cols=n+4,rows=9;
+  // alignée à gauche sous le tableau de bord ; un pixel de police = p pixels d'écran (entier), le cadre tenant dans 41 % de la largeur
+  const p=Math.max(1,Math.floor(w*.41/((cols+2)*8))),cw=8*p,chh=16*p,x0=(F.hudG??Math.round(w*.02))+cw,y0=(F.hudB??Math.round(h*.3))+chh+Math.round(6*(F.dpr||1));   /* sa bordure noire (une case autour) commence sous le tableau */
+  const pa=Math.max(0,Math.min(1,(t-FG_ANN_T0)/(FG_ANN_T1-FG_ANN_T0))),q=Math.max(0,Math.min(1,(t-(FG_ANNONCE-FG_ANN_FIN))/FG_ANN_FIN)),tic=Math.floor(t*20);
+  const H=(a,b,k)=>{let v=(a*73856093)^(b*19349663)^(k*83492791);v^=v<<13;v^=v>>>17;v^=v<<5;return (v>>>0)/4294967296;};
+  const d1=Math.floor((cols-l1.length)/2),d2=Math.floor((cols-l2.length)/2);
+  // ce que porte chaque case, une fois figée : [caractère, couleur, est-ce du cadre]
+  const cible=(c,r)=>{if(r===0||r===rows-1||c===0||c===cols-1)return ['█',col,1];
+    if(r===1||r===rows-2)return (c+(r===1?0:1))%2?['█',col,1]:[' ',col,0];
+    if(r===3&&c>=d1&&c<d1+l1.length)return [l1[c-d1],col,0];if(r===5&&c>=d2&&c<d2+l2.length)return [l2[c-d2],blanc,0];return [' ',blanc,0];};
+  for(let r=-1;r<=rows;r++)for(let c=-1;c<=cols;c++){const px=x0+c*cw,py=y0+r*chh,bord=r<0||c<0||r>=rows||c>=cols;
+    // avancement de la case : à l'apparition, de gauche à droite avec du désordre ; à la disparition, l'inverse
+    let s=Math.max(0,Math.min(1,pa*2.05-(c+1)/(cols+2)*.7-H(c,r,1)*.35));   /* tout est figé quand pa = 1 */
+    if(q>0)s=Math.min(s,Math.max(0,Math.min(1,((c+1)/(cols+2))*1.2+.25-q*1.6+H(c,r,2)*.15)));
+    if(s<=0)continue;x.fillStyle='#000';x.fillRect(px,py,cw,chh);   // le fond noir n'existe que là où la case a commencé
+    if(bord)continue;const [ch,cc,cadre]=cible(c,r),k=Math.floor(s*5);   // 0-1 rampe . i 0, 2-3 hasard sur pavé, 4 (s=1) figé
+    if(s>=1){if(ch!==' ')dosCar(x,ch,px,py,p,cc);continue;}
+    if(cadre){dosCar(x,FG_ANN_BLOC[Math.min(2,Math.floor(s*3))],px,py,p,col);continue;}
+    if(s<.45){const g=FG_ANN_RAMPE[Math.min(2,Math.floor(s/.45*3))];dosCar(x,g,px,py,p,gris);continue;}
+    const g=FG_ANN_GL[Math.floor(H(c,r,tic)*FG_ANN_GL.length)],fond=H(c,r,tic+7)<.5?col:gris;
+    if(H(c,r,tic+3)<.55)dosCar(x,g,px,py,p,'#000',fond);else dosCar(x,g,px,py,p,H(c,r,tic+5)<.5?col:blanc);}}
 function fgHud(F,t){const x=F.x,{w,h,dpr}=F,fs=Math.round(12*dpr),lh=Math.round(17*dpr),m=Math.round(20*dpr),fall=F.ph>=2,M=FG_MAT[fgIci(F)];
   x.font=`${fs}px ${FG_FONT}`;x.textAlign='left';x.textBaseline='top';
   const nd=Math.max(0,Math.min(5,Math.round(F.hs*5))),esp=v=>String(v).replace(/\B(?=(\d{3})+$)/g,' '),
@@ -369,9 +373,9 @@ function fgHud(F,t){const x=F.x,{w,h,dpr}=F,fs=Math.round(12*dpr),lh=Math.round(
   if(F.jeu){L.push([`MINES      ${F.touche} touchée${F.touche>1?'s':''}`,F.touche?F.pal.o:F.pal.g]);
     if(F.ph===1&&Math.floor(t*5)%2===0&&F.mines.some(m=>m.ok&&m.y>F.d&&m.y<F.d+F.R*.7&&Math.abs(m.x-F.cx-F.vx*(m.y-F.d)/Math.max(6,F.vy))<FG_R))L.push(['▲ MINE SUR LA ROUTE ▸ ÉCARTEZ-VOUS','#ff5a4a']);
     if(F.mort)L.push(['FOREUSE DÉTRUITE','#ff5a4a']);}
-  if(!F.jeu&&F.amasY){const A=F.amas;L.push([`RÉCOLTE    ${F.recolte?'+'+F.recolte+' matière':'0'}`,F.recolte?F.pal.a:F.pal.g]);
-    if(F.recolte&&F.t-F.tRec<1.2&&Math.floor(t*6)%2===0)L.push([`◆ MATIÈRE RÉCOLTÉE ▸ +${F.recolte}`,F.pal.a]);
-    else if(F.ph===1&&A&&A.ok&&A.y>F.d-1&&Math.floor(t*4)%2===0)L.push(['◆ AMAS DE MATIÈRE EN VUE ▸ PASSEZ DESSUS',F.pal.a]);}
+  if(!F.jeu&&F.amasY){const A=F.amas;L.push([`RÉCOLTE    ${F.recolte?'+'+F.recolte+' Matière {µ}':'0'}`,F.recolte?F.pal.a:F.pal.g]);
+    if(F.recolte&&F.t-F.tRec<1.2&&Math.floor(t*6)%2===0)L.push([`◆ MATIÈRE {µ} RÉCOLTÉE ▸ +${F.recolte}`,F.pal.a]);
+    else if(F.ph===1&&A&&A.ok&&A.y>F.d-1&&Math.floor(t*4)%2===0)L.push(['◆ AMAS DE MATIÈRE {µ} EN VUE ▸ PASSEZ DESSUS',F.pal.a]);}
   if(F.ph===1&&F.evit>1.7&&Math.floor(t*4)%2===0)L.push(['▲ MASSE DURE DEVANT ▸ CONTOURNEMENT',F.pal.o]);
   if(F.ph===2&&Math.floor(t*5)%2===0)L.push(['ALERTE ▸ PERTE DE SUPPORT','#ff5a4a']);
   if(F.ph>=3)L.push(['IMPACT ▸ ARRIVÉE AU NIVEAU SUIVANT',F.pal.o]);

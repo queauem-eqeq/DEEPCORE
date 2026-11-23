@@ -69,7 +69,7 @@ function travelStep(){const T=TRAV;if(!T)return;if(busy()){stopTravel();return;}
 let EXPL=null;
 const EXPL_VUS=new WeakSet();   // créatures déjà signalées : chacune n'interrompt l'exploration qu'une fois (sinon un insectoïde qui suit la foreuse l'arrêterait sans cesse)
 function exploreScan(E,deep){const N=W*H,prev=new Int32Array(N).fill(-2),q=[idx(G.px,G.py)];prev[q[0]]=-1;const plein=G.st.vie>=G.st.vieMax;
-  const butin=j=>{if(G.cles&&G.cles[j])return 'une clé';if(G.items&&G.items[j]&&G.items[j].length&&!(G.pieges||[]).some(p=>p.on&&p.c===j)&&!(G.vit&&G.vit[j]))return 'un objet';   /* l'exploration automatique ne touche ni à l'appât d'une salle piégée ni aux vitrines : c'est au joueur de choisir */const o=G.ore&&G.ore[j];if(o&&oreSol(o)&&(oreMat(o)||!plein))return oreMat(o)?'de la Matière':'des éclats de métal';
+  const butin=j=>{if(G.cles&&G.cles[j])return 'une clé';if(G.items&&G.items[j]&&G.items[j].length&&!(G.pieges||[]).some(p=>p.on&&p.c===j)&&!(G.vit&&G.vit[j]))return 'un objet';   /* l'exploration automatique ne touche ni à l'appât d'une salle piégée ni aux vitrines : c'est au joueur de choisir */const o=G.ore&&G.ore[j];if(o&&oreSol(o)&&(oreMat(o)||!plein))return oreMat(o)?'de la Matière {µ}':'des éclats de métal';
     return null;};
   for(let k=0;k<q.length;k++){const c=q[k],x=c%W,y=(c/W)|0;
     if(k>0){if(butin(c))return {c,prev};
@@ -179,7 +179,7 @@ const TDESC={[GROUND]:['Sol rocheux','Praticable. Les points au sol se densifien
   [GRILLE]:['Grille d’énergie','Infranchissable tant que son socle n’est pas alimenté par une pile. On voit au travers. Une charge sismique la détruit.'],
   [STATION]:['Station de réparation','Avancer dessus remet la vie et l’énergie au maximum, une seule fois. Le bruit attire les ennemis à 12 cases.'],
   [CHARGEUR]:['Distributeur de pile','Sa pile attend à côté de lui. Avancer dessus la rappelle : utile si elle est coincée.'],
-  [FABRIC]:['Fabricateur','Avancer dessus ouvre la liste de fabrication : des objets contre de la Matière.'],
+  [FABRIC]:['Fabricateur','Avancer dessus ouvre la liste de fabrication : des objets contre de la Matière {µ}.'],
   [PILLAR]:['Pilier','Infranchissable et opaque : il coupe la ligne de vue. Compte comme une paroi pour la discrétion.'],
   [LIQ]:['Eau peu profonde','Praticable par tous. Défense −20 pour qui s’y trouve ; pas deux fois plus lent, sauf pour les crabos qui nagent.'],
   [DEEP]:['Eau profonde','Praticable par tous. Défense −20, pas deux fois plus lent (sauf crabos), et le courant fait dévier la foreuse. Les créatures, elles, nagent droit.'],
@@ -196,7 +196,7 @@ const BEHAV={insectoide:'Suit la foreuse à 2 ou 3 cases et recule au contact. D
 function inspectHTML(){const {x,y}=HOV;if(x<0||y<0||x>=W||y>=H)return '';
   const i=idx(x,y),seen=!fog||G.seen[i],see=!fog||vis[i],d=Math.max(Math.abs(x-G.px),Math.abs(y-G.py)),dt=d?`${d} case${d>1?'s':''}`:'ici';
   const head=(ic,n,ex)=>`<div class="ih">${ic?`<img src="${ic}" alt="">`:''}<b>${n}</b><span>${ex||''}</span></div>`;
-  if(!seen&&G.ore&&G.ore[i]&&sonarVu(i,sonarR())){const o=G.ore[i];return `<div class="insp">${head('','Gisement détecté',dt)}<p><b>${oreMat(o)?'Matière':'Éclats de métal'}</b> · repéré par le sonar : ${oreMat(o)?`+${ORE_PV[oreLv(o)]} en réserve`:`+${ORE_PV[oreLv(o)]} PV`}. ${oreSol(o)?'Au sol.':'Pris dans la roche : il faudra forer.'}</p></div>`;}
+  if(!seen&&G.ore&&G.ore[i]&&sonarVu(i,sonarR())){const o=G.ore[i];return `<div class="insp">${head('','Gisement détecté',dt)}<p><b>${oreMat(o)?'Matière {µ}':'Éclats de métal'}</b> · repéré par le sonar : ${oreMat(o)?`+${ORE_PV[oreLv(o)]} en réserve`:`+${ORE_PV[oreLv(o)]} PV`}. ${oreSol(o)?'Au sol.':'Pris dans la roche : il faudra forer.'}</p></div>`;}
   if(!seen)return `<div class="insp">${head('','Zone inexplorée',dt)}<p>Aucune donnée : la foreuse n’est jamais passée à portée de ce secteur.</p></div>`;
   const out=[],t=G.t[i],[tn,td]=TDESC[t]||['Terrain',''],border=x===0||y===0||x===W-1||y===H-1;
   const occ=see?occupant(x,y):null;
@@ -215,7 +215,7 @@ function inspectHTML(){const {x,y}=HOV;if(x<0||y<0||x>=W||y>=H)return '';
   const s=siteAt(x,y);
   if(s)out.push(`<p><b>Site de forage</b> · ${s.known?'détecté. [F] pour forer.':'non analysé : placez la foreuse dessus.'}</p>`);
   const om=G.ore&&G.ore[i];
-  if(om&&oreMat(om))out.push(oreSol(om)?`<p><b>Matière</b> · placez la foreuse dessus pour la ramasser : +${ORE_PV[oreLv(om)]} en réserve.</p>`:`<p><b>Matière prise dans la montagne</b> · brisez la paroi pour la faire tomber (+${ORE_PV[oreLv(om)]}).</p>`);
+  if(om&&oreMat(om))out.push(oreSol(om)?`<p><b>Matière {µ}</b> · placez la foreuse dessus pour la ramasser : +${ORE_PV[oreLv(om)]} en réserve.</p>`:`<p><b>Matière {µ} prise dans la montagne</b> · brisez la paroi pour la faire tomber (+${ORE_PV[oreLv(om)]}).</p>`);
   else if(om&&oreSol(om))out.push(`<p><b>Éclats de métal ${ORE_NOM[oreLv(om)]}</b> · placez la foreuse dessus pour les ramasser : +${ORE_PV[oreLv(om)]} PV.</p>`);
   else if(om)out.push('<p><b>Éclats de métal '+ORE_NOM[oreLv(om)]+' pris dans la montagne</b> · brisez la paroi pour les faire tomber (+'+ORE_PV[oreLv(om)]+' PV).</p>');
   if(G.cles&&G.cles[i])out.push('<p>Une clé : passer dessus pour la ramasser.</p>');

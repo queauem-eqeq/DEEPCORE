@@ -65,7 +65,7 @@ Artefact à part (https://claude.ai/artifact/9BKRaoB4hzgdWhzYFx5A6q) qui rejoue 
   globale (pas de modules, pas d'import/export)** : une constante déclarée dans un fichier est visible dans les suivants ;
   attention aux noms en double (`const` redéclarée = erreur de syntaxe) et aux noms qui existent déjà dans `window`.
   Un nouveau fichier doit aussi être ajouté en balise `<script>` dans `index.html`.
-  00 base · 01 sons · 02 palette · 03 tuiles (motifs 16×16) · 03b tuiles des machines · 04 vaisseau · 05 tuiles éditables · 06 réglages et ambiances ·
+  00 base · 01 sons · 02 palette · 02b police DOS (Modern DOS 8x16, CP437, domaine public : annonces des descentes) · 03 tuiles (motifs 16×16) · 03b tuiles des machines · 04 vaisseau · 05 tuiles éditables · 06 réglages et ambiances ·
   06b groupes · 07 génération de la carte · 07b bâtiments · 07c artefacts · 07d zones et tunnels · 07e cavernes · 07f machines · 07g grande base · 08 faune et prédateurs · 09 vision, déplacement, forage · 10 rendu et gouffres ·
   11 interface (mode carte, « En vue », commandes, enregistrement) · 12 souris et inspection · 13 éditeur de tuiles ·
   14 inventaire et équipement · 14b forage (cinématique et mini-jeu des mines) · 14c fabricateur · 14d objets (butin, capsules à identifier, visée, plans, Lab → Items) · 15 cinématique d'intro (qui lance aussi le jeu : rester le dernier).

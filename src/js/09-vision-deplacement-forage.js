@@ -129,7 +129,7 @@ function tryMove(dx,dy){
     const i=idx(nx,ny),hp=2;G.dmg=G.dmg||{};const hits=(G.dmg[i]||0)+1;G.turn++;G.msg=null;
     {const brk=hits>=hp;addFx({kind:'lunge',robot:true,dx,dy,dur:180});}
     if(hits>=hp){delete G.dmg[i];G.t[i]=RUBBLE;SFX.break();say(v===ROCK?'Rocher brisé : il ne reste que des gravats.':'La paroi cède : passage ouvert.','good');
-      if(G.ore&&G.ore[i]&&!oreSol(G.ore[i])){const l=oreLv(G.ore[i]),mt=oreMat(G.ore[i]);G.ore[i]=(mt?'m':'')+'sol'+l;sayMore(mt?['','Un peu de Matière tombe au sol.','De la Matière tombe au sol.','Un gros bloc de Matière tombe au sol.'][l]:['','De petits éclats de métal tombent au sol.','Des éclats de métal tombent au sol.','De gros éclats de métal tombent au sol.'][l],'info');}}
+      if(G.ore&&G.ore[i]&&!oreSol(G.ore[i])){const l=oreLv(G.ore[i]),mt=oreMat(G.ore[i]);G.ore[i]=(mt?'m':'')+'sol'+l;sayMore(mt?['','Un peu de Matière {µ} tombe au sol.','De la Matière {µ} tombe au sol.','Un gros bloc de Matière {µ} tombe au sol.'][l]:['','De petits éclats de métal tombent au sol.','Des éclats de métal tombent au sol.','De gros éclats de métal tombent au sol.'][l],'info');}}
     else{G.dmg[i]=hits;SFX.crack();say(v===ROCK?'La foreuse frappe le rocher : il se fissure.':`La foreuse attaque la montagne : fissure ${hits}/${hp-1}.`,'warn');}
     pass(DUR.forage);computeFOV();render();if(G.over&&G.over.dead)dead();return;}
   // eau profonde : une fois sur deux, le courant emporte le pas dans une autre direction au hasard
@@ -153,7 +153,7 @@ function tryMove(dx,dy){
   if(G.t[idx(G.px,G.py)]===DOOR)SFX.porte();   // la foreuse pousse une porte
   {const ci=idx(G.px,G.py);if(G.cles&&G.cles[ci]){delete G.cles[ci];G.items=G.items||{};(G.items[ci]=G.items[ci]||[]).push('cle');addFx({kind:'num',x:G.px,y:G.py,txt:'clé',col:PAL['1'],dur:900});/* la clé est un objet : elle est ramassée avec les autres, juste après (invPickup) */}}
   {const oi=idx(G.px,G.py);if(G.ore&&G.ore[oi]&&oreSol(G.ore[oi])){const l=oreLv(G.ore[oi]),mt=oreMat(G.ore[oi]);delete G.ore[oi];
-    if(mt){G.st.matiere=(G.st.matiere||0)+ORE_PV[l];addFx({kind:'num',x:G.px,y:G.py,txt:'+'+ORE_PV[l],col:PAL['1'],dur:750});sayMore(`Matière récupérée : +${ORE_PV[l]} (réserve : ${G.st.matiere}).`,'good');SFX.spot();}
+    if(mt){G.st.matiere=(G.st.matiere||0)+ORE_PV[l];addFx({kind:'num',x:G.px,y:G.py,txt:'+'+ORE_PV[l],col:PAL['1'],dur:750});sayMore(`Matière {µ} récupérée : +${ORE_PV[l]} (réserve : ${G.st.matiere}).`,'good');SFX.spot();}
     else{const av=G.st.vie,ae=G.st.energie;   // les éclats refont le plein de vie ET d'énergie (16 novembre 2026)
     G.st.vie=Math.min(G.st.vieMax,G.st.vie+ORE_PV[l]);G.st.energie=Math.min(G.st.energieMax,G.st.energie+ORE_PV[l]);
     const dv=Math.round(G.st.vie-av),de=Math.round(G.st.energie-ae);
@@ -194,7 +194,7 @@ $('offOn').onclick=()=>{$('off').hidden=true;try{if(AC)AC.resume();}catch(e){}un
    cinématique de forage se joue et le niveau suivant commence. */
 function end(s){
   drilling=false;
-  if((G.niv||1)<NIV_MAX){$('overlay').hidden=true;playForage(()=>{niveauSuivant();render();},G.niv||1);return;}const bilan=`<div class="stats"><span>${G.turn} tours · ${G.dist} cases parcourues</span><span>Matière en réserve : ${G.st.matiere||0}</span></div>`;
+  if((G.niv||1)<NIV_MAX){$('overlay').hidden=true;playForage(()=>{niveauSuivant();render();},G.niv||1);return;}const bilan=`<div class="stats"><span>${G.turn} tours · ${G.dist} cases parcourues</span><span>Matière {µ} en réserve : ${G.st.matiere||0}</span></div>`;
   G.over={site:s.id,win:true};
   $('card').innerHTML=`<div class="tag">Site ${s.id} foré</div><h2>NOYAU<br>ATTEINT</h2>${bilan}<p>La foreuse a percé jusqu’au noyau de la planète.</p><button class="go" id="again">Nouvelle exploration</button>`;
   $('overlay').hidden=false;$('again').onclick=()=>{nouvellePartie();};$('again').focus();

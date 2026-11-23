@@ -1117,6 +1117,10 @@ pièce ils deviennent du sol, sous un mur du mur) ; seuls le vaisseau et le bord
 
 ## 9. Interface
 
+- **« Matière {µ} »** (23 novembre 2026) : partout où le jeu parle de la ressource (colonne, fabricateur, journal, objets,
+  inspection, sonar, Lab → Items, descente), elle s'écrit « Matière {µ} ». Le « MATIÈRE » du tableau de bord des descentes
+  désigne la roche traversée (argile, filon…) et garde son nom.
+
 - **Pas d'écran d'accueil** : la partie commence directement, foreuse dans la soute. Le son s'active à la première
   touche ou au premier clic.
 - **Barres de défilement** (22 novembre 2026) : 4 pixels, sans fond, couleur du texte secondaire (`--dim`), plus
@@ -1291,17 +1295,14 @@ l'essayer (F9 jusqu'au 23 novembre 2026). **Échap, Espace ou Entrée** la passe
   la route (9 à 14 cases à côté : il faut tourner), six loin à gauche et à droite, hors d'atteinte, pour que le sous-sol ait
   l'air d'exister aussi sur les côtés. Maximum 60 par descente ; mesuré : 6 sans piloter, 54 en visant (`test-forage.js`).
   Avant, le même jour : un seul amas de 7 × 3, +20 d'un bloc.
-- **Annonce en gros (22 novembre 2026)** : **alignée à gauche, juste sous le tableau de bord** (23 novembre 2026 ; avant, en haut
-  au centre), pas plus large qu'un tiers d'écran pour laisser la foreuse dégagée, dans un cadre à fond noir, rebord plein et bandes de chantier (dessin n° 3 de quatre proposés, `FG_ANN`).
-  Le cadre paraît à 1 s ; les caractères défilent au hasard puis se figent de gauche à droite ; message complet à 2 s. De 4 s à 4,5 s il
-  s'efface colonne par colonne, de gauche à droite, les caractères se remettant à défiler juste avant de partir. Le défilement
-  n'emploie que des signes ASCII, des chiffres et des lettres ordinaires. Première descente : « MATIÈRE {µ} DÉTECTÉE / COLLECTE POSSIBLE » (couleur accent) ; seconde : « EXPLOSIFS DÉTECTÉS /
-  ATTENTION SOUS-SOL PIÉGÉ ! » (rouge).
-
-### Seconde descente : le mini-jeu des mines (21 novembre 2026)
-
-Du niveau 2 au niveau 3, la descente se joue. `playForage(suite, 2)` ; **NIV3** pour l'essayer (Maj + F9 jusqu'au 23 novembre 2026).
-
+- **Annonce en gros (22 novembre 2026, revue le 23)** : **alignée à gauche, juste sous le tableau de bord**, dans un cadre plein
+  à fond noir avec deux bandes de chantier (la forme choisie le 22). Depuis le 23 novembre 2026, tout est en **police DOS**
+  (Modern DOS 8x16, jeu CP437, domaine public : `02b-police-dos.js`, `dosCar`, `dosTexte`), un pixel de police calé sur des
+  pixels d'écran, d'après les références de l'utilisateur (`F:\WORK\IAZONE\DEEPCORE\REF` : polices IBM PC, GIF de
+  caractères qui s'allument). **Apparition** de 1 à 2 s, de gauche à droite avec du désordre : chaque case monte en densité
+  « . → i → 0 », puis montre des caractères au hasard sur des pavés de couleur (couleur de l'alerte ou gris, en inverse vidéo)
+  avant de se figer ; le rebord et les bandes montent en « ░ ▒ ▓ █ ». **Disparition** dans la dernière demi-seconde (4 → 4,5 s),
+  colonne par colonne de gauche à droite, à rebours : pavés, « 0 → i → . », plus rien ; la roche reparaît derrière.
 - Caractères d'un 52ᵉ de la hauteur d'écran — **la même échelle aux deux descentes depuis le 22 novembre 2026** (la
   première, en 36ᵉ, était trop zoomée). La foreuse est tenue en haut de l'écran :
   on voit 0,7 écran devant elle — **aux deux descentes depuis le 23 novembre 2026** (à la première, elle était au milieu). La descente est plus longue que la première et la foreuse répond

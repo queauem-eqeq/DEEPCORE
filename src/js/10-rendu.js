@@ -181,7 +181,7 @@ const SONAR_V=38,SONAR_MIN=2600;                         // cases par seconde ; 
 function sonarStart(){G.sonar=2;G.sonX=G.px;G.sonY=G.py;const r=Math.hypot(Math.max(G.px,W-G.px),Math.max(G.py,H-G.py))+2,dur=reduced?1:Math.max(SONAR_MIN,r/SONAR_V*1000);
   addFx({kind:'sonar',x:G.px,y:G.py,r,dur});SFX.sonar(dur/1000);
   const l=Object.values(G.ore||{}),m=l.filter(oreMat).length,n=l.length-m;
-  sayMore(`Sonar : ${n} gisement${n>1?'s':''} de métal et ${m} de Matière détecté${l.length>1?'s':''}.`,'info');}
+  sayMore(`Sonar : ${n} gisement${n>1?'s':''} de métal et ${m} de Matière {µ} détecté${l.length>1?'s':''}.`,'info');}
 function sonarR(){if(!G||G.sonar===1)return -1;const f=FX.find(f=>f.kind==='sonar'&&!f.ant);return f?fxP(f)*f.r:Infinity;}   // f.ant : le cercle d'une antenne ne détecte pas les gisements
 const sonarVu=(i,sr)=>Math.hypot(i%W-(G.sonX??G.px),((i/W)|0)-(G.sonY??G.py))<=sr;
 function render(){

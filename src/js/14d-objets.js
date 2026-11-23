@@ -11,7 +11,7 @@
    à l'autre. Valeurs réglables : Lab → Items (np-items). */
 const ITEM_VAL_DEF={repar:{soin:50},batterie:{energie:50,choc:12,etourdi:6},charge:{degats:30},puissance:{pow:1,deg:5},
   berserk:{crit:50,duree:10},camo:{duree:10},balise:{rayon:20,duree:25,pv:40},court:{etourdi:10},matiere:{mat:15}};
-const ITEM_VAL_LIB={soin:'Vie rendue',energie:'Énergie rendue',choc:'Dégâts de la décharge',etourdi:'Étourdissement (battements)',degats:'Dégâts',pow:'POW gagné',deg:'Dégâts par point de POW en trop (%)',crit:'CRIT en plus (points)',duree:'Durée (battements)',rayon:'Rayon de l’appel (cases)',pv:'PV de la balise posée',mat:'Matière rendue'};
+const ITEM_VAL_LIB={soin:'Vie rendue',energie:'Énergie rendue',choc:'Dégâts de la décharge',etourdi:'Étourdissement (battements)',degats:'Dégâts',pow:'POW gagné',deg:'Dégâts par point de POW en trop (%)',crit:'CRIT en plus (points)',duree:'Durée (battements)',rayon:'Rayon de l’appel (cases)',pv:'PV de la balise posée',mat:'Matière {µ} rendue'};
 let ITEM_VAL=JSON.parse(JSON.stringify(ITEM_VAL_DEF));
 // chance qu'un robot abattu lâche un objet, par espèce (clé du Bestiaire)
 const DROPS_DEF={crabos:8,cafar:6,mastok:90,brochon:10,mine:0,paralyzor:25,gardien:60,artilleur:35,drone:5,soudeur:45,englueur:35};
@@ -45,7 +45,7 @@ Object.assign(ITEMS,{
     plein:st=>false,non:'',use:st=>'',
     art:["     ▄▄▄▄▄     ", "    █  ▄▀ █    ", "    █ ▀▄  █    ", "    █  ▄▀ █    ", "     ▀▀▀▀▀     "],
     col:[".....wwwww.....", "....w..11.w....", "....w.11..w....", "....w..11.w....", ".....wwwww....."]},
-  matiere:{n:'Matière',mat:1,eff:'Matière +15',d:'Un bloc de Matière brute : il rejoint la réserve dès qu’on le ramasse.',
+  matiere:{n:'Matière {µ}',mat:1,eff:'Matière {µ} +15',d:'Un bloc de Matière {µ} brute : il rejoint la réserve dès qu’on le ramasse.',
     art:["     ▄▄        ", "   ▄████▄  ▄▄  ", "  ████████████ ", "   ▀████████▀  ", "      ▀▀▀▀     "],
     col:[".....11........", "...11w111..11..", "..111111111w11.", "...1111111111..", "......1111....."]}});
 Object.assign(FAB_PRIX,{berserk:20,camo:24,balise:12,court:16});
@@ -81,7 +81,7 @@ function itemTxt(){const V=ITEM_VAL,v=k=>ITEMS[k].vrai;
   v('berserk').eff=`CRIT +${V.berserk.crit} pendant ${V.berserk.duree} battements`;
   v('camo').eff=`Invisible ${V.camo.duree} battements`;
   v('balise').eff=`Appelle les ennemis à ${V.balise.rayon} cases`;v('court').eff=`Énergie à zéro, ou ennemi hors service ${V.court.etourdi} battements`;
-  ITEMS.matiere.eff=`Matière +${V.matiere.mat}`;}
+  ITEMS.matiere.eff=`Matière {µ} +${V.matiere.mat}`;}
 // plans de fabrication : un objet « plan_<clé> » par objet fabricable ; jamais dans le sac, il s'apprend en le ramassant
 const ART_PLAN={art:["  ┌─────────┐  ", "  │ ┌──┐ ── │  ", "  │ │  │ ── │  ", "  │ └──┘ ── │  ", "  └─────────┘  "],col:["..wwwwwwwwwww..", "..w.2222.22.w..", "..w.2..2.22.w..", "..w.2222.22.w..", "..wwwwwwwwwww.."]};
 function plansInit(){for(const k in FAB_PRIX)if(ITEMS[k]&&!ITEMS['plan_'+k]){const o={plan:k,art:ART_PLAN.art,col:ART_PLAN.col,d:'Un plan de fabrication : une fois ramassé, le fabricateur sait produire cet objet.',eff:'Plan de fabrication'};
@@ -144,8 +144,8 @@ function butinExplo(){const N=W*H,t=G.t,dep=idx(G.px,G.py),s0=G.sites&&G.sites[0
 /* ----- Ramassage : la Matière rejoint la réserve, un plan s'apprend, le reste va au sac ----- */
 function butinPrend(c,more){const l=G.items&&G.items[c];if(!l)return;const dire=more?sayMore:invSay,reste=[];
   for(const k of l){const d=ITEMS[k];
-    if(d&&d.mat){const m=ITEM_VAL.matiere.mat;G.st.matiere=(G.st.matiere||0)+m;addFx({kind:'num',x:G.px,y:G.py,txt:'+'+m,col:PAL['1'],dur:750});dire(`Matière ramassée : +${m} (réserve ${G.st.matiere}).`,'good');SFX.spot();}
-    else if(d&&d.plan){const s=savoir();if(s.plans[d.plan]){G.st.matiere=(G.st.matiere||0)+PLAN_DOUBLON;dire(`${d.n} : déjà connu, recyclé en Matière (+${PLAN_DOUBLON}).`,'info');}
+    if(d&&d.mat){const m=ITEM_VAL.matiere.mat;G.st.matiere=(G.st.matiere||0)+m;addFx({kind:'num',x:G.px,y:G.py,txt:'+'+m,col:PAL['1'],dur:750});dire(`Matière {µ} ramassée : +${m} (réserve ${G.st.matiere}).`,'good');SFX.spot();}
+    else if(d&&d.plan){const s=savoir();if(s.plans[d.plan]){G.st.matiere=(G.st.matiere||0)+PLAN_DOUBLON;dire(`${d.n} : déjà connu, recyclé en Matière {µ} (+${PLAN_DOUBLON}).`,'info');}
       else{s.plans[d.plan]=1;identifier(d.plan);dire(`${d.n} appris : le fabricateur sait maintenant le produire.`,'good');}SFX.analyse();}
     else reste.push(k);}
   if(reste.length)G.items[c]=reste;else delete G.items[c];}
@@ -287,14 +287,14 @@ function buildItems(){TOUT_CONNU=true;const champ=(lib,chemin,v,min,max)=>`<labe
   let h='';
   for(const [titre,test] of ITEMS_FAM){const l=Object.keys(ITEMS).filter(k=>!ITEMS[k].plan&&test(k));if(!l.length)continue;h+=`<h3>${titre}</h3>`;
     for(const k of l){const d=ITEMS[k],f=[];
-      if(k in FAB_PRIX)f.push(champ('Prix (Matière)',`prix.${k}`,FAB_PRIX[k],0,500));
+      if(k in FAB_PRIX)f.push(champ('Prix (Matière {µ})',`prix.${k}`,FAB_PRIX[k],0,500));
       for(const c in ITEM_VAL[k]||{})f.push(champ(ITEM_VAL_LIB[c]||c,`val.${k}.${c}`,ITEM_VAL[k][c],0,500));
       if(d.req!=null)f.push(champ('POW requis',`req.${k}`,d.req,0,30));
       if(d.de){f.push(champ('Dés',`de.${k}.n`,d.de.n,1,9));f.push(champ('Faces',`de.${k}.f`,d.de.f,1,30));f.push(champ('Bonus',`de.${k}.p`,d.de.p,0,60));}
       for(const m in d.mod||{})f.push(champ(MODS[m]?MODS[m][0]:m,`mod.${k}.${m}`,d.mod[m],-200,200));
       const tu=(k==='matiere'?TL.mat2:TL[k==='cle'?'cle':'o_'+k])||TL.objet;let ic='';try{ic=tu.toDataURL();}catch(e){}
       h+=`<div class="itl"><img src="${ic}" alt="" width="32" height="32"><div><b>${(d.vrai||d).n}</b><small>${k in FAB_PRIX?'fabricable (plan)':k==='puissance'?'se trouve, ne se fabrique pas':k==='matiere'?'butin':d.base?'équipement de départ':'se trouve'} · ${(d.vrai||d).eff||(d.slot?fabEffet(k):'')}</small></div><div class="itfs">${f.join('')||'<i>rien à régler</i>'}</div></div>`;}}
-  h+=`<h3>Butin des robots abattus (chance en %)</h3><div class="itl"><div></div><div><small>Ce qu’un robot lâche : Matière 40 %, capsule 35 %, plan 18 %, équipement 7 %.</small></div><div class="itfs">${BEASTS.map(b=>champ(b.n,`drops.${b.key}`,DROPS[b.key]||0,0,100)).join('')}</div></div>`;
+  h+=`<h3>Butin des robots abattus (chance en %)</h3><div class="itl"><div></div><div><small>Ce qu’un robot lâche : Matière {µ} 40 %, capsule 35 %, plan 18 %, équipement 7 %.</small></div><div class="itfs">${BEASTS.map(b=>champ(b.n,`drops.${b.key}`,DROPS[b.key]||0,0,100)).join('')}</div></div>`;
   $('itList').innerHTML=h;TOUT_CONNU=false;}
 function itemsLit(){const o=itemsEtat();for(const e of $('itList').querySelectorAll('input[data-c]')){const v=+e.value;if(!isFinite(v))continue;const c=e.dataset.c.split('.');let p=o;for(let n=0;n<c.length-1;n++)p=p[c[n]]=p[c[n]]||{};p[c[c.length-1]]=Math.round(v);}return o;}
 function openItems(){if(TRAV)stopTravel();if(REST)stopRest();if(EXPL)stopExplore();buildItems();$('itMsg').textContent='';$('items').hidden=false;$('items').querySelector('.mcard').focus();}

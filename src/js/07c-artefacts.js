@@ -21,7 +21,7 @@ const ART_LISTE=[['antenne','Antenne','Activée par la foreuse, elle lève le br
   ['pieges','Salles piégées','Un butin au milieu de la pièce, des relais cachés dans les murs : ils surgissent quand on le ramasse.',[.5,1,2]],
   ['vitrines','Vitrines','Une petite pièce en cul-de-sac, trois lots sous vitrine : on n’en emporte qu’un.',[.4,1,2]],
   ['station','Station de réparation','Vie et énergie au maximum, une seule fois. Le bruit attire les ennemis proches.',[.3,.7,1.2]],
-  ['fabric','Fabricateur','Fabrique des objets contre de la Matière.',[.5,1,2]]];
+  ['fabric','Fabricateur','Fabrique des objets contre de la Matière {µ}.',[.5,1,2]]];
 const ARTEFACTS_DEF=()=>({antenne:{on:1,f:1},herbe:{on:1,f:1},machines:{on:1,f:1},terminal:{on:1,f:1},lasers:{on:1,f:1},croix:{on:0,f:1},ponts:{on:1,f:1},piles:{on:1,f:1},pieges:{on:1,f:1},vitrines:{on:1,f:1},station:{on:1,f:1},fabric:{on:1,f:1}});   // réglage du joueur, relu le 21 novembre 2026 à 23 h 39 (croix laser désactivée, machines en fréquence normale)
 /* Niveaux de profondeur où un artefact peut apparaître (21 novembre 2026, réglé dans la fenêtre LIFE). Départ : les lasers à partir
    du niveau 2, les croix au niveau 3, les piles à partir du niveau 2, tout le reste partout. */
