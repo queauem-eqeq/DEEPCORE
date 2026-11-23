@@ -17,7 +17,14 @@ const bati=v=>v===WALL||v===PILLAR||v===LOCK||v===SECRET;
 const NIVEAUX=[null,
   {recette:'atterrissage',part:{ext:75,bati:20,tunnel:5}},
   {recette:'cavernes',part:{ext:80,bati:18,tunnel:2}},
-  {recette:'base',part:{ext:35,bati:60,tunnel:5}}];
+  {recette:'base',part:{ext:35,bati:60,tunnel:5}},
+  /* Au-delà du niveau 3, un niveau peut aussi porter : groupes (noms des groupes qui y apparaissent, tant que le joueur ne les a pas
+     choisis lui-même dans LIFE) et groupesPropres (groupes créés pour lui, ajoutés à la liste du Lab s'ils n'y sont pas). Sans
+     « groupes », le niveau prend ceux du niveau 3. Les artefacts d'un niveau au-delà du 3 sont ceux du niveau 3 tant qu'aucun réglage ne le cite. */
+  {recette:'inonde',part:{ext:85,bati:13,tunnel:2},
+   groupes:['Crabots','Large crabot groupe','Banc de torpilles','Meute de torpilles','Patrouille amphibie','Essaim de drones','Ronde de drones','Tireurs embusqués','2-3 sentinelles','Broyeur solitaire','Batterie'],
+   groupesPropres:[{n:'Meute de torpilles',cout:8,f:1,on:1,lieux:['ext'],m:[{k:'brochon',min:3,max:5}],pats:['voyage','errance']},
+     {n:'Patrouille amphibie',cout:7,f:1,on:1,lieux:[],m:[{k:'crabos',min:2,max:2},{k:'brochon',min:2,max:2}],pats:['ronde','navette']}]}];
 const NIV_MAX=NIVEAUX.length-1,NIVS=NIVEAUX.map((_,i)=>i).slice(1),nivBorne=n=>Math.max(1,Math.min(NIV_MAX,n||1));
 const RECETTE_NIV=n=>NIVEAUX[nivBorne(n)].recette,   // la recette de chaque niveau de la descente
   NIV_RECETTE=r=>Math.max(1,NIVEAUX.findIndex(v=>v&&v.recette===r));   // et l'inverse (recette « classique » : niveau 1)

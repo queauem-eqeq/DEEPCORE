@@ -229,7 +229,7 @@ function introFrame(now){const I=INTRO;if(!I)return;ensureChasmOv();ensureSolOv(
    Niv1 : la cinématique d'arrivée, puis un niveau 1 (recette « atterrissage ») aux réglages tirés au hasard.
    Niv2 : la cinématique de forage, puis un niveau 2 (recette « cavernes ») aux réglages tirés au hasard ; la foreuse garde
    ce qu'elle a. Dans les deux cas le menu Monde du joueur est remis tel qu'il était : seule la taille de carte en est reprise. */
-for(const b of ['niv1Btn','niv2Btn','niv3Btn'])$(b).addEventListener('click',e=>e.currentTarget.blur());   /* plus de cadre de focus qui reste autour du bouton après le clic */
+for(const b of ['niv1Btn','niv2Btn','niv3Btn','niv4Btn'])$(b).addEventListener('click',e=>e.currentTarget.blur());   /* plus de cadre de focus qui reste autour du bouton après le clic */
 $('niv1Btn').onclick=()=>{unlock();if(TRAV)stopTravel();
   const sauve=JSON.parse(JSON.stringify(GEN));recRange();recPrend(RECETTE_NIV(1));hasardReglages();newGame();
   genRemet(sauve);started=true;$('overlay').hidden=true;render();playIntro();};
@@ -238,6 +238,8 @@ $('niv2Btn').onclick=()=>{unlock();if(TRAV)stopTravel();$('overlay').hidden=true
 // Niv3 : la seconde descente (mini-jeu des mines), puis une grande base aux réglages tirés au hasard
 $('niv3Btn').onclick=()=>{unlock();if(TRAV)stopTravel();$('overlay').hidden=true;started=true;
   playForage(()=>{G.niv=2;niveauSuivant(true);render();},2);};
+$('niv4Btn').onclick=()=>{unlock();if(TRAV)stopTravel();$('overlay').hidden=true;started=true;
+  playForage(()=>{G.niv=3;niveauSuivant(true);render();},3);};
 function savePresets(){try{localStorage.setItem('np-presets',JSON.stringify(PRESETS.map(p=>p.c)));localStorage.setItem('np-preset-active',PRESET_ACTIVE);}catch(e){}touchLocal();}
 function drawPresets(){$('presets').innerHTML=PRESETS.map((p,i)=>`<button data-p="${i}" title="${p.n}" aria-label="Palette ${p.n}" aria-pressed="${i===PRESET_ACTIVE}">${[2,4,1,0,3].map(j=>`<i style="background:${p.c[j]}"></i>`).join('')}</button>`).join('');
   $('palName').textContent=PRESETS[PRESET_ACTIVE].n;}

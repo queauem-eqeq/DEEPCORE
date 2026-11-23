@@ -153,6 +153,15 @@ const RECETTES={atterrissage:{n:'Niveau 1 : extérieur, montagne, complexe enfou
   classique:{n:'Classique : terrain partout, bâtiments posés dessus',titre:'Structures',aide:R_AIDE,
     regl:[R_AMB('classique'),R_STYLE,['sel','sNb','Nombre de structures',[[0,'Une ou deux'],[1,'Une'],[2,'Deux']],0,[0,1,2]],['num','structure','Surface bâtie (%)',0,70,10,[6,22]],
       R_PIECES,['num','sEntrees','Portes d’entrée',0,4,0],R_OUVERT,R_VERROUS,R_SECRETS]}};
+/* Niveau 4, la station noyée (23 novembre 2026) : la carte des cavernes, puis l'eau monte (07h-inonde.js). */
+RECETTES.inonde=Object.assign({},RECETTES.cavernes,{n:'Niveau 4 : station noyée',inonde:true,titre:'Station noyée',
+  aide:'Les cavernes sont noyées : hauts-fonds près des parois, eau profonde au large, quelques îlots au sec. La foreuse y est lente, torpilles et crabots y nagent. Chaque curseur donne un centre. '+R_AIDE,
+  regl:[R_AMB('inonde'),['sub','Eau'],['num','inIles','Îlots au sec (% des cavernes)',5,60,20,[10,45]],['num','inProf','Largeur des hauts-fonds (cases)',1,5,3,[2,4]],...RECETTES.cavernes.regl.slice(1)]});
+AMBIANCES.inonde={
+  lagune:{n:'Lagune souterraine',v:{cvDispo:'cav',cvPart:48,cvTaille:500,cvVar:40,cvForme:40,cvBati:2,cvSurf:12,inIles:25,inProf:3}},
+  citernes:{n:'Citernes',v:{cvDispo:'mel',cvPart:34,cvTaille:160,cvVar:20,cvForme:15,cvBoyaux:3,cvBati:3,cvSurf:16,inIles:10,inProf:2}},
+  archipel:{n:'Archipel',v:{cvDispo:'cav',cvPart:55,cvTaille:700,cvForme:60,cvBati:1,cvSurf:8,inIles:45,inProf:3}},
+  docks:{n:'Docks engloutis',v:{cvDispo:'cote',cvPart:36,cvTaille:300,cvBati:4,cvSurf:22,cvPortes:2,sStyle:'hangar',inIles:15,inProf:4}}};
 if(!RECETTES[GEN.recette])GEN.recette='atterrissage';
 const ENFOUI=()=>!!(RECETTES[GEN.recette]||{}).enfoui;
 const recLignes=r=>RECETTES[r].regl.filter(l=>l[0]!=='sub');

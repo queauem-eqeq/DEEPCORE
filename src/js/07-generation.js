@@ -268,6 +268,7 @@ function niveau(refait){drilling=false;
   if(typeof baseFinir==='function'&&(RECETTES[GEN.recette]||{}).base)baseFinir();
   const PLANS_POSES_M=PLANS_POSES={};
   machines();
+  if((RECETTES[GEN.recette]||{}).inonde)inondeFinir();   // l'eau monte après les machines, avant le butin et la faune
   PLANS_POSES=PLANS_POSES_M;butinExplo();   // butin des pièces secrètes, des culs-de-sac et des coins reculés (22 novembre 2026)
   if(G.sites[0]&&accesSite()<0&&(refait||0)<3)return niveau((refait||0)+1);   // garde-fou : un site inatteignable, la carte est refaite (trois fois au plus)
   spawnGroupes();lastAct='move';palBiome(null);buildTiles();turnStealth();computeFOV();}
@@ -313,7 +314,7 @@ function niveauSuivant(hasard){   // hasard : un archétype monde et un archéty
   G.inv=inv;G.st=st;G.niv=niv;G.turn=tour;G.dist=dist;G.over=null;drilling=false;SAV_GARDE=null;fuelPlus(REGLES.fuelNiveau);
   G.sonarAt=tour+(G.sonarAt||0);   // le délai du sonar (10 à 30 battements) part de l'arrivée : niveau() l'a compté depuis 0, avant qu'on remette le compteur de tours (22 novembre 2026 : il partait tout de suite)
   eboulis();
-  say(G.arrivee==='base'?`Niveau ${G.niv}${G.amb?' — '+G.amb:''}. La foreuse a traversé le plafond d’une salle : elle est dans une base enfouie. Un site de forage est signalé plus loin.`:`Niveau ${G.niv}${G.amb?' — '+G.amb:''}. La foreuse a percé le plafond et s'est écrasée plus bas. Un nouveau site de forage est signalé.`,'info');}
+  say(G.arrivee==='base'?`Niveau ${G.niv}${G.amb?' — '+G.amb:''}. La foreuse a traversé le plafond d’une salle : elle est dans une base enfouie. Un site de forage est signalé plus loin.`:G.inonde?`Niveau ${G.niv}${G.amb?' — '+G.amb:''}. La foreuse a percé le plafond d’une station noyée : l’eau la ralentit, pas ce qui y nage. Un site de forage est signalé.`:`Niveau ${G.niv}${G.amb?' — '+G.amb:''}. La foreuse a percé le plafond et s'est écrasée plus bas. Un nouveau site de forage est signalé.`,'info');}
 const B_PORTE=i=>!!(BATI_DER&&BATI_DER.B.porte[i])||D4.some(([dx,dy])=>{const v=G.t[idx(i%W+dx,((i/W)|0)+dy)];return v===DOOR||v===LOCK;});   // devant un passage : pas de débris
 
 /* ---------- Bestiaire : édition des statistiques ---------- */

@@ -29,7 +29,7 @@ const ART_NIV_DEF={lasers:[2,3],croix:[3],piles:[2,3],pieges:[2,3],fabric:[2,3],
 function artefactsSains(d){const o=ARTEFACTS_DEF();for(const [k] of ART_LISTE)o[k].niv=(ART_NIV_DEF[k]||ART_NIVS).slice();
   if(d&&typeof d==='object')for(const [k] of ART_LISTE)if(d[k]){o[k].on=d[k].on?1:0;o[k].f=[0,1,2].includes(+d[k].f)?+d[k].f:1;if(Array.isArray(d[k].niv))o[k].niv=ART_NIVS.filter(n=>d[k].niv.includes(n));}return o;}
 // l'artefact est-il permis sur la carte en cours de génération ? (actif dans le Lab, et permis à ce niveau)
-const artOn=k=>{const a=ARTEFACTS[k];return !!(a&&a.on&&(!a.niv||a.niv.includes(nivBorne(typeof NIV_GEN==='number'?NIV_GEN:1))));};
+const artOn=k=>{const a=ARTEFACTS[k],n=nivBorne(typeof NIV_GEN==='number'?NIV_GEN:1);return !!(a&&a.on&&(!a.niv||a.niv.includes(n)||(n>3&&a.niv.includes(3)&&!a.niv.some(x=>x>3))));};
 let ARTEFACTS=artefactsSains(null);
 try{ARTEFACTS=artefactsSains(JSON.parse(localStorage.getItem('np-artefacts')||'null'));}catch(e){}
 function saveArtefacts(){try{localStorage.setItem('np-artefacts',JSON.stringify(ARTEFACTS));}catch(e){}touchLocal();}

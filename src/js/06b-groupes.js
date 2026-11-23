@@ -24,7 +24,7 @@ const LIEUX=[['ext','Extérieur'],['bati','Bâti'],['tunnel','Tunnels']];
 const GR_NIVS=NIVS,GR_NIV_DEF={"Large crabot groupe":[2,3],"Family":[2,3],"3-5 puces + sentinelles":[2,3],"Mines & Sentinelles":[2,3],"2-3 sentinelles":[2,3],"Broyeur solitaire":[2,3],"Poste de garde":[3],"Batterie":[2,3],"Essaim de drones":[2,3],"Escouade de réparation":[3],"Embuscade gluante":[3],"Chasse à courre":[3],"Convoi":[3],"Tireurs embusqués":[2,3],"Ronde de drones":[2,3]};
 function nivSains(d,liste,budget,pente){const o={};
   for(const n of GR_NIVS){const s=d&&d[n],b=s&&isFinite(+s.budget)?Math.max(0,Math.min(2000,Math.round(+s.budget))):Math.round(budget*(1+pente/100*(n-1)));
-    o[n]={budget:b,part:partSaine(s&&s.part,n),gr:s&&Array.isArray(s.gr)?liste.map(g=>g.n).filter(x=>s.gr.includes(x)):liste.map(g=>g.n).filter(x=>(GR_NIV_DEF[x]||GR_NIVS).includes(n))};}
+    o[n]={budget:b,part:partSaine(s&&s.part,n),gr:s&&Array.isArray(s.gr)?liste.map(g=>g.n).filter(x=>s.gr.includes(x)):NIVEAUX[n].groupes?liste.map(g=>g.n).filter(x=>NIVEAUX[n].groupes.includes(x)):liste.map(g=>g.n).filter(x=>(GR_NIV_DEF[x]||[1,2,3]).includes(Math.min(n,3)))};}
   return o;}
 const nivDe=n=>GROUPES.niv[nivBorne(n)];
 // Répartition de départ, par niveau : celle que donnaient les anciennes densités (mesurée le 21 novembre 2026 sur 12 cartes par niveau).
@@ -67,6 +67,7 @@ function groupesV2(g){if(!g||g.v>=2)return g;const D=GROUPES_DEF();
 // L'effectif minimal peut être 0 : l'espèce est alors parfois absente du groupe.
 function groupesSains(d){const ks=ESPECES().map(e=>e[0]),n=(v,mn,mx,df)=>Number.isFinite(+v)&&v!==''&&v!=null?Math.max(mn,Math.min(mx,Math.round(+v))):df;
   if(!d||!Array.isArray(d.liste))return null;
+  {const propres=NIVEAUX.flatMap(v=>(v&&v.groupesPropres)||[]).filter(g=>!d.liste.some(x=>x&&x.n===g.n));if(propres.length)d=Object.assign({},d,{liste:[...d.liste,...propres]});}   // groupes créés pour un niveau : ajoutés s'ils manquent
   const liste=d.liste.slice(0,40).map(g=>({n:String(g.n||'Groupe').slice(0,30),lieux:[...new Set(Array.isArray(g.lieux)?g.lieux:[])].filter(v=>LIEUX.some(l=>l[0]===v)),cout:n(g.cout,1,500,1),on:g.on?1:0,f:[0,1,2].includes(+g.f)?+g.f:1,
     pats:[...new Set(Array.isArray(g.pats)?g.pats:[g.pat||'errance'])].filter(v=>PATS.some(p=>p[0]===v)),   // liste vide permise : le style est alors tiré parmi tous
     m:(Array.isArray(g.m)?g.m:[]).filter(m=>m&&ks.includes(m.k)).slice(0,6).map(m=>{const a=n(m.min,0,20,1),b=n(m.max,1,20,Math.max(1,a));return {k:m.k,min:Math.min(a,b),max:Math.max(a,b)};})}));
