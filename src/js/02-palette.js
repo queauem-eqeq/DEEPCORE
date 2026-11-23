@@ -9,7 +9,7 @@ const PAL_N=5,PAL_CLES=['1','2','3','4','5'];
 const PRESETS=[   // c : accent, bio, monde, danger, bâti
   {n:'Braise',c:['#c99acf','#6de6e7','#ca614e','#d8180b','#7c85c5']},
   {n:'Lagon',c:['#f7f688','#3ab99d','#116bb5','#d8180b','#75a3a8']},
-  {n:'Désert',c:['#6de6e7','#947e31','#dfae65','#a91d18','#966949']},
+  {n:'Désert',c:['#833e11','#ebbf4a','#be8f44','#a91d18','#966949']},
   {n:'Jungle',c:['#2e9adc','#ebbf4a','#1a946c','#d8180b','#4d858d']},
   {n:'Améthyste',c:['#6de6e7','#e8bfe2','#7f65bb','#d8180b','#30626d']},
   {n:'Cendre',c:['#e38d18','#3ab99d','#6f6f6e','#d8180b','#af8568']},
@@ -19,7 +19,7 @@ const PRESETS=[   // c : accent, bio, monde, danger, bâti
 // Les palettes prédéfinies sont modifiables : la palette sélectionnée suit les sélecteurs de couleur
 const PRESETS_DEF=PRESETS.map(p=>({n:p.n,c:p.c.slice()}));
 const palDe=c=>({'1':c[0],'2':c[1],'3':c[2],'4':c[3],'5':c[4]});
-let PRESET_ACTIVE=0;   // Braise, la plus proche de l'ancienne Rouille du joueur
+let PRESET_ACTIVE=2;   // Désert, la palette choisie par le joueur (23 novembre 2026)
 try{const sv=JSON.parse(localStorage.getItem('np-presets')||'null');
   if(Array.isArray(sv))sv.forEach((c,i)=>{if(PRESETS[i]&&Array.isArray(c)&&c.length===PAL_N)PRESETS[i].c=c;});}catch(e){}
 // premier lancement à cinq couleurs : on repart de Braise

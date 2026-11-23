@@ -12,6 +12,10 @@ Partie du document de conception (sommaire et règles à ne pas casser : `concep
   portes et piliers des bâtiments, pour que l'intérieur ne se confonde plus avec la montagne). Le blanc reste fixe. Dans le
   code les clés sont `3` monde, `2` bio, `1` accent, `4` danger, `5` bâti ; les encres `r` et `L` des tuiles se lisent en
   couleur danger, et l'encre `3` se lit en couleur bâti sur les tuiles de `BATI_TUILES` (`02-palette.js`).
+- **Réglages du joueur adoptés le 23 novembre 2026** : les dessins retouchés dans l'artefact (`reglages/courant`) sont recopiés dans
+  `TUILES_JOUEUR` (`03-tuiles.js`) et `TUILES_JOUEUR_B` (`03b-tuiles-machines.js`) — bz6r, bz7r, mach5, robot_u, siteUnknown, niche,
+  stationOff, chargeur, o_capsule, o_plan — et la palette **Désert** retouchée dans `PRESETS` ; **Désert** devient la palette de départ
+  (`PRESET_ACTIVE`). La recopie **fusionne** : les tuiles déjà adoptées et absentes de la base sont gardées telles quelles.
 - **Une palette par niveau** (23 novembre 2026) : à chaque niveau suivant, la palette est tirée au hasard parmi les prédéfinies (jamais la
   même deux fois de suite) ; la palette choisie par le joueur n'est pas modifiée et revient au niveau 1. Voir `conception-descente.md`.
 - **Toutes les couleurs viennent de LACKING64** (lospec.com/palette-list/lacking64) : 8 palettes neuves, toutes modifiables

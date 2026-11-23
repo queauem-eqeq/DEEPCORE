@@ -95,7 +95,8 @@ Pour le passage au niveau suivant. Vue **de côté**, tout en **caractères ASCI
 - **Amas de Matière (demande de l'utilisateur)** : à la première descente, **plusieurs amas irréguliers de
   20 caractères**, couleur accent. **Chaque caractère touché par le puits rapporte 1 de Matière.** Trois amas naissent près de
   la route (9 à 14 cases à côté : il faut tourner), seize loin à gauche et à droite (jusqu'au bord de l'écran), hors d'atteinte, pour que le sous-sol ait
-  l'air d'exister aussi sur les côtés (23 novembre 2026 : six avant). Maximum 60 par descente ; mesuré : 6 sans piloter, 54 en visant (`test-forage.js`).
+  l'air d'exister aussi sur les côtés (23 novembre 2026 : six avant). Deux taches ne se posent pas l'une sur l'autre (7 rangées et 11 colonnes d'écart au minimum) : celle qui n'a pas de place est
+  abandonnée. Maximum 60 par descente ; mesuré : 6 sans piloter, 54 en visant (`test-forage.js`).
   
 - **Annonce en gros** : alignée à gauche, juste sous le tableau de bord, dans un cadre plein à fond noir avec deux bandes de chantier. Tout en **police DOS** (Modern DOS 8x16, CP437, domaine public : `02b-police-dos.js`, `dosCar`, `dosTexte`), un pixel de police calé sur des pixels d'écran, d'après les références de l'utilisateur (`F:\WORK\IAZONE\DEEPCORE\REF`). **Apparition** (2 s), de gauche à droite avec du désordre : chaque case monte en densité « . → i → 0 », puis montre des caractères au hasard sur des pavés de couleur (couleur de l'alerte ou gris, en inverse vidéo) avant de se figer ; le rebord et les bandes montent en « ░ ▒ ▓ █ ». Le message reste 4 s. **Disparition** (1 s), colonne par colonne de gauche à droite, à rebours : pavés, « 0 → i → . », plus rien ; la roche reparaît derrière. Première descente : « MATIÈRE {µ} DÉTECTÉE / COLLECTE POSSIBLE » (couleur accent) ; seconde : « EXPLOSIFS DÉTECTÉS / ATTENTION SOUS-SOL PIÉGÉ ! » (rouge). Le cadre a **la même taille aux deux descentes et à l'arrivée** (30 cases de large, règle `fgAnnP`, 30 % de la largeur de l'écran) ; deux lignes sont réservées sous le tableau de bord pour ses alertes qui clignotent, que l'annonce ne cache pas.
 
@@ -121,6 +122,9 @@ Du niveau 2 au niveau 3, la descente se joue. `playForage(suite, 2)` ; **NIV3** 
   Une mine est un pavé plein de 7 × 3 caractères, rouge et blanc en alternance. **Une ou deux mines de plus par rangée** sont
   semées sur toute la largeur de l'écran, indépendamment de la route de la foreuse (au moins 12 colonnes d'elle), pour que les mines
   n'existent pas seulement sous elle (23 novembre 2026).
+- **Deux mines ne se chevauchent jamais** : le pavé occupe 9 colonnes sur 5 rangées (fond noir compris), et toute mine posée garde cet
+  écart avec celles déjà en place, les rangées précédentes comprises (`fgMPose`, `FG_MDX`, `FG_MDY`). Si la place est prise, la mine
+  glisse de 9 colonnes, jusqu'à deux fois de chaque côté, puis renonce. Vérifié : 420 mines posées, aucune paire qui se chevauche.
 - Toucher une mine (elle saute dès qu'elle est dans le puits) coûte **12 points de vie** (`FG_MINE_DM`), de la vraie vie de la
   foreuse. **À zéro, la foreuse explose** : écran « FOREUSE DÉTRUITE », pas de niveau 3.
 - Échap passe la scène contre **30 points de vie** (`FG_PASSE_DM`), sans jamais tuer. Espace et Entrée ne passent plus.
@@ -139,10 +143,11 @@ Du niveau 2 au niveau 3, la descente se joue. `playForage(suite, 2)` ; **NIV3** 
 - **Entrée et sortie des deux descentes** : la sortie éteint l'écran case par case (« ▒ ░ · » puis le noir) ; l'entrée joue la même
   animation à l'envers (`FG_ENT`, 0,8 s : le noir se rallume case par case). La mort garde sa propre extinction.
 - **Plancher de départ et plancher d'arrivée** : la carte, vue de dessus, est lue en coupe sur la rangée de la foreuse et dressée de
-  côté (`fgCoupe`, `fgDecor`) : une case de carte = 4 colonnes, un mur = 14 rangées. **Départ** : l'endroit réel où l'on fore, lu
+  côté (`fgCoupe`, `fgDecor`) : une case de carte = 4 colonnes, un mur = 14 rangées. Le décor est tracé **une seule fois dans son
+  propre canevas**, puis posé d'un bloc à chaque image (sinon deux mille caractères à retracer soixante fois par seconde). **Départ** : l'endroit réel où l'on fore, lu
   sur le niveau quitté. Un bâtiment montre ses **murs et son toit en couleur bâti**, sa **porte** percée dans le mur, au plus
-  **deux ensembles de machines** en couleur monde (une antenne est un mât) ; les roches alentour dessinent un relief en couleur
-  monde. **Arrivée** : le même dessin, lu sur le niveau d'arrivée, posé sur le sol de la caverne. Le niveau d'arrivée est donc
+  **deux ensembles de machines** en couleur monde (une antenne est un mât) ; les roches alentour dessinent une **crête** en couleur
+  monde, lissée d'une case à l'autre pour qu'elle ondule, et de plus en plus dense vers sa base (« ▀ ░ ▒ ▓ »). **Arrivée** : le même dessin, lu sur le niveau d'arrivée, posé sur le sol de la caverne. Le niveau d'arrivée est donc
   **généré avant la scène** (`descendre()`, `14b-forage.js`), qui se joue par-dessus la partie déjà changée.
 - **Palette par niveau** : à chaque niveau, la palette change (`palNiveauSuivant`, `02-palette.js`), tirée au hasard parmi les
   palettes prédéfinies, jamais la même deux fois de suite ; elle ne touche pas à la palette choisie par le joueur, que reprend le
