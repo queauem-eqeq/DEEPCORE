@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Noyau Profond — arrivée en ASCII (essai)</title>
+<style>
+html,body{margin:0;height:100%;background:#000;overflow:hidden}
+canvas{display:block;width:100vw;height:100vh}
+#ui{position:fixed;right:14px;bottom:12px;display:flex;gap:8px;font:12px "JetBrains Mono",ui-monospace,Menlo,Consolas,monospace}
+#ui select,#ui button,#fin button{background:#000;color:#a9b6ba;border:1px solid #3a4448;font:inherit;padding:5px 10px;cursor:pointer}
+#ui select:hover,#ui button:hover,#fin button:hover{color:#f2f7f8;border-color:#a9b6ba}
+#fin{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;font:13px "JetBrains Mono",ui-monospace,Menlo,Consolas,monospace}
+#fin[hidden]{display:none}
+</style></head><body>
+<canvas id="cv" aria-label="Cinématique d'arrivée sur la planète, en caractères ASCII"></canvas>
+<div id="fin" hidden><button id="rej2">▶ Rejouer l'arrivée</button></div>
+<div id="ui"><label><select id="pal" aria-label="Palette"></select></label><button id="rej">Rejouer</button></div>
+<script src="police-dos.js"></script>
+<script src="scene.js"></script>
+</body></html>

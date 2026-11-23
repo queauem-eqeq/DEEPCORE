@@ -74,7 +74,7 @@ Artefact à part (https://claude.ai/artifact/9BKRaoB4hzgdWhzYFx5A6q) qui rejoue 
   pour disparaître : on passe par des caractères de moins en moins denses (« █ ▓ ▒ ░ · »), puis le noir. Pas d'éclair blanc
   translucide non plus.
 - `docs/` : conception, mesures, notes sur Brogue (voir plus haut). `planches/` : planches de travail
-  (vaisseau, gouffres). `outils/` : scripts de vérification (voir plus haut).
+  (vaisseau, gouffres ; `intro-ascii/` : essai de l'arrivée en ASCII, artefact à part https://claude.ai/artifact/NqyAPH2j2Nxi5AxgQX5ZSX). `outils/` : scripts de vérification (voir plus haut).
 
 ## Après chaque modification
 1. Syntaxe : `for f in src/js/*.js; do node --check "$f"; done`.
