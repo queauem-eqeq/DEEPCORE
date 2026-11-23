@@ -145,7 +145,7 @@ function restStep(){const T=REST;if(!T)return;if(busy()){stopRest();return;}
 // Mode inspection au clavier (touche X)
 function setInspect(on){INSPECT=on;$('inspTag').hidden=!on;if(on){if(freeCam)setFreeCam(false);HOV={x:G.px,y:G.py};}else HOV=null;render();}
 function moveInspect(dx,dy){const vc=Math.floor(vw/S),vr=Math.floor(vh/S);
-  HOV={x:Math.max(camX,Math.min(Math.min(W,camX+vc)-1,HOV.x+dx)),y:Math.max(camY,Math.min(Math.min(H,camY+vr)-1,HOV.y+dy))};render();}
+  HOV={x:Math.max(Math.max(0,camX),Math.min(Math.min(W,camX+vc)-1,HOV.x+dx)),y:Math.max(Math.max(0,camY),Math.min(Math.min(H,camY+vr)-1,HOV.y+dy))};render();}
 const cellAt=ev=>{const r=cv.getBoundingClientRect();return {x:Math.floor((ev.clientX-r.left)/S)+camX,y:Math.floor((ev.clientY-r.top)/S)+camY};};
 cv.addEventListener('pointerdown',ev=>{lastPT=ev.pointerType||'mouse';});
 cv.addEventListener('pointermove',ev=>{if(ev.pointerType==='touch'||!G)return;const c=cellAt(ev);if(c.x<0||c.y<0||c.x>=W||c.y>=H)return;

@@ -49,15 +49,15 @@ const FICT=new Map();
 function fict(a,b){const K=(b+5000)*20000+(a+5000);let e=FICT.get(K);if(e)return e;
   const F=(s,f)=>.55*vn(a/f,b/f,1e4,1e4,s)+.3*vn(a/(f/2),b/(f/2),1e4,1e4,s+1)+.15*vn(a/(f/4),b/(f/4),1e4,1e4,s+2);
   const d=Math.max(0,-a,a-W+1,-b,b-H+1),m=F(SEED+31,14)+.1*Math.exp(-d/7),v=F(SEED+41,12),c=F(SEED+51,13),h=hsh(a,b,9);
-  if(m>.6){const k=m-.6;e=k<.025?['▒','M',.75]:k<.08?['▓','M',.62+.25*h]:['█','M',.5+.3*h];}
+  if(d<6+12*F(SEED+61,8)){const bd=d>=4+11*F(SEED+61,8);e=bd?['▒','M',.75]:[h<.6?'▓':'█','M',.5+.3*h];}   /* le massif qui entoure la carte, au bord déchiqueté : au sol, il rejoint la montagne du jeu en pixels */
+  else if(m>.6){const k=m-.6;e=k<.025?['▒','M',.75]:k<.08?['▓','M',.62+.25*h]:['█','M',.5+.3*h];}
   else if(c<.27)e=c<.24?[' ','K',1]:['░','M',.35];
   else if(v>.62)e=[h<.5?'w':h<.8?'ʷ':'"','A',.55+.3*h];
   else e=h<.07?['.','M',.4]:h<.09?['o','M',.6]:h<.2?['·','M',.3]:[' ','K',1];
   FICT.set(K,e);return e;}
-let ENROULE=true;   /* vue de loin, la carte s'enroule en globe ; de près, le terrain inventé la prolonge */
-const cellMap=(mx,my)=>{let a=Math.floor(mx),b=Math.floor(my);
-  if(ENROULE){a=((a%W)+W)%W;b=((b%H)+H)%H;}else if(a<0||b<0||a>=W||b>=H)return fict(a,b);
-  return MAP[b*W+a]||fict(a,b);};
+let ENROULE=true;   /* vue de loin, le disque est courbé en globe ; de près, à plat */
+/* la planète ne répète jamais la carte : tout autour, le relief inventé (choisi le 23 novembre 2026, plutôt qu'une répétition en miroir) */
+const cellMap=(mx,my)=>{const a=Math.floor(mx),b=Math.floor(my);if(a<0||b<0||a>=W||b>=H)return fict(a,b);return MAP[b*W+a]||fict(a,b);};
 
 /* ---------- le vaisseau, vu de dessus : tiré de SHIP_GRID, chaque case du vaisseau = 4 caractères × 2 rangées, ce qui,
    au sol, est exactement sa taille dans le jeu (une tuile de 32 px = 4 × 2 cases de 8 × 16 px) ---------- */
@@ -73,7 +73,8 @@ const NEF=(()=>{const g=SHIP_GRID,NWc=g[0].length*4,NHc=g.length*2,on=(c,r)=>c>=
     rows.push(l);}
   return rows;})(),NW=NEF[0].length,NH=NEF.length;
 const nefCol=c=>c==='▲'?['W',1]:c==='◆'?['B',1.35]:c==='▒'?['T',.55]:c==='░'?['B',.4]:c==='│'?['B',.45]:c==='▬'?['A',1]:'█▀'.includes(c)?['A',.8]:['B',1];
-const REACT=[5,6,13,14];   // colonnes des flammes, sous les réacteurs
+const REACT=[5,6,13,14];
+const NU_CH=['··:','·:░','░░:','░▒░','▒░▒','▒▒▓','▒▓▒','▓▒▓'],NU_GRIS=['#4d585d','#737f84','#9aa5a9','#c4cdd0','#eef2f3'];   /* nuages : du plus clairsemé au plus dense, et cinq gris */   // colonnes des flammes, sous les réacteurs
 
 /* ---------- la scène, sur le canvas de l'intro ---------- */
 let x=null;   /* le contexte du canvas de l'intro (déclaré par 15-intro.js, chargé après) */
@@ -85,7 +86,7 @@ function glyph(ch,co){const k=ch+co;let g=ATL[k];if(!g){g=document.createElement
   c.font=FONT;c.textAlign='center';c.textBaseline='middle';c.fillStyle=co;c.fillText(ch,cw/2,chh/2);ATL[k]=g;}return g;}
 const put=(i,j,ch,co)=>{if(i<0||j<0||i>=C||j>=R)return;CH[j*C+i]=ch;CO[j*C+i]=co;};   // la dernière écriture gagne : pas de superposition
 
-const T_HYP=1.3,T_P0=.85,T_P1=3,T_D0=2.2,T_D1=10.6,T_POSE=11.4,T_NOIR=12.7,T_FIN=13.8;   // secondes
+const T_HYP=1.3,T_P0=.85,T_P1=2.2,T_D0=2.2,T_D1=10.6,T_POSE=11.4,T_NOIR=12.7,T_FIN=13.8;   // secondes
 const ANN={t0:1.2,t1:3.2,fin:8.2,sortie:1,l1:'PLANÈTE EN VUE',l2:'ATTERRISSAGE IMMINENT'};
 let S=null;
 function nouvelle(){x=ictx;SEED=(Math.random()*1e6)|0;palJeu();carteAscii();DIM='';setup();const r=()=>Math.random();
@@ -101,7 +102,7 @@ function chaleur(t){const u=(t-T_D0)/(T_D1-T_D0);return u<.08?0:u<S.pic?s3((u-.0
 
 /* cadrage final : celui du jeu (foreuse au centre, caméra bornée), pour finir à l'échelle et à la place exactes des pixels */
 function cadreJeu(){const el=$('mapwrap'),mr=el?el.getBoundingClientRect():{left:0,top:0,width:innerWidth,height:innerHeight},vc=Math.floor(mr.width)/S_TUILE,vr=Math.floor(mr.height)/S_TUILE;
-  const camX=Math.max(0,Math.min(W-Math.floor(vc),G.px-Math.floor(vc/2))),camY=Math.max(0,Math.min(H-Math.floor(vr),G.py-Math.floor(vr/2)));
+  const camX=G.px-Math.floor(vc/2),camY=G.py-Math.floor(vr/2);   /* comme le jeu : la foreuse au centre, sans bornes */
   return {gx:(((mr.left*dpr)%cw)+cw)%cw-cw,gy:(((mr.top*dpr)%chh)+chh)%chh-chh,
     px:(mr.left+(G.ship.x+SGW/2-camX)*S_TUILE)*dpr,py:(mr.top+(G.ship.y+SGH/2-camY)*S_TUILE)*dpr};}
 const S_TUILE=32;   /* S, la taille d'une tuile du jeu en pixels (00-base.js) */
@@ -127,7 +128,8 @@ function frame(now){if(!S||INTRO!==S)return;setup();const t=(now-S.t0)/1000+S.sa
       if(r>.9&&Rs<70){if(ch!==' ')ch=r>.96?'░':'▒';c=col(e[1]==='K'?'M':e[1],.45);}   // le bord du disque, plus clair
       put(i,j,ch,c);}}   /* le disque cache les étoiles, même là où le sol est nu */
   // le vaisseau est centré sur le point d'atterrissage ; il tangue, puis se stabilise
-  const sw=t<T_POSE?Math.round(Math.sin(t*1.1)*1.6*cl((T_POSE-t)/1.5)):0,sc=Math.round((PX-GX0)/cw)-NW/2+sw,sr=Math.round((PY-GY0)/chh)-NH/2;
+  const mont=s3(t/T_D0),SYv=(h+NH*chh*.6)+(PY0-(h+NH*chh*.6))*mont;   /* le vaisseau entre par le bas et rejoint le milieu de la planète quand la descente commence */
+  const sw=t<T_POSE?Math.round(Math.sin(t*1.1)*1.6*cl((T_POSE-t)/1.5)):0,sc=Math.round((PX-GX0)/cw)-NW/2+sw,sr=Math.round((SYv-GY0)/chh)-NH/2;
   // ombre du vaisseau sur le sol, qui le rejoint en se posant
   if(k<.85){const a=cl((T_POSE-t)/1.6),ox=Math.round(a*9),oy=Math.round(a*5);
     NEF.forEach((l,r)=>{for(let c=0;c<l.length;c++)if(l[c]!==' '){const i=sc+c+ox,j=sr+r+oy;if(i<0||j<0||i>=C||j>=R)continue;const q=j*C+i;CO[q]=col('M',.22);if(CH[q]===' ')CH[q]='░';}});}
@@ -136,7 +138,8 @@ function frame(now){if(!S||INTRO!==S)return;setup();const t=(now-S.t0)/1000+S.sa
   for(const L of S.nuages){if(Z<=L.a||Rs<12)continue;const kl=k*(Z-L.a)/Z,pres=cl((Z-L.a)/(L.a*1.6)),thr=L.thr+.3*(1-pres)*(1-pres)+.1*cl((Z-6)/60)+.45*monte;   /* vus de l'espace, clairsemés ; ils s'épaississent en douceur */
     const dessus=pres<.35;for(let j=0;j<R;j++)for(let i=0;i<C;i++){const dx=(cx0(i)-PX)/chh,dy=(cy0(j)-PY)/chh;
       if(Rs<70&&Math.hypot(dx,dy)>Rs)continue;
-      const n=fbm(LX+dx*kl+t*.15*k,LY+dy*kl,L.s)-thr;if(n<0)continue;const ch=n<.06?'░':n<.13?'▒':'▓',c=n<.06?P.K:n<.13?P.G:P.W;   /* nuages légers : jamais de pavé plein */
+      const n0=fbm(LX+dx*kl+t*.15*k,LY+dy*kl,L.s)-thr;if(n0<0)continue;const gr=hsh(i,j,L.s+((t*3)|0)),n=n0+(gr-.5)*.07;if(n<.005)continue;   /* du grain dans la matière, qui bouge lentement */
+      const q=Math.min(NU_CH.length-1,Math.floor(n/.032)),ch=NU_CH[q][Math.floor(hsh(i,j,L.s+7)*NU_CH[q].length)],c=NU_GRIS[Math.min(4,Math.max(0,Math.floor(n/.04)+(gr<.2?-1:gr>.85?1:0)))];   /* nuages légers : jamais de pavé plein */
       if(dessus)lame.push([i,j,ch,c]);else put(i,j,ch,c);}}
   // éclairs : zigzag de haut en bas, quelques centièmes de seconde, nuages alentour illuminés
   let orage=false;
