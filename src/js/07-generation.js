@@ -248,7 +248,6 @@ const pvDe=sp=>sp.pv,dmgDe=sp=>sp.dmin+Math.floor(Math.random()*(sp.dmax-sp.dmin
 // Gisements pour une carte de taille 2 ; les autres tailles en proportion de leur surface.
 const GISEMENTS={metal:3,mat:1};
 let SANS_VAISSEAU=false;
-const NIV_MAX=3;   // nombre de niveaux (21 novembre 2026 : la descente revient ; trois avec la grande base)
 // Génère la carte à partir des réglages en cours du menu Monde (relief, taille, faune), avec le vaisseau.
 function niveau(refait){drilling=false;
   // structures bâties (07b), avant la roche dure et les métaux. Recette à complexe enfoui : si le complexe n'a pas tenu dans le
@@ -275,7 +274,6 @@ function niveau(refait){drilling=false;
 /* Le niveau d'une carte générée depuis le menu (REGEN, GÉNÉRER LA CARTE) est celui de sa recette (22 novembre 2026 ; avant,
    toujours 1) : une carte « cavernes » est un niveau 2, une « base » un niveau 3, et prend la faune (fenêtre LIFE) et les
    artefacts de ce niveau. La descente reprend de là. */
-const NIV_RECETTE=r=>r==='cavernes'?2:r==='base'?3:1;
 function newGame(){SANS_VAISSEAU=false;NIV_GEN=NIV_RECETTE(GEN.recette);niveau();G.niv=NIV_GEN;   // G n'existe qu'une fois la carte générée
   if(G.ship)say('Atterrissage confirmé. Un site de forage signalé par l’orbiteur. La foreuse est dans la soute ; la porte est à l’arrière.','info');
   else if(G.arrivee==='base')say(`Niveau ${G.niv} : la foreuse a traversé le plafond d’une salle, dans une base enfouie. Un site de forage est signalé plus loin.`,'info');
@@ -307,7 +305,6 @@ function eboulis(){
   computeFOV();}
 // remet le menu Monde tel qu'il était avant un tirage provisoire (les réglages d'une autre recette ne doivent pas y traîner)
 function genRemet(sauve){for(const k in GEN)if(!(k in sauve))delete GEN[k];Object.assign(GEN,sauve);saveGen();buildGen();}
-const RECETTE_NIV=n=>n<=1?'atterrissage':n===2?'cavernes':'base';   // la recette de chaque niveau de la descente (le niveau 1 suit le menu Monde)
 function niveauSuivant(hasard){   // hasard : un archétype monde et un archétype bâti tirés au hasard (Lab → Niv2, Niv3)
   const sauve=JSON.parse(JSON.stringify(GEN)),inv=G.inv,st=G.st,tour=G.turn,dist=G.dist,niv=(G.niv||1)+1;SAV_GARDE=st.savoir||null;   // la génération tire les plans d'après ce que la foreuse sait déjà
   recRange();recPrend(RECETTE_NIV(niv));if(hasard)hasardReglages();SANS_VAISSEAU=true;NIV_GEN=niv;   // sans hasard : les réglages en cours du menu Monde pour cette recette

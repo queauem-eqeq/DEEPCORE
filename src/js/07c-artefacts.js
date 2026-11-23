@@ -25,11 +25,11 @@ const ART_LISTE=[['antenne','Antenne','Activée par la foreuse, elle lève le br
 const ARTEFACTS_DEF=()=>({antenne:{on:1,f:1},herbe:{on:1,f:1},machines:{on:1,f:1},terminal:{on:1,f:1},lasers:{on:1,f:1},croix:{on:0,f:1},ponts:{on:1,f:1},piles:{on:1,f:1},pieges:{on:1,f:1},vitrines:{on:1,f:1},station:{on:1,f:1},fabric:{on:1,f:1}});   // réglage du joueur, relu le 21 novembre 2026 à 23 h 39 (croix laser désactivée, machines en fréquence normale)
 /* Niveaux de profondeur où un artefact peut apparaître (21 novembre 2026, réglé dans la fenêtre LIFE). Départ : les lasers à partir
    du niveau 2, les croix au niveau 3, les piles à partir du niveau 2, tout le reste partout. */
-const ART_NIV_DEF={lasers:[2,3],croix:[3],piles:[2,3],pieges:[2,3],fabric:[2,3],ponts:[3],station:[3]},ART_NIVS=[1,2,3];
+const ART_NIV_DEF={lasers:[2,3],croix:[3],piles:[2,3],pieges:[2,3],fabric:[2,3],ponts:[3],station:[3]},ART_NIVS=NIVS;
 function artefactsSains(d){const o=ARTEFACTS_DEF();for(const [k] of ART_LISTE)o[k].niv=(ART_NIV_DEF[k]||ART_NIVS).slice();
   if(d&&typeof d==='object')for(const [k] of ART_LISTE)if(d[k]){o[k].on=d[k].on?1:0;o[k].f=[0,1,2].includes(+d[k].f)?+d[k].f:1;if(Array.isArray(d[k].niv))o[k].niv=ART_NIVS.filter(n=>d[k].niv.includes(n));}return o;}
 // l'artefact est-il permis sur la carte en cours de génération ? (actif dans le Lab, et permis à ce niveau)
-const artOn=k=>{const a=ARTEFACTS[k];return !!(a&&a.on&&(!a.niv||a.niv.includes(Math.min(3,typeof NIV_GEN==='number'?NIV_GEN:1))));};
+const artOn=k=>{const a=ARTEFACTS[k];return !!(a&&a.on&&(!a.niv||a.niv.includes(nivBorne(typeof NIV_GEN==='number'?NIV_GEN:1))));};
 let ARTEFACTS=artefactsSains(null);
 try{ARTEFACTS=artefactsSains(JSON.parse(localStorage.getItem('np-artefacts')||'null'));}catch(e){}
 function saveArtefacts(){try{localStorage.setItem('np-artefacts',JSON.stringify(ARTEFACTS));}catch(e){}touchLocal();}

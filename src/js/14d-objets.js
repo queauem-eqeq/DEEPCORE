@@ -93,7 +93,7 @@ const tenuPar=()=>(G.beasts||[]).find(b=>b.tient&&!(b.stun>0)&&Math.max(Math.abs
 
 /* ----- Butin ----- */
 const PLAN_RANG=k=>{const d=ITEMS[k];return ['repar','batterie','fumigene','cle','balise'].includes(k)?1:d.conso||d.slot==='acc'?2:3;};   // objets simples d'abord, les meilleurs plus bas
-const nivCarte=()=>Math.max(1,Math.min(3,(typeof G!=='undefined'&&G&&G.niv)||(typeof NIV_GEN==='number'?NIV_GEN:1)));
+const nivCarte=()=>nivBorne((typeof G!=='undefined'&&G&&G.niv)||(typeof NIV_GEN==='number'?NIV_GEN:1));
 let PLANS_POSES={};   // plans déjà posés sur la carte en cours de génération : pas deux fois le même
 function planTire(){const s=savoir(),niv=nivCarte(),lib=Object.keys(FAB_PRIX).filter(k=>ITEMS[k]&&!s.plans[k]&&!PLANS_POSES[k]);
   let l=lib.filter(k=>PLAN_RANG(k)<=niv);if(!l.length)l=lib.filter(k=>PLAN_RANG(k)<=niv+1);if(!l.length)return 'matiere';
