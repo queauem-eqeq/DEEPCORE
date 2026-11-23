@@ -73,7 +73,7 @@ ennemis renoncent plus tôt que dans Brogue.
   à passer un par un. La **vue**, elle, ne suit pas cette règle : on voit en diagonale à travers un
   coin qu'on ne peut pas franchir.
 - **L'exploration automatique** vers la zone inexplorée la plus proche : faite le 13 novembre 2026
-  (touche O, `conception.md` § 3 ter), sur le moteur de trajet déjà en place.
+  (touche O, `conception-carte.md` § 3 ter), sur le moteur de trajet déjà en place.
 
 ## Comment Brogue gère ses ennemis
 
