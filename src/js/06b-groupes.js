@@ -21,14 +21,14 @@ const LIEUX=[['ext','Extérieur'],['bati','Bâti'],['tunnel','Tunnels']];
    Le budget de chaque niveau se règle à part (avant : un budget et une pente en % par niveau). Un groupe n'est posé que s'il est
    actif (Lab → Groupes) ET dans la liste du niveau. Départ : les groupes arrivent peu à peu, les plus durs au niveau 3.
    Un groupe créé par le joueur est permis partout tant qu'il ne l'a pas retiré d'un niveau. */
-const GR_NIVS=[1,2,3],GR_NIV_DEF={"Large crabot groupe":[2,3],"Family":[2,3],"3-5 puces + sentinelles":[2,3],"Mines & Sentinelles":[2,3],"2-3 sentinelles":[2,3],"Broyeur solitaire":[2,3],"Poste de garde":[3],"Batterie":[2,3],"Essaim de drones":[2,3],"Escouade de réparation":[3],"Embuscade gluante":[3],"Chasse à courre":[3],"Convoi":[3],"Tireurs embusqués":[2,3],"Ronde de drones":[2,3]};
+const GR_NIVS=NIVS,GR_NIV_DEF={"Large crabot groupe":[2,3],"Family":[2,3],"3-5 puces + sentinelles":[2,3],"Mines & Sentinelles":[2,3],"2-3 sentinelles":[2,3],"Broyeur solitaire":[2,3],"Poste de garde":[3],"Batterie":[2,3],"Essaim de drones":[2,3],"Escouade de réparation":[3],"Embuscade gluante":[3],"Chasse à courre":[3],"Convoi":[3],"Tireurs embusqués":[2,3],"Ronde de drones":[2,3]};
 function nivSains(d,liste,budget,pente){const o={};
   for(const n of GR_NIVS){const s=d&&d[n],b=s&&isFinite(+s.budget)?Math.max(0,Math.min(2000,Math.round(+s.budget))):Math.round(budget*(1+pente/100*(n-1)));
     o[n]={budget:b,part:partSaine(s&&s.part,n),gr:s&&Array.isArray(s.gr)?liste.map(g=>g.n).filter(x=>s.gr.includes(x)):liste.map(g=>g.n).filter(x=>(GR_NIV_DEF[x]||GR_NIVS).includes(n))};}
   return o;}
-const nivDe=n=>GROUPES.niv[Math.max(1,Math.min(3,n||1))];
+const nivDe=n=>GROUPES.niv[nivBorne(n)];
 // Répartition de départ, par niveau : celle que donnaient les anciennes densités (mesurée le 21 novembre 2026 sur 12 cartes par niveau).
-const PART_DEF=n=>({1:{ext:75,bati:20,tunnel:5},2:{ext:80,bati:18,tunnel:2},3:{ext:35,bati:60,tunnel:5}})[n],PART_PLAFOND=3;
+const PART_DEF=n=>Object.assign({},NIVEAUX[n].part),PART_PLAFOND=3;
 function partSaine(p,n){const o=PART_DEF(n);if(p&&typeof p==='object')for(const [k] of LIEUX)if(isFinite(+p[k])&&p[k]!==''&&p[k]!=null)o[k]=Math.max(0,Math.min(100,Math.round(+p[k])));return o;}
 // RÉFÉRENCE DU JOUEUR : groupes, ordre, valeurs, patrouilles, lieux et niveaux relus dans la base de l'artefact le 21 novembre 2026
 // à 23 h 39 (reglages/courant). Avant : dix groupes du joueur (lus dans la base de l'artefact le 20 novembre 2026), neuf groupes nouveaux bâtis sur les cinq espèces du

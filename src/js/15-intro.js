@@ -265,11 +265,9 @@ function start(data){
   // partie reprise à chaud : la carte garde la taille qu'elle avait
   if(data&&data.G&&data.G.t){const g=data.G,w=g.w||96,h=g.h||64;if(g.t.length===w*h){W=w;H=h;F=W/96;vis=new Uint8Array(W*H);}}
   const fromHot=!!(data&&data.G&&data.G.t&&data.G.t.length===W*H);
-  if(data&&data.G&&data.G.t&&data.G.st&&data.G.t.length===W*H){G=data.G;G.dmg=G.dmg||{};for(let i=0;i<G.t.length;i++)if(G.t[i]===LOW)G.t[i]=FLAT;   // herbes basses et couchées fusionnées
-    if(G.st&&G.st.crit==null)G.st.crit=5;if(G.st&&G.st.def==null&&G.st.esq!=null){G.st.def=Math.round(G.st.esq*1.2);delete G.st.esq;}   /* partie d'avant le 16 novembre 2026 : l'esquive devient la défense */
-    if(G.st)G.st.cout=10;if(G.st&&G.st.power<1)G.st.power=1;if(G.st&&G.st.power<6){G.st.power+=9;G.st.pre+=20;}   /* partie d'avant le POW de base 10 et la précision de base 100 */
-    if(G.st&&G.st.degats===10)G.st.degats=0;   /* 17 novembre 2026 : DEG n'est plus les dégâts eux-mêmes mais un bonus au jet de dés de l'arme */
-    if(G.st&&(G.st.capteur<10||G.st.capteur===12||G.st.capteur===15))G.st.capteur=10;if(!G.ore)hideOre();if(!G.st||G.st.pre==null||G.st.energieMax==null){G.st={vie:100,vieMax:100,energie:100,energieMax:100,repar:0,power:10,vitesse:5,degats:0,capteur:10,cout:10,pre:100,def:10,crit:5};if(G.inv)G.inv.forEach(o=>o.eq=0);}
+  if(data&&data.G&&data.G.t&&data.G.st&&data.G.t.length===W*H){G=data.G;G.dmg=G.dmg||{};
+    if(G.st)G.st.cout=10;
+    if(!G.ore)hideOre();if(!G.st||G.st.pre==null||G.st.energieMax==null){G.st={vie:100,vieMax:100,energie:100,energieMax:100,repar:0,power:10,vitesse:5,degats:0,capteur:10,cout:10,pre:100,def:10,crit:5};if(G.inv)G.inv.forEach(o=>o.eq=0);}
   if(!G.inv)G.inv=invTest();if(!G.items)G.items={};if(!G.eff)G.eff={};if(!G.fum)G.fum={};delete G.amb;G.w=W;G.h=H;invMigre();
   /* Retiré le 22 novembre 2026 : la renumérotation des espèces du 17 novembre (rangs 2 à 7 supprimés, 8 → 2, 9 → 3) se
      rejouait sur toute partie reprise qui n'en portait pas la marque G.bz17 — or une partie neuve ne la porte pas. À chaque

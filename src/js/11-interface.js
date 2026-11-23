@@ -70,7 +70,6 @@ function seenHTML(){
   const ins=HOV&&!busy()?inspectHTML():'';
   return ins+(out.join('')||'<div class="none">Rien en vue.</div>');
 }
-function segs(el,v,max,n){n=n||max;const on=Math.ceil(v/max*n-1e-9);el.innerHTML=Array.from({length:n},(_,i)=>`<i class="${i<on?'on':''}"></i>`).join('');}
 function side(){
   const st=G.st;
 

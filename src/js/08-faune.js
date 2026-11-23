@@ -138,7 +138,7 @@ function fumTick(){const F=G.fum;if(!F)return;let ks=Object.keys(F);if(!ks.lengt
    - affut      : immobile à son point de départ ; il y revient après une chasse.
    Chaque groupe posé a son état dans G.patr[id] : pts (les points), k (le point visé), pause, age. Une créature connaît
    son groupe par o.gi. En patrouille on marche : un pas par battement au plus, quelle que soit la vitesse de l'espèce. */
-const PAT_CIBLE={ronde:1,territoire:1,sentinelle:1,affut:1},PAT_BLOC=8;let PAT_BT=0;
+const PAT_BLOC=8;let PAT_BT=0;
 let PATD={};
 function patBfs(tx,ty,eau){const d=new Int16Array(W*H).fill(-1),q=[idx(tx,ty)];d[q[0]]=0;
   for(let k=0;k<q.length;k++){const c=q[k],x=c%W,y=(c/W)|0;for(const[dx,dy]of DIRS){const a=x+dx,b=y+dy;if(a<1||b<1||a>=W-1||b>=H-1)continue;
@@ -322,7 +322,6 @@ function distFromVol(tx,ty){const d=new Int16Array(W*H).fill(-1),q=[idx(tx,ty)];
   for(let k=0;k<q.length;k++){const c=q[k],x=c%W,y=(c/W)|0;for(const[dx,dy]of DIRS){const a=x+dx,b=y+dy;if(a<1||b<1||a>=W-1||b>=H-1)continue;const j=idx(a,b),v=G.t[j];if(d[j]>=0||!diagOk(x,y,dx,dy)||(v!==CHASM&&blocks(v)))continue;d[j]=d[c]+1;q.push(j);}}return d;}
 function distFrom(tx,ty,mouille){const d=new Int16Array(W*H).fill(-1),q=[idx(tx,ty)];d[q[0]]=0;
   for(let k=0;k<q.length;k++){const c=q[k],x=c%W,y=(c/W)|0;for(const[dx,dy]of DIRS){const a=x+dx,b=y+dy;if(a<1||b<1||a>=W-1||b>=H-1)continue;const j=idx(a,b),v=G.t[j];if(d[j]>=0||!diagOk(x,y,dx,dy)||!canWalk(v,mouille))continue;d[j]=d[c]+1;q.push(j);}}return d;}
-const footDist=(x,y,d)=>Math.min(...FOOT.map(([dx,dy])=>{const v=d[idx(x+dx,y+dy)];return v<0?9999:v;}));
 const nearRobot=b=>canHit(b);
 // Chance de toucher = précision × 0,987^défense, bornée entre 5 et 95 % (modèle Brogue, 16 novembre 2026 ;
 // précision − esquive avant). Chaque point de défense retire 1,3 % des coups ; 53 points les divisent par deux.

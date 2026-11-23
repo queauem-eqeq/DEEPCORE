@@ -21,6 +21,7 @@ Rappel : les noms du jeu (G, idx, W, H, GROUND, GRASS, FLAT, MOUNT, render, comp
 animalsAct, beastsAct, tryMove…) sont tous globaux, donc directement accessibles dans le script.
 """
 import asyncio
+import os
 import pathlib
 import sys
 
@@ -34,7 +35,8 @@ async def principal(dossier: pathlib.Path, script: str | None) -> int:
     dossier.mkdir(parents=True, exist_ok=True)
     async with async_playwright() as p:
         nav = await p.chromium.launch()
-        page = await nav.new_page(viewport={'width': 1280, 'height': 800})
+        page = await nav.new_page(viewport={'width': 1280, 'height': 800},
+                                  reduced_motion='reduce' if os.environ.get('SANS_ANIM') else None)   # SANS_ANIM=1 : mouvement réduit, pour les contrôles reproductibles
         erreurs: list[str] = []
         page.on('pageerror', lambda e: erreurs.append(str(e)))
         await page.goto(JEU)

@@ -117,7 +117,6 @@ const modTxt=d=>Object.entries(d.mod||{}).map(([k,v])=>modLib(k,v)).join(', ');
 const typeNom=d=>d.conso?'Consommable':SLOTS[d.slot].nom;
 const accord=d=>(d.f?'e':'')+(d.pl?'s':'');   // « équipée », « utilisés »
 // total apporté par l'équipement porté sur une stat (sert à colorer le panneau Statistiques)
-function invBonus(k){let s=0;for(const o of (G&&G.inv)||[])if(o.eq)s+=(ITEMS[o.k].mod||{})[k]||0;return s;}
 function invApply(o,sg){const m=ITEMS[o.k].mod||{},st=G.st,v0=st.vieMax,e0=st.energieMax;for(const k in m)st[k]=(st[k]||0)+sg*m[k];
   // quand un maximum change, la jauge garde sa proportion : s'équiper ne soigne pas et ne blesse pas (et on ne gagne rien à retirer puis remettre)
   if(st.vieMax!==v0&&st.vie>0)st.vie=Math.max(1,Math.round(st.vie*st.vieMax/v0));if(st.energieMax!==e0)st.energie=Math.round(st.energie*st.energieMax/e0);
@@ -185,12 +184,6 @@ function viseeOk(){if(!VISEE||G.over)return;const {i,x,y}=VISEE,o=G.inv[i];
   say(`${neufCh?`Capsule ${savoir().codes.charge} : c’était une charge sismique. `:''}${moi?`La foreuse est prise dans l’explosion : −${moi} vie. `:''}Charge sismique : ${n?`${n} ennemi${n>1?'s':''} touché${n>1?'s':''}${k?`, ${k} abattu${k>1?'s':''}`:''}`:'personne dans la zone'}${roches?`, ${roches} case${roches>1?'s':''} de roche pulvérisée${roches>1?'s':''}`:''}.`,moi||!(n||roches)?'warn':'good');
   if(consoTemps('dig'))return;
   render();}
-function invBoum(r,dm){let n=0,k=0;lastAct='dig';
-  for(const o of invCibles(r)){n++;const isB=G.beasts.includes(o),sp=isB?BEASTS[o.sp]:SPECIES[o.sp];o.hp=(o.hp??pvDe(sp))-dm;
-    addFx({kind:'num',x:o.x,y:o.y,txt:'-'+dm,col:PAL['3'],dur:900});
-    if(o.hp<=0){k++;(isB?G.beasts:G.animals).splice((isB?G.beasts:G.animals).indexOf(o),1);bleed(o.x,o.y);if(isB)butinMort(o);}
-    else if(isB){o.hunt=1;spot(o);}else{o.aware=1;spot(o);}}
-  if(n)engage();addFx({kind:'shake',amp:8,dur:300});SFX.explode();return `${n} ennemi${n>1?'s':''} touché${n>1?'s':''}${k?`, ${k} abattu${k>1?'s':''}`:''}`;}
 /* Visuel de la foreuse selon l'équipement : l'arme dessine la moitié avant (lignes 0 à 7, pointe en haut), l'armure la moitié arrière
    (lignes 8 à 15). Sans arme spéciale (la foreuse) ni armure, c'est la tuile « Foreuse » du Tile editor, retouches comprises. */
 function robotTiles(){if(!TL.robot_u||!G||!G.inv)return;const porte=s=>{const o=G.inv.find(o=>o.eq&&ITEMS[o.k].slot===s);return o?o.k:null;};

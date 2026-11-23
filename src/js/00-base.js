@@ -11,7 +11,16 @@ const bati=v=>v===WALL||v===PILLAR||v===LOCK||v===SECRET;
 // HARD = roche dure (16 novembre 2026) : au cœur des massifs, impossible à creuser ; seule la charge sismique en vient à bout.
 // FLAT = herbes basses (13 novembre 2026 : les herbes couchées et les herbes basses n'en font plus qu'une).
 // LOW n'est plus produit ; il ne sert qu'à convertir une partie commencée avant ce changement.
-const TNAME=['sol rocheux','rocher','montagne','liquide','herbes hautes','herbes basses','eau profonde','gouffre','pont','gravats','(inutilisé)','coque du vaisseau','soute du vaisseau','roche dure','mur','sol bâti','porte','pilier','porte verrouillée','mur'];
+/* LA DESCENTE, NIVEAU PAR NIVEAU (23 novembre 2026). C'est LA table à allonger pour ajouter un niveau : tout le reste du jeu
+   (groupes et budget par niveau, artefacts par niveau, fenêtre LIFE, boutons du Lab, butin, fin de partie) lit NIV_MAX et NIVS.
+   recette : la recette de carte du niveau (06-reglages.js, 07-generation.js) ; part : où naissent les groupes, en % du budget. */
+const NIVEAUX=[null,
+  {recette:'atterrissage',part:{ext:75,bati:20,tunnel:5}},
+  {recette:'cavernes',part:{ext:80,bati:18,tunnel:2}},
+  {recette:'base',part:{ext:35,bati:60,tunnel:5}}];
+const NIV_MAX=NIVEAUX.length-1,NIVS=NIVEAUX.map((_,i)=>i).slice(1),nivBorne=n=>Math.max(1,Math.min(NIV_MAX,n||1));
+const RECETTE_NIV=n=>NIVEAUX[nivBorne(n)].recette,   // la recette de chaque niveau de la descente
+  NIV_RECETTE=r=>Math.max(1,NIVEAUX.findIndex(v=>v&&v.recette===r));   // et l'inverse (recette « classique » : niveau 1)
 const DIRN=['est','ouest','sud','nord','sud-est','nord-est','sud-ouest','nord-ouest'];
 // (la table STATS de la colonne a disparu avec le sous-menu Statistiques, le 15 novembre 2026)
 let VISEE=null;   // visée d'une charge sismique en cours : {i, x, y} — voir 14-inventaire.js

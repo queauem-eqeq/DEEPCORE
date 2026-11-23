@@ -191,7 +191,6 @@ function setS(k,v){const l=recLignes(GEN.recette).find(l=>l[1]===k);if(!l)return
 function persoAmb(k){if(k==='amb'||k==='ambM'||APPLYING_AMB)return;const m=MONDE_KEYS.includes(k),c=m?'ambM':'amb';
   if(GEN[c]){GEN[c]='';setv('gs-'+c,'');}const o=$('genObt');if(o)o.textContent=obtenuTxt();}
 let APPLYING_AMB=false;
-function setStruct(v){setS('structure',v);}
 const ligneNum=(k,lb,mn,mx,v)=>`<div class="g"><label for="gn-${k}">${lb}</label><input type="range" id="gr-${k}" min="${mn}" max="${mx}" step="1" value="${v}" aria-label="${lb}"><input type="number" id="gn-${k}" min="${mn}" max="${mx}" step="1" value="${v}"></div>`;
 /* Haut du menu Monde (22 novembre 2026) : la recette, puis les deux archétypes (monde, bâti) côte à côte. Viennent ensuite,
    dans le balisage, le preset de niveau (enregistrement), le bouton GÉNÉRER LA CARTE, puis les deux colonnes de réglages. */
@@ -271,7 +270,7 @@ function mondeDel(){const v=$('mdSel').value;if(!v.startsWith('u:')){mondeMsg('C
   const n=v.slice(2);delete MONDES[n];saveMondes();mondeListe('');$('mdNom').value='';mondeMsg(`« ${n} » supprimé.`);}
 function mondeOpen(){if(TRAV)stopTravel();if(REST)stopRest();if(EXPL)stopExplore();mondeListe($('mdSel').value);mondeMsg('');$('monde').hidden=false;$('monde').querySelector('.mcard').focus();}
 // Fenêtre Life : la faune, sortie du menu Monde le 18 novembre 2026
-function lifeOpen(){if(TRAV)stopTravel();if(REST)stopRest();if(EXPL)stopExplore();LIFE_NIV=Math.max(1,Math.min(3,(G&&G.niv)||1));buildLife();$('faune').hidden=false;$('faune').querySelector('.mcard').focus();}
+function lifeOpen(){if(TRAV)stopTravel();if(REST)stopRest();if(EXPL)stopExplore();LIFE_NIV=nivBorne(G&&G.niv);buildLife();$('faune').hidden=false;$('faune').querySelector('.mcard').focus();}
 function lifeClose(){$('faune').hidden=true;$('lifeBtn').focus();render();}
 $('lifeBtn').onclick=lifeOpen;$('lfClose').onclick=lifeClose;
 $('faune').addEventListener('pointerdown',ev=>{if(ev.target===$('faune'))lifeClose();});
