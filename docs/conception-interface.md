@@ -67,7 +67,9 @@ molette ou fine barre pour remonter jusqu'aux 200 derniers messages ; un nouveau
   remplissage est un **calque de `█` découpé à la largeur exacte** posé sur un fond de `░`, donc juste à toute
   largeur de colonne et à toute taille de police.
 - **En vue** (sous la Carte) : la fiche d'inspection de la case survolée, puis les créatures visibles (icône,
-  barre de vie ASCII, colonnes TOUCHER / SUBIR colorées).
+  barre de vie ASCII, colonnes TOUCHER / SUBIR colorées). Une créature **en chasse** porte un cadre couleur monde autour de son
+  icône. La colonne de l'icône fait 20 px, pas 16 : le cadre déborde de 2 px de chaque côté et la colonne défilante
+  (`overflow-y:auto`) lui coupait son bord gauche (24 novembre 2026).
 - **En tête de colonne, au-dessus de Vie**  : trois lignes en capitales couleur monde, sans étiquette — `NIVEAU 2 · −1564 M · 96×64` (le niveau, sa profondeur et la taille de la carte ; la
   profondeur vaut 0 au niveau 1, puis la fin de chaque descente, les mêmes chiffres que le compteur PROFONDEUR des
   cinématiques de forage, qui part de la profondeur du niveau quitté : `profNiv`, 14b), puis l'**archétype monde** et

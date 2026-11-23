@@ -74,7 +74,7 @@ body{margin:0;background:var(--black);color:var(--fg);font:13px/1.45 var(--mono)
 .seenwrap{font-size:12px;min-width:0}
 .seen{display:grid;gap:7px}
 .seen .grp{display:grid;gap:5px}
-.seen .an,.seen .hd{display:grid;grid-template-columns:16px calc(50% - 26px) 1fr 1fr;gap:0 10px;align-items:center}
+.seen .an,.seen .hd{display:grid;grid-template-columns:20px calc(50% - 30px) 1fr 1fr;gap:0 10px;align-items:center}   /* 20 px pour l'icône : le cadre « en chasse » déborde de 2 px et la colonne défilante le coupait (24 novembre 2026) */
 .seen .hd{font-size:10px;letter-spacing:.14em;color:var(--dim);text-transform:uppercase}
 .seen .hd span:nth-child(n+3),.seen .an .n{text-align:right;font-variant-numeric:tabular-nums}
 .seen .an .n{font-size:12px}
@@ -82,7 +82,7 @@ body{margin:0;background:var(--black);color:var(--fg);font:13px/1.45 var(--mono)
 .seen .tgt .t{display:flex;justify-content:space-between;gap:8px}
 .seen .tgt .t b{font-weight:400;color:var(--fg)}
 .seen .tgt .f{font-size:11px;color:var(--dim);padding-left:10px}
-.seen .an img{width:16px;height:16px;image-rendering:pixelated}
+.seen .an img{width:16px;height:16px;image-rendering:pixelated;justify-self:center}
 .seen .an.hunt img{outline:1px solid var(--c3);outline-offset:1px}
 .seen .an .st{font-size:11px;color:var(--dim);font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden}
 .seen .an .hp{color:var(--c2);white-space:nowrap;overflow:hidden;font-size:12px;line-height:1}
