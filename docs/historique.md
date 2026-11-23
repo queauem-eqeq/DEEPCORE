@@ -295,3 +295,16 @@ Ce qui a été remplacé, et pourquoi (demandes de l'utilisateur, « chaque mach
 - **La foreuse toujours au centre de la vue, avec de la roche dure dessinée au-delà de la carte** (essayé le 23 novembre
   2026, retiré le même jour à la demande : « map trafiquée »). La caméra reste bornée au bord de la carte ; à l'arrivée,
   c'est le glissement amorti vers la place du vaisseau, commencé dès la descente, qui absorbe le décalage.
+
+## 23 novembre 2026 : nettoyage, économie de la vie, niveau 4
+
+- **Retiré** : les conversions de parties d'avant le 17 novembre (esquive → défense, POW de base, DEG, capteur, herbes
+  couchées) et le remaniement des tuiles `bz` du 17 novembre. Elles ne servaient plus qu'à des parties et des navigateurs
+  qui n'existent plus, et c'est cette famille de code qui avait produit les Broyeurs à 6 PV.
+- **Retiré** : 14 fonctions et tables jamais appelées (`TNAME`, `PAL_NOMS`, `NGRASS`, `setStruct`, `fauneTxt`, `dmgMoy`,
+  `machCouleur`, `PAT_CIBLE`, `footDist`, `segs`, `invBonus`, `invBoum`, `FAB_PRIX_DEF`, `FUM_PORTEE`).
+- **Changé** : les éclats de métal ne rendent plus de vie (ils en rendaient 260 par niveau, plus que le niveau n'en
+  coûtait). Avant : +30 / +40 / +50 PV, sept gisements par carte.
+- **Changé** : « pas de réparation automatique » devient « attendre répare, contre du fuel ».
+- **Choix de méthode** : l'équilibrage passe par la table `REGLES`, par-dessus les réglages enregistrés du joueur, plutôt
+  que par une conversion de ses réglages : une conversion rejouée à tort est exactement ce qui avait cassé les Broyeurs.

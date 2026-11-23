@@ -573,6 +573,25 @@ bâti (2 à 6 **ailes**, 18 à 45 % de la carte), une ou deux petites **poches**
 Garde-fou valable pour toutes les recettes : si, machines posées, le site n'est plus atteignable (`accesSite()`), la carte
 est refaite (trois fois au plus).
 
+### La descente : table `NIVEAUX` (`00-base.js`, 23 novembre 2026)
+
+Quatre niveaux aujourd'hui, huit prévus (`docs/propositions-2026-11-23.md`). **Ajouter un niveau = ajouter une ligne à
+`NIVEAUX`** : sa recette, la répartition de ses groupes par lieu, et au besoin `groupes` (les groupes qui y apparaissent
+tant que LIFE ne dit rien) et `groupesPropres` (groupes créés pour lui, ajoutés à la liste du Lab s'ils manquent). Tout le
+reste lit `NIV_MAX` et `NIVS` : fenêtre LIFE, artefacts par niveau, butin, fin de partie. Au-delà du niveau 3, un niveau
+sans réglage prend les groupes et les artefacts du niveau 3, et un budget qui suit la pente de LIFE.
+
+### Niveau 4 : la station noyée (recette `inonde`, `07h-inonde.js`, 23 novembre 2026)
+
+La carte des cavernes (§ Réseau de cavernes), puis `inondeFinir` fait monter l'eau, après les machines et avant le butin
+et la faune : le sol des cavernes devient **hauts-fonds** jusqu'à `inProf` cases des parois (3 par défaut) et **eau
+profonde** au-delà. Restent au sec : des **îlots** (`inIles` % des cavernes, 20 par défaut), trois cases autour de la
+foreuse, deux autour du site, une autour des portes, des clés et des artefacts, et les bâtiments. Les herbes hautes au
+bord des parois restent (roseaux). Quatre archétypes bâti : Lagune souterraine, Citernes, Archipel, Docks engloutis.
+Groupes du niveau : Crabots, Large crabot groupe, Banc de torpilles, **Meute de torpilles** (3 à 5, valeur 8),
+**Patrouille amphibie** (2 crabots + 2 torpilles, valeur 7), drones, tireurs embusqués, sentinelles, Broyeur, Batterie.
+La descente du niveau 3 au niveau 4 rejoue le mini-jeu des mines. Le Noyau est atteint au forage du niveau 4.
+
 ## 3 ter. Exploration automatique
 
 Touche **O** ou bouton **EXPLORER** : la foreuse explore seule.
@@ -1435,7 +1454,7 @@ Du niveau 2 au niveau 3, la descente se joue. `playForage(suite, 2)` ; **NIV3** 
 
 ## 11. Règles à ne pas casser
 
-- **Pas de blindage, pas de réparation automatique.** La défense fait rater les coups, elle ne les réduit jamais.
+- **Pas de blindage.** La vie ne revient qu'en attendant, contre du fuel (§ 5). La défense fait rater les coups, elle ne les réduit jamais.
 - **Une nouvelle espèce s'ajoute à la fin de `BEASTS`** (§ 7).
 - **Un objet ne change pas de clé** (`ITEMS`) : les plans connus, les capsules identifiées et les réglages de Lab → Items
   sont enregistrés sous ces clés.

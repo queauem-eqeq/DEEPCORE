@@ -27,6 +27,10 @@ Le jeu est une page web en plusieurs fichiers (`src/`), **sans étape d'assembla
 - `docs/brogue.md` : ce que fait Brogue, pour s'y référer quand on règle le jeu.
 
 ## Outils de vérification
+- **`python3 outils/verifier.py`** : tout d'un coup — syntaxe, les cinq essais automatiques, et l'**empreinte** (hasard fixé,
+  trois recettes générées, 250 actions jouées, comparées à `outils/empreinte-reference.txt`). Après un nettoyage qui ne doit
+  rien changer au jeu, l'empreinte doit rester identique ; après un changement de règle voulu, relancer avec `--maj`.
+  **À lancer après toute modification, avant de publier.**
 - `python3 outils/captures.py DOSSIER t1 t2 …` : images de l'intro à ces instants, contrôle des erreurs.
 - `python3 outils/forage.py DOSSIER t1 t2 …` : images de la cinématique de forage à ces instants (NIV2 la lance dans le jeu ; F9 ajoute désormais un exemplaire de chaque consommable à l'inventaire).
 - `python3 outils/jeu.py DOSSIER [script.js]` : image de la partie, intro passée ; le script prépare la
@@ -41,7 +45,7 @@ Le jeu est une page web en plusieurs fichiers (`src/`), **sans étape d'assembla
 - `python3 outils/forage.py DOSSIER niv2 t1 t2 …` : images de la seconde descente (le mini-jeu des mines).
 - **Essais automatiques**, à passer à `jeu.py` et à relancer après tout changement de ces systèmes : `test-machines.js`
   (machines), `test-ennemis.js` (espèces, patrouilles, lieux), `test-forage.js` (mini-jeu), `test-descente.js` (la descente
-  entière, trois niveaux) ; mesures : `mesure-ambiances.js`, `mesure-faune.js`. Chacun renvoie une ligne par essai.
+  entière, tous les niveaux), `test-regles.js` (fuel, repos, éclats, dégâts, renforts) ; mesures : `mesure-ambiances.js`, `mesure-faune.js`, `mesure-economie.js` (ce qu'un niveau coûte et rend). Chacun renvoie une ligne par essai.
 - `outils/scripts/` : scripts à passer à `jeu.py` — `six-cartes.js` (six cartes côte à côte, tunnels en jaune),
   `mesure-recettes.js` (40 cartes par taille et par recette : complexes, tunnels, sorties), `cavernes.js` (six cartes de la recette cavernes, secteurs teintés ; `window.CAS` choisit les cartes), `planche-objets.js` (chaque objet : illustration ASCII et tuile au sol côte à côte), `mesure-cavernes.js` (25 cartes par réglage et par ambiance : obtenu contre visé, pièces, connexité).
 
@@ -65,8 +69,8 @@ Artefact à part (https://claude.ai/artifact/9BKRaoB4hzgdWhzYFx5A6q) qui rejoue 
   globale (pas de modules, pas d'import/export)** : une constante déclarée dans un fichier est visible dans les suivants ;
   attention aux noms en double (`const` redéclarée = erreur de syntaxe) et aux noms qui existent déjà dans `window`.
   Un nouveau fichier doit aussi être ajouté en balise `<script>` dans `index.html`.
-  00 base · 01 sons · 02 palette · 02b police DOS (Modern DOS 8x16, CP437, domaine public : annonces des descentes) · 03 tuiles (motifs 16×16) · 03b tuiles des machines · 04 vaisseau · 05 tuiles éditables · 06 réglages et ambiances ·
-  06b groupes · 07 génération de la carte · 07b bâtiments · 07c artefacts · 07d zones et tunnels · 07e cavernes · 07f machines · 07g grande base · 08 faune et prédateurs · 09 vision, déplacement, forage · 10 rendu et gouffres ·
+  00 base (dont **`NIVEAUX`**, la table de la descente : ajouter un niveau = y ajouter une ligne, et **`REGLES`**, l'équilibrage d'ensemble : fuel, repos, danger et nombre des ennemis, renforts) · 01 sons · 02 palette · 02b police DOS (Modern DOS 8x16, CP437, domaine public : annonces des descentes) · 03 tuiles (motifs 16×16) · 03b tuiles des machines · 04 vaisseau · 05 tuiles éditables · 06 réglages et ambiances ·
+  06b groupes · 07 génération de la carte · 07b bâtiments · 07c artefacts · 07d zones et tunnels · 07e cavernes · 07f machines · 07g grande base · 07h station noyée (niveau 4) · 08 faune et prédateurs · 09 vision, déplacement, forage · 10 rendu et gouffres ·
   11 interface (mode carte, « En vue », commandes, enregistrement) · 12 souris et inspection · 13 éditeur de tuiles ·
   14 inventaire et équipement · 14b forage (cinématique et mini-jeu des mines) · 14c fabricateur · 14d objets (butin, capsules à identifier, visée, plans, Lab → Items) · 14e arrivée en ASCII (l'intro jouée depuis le 23 novembre 2026) · 15 cinématique d'intro (qui lance aussi le jeu : rester le dernier).
 - **Règle permanente des mini-jeux ASCII (descentes, 23 novembre 2026) : jamais d'alpha ni de transparence.** Chaque case
