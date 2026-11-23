@@ -1299,10 +1299,25 @@ l'essayer (F9 jusqu'au 23 novembre 2026). **Échap, Espace ou Entrée** la passe
   à fond noir avec deux bandes de chantier (la forme choisie le 22). Depuis le 23 novembre 2026, tout est en **police DOS**
   (Modern DOS 8x16, jeu CP437, domaine public : `02b-police-dos.js`, `dosCar`, `dosTexte`), un pixel de police calé sur des
   pixels d'écran, d'après les références de l'utilisateur (`F:\WORK\IAZONE\DEEPCORE\REF` : polices IBM PC, GIF de
-  caractères qui s'allument). **Apparition** de 1 à 2 s, de gauche à droite avec du désordre : chaque case monte en densité
+  caractères qui s'allument). **Apparition**, de gauche à droite avec du désordre : chaque case monte en densité
   « . → i → 0 », puis montre des caractères au hasard sur des pavés de couleur (couleur de l'alerte ou gris, en inverse vidéo)
-  avant de se figer ; le rebord et les bandes montent en « ░ ▒ ▓ █ ». **Disparition** dans la dernière demi-seconde (4 → 4,5 s),
-  colonne par colonne de gauche à droite, à rebours : pavés, « 0 → i → . », plus rien ; la roche reparaît derrière.
+  avant de se figer ; le rebord et les bandes montent en « ░ ▒ ▓ █ ». **Disparition**
+  colonne par colonne de gauche à droite, à rebours : pavés, « 0 → i → . », plus rien ; la roche reparaît derrière. Première descente :
+  « MATIÈRE {µ} DÉTECTÉE / COLLECTE POSSIBLE » (couleur accent) ; seconde : « EXPLOSIFS DÉTECTÉS / ATTENTION SOUS-SOL PIÉGÉ ! » (rouge).
+  Le cadre a **la même taille aux deux descentes** (30 cases de large, mêmes caractères). Depuis le 23 novembre 2026 (soir),
+  l'apparition dure **2 s** (1 → 3 s), le message reste **4 s**, la disparition dure **1 s** (7 → 8 s) ; deux lignes sont
+  réservées sous le tableau de bord pour ses alertes qui clignotent, que l'annonce ne cache pas.
+
+**Foreuse détruite pendant une descente** (23 novembre 2026). Elle explose dans le puits, en ASCII : elle se défait en ses
+propres caractères, projetés autour d'elle ; une boule de feu en « █ ▓ ▒ ░ » (blanc, jaune, orange, rouge) grandit en
+0,45 s puis fond en fumée grise ; une onde de choc en « * # + » s'étend. Après 2,4 s, l'écran passe au noir et le jeu montre
+aussitôt **« FOREUSE DÉTRUITE »** sur fond **noir plein** : ni la carte du niveau, ni une seconde explosion sur la carte.
+Partout, mort en descente ou non, « FOREUSE DÉTRUITE » est **toujours rouge**, quelle que soit la palette.
+
+### Seconde descente : le mini-jeu des mines (21 novembre 2026)
+
+Du niveau 2 au niveau 3, la descente se joue. `playForage(suite, 2)` ; **NIV3** pour l'essayer (Maj + F9 jusqu'au 23 novembre 2026).
+
 - Caractères d'un 52ᵉ de la hauteur d'écran — **la même échelle aux deux descentes depuis le 22 novembre 2026** (la
   première, en 36ᵉ, était trop zoomée). La foreuse est tenue en haut de l'écran :
   on voit 0,7 écran devant elle — **aux deux descentes depuis le 23 novembre 2026** (à la première, elle était au milieu). La descente est plus longue que la première et la foreuse répond
