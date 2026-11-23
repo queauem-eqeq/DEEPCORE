@@ -196,7 +196,8 @@ inconnue sur soi peut coûter cher, la lancer sur un ennemi peut le servir. Fabr
   exemplaire au sol**, sur une case libre voisine , et libère une place.
 - **Un objet par case au sol** : un objet qui tombe — jeté par la foreuse, lâché par un robot abattu,
   sorti du fabricateur quand le sac est plein — ne se pose jamais sur un autre objet ; il roule sur la case libre la plus
-  proche (`caseSol`, 14-inventaire). Les lots posés à la génération (appât d'une salle piégée, dépôts, vitrines) restent
+  proche (`caseSol`, 14-inventaire). **Jamais sous la foreuse** (24 novembre 2026) : si la case de chute est la sienne, l'objet roule
+  ailleurs. Jamais non plus sous une créature vivante, sauf quand une créature vient se poser sur un objet déjà au sol. Les lots posés à la génération (appât d'une salle piégée, dépôts, vitrines) restent
   groupés sur leur case.
   La **clé** est un consommable comme les autres (voir § portes verrouillées) : elle s'empile, se jette, se ramasse.
 - **Touche I** : ouvre le sous-menu et choisit le premier consommable ; **↑ ↓** parcourir, **Entrée** utiliser,

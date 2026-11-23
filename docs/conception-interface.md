@@ -5,8 +5,10 @@ Partie du document de conception (sommaire et règles à ne pas casser : `concep
 ## 2. Direction visuelle
 
 - Tuiles pixel art 16 × 16, affichées en 32 × 32 ; fond quasi noir. Pas d'effet d'écran.
-- **Un objet sous une créature** : la créature le cache ; un petit **+ blanc de 3 × 3 pixels de tuile** s'affiche dans le coin
-  bas droit de la case, tant que la créature est dessus.
+- **Un objet au sol ne se voit jamais sous la foreuse ni sous une créature** (24 novembre 2026) : sa tuile n'est pas dessinée, et il
+  reste invisible tant que la case n'est pas libérée (créature partie ou tuée). Sous une **créature**, un petit **+ blanc de 3 × 3
+  pixels de tuile** dans le coin bas droit de la case dit qu'il y a quelque chose ; **sous la foreuse, rien du tout**. La règle vaut
+  aussi pour les clés au sol.
 - **Palette à cinq couleurs** (trois avant), dans cet ordre dans le menu : **#1 Monde** (sol, rochers,
   montagnes), **#2 Bio**, **#3 Accent**, **#4 Danger** (lasers, dégâts, alertes : l'ancien rouge fixe), **#5 Bâti** (murs, sols,
   portes et piliers des bâtiments, pour que l'intérieur ne se confonde plus avec la montagne). Le blanc reste fixe. Dans le
