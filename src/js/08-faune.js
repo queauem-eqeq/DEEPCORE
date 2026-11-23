@@ -491,7 +491,7 @@ function vagueTick(){const V=G.vague=G.vague||{bt:0,n:0,dans:REGLES.vagueDebut};
   const ok=GROUPES.liste.map((g,i)=>[g,i]).filter(([g])=>g.on&&NV.gr.includes(g.n)&&g.m.length&&Math.max(1,g.cout)<=plafond);if(!ok.length)return;
   for(let t=0;t<6;t++){const [g,gi]=ok[rnd(0,ok.length-1)],c=bord[rnd(0,bord.length-1)],l=lieuDe(c);
     if(g.lieux&&g.lieux.length&&!g.lieux.includes(l))continue;
-    const id=G.grN=(G.grN||0)+1;if(poseGroupe(g,gi,id,bord.filter(i=>lieuDe(i)===l&&Math.hypot(i%W-c%W,((i/W)|0)-((c/W)|0))<=8))===true){V.n++;sayMore('Signal lointain : un groupe vient d’entrer dans le secteur.','warn');return;}}}
+    const id=G.grN=(G.grN??Math.max(-1,...[...G.beasts,...G.animals].map(o=>o.gi??-1)))+1;   /* partie reprise d'avant le 23 novembre : pas de compteur, on repart du plus grand numéro de groupe */if(poseGroupe(g,gi,id,bord.filter(i=>lieuDe(i)===l&&Math.hypot(i%W-c%W,((i/W)|0)-((c/W)|0))<=8))===true){V.n++;sayMore('Signal lointain : un groupe vient d’entrer dans le secteur.','warn');return;}}}
 // Coup de foreuse : consomme de l'énergie ; refusé si la réserve est insuffisante
 function spend(){if(G.st.energie<G.st.cout){say(`Énergie insuffisante pour frapper (${Math.floor(G.st.energie)}/${G.st.cout}). Attendez qu’elle se recharge.`,'warn');SFX.blocked();render();return false;}G.st.energie-=G.st.cout;return true;}
 const TRACK_LIFE=5;
