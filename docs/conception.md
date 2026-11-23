@@ -1215,6 +1215,32 @@ recopier** la configuration d'essai que la base contient aussi (génération, é
 
 ## 10 bis. Cinématique d'intro
 
+**Depuis le 23 novembre 2026, l'arrivée est en ASCII** (`src/js/14e-arrivee.js`, lancée par `playIntro`) ; l'intro en
+pixels décrite plus bas n'est plus jouée (son code reste dans `15-intro.js`). Mêmes règles que les descentes : grille de
+caractères, **chaque case opaque, jamais d'alpha ni de transparence**, rien ne s'efface en fondu. Vue de dessus, ≈ 14 s :
+- **0-1,3 s, hyperespace** : les étoiles filent en traînées « │ ¦ », puis ralentissent en points qui défilent lentement.
+- **0,85-3 s, la planète entre par le haut** : la **vraie carte du niveau 1**, en caractères (roche « ▒ ▓ », montagne
+  « ▲ █ » et roche dure en couleur monde, eau « ≈ », herbe « w », bâtiments en couleur bâti, sol nu « · . o »), enroulée en
+  globe (bords courbés, plus clairs) avec un anneau d'atmosphère ; elle tourne un peu en arrivant.
+- **2,2-10,6 s, la descente** : le disque grandit jusqu'à couvrir l'écran ; au sol, une case de carte fait deux rangées, et
+  le vaisseau se pose **à sa place sur la carte**. Nuages en « ░ ▒ ▓ █ » (blanc et gris), clairsemés vus de l'espace, qui
+  grossissent et s'effilochent en passant le vaisseau. **Entrée dans l'atmosphère** : arc de plasma devant le nez, traînées
+  de feu, coque qui chauffe (jusqu'à environ 1 700 °C), écran qui tremble. **Éclairs** en zigzag « ╱ │ ╲ » qui illuminent
+  les nuages autour.
+- **11,4 s, posé** : l'ombre du vaisseau l'a rejoint, un anneau de poussière s'éloigne en perdant sa densité.
+- **12,7-13,8 s** : l'écran s'éteint case par case (« ▒ ░ · »), puis le jeu.
+- **Alerte** en police DOS, même cadre que les descentes, **couleur monde** : « PLANÈTE EN VUE / ATTERRISSAGE IMMINENT »
+  (apparition 1,2-3,2 s, affichée 4 s, disparition 1 s).
+- **Tableau de bord** repris des descentes : ARRIVÉE ▸ SÉQUENCE D'ATTERRISSAGE, cible, altitude, vitesse, atmosphère (vide,
+  haute, dense, basse, sol), coque (barre et température), cap, soute (foreuse arrimée) ; alertes qui clignotent
+  (hyperespace, chaleur critique, orage, contact) ; jauge d'altitude à droite.
+- **Bruitages** : ceux de l'intro en pixels (hyperespace, ronronnement, approche, rentrée, tonnerre à chaque éclair,
+  poussée, contact au sol).
+- **Échap, Espace, Entrée** : passer (on saute à l'extinction). Essai d'origine, avec palette et carte de démonstration :
+  `planches/intro-ascii/` (artefact à part).
+
+*Intro en pixels (jusqu'au 22 novembre 2026) :*
+
 Vue de dessus du début à la fin, vaisseau nez vers le haut. Durée ≈ 11,6 s. Jouée au premier lancement
 (`np-intro`) et, depuis le 21 novembre 2026, **à chaque nouvelle partie lancée par le joueur** (`nouvellePartie`,
 appelée par « Nouvelle exploration » après la victoire et par le rallumage ; après la destruction de la foreuse,

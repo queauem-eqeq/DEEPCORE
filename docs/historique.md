@@ -288,3 +288,7 @@ Ce qui a été remplacé, et pourquoi (demandes de l'utilisateur, « chaque mach
 - **Les palettes à trois couleurs et le nuancier maison de 64 teintes** : cinq couleurs, LACKING64.
 - **Le fumigène qui fait perdre la trace où qu'il soit posé** : seulement si la foreuse est dans le nuage, puisqu'on peut
   maintenant le lancer à distance.
+
+## 23 novembre 2026 — l'arrivée en ASCII
+- **L'intro en pixels** (tuiles de la carte, nuages en tuiles, fondu final) n'est plus jouée : l'arrivée au niveau 1 est
+  refaite en ASCII (`14e-arrivee.js`), comme les descentes, sans aucune transparence. Son code reste dans `15-intro.js`.
