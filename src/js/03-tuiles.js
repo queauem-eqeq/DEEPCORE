@@ -8,7 +8,8 @@ const PAT={
   rock:["................","................","................","................","................","......333.......","....33333.3.....","...333.33333....","..3333333.333...","..333.3333333...","..33333333.333..","...333333333....","....3333333.....","................","................","................"],
   rock2:["................","................","................","................","................","................","..........333...",".........33333..","...333...3.3333.","..33333..33333..",".333.333........",".3333333........","..33333.........","................","................","................"],
   // roche dure : pleine, piquée de trous noirs et d'éclats brillants (16 novembre 2026)
-  hard:[".....3.......3..","..33.3..3..333..","...333.333.33...",".3..3.33..3.3.3.","..33.3333.33.33.","33..3..3333.3.3.",".3.333..33..3..3","...3.33.3..3.33.",".333.333.333..33","3..333..3.3333..",".3..3..33...33..",".33.3.33.33.3...","..33.33..333.33.","..3.3.3333..3.3.",".3..3..33..33...","...3....3......."],   // dessin retouché au Tile editor (16 novembre 2026)
+  // dessin retouché au Tile editor (16 novembre 2026)
+  hard:[".....3.......3..","..33.3..3..333..","...333.333.33...",".3..3.33..3.3.3.","..33.3333.33.33.","33..3..3333.3.3.",".3.333..33..3..3","...3.33.3..3.33.",".333.333.333..33","3..333..3.3333..",".3..3..33...33..",".33.3.33.33.3...","..33.33..333.33.","..3.3.3333..3.3.",".3..3..33..33...","...3....3......."],
   // bâtiments (18 novembre 2026)
   wall:["3333333.3333333.","3333333.3333333.","3333333.3333333.","................","333.3333333.3333","333.3333333.3333","333.3333333.3333","................","3333333.3333333.","3333333.3333333.","3333333.3333333.","................","333.3333333.3333","333.3333333.3333","333.3333333.3333","................"],
   wallFace:["3333333.3333333.","3333333.3333333.","3333333.3333333.","................","333.3333333.3333","333.3333333.3333","333.3333333.3333","................","3333333333333333","................",".3...3...3...3..",".3...3...3...3..",".3...3...3...3..",".3...3...3...3..",".3...3...3...3..","3.3.3.3.3.3.3.3."],
@@ -20,7 +21,8 @@ const PAT={
   lock:["................",".11111111111111.",".11.1.1.1.1.1.1.",".1.1.1.1.1.1.11.",".11.1.1.1.1.1.1.",".1.1.1.ww..1.11.",".11.1.wwww1.1.1.",".1.1.1wwww.1.11.",".11.1.1ww.1.1.1.",".1.1.1.ww1.1.11.",".11.1.1ww.1.1.1.",".1.1.1.1.1.1.11.",".11.1.1.1.1.1.1.",".1.1.1.1.1.1.11.",".11111111111111.","................"],
   cle:["................","................","................","................","..www...........",".w000w..........",".w0.0wwwwwwwww..",".w0.0w00000w0w..",".w000w.....w.w..","..www...........","................","................","................","................","................","................"],
   mtBody:(x,y)=>((x+y)%4!==0&&(x-y+32)%8!==0)?'3':'.',
-  mtTop:(x,y)=>{const h=Math.min(Math.abs(x-4)+3,Math.abs(x-11)+6);if(y<h)return '.';if(y===h)return '3';return ((x+y)%4!==0&&(x-y+32)%8!==0)?'3':'.';},
+  mtTop:(x,y)=>{const h=Math.min(Math.abs(x-4)+3,Math.abs(x-11)+6);if(y<h)return '.';if(y===h)return '3';
+    return ((x+y)%4!==0&&(x-y+32)%8!==0)?'3':'.';},
   liq0:["................","................",".222......222...","2...2....2...2..",".....2222.....22","................","................","................","....222.......22","...2...2....22..","22......2222....","................","................","................","..222......222..",".2...2....2...2."],
   liq1:["................","................","...222......222.","..2...2....2...2","22.....2222.....","................","................","................","22....222.......","..22.2...2......","....22....2222..","................","................","................","....222......222","...2...2....2..."],
   grass:["................","..1.....1....1..","..1..1..1.1..1..",".1...1.1..1.1...",".1..1..1..1.1..1",".1..1.1...1.1..1","1.1.1.1..1..1.1.","1.1.1.1..1.1..1.","1.1.11...1.1..1.",".1.1.1..1..1.1..",".1.1.1..1..1.1..","..11.1.1...11...","..11..11...11...","...1..11....1...","...1...1....1...","................"],
@@ -86,8 +88,10 @@ PAT.oreSol1=["................","................","................",".........
 PAT.oreSol2=["................","................","................","...2............","...2..22.2......",".......2.22.....","....2.222.......","....22.22.2.....","...2..2.2.2.....",".....22..2......","...22.2.2.......","...2............","................","................","................","................"];
 PAT.ore=["................","....222.........","...22222.2......","....222...22.2..",".2...2....2222..",".22.......22....","......2.........","..2..22..2..2...",".222.2..222.22..","..22....222.22..","...2...222..2...","................",".22.222..2..2...",".22..22.22.222..",".2..2...22...22.","................"];
 PAT.oreSol=["................","...2............","..22.......2....","..2...2..22.....","....22...22.....","....22.2........","...2..22..2.2...",".....2.2.22.22..","....222.2.2.....",".....2.22..2....","......2..22.....","...22...........","...22....22.22..","....2.....2.22..","................","................"];
-PAT.objet=["................","................","................","....00000000....","...0wwwwwwww0...","...0w111111w0...","...0w1....1w0...","...0w1.33.1w0...","...0w1.33.1w0...","...0w1....1w0...","...0w111111w0...","...0wwwwwwww0...","....00000000....","................","................","................"];   // objet posé au sol (inventaire)
-// Objets au sol (21 novembre 2026) : une tuile par objet posé par terre (touche [X] du sac, bouton Jeter) ; la clé garde sa tuile « cle ». Clé de PAT : o_ + clé de l'objet.
+// objet posé au sol (inventaire)
+PAT.objet=["................","................","................","....00000000....","...0wwwwwwww0...","...0w111111w0...","...0w1....1w0...","...0w1.33.1w0...","...0w1.33.1w0...","...0w1....1w0...","...0w111111w0...","...0wwwwwwww0...","....00000000....","................","................","................"];
+// Objets au sol (21 novembre 2026) : une tuile par objet posé par terre (touche [X] du sac, bouton Jeter) ; la clé garde sa tuile « cle ».
+// Clé de PAT : o_ + clé de l'objet.
 PAT.o_foreuse=["................", ".....wwwwww.....", ".....w1111w.....", ".....wwwwww.....", "...w10110110w...", "...w01101101w...", "....w101101w....", "....w011011w....", "....w110110w....", ".....w0110w.....", ".....w1101w.....", "......w01w......", "......w11w......", ".......ww.......", ".......ww.......", "................"];
 PAT.o_usine=["................", "................", "................", "..ww........ww..", "..w1w......w1w..", "..w11wwwwww11w..", "..w1111111111w..", "..w1111ww1111w..", "..w111w00w111w..", "..w1111ww1111w..", "...w11111111w...", "....w111111w....", ".....wwwwww.....", "................", "................", "................"];
 PAT.o_servo=["................", "................", "........w.......", "........w.......", "....w.wwwww.w...", ".....ww111ww....", "....ww11011ww...", "....w1100011w...", "..www1001001www.", "....w1100011w...", "....ww11011ww...", ".....ww111ww....", "....w.wwwww.w...", "........w.......", "........w.......", "................"];
@@ -131,7 +135,8 @@ const SPECIES=[
 function critter(p){const cx=7,cy=9,hx=cx+p.rx+1,hy=cy-p.ry+1,top=hy-Math.ceil(p.hr)-1,by=cy+p.ry,tx=cx-p.rx;
   return (x,y)=>{
     if(x===hx+1&&y===hy)return '0';
-    if(((x-cx)/p.rx)**2+((y-cy)/p.ry)**2<=1){if(p.pat==='rayures'&&x%3===0&&y>cy-p.ry)return p.a;if(p.pat==='taches'&&(x*7+y*3)%5===0)return p.a;return p.b;}
+    if(((x-cx)/p.rx)**2+((y-cy)/p.ry)**2<=1){if(p.pat==='rayures'&&x%3===0&&y>cy-p.ry)return p.a;
+      if(p.pat==='taches'&&(x*7+y*3)%5===0)return p.a;return p.b;}
     if((x-hx)**2+(y-hy)**2<=p.hr*p.hr)return p.b;
     if(p.ears==='pointe'&&((x===hx-1&&(y===top||y===top-1))||(x===hx+1&&y===top)))return p.b;
     if(p.ears==='ronde'&&y===top&&(x===hx-1||x===hx))return p.b;
@@ -145,7 +150,8 @@ function critter(p){const cx=7,cy=9,hx=cx+p.rx+1,hy=cy-p.ry+1,top=hy-Math.ceil(p
     return '.';};}
 // Animal agressif (1 case) : v = vitesse, d = détection, pv = points de vie
 const BEASTS=[
-  {n:'Crabot',key:'crabos',nb:15,role:'Chasse le robot',v:5,pv:22,dmin:3,dmax:6,pre:65,def:0,crit:2,swim:true,nage:true,rows:["................",
+  {n:'Crabot',key:'crabos',nb:15,role:'Chasse le robot',v:5,pv:22,dmin:3,dmax:6,pre:65,def:0,crit:2,swim:true,nage:true,
+    rows:["................",
      "................",
      "................",
      "................",
@@ -161,7 +167,8 @@ const BEASTS=[
      "...1.1....1.1...",
      "................",
      "................"]},
-  {n:'Relais',key:'cafar',nb:12,role:'En bande de 2 à 4 ; ce qu’un membre voit, la bande le sait',v:5,pv:15,dmin:3,dmax:4,pre:50,def:10,crit:5,pack:true,alarm:false,
+  {n:'Relais',key:'cafar',nb:12,role:'En bande de 2 à 4 ; ce qu’un membre voit, la bande le sait',v:5,pv:15,dmin:3,dmax:4,pre:50,def:10,
+    crit:5,pack:true,alarm:false,
    // dessin robotique adopté comme norme le 17 novembre 2026
    sec:true,rows:["................",
      "................",
@@ -197,7 +204,8 @@ const BEASTS=[
      "....22....22....",
      "...2222..2222..."]},
   // Brochon (16 novembre 2026) : le poisson. Il ne quitte jamais l'eau (aqua) et disparaît dès qu'il plonge en eau profonde (cache).
-  {n:'Torpille',fem:true,key:'brochon',nb:5,role:'Ne quitte jamais l’eau ; invisible dès qu’il plonge en eau profonde',v:7,pv:14,dmin:4,dmax:5,pre:80,def:20,crit:2,nage:true,aqua:true,cache:true,
+  {n:'Torpille',fem:true,key:'brochon',nb:5,role:'Ne quitte jamais l’eau ; invisible dès qu’il plonge en eau profonde',v:7,pv:14,dmin:4,
+    dmax:5,pre:80,def:20,crit:2,nage:true,aqua:true,cache:true,
    rows:["................",
      "................",
      "................",
@@ -230,7 +238,8 @@ const BEASTS=[
      "...1...11...1...",
      ".......11.......",
      "................"]},
-  {n:'Sentinelle',fem:true,key:'paralyzor',nb:3,role:'Tire un laser jusqu’à 2 cases, en ligne de vue',v:7,pv:18,dmin:2,dmax:2,pre:70,def:10,crit:0,laser:2,rows:["................",
+  {n:'Sentinelle',fem:true,key:'paralyzor',nb:3,role:'Tire un laser jusqu’à 2 cases, en ligne de vue',v:7,pv:18,dmin:2,dmax:2,pre:70,def:10,
+    crit:0,laser:2,rows:["................",
      "................",
      "......1111......",
      ".....122221.....",
@@ -249,10 +258,14 @@ const BEASTS=[
   /* Cinq espèces ajoutées le 21 novembre 2026, à la FIN de la liste (les tuiles sont numérotées par rang). Capacités nouvelles, lues par
      08-faune : vol (franchit gouffres et eau), cadence (un tir tous les N battements), recul (s'écarte quand la foreuse est à cette
      distance), soin + portee (répare un allié blessé), glu (portée du jet de glu). Dessins de départ, à retoucher dans le Tile editor. */
-  {n:'Bloqueur',key:'gardien',bk:'bloqueur',bloque:true,nb:2,role:'Rapide : il agrippe la foreuse, qui ne peut plus se déplacer tant qu’il vit. Frappe peu fort',v:8,pv:30,dmin:2,dmax:4,pre:100,def:15,crit:0,   // l'ancien Gardien (22 novembre 2026) ; la clé reste « gardien » pour les groupes déjà réglés, ses stats sont enregistrées sous « bloqueur »
+  // l'ancien Gardien (22 novembre 2026) ; la clé reste « gardien » pour les groupes déjà réglés, ses stats sont enregistrées sous « bloqueur »
+  {n:'Bloqueur',key:'gardien',bk:'bloqueur',bloque:true,nb:2,
+    role:'Rapide : il agrippe la foreuse, qui ne peut plus se déplacer tant qu’il vit. Frappe peu fort',v:8,pv:30,dmin:2,dmax:4,
+    pre:100,def:15,crit:0,
   
    rows:["................", "................", ".....1....1.....", ".....1....1.....", "...1111111111...", "..112222222211..", ".31123322332113.", ".33122222222133.", "..312223322213..", "..312233332213..", "...1122222211...", "...1111111111...", "...11......11...", "..111......111..", "................", "................"]},
-  {n:'Artilleur',key:'artilleur',nb:2,role:'Tire un laser jusqu’à 5 cases, un battement sur deux, et recule quand on l’approche',v:5,pv:14,dmin:4,dmax:7,pre:65,def:5,crit:0,laser:5,cadence:2,recul:2,
+  {n:'Artilleur',key:'artilleur',nb:2,role:'Tire un laser jusqu’à 5 cases, un battement sur deux, et recule quand on l’approche',v:5,pv:14,
+    dmin:4,dmax:7,pre:65,def:5,crit:0,laser:5,cadence:2,recul:2,
    rows:["................",
      "................",
      "....1111........",
@@ -269,7 +282,8 @@ const BEASTS=[
      "..11....11......",
      "................",
      "................"]},
-  {n:'Drone',key:'drone',nb:4,role:'Vole : ni gouffre ni eau ne l’arrêtent. Fragile, rapide, en essaim',v:9,pv:6,dmin:2,dmax:3,pre:80,def:30,crit:0,vol:true,swim:true,nage:true,pack:true,
+  {n:'Drone',key:'drone',nb:4,role:'Vole : ni gouffre ni eau ne l’arrêtent. Fragile, rapide, en essaim',v:9,pv:6,dmin:2,dmax:3,pre:80,
+    def:30,crit:0,vol:true,swim:true,nage:true,pack:true,
    rows:["................",
      "................",
      ".11111....11111.",
@@ -286,7 +300,8 @@ const BEASTS=[
      "................",
      "................",
      "................"]},
-  {n:'Soudeur',key:'soudeur',nb:1,role:'Répare ses alliés à 4 cases, 5 PV par battement, et fuit le contact',v:5,pv:16,dmin:1,dmax:2,pre:60,def:10,crit:0,soin:5,portee:4,recul:1,
+  {n:'Soudeur',key:'soudeur',nb:1,role:'Répare ses alliés à 4 cases, 5 PV par battement, et fuit le contact',v:5,pv:16,dmin:1,dmax:2,pre:60,
+    def:10,crit:0,soin:5,portee:4,recul:1,
    rows:["................",
      "................",
      "....11111111....",
@@ -340,24 +355,32 @@ const grassB=rows(norm(["................","...1.1..........","..1.1.1........."
 const flatB=rows(norm(["................","................","..11111.........","...111..........","................","...........1111.","..........111...","................","....11111.......",".....111........","................","..............11","111...........1.",".11.............","................","................"]));
 // C : hautes tiges à épis
 const STEMS=[[1,1],[4,4],[7,0],[10,5],[13,2]];
-const grassC=(x,y)=>{for(const[sx,h]of STEMS){if((x===sx||x===sx+1)&&(y===h||y===h+1)&&x===sx+((y-h)%2))return '3';if(x===sx&&y>h+1&&y<=h+12)return '1';}return '.';};
-const flatC=(x,y)=>{const L=[[0,2],[5,7],[2,12]];for(const[ox,oy]of L){for(let k=0;k<11;k++){const px=(ox+k)%16,py=oy+Math.floor(k/3);if(px===x&&py===y)return k>=9?'3':'1';}}return '.';};
+const grassC=(x,y)=>{for(const[sx,h]of STEMS){if((x===sx||x===sx+1)&&(y===h||y===h+1)&&x===sx+((y-h)%2))return '3';
+  if(x===sx&&y>h+1&&y<=h+12)return '1';}return '.';};
+const flatC=(x,y)=>{const L=[[0,2],[5,7],[2,12]];for(const[ox,oy]of L){for(let k=0;k<11;k++){const px=(ox+k)%16,py=oy+Math.floor(k/3);
+  if(px===x&&py===y)return k>=9?'3':'1';}}return '.';};
 // D : fougères en chevrons
 const FERNS=[[3,7],[11,4],[7,14]];
-const grassD=(x,y)=>{for(const[cx,by]of FERNS){const top=by-6;if(x===cx&&y>=top&&y<=by)return '1';for(let k=0;k<3;k++){const ly=top+1+k*2,w=k+1;if(y===ly&&(x===cx-w||x===cx+w))return '1';if(y===ly+1&&(x===cx-w-1||x===cx+w+1)&&k<2)return '1';}}return '.';};
+const grassD=(x,y)=>{for(const[cx,by]of FERNS){const top=by-6;if(x===cx&&y>=top&&y<=by)return '1';
+  for(let k=0;k<3;k++){const ly=top+1+k*2,w=k+1;if(y===ly&&(x===cx-w||x===cx+w))return '1';
+  if(y===ly+1&&(x===cx-w-1||x===cx+w+1)&&k<2)return '1';}}return '.';};
 const flatD=(x,y)=>grassD(15-y,x)==='1'&&(x+y)%2===0?'1':'.';
 // E : herbe basse couchée par le vent (diagonales)
 const WIND=[[1,6],[6,7],[11,5],[3,12],[8,13],[13,11],[0,15],[10,15]];
-const grassE=(x,y)=>{for(const[bx,by]of WIND)for(let k=0;k<3;k++){const px=(bx+k)%16;if(px===x&&(y===by-2*k||y===by-2*k-1))return '1';}return '.';};
+const grassE=(x,y)=>{for(const[bx,by]of WIND)for(let k=0;k<3;k++){const px=(bx+k)%16;
+  if(px===x&&(y===by-2*k||y===by-2*k-1))return '1';}return '.';};
 const flatE=(x,y)=>(y%4===1&&(x+y*3)%8<4)||(y%4===3&&(x+y*5)%9===0)?'1':'.';
 // F : herbe fleurie
 const FLW=[[2,1],[9,0],[13,2]];
-const grassF=(x,y)=>{for(const[fx,fy]of FLW){if(x===fx&&y===fy)return '3';if((Math.abs(x-fx)===1&&y===fy)||(x===fx&&Math.abs(y-fy)===1))return '2';}return grassA(x,y);};
-const flatF=(x,y)=>{if((x===12&&y===8)||(x===3&&y===12))return '3';if((x===11&&y===8)||(x===13&&y===8)||(x===2&&y===12)||(x===4&&y===12))return '2';return flatA(x,y);};
+const grassF=(x,y)=>{for(const[fx,fy]of FLW){if(x===fx&&y===fy)return '3';
+  if((Math.abs(x-fx)===1&&y===fy)||(x===fx&&Math.abs(y-fy)===1))return '2';}return grassA(x,y);};
+const flatF=(x,y)=>{if((x===12&&y===8)||(x===3&&y===12))return '3';
+  if((x===11&&y===8)||(x===13&&y===8)||(x===2&&y===12)||(x===4&&y===12))return '2';return flatA(x,y);};
 const GT=[[grassA,flatA],[grassB,flatB],[grassC,flatC],[grassD,flatD],[grassE,flatE],[grassF,flatF]];
 GT.forEach(([g,f],i)=>{PAT['grass'+i]=g;PAT['flat'+i]=f;});
 }
-{const D10=['3.333','3.3.3','3.3.3','3.3.3','3.333'];PAT.site10=(x,y)=>(x>=5&&x<=9&&y>=4&&y<=8)?(D10[y-4][x-5]==='3'?'3':'.'):RING[y][x];}   // profondeur 10, la seule depuis le 13 novembre 2026
+// profondeur 10, la seule depuis le 13 novembre 2026
+{const D10=['3.333','3.3.3','3.3.3','3.3.3','3.333'];PAT.site10=(x,y)=>(x>=5&&x<=9&&y>=4&&y<=8)?(D10[y-4][x-5]==='3'?'3':'.'):RING[y][x];}
 for(let d=1;d<=5;d++)PAT['site'+d]=(x,y)=>{const g=DIGITS[d];if(x>=6&&x<=8&&y>=4&&y<=8)return g[y-4][x-6]==='3'?'3':'.';return RING[y][x];};
 // Nuages de l'intro : 4 variantes de tuiles opaques (blanc, ombre bio)
 // Nuages : tuiles jointives. nuage0-1 = cœur (plein, texturé) ; nuage2-5 = bords (hachures, le terrain se voit entre les traits)

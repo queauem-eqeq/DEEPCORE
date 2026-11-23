@@ -1,7 +1,8 @@
 /* ---------- Rendu ---------- */
 const cv=$('view'),ctx=cv.getContext('2d'),fcv=$('fxv'),fctx=fcv.getContext('2d');let cols=20,rows=15,camX=0,camY=0,vw=0,vh=0;
 function resize(){const r=$('mapwrap').getBoundingClientRect();vw=Math.max(1,Math.floor(r.width));vh=Math.max(1,Math.floor(r.height));
-  const dpr=devicePixelRatio||1;cv.width=vw*dpr;cv.height=vh*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);fcv.width=vw*dpr;fcv.height=vh*dpr;fctx.setTransform(dpr,0,0,dpr,0,0);
+  const dpr=devicePixelRatio||1;cv.width=vw*dpr;cv.height=vh*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);fcv.width=vw*dpr;fcv.height=vh*dpr;
+    fctx.setTransform(dpr,0,0,dpr,0,0);
   cols=Math.ceil(vw/S);rows=Math.ceil(vh/S);render();}
 const hash=(x,y)=>((x*73856093)^(y*19349663))>>>0;
 let ox=0,oy=0;
@@ -10,7 +11,8 @@ let FX=[],fxRaf=0,SHOWVIS=false;
 // Champ de vision (touche V) : contour pointillé blanc, en pixels de tuile opaques, sur le bord de la zone ; l'intérieur reste intact
 function drawVisCells(cells,col){ctx.globalAlpha=1;ctx.fillStyle=col||'#ffffff';
   for(const i of cells){const x=i%W,y=(i/W)|0,px=(x-camX)*S,py=(y-camY)*S,edge=(dx,dy)=>!cells.has(idx(x+dx,y+dy));
-    for(let k=0;k<16;k+=2){if(edge(0,-1))ctx.fillRect(px+k*2,py,2,2);if(edge(0,1))ctx.fillRect(px+k*2,py+S-2,2,2);if(edge(-1,0))ctx.fillRect(px,py+k*2,2,2);if(edge(1,0))ctx.fillRect(px+S-2,py+k*2,2,2);}}}
+    for(let k=0;k<16;k+=2){if(edge(0,-1))ctx.fillRect(px+k*2,py,2,2);if(edge(0,1))ctx.fillRect(px+k*2,py+S-2,2,2);
+      if(edge(-1,0))ctx.fillRect(px,py+k*2,2,2);if(edge(1,0))ctx.fillRect(px+S-2,py+k*2,2,2);}}}
 /* ---------- Foreuse endommagée : fumée sous 50 PV, fumée + flammèches sous 20 PV ----------
    Dessiné sur un calque transparent posé sur la vue (#fxv), animé en continu sans redessiner la carte.
    Particules en pixels de carte (case × S) : la fumée qui s'élève reste sur place quand la foreuse avance (traînée).
@@ -23,7 +25,8 @@ const SMOKE={p:[],raf:0,last:0,acc:0,accF:0};
      puis restent au sol (G.splat, pixels de carte), sauf dans l'eau ou un gouffre. Au plus SPLAT_MAX débris gardés.
    Pixel art strict : grains opaques de 1 ou 2 pixels de tuile, calés sur la grille, qui disparaissent d'un coup. */
 const SPLAT_MAX=1500;
-function gore(x,y){const cx=(x+.5)*S,cy=(y+.5)*S,deb=[PAL['3'],PAL['3'],PAL['1']],ETINC_COLS=[PAL['1'],PAL['1'],PAL['3']];   // deux couleurs seulement : monde et accent
+// deux couleurs seulement : monde et accent
+function gore(x,y){const cx=(x+.5)*S,cy=(y+.5)*S,deb=[PAL['3'],PAL['3'],PAL['1']],ETINC_COLS=[PAL['1'],PAL['1'],PAL['3']];
   for(let j=0,n=34+((Math.random()*14)|0);j<n;j++){const an=Math.random()*Math.PI*2,v=150+Math.random()*330;
     SMOKE.p.push({x:cx+Math.cos(an)*4,y:cy+Math.sin(an)*4,vx:Math.cos(an)*v,vy:Math.sin(an)*v-40,a:0,l:.1+Math.random()*.3,sz:2,c:ETINC_COLS[(Math.random()*ETINC_COLS.length)|0],spark:true});}
   for(let j=0,n=14+((Math.random()*8)|0);j<n;j++){const an=Math.random()*Math.PI*2,v=50+Math.random()*150,r0=2+Math.random()*5;
@@ -48,8 +51,10 @@ function smokeStep(now){const dt=Math.min(.05,(now-SMOKE.last)/1000);SMOKE.last=
         if(t!==LIQ&&t!==DEEP&&t!==CHASM&&!blocks(t)){G.splat=G.splat||[];G.splat.push([Math.round(q.x/2)*2,Math.round(q.y/2)*2,q.c,q.sz]);
           if(G.splat.length>SPLAT_MAX)G.splat.splice(0,G.splat.length-SPLAT_MAX);landed=true;}continue;}
       SMOKE.p[n++]=q;fctx.fillStyle=q.c;fctx.fillRect(Math.round((q.x-camX*S)/2)*2,Math.round((q.y-q.z-camY*S)/2)*2,q.sz,q.sz);continue;}
-    if(q.spark){const dr=Math.exp(-7*dt);q.vx*=dr;q.vy*=dr;q.x+=q.vx*dt;q.y+=q.vy*dt;SMOKE.p[n++]=q;fctx.fillStyle=q.c;   // étincelle : le grain et sa traîne, un cran derrière
-      fctx.fillRect(Math.round((q.x-camX*S)/2)*2,Math.round((q.y-camY*S)/2)*2,2,2);fctx.fillRect(Math.round((q.x-q.vx*.018-camX*S)/2)*2,Math.round((q.y-q.vy*.018-camY*S)/2)*2,2,2);continue;}
+    // étincelle : le grain et sa traîne, un cran derrière
+    if(q.spark){const dr=Math.exp(-7*dt);q.vx*=dr;q.vy*=dr;q.x+=q.vx*dt;q.y+=q.vy*dt;SMOKE.p[n++]=q;fctx.fillStyle=q.c;
+      fctx.fillRect(Math.round((q.x-camX*S)/2)*2,Math.round((q.y-camY*S)/2)*2,2,2);
+        fctx.fillRect(Math.round((q.x-q.vx*.018-camX*S)/2)*2,Math.round((q.y-q.vy*.018-camY*S)/2)*2,2,2);continue;}
     q.x+=(q.vx+Math.sin(now/600+q.l*9)*4)*dt;q.y+=q.vy*dt;if(q.smoke)q.vy*=Math.exp(-.6*dt);
     SMOKE.p[n++]=q;   // pixel art strict : taille fixe, opaque, calé sur la grille des pixels de tuile (2 px), disparaît d'un coup
     fctx.fillStyle=q.c;fctx.fillRect(Math.round((q.x-camX*S)/2)*2,Math.round((q.y-camY*S)/2)*2,q.sz,q.sz);}
@@ -62,8 +67,10 @@ const ETOURDI_VAR=new WeakMap();
 function tuileEtourdie(base){if(!base)return base;const ph=(G.turn||0)&1,a=PAL['2'],b=PAL['3'],cle=a+b+ph;
   let m=ETOURDI_VAR.get(base);if(!m){m={};ETOURDI_VAR.set(base,m);}if(m[cle])return m[cle];
   const c=document.createElement('canvas');c.width=c.height=16;const x=c.getContext('2d');x.drawImage(base,0,0,16,16);
-  try{const im=x.getImageData(0,0,16,16),p=im.data,rgb=h=>{const n=parseInt(h.slice(1),16);return [n>>16&255,n>>8&255,n&255];},A=rgb(a),B=rgb(b);
-    for(let j=0;j<16;j++)for(let i=0;i<16;i++){const q=(j*16+i)*4;if(!p[q+3])continue;const k=(i+j+ph)&1?A:B;p[q]=k[0];p[q+1]=k[1];p[q+2]=k[2];p[q+3]=255;}
+  try{const im=x.getImageData(0,0,16,16),p=im.data,rgb=h=>{const n=parseInt(h.slice(1),16);return [n>>16&255,n>>8&255,n&255];
+    },A=rgb(a),B=rgb(b);
+    for(let j=0;j<16;j++)for(let i=0;i<16;i++){const q=(j*16+i)*4;if(!p[q+3])continue;const k=(i+j+ph)&1?A:B;p[q]=k[0];p[q+1]=k[1];
+      p[q+2]=k[2];p[q+3]=255;}
     x.putImageData(im,0,0);}catch(e){}
   return m[cle]=c;}
 /* Trait de laser au pixel de tuile (u = 1/16 de case) de (ax, ay) à (bx, by), en pixels de tuile : couleur col (danger par
@@ -72,15 +79,18 @@ function traitLaser(u,ax,ay,bx,by,graine,etinc,col){let x0=Math.round(ax),y0=Mat
        const dx=Math.abs(x1-x0),dy=-Math.abs(y1-y0),sx=x0<x1?1:-1,sy=y0<y1?1:-1,pts=[];let e=dx+dy;
        for(let n=0;n<600;n++){pts.push([x0,y0]);if(x0===x1&&y0===y1)break;const e2=2*e;if(e2>=dy){e+=dy;x0+=sx;}if(e2<=dx){e+=dx;y0+=sy;}}
        ctx.fillStyle=col||PAL['4'];for(const [x,y] of pts)ctx.fillRect(x*u,y*u,u,u);
-       if(!reduced&&etinc){const T=Math.floor(performance.now()/85),h=n=>{const v=Math.sin(n*12.9898+T*78.233+graine)*43758.5453;return v-Math.floor(v);};
+       if(!reduced&&etinc){const T=Math.floor(performance.now()/85),h=n=>{const v=Math.sin(n*12.9898+T*78.233+graine)*43758.5453;
+         return v-Math.floor(v);};
          for(let k=0;k<etinc;k++){const [x,y]=pts[Math.floor(h(k)*pts.length)],ox=Math.round(h(k+10)*4-2),oy=Math.round(h(k+20)*4-2);
-           ctx.fillStyle=h(k+30)<.5?'#fff':PAL['1'];ctx.fillRect((x+ox)*u,(y+oy)*u,u,u);if(h(k+40)<.4)ctx.fillRect((x+ox+(h(k+50)<.5?1:-1))*u,(y+oy)*u,u,u);}}
+           ctx.fillStyle=h(k+30)<.5?'#fff':PAL['1'];ctx.fillRect((x+ox)*u,(y+oy)*u,u,u);
+             if(h(k+40)<.4)ctx.fillRect((x+ox+(h(k+50)<.5?1:-1))*u,(y+oy)*u,u,u);}}
   ctx.fillStyle=PAL['1'];}
 // Rayons du Bloqueur qui tient la foreuse : trois traits parallèles couleur bio, espacés d'un pixel (22 novembre 2026 ; d'abord un
 // trait rouge). Décalés en travers du rayon : en hauteur s'il est plutôt horizontal, en largeur sinon. Dessinés avant les créatures
 // et la foreuse, pour passer sous elles.
 function rayonsBloqueur(){const u=S/16,cx=o=>(o.x+.5-camX)*16,cy=o=>(o.y+.5-camY)*16;
-  for(const b of G.beasts||[])if(b.tient&&!(b.stun>0)&&beastVisible(b)){const ax=cx(b),ay=cy(b),bx=cx({x:G.px,y:G.py}),by=cy({x:G.px,y:G.py}),hz=Math.abs(bx-ax)>=Math.abs(by-ay);
+  for(const b of G.beasts||[])if(b.tient&&!(b.stun>0)&&beastVisible(b)){const ax=cx(b),ay=cy(b),bx=cx({x:G.px,y:G.py}),
+    by=cy({x:G.px,y:G.py}),hz=Math.abs(bx-ax)>=Math.abs(by-ay);
     for(const d of [-2,0,2]){const ox=hz?0:d,oy=hz?d:0;traitLaser(u,ax+ox,ay+oy,bx+ox,by+oy,b.x*7+b.y+d,d?0:2,PAL['2']);}}}
 /* ---------- Explosion de la foreuse (mort) ----------
    Comme la poussière d'atterrissage : des centaines d'éclats (couleurs de la foreuse) projetés en l'air, qui retombent,
@@ -94,26 +104,37 @@ function explode(done){
       l:.6+Math.random()*1.6,a:0,sz:2+(Math.random()<.3?1:0)+(Math.random()<.06?2:0),c:cols[(Math.random()*cols.length)|0]});}
   BOOM={p,last:performance.now(),t0:performance.now(),done};SFX.explode();addFx({kind:'shake',amp:10,dur:600});
   if(reduced){BOOM=null;render();setTimeout(done,400);return;}
-  const hard=(x,y)=>{const a=Math.floor(x),b=Math.floor(y);if(a<0||b<0||a>=W||b>=H)return true;const i=idx(a,b),v=G.t[i];return v===ROCK||v===MOUNT||v===HARD||v===SHIP||bati(v)||(fog&&!vis[i]);};   // la zone hors de vue arrête les éclats
+  // la zone hors de vue arrête les éclats
+  const hard=(x,y)=>{const a=Math.floor(x),b=Math.floor(y);if(a<0||b<0||a>=W||b>=H)return true;const i=idx(a,b),v=G.t[i];
+    return v===ROCK||v===MOUNT||v===HARD||v===SHIP||bati(v)||(fog&&!vis[i]);};
   const step=now=>{if(!BOOM)return;const dt=Math.min(.05,(now-BOOM.last)/1000);BOOM.last=now;let n=0;
     for(const q of BOOM.p){q.a+=dt;if(q.a>=q.l)continue;const air=q.z>0||q.vz>0,dr=Math.exp(-(air?1:7)*dt);q.vx*=dr;q.vy*=dr;
       const nx=q.x+q.vx*dt,ny=q.y+q.vy*dt;
-      if(hard(nx,ny)){const hx=hard(nx,q.y),hy=hard(q.x,ny);if(hx)q.vx*=-.55;if(hy)q.vy*=-.55;if(!hx&&!hy){q.vx*=-.55;q.vy*=-.55;}}else{q.x=nx;q.y=ny;}
-      if(air){q.vz-=28*dt;q.z+=q.vz*dt;if(q.z<=0){q.z=0;if(G.t[idx(Math.floor(q.x),Math.floor(q.y))]===CHASM)continue;   // tombe dans le gouffre
+      if(hard(nx,ny)){const hx=hard(nx,q.y),hy=hard(q.x,ny);if(hx)q.vx*=-.55;if(hy)q.vy*=-.55;if(!hx&&!hy){q.vx*=-.55;q.vy*=-.55;
+        }}else{q.x=nx;q.y=ny;}
+      // tombe dans le gouffre
+      if(air){q.vz-=28*dt;q.z+=q.vz*dt;if(q.z<=0){q.z=0;if(G.t[idx(Math.floor(q.x),Math.floor(q.y))]===CHASM)continue;
         if(q.vz<-1.2){q.vz=-q.vz*.45;q.vx*=.75;q.vy*=.75;}else q.vz=0;}}
       BOOM.p[n++]=q;}
     BOOM.p.length=n;render();
     if(n)requestAnimationFrame(step);else{const d=BOOM.done;BOOM=null;render();setTimeout(d,250);}};
   requestAnimationFrame(step);}
 function drawBoom(){const fl=1-(performance.now()-BOOM.t0)/180;
-  if(fl>0){ctx.globalAlpha=fl*.8;ctx.fillStyle='#ffffff';ctx.beginPath();ctx.arc((G.px+.5-camX)*S,(G.py+.5-camY)*S,S*1.6,0,Math.PI*2);ctx.fill();}   // éclair de l'explosion
-  ctx.globalAlpha=1;for(const q of BOOM.p){ctx.fillStyle=q.c;ctx.fillRect(Math.round((q.x-camX)*S/2)*2,Math.round((q.y-q.z-camY)*S/2)*2,q.sz,q.sz);}}
-function addFx(f){f.t0=performance.now();if(f.kind==='num')f.stack=FX.filter(o=>o.kind==='num'&&o.x===f.x&&o.y===f.y&&fxP(o)<.5).length;FX.push(f);if(!fxRaf)fxRaf=requestAnimationFrame(fxLoop);}
+  // éclair de l'explosion
+  if(fl>0){ctx.globalAlpha=fl*.8;ctx.fillStyle='#ffffff';ctx.beginPath();
+    ctx.arc((G.px+.5-camX)*S,(G.py+.5-camY)*S,S*1.6,0,Math.PI*2);ctx.fill();}
+  ctx.globalAlpha=1;for(const q of BOOM.p){ctx.fillStyle=q.c;
+    ctx.fillRect(Math.round((q.x-camX)*S/2)*2,Math.round((q.y-q.z-camY)*S/2)*2,q.sz,q.sz);}}
+function addFx(f){f.t0=performance.now();if(f.kind==='num')f.stack=FX.filter(o=>o.kind==='num'&&o.x===f.x&&o.y===f.y&&fxP(o)<.5).length;
+  FX.push(f);if(!fxRaf)fxRaf=requestAnimationFrame(fxLoop);}
 // grains d'un effet de consommable : position dans la case et instant d'apparition, tirés une fois pour toutes
 const fxGrains=n=>Array.from({length:n},()=>({x:rnd(0,13),y:rnd(3,14),d:Math.random()*.55}));
-function fxLoop(){const now=performance.now();FX=FX.filter(f=>now-f.t0<f.dur);if(antAnime())antVis();render();fxRaf=(FX.length||animVif())?requestAnimationFrame(fxLoop):0;}   // une mine armée ou un paralyzor accroché gardent le rendu en marche
+// une mine armée ou un paralyzor accroché gardent le rendu en marche
+function fxLoop(){const now=performance.now();FX=FX.filter(f=>now-f.t0<f.dur);if(antAnime())antVis();render();
+  fxRaf=(FX.length||animVif())?requestAnimationFrame(fxLoop):0;}
 const fxP=f=>Math.min(1,(performance.now()-f.t0)/f.dur);
-function lungeOff(match){if(reduced)return [0,0];const f=FX.find(match);if(!f)return [0,0];const k=Math.sin(Math.PI*fxP(f))*.4*S;return [f.dx*k,f.dy*k];}
+function lungeOff(match){if(reduced)return [0,0];const f=FX.find(match);if(!f)return [0,0];const k=Math.sin(Math.PI*fxP(f))*.4*S;
+  return [f.dx*k,f.dy*k];}
 
 function put(t,x,y,a){ctx.globalAlpha=a;ctx.drawImage(t,ox+(x-camX)*S,oy+(y-camY)*S,S,S);}
 /* ---------- Gouffres lisibles (variante D′) ----------
@@ -122,8 +143,10 @@ function put(t,x,y,a){ctx.globalAlpha=a;ctx.drawImage(t,ox+(x-camX)*S,oy+(y-camY
    7 teintes sur 7 pixels, de la couleur monde atténuée jusqu'au noir. Calculé une fois par planète et par palette,
    dans une image de la taille de la carte (16 pixels par case), puis recopié case par case au rendu. */
 let CHASM_OV=null,CHASM_KEY='';
-const hash3=(a,b,c)=>{let h=(a*73856093)^(b*19349663)^(c*83492791);h=Math.imul(h^(h>>>13),1274126177);return ((h^(h>>>16))>>>0)/4294967296;};
-const lipD=(gx,gy,side,i)=>{const s=hash3(gx,gy,side);return 1+Math.min(2,Math.floor((Math.sin(i*.42+s*20)+Math.sin(i*.95+s*7)*.35+1.35)/2.7*3));};
+const hash3=(a,b,c)=>{let h=(a*73856093)^(b*19349663)^(c*83492791);h=Math.imul(h^(h>>>13),1274126177);
+  return ((h^(h>>>16))>>>0)/4294967296;};
+const lipD=(gx,gy,side,i)=>{const s=hash3(gx,gy,side);
+  return 1+Math.min(2,Math.floor((Math.sin(i*.42+s*20)+Math.sin(i*.95+s*7)*.35+1.35)/2.7*3));};
 const isCh=(x,y)=>x>=0&&y>=0&&x<W&&y<H&&G.t[idx(x,y)]===CHASM;
 const solid=(x,y)=>!(x>=0&&y>=0&&x<W&&y<H)||(G.t[idx(x,y)]!==CHASM&&G.t[idx(x,y)]!==BRIDGE);   // côté « sol » (pas gouffre, pas pont)
 function chasmLip(cx,cy){const N=solid(cx,cy-1),Sd=solid(cx,cy+1),Wd=solid(cx-1,cy),E=solid(cx+1,cy),lip=new Uint8Array(256);
@@ -132,8 +155,10 @@ function chasmLip(cx,cy){const N=solid(cx,cy-1),Sd=solid(cx,cy+1),Wd=solid(cx-1,
     if((N&&j<lipD(cx,cy,0,i))||(Sd&&15-j<lipD(cx,cy,1,i))||(Wd&&i<lipD(cx,cy,2,j))||(E&&15-i<lipD(cx,cy,3,j))||
        cor(-1,-1,i,j)||cor(1,-1,15-i,j)||cor(-1,1,i,15-j)||cor(1,1,15-i,15-j))lip[j*16+i]=1;}
   return lip;}
-function ensureChasmOv(){if(!G)return;const key=(G.seed||'')+'|'+PAL['3']+'|'+G.t.length;if(CHASM_OV&&CHASM_KEY===key&&CHASM_OV._g===G)return;
-  const PW=W*16,PH=H*16,c=document.createElement('canvas');c.width=PW;c.height=PH;const x=c.getContext('2d'),img=x.createImageData(PW,PH),d=img.data,vd=new Uint8Array(PW*PH);
+function ensureChasmOv(){if(!G)return;const key=(G.seed||'')+'|'+PAL['3']+'|'+G.t.length;
+  if(CHASM_OV&&CHASM_KEY===key&&CHASM_OV._g===G)return;
+  const PW=W*16,PH=H*16,c=document.createElement('canvas');c.width=PW;c.height=PH;
+    const x=c.getContext('2d'),img=x.createImageData(PW,PH),d=img.data,vd=new Uint8Array(PW*PH);
   const m=hexRgb3(PAL['3']),vo=[2,6,5],GRc=vo.map((v,n)=>Math.round(v+(m[n]-v)*.08)),base=m.map(v=>v*.6),NT=7;
   const set=(i,c)=>{d[i*4]=c[0];d[i*4+1]=c[1];d[i*4+2]=c[2];d[i*4+3]=255;};
   for(let cy=0;cy<H;cy++)for(let cx=0;cx<W;cx++){if(!isCh(cx,cy))continue;const lip=chasmLip(cx,cy);
@@ -144,14 +169,16 @@ function ensureChasmOv(){if(!G)return;const key=(G.seed||'')+'|'+PAL['3']+'|'+G.
 function hexRgb3(h){const n=parseInt(h.slice(1),16);return [(n>>16)&255,(n>>8)&255,n&255];}
 // la tuile « Bord croisé » teinte en rouge, refaite si elle est retouchée au Tile editor
 let VIS_T=null,VIS_K='';
-function viseeTuile(){const r=rowsOf('nuage3'),k=r.join('');const k4=k+PAL['4'];if(!VIS_T||VIS_K!==k4){VIS_T=curCanvas(r,PAL['4']);VIS_K=k4;}return VIS_T;}
+function viseeTuile(){const r=rowsOf('nuage3'),k=r.join('');const k4=k+PAL['4'];if(!VIS_T||VIS_K!==k4){VIS_T=curCanvas(r,PAL['4']);
+  VIS_K=k4;}return VIS_T;}
 /* Texture du sol (16 novembre 2026, variante « plaques rugueuses » choisie sur la planche planches/sol-grain.js) :
    chaque case prend une nuance de la couleur monde très légèrement décalée (grandes plages douces, teinte ±4°, saturation ±13 %),
    et un grain de 0 à 11 pixels par case dont la DENSITÉ varie par zones : des coins presque lisses, d'autres nettement granuleux.
    Comme les gouffres, c'est calculé une fois par planète et par palette, dans une image de 16 pixels par case. */
 let SOL_OV=null,SOL_KEY='';
 const solH=(a,b,k)=>{let n=((a*73856093)^(b*19349663)^(k*83492791))>>>0;n^=n<<13;n>>>=0;n^=n>>17;n^=n<<5;n>>>=0;return n/4294967296;};
-const solN=(a,b,sc)=>{const X=a/sc,Y=b/sc,x0=Math.floor(X),y0=Math.floor(Y),tx=X-x0,ty=Y-y0,sx=tx*tx*(3-2*tx),sy=ty*ty*(3-2*ty),v=(i,j)=>solH(i,j,7);
+const solN=(a,b,sc)=>{const X=a/sc,Y=b/sc,x0=Math.floor(X),y0=Math.floor(Y),tx=X-x0,ty=Y-y0,sx=tx*tx*(3-2*tx),sy=ty*ty*(3-2*ty),
+  v=(i,j)=>solH(i,j,7);
   return (v(x0,y0)*(1-sx)+v(x0+1,y0)*sx)*(1-sy)+(v(x0,y0+1)*(1-sx)+v(x0+1,y0+1)*sx)*sy;};
 /* Les six nombres du réglage. teinte, clarte, satu : amplitude totale des nuances d'une plage à l'autre (en degrés et en %).
    grainMax : nombre maximal de pixels de grain sur une case, dans les coins les plus rugueux.
@@ -161,9 +188,11 @@ const solN=(a,b,sc)=>{const X=a/sc,Y=b/sc,x0=Math.floor(X),y0=Math.floor(Y),tx=X
 const SOL_REG={teinte:18,clarte:9,satu:58,grainMax:20,fond:20,grain:72,echPlage:10,echGrain:5};
 function ensureSolOv(){if(!G)return;const R=SOL_REG,key=(G.seed||'')+'|'+PAL['3']+'|'+G.t.length+'|'+Object.values(R).join(',');
   if(SOL_OV&&SOL_KEY===key&&SOL_OV._g===G)return;
-  const PW=W*16,PH=H*16,c=document.createElement('canvas');c.width=PW;c.height=PH;const x=c.getContext('2d'),img=x.createImageData(PW,PH),d=img.data;
+  const PW=W*16,PH=H*16,c=document.createElement('canvas');c.width=PW;c.height=PH;
+    const x=c.getContext('2d'),img=x.createImageData(PW,PH),d=img.data;
   for(let cy=0;cy<H;cy++)for(let cx=0;cx<W;cx++){
-    const [r,g,b]=hexRgb3(teinter(PAL['3'],(solN(cx,cy,R.echPlage)-.5)*R.teinte,(solN(cx+99,cy,R.echPlage*.85)-.5)*R.clarte,(solN(cx,cy+99,R.echPlage*1.15)-.5)*R.satu));
+    const [r,g,
+      b]=hexRgb3(teinter(PAL['3'],(solN(cx,cy,R.echPlage)-.5)*R.teinte,(solN(cx+99,cy,R.echPlage*.85)-.5)*R.clarte,(solN(cx,cy+99,R.echPlage*1.15)-.5)*R.satu));
     for(let j=0;j<16;j++){let pi=((cy*16+j)*PW+cx*16)*4;for(let i=0;i<16;i++,pi+=4){d[pi]=r;d[pi+1]=g;d[pi+2]=b;d[pi+3]=R.fond;}}
     const n=Math.round(solN(cx,cy,R.echGrain)*R.grainMax);
     for(let k=0;k<n;k++){const gx=Math.floor(solH(cx,cy,5+k*3)*16),gy=Math.floor(solH(cx,cy,5+k*3+1)*16);
@@ -178,11 +207,13 @@ function voile(x,y,px,py,a,cx2,uni){const c=cx2||ctx;   // uni : couleur unie, s
    Ce qui est détecté s'affiche sur la carte et la mini-carte, même là où la foreuse n'a rien vu, au fur et à mesure que l'onde l'atteint.
    L'onde se dessine aussi sur la mini-carte ; un « blip blip » l'accompagne pendant tout le balayage. */
 const SONAR_V=38,SONAR_MIN=2600;                         // cases par seconde ; durée minimale du balayage, en ms
-function sonarStart(){G.sonar=2;G.sonX=G.px;G.sonY=G.py;const r=Math.hypot(Math.max(G.px,W-G.px),Math.max(G.py,H-G.py))+2,dur=reduced?1:Math.max(SONAR_MIN,r/SONAR_V*1000);
+function sonarStart(){G.sonar=2;G.sonX=G.px;G.sonY=G.py;
+  const r=Math.hypot(Math.max(G.px,W-G.px),Math.max(G.py,H-G.py))+2,dur=reduced?1:Math.max(SONAR_MIN,r/SONAR_V*1000);
   addFx({kind:'sonar',x:G.px,y:G.py,r,dur});SFX.sonar(dur/1000);
   const l=Object.values(G.ore||{}),m=l.filter(oreMat).length,n=l.length-m;
   sayMore(`Sonar : ${n} gisement${n>1?'s':''} de métal et ${m} de Matière {µ} détecté${l.length>1?'s':''}.`,'info');}
-function sonarR(){if(!G||G.sonar===1)return -1;const f=FX.find(f=>f.kind==='sonar'&&!f.ant);return f?fxP(f)*f.r:Infinity;}   // f.ant : le cercle d'une antenne ne détecte pas les gisements
+// f.ant : le cercle d'une antenne ne détecte pas les gisements
+function sonarR(){if(!G||G.sonar===1)return -1;const f=FX.find(f=>f.kind==='sonar'&&!f.ant);return f?fxP(f)*f.r:Infinity;}
 const sonarVu=(i,sr)=>Math.hypot(i%W-(G.sonX??G.px),((i/W)|0)-(G.sonY??G.py))<=sr;
 function render(){
   if(!fxRaf&&animVif())fxRaf=requestAnimationFrame(fxLoop);
@@ -203,14 +234,19 @@ function render(){
     if(t>=WALL)batiTuile(t,x,y,(tl,a)=>put(tl,x,y,a*k));else
     if(t!==BRIDGE)put(TL.ground0,x,y,.6*k);   // sol uniforme : plus de variations près des sites (13 novembre 2026)
     if(t===ROCK)put(h%3?TL.rock:TL.rock2,x,y,.95*k);
-    else if(t===MOUNT){const up=y>0?G.t[idx(x,y-1)]:-1;if(up===MOUNT)put(TL.mtBody,x,y,.9*k);else{if(up===HARD)put(TL.softTopBg,x,y,.9*k);put(TL.mtTop,x,y,.9*k);}}   // sous de la roche dure, la crête se pose sur un fond de roche dure
+    // sous de la roche dure, la crête se pose sur un fond de roche dure
+    else if(t===MOUNT){const up=y>0?G.t[idx(x,y-1)]:-1;if(up===MOUNT)put(TL.mtBody,x,y,.9*k);else{if(up===HARD)put(TL.softTopBg,x,y,.9*k);
+      put(TL.mtTop,x,y,.9*k);}}
     else if(t===HARD){const up=y>0?G.t[idx(x,y-1)]:-1;   // comme la montagne : crête irrégulière en haut, posée sur de la roche tendre
       if(up!==HARD){if(up===MOUNT||up===ROCK)put(TL.hardTopBg,x,y,.9*k);put(TL.hardTop,x,y,.9*k);}else put(TL.hardBody,x,y,.9*k);}
     else if((t===SHIP||t===DECK)&&G.ship){const sk=TL['ship_'+(x-G.ship.x)+'_'+(y-G.ship.y)];if(sk)put(sk,x,y,k);}
     if(t===MOUNT&&G.ore&&G.ore[i]&&!oreSol(G.ore[i]))put(oreTile(G.ore[i],false),x,y,k);
-    else if(t===LIQ){ctx.globalAlpha=.24*k;ctx.fillStyle=PAL['e'];ctx.fillRect((x-camX)*S,(y-camY)*S,S,S);put((liqFrame+(h%2))%2?TL.liq1:TL.liq0,x,y,.9*k);}
-    else if(t===DEEP){ctx.globalAlpha=k;ctx.fillStyle='#01060c';ctx.fillRect((x-camX)*S,(y-camY)*S,S,S);ctx.globalAlpha=.08*k;ctx.fillStyle=PAL['e'];ctx.fillRect((x-camX)*S,(y-camY)*S,S,S);put((liqFrame+(h%2))%2?TL.deep1:TL.deep0,x,y,.4*k);}
-    else if(t===CHASM){ctx.globalAlpha=1;ctx.fillStyle='#000';ctx.fillRect((x-camX)*S,(y-camY)*S,S,S);if(CHASM_OV){ctx.globalAlpha=k;ctx.drawImage(CHASM_OV,x*16,y*16,16,16,(x-camX)*S,(y-camY)*S,S,S);}}
+    else if(t===LIQ){ctx.globalAlpha=.24*k;ctx.fillStyle=PAL['e'];ctx.fillRect((x-camX)*S,(y-camY)*S,S,S);
+      put((liqFrame+(h%2))%2?TL.liq1:TL.liq0,x,y,.9*k);}
+    else if(t===DEEP){ctx.globalAlpha=k;ctx.fillStyle='#01060c';ctx.fillRect((x-camX)*S,(y-camY)*S,S,S);ctx.globalAlpha=.08*k;
+      ctx.fillStyle=PAL['e'];ctx.fillRect((x-camX)*S,(y-camY)*S,S,S);put((liqFrame+(h%2))%2?TL.deep1:TL.deep0,x,y,.4*k);}
+    else if(t===CHASM){ctx.globalAlpha=1;ctx.fillStyle='#000';ctx.fillRect((x-camX)*S,(y-camY)*S,S,S);if(CHASM_OV){ctx.globalAlpha=k;
+      ctx.drawImage(CHASM_OV,x*16,y*16,16,16,(x-camX)*S,(y-camY)*S,S,S);}}
     else if(t===RUBBLE)put(TL.rubble,x,y,.65*k);
     // herbes assombries de moitié le 15 novembre 2026 (elles ressortaient trop) : même teinte, luminosité divisée par deux
     else if(t===GRASS)put(TL.grass0,x,y,.45*k);
@@ -219,12 +255,21 @@ function render(){
   }
   if(G.tracks)for(const k in G.tracks){const tr=G.tracks[k],age=G.turn-tr.t;if(age>=TRACK_LIFE){delete G.tracks[k];continue;}
     const i=+k;if(tr.i==null||(fog&&!vis[i]))continue;put(TL[`tk${tr.i}${tr.o}${Math.max(0,age)}`],i%W,(i/W)|0,.6);}
-  if(G.ore)for(const k in G.ore){if(!oreSol(G.ore[k]))continue;const i=+k;if(fog&&!G.seen[i])continue;put(oreTile(G.ore[k],true),i%W,(i/W)|0,fog&&!vis[i]?.35:1);}
-  {const sr=sonarR();if(sr>0&&G.ore&&fog)for(const k in G.ore){const i=+k;if(G.seen[i]||!sonarVu(i,sr))continue;put(oreTile(G.ore[k],oreSol(G.ore[k])),i%W,(i/W)|0,1);}}   // gisements détectés par le sonar, même hors de vue
+  if(G.ore)for(const k in G.ore){if(!oreSol(G.ore[k]))continue;const i=+k;if(fog&&!G.seen[i])continue;
+    put(oreTile(G.ore[k],true),i%W,(i/W)|0,fog&&!vis[i]?.35:1);}
+  // gisements détectés par le sonar, même hors de vue
+  {const sr=sonarR();if(sr>0&&G.ore&&fog)for(const k in G.ore){const i=+k;if(G.seen[i]||!sonarVu(i,sr))continue;
+    put(oreTile(G.ore[k],oreSol(G.ore[k])),i%W,(i/W)|0,1);}}
   if(G.cles)for(const k in G.cles){const i=+k;if(fog&&!G.seen[i])continue;put(TL.cle,i%W,(i/W)|0,fog&&!vis[i]?.35:1);}   // clés au sol
-  if(G.vit)for(const k in G.vit){const i=+k;if(fog&&!G.seen[i])continue;put(G.vit[k]===2?TL.vitrineOff:TL.vitrine,i%W,(i/W)|0,fog&&!vis[i]?.35:1);}   // vitrines : le socle sous le lot (22 novembre 2026)
-  if(G.items)for(const k in G.items){const i=+k,l=G.items[k];if(!l||!l.length||fog&&!G.seen[i])continue;put(itemTile(l[l.length-1]),i%W,(i/W)|0,fog&&!vis[i]?.35:1);}   // un objet au sol : sa tuile (le dernier posé s'il y en a plusieurs)   // objets posés au sol
-  if(G.splat)for(const [px,py,c,sz] of G.splat){const i=idx(Math.floor(px/S),Math.floor(py/S));if(fog&&!G.seen[i])continue;   // débris au sol
+  // vitrines : le socle sous le lot (22 novembre 2026)
+  if(G.vit)for(const k in G.vit){const i=+k;if(fog&&!G.seen[i])continue;
+    put(G.vit[k]===2?TL.vitrineOff:TL.vitrine,i%W,(i/W)|0,fog&&!vis[i]?.35:1);}
+  // un objet au sol : sa tuile (le dernier posé s'il y en a plusieurs)
+  // objets posés au sol
+  if(G.items)for(const k in G.items){const i=+k,l=G.items[k];if(!l||!l.length||fog&&!G.seen[i])continue;
+    put(itemTile(l[l.length-1]),i%W,(i/W)|0,fog&&!vis[i]?.35:1);}
+  // débris au sol
+  if(G.splat)for(const [px,py,c,sz] of G.splat){const i=idx(Math.floor(px/S),Math.floor(py/S));if(fog&&!G.seen[i])continue;
     ctx.globalAlpha=fog&&!vis[i]?.3:1;ctx.fillStyle=c;ctx.fillRect(px-camX*S,py-camY*S,sz,sz);}
   ctx.globalAlpha=1;
   // (les taches de sang ne sont plus dessinées depuis le 19 novembre 2026 : les ennemis laissent des débris)
@@ -239,25 +284,36 @@ function render(){
   drawPath();
   rayonsBloqueur();   // sous les créatures et la foreuse
   // balises posées (23 novembre 2026) : la tuile de la balise, un point rouge qui clignote tant qu'elle hurle, sa barre de vie
-  if(G.balises)for(const q of G.balises){const i=idx(q.x,q.y);if(fog&&!vis[i])continue;if(FX.some(f=>f.kind==='jet'&&f.q===q.id&&fxP(f)<1))continue;/* encore en vol : elle n'est pas arrivée */const px=(q.x-camX)*S,py=(q.y-camY)*S;ctx.globalAlpha=1;
-    if(TL.o_balise)ctx.drawImage(TL.o_balise,px,py,S,S);if(Math.floor(performance.now()/300)%2){const u=S/16;ctx.fillStyle=PAL['4'];ctx.fillRect(px+7*u,py+u,2*u,2*u);}
-    const pv=ITEM_VAL.balise.pv;if(q.hp<pv){const w=S-6;ctx.fillStyle='#000';ctx.fillRect(px+3,py-4,w,3);ctx.fillStyle=PAL['4'];ctx.fillRect(px+3,py-4,Math.round(w*Math.max(0,q.hp)/pv),3);}}
+  if(G.balises)for(const q of G.balises){const i=idx(q.x,q.y);if(fog&&!vis[i])continue;
+    if(FX.some(f=>f.kind==='jet'&&f.q===q.id&&fxP(f)<1))continue;
+    /* encore en vol : elle n'est pas arrivée */const px=(q.x-camX)*S,py=(q.y-camY)*S;ctx.globalAlpha=1;
+    if(TL.o_balise)ctx.drawImage(TL.o_balise,px,py,S,S);if(Math.floor(performance.now()/300)%2){const u=S/16;ctx.fillStyle=PAL['4'];
+      ctx.fillRect(px+7*u,py+u,2*u,2*u);}
+    const pv=ITEM_VAL.balise.pv;if(q.hp<pv){const w=S-6;ctx.fillStyle='#000';ctx.fillRect(px+3,py-4,w,3);ctx.fillStyle=PAL['4'];
+      ctx.fillRect(px+3,py-4,Math.round(w*Math.max(0,q.hp)/pv),3);}}
   // barre de vie au-dessus d'une créature blessée (insectoïdes compris depuis le 16 novembre 2026 : ils en étaient privés)
-  const barreVie=(px,py,hp,pv)=>{if(hp>=pv)return;const w=S-6;ctx.fillStyle='#000';ctx.fillRect(px+3,py-4,w,3);ctx.fillStyle=PAL['4'];ctx.fillRect(px+3,py-4,Math.round(w*Math.max(0,hp)/pv),3);};
+  const barreVie=(px,py,hp,pv)=>{if(hp>=pv)return;const w=S-6;ctx.fillStyle='#000';ctx.fillRect(px+3,py-4,w,3);ctx.fillStyle=PAL['4'];
+    ctx.fillRect(px+3,py-4,Math.round(w*Math.max(0,hp)/pv),3);};
   if(G.animals)for(const a of G.animals)if(!fog||vis[idx(a.x,a.y)]){const [lx,ly]=lungeOff(f=>f.kind==='lunge'&&f.beast===a);
-    const px=(a.x-camX)*S+lx,py=(a.y-camY)*S+ly;ctx.globalAlpha=1;{const t=TL['an'+a.sp+(a.dir<0?'l':'r')];ctx.drawImage(a.stun>0?tuileEtourdie(t):t,px,py,S,S);}
+    const px=(a.x-camX)*S+lx,py=(a.y-camY)*S+ly;ctx.globalAlpha=1;{const t=TL['an'+a.sp+(a.dir<0?'l':'r')];
+      ctx.drawImage(a.stun>0?tuileEtourdie(t):t,px,py,S,S);}
     const sp=SPECIES[a.sp];barreVie(px,py,a.hp??pvDe(sp),pvDe(sp));}
   if(G.beasts)for(const b of G.beasts){if(!beastVisible(b)||beastCache(b))continue;const [lx,ly]=lungeOff(f=>f.kind==='lunge'&&f.beast===b);
-    const px=(b.x-camX)*S+lx,py=(b.y-camY)*S+ly,img0=b.fuse>0&&Math.floor(performance.now()/130)%2?TL.mineA:TL['bz'+b.sp+(b.dir<0?'l':'r')],img=b.stun>0?tuileEtourdie(img0):img0;   // mine armée : elle clignote ; étourdie : damier bio / bâti
+    // mine armée : elle clignote ; étourdie : damier bio / bâti
+    const px=(b.x-camX)*S+lx,py=(b.y-camY)*S+ly,img0=b.fuse>0&&Math.floor(performance.now()/130)%2?TL.mineA:TL['bz'+b.sp+(b.dir<0?'l':'r')],
+      img=b.stun>0?tuileEtourdie(img0):img0;
     ctx.globalAlpha=1;ctx.drawImage(img,px,py,S,S);
-    const fl=FX.find(f=>f.kind==='flash'&&f.beast===b);if(fl){ctx.globalCompositeOperation='lighter';ctx.globalAlpha=1-fxP(fl);ctx.drawImage(img,px,py,S,S);ctx.drawImage(img,px,py,S,S);ctx.globalCompositeOperation='source-over';ctx.globalAlpha=1;}
+    const fl=FX.find(f=>f.kind==='flash'&&f.beast===b);if(fl){ctx.globalCompositeOperation='lighter';ctx.globalAlpha=1-fxP(fl);
+      ctx.drawImage(img,px,py,S,S);ctx.drawImage(img,px,py,S,S);ctx.globalCompositeOperation='source-over';ctx.globalAlpha=1;}
     barreVie(px,py,b.hp,pvDe(BEASTS[b.sp]));}
   // objet sous une créature (23 novembre 2026) : la créature le cache ; sa tuile, en petit, dans le coin bas droit de la case
-  if(G.items){const sous=new Set();for(const b of G.beasts||[])if(beastVisible(b)&&!beastCache(b))sous.add(idx(b.x,b.y));for(const a of G.animals||[])if(!fog||vis[idx(a.x,a.y)])sous.add(idx(a.x,a.y));
+  if(G.items){const sous=new Set();for(const b of G.beasts||[])if(beastVisible(b)&&!beastCache(b))sous.add(idx(b.x,b.y));
+    for(const a of G.animals||[])if(!fog||vis[idx(a.x,a.y)])sous.add(idx(a.x,a.y));
     for(const i of sous){const l=G.items[i];if(!l||!l.length)continue;const q=Math.round(S*.5),px=(i%W-camX)*S+S-q,py=(((i/W)|0)-camY)*S+S-q;
       ctx.globalAlpha=1;ctx.fillStyle='#000';ctx.fillRect(px-1,py-1,q+2,q+2);ctx.drawImage(itemTile(l[l.length-1]),px,py,q,q);}}
   // antenne : un ennemi hors de vue dans le disque d'une antenne allumée se montre par un point en couleur danger (22 novembre 2026)
-  if(G.beasts&&fog)for(const b of G.beasts){if(vis[idx(b.x,b.y)]||!antDetecte(b))continue;const q=S/16;ctx.globalAlpha=1;ctx.fillStyle=PAL['4'];ctx.fillRect((b.x-camX)*S+6*q,(b.y-camY)*S+6*q,4*q,4*q);}
+  if(G.beasts&&fog)for(const b of G.beasts){if(vis[idx(b.x,b.y)]||!antDetecte(b))continue;const q=S/16;ctx.globalAlpha=1;
+    ctx.fillStyle=PAL['4'];ctx.fillRect((b.x-camX)*S+6*q,(b.y-camY)*S+6*q,4*q,4*q);}
   // nuage d'un fumigène : les tuiles de nuage par-dessus le terrain et les créatures, sous la foreuse ; elles pâlissent en se dissipant
   // la fumée se voit même là où elle coupe la vue : sinon on ne verrait que les neuf cases autour de la foreuse
   if(G.fum)for(const k in G.fum){const i=+k;if(fog&&!vis[i]&&!G.seen[i])continue;const c=G.fum[k],t=TL['nuage'+c.k];
@@ -267,21 +323,26 @@ function render(){
     for(const [zx,zy] of viseeCases()){
       if(zx<0||zy<0||zx>=W||zy>=H)continue;ctx.drawImage(t,(zx-camX)*S,(zy-camY)*S,S,S);}}
   const wreck=BOOM||(G.over&&G.over.dead);   // foreuse détruite : plus dessinée
-  if(!wreck){const [lx,ly]=lungeOff(f=>f.kind==='lunge'&&f.robot);ctx.globalAlpha=1;ctx.drawImage(robotTuile(),(G.px-camX)*S+lx,(G.py-camY)*S+ly,S,S);}
+  if(!wreck){const [lx,ly]=lungeOff(f=>f.kind==='lunge'&&f.robot);ctx.globalAlpha=1;
+    ctx.drawImage(robotTuile(),(G.px-camX)*S+lx,(G.py-camY)*S+ly,S,S);}
   const ht=G.t[idx(G.px,G.py)];if(wreck){}else if(ht===LIQ)put(TL.wade,G.px,G.py,.95);else if(ht===DEEP)put(TL.wadeDeep,G.px,G.py,.95);
   for(const f of FX){if(f.kind!=='num')continue;const p=fxP(f),rise=reduced?0:p*14;
-    ctx.globalAlpha=p<.6?1:1-(p-.6)/.4;ctx.font='bold 14px "JetBrains Mono", ui-monospace, monospace';ctx.textAlign='center';ctx.textBaseline='bottom';
-    const tx=(f.x-camX)*S+S/2,ty=(f.y-camY)*S-2-rise-(f.stack||0)*14;ctx.fillStyle='#000';ctx.fillText(f.txt,tx+1,ty+1);ctx.fillStyle=f.col;ctx.fillText(f.txt,tx,ty);}
+    ctx.globalAlpha=p<.6?1:1-(p-.6)/.4;ctx.font='bold 14px "JetBrains Mono", ui-monospace, monospace';ctx.textAlign='center';
+      ctx.textBaseline='bottom';
+    const tx=(f.x-camX)*S+S/2,ty=(f.y-camY)*S-2-rise-(f.stack||0)*14;ctx.fillStyle='#000';ctx.fillText(f.txt,tx+1,ty+1);ctx.fillStyle=f.col;
+      ctx.fillText(f.txt,tx,ty);}
   ctx.globalAlpha=1;
   // Consommables : + rouges (réparobots) et flèches bio (batterie) qui montent, filet pulsé autour de la foreuse (purge).
   // Pixel art strict : taille fixe, opaques, calés sur la grille des pixels de tuile ; chaque grain apparaît à son heure et s'efface d'un coup.
   {const u=S/16;
    for(const f of FX){if(f.kind!=='soin'&&f.kind!=='ener')continue;const p=fxP(f),bx=(f.x-camX)*16,by=(f.y-camY)*16;
      ctx.fillStyle=f.kind==='soin'?PAL['4']:PAL['2'];
-     const bas=f.kind==='ener'?7:0,mont=f.kind==='ener'?24:13;   // les flèches partent plus bas et montent plus haut : sinon elles se perdent dans la foreuse, de la même couleur
+     // les flèches partent plus bas et montent plus haut : sinon elles se perdent dans la foreuse, de la même couleur
+     const bas=f.kind==='ener'?7:0,mont=f.kind==='ener'?24:13;
      for(const g of f.gr){const q=(p-g.d)*2.2;if(q<0||q>1)continue;const gx=Math.round(bx+g.x),gy=Math.round(by+g.y+bas-q*mont);
        if(f.kind==='soin'){ctx.fillRect(gx*u,(gy+1)*u,3*u,u);ctx.fillRect((gx+1)*u,gy*u,u,3*u);}           // une petite croix
-       else{ctx.fillRect((gx+1)*u,gy*u,u,4*u);ctx.fillRect(gx*u,(gy+1)*u,u,u);ctx.fillRect((gx+2)*u,(gy+1)*u,u,u);}}}   // une flèche vers le haut
+       // une flèche vers le haut
+       else{ctx.fillRect((gx+1)*u,gy*u,u,4*u);ctx.fillRect(gx*u,(gy+1)*u,u,u);ctx.fillRect((gx+2)*u,(gy+1)*u,u,u);}}}
 }
   // Dessins au pixel de tuile (u = 1/16 de case), calés sur la grille, opaques : le projectile d'un tireur et l'onde du sonar
   {const u=S/16;ctx.fillStyle=PAL['1'];
@@ -292,22 +353,31 @@ function render(){
      for(const f of FX)if(f.kind==='laser'&&G.beasts.includes(f.o)&&fxP(f)<.75)laser(cx(f.o),cy(f.o),(f.x+.5-camX)*16+f.ox,(f.y+.5-camY)*16+f.oy,f.ox*5.3+f.oy+f.t0,4);
      // boule de glu de l'englueur : la tuile « glu » file de l'ennemi à sa cible, calée sur les pixels de tuile
      // balise lancée : sa tuile vole de la foreuse à la case visée (23 novembre 2026)
-     for(const f of FX)if(f.kind==='jet'&&TL.o_balise){const p=fxP(f),gx=Math.round((f.ax+(f.bx-f.ax)*p-camX)*16),gy=Math.round((f.ay+(f.by-f.ay)*p-camY)*16-Math.sin(p*Math.PI)*10);ctx.drawImage(TL.o_balise,gx*u,gy*u,S,S);}
-     for(const f of FX)if(f.kind==='boule'&&TL.glu){const p=fxP(f),gx=Math.round((f.ax+(f.bx-f.ax)*p-camX)*16),gy=Math.round((f.ay+(f.by-f.ay)*p-camY)*16);ctx.drawImage(TL.glu,gx*u,gy*u,S,S);}}
+     for(const f of FX)if(f.kind==='jet'&&TL.o_balise){const p=fxP(f),gx=Math.round((f.ax+(f.bx-f.ax)*p-camX)*16),
+       gy=Math.round((f.ay+(f.by-f.ay)*p-camY)*16-Math.sin(p*Math.PI)*10);ctx.drawImage(TL.o_balise,gx*u,gy*u,S,S);}
+     for(const f of FX)if(f.kind==='boule'&&TL.glu){const p=fxP(f),gx=Math.round((f.ax+(f.bx-f.ax)*p-camX)*16),
+       gy=Math.round((f.ay+(f.by-f.ay)*p-camY)*16);ctx.drawImage(TL.glu,gx*u,gy*u,S,S);}}
    // Explosion (mine, charge sismique) : sur chaque case de sa zone (3 × 3 et 5 cases autour, f.cases), les tuiles boom0 (éclair), boom1 (damier), boom2
    // (braises), éditables dans le Tile editor (groupe FX, 22 novembre 2026) ; boom1 et boom2 alternent avec leur variante pour crépiter
-   for(const f of FX)if(f.kind==='boom'){const p=fxP(f),t=Math.floor(p*16),tl=p<.2?TL.boom0:p<.6?(t&1?TL.boom1b:TL.boom1):(t&1?TL.boom2b:TL.boom2);ctx.globalAlpha=1;
+   for(const f of FX)if(f.kind==='boom'){const p=fxP(f),t=Math.floor(p*16),
+     tl=p<.2?TL.boom0:p<.6?(t&1?TL.boom1b:TL.boom1):(t&1?TL.boom2b:TL.boom2);ctx.globalAlpha=1;
      if(tl)for(const [zx,zy] of f.cases||[[f.x,f.y]])ctx.drawImage(tl,(zx-camX)*S,(zy-camY)*S,S,S);}
-   // « ! » d'un ennemi qui repère la foreuse : un trait d'un pixel de tuile, blanc cerné de noir, au-dessus de lui ; il monte de 2 pixels puis s'éteint d'un coup (affiné le 16 novembre 2026)
-   for(const f of FX)if(f.kind==='alerte'&&(G.beasts.includes(f.o)||G.animals.includes(f.o))&&vis[idx(f.o.x,f.o.y)]){const p=fxP(f),px=Math.round((f.o.x-camX)*16)+7,py=Math.round((f.o.y-camY)*16)-10-(reduced?2:Math.min(2,Math.floor(p*12)));
-     ctx.fillStyle='#000';ctx.fillRect((px-1)*u,(py-1)*u,3*u,9*u);ctx.fillStyle='#fff';ctx.fillRect(px*u,py*u,u,5*u);ctx.fillRect(px*u,(py+6)*u,u,u);ctx.fillStyle=PAL['1'];}
-   for(const f of FX)if(f.kind==='sonar'){const R=fxP(f)*f.r*16,cx=Math.round((f.x+.5-camX)*16),cy=Math.round((f.y+.5-camY)*16),w=Math.ceil(vw/u),h=Math.ceil(vh/u),q=R*Math.SQRT1_2;
+   // « ! » d'un ennemi qui repère la foreuse : un trait d'un pixel de tuile, blanc cerné de noir, au-dessus de lui ; il monte de 2 pixels
+   // puis s'éteint d'un coup (affiné le 16 novembre 2026)
+   for(const f of FX)if(f.kind==='alerte'&&(G.beasts.includes(f.o)||G.animals.includes(f.o))&&vis[idx(f.o.x,f.o.y)]){const p=fxP(f),
+     px=Math.round((f.o.x-camX)*16)+7,py=Math.round((f.o.y-camY)*16)-10-(reduced?2:Math.min(2,Math.floor(p*12)));
+     ctx.fillStyle='#000';ctx.fillRect((px-1)*u,(py-1)*u,3*u,9*u);ctx.fillStyle='#fff';ctx.fillRect(px*u,py*u,u,5*u);
+       ctx.fillRect(px*u,(py+6)*u,u,u);ctx.fillStyle=PAL['1'];}
+   for(const f of FX)if(f.kind==='sonar'){const R=fxP(f)*f.r*16,cx=Math.round((f.x+.5-camX)*16),cy=Math.round((f.y+.5-camY)*16),
+     w=Math.ceil(vw/u),h=Math.ceil(vh/u),q=R*Math.SQRT1_2;
      const dot=(px,py)=>{if(px>=0&&py>=0&&px<w&&py<h)ctx.fillRect(px*u,py*u,u,u);};
-     for(let d=-Math.ceil(q);d<=Math.ceil(q);d++){const e=Math.round(Math.sqrt(Math.max(0,R*R-d*d)));dot(cx+d,cy-e);dot(cx+d,cy+e);dot(cx-e,cy+d);dot(cx+e,cy+d);}}}
+     for(let d=-Math.ceil(q);d<=Math.ceil(q);d++){const e=Math.round(Math.sqrt(Math.max(0,R*R-d*d)));dot(cx+d,cy-e);dot(cx+d,cy+e);
+       dot(cx-e,cy+d);dot(cx+e,cy+d);}}}
   if(BOOM)drawBoom();
   ctx.restore();
   smokeKick();
-  if(HOV&&CURT&&!busy()){const ok=(x,y)=>{const i=idx(x,y);return (!fog||G.seen[i])&&(getPath()||Math.max(Math.abs(x-G.px),Math.abs(y-G.py))<=1);};
+  if(HOV&&CURT&&!busy()){const ok=(x,y)=>{const i=idx(x,y);
+    return (!fog||G.seen[i])&&(getPath()||Math.max(Math.abs(x-G.px),Math.abs(y-G.py))<=1);};
     ctx.globalAlpha=1;ctx.drawImage(ok(HOV.x,HOV.y)?CURT:CURT_DIM,(HOV.x-camX)*S,(HOV.y-camY)*S,S,S);}
   ctx.globalAlpha=1;side();mini();
 }

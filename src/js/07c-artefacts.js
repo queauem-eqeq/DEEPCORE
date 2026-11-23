@@ -22,12 +22,14 @@ const ART_LISTE=[['antenne','Antenne','Activée par la foreuse, elle lève le br
   ['vitrines','Vitrines','Une petite pièce en cul-de-sac, trois lots sous vitrine : on n’en emporte qu’un.',[.4,1,2]],
   ['station','Station de réparation','Vie et énergie au maximum, une seule fois. Le bruit attire les ennemis proches.',[.3,.7,1.2]],
   ['fabric','Fabricateur','Fabrique des objets contre de la Matière {µ}.',[.5,1,2]]];
-const ARTEFACTS_DEF=()=>({antenne:{on:1,f:1},herbe:{on:1,f:1},machines:{on:1,f:1},terminal:{on:1,f:1},lasers:{on:1,f:1},croix:{on:0,f:1},ponts:{on:1,f:1},piles:{on:1,f:1},pieges:{on:1,f:1},vitrines:{on:1,f:1},station:{on:1,f:1},fabric:{on:1,f:1}});   // réglage du joueur, relu le 21 novembre 2026 à 23 h 39 (croix laser désactivée, machines en fréquence normale)
+// réglage du joueur, relu le 21 novembre 2026 à 23 h 39 (croix laser désactivée, machines en fréquence normale)
+const ARTEFACTS_DEF=()=>({antenne:{on:1,f:1},herbe:{on:1,f:1},machines:{on:1,f:1},terminal:{on:1,f:1},lasers:{on:1,f:1},croix:{on:0,f:1},ponts:{on:1,f:1},piles:{on:1,f:1},pieges:{on:1,f:1},vitrines:{on:1,f:1},station:{on:1,f:1},fabric:{on:1,f:1}});
 /* Niveaux de profondeur où un artefact peut apparaître (21 novembre 2026, réglé dans la fenêtre LIFE). Départ : les lasers à partir
    du niveau 2, les croix au niveau 3, les piles à partir du niveau 2, tout le reste partout. */
 const ART_NIV_DEF={lasers:[2,3],croix:[3],piles:[2,3],pieges:[2,3],fabric:[2,3],ponts:[3],station:[3]},ART_NIVS=NIVS;
 function artefactsSains(d){const o=ARTEFACTS_DEF();for(const [k] of ART_LISTE)o[k].niv=(ART_NIV_DEF[k]||ART_NIVS).slice();
-  if(d&&typeof d==='object')for(const [k] of ART_LISTE)if(d[k]){o[k].on=d[k].on?1:0;o[k].f=[0,1,2].includes(+d[k].f)?+d[k].f:1;if(Array.isArray(d[k].niv))o[k].niv=ART_NIVS.filter(n=>d[k].niv.includes(n));}return o;}
+  if(d&&typeof d==='object')for(const [k] of ART_LISTE)if(d[k]){o[k].on=d[k].on?1:0;o[k].f=[0,1,2].includes(+d[k].f)?+d[k].f:1;
+    if(Array.isArray(d[k].niv))o[k].niv=ART_NIVS.filter(n=>d[k].niv.includes(n));}return o;}
 // l'artefact est-il permis sur la carte en cours de génération ? (actif dans le Lab, et permis à ce niveau)
 const artOn=k=>{const a=ARTEFACTS[k];return !!(a&&a.on&&(!a.niv||a.niv.includes(nivBorne(typeof NIV_GEN==='number'?NIV_GEN:1))));};
 let ARTEFACTS=artefactsSains(null);
@@ -48,29 +50,37 @@ const TERM_TXT=[
   ['Dernière entrée','Le noyau est plus près qu’on ne le pensait. Le site est derrière la dernière porte. Nous laissons la foreuse suivante finir le travail.']];
 
 // une case de pièce où poser un obstacle sans rien couper : pas devant un passage, et les cases praticables autour d'elle restent d'un seul tenant
-function artLibre(B,i,site){const t=G.t;if(t[i]!==FLOOR||G.cles[i]||i===site||(G.art&&G.art[i]!=null))return false;const x=i%W,y=(i/W)|0;if(x===G.px&&y===G.py)return false;
+function artLibre(B,i,site){const t=G.t;if(t[i]!==FLOOR||G.cles[i]||i===site||(G.art&&G.art[i]!=null))return false;const x=i%W,y=(i/W)|0;
+  if(x===G.px&&y===G.py)return false;
   for(const [dx,dy] of D4){const j=idx(x+dx,y+dy),v=t[j];if(v===DOOR||v===LOCK||v===SECRET||B.porte[j])return false;}
   const ring=[[0,-1],[1,-1],[1,0],[1,1],[0,1],[-1,1],[-1,0],[-1,-1]].map(([dx,dy])=>!blocks(t[idx(x+dx,y+dy)]));let runs=0;
   for(let k=0;k<8;k++)if(ring[k]&&!ring[(k+7)%8])runs++;
   return runs===1||ring.every(Boolean);}
 function artefacts(B,strs){G.art={};const A=ARTEFACTS,t=G.t,site=G.sites&&G.sites[0]?idx(G.sites[0].x,G.sites[0].y):-1;
   const pieces=[];for(const S of strs)for(const p of S.pieces)if(p.g!=='couloir'&&p.c.length>=9)pieces.push(p);if(!pieces.length)return;
-  const fq=k=>ART_LISTE.find(a=>a[0]===k)[3][A[k].f],mel=()=>pieces.slice().sort(()=>Math.random()-.5),murV=i=>D4.some(([dx,dy])=>t[idx(i%W+dx,((i/W)|0)+dy)]===WALL);
+  const fq=k=>ART_LISTE.find(a=>a[0]===k)[3][A[k].f],mel=()=>pieces.slice().sort(()=>Math.random()-.5),
+    murV=i=>D4.some(([dx,dy])=>t[idx(i%W+dx,((i/W)|0)+dy)]===WALL);
   const compte=n=>Math.floor(n)+(Math.random()<n-Math.floor(n)?1:0);
   // pose un obstacle dans une pièce, de préférence contre un mur ; renvoie la case, ou -1
-  const pose=(p,terrain,val,mur)=>{const c=p.c.filter(i=>artLibre(B,i,site));if(!c.length)return -1;const m=c.filter(murV),l=mur&&m.length?m:c,i=l[rnd(0,l.length-1)];t[i]=terrain;G.art[i]=val;return i;};
+  const pose=(p,terrain,val,mur)=>{const c=p.c.filter(i=>artLibre(B,i,site));if(!c.length)return -1;
+    const m=c.filter(murV),l=mur&&m.length?m:c,i=l[rnd(0,l.length-1)];t[i]=terrain;G.art[i]=val;return i;};
   G.artN={antenne:0,herbe:0,machines:0,terminal:0};
   // 2. herbe : la pièce entière, hautes et basses mêlées par petites touffes (le site et les clés gardent leur sol)
   if(artOn('herbe')){const pris=mel().filter(p=>!p.c.includes(site)).slice(0,compte(pieces.length*fq('herbe')));
     for(const p of pris){const g=Math.random()*10,h=Math.random()*10;p.herbe=1;G.artN.herbe++;
-      for(const i of p.c)if(t[i]===FLOOR&&i!==site){const x=i%W,y=(i/W)|0;t[i]=G.cles[i]?FLAT:Math.sin(x*.9+g)+Math.cos(y*1.1+h)+Math.random()*.9>.45?GRASS:FLAT;}}}   // sous une clé : de la terre nue, pas la dalle du bâtiment (22 novembre 2026)
+      // sous une clé : de la terre nue, pas la dalle du bâtiment (22 novembre 2026)
+      for(const i of p.c)if(t[i]===FLOOR&&i!==site){const x=i%W,y=(i/W)|0;
+        t[i]=G.cles[i]?FLAT:Math.sin(x*.9+g)+Math.cos(y*1.1+h)+Math.random()*.9>.45?GRASS:FLAT;}}}
   const libres=()=>mel().filter(p=>!p.herbe);
   // 1. antenne et 4. terminal : un par pièce, contre un mur si possible
-  if(artOn('antenne')){let n=compte(fq('antenne'));for(const p of libres()){if(n<=0)break;if(pose(p,ANTENNA,0,true)>=0){n--;p.ant=1;G.artN.antenne++;}}}
-  if(artOn('terminal')){let n=compte(fq('terminal')),k=rnd(0,TERM_TXT.length-1);for(const p of libres()){if(n<=0)break;if(p.ant)continue;if(pose(p,TERMINAL,k%TERM_TXT.length,true)>=0){n--;k++;G.artN.terminal++;}}}
+  if(artOn('antenne')){let n=compte(fq('antenne'));for(const p of libres()){if(n<=0)break;if(pose(p,ANTENNA,0,true)>=0){n--;p.ant=1;
+    G.artN.antenne++;}}}
+  if(artOn('terminal')){let n=compte(fq('terminal')),k=rnd(0,TERM_TXT.length-1);for(const p of libres()){if(n<=0)break;if(p.ant)continue;
+    if(pose(p,TERMINAL,k%TERM_TXT.length,true)>=0){n--;k++;G.artN.terminal++;}}}
   // 3. machines : une à cinq par pièce choisie, selon sa taille
   if(artOn('machines')){const pris=libres().slice(0,compte(pieces.length*fq('machines')));
-    for(const p of pris){let n=Math.max(1,Math.min(5,Math.round(p.c.length/14)));for(let k=0;k<n;k++)if(pose(p,MACHINE,rnd(0,9),Math.random()<.7)>=0)G.artN.machines++;}}}
+    for(const p of pris){let n=Math.max(1,Math.min(5,Math.round(p.c.length/14)));
+      for(let k=0;k<n;k++)if(pose(p,MACHINE,rnd(0,9),Math.random()<.7)>=0)G.artN.machines++;}}}
 
 // la foreuse avance sur une antenne : elle s'allume et lève le brouillard autour d'elle
 const ANT_R=15;
@@ -83,20 +93,30 @@ const antAnime=()=>{for(const k in ANT_ANIM)return true;return false;};
    Ensuite le brouillard revient sur son disque, mais elle continue de détecter : tout ennemi dans le disque se montre par un
    point en couleur danger, sur la carte et la mini-carte (antDetecte). G.art[case] : 1 = disque en vue, 2 = détection seule. */
 const ANT_TOURS=15;
-const antDetecte=o=>{if(!G.art)return false;for(const k in G.art){const i=+k,e=G.art[k];if((e!==1&&e!==2)||G.t[i]!==ANTENNA)continue;const dx=o.x-i%W,dy=o.y-((i/W)|0);if(dx*dx+dy*dy<=ANT_R*ANT_R+ANT_R)return true;}return false;};
-function antVis(){if(!G.art)return;const now=performance.now();for(const k in G.art){const i=+k;if(G.art[k]!==1||G.t[i]!==ANTENNA)continue;const x=i%W,y=(i/W)|0;
-  if(G.antFin&&G.antFin[i]!=null&&G.turn>=G.antFin[i]){G.art[k]=2;delete G.antFin[i];sayMore('L’antenne cesse d’éclairer la zone : le brouillard revient, mais elle signale toujours les ennemis (points rouges).','info');continue;}
-  let R2=ANT_R*ANT_R+ANT_R;if(ANT_ANIM[i]!=null){const p=(now-ANT_ANIM[i])/ANT_DUR;if(p>=1||reduced)delete ANT_ANIM[i];else{const r=Math.floor(p*(ANT_R+1))+1;R2=Math.min(R2,r*r);}}   // anneau r : les cases à moins de r de distance
-  for(let dy=-ANT_R;dy<=ANT_R;dy++)for(let dx=-ANT_R;dx<=ANT_R;dx++){const a=x+dx,b=y+dy;if(a<0||b<0||a>=W||b>=H||dx*dx+dy*dy>R2)continue;const j=idx(a,b);vis[j]=1;G.seen[j]=1;}}}
+const antDetecte=o=>{if(!G.art)return false;for(const k in G.art){const i=+k,e=G.art[k];if((e!==1&&e!==2)||G.t[i]!==ANTENNA)continue;
+  const dx=o.x-i%W,dy=o.y-((i/W)|0);if(dx*dx+dy*dy<=ANT_R*ANT_R+ANT_R)return true;}return false;};
+function antVis(){if(!G.art)return;const now=performance.now();for(const k in G.art){const i=+k;if(G.art[k]!==1||G.t[i]!==ANTENNA)continue;
+  const x=i%W,y=(i/W)|0;
+  if(G.antFin&&G.antFin[i]!=null&&G.turn>=G.antFin[i]){G.art[k]=2;delete G.antFin[i];
+    sayMore('L’antenne cesse d’éclairer la zone : le brouillard revient, mais elle signale toujours les ennemis (points rouges).','info');continue;}
+  // anneau r : les cases à moins de r de distance
+  let R2=ANT_R*ANT_R+ANT_R;if(ANT_ANIM[i]!=null){const p=(now-ANT_ANIM[i])/ANT_DUR;if(p>=1||reduced)delete ANT_ANIM[i];
+    else{const r=Math.floor(p*(ANT_R+1))+1;R2=Math.min(R2,r*r);}}
+  for(let dy=-ANT_R;dy<=ANT_R;dy++)for(let dx=-ANT_R;dx<=ANT_R;dx++){const a=x+dx,b=y+dy;if(a<0||b<0||a>=W||b>=H||dx*dx+dy*dy>R2)continue;
+    const j=idx(a,b);vis[j]=1;G.seen[j]=1;}}}
 function antenneUse(i){G.art=G.art||{};const x=i%W,y=(i/W)|0;
   if(G.art[i]===1||G.art[i]===2){say('Antenne : déjà en service.');SFX.blocked();render();return;}
-  G.art[i]=1;(G.antFin=G.antFin||{})[i]=G.turn+1+ANT_TOURS;let n=0;for(let dy=-ANT_R;dy<=ANT_R;dy++)for(let dx=-ANT_R;dx<=ANT_R;dx++){const a=x+dx,b=y+dy;if(a<0||b<0||a>=W||b>=H||dx*dx+dy*dy>ANT_R*ANT_R+ANT_R)continue;if(!G.seen[idx(a,b)])n++;}   // compté ici, découvert par antVis
+  // compté ici, découvert par antVis
+  G.art[i]=1;(G.antFin=G.antFin||{})[i]=G.turn+1+ANT_TOURS;let n=0;
+    for(let dy=-ANT_R;dy<=ANT_R;dy++)for(let dx=-ANT_R;dx<=ANT_R;dx++){const a=x+dx,b=y+dy;
+    if(a<0||b<0||a>=W||b>=H||dx*dx+dy*dy>ANT_R*ANT_R+ANT_R)continue;if(!G.seen[idx(a,b)])n++;}
   if(!reduced)ANT_ANIM[i]=performance.now();
   G.turn++;G.msg=null;addFx({kind:'sonar',ant:1,x,y,r:ANT_R+1,dur:reduced?1:ANT_DUR});SFX.sonar(.7);
   say(`L’antenne s’allume : ${n?`${n} cases apparaissent sur la carte`:'la zone alentour est en vue'} pendant ${ANT_TOURS} tours. Ensuite elle signalera encore les ennemis.`,'good');pass(DUR.wait||100);computeFOV();render();}
 // la foreuse avance sur un terminal : il affiche son texte (le temps ne passe pas)
 function terminalUse(i){const [titre,txt]=TERM_TXT[((G.art&&G.art[i])||0)%TERM_TXT.length];
-  if(TRAV)stopTravel();if(EXPL)stopExplore();$('termTitre').textContent=titre;$('termTxt').textContent=txt;$('terminal').hidden=false;$('termClose').focus();SFX.spot();}
+  if(TRAV)stopTravel();if(EXPL)stopExplore();$('termTitre').textContent=titre;$('termTxt').textContent=txt;$('terminal').hidden=false;
+    $('termClose').focus();SFX.spot();}
 function closeTerminal(){$('terminal').hidden=true;render();}
 $('termClose').onclick=closeTerminal;$('terminal').addEventListener('pointerdown',ev=>{if(ev.target===$('terminal'))closeTerminal();});
 
@@ -104,7 +124,8 @@ $('termClose').onclick=closeTerminal;$('terminal').addEventListener('pointerdown
 function buildArtefacts(){const n=G&&G.artN;
   $('artList').innerHTML=ART_LISTE.map(([k,nom,d])=>`<div class="artl${ARTEFACTS[k].on?'':' inactif'}" data-k="${k}">
     <input type="checkbox" id="art-${k}"${ARTEFACTS[k].on?' checked':''}><label for="art-${k}"><b>${nom}</b><span>${d}${n?` Sur cette carte : ${n[k]||0}.`:''}</span></label>${freqHtml(ARTEFACTS[k].f,nom)}</div>`).join('');}
-function openArtefacts(){if(TRAV)stopTravel();if(REST)stopRest();if(EXPL)stopExplore();buildArtefacts();$('artefacts').hidden=false;$('artefacts').querySelector('.mcard').focus();}
+function openArtefacts(){if(TRAV)stopTravel();if(REST)stopRest();if(EXPL)stopExplore();buildArtefacts();$('artefacts').hidden=false;
+  $('artefacts').querySelector('.mcard').focus();}
 function closeArtefacts(){$('artefacts').hidden=true;$('artBtn').focus();render();}
 $('artBtn').onclick=openArtefacts;$('artClose').onclick=closeArtefacts;
 $('artefacts').addEventListener('pointerdown',ev=>{if(ev.target===$('artefacts'))closeArtefacts();});

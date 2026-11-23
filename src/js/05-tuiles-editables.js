@@ -15,16 +15,21 @@ const TILE_LIST=[
   ['Machines',[['tourelle','Tourelle laser'],['tourelleOn','Tourelle laser (tir)'],['pylone','Croix laser'],['pyloneOn','Croix laser (allumée)'],['pile','Pile énergétique'],['socle','Socle'],['socleOn','Socle alimenté'],['levier','Levier'],['levierOn','Levier (actionné)'],['grille','Grille d’énergie'],['station','Station de réparation'],['stationOff','Station (vide)'],['chargeur','Distributeur de pile'],['fabric','Fabricateur'],['niche','Niche (salle piégée)'],['nicheOuverte','Niche ouverte'],['glu','Boule de glu'],['vitrine','Vitrine'],['vitrineOff','Vitrine verrouillée']]],
   ['Vaisseau',[['ship','Cargo']]],
   ['FX',[['boom0','Explosion 1 (éclair)'],['boom1','Explosion 2 (damier)'],['boom2','Explosion 3 (braises)'],['laserV','Laser (rayon)'],['laserX','Laser (croix)'],['nuage0','Nuage plein'],['nuage1','Nuage texturé'],['nuage2','Bord diagonal'],['nuage3','Bord croisé'],['nuage4','Bord rayé'],['nuage5','Bord tramé']]]];
-const TILE_DEPS={robot_u:['robot_u','robot_r','robot_d','robot_l'],an0r:['an0r','an0l'],bz0r:['bz0r','bz0l'],bz1r:['bz1r','bz1l'],deep0:['deep0','deep1'],grass0:['grass0'],gem:['gem','gemDim','gemHole'],ship:['ship',...SHIP_KEYS]};
+const TILE_DEPS={robot_u:['robot_u','robot_r','robot_d','robot_l'],an0r:['an0r','an0l'],bz0r:['bz0r','bz0l'],bz1r:['bz1r','bz1l'],
+  deep0:['deep0','deep1'],grass0:['grass0'],gem:['gem','gemDim','gemHole'],ship:['ship',...SHIP_KEYS]};
 // dimensions en pixels : 16 x 16, sauf le vaisseau édité d'un bloc (5 x 6 tuiles)
 BEASTS.forEach((_,i)=>{TILE_DEPS['bz'+i+'r']=['bz'+i+'r','bz'+i+'l'];});
 const tileDim=k=>k==='ship'?[SGW*16,SGH*16]:[16,16];
-const validTile=(r,k)=>{const [w,h]=tileDim(k);return Array.isArray(r)&&r.length===h&&r.every(l=>typeof l==='string'&&l.length===w&&/^[.0w123r5R]+$/.test(l));};
+const validTile=(r,k)=>{const [w,h]=tileDim(k);
+  return Array.isArray(r)&&r.length===h&&r.every(l=>typeof l==='string'&&l.length===w&&/^[.0w123r5R]+$/.test(l));};
 const PAT_ORIG={};
 let TILE_OV={},TILE_BASE={};   // TILE_BASE : dernières tuiles enregistrées, auxquelles « Rétablir » revient
-try{const o=JSON.parse(localStorage.getItem('np-tiles-base')||'null');if(o&&typeof o==='object')for(const k in o)if(validTile(o[k],k))TILE_BASE[k]=o[k];}catch(e){}
-function commitTileBase(){TILE_BASE=JSON.parse(JSON.stringify(TILE_OV));try{localStorage.setItem('np-tiles-base',JSON.stringify(TILE_BASE));}catch(e){}}
-try{const o=JSON.parse(localStorage.getItem('np-tiles')||'null');if(o&&typeof o==='object')for(const k in o)if(validTile(o[k],k))TILE_OV[k]=o[k];}catch(e){}
+try{const o=JSON.parse(localStorage.getItem('np-tiles-base')||'null');
+  if(o&&typeof o==='object')for(const k in o)if(validTile(o[k],k))TILE_BASE[k]=o[k];}catch(e){}
+function commitTileBase(){TILE_BASE=JSON.parse(JSON.stringify(TILE_OV));
+  try{localStorage.setItem('np-tiles-base',JSON.stringify(TILE_BASE));}catch(e){}}
+try{const o=JSON.parse(localStorage.getItem('np-tiles')||'null');
+  if(o&&typeof o==='object')for(const k in o)if(validTile(o[k],k))TILE_OV[k]=o[k];}catch(e){}
 const saveTiles=()=>{try{localStorage.setItem('np-tiles',JSON.stringify(TILE_OV));}catch(e){}touchLocal();};
 // version retouchée si elle existe, sinon l'originale
 const TF=k=>{const o=TILE_OV[k];if(o)return (x,y)=>o[y][x];const p=PAT_ORIG[k];return typeof p==='function'?p:(x,y)=>p[y][x];};
@@ -32,7 +37,9 @@ for(const [,l] of TILE_LIST)for(const [k] of l)PAT_ORIG[k]=k==='cursor'?CURSOR_D
 for(const k in PAT_ORIG)if(k!=='cursor'&&k!=='ship')PAT[k]=(x,y)=>TF(k)(x,y);
 // tuiles du vaisseau posées case par case sur la carte, découpées dans l'image d'ensemble
 for(const k of SHIP_KEYS){const [,cx,cy]=k.split('_').map(Number);PAT[k]=(x,y)=>TF('ship')(cx*16+x,cy*16+y);}
-for(const k of ['tourelle','tourelleOn']){PAT[k+'_d']=(x,y)=>TF(k)(x,y);PAT[k+'_u']=(x,y)=>TF(k)(15-x,15-y);PAT[k+'_l']=(x,y)=>TF(k)(y,15-x);PAT[k+'_r']=(x,y)=>TF(k)(15-y,x);TILE_DEPS[k]=[k,k+'_d',k+'_u',k+'_r',k+'_l'];}   // tourelle : quatre sens de tir
+// tourelle : quatre sens de tir
+for(const k of ['tourelle','tourelleOn']){PAT[k+'_d']=(x,y)=>TF(k)(x,y);PAT[k+'_u']=(x,y)=>TF(k)(15-x,15-y);
+  PAT[k+'_l']=(x,y)=>TF(k)(y,15-x);PAT[k+'_r']=(x,y)=>TF(k)(15-y,x);TILE_DEPS[k]=[k,k+'_d',k+'_u',k+'_r',k+'_l'];}
 PAT.robot_r=(x,y)=>TF('robot_u')(y,15-x);PAT.robot_d=(x,y)=>TF('robot_u')(15-x,15-y);PAT.robot_l=(x,y)=>TF('robot_u')(15-y,x);
 for(const k of ['an0',...BEASTS.map((_,i)=>'bz'+i)])PAT[k+'l']=(x,y)=>TF(k+'r')(15-x,y);
 // mine armée : la tuile de la mine, bio en rouge et accent en blanc ; elle alterne avec la tuile normale (clignotement)
@@ -40,8 +47,10 @@ for(const k of ['an0',...BEASTS.map((_,i)=>'bz'+i)])PAT[k+'l']=(x,y)=>TF(k+'r')(
 PAT.hardBody=(x,y)=>{const c=TF('mtBody')(x,y);return c==='3'?'d':c;};PAT.hardTop=(x,y)=>{const c=TF('mtTop')(x,y);return c==='3'?'d':c;};
 // Fonds des crêtes : seule la partie AU-DESSUS de la ligne de crête est un fond, le reste garde ses trous (sinon la crête sombre paraît plus claire)
 const crestY=(f,x)=>{for(let y=0;y<16;y++)if(f(x,y)!=='.')return y;return 16;};
-PAT.hardTopBg=(x,y)=>{const f=TF('mtTop');return y<crestY(f,x)&&TF('mtBody')(x,y)==='3'?'3':'.';};   // crête de roche dure : fond de roche tendre
-PAT.softTopBg=(x,y)=>{const f=TF('mtTop');return y<crestY(f,x)&&TF('mtBody')(x,y)==='3'?'d':'.';};   // crête de roche tendre sous de la roche dure : fond de roche dure
+// crête de roche dure : fond de roche tendre
+PAT.hardTopBg=(x,y)=>{const f=TF('mtTop');return y<crestY(f,x)&&TF('mtBody')(x,y)==='3'?'3':'.';};
+// crête de roche tendre sous de la roche dure : fond de roche dure
+PAT.softTopBg=(x,y)=>{const f=TF('mtTop');return y<crestY(f,x)&&TF('mtBody')(x,y)==='3'?'d':'.';};
 TILE_DEPS.mtBody=['mtBody','hardBody','hardTopBg','softTopBg'];TILE_DEPS.mtTop=['mtTop','hardTop','hardTopBg','softTopBg'];
 PAT.mineA=(x,y)=>{const c=TF('bz'+MINE_I+'r')(x,y);return c==='2'?'r':c==='1'?'w':c==='r'?'w':c;};TILE_DEPS['bz'+MINE_I+'r'].push('mineA');
 PAT.deep1=(x,y)=>TF('deep0')((x+14)%16,y);
@@ -55,21 +64,30 @@ try{fog=localStorage.getItem('np-fog')!=='off';}catch(e){}
 const ROUGE_FIXE='#d8180b';   // pris dans LACKING64
 const inkCol=ch=>ch==='0'?'#020605':ch==='r'||ch==='L'?PAL['4']:ch==='R'?ROUGE_FIXE:ch==='w'?'#ffffff':PAL[ch];
 function tileCanvas(src,w=16,h=16){const c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d');
-  for(let j=0;j<h;j++)for(let i=0;i<w;i++){const ch=typeof src==='function'?src(i,j):src[j][i];const col=inkCol(ch);if(col){x.fillStyle=col;x.fillRect(i,j,1,1);}}return c;}
+  for(let j=0;j<h;j++)for(let i=0;i<w;i++){const ch=typeof src==='function'?src(i,j):src[j][i];const col=inkCol(ch);if(col){x.fillStyle=col;
+    x.fillRect(i,j,1,1);}}return c;}
 // reconstruit une tuile retouchée et ses variantes
-const batiSrc=k=>{const f=PAT[k];return typeof f==='function'?(x,y)=>{const c=f(x,y);return c==='3'?'5':c;}:f.map(r=>r.replace(/3/g,'5'));};   // tuiles du bâti : encre monde -> couleur bâti (22 novembre 2026)
+// tuiles du bâti : encre monde -> couleur bâti (22 novembre 2026)
+const batiSrc=k=>{const f=PAT[k];return typeof f==='function'?(x,y)=>{const c=f(x,y);return c==='3'?'5':c;}:f.map(r=>r.replace(/3/g,'5'));};
 const tuileSrc=k=>EAU_TUILES.includes(k)?eauSrc(k):BATI_TUILES.includes(k)?batiSrc(k):PAT[k];
-function eauSrc(k){const f=PAT[k];return typeof f==='function'?(x,y)=>{const c=f(x,y);return c==='2'?'e':c;}:f.map(r=>r.replace(/2/g,'e'));}   // tuiles d'eau : encre bio -> couleur eau
-function rebuildTile(k){for(const d of TILE_DEPS[k]||[k]){if(d==='ship')TL.ship=tileCanvas(TF('ship'),SGW*16,SGH*16);else if(PAT[d])TL[d]=tileCanvas(tuileSrc(d));if(/^(an|bz)\d+r$|^robot_r$/.test(d)){try{ICON[d]=TL[d].toDataURL();}catch(e){}}}buildCursor();if(k==='robot_u')robotTiles();}
+// tuiles d'eau : encre bio -> couleur eau
+function eauSrc(k){const f=PAT[k];return typeof f==='function'?(x,y)=>{const c=f(x,y);return c==='2'?'e':c;}:f.map(r=>r.replace(/2/g,'e'));}
+function rebuildTile(k){for(const d of TILE_DEPS[k]||[k]){if(d==='ship')TL.ship=tileCanvas(TF('ship'),SGW*16,SGH*16);
+  else if(PAT[d])TL[d]=tileCanvas(tuileSrc(d));if(/^(an|bz)\d+r$|^robot_r$/.test(d)){try{ICON[d]=TL[d].toDataURL();
+  }catch(e){}}}buildCursor();if(k==='robot_u')robotTiles();}
 function buildTiles(){
   TL={};for(const k in PAT)TL[k]=tileCanvas(tuileSrc(k));
   // la Matière reprend les dessins des éclats de métal (retouches comprises), en couleur accent au lieu de bio
-  for(const k of ['ore','ore1','ore2','oreSol','oreSol1','oreSol2']){const f=TF(k);TL[k.replace('ore','mat')]=tileCanvas((x,y)=>{const c=f(x,y);return c==='2'?'1':c;});}TL.ship=tileCanvas(TF('ship'),SGW*16,SGH*16);buildCursor();
+  for(const k of ['ore','ore1','ore2','oreSol','oreSol1','oreSol2']){const f=TF(k);
+    TL[k.replace('ore','mat')]=tileCanvas((x,y)=>{const c=f(x,y);return c==='2'?'1':c;});
+    }TL.ship=tileCanvas(TF('ship'),SGW*16,SGH*16);buildCursor();
   ICON={};for(const k in TL)if(/^(an|bz)\d+r$|^robot_r$/.test(k)){try{ICON[k]=TL[k].toDataURL();}catch(e){}}
   robotTiles();
   ANIMG=SPECIES.map((_,i)=>{try{return TL['an'+i+'r'].toDataURL();}catch(e){return '';}});
-  const r=document.documentElement.style;r.setProperty('--c1',PAL['1']);r.setProperty('--c2',PAL['2']);r.setProperty('--c3',PAL['3']);r.setProperty('--c4',PAL['4']);r.setProperty('--c5',PAL['5']);r.setProperty('--life',PAL['4']);
+  const r=document.documentElement.style;r.setProperty('--c1',PAL['1']);r.setProperty('--c2',PAL['2']);r.setProperty('--c3',PAL['3']);
+    r.setProperty('--c4',PAL['4']);r.setProperty('--c5',PAL['5']);r.setProperty('--life',PAL['4']);
   PAL_CLES.forEach(k=>{$('pc'+k).style.background=PAL_U[k];$('pc'+k).title=PAL_U[k];});
 }
-function setPal(p){PAL_U=p;try{localStorage.setItem('np-palette',JSON.stringify(PAL_U));}catch(e){}touchLocal();palBiome(TEINTE);buildTiles();render();}
+function setPal(p){PAL_U=p;try{localStorage.setItem('np-palette',JSON.stringify(PAL_U));}catch(e){}touchLocal();palBiome(TEINTE);
+  buildTiles();render();}
 
