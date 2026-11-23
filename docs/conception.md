@@ -1256,6 +1256,20 @@ Espace ou Entrée** passe directement au posé.
 
 ## 10 ter. Cinématique de forage (21 novembre 2026)
 
+**Règle permanente (23 novembre 2026), aux deux descentes : jamais d'alpha ni de transparence.** Chaque case dessinée est
+opaque (fond noir plein, puis le caractère), sur la grille. Rien ne disparaît en fondu : la **fumée** garde sa couleur et
+perd sa densité (« ▓ ▒ ░ · ») avant de s'effacer ; les éclats et la foreuse sont opaques ; plus d'éclair blanc translucide
+(les chocs se sentent par le tremblement et la roche chauffée à blanc) ; la **fin de chaque descente** s'éteint case par
+case, chacune gardant sa teinte et passant par « ▒ ░ · » avant le noir.
+
+**La roche fond au contact du cône** (23 novembre 2026). Une poche de chaleur palpite sous la pointe (rouge, orange, jaune
+au centre). Chaque rangée percée brûle au lieu de disparaître (« █ ▓ ▒ ░ · » en couleurs de feu, puis braises) ; les parois
+du puits, chauffées, prennent des caractères abîmés (« ╬ ═ ┼ ┐ ░ … »), rougeoient puis refroidissent en cendre : le puits
+garde une trace brûlée.
+
+**Les mines explosent comme la foreuse** (23 novembre 2026, seconde descente) : même cratère au bord déchiqueté (plus petit),
+même onde de choc dégressive, et leur pavé rouge et blanc part en éclats qui creusent la roche puis restent en débris.
+
 Pour le passage au niveau suivant. Vue **de côté**, tout en **caractères ASCII** (comme les dessins d'équipement),
 environ 15 s ; `src/js/14b-forage.js`. **`playForage(suite, niv)`** la lance et appelle `suite()` à la fin (rien ne
 l'appelle encore dans le jeu : la descente par niveaux, étape 4 de la refonte, doit s'y brancher) ; **NIV2** la lance pour

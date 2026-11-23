@@ -69,6 +69,10 @@ Artefact à part (https://claude.ai/artifact/9BKRaoB4hzgdWhzYFx5A6q) qui rejoue 
   06b groupes · 07 génération de la carte · 07b bâtiments · 07c artefacts · 07d zones et tunnels · 07e cavernes · 07f machines · 07g grande base · 08 faune et prédateurs · 09 vision, déplacement, forage · 10 rendu et gouffres ·
   11 interface (mode carte, « En vue », commandes, enregistrement) · 12 souris et inspection · 13 éditeur de tuiles ·
   14 inventaire et équipement · 14b forage (cinématique et mini-jeu des mines) · 14c fabricateur · 14d objets (butin, capsules à identifier, visée, plans, Lab → Items) · 15 cinématique d'intro (qui lance aussi le jeu : rester le dernier).
+- **Règle permanente des mini-jeux ASCII (descentes, 23 novembre 2026) : jamais d'alpha ni de transparence.** Chaque case
+  dessinée est opaque (fond noir plein, puis le caractère) et reste sur la grille ; rien ne s'efface en fondu ni ne s'assombrit
+  pour disparaître : on passe par des caractères de moins en moins denses (« █ ▓ ▒ ░ · »), puis le noir. Pas d'éclair blanc
+  translucide non plus.
 - `docs/` : conception, mesures, notes sur Brogue (voir plus haut). `planches/` : planches de travail
   (vaisseau, gouffres). `outils/` : scripts de vérification (voir plus haut).
 
