@@ -12,9 +12,16 @@ function peekBehind(x0,y0,x1,y1){const p=line(x0,y0,x1,y1),n=p.length;if(n<3)ret
   for(let i=1;i<n-2;i++)if(opaque(p[i][0],p[i][1]))return false;
   const o=G.t[idx(p[n-2][0],p[n-2][1])];if(bati(o)||o===DOOR)return false;   // le capteur ne devine rien derrière un mur bâti ou une porte
   return opaque(p[n-2][0],p[n-2][1]);}
+let HORS_VIS=new Set();
 function computeFOV(){vis=new Uint8Array(W*H);const r=G.st.capteur,px=G.px,py=G.py;
   for(let y=py-r;y<=py+r;y++)for(let x=px-r;x<=px+r;x++){if(x<0||y<0||x>=W||y>=H)continue;if((x-px)**2+(y-py)**2>r*r+r)continue;
     if(los(px,py,x,y)){vis[idx(x,y)]=1;G.seen[idx(x,y)]=1;}else if(peekBehind(px,py,x,y))G.seen[idx(x,y)]=1;}
+  /* au-delà de la carte (23 novembre 2026) : la roche dure (comme le bord) est vue sur deux cases au plus, là où le bord de carte le plus
+     proche est vu, dans la portée du capteur ; on s'en souvient ensuite comme du reste (G.horsVu) */
+  HORS_VIS=new Set();if(!G.horsVu)G.horsVu={};
+  for(let y=py-r;y<=py+r;y++)for(let x=px-r;x<=px+r;x++){if(x>=0&&y>=0&&x<W&&y<H)continue;if((x-px)**2+(y-py)**2>r*r+r)continue;
+    if(Math.max(-x,x-W+1,-y,y-H+1)>2)continue;   /* roche opaque : on n'en voit que la face, deux cases au plus derrière le bord */
+    if(vis[idx(Math.max(0,Math.min(W-1,x)),Math.max(0,Math.min(H-1,y)))]){const k=x+','+y;HORS_VIS.add(k);G.horsVu[k]=1;}}
   if(G.animals)for(const a of G.animals)if(vis[idx(a.x,a.y)]&&!G.fauna.includes(a.sp)){G.fauna.push(a.sp);const sp=SPECIES[a.sp];
     sayMore(`Nouvelle espèce observée : ${sp.n} (vitesse ${sp.v}).`,'info');SFX.chirp();}
   antVis();   // les antennes allumées tiennent leur zone en vue

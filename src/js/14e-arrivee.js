@@ -49,7 +49,7 @@ const FICT=new Map();
 function fict(a,b){const K=(b+5000)*20000+(a+5000);let e=FICT.get(K);if(e)return e;
   const F=(s,f)=>.55*vn(a/f,b/f,1e4,1e4,s)+.3*vn(a/(f/2),b/(f/2),1e4,1e4,s+1)+.15*vn(a/(f/4),b/(f/4),1e4,1e4,s+2);
   const d=Math.max(0,-a,a-W+1,-b,b-H+1),m=F(SEED+31,14)+.1*Math.exp(-d/7),v=F(SEED+41,12),c=F(SEED+51,13),h=hsh(a,b,9);
-  if(d<6+12*F(SEED+61,8)){const bd=d>=4+11*F(SEED+61,8);e=bd?['▒','M',.75]:[h<.6?'▓':'█','M',.5+.3*h];}   /* le massif qui entoure la carte, au bord déchiqueté : au sol, il rejoint la montagne du jeu en pixels */
+  if(d<6+12*F(SEED+61,8)){const bd=d>=4+11*F(SEED+61,8);e=bd?['▒','H',.85]:[h<.6?'▓':'█','H',.65+.25*h];}   /* le massif de roche dure qui entoure la carte, au bord déchiqueté : au sol, il rejoint la roche dure que le jeu en pixels dessine au-delà du bord */
   else if(m>.6){const k=m-.6;e=k<.025?['▒','M',.75]:k<.08?['▓','M',.62+.25*h]:['█','M',.5+.3*h];}
   else if(c<.27)e=c<.24?[' ','K',1]:['░','M',.35];
   else if(v>.62)e=[h<.5?'w':h<.8?'ʷ':'"','A',.55+.3*h];
@@ -105,7 +105,8 @@ function cadreJeu(){const el=$('mapwrap'),mr=el?el.getBoundingClientRect():{left
   const camX=G.px-Math.floor(vc/2),camY=G.py-Math.floor(vr/2);   /* comme le jeu : la foreuse au centre, sans bornes */
   return {gx:(((mr.left*dpr)%cw)+cw)%cw-cw,gy:(((mr.top*dpr)%chh)+chh)%chh-chh,
     px:(mr.left+(G.ship.x+SGW/2-camX)*S_TUILE)*dpr,py:(mr.top+(G.ship.y+SGH/2-camY)*S_TUILE)*dpr};}
-const S_TUILE=32;   /* S, la taille d'une tuile du jeu en pixels (00-base.js) */
+const S_TUILE=32;
+const lisse5=v=>{v=cl(v);return v*v*v*(v*(v*6-15)+10);};   /* S, la taille d'une tuile du jeu en pixels (00-base.js) */
 // position des étoiles : l'intégrale de leur vitesse, qui retombe en douceur à la sortie d'hyperespace (jamais de recul)
 const trajet=t=>t<T_HYP?t+20*T_HYP*(1-Math.pow(1-t/T_HYP,3)):t+20*T_HYP;
 function frame(now){if(!S||INTRO!==S)return;setup();const t=(now-S.t0)/1000+S.saut,ev=k=>{if(S.ev[k])return false;S.ev[k]=true;return true;};
@@ -113,7 +114,7 @@ function frame(now){if(!S||INTRO!==S)return;setup();const t=(now-S.t0)/1000+S.sa
   CH.fill(' ');CO.fill('#000');
   const J=cadreJeu(),GX0=J.gx,GY0=J.gy,cx0=i=>i*cw+GX0+cw/2,cy0=j=>j*chh+GY0+chh/2;
   // le point d'atterrissage : au centre de l'écran pendant la descente, puis il glisse jusqu'à la place du vaisseau dans le jeu
-  const {k,Z,Rs}=zoom(t),hc=chaleur(t),ent=s3((t-T_P0)/(T_P1-T_P0)),cal=s3((t-(T_D1-2.4))/(T_POSE-.25-(T_D1-2.4))),
+  const {k,Z,Rs}=zoom(t),hc=chaleur(t),ent=s3((t-T_P0)/(T_P1-T_P0)),cal=lisse5((t-T_D0)/(T_POSE-.2-T_D0)),
     PX=w/2+(J.px-w/2)*cal,PY0=h*.45+(J.py-h*.45)*cal,PY=-Rs*chh*1.2+(PY0+Rs*chh*1.2)*ent,
     LX=G.ship.x+SGW/2+14*(1-s3(t/4.5)),LY=G.ship.y+SGH/2;   // le vaisseau se pose à sa place sur la carte ; la planète tourne un peu en entrant
   // étoiles : traînées d'hyperespace qui raccourcissent pendant un ralenti amorti, puis points qui défilent lentement
@@ -128,7 +129,7 @@ function frame(now){if(!S||INTRO!==S)return;setup();const t=(now-S.t0)/1000+S.sa
       if(r>.9&&Rs<70){if(ch!==' ')ch=r>.96?'░':'▒';c=col(e[1]==='K'?'M':e[1],.45);}   // le bord du disque, plus clair
       put(i,j,ch,c);}}   /* le disque cache les étoiles, même là où le sol est nu */
   // le vaisseau est centré sur le point d'atterrissage ; il tangue, puis se stabilise
-  const mont=s3(t/T_D0),SYv=(h+NH*chh*.6)+(PY0-(h+NH*chh*.6))*mont;   /* le vaisseau entre par le bas et rejoint le milieu de la planète quand la descente commence */
+  const mont=1-Math.pow(1-cl(t/T_D0),4),SYv=(h+NH*chh*.6)+(PY0-(h+NH*chh*.6))*mont;   /* le vaisseau entre par le bas et rejoint le milieu de la planète quand la descente commence */
   const sw=t<T_POSE?Math.round(Math.sin(t*1.1)*1.6*cl((T_POSE-t)/1.5)):0,sc=Math.round((PX-GX0)/cw)-NW/2+sw,sr=Math.round((SYv-GY0)/chh)-NH/2;
   // ombre du vaisseau sur le sol, qui le rejoint en se posant
   if(k<.85){const a=cl((T_POSE-t)/1.6),ox=Math.round(a*9),oy=Math.round(a*5);
@@ -201,7 +202,7 @@ function hud(t,o){const fs=Math.round(12*dpr),lh=Math.round(17*dpr),m=Math.round
   [[0,.35,col('K',.5)],[.35,.75,col('B',.45)],[.75,1,col('M',.8)]].forEach(([a,b,c])=>{x.fillStyle=c;x.fillRect(gx,gt+Math.round(gh*a),gw,Math.round(gh*(b-a)));});
   x.fillStyle='#fff';x.fillRect(gx-Math.round(6*dpr),Math.round(gt+gh*f)-1,gw+Math.round(12*dpr),Math.max(2,Math.round(2*dpr)));
   x.textAlign='right';x.fillStyle=P.G;x.fillText('ALT',gx+gw,gt-lh);x.textAlign='left';
-  if(t>=ANN.t0&&t<ANN.fin)annonce(t);}
+  /* pas d'alerte à l'arrivée (retirée le 23 novembre 2026, à la demande) ; annonce() reste pour mémoire */}
 
 /* ---------- l'alerte, en police DOS (même cadre que les descentes), couleur monde ---------- */
 const GL='#%&$@/\\<>=+*?!;:-_|[]{}()0123456789ABCDEFGHJKLMNPQRSTUVWXYZ£¥§¶«»±÷≈∙√ⁿ²■ΣΩδ∞φε∩≡',RAMPE='.i0',BLOC='░▒▓';

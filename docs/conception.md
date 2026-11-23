@@ -23,7 +23,11 @@ revient sur **3 niveaux** ; elle n'est pas encore codée, et forer termine la pa
 
 - Tuiles pixel art 16 × 16, affichées en 32 × 32 ; fond quasi noir. Pas d'effet d'écran.
 - **La foreuse est toujours au centre de la vue** (23 novembre 2026 ; avant, la caméra s'arrêtait au bord de la carte) : au-delà
-  de la carte, la vue montre un **massif de montagne**, découvert comme le bord de carte le plus proche (brouillard compris).
+  de la carte, de la **roche dure**, comme le mur du bord (sans crête au bord haut de la carte). Elle suit le brouillard
+  comme toute roche : on n'en voit que la face (deux cases au plus derrière le bord), là où le bord est vu, et on s'en
+  souvient ensuite (`G.horsVu`).
+- **Un objet sous une créature** (23 novembre 2026) : la créature le cache, mais sa tuile s'affiche en petit (moitié de case,
+  sur fond noir) dans le coin bas droit de la case, tant que la créature est dessus.
 - **Palette à cinq couleurs** (22 novembre 2026 ; trois avant), dans cet ordre dans le menu : **#1 Monde** (sol, rochers,
   montagnes), **#2 Bio**, **#3 Accent**, **#4 Danger** (lasers, dégâts, alertes : l'ancien rouge fixe), **#5 Bâti** (murs, sols,
   portes et piliers des bâtiments, pour que l'intérieur ne se confonde plus avec la montagne). Le blanc reste fixe. Dans le
@@ -1220,8 +1224,10 @@ recopier** la configuration d'essai que la base contient aussi (génération, é
 **Depuis le 23 novembre 2026, l'arrivée est en ASCII** (`src/js/14e-arrivee.js`, lancée par `playIntro`) ; l'intro en
 pixels décrite plus bas n'est plus jouée (son code reste dans `15-intro.js`). Mêmes règles que les descentes : grille de
 caractères, **chaque case opaque, jamais d'alpha ni de transparence**, rien ne s'efface en fondu. Vue de dessus, ≈ 14 s :
-- **Le vaisseau entre par le bas** de l'écran pendant l'hyperespace et rejoint le milieu de la planète quand la descente
-  commence (2,2 s) ; la planète, elle, entre par le haut et s'immobilise au même moment.
+- **Le vaisseau entre par le bas** de l'écran pendant l'hyperespace, **décélère** et s'arrête au milieu de la planète quand
+  la descente commence (2,2 s) ; la planète, elle, entre par le haut et s'immobilise au même moment. Pendant toute la
+  descente, la vue glisse lentement vers la place du vaisseau dans le jeu (décalée à gauche par la colonne de droite), avec
+  un amorti à la fin.
 - **0-1,3 s, hyperespace** : les étoiles filent en traînées « │ ¦ », puis **ralentissent en douceur** (ralenti amorti, jamais
   de recul) en points qui défilent lentement.
 - **0,85-3 s, la planète entre par le haut** : la **vraie carte du niveau 1**, en caractères (roche « ▒ ▓ », montagne
@@ -1232,8 +1238,8 @@ caractères, **chaque case opaque, jamais d'alpha ni de transparence**, rien ne 
   cadrage que le jeu (la foreuse au centre) ; le vaisseau ASCII, tiré de la grille du vaisseau (`SHIP_GRID`, 20 × 12 caractères),
   se pose **à la place exacte du vaisseau en pixels**. **La planète ne répète jamais la carte** (choix du 23 novembre 2026, plutôt
   qu'une répétition en miroir) : la vraie carte est posée dans un **relief inventé plus large**. Tout autour (et à la
-  place de son mur de roche dure du bord), un **massif** au bord déchiqueté, qui rejoint au sol la montagne que le jeu en
-  pixels dessine au-delà de la carte ; plus loin, un relief libre (montagnes, gouffres, herbe, sol nu). Rendu du sol comme dans l'essai (roche « ▒ » au bord, « ▓ █ » au cœur, sans triangles). Nuages en « · : ░ ▒ ▓ » (cinq gris, jamais de pavé plein ; du grain dans la matière : caractère et gris varient d'une case
+  place de son mur de roche dure du bord), un **massif de roche dure** au bord déchiqueté, qui rejoint au sol la roche dure que
+  le jeu en pixels dessine au-delà de la carte ; plus loin, un relief libre (montagnes, gouffres, herbe, sol nu). Rendu du sol comme dans l'essai (roche « ▒ » au bord, « ▓ █ » au cœur, sans triangles). Nuages en « · : ░ ▒ ▓ » (cinq gris, jamais de pavé plein ; du grain dans la matière : caractère et gris varient d'une case
   à l'autre et bougent lentement), clairsemés vus de l'espace, qui
   **apparaissent peu à peu**, grossissent et s'effilochent en passant le vaisseau. **Entrée dans l'atmosphère** : arc de plasma devant le nez, traînées
   de feu, coque qui chauffe (jusqu'à environ 1 700 °C), écran qui tremble. **Éclairs** en zigzag « ╱ │ ╲ » qui illuminent
@@ -1241,8 +1247,7 @@ caractères, **chaque case opaque, jamais d'alpha ni de transparence**, rien ne 
 - **11,4 s, posé** : l'ombre du vaisseau l'a rejoint, un anneau de poussière s'éloigne en perdant sa densité.
 - **12,7-13,8 s** : l'écran s'éteint case par case (« ▒ ░ · ») et chaque case éteinte **laisse voir le jeu en pixels**, à la
   même échelle et à la même place : un fondu entre les deux styles, sans transparence.
-- **Alerte** en police DOS, même cadre que les descentes, **couleur monde** : « PLANÈTE EN VUE / ATTERRISSAGE IMMINENT »
-  (apparition 1,2-3,2 s, affichée 4 s, disparition 1 s).
+- **Pas d'alerte** (« Planète en vue / Atterrissage imminent » retirée le 23 novembre 2026).
 - **Tableau de bord** repris des descentes : ARRIVÉE ▸ SÉQUENCE D'ATTERRISSAGE, cible, altitude, vitesse, atmosphère (vide,
   haute, dense, basse, sol), coque (barre et température), cap, soute (foreuse arrimée) ; alertes qui clignotent
   (hyperespace, chaleur critique, orage, contact) ; jauge d'altitude à droite.
