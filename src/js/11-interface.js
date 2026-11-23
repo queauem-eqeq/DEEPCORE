@@ -1,6 +1,10 @@
 /* ---------- Mode carte : la vue défile sans déplacer le robot ---------- */
 let freeCam=false,camCX=0,camCY=0;
-function setFreeCam(on){freeCam=on;if(on){camCX=G.px;camCY=G.py;}$('camTag').hidden=!on;render();}
+/* Mode carte (M) : la Carte de la colonne s'ouvre en y entrant et se referme en sortant, sauf si elle était déjà ouverte avant
+   (22 novembre 2026). */
+let CARTE_AVANT=null;
+function setFreeCam(on){const f=$('fd-carte');if(on&&!freeCam){CARTE_AVANT=f.open;f.open=true;}else if(!on&&freeCam&&CARTE_AVANT===false){f.open=false;CARTE_AVANT=null;}
+  freeCam=on;if(on){camCX=G.px;camCY=G.py;}$('camTag').hidden=!on;render();}
 function panCam(dx,dy){camCX=Math.max(0,Math.min(W-1,camCX+dx));camCY=Math.max(0,Math.min(H-1,camCY+dy));render();}
 // Mini-carte : un clic recentre la vue ; bouton maintenu + glisser = défilement en temps réel.
 // Saisi à l'intérieur, le cadre suit le pointeur sans sauter ; saisi à l'extérieur, il se centre d'abord sous le pointeur.
@@ -74,9 +78,12 @@ function side(){
   {const b=$('sprintBtn');b.textContent=G.sprint?'COURSE':'MARCHE';b.classList.toggle('on',!!G.sprint);b.setAttribute('aria-pressed',!!G.sprint);}
   // Le sous-menu Statistiques a été retiré le 15 novembre 2026 : les stats sont dans la fenêtre Équipement.
   sacDraw();
-  {const E=G.eff||{},l=[];if(E.poison>0)l.push(`<span style="color:var(--life)">Poison ${E.poison}</span>`);if(E.glu>0)l.push(`Englué ${E.glu}`);{const f=G.fum&&G.fum[idx(G.px,G.py)];if(f)l.push(`<span style="color:var(--c1)">Dans la fumée ${f.v}</span>`);}$('effs').innerHTML=l.join(' · ');}
+  {const E=G.eff||{},l=[];if(E.poison>0)l.push(`<span style="color:var(--life)">Poison ${E.poison}</span>`);if(E.glu>0)l.push(`Englué ${E.glu}`);if(E.camo>0)l.push(`<span style="color:var(--c3)">Camouflé ${E.camo}</span>`);{const bt=Math.max(0,...(G.balises||[]).map(q=>q.t));if(bt>0)l.push(`<span style="color:var(--life)">Balise ${bt}</span>`);}/* battements restants (22 novembre 2026) */{const f=G.fum&&G.fum[idx(G.px,G.py)];if(f)l.push(`<span style="color:var(--c1)">Dans la fumée ${f.v}</span>`);}$('effs').innerHTML=l.join(' · ');}
   // le niveau est revenu le 21 novembre 2026 ; la taille de la carte se règle dans le menu Monde
-  $('lvl').textContent=`Niveau ${G.niv||1}${G.amb?' · '+G.amb:''} · ${W} × ${H}`;
+  // Carte (22 novembre 2026) : niveau, profondeur (raccord avec le compteur des descentes) et taille, puis l'archétype monde et
+  // l'archétype bâti, sans étiquette. Remplace la ligne du niveau qui était en haut de la colonne.
+  {const n=G.niv||1,p=profNiv(n),[am,ab]=G.archM?[G.archM,G.archB]:typeof G.amb==='string'?G.amb.split(' · '):[];   // G.amb n'est pas toujours un texte (banc de combat)
+    $('cProf').textContent=`Niveau ${n} · ${p?'−'+p:0} m · ${W}×${H}`;$('cMonde').textContent=am||'Personnalisé';$('cBati').textContent=ab||'Personnalisé';}
   $('matN').textContent=G.st.matiere||0;   // avalée par le commentaire depuis le 16 novembre 2026 : la matière ne s'affichait plus
   if(!$('inventaire').hidden)invDraw();
   $('msg').innerHTML=seenHTML();
@@ -98,7 +105,9 @@ const KEYS={arrowup:[0,-1],arrowdown:[0,1],arrowleft:[-1,0],arrowright:[1,0],z:[
 addEventListener('keydown',ev=>{
   if(INTRO){ev.preventDefault();if(ev.key==='Escape'||ev.key===' '||ev.key==='Enter')skipIntro();return;}
   if(FORAGE){ev.preventDefault();if(ev.key==='Escape'||(!FORAGE.jeu&&(ev.key===' '||ev.key==='Enter')))skipForage();return;}   // mini-jeu : seul Échap passe (cela coûte de la vie)
-  if(ev.key==='F9'){ev.preventDefault();playForage(null,ev.shiftKey?2:1);return;}   // Maj + F9 : la seconde descente, le mini-jeu des mines   // essai de la cinématique de forage (21 novembre 2026)
+  // F9 (23 novembre 2026 ; avant, la cinématique de forage, qu'on lance aussi par NIV2 et NIV3) : un exemplaire de chaque
+  // consommable dans l'inventaire, déjà identifié, dans la limite des 20 places
+  if(ev.key==='F9'){ev.preventDefault();if(G&&!G.over)f9Consos();return;}
   if(!$('inventaire').hidden){invKey(ev);return;}
   if(SAC_NAV&&$('overlay').hidden&&ev.target.tagName!=='INPUT'){if(sacKey(ev))return;}   // navigation au clavier dans le sous-menu Inventaire
   if(!$('monde').hidden){if(ev.key==='Escape'){ev.preventDefault();mondeClose();}return;}
@@ -201,6 +210,7 @@ const saveSnd=()=>{try{localStorage.setItem('np-son',JSON.stringify(SND));}catch
 function toggleSound(){SND.on=!SND.on;saveSnd();say(SND.on?'Son activé.':'Son coupé.','info');if(SND.on){unlock();SFX.spot();}render();}
 function toggleVision(){SHOWVIS=!SHOWVIS;say(SHOWVIS?'Portée de discrétion affichée.':'Portée de discrétion masquée.','info');render();}
 function toggleFog(){fog=!fog;try{localStorage.setItem('np-fog',fog?'on':'off');}catch(e){}say(fog?'Brouillard de guerre activé.':'Brouillard de guerre désactivé.','info');render();}
-['fd-sac','fd-pal','fd-lab'].forEach(id=>{const d=$(id);try{d.open=localStorage.getItem('np-'+id)==='open';}catch(e){}
+$('fd-carte').addEventListener('toggle',()=>{if(G)render();});   // la mini-carte se dessine à l'ouverture
+['fd-sac','fd-carte','fd-pal','fd-lab','fd-ctrl'].forEach(id=>{const d=$(id);try{d.open=localStorage.getItem('np-'+id)==='open';}catch(e){}
   d.addEventListener('toggle',()=>{try{localStorage.setItem('np-'+id,d.open?'open':'closed');}catch(e){}});});
 $('restart').onclick=e=>{e.preventDefault();e.stopPropagation();unlock();SFX.start();newGame();started=true;$('overlay').hidden=true;render();};

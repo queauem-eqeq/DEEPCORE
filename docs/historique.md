@@ -256,6 +256,15 @@ Les chiffres mesurés sont dans `mesures.md`.
   tous les curseurs). Ceux déjà enregistrés restent lisibles, sans recette.
 - **Bug corrigé : baisser les PV d'une espèce au Bestiaire ramenait TOUTES les créatures de la carte à ce maximum**
   (passer le drone à 6 PV mettait les broyeurs à 6). Seule l'espèce modifiée est désormais concernée.
+- **Bug corrigé (22 novembre 2026, 21 h 30) : des Broyeurs à 6 PV après chaque mise à jour de l'artefact.** La vraie cause
+  était ailleurs : la conversion des parties du 17 novembre (six espèces retirées, rangs renumérotés) se rejouait à chaque
+  reprise à chaud d'une partie neuve, qui n'en portait pas la marque. Les Broyeurs, Torpilles, Mines, Sentinelles,
+  Bloqueurs et Artilleurs disparaissaient, les Drones devenaient des Broyeurs à 6 PV et les Soudeurs des Torpilles.
+  Conversion retirée ; une partie déjà touchée le reste (REGEN pour repartir sur une carte saine).
+- **Réglages du joueur recopiés dans le code** (22 novembre 2026, 21 h 55) : relus dans la base de l'artefact (enregistrés à
+  21 h 53). Deux différences seulement : la tuile **Tourelle laser (tir)**, dont le rayon devient un filet blanc qui ondule
+  (au lieu de deux colonnes blanches droites), et la **précision du Bloqueur**, 75 → 100. Toutes les autres tuiles et
+  stats du Bestiaire étaient déjà celles du code.
 - **Réglages du joueur recopiés dans le code** (22 novembre 2026, 2 h) : relus dans la base de l'artefact (enregistrés à
   0 h 31). Stats, palettes, groupes, artefacts et discrétion étaient déjà identiques ; deux dessins différaient (le site
   de forage et le Gardien) et la palette par défaut devient **Rouille**. Bug corrigé au passage : sans réglage

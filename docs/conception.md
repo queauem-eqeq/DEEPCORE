@@ -230,7 +230,7 @@ faune réglés dans le **menu Monde**. **REGEN** (et **GÉNÉRER LA CARTE**, dan
 avec les réglages du moment. Forer le site atteint le noyau : écran « NOYAU ATTEINT », puis une nouvelle carte.
 Mort : idem.
 
-- **Taille** : celle du menu Monde. Affichée en jeu sous le titre Statut (« Carte 96 × 64 »).
+- **Taille** : celle du menu Monde. Affichée en jeu en haut de la colonne (« Niveau 1 · 96 × 64 »).
 - **Gisements** : 3 de métal et 1 de Matière pour une carte de taille 2, les autres tailles en proportion de leur
   surface. Chaque gisement vaut **30, 40 ou 50**.
 - **Palette** : celle du joueur, sans variation.
@@ -503,7 +503,7 @@ Pris dans la montagne, il tombe quand on brise la paroi ; passer dessus ajoute *
 
 ### Sonar
 
-**10 à 20 tours après l'arrivée**, la foreuse émet une **onde circulaire** qui balaie toute la carte : un cercle
+**10 à 30 tours après l'arrivée** (10 à 20 jusqu'au 22 novembre 2026), la foreuse émet une **onde circulaire** qui balaie toute la carte : un cercle
 d'un pixel de tuile, calé sur la grille, opaque, couleur accent, à 38 cases par seconde et pendant 2,6 s au moins.
 L'onde se voit **aussi sur la mini-carte**, et un « blip blip » l'accompagne.
 
@@ -533,9 +533,13 @@ Artefact à part (https://claude.ai/artifact/9BKRaoB4hzgdWhzYFx5A6q) : la page d
 la colonne. On y choisit une carte de taille 1 (arène nue ou l'un des six reliefs d'essai), des ennemis, un
 équipement, une consigne de pilote automatique (chasse ou traversée), et l'on lance une **série** sans affichage
 (moyennes : victoires, vie restante, points perdus, points perdus par ennemi tué, durée) ou **un combat à l'écran**.
-Options : ennemis en alerte, vie d'essai. Onglets « Mes résultats » (gardés dans le navigateur) et « Archives »
-(un clic sur une ligne reprend la configuration). Il sert à régler les coûts de menace ; **à republier quand le
-moteur change**, sinon il mesure l'ancien jeu.
+Options : ennemis en alerte, vie d'essai. Onglet « Mes résultats » (gardés dans le navigateur ; un clic sur une ligne
+reprend la configuration). L'onglet « Archives » et ses données ont été **effacés le 22 novembre 2026**.
+**Générer** (22 novembre 2026) : pose la même arène et ses ennemis, puis **on joue soi-même**, au clavier et à la souris ;
+le haut de la colonne du jeu revient à côté du panneau (barres, boutons, Inventaire ouvert). Inventaire **plein au
+départ : 2 exemplaires de chaque consommable**, tous identifiés (18 places sur 20), plus l'équipement choisi. Foreuse
+détruite : « Déployer une nouvelle foreuse » relance la même arène. Le Lab du jeu ouvre le banc par son bouton **Combat**.
+Il sert à régler les coûts de menace ; **à republier quand le moteur change**, sinon il mesure l'ancien jeu.
 
 ### La grande base (`07g-base.js`, 21 novembre 2026)
 
@@ -787,8 +791,11 @@ Modèle Brogue :
   tuile de capsule au sol. Le premier usage révèle ce que c'est, pour toute la partie ; trouver le plan aussi. La clé et la
   Matière sont toujours connues. Ce que la foreuse sait (plans, capsules identifiées, codes) est dans `G.st.savoir` et la
   suit d'un niveau à l'autre.
-- **Tout consommable se vise**, comme la charge sismique, jusqu'à 4 cases : une case, un carré de 3 × 3 (charge) ou le disque
-  du nuage (fumigène). La visée s'ouvre **sur la foreuse** pour les objets qui la servent : Entrée deux fois = sur soi.
+- **Tout consommable se vise**, comme la charge sismique, jusqu'à 4 cases. **La visée montre toujours une seule case**
+  (22 novembre 2026, avant : le carré de 3 × 3 de la charge, le disque du fumigène) : une capsule inconnue ne se trahit
+  pas par sa zone. La visée s'ouvre **sur la foreuse** pour les objets qui la servent **et pour toute capsule non
+  identifiée** : Entrée deux fois = sur soi, quitte à faire sauter une charge sismique sous ses pieds. La charge connue
+  s'ouvre une case devant.
   Sur un ennemi, l'objet sert l'ennemi ou le frappe ; dans le vide, il est perdu.
 
 | Consommable | Sur la foreuse | Sur un ennemi |
@@ -796,13 +803,32 @@ Modèle Brogue :
 | Réparobots | Vie +50 | le répare de 50 PV |
 | Batterie | Énergie +50 | décharge : 12 dégâts, **étourdi 6 battements** (un Bloqueur étourdi lâche prise) |
 | Fumigène | nuage là où on le lance ; **les ennemis ne perdent la trace que si la foreuse est dedans** | idem |
-| Charge sismique | 3 × 3, 30 dégâts, roche brisée | idem |
+| Charge sismique | explose comme une mine (3 × 3 et 5 cases autour), 30 dégâts **à la foreuse aussi**, roche brisée | idem |
 | **Module de puissance** | **POW +1 pour toujours** ; chaque point de POW au-dessus du POW requis par l'arme donne **+5 % de dégâts** (+1,5 % avant ; 8 % essayé quelques heures le 22 novembre, baissé parce que la foreuse de série rattrapait le Trépan) | ses coups portent 25 % plus fort |
 | **Surrégime** | CRIT +50 pendant 10 battements ; la foreuse vire au rouge | ses coups sont tous critiques pendant 10 battements |
-| **Camouflage optique** | invisible 10 battements : vue seulement au contact, les poursuivants à distance lâchent ; **rompu par un coup ou un forage** | il disparaît 10 battements (visible au contact) |
-| **Balise** (néfaste) | tous les ennemis à 20 cases savent où est la foreuse | lancée au loin, ils y courent : un leurre |
+| **Camouflage optique** | invisible 10 battements : vue seulement au contact, les poursuivants à distance lâchent ; **rompu par un coup ou un forage** ; « Camouflé N » sous les barres, comme « Englué N » (22 novembre 2026) | il disparaît 10 battements (visible au contact) |
+| **Balise** (néfaste sur soi) | une **sirène à deux tons** retentit (22 novembre 2026) ; tous les ennemis à 20 cases savent où est la foreuse ; **elle rompt son camouflage optique** | **lancée ailleurs, c'est un leurre posé au sol** (23 novembre 2026, ci-dessous) |
 | **Court-circuit** (néfaste) | énergie à zéro | hors service 10 battements, sans dégât ; un Bloqueur lâche |
-| **Matière** (butin au sol) | +15 en réserve, dès qu'on marche dessus | – |
+| **Matière** (butin au sol) | +15 en réserve, dès qu'on marche dessus ; au sol, elle a le dessin des **éclats moyens** en couleur Matière (23 novembre 2026 : sa tuile propre « Matière (butin) » est retirée du Tile editor) | – |
+
+**Balise posée** (23 novembre 2026). Lancée ailleurs que sur la foreuse, la balise **vole jusqu'à la case visée** (elle n'y apparaît qu'à la fin du vol) et s'y
+pose (sur la case libre la plus proche si un obstacle ou une créature l'occupe). Elle **hurle 25 battements** — « Balise N »
+sous les barres — avec un point rouge qui clignote. Tant qu'elle hurle, **tout ennemi à 20 cases d'elle, ou qui chasse la
+foreuse, la délaisse pour s'acharner sur la balise** : il y court et l'attaque au contact ; les tireurs (Sentinelle,
+Artilleur, Englueur) lui tirent dessus à portée ; les mines s'arment à côté d'elle. **Chaque coup la touche** (100 %), le
+critique reste possible ; les attaques font du bruit (morsure ou laser), **un seul bruit par battement** quel que soit le nombre d'attaquants. Elle a **40 PV** et barre le passage comme
+une créature ; **détruite, elle explose sur sa seule case**, sans dégâts alentour. Mines et charges sismiques l'abîment aussi.
+Les ennemis attirés **restent en chasse** : **pas de coup par surprise** sur eux, et ils gardent le souvenir de la foreuse.
+Balise éteinte ou détruite, ils reprennent la chasse — sur la foreuse s'ils la voient, sinon là où ils l'ont vue (autour de
+la balise s'ils ne l'avaient jamais vue). Un ennemi que la foreuse frappe délaisse la balise et revient à elle. La balise
+posée ne rompt pas le camouflage. Valeurs réglables dans Lab → Items (rayon, durée, PV). Correctifs du 23 novembre, 0 h 40 :
+explosion ramenée à sa case (d'abord celle d'une mine, 20 dégâts), coups toujours portés, ennemis gardés en chasse.
+
+**Créature étourdie** (batterie, Court-circuit ; 22 novembre 2026) : elle ne fait plus rien, Puces comprises (elles n’en
+tenaient pas compte avant). Toute sa silhouette devient un **damier d'un pixel sur deux, couleur bio et couleur bâti en
+quinconce** ; les deux couleurs **s'échangent à chaque battement**, pour qu'on voie d'un coup d'œil qu'elle est immobilisée. **La foreuse prend le même damier
+quand elle est immobilisée**, c'est-à-dire tenue par un Bloqueur (22 novembre 2026) ; il prime sur ses autres allures
+(engluée, camouflée, en surrégime).
 
 Les deux capsules néfastes (22 novembre 2026, choix de l'utilisateur) font de l'identification un pari : essayer une capsule
 inconnue sur soi peut coûter cher, la lancer sur un ennemi peut le servir. Fabricables une fois le plan trouvé (12 et 16).
@@ -819,9 +845,14 @@ inconnue sur soi peut coûter cher, la lancer sur un ennemi peut le servir. Fabr
   combat et le visuel.
 - **Deux endroits, un seul sac** : la fenêtre **Équipement** (armes, armures, accessoires) et le sous-menu
   repliable **Inventaire** de la colonne (les consommables : nom, nombre, **USE**, **[X]**).
-- **Dix places** dans l'inventaire, **une par sorte** quel que soit le nombre d'exemplaires. Ramasser une sorte
-  nouvelle quand les 10 places sont prises est refusé et **l'objet reste au sol**. **[X] jette UN exemplaire au sol**,
-  sur une case libre voisine (21 novembre 2026 ; avant, il détruisait la pile) : la place se libère quand le dernier exemplaire est jeté.
+- **Vingt places** dans l'inventaire, **une par exemplaire** (22 novembre 2026 ; avant, dix places, une par sorte) :
+  les exemplaires s'empilent à l'affichage (×3), mais trois batteries prennent trois places. Le compteur affiche
+  `[places/20]`. Ramasser quand les 20 places sont prises est refusé et **l'objet reste au sol**. **[X] jette UN
+  exemplaire au sol**, sur une case libre voisine (21 novembre 2026 ; avant, il détruisait la pile), et libère une place.
+- **Un objet par case au sol** (22 novembre 2026) : un objet qui tombe — jeté par la foreuse, lâché par un robot abattu,
+  sorti du fabricateur quand le sac est plein — ne se pose jamais sur un autre objet ; il roule sur la case libre la plus
+  proche (`caseSol`, 14-inventaire). Les lots posés à la génération (appât d'une salle piégée, dépôts, vitrines) restent
+  groupés sur leur case.
   La **clé** est un consommable comme les autres (voir § portes verrouillées) : elle s'empile, se jette, se ramasse.
 - **Touche I** : ouvre le sous-menu et choisit le premier consommable ; **↑ ↓** parcourir, **Entrée** utiliser,
   **X**, **Suppr** ou **J** jeter un exemplaire au sol, **Échap** ou **I** sortir.
@@ -857,7 +888,7 @@ inconnue sur soi peut coûter cher, la lancer sur un ennemi peut le servir. Fabr
 | Réparobots (×2) | consommable | – | Vie +50 ; **croix rouges** autour de la foreuse |
 | Batterie (×2) | consommable | – | Énergie +50 ; **flèches bio** qui montent |
 | Fumigène (×2) | consommable | – | un **nuage de fumée** (ci-dessous) |
-| Charge sismique (×2) | consommable | – | **visée** : 3 × 3 à placer jusqu'à 4 cases, **30 dégâts** ; bruyante |
+| Charge sismique (×2) | consommable | – | **visée** d'une case jusqu'à 4 cases ; explosion de mine, **30 dégâts** ; bruyante |
 
 **Fumigène.** À la pose, une **galette ovale** autour de la foreuse : 7 cases de large et de haut, 5 en diagonale
 (37 cases). Chaque case tire sa durée entre **15 et 25 battements**. À chaque battement le nuage **gagne une à
@@ -869,12 +900,14 @@ s'efface case par case. Les ennemis qui chassaient **perdent aussitôt la trace*
 - Dessiné avec les **six tuiles de nuage** de l'intro ; **les tuiles changent d'un battement à l'autre** (cœur si
   les huit voisines sont de la fumée, bord sinon ; une case sur deux retire sa tuile au hasard dans sa famille), si
   bien que le nuage a l'air de vivre. Elles pâlissent dans leurs quatre derniers battements.
-- Sous Statut, « Dans la fumée N » tant que la foreuse y est.
+- Sous les barres, « Dans la fumée N » tant que la foreuse y est.
 
-**Charge sismique : une visée.** L'utiliser n'explose pas tout de suite : un **carré de 3 × 3 rouge** s'ouvre une
-case devant la foreuse. On le déplace à la souris ou aux touches de direction, sans que la foreuse bouge, dans un
-**rayon de 4 cases** (butée nette). **Entrée** ou un **clic** tire : **30 dégâts** à chaque créature des neuf
-cases, et **la roche vole en éclats** — rocher, montagne, **roche dure**, murs, piliers, portes verrouillées et
+**Charge sismique : une visée.** L'utiliser n'explose pas tout de suite : une **case rouge** s'ouvre une case devant
+la foreuse (sur elle tant que la capsule n'est pas identifiée). On la déplace à la souris ou aux touches de direction,
+sans que la foreuse bouge, dans un **rayon de 4 cases** (butée nette). **Entrée** ou un **clic** tire. **L'explosion est
+celle d'une mine** (22 novembre 2026) : le carré de 3 × 3 autour de la case visée **et 5 cases tirées au hasard parmi les
+12 qui le bordent par un côté**. **30 dégâts** à chaque créature de la zone, **la foreuse comprise** si elle y est, et
+**la roche vole en éclats** — rocher, montagne, **roche dure**, murs, piliers, portes verrouillées et
 machines ; les métaux tombent au sol. Le tir prend **un battement** et fait autant de bruit qu'un coup sur la roche
 (portée de discrétion ×1,5 ce battement-là) ; le combat est engagé. **Échap** annule sans rien consommer.
 
@@ -917,10 +950,11 @@ s au pluriel sur un nom qui en porte déjà un : « la puce », « la torpille �
   groupe ne sont pas alertées, et aucune autre espèce ne partage.
 - **Torpille** : ne quitte jamais l'eau ; invisible dès qu'elle plonge en eau profonde.
 - **Mine** : elle fonce dès qu'elle a repéré la foreuse. Arrivée **à une case**, elle **s'arme** : elle ne bouge
-  plus et **clignote**, puis **explose 2 à 3 battements plus tard** (1 à 3 jusqu'au 22 novembre 2026 : à 1, elle sautait au battement suivant) — **20 dégâts** dans un **carré de 3 × 3** à la
-  foreuse et à toute créature qui s'y trouve. Détruite avant, elle n'explose pas ; elle n'a pas d'autre attaque.
+  plus et **clignote**, puis **explose 2 à 3 battements plus tard** (1 à 3 jusqu'au 22 novembre 2026 : à 1, elle sautait au battement suivant) — **20 dégâts** dans un **carré de 3 × 3, plus 5 cases tirées
+  au hasard parmi les 12 qui le bordent par un côté** (les coins du 5 × 5 exclus ; 22 novembre 2026), à la foreuse et à
+  toute créature qui s'y trouve. Les flammes se dessinent sur toute la zone, si bien qu'aucune explosion n'a la même forme. Détruite avant, elle n'explose pas ; elle n'a pas d'autre attaque.
   **L'explosion brise la roche et la montagne tendre** du carré (22 novembre 2026) : elles deviennent des gravats, et le
-  métal ou la Matière qu'elles cachaient tombent au sol. La roche dure, les murs et les machines tiennent : seule la
+  métal ou la Matière qu'elles cachaient tombent au sol, sur toute la zone. La roche dure, les murs et les machines tiennent : seule la
   charge sismique en vient à bout.
   L'animation pose sur chaque case du carré les tuiles **boom0** (éclair blanc), **boom1** (damier accent) puis
   **boom2** (braises monde), qui alternent avec une variante décalée pour crépiter ; elles se retouchent au Tile
@@ -935,7 +969,7 @@ Ajoutées à la fin de `BEASTS` (tuiles `bz6` à `bz10`, dessins de départ). St
 
 | Espèce | Rôle | Capacité (`08-faune.js`) |
 |---|---|---|
-| **Bloqueur** (l'ancien Gardien, 22 novembre 2026) | Rapide (VIT 8), 30 PV, DEF 15, frappe à 2-4 | `bloque` : au contact il **agrippe la foreuse, qui ne peut plus se déplacer** (ni forer) tant qu'il vit ; un trait rouge les relie. Étourdi (batterie), il lâche. La clé reste `gardien` pour les groupes ; ses stats s'enregistrent sous `bloqueur` (`bk`). |
+| **Bloqueur** (l'ancien Gardien, 22 novembre 2026) | Rapide (VIT 8), 30 PV, DEF 15, frappe à 2-4 | `bloque` : au contact il **agrippe la foreuse, qui ne peut plus se déplacer** (ni forer) tant qu'il vit ; trois rayons parallèles couleur bio, espacés d'un pixel, les relient en passant sous eux (un trait rouge jusqu'au 22 novembre 2026, 21 h 50). Étourdi (batterie), il lâche. La clé reste `gardien` pour les groupes ; ses stats s'enregistrent sous `bloqueur` (`bk`). |
 | **Artilleur** | Laser à 5 cases, 4-7 dégâts | `cadence:2` (un tir tous les deux battements), `recul:2` (s'écarte quand la foreuse est à 2 cases) |
 | **Drone** | Rapide, fragile, en essaim | `vol` : gouffres et eau ne l'arrêtent pas ; partage ce qu'il voit avec sa bande |
 | **Soudeur** | Soutien | `soin:5`, `portee:4` : répare l'allié le plus abîmé à portée ; `recul:1` : fuit le contact |
@@ -1024,7 +1058,10 @@ remplace la plus ancienne. **Enregistrer** écrit les valeurs dans la base de l'
 - **Mort** : à 0 PV la foreuse **explose** — éclair blanc, secousse, détonation, ~520 éclats (accent et bio,
   quelques blancs, 2 à 5 px) qui retombent, **rebondissent**, ricochent sur les obstacles, tombent dans les
   gouffres et disparaissent d'un coup chacun à son heure ; ils restent dans la zone visible. Puis **« FOREUSE
-  DÉTRUITE »** et deux boutons : **Nouvelle exploration** et **Quitter**.
+  DÉTRUITE »** et deux boutons : **Déployer une nouvelle foreuse** et **Quitter**.
+- **Déployer une nouvelle foreuse** (22 novembre 2026 ; avant « Nouvelle exploration », qui repartait sur la recette du
+  menu Monde) : on repart **toujours du niveau 1** (recette « atterrissage », vaisseau compris), **cinématique d'arrivée
+  comprise**, avec une foreuse neuve ; le menu Monde du joueur est remis tel qu'il était.
 - **Quitter** : l'écran devient noir avec « SIGNAL COUPÉ », le son est coupé, un bouton discret « Rallumer »
   relance une exploration.
 - **Aucune progression permanente** pour l'instant : c'est le grand chantier qui reste (§ 12).
@@ -1080,25 +1117,43 @@ pièce ils deviennent du sol, sous un mur du mur) ; seuls le vaisseau et le bord
 
 ## 9. Interface
 
+- **« Matière {µ} »** (23 novembre 2026) : partout où le jeu parle de la ressource (colonne, fabricateur, journal, objets,
+  inspection, sonar, Lab → Items, descente), elle s'écrit « Matière {µ} ». Le « MATIÈRE » du tableau de bord des descentes
+  désigne la roche traversée (argile, filon…) et garde son nom.
+
 - **Pas d'écran d'accueil** : la partie commence directement, foreuse dans la soute. Le son s'active à la première
   touche ou au premier clic.
 - **Barres de défilement** (22 novembre 2026) : 4 pixels, sans fond, couleur du texte secondaire (`--dim`), plus
   claires au survol ; « thin » sous Firefox. Ne pas poser `scrollbar-width` ou `scrollbar-color` sur un élément :
   Chrome les préférerait et rendrait la barre épaisse.
-- Plein écran ; colonne noire à droite, défilable à la molette ou au doigt mais sans barre de défilement ; journal
+- Plein écran ; colonne noire à droite. **Son haut reste fixe** (22 novembre 2026) : barres Vie, Énergie, Matière,
+  boutons, effets en cours et **Inventaire**. **Seul ce qui suit défile**, à la molette ou au doigt, sans barre de
+  défilement. Le titre « Statut » a été retiré le même jour.
+  Journal
   de bord sous la carte (5 lignes visibles, numéro de tour, ×N pour les répétitions). **Il défile** (22 novembre 2026) :
 molette ou fine barre pour remonter jusqu'aux 200 derniers messages ; un nouveau message le ramène tout en bas. Un message
   trop long passe à la ligne, aligné après le numéro de tour.
-- **Statut** : barres ASCII `█`/`░` — Vie en bio, Énergie en accent — suivies de leur valeur chiffrée. Le
+- **Barres** (l'ancien Statut) : barres ASCII `█`/`░` — Vie en bio, Énergie en blanc (accent jusqu’au 22 novembre 2026 ; le « +N » d’énergie regagnée aussi, éclats de métal comme batterie) — suivies de leur valeur chiffrée. Le
   remplissage est un **calque de `█` découpé à la largeur exacte** posé sur un fond de `░`, donc juste à toute
   largeur de colonne et à toute taille de police.
-- **En vue** (sous la mini-carte) : la fiche d'inspection de la case survolée, puis les créatures visibles (icône,
+- **En vue** (sous la Carte) : la fiche d'inspection de la case survolée, puis les créatures visibles (icône,
   barre de vie ASCII, colonnes TOUCHER / SUBIR colorées).
+- **En tête de colonne, au-dessus de Vie** (22 novembre 2026 ; d'abord placées sous la mini-carte, remontées le soir
+  même) : trois lignes en capitales couleur monde, sans étiquette — `NIVEAU 2 · −1564 M · 96×64` (le niveau, sa profondeur et la taille de la carte ; la
+  profondeur vaut 0 au niveau 1, puis la fin de chaque descente, les mêmes chiffres que le compteur PROFONDEUR des
+  cinématiques de forage, qui part de la profondeur du niveau quitté : `profNiv`, 14b), puis l'**archétype monde** et
+  l'**archétype bâti** de la carte (« Personnalisé » s'il n'y en a pas).
+- **Carte** (sous-menu repliable sous l'Inventaire, 22 novembre 2026) : la mini-carte. Elle **s'ouvre d'elle-même en mode
+  carte (M)** et se referme en sortant, sauf si elle était déjà ouverte avant.
 - **Mini-carte** pleine largeur ; ennemis en points rouges ; un clic recentre la vue ; bouton maintenu + glisser =
   défilement en temps réel. Saisie à l'intérieur, le cadre suit le pointeur sans sauter ; à l'extérieur, il se
   centre d'abord sous le pointeur.
-- Sous-menus repliables : **Inventaire**, **Génération** (+ REGEN), **Life**, **Palette**, **Lab** (Bestiaire,
-  Groupes, Artefacts, Discrétion, Tile editor, Niv1, Niv2, aide des touches).
+- **Tile editor** (Lab) : encres sur deux lignes (22 novembre 2026) — les cinq couleurs de la palette (Monde, Bio, Accent,
+  Danger, Bâti), puis Blanc, Noir, **Rouge fixe** (`R`, #d8180b, le même avec toutes les palettes) et Transparent.
+  Nouveaux codes de tuile : `5` (bâti) et `R` (rouge fixe). Le texte d'explication en tête de la fenêtre a été retiré.
+- Sous **REGEN · MONDE · LIFE**, une rangée **NIV1 · NIV2 · NIV3** (sortie du Lab le 22 novembre 2026), à 5 px.
+- Sous-menus repliables : **Inventaire**, **Carte**, **Lab**, **Palette**, **Contrôles** (Palette sous Lab depuis le 22 novembre 2026 ; Carte sous Inventaire et Palette sous Lab à 5 px, les autres à 20) (Bestiaire,
+  Groupes, Artefacts, Items, Discrétion, Tile editor, **Combat** — un lien qui ouvre le banc de combat dans un autre onglet, 22 novembre 2026), puis **Contrôles** sous Palette (22 novembre 2026 : l'aide des touches, sortie du Lab, une commande par ligne — la touche, puis ce qu'elle fait en dessous — en trois groupes : Se déplacer, Objets, Voir).
 
 ### Souris et inspection
 
@@ -1162,7 +1217,8 @@ recopier** la configuration d'essai que la base contient aussi (génération, é
 
 Vue de dessus du début à la fin, vaisseau nez vers le haut. Durée ≈ 11,6 s. Jouée au premier lancement
 (`np-intro`) et, depuis le 21 novembre 2026, **à chaque nouvelle partie lancée par le joueur** (`nouvellePartie`,
-appelée par les boutons « Nouvelle exploration » et par le rallumage) : elle marque l'arrivée au niveau 1, comme la
+appelée par « Nouvelle exploration » après la victoire et par le rallumage ; après la destruction de la foreuse,
+`deployerForeuse` force en plus le niveau 1) : elle marque l'arrivée au niveau 1, comme la
 cinématique de forage marque le passage au niveau suivant. Pas après une mise à jour de page en cours de partie,
 pas si l'utilisateur a demandé moins d'animations. **Lab → Niv1** rejoue la scène puis lance un niveau 1 (recette « atterrissage ») aux réglages tirés au hasard ; **Lab → Niv2** joue la cinématique de forage puis lance un niveau 2 (recette « cavernes ») aux réglages tirés au hasard, la foreuse gardant ce qu'elle a. Dans les deux cas le menu Monde du joueur est remis tel qu'il était ; seule la taille de carte en est reprise (21 novembre 2026 ; avant, un bouton « Intro » rejouait l'arrivée sur la carte du menu). REGEN ne joue aucune cinématique. **Échap,
 Espace ou Entrée** passe directement au posé.
@@ -1200,11 +1256,28 @@ Espace ou Entrée** passe directement au posé.
 
 ## 10 ter. Cinématique de forage (21 novembre 2026)
 
+**Règle permanente (23 novembre 2026), aux deux descentes : jamais d'alpha ni de transparence.** Chaque case dessinée est
+opaque (fond noir plein, puis le caractère), sur la grille. Rien ne disparaît en fondu : la **fumée** garde sa couleur et
+perd sa densité (« ▓ ▒ ░ · ») avant de s'effacer ; les éclats et la foreuse sont opaques ; plus d'éclair blanc translucide
+(les chocs se sentent par le tremblement et la roche chauffée à blanc) ; la **fin de chaque descente** s'éteint case par
+case, chacune gardant sa teinte et passant par « ▒ ░ · » avant le noir.
+
+**La roche fond au contact du cône** (23 novembre 2026). Une poche de chaleur palpite sous la pointe (rouge, orange, jaune
+au centre). Chaque rangée percée brûle au lieu de disparaître (« █ ▓ ▒ ░ · » en couleurs de feu, puis braises) ; les parois
+du puits, chauffées, prennent des caractères abîmés (« ╬ ═ ┼ ┐ ░ … »), rougeoient puis refroidissent en cendre : le puits
+garde une trace brûlée.
+
+**Les mines explosent comme la foreuse** (23 novembre 2026, seconde descente) : même cratère au bord déchiqueté (plus petit),
+même onde de choc dégressive, et leur pavé rouge et blanc part en éclats qui creusent la roche puis restent en débris.
+
 Pour le passage au niveau suivant. Vue **de côté**, tout en **caractères ASCII** (comme les dessins d'équipement),
 environ 15 s ; `src/js/14b-forage.js`. **`playForage(suite, niv)`** la lance et appelle `suite()` à la fin (rien ne
-l'appelle encore dans le jeu : la descente par niveaux, étape 4 de la refonte, doit s'y brancher) ; **F9** la lance pour
-l'essayer. **Échap, Espace ou Entrée** la passent. Pas jouée si l'utilisateur a demandé moins d'animations.
+l'appelle encore dans le jeu : la descente par niveaux, étape 4 de la refonte, doit s'y brancher) ; **NIV2** la lance pour
+l'essayer (F9 jusqu'au 23 novembre 2026). **Échap, Espace ou Entrée** la passent. Pas jouée si l'utilisateur a demandé moins d'animations.
 
+- **Échelle** : caractères d'un 52ᵉ de la hauteur d'écran, comme à la seconde descente (22 novembre 2026 ; avant, un
+  36ᵉ, trop zoomé). Le compteur **PROFONDEUR** part de la profondeur du niveau quitté (`profNiv`) : 0 → 1 564 m à la
+  première descente, 1 564 → 5 168 m à la seconde.
 - **La machine tourne.** Elle démarre **couchée à l'horizontale** sur l'herbe, nez à droite, moteur qui monte ; elle se
   cabre, plante son nez et **plonge à la verticale** (1,3 s) ; à l'arrivée elle touche le fond, **bascule sur le côté**
   autour de son nez, rebondit et se **recouche à l'horizontale**. Le dessin (`FG_ART`, 15 lignes sur 11 colonnes) est
@@ -1236,19 +1309,38 @@ l'essayer. **Échap, Espace ou Entrée** la passent. Pas jouée si l'utilisateur
   la route (9 à 14 cases à côté : il faut tourner), six loin à gauche et à droite, hors d'atteinte, pour que le sous-sol ait
   l'air d'exister aussi sur les côtés. Maximum 60 par descente ; mesuré : 6 sans piloter, 54 en visant (`test-forage.js`).
   Avant, le même jour : un seul amas de 7 × 3, +20 d'un bloc.
-- **Annonce en gros (22 novembre 2026)** : en haut de l'écran, entre le tableau de bord et la coupe (ni la foreuse ni le HUD ne
-  sont couverts), dans un cadre à fond noir, rebord plein et bandes de chantier (dessin n° 3 de quatre proposés, `FG_ANN`).
-  Le cadre paraît à 1 s ; les caractères défilent au hasard puis se figent de gauche à droite ; message complet à 2 s. De 4 s à 4,5 s il
-  s'efface colonne par colonne, de gauche à droite, les caractères se remettant à défiler juste avant de partir. Le défilement
-  n'emploie que des signes ASCII, des chiffres et des lettres ordinaires. Première descente : « MATIÈRE {µ} DÉTECTÉE / COLLECTE POSSIBLE » (couleur accent) ; seconde : « EXPLOSIFS DÉTECTÉS /
-  ATTENTION SOUS-SOL PIÉGÉ ! » (rouge).
+- **Annonce en gros (22 novembre 2026, revue le 23)** : **alignée à gauche, juste sous le tableau de bord**, dans un cadre plein
+  à fond noir avec deux bandes de chantier (la forme choisie le 22). Depuis le 23 novembre 2026, tout est en **police DOS**
+  (Modern DOS 8x16, jeu CP437, domaine public : `02b-police-dos.js`, `dosCar`, `dosTexte`), un pixel de police calé sur des
+  pixels d'écran, d'après les références de l'utilisateur (`F:\WORK\IAZONE\DEEPCORE\REF` : polices IBM PC, GIF de
+  caractères qui s'allument). **Apparition**, de gauche à droite avec du désordre : chaque case monte en densité
+  « . → i → 0 », puis montre des caractères au hasard sur des pavés de couleur (couleur de l'alerte ou gris, en inverse vidéo)
+  avant de se figer ; le rebord et les bandes montent en « ░ ▒ ▓ █ ». **Disparition**
+  colonne par colonne de gauche à droite, à rebours : pavés, « 0 → i → . », plus rien ; la roche reparaît derrière. Première descente :
+  « MATIÈRE {µ} DÉTECTÉE / COLLECTE POSSIBLE » (couleur accent) ; seconde : « EXPLOSIFS DÉTECTÉS / ATTENTION SOUS-SOL PIÉGÉ ! » (rouge).
+  Le cadre a **la même taille aux deux descentes** (30 cases de large, mêmes caractères). Depuis le 23 novembre 2026 (soir),
+  l'apparition dure **2 s** (1 → 3 s), le message reste **4 s**, la disparition dure **1 s** (7 → 8 s) ; deux lignes sont
+  réservées sous le tableau de bord pour ses alertes qui clignotent, que l'annonce ne cache pas.
+
+**Foreuse détruite pendant une descente** (23 novembre 2026, explosion revue deux fois le même jour). Tout se joue
+**sur la grille de la descente** (elle ne change pas), **chaque case dessinée opaque** (aucune transparence). Un coup très
+fort, d'un seul coup : l'écran tremble, le bout du trou devient un **cratère** (roche détruite au centre, abîmée autour,
+bord déchiqueté), chauffé à blanc ; une onde de choc abîme la roche alentour par endroits, **fort près du cratère, de plus
+en plus rarement et légèrement au loin**. Chaque **caractère de la foreuse est projeté** dans tous les sens : en traversant
+la roche, il la **creuse** et abîme ses voisines, puis ralentit et s'arrête. Une case détruite passe par « █ ▓ ▒ ░ · »
+puis disparaît ; une case abîmée prend un autre caractère (« ╬ ╪ ═ ║ ┼ ┐ ░ … », plus clair si moins touchée). Tout **brûle**
+(blanc, jaune, orange, rouge) puis refroidit en cendre ; des braises restent au fond du cratère et **les débris de la foreuse
+restent** là où ils sont tombés. À 2,55 s, tout l'écran s'éteint case par case, par « ▒ ░ · », et à 3,6 s le jeu montre
+aussitôt **« FOREUSE DÉTRUITE »** sur fond **noir plein** : ni la carte du niveau, ni une seconde explosion sur la carte.
+Partout, mort en descente ou non, « FOREUSE DÉTRUITE » est **toujours rouge**, quelle que soit la palette.
 
 ### Seconde descente : le mini-jeu des mines (21 novembre 2026)
 
-Du niveau 2 au niveau 3, la descente se joue. `playForage(suite, 2)` ; Lab → **Niv3** ou Maj + F9 pour l'essayer.
+Du niveau 2 au niveau 3, la descente se joue. `playForage(suite, 2)` ; **NIV3** pour l'essayer (Maj + F9 jusqu'au 23 novembre 2026).
 
-- La foreuse est **plus petite** (caractères d'un 52ᵉ de la hauteur d'écran, contre un 36ᵉ) et tenue en haut de l'écran :
-  on voit 0,7 écran devant elle. La descente est plus longue que la première et la foreuse répond
+- Caractères d'un 52ᵉ de la hauteur d'écran — **la même échelle aux deux descentes depuis le 22 novembre 2026** (la
+  première, en 36ᵉ, était trop zoomée). La foreuse est tenue en haut de l'écran :
+  on voit 0,7 écran devant elle — **aux deux descentes depuis le 23 novembre 2026** (à la première, elle était au milieu). La descente est plus longue que la première et la foreuse répond
   plus vite aux commandes.
 - Des **mines explosives** naissent juste sous le bas de l'écran, par rangées de plus en plus
   serrées. Sept sur dix sont visées sur la route de la foreuse ; une fois sur quatre, une seconde mine vient à côté.
@@ -1285,7 +1377,7 @@ Du niveau 2 au niveau 3, la descente se joue. `playForage(suite, 2)` ; Lab → *
   menu Monde du joueur est remis en place aussitôt après. Avant le 21 novembre au soir, tout était tiré au hasard. Pas de
   vaisseau : on arrive par le puits. `genPlanet` refait l'objet `G`, donc ce que **la foreuse garde est remis en
   place juste après** : vie, énergie, inventaire, matière en réserve, tours et distance parcourue.
-- **F9 reste** : il joue la cinématique seule, sans changer de niveau.
+- **F9** (23 novembre 2026) ne lance plus la cinématique : il garantit **au moins un exemplaire de chaque consommable** dans l'inventaire (capsules identifiées et clé) : une sorte déjà présente n'est pas ajoutée ; s'il manque des places, il **retire des doublons** (un exemplaire à la fois, sur la plus grosse pile) jusqu'à ce que toutes les sortes tiennent. Touche d'essai, absente du sous-menu Contrôles.
 - La taille de la carte ne change pas d'un niveau à l'autre (elle s'applique au lancement).
 
 ## 11. Règles à ne pas casser

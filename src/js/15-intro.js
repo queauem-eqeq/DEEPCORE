@@ -269,9 +269,11 @@ function start(data){
     if(G.st&&G.st.degats===10)G.st.degats=0;   /* 17 novembre 2026 : DEG n'est plus les dégâts eux-mêmes mais un bonus au jet de dés de l'arme */
     if(G.st&&(G.st.capteur<10||G.st.capteur===12||G.st.capteur===15))G.st.capteur=10;if(!G.ore)hideOre();if(!G.st||G.st.pre==null||G.st.energieMax==null){G.st={vie:100,vieMax:100,energie:100,energieMax:100,repar:0,power:10,vitesse:5,degats:0,capteur:10,cout:10,pre:100,def:10,crit:5};if(G.inv)G.inv.forEach(o=>o.eq=0);}
   if(!G.inv)G.inv=invTest();if(!G.items)G.items={};if(!G.eff)G.eff={};if(!G.fum)G.fum={};delete G.amb;G.w=W;G.h=H;invMigre();
-  /* 17 novembre 2026 : six espèces retirées. Dans une partie enregistrée, les créatures portent le rang de leur espèce :
-     on retire celles des espèces disparues (rangs 2 à 7) et on renumérote le Mastok (8 → 2) et le Brochon (9 → 3). */
-  if(!G.bz17){if(G.beasts)G.beasts=G.beasts.filter(b=>!(b.sp>=2&&b.sp<=7)).map(b=>{if(b.sp===8)b.sp=2;else if(b.sp===9)b.sp=3;return b;});G.bz17=1;}
+  /* Retiré le 22 novembre 2026 : la renumérotation des espèces du 17 novembre (rangs 2 à 7 supprimés, 8 → 2, 9 → 3) se
+     rejouait sur toute partie reprise qui n'en portait pas la marque G.bz17 — or une partie neuve ne la porte pas. À chaque
+     mise à jour de l'artefact, la partie en cours perdait ses Broyeurs, Mines, Sentinelles, Bloqueurs…, et ses Drones (6 PV)
+     devenaient des Broyeurs à 6 PV. Les espèces d'aujourd'hui occupent ces rangs : plus rien à renuméroter. */
+  G.bz17=1;
   delete G.mode;delete G.biome;delete G.suite;   // partie enregistrée avant le 16 novembre 2026 : ses biomes n'existent plus
   if(!(G.niv>=1&&G.niv<=NIV_MAX))G.niv=1;   // la descente est revenue le 21 novembre 2026, sur NIV_MAX niveaux
   if(G.st.matiere==null)G.st.matiere=0;if(G.sonar==null)G.sonar=1;   // partie commencée avant la descente

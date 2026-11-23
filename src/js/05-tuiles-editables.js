@@ -1,5 +1,6 @@
 /* ---------- Tile editor : tuiles éditables ---------- */
-// Codes : '.' transparent, '0' noir, 'w' blanc, '1' accent, '2' bio, '3' monde, 'r' rouge (sang)
+// Codes : '.' transparent, '0' noir, 'w' blanc, '1' accent, '2' bio, '3' monde, 'r' danger (rouge de la palette), '5' bâti,
+// 'R' rouge fixe, le même quelle que soit la palette ('5' et 'R' : 22 novembre 2026)
 function curGen(f){const r=[];for(let y=0;y<16;y++){let l='';for(let x=0;x<16;x++)l+=f(x,y)?'w':'.';r.push(l);}return r;}
 // contour noir automatique autour des pixels colorés, pour rester lisible sur un terrain clair
 function curOutline(r){return r.map((l,y)=>[...l].map((c,x)=>c!=='.'?c:[[1,0],[-1,0],[0,1],[0,-1]].some(([dx,dy])=>{const n=(r[y+dy]||'')[x+dx];return n&&n!=='.'&&n!=='0';})?'0':'.').join(''));}
@@ -8,7 +9,7 @@ const TILE_LIST=[
   ['Viseur',[['cursor','Viseur']]],
   ['Foreuse et faune',[['robot_u','Foreuse'],['an0r',SPECIES[0].n],...BEASTS.map((b,i)=>['bz'+i+'r',b.n])]],
   ['Terrain',[['ground0','Sol'],['rock','Rocher'],['rock2','Rocher 2'],['mtTop','Crête'],['mtBody','Montagne'],['wall','Mur'],['wallFace','Mur (face)'],['floor','Sol bâti'],['door','Porte'],['doorOpen','Porte ouverte'],['doorOpenV','Porte ouverte (côté)'],['pillar','Pilier'],['lock','Porte verrouillée'],['cle','Clé'],['liq0','Eau A'],['liq1','Eau B'],['deep0','Eau profonde'],['grass0','Herbes hautes'],['flat0','Herbes basses'],['rubble','Gravats'],['crackH','Fissures'],['wade','Remous'],['wadeDeep','Remous profond']]],
-  ['Objets au sol',[['o_foreuse','Foreuse'],['o_usine','Coque d’usine'],['o_servo','Servomoteur'],['o_optique','Téléobjectif'],['o_viseur','Viseur laser'],['o_conden','Condensateur'],['o_gyro','Gyroscope'],['o_stabil','Stabilisateur'],['o_accu','Accumulateur'],['o_repar','Réparobots'],['o_batterie','Batterie'],['o_fumigene','Fumigène'],['o_charge','Charge sismique'],['o_vrille','Vrille rapide'],['o_trepan','Trépan lourd'],['o_carene','Carène légère'],['o_blindage','Blindage composite'],['o_capsule','Consommable non identifié'],['o_matiere','Matière (butin)'],['o_puissance','Module de puissance'],['o_berserk','Surrégime'],['o_camo','Camouflage optique'],['o_balise','Balise'],['o_court','Court-circuit'],['o_plan','Plan de fabrication']]],
+  ['Objets au sol',[['o_foreuse','Foreuse'],['o_usine','Coque d’usine'],['o_servo','Servomoteur'],['o_optique','Téléobjectif'],['o_viseur','Viseur laser'],['o_conden','Condensateur'],['o_gyro','Gyroscope'],['o_stabil','Stabilisateur'],['o_accu','Accumulateur'],['o_repar','Réparobots'],['o_batterie','Batterie'],['o_fumigene','Fumigène'],['o_charge','Charge sismique'],['o_vrille','Vrille rapide'],['o_trepan','Trépan lourd'],['o_carene','Carène légère'],['o_blindage','Blindage composite'],['o_capsule','Consommable non identifié'],['o_puissance','Module de puissance'],['o_berserk','Surrégime'],['o_camo','Camouflage optique'],['o_balise','Balise'],['o_court','Court-circuit'],['o_plan','Plan de fabrication']]],
   ['Objets',[['siteUnknown','Site'],['objet','Objet au sol (générique)'],['ore1','Éclats petits (montagne)'],['ore2','Éclats moyens (montagne)'],['ore','Éclats gros (montagne)'],['oreSol1','Éclats petits (sol)'],['oreSol2','Éclats moyens (sol)'],['oreSol','Éclats gros (sol)']]],
   ['Artefacts',[['antenne','Antenne'],['antenneOn','Antenne allumée'],['terminal','Terminal'],['mach0','Tuyaux'],['mach1','Serveur'],['mach2','Caisses'],['mach3','Ordinateur'],['mach4','Établi'],['mach5','Cuve'],['mach6','Générateur'],['mach7','Console'],['mach8','Turbine'],['mach9','Armoire électrique']]],
   ['Machines',[['tourelle','Tourelle laser'],['tourelleOn','Tourelle laser (tir)'],['pylone','Croix laser'],['pyloneOn','Croix laser (allumée)'],['pile','Pile énergétique'],['socle','Socle'],['socleOn','Socle alimenté'],['levier','Levier'],['levierOn','Levier (actionné)'],['grille','Grille d’énergie'],['station','Station de réparation'],['stationOff','Station (vide)'],['chargeur','Distributeur de pile'],['fabric','Fabricateur'],['niche','Niche (salle piégée)'],['nicheOuverte','Niche ouverte'],['glu','Boule de glu'],['vitrine','Vitrine'],['vitrineOff','Vitrine verrouillée']]],
@@ -18,7 +19,7 @@ const TILE_DEPS={robot_u:['robot_u','robot_r','robot_d','robot_l'],an0r:['an0r',
 // dimensions en pixels : 16 x 16, sauf le vaisseau édité d'un bloc (5 x 6 tuiles)
 BEASTS.forEach((_,i)=>{TILE_DEPS['bz'+i+'r']=['bz'+i+'r','bz'+i+'l'];});
 const tileDim=k=>k==='ship'?[SGW*16,SGH*16]:[16,16];
-const validTile=(r,k)=>{const [w,h]=tileDim(k);return Array.isArray(r)&&r.length===h&&r.every(l=>typeof l==='string'&&l.length===w&&/^[.0w123r]+$/.test(l));};
+const validTile=(r,k)=>{const [w,h]=tileDim(k);return Array.isArray(r)&&r.length===h&&r.every(l=>typeof l==='string'&&l.length===w&&/^[.0w123r5R]+$/.test(l));};
 const PAT_ORIG={};
 let TILE_OV={},TILE_BASE={};   // TILE_BASE : dernières tuiles enregistrées, auxquelles « Rétablir » revient
 try{const o=JSON.parse(localStorage.getItem('np-tiles-base')||'null');if(o&&typeof o==='object')for(const k in o)if(validTile(o[k],k))TILE_BASE[k]=o[k];}catch(e){}
@@ -73,7 +74,8 @@ PAT.boom1b=(x,y)=>TF('boom1')((x+2)%16,y);PAT.boom2b=(x,y)=>TF('boom2')(15-x,y);
 Object.assign(TILE_DEPS,{laserV:['laserV','laserV_','laserH_'],laserX:['laserX','laserX_'],boom1:['boom1','boom1b'],boom2:['boom2','boom2b']});
 let TL={},ANIMG=[],fog=true;
 try{fog=localStorage.getItem('np-fog')!=='off';}catch(e){}
-const inkCol=ch=>ch==='0'?'#020605':ch==='r'||ch==='L'?PAL['4']:ch==='w'?'#ffffff':PAL[ch];
+const ROUGE_FIXE='#d8180b';   // pris dans LACKING64
+const inkCol=ch=>ch==='0'?'#020605':ch==='r'||ch==='L'?PAL['4']:ch==='R'?ROUGE_FIXE:ch==='w'?'#ffffff':PAL[ch];
 function tileCanvas(src,w=16,h=16){const c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d');
   for(let j=0;j<h;j++)for(let i=0;i<w;i++){const ch=typeof src==='function'?src(i,j):src[j][i];const col=inkCol(ch);if(col){x.fillStyle=col;x.fillRect(i,j,1,1);}}return c;}
 // reconstruit une tuile retouchée et ses variantes

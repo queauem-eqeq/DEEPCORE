@@ -3,15 +3,15 @@
       salles piégées, pièces secrètes) ou se fabrique.
    2. Consommables non identifiés : chaque sorte porte un nom de code tiré à chaque partie (« //KZ7-3FQ ») et la même
       tuile de capsule. Le premier usage, ou le plan de fabrication, révèle ce que c'est.
-   3. Tout consommable se vise, comme la charge sismique : une case (ou une zone) jusqu'à VISEE_R cases. Sur la foreuse,
+   3. Tout consommable se vise, comme la charge sismique : une case jusqu'à VISEE_R cases (jamais de zone dessinée). Sur la foreuse,
       il la sert ; sur un ennemi, il sert l'ennemi (réparé, surrégime…) ou le frappe (batterie : décharge et étourdissement).
    4. Plans : le fabricateur ne propose que les objets dont on a trouvé le plan.
    5. Matière au sol (butin d'exploration), Module de puissance (POW +1 pour toujours), Surrégime, Camouflage optique.
    Ce que la foreuse sait (plans, capsules identifiées, noms de code) vit dans G.st.savoir : G.st suit la foreuse d'un niveau
    à l'autre. Valeurs réglables : Lab → Items (np-items). */
 const ITEM_VAL_DEF={repar:{soin:50},batterie:{energie:50,choc:12,etourdi:6},charge:{degats:30},puissance:{pow:1,deg:5},
-  berserk:{crit:50,duree:10},camo:{duree:10},balise:{rayon:20},court:{etourdi:10},matiere:{mat:15}};
-const ITEM_VAL_LIB={soin:'Vie rendue',energie:'Énergie rendue',choc:'Dégâts de la décharge',etourdi:'Étourdissement (battements)',degats:'Dégâts',pow:'POW gagné',deg:'Dégâts par point de POW en trop (%)',crit:'CRIT en plus (points)',duree:'Durée (battements)',rayon:'Rayon de l’appel (cases)',mat:'Matière rendue'};
+  berserk:{crit:50,duree:10},camo:{duree:10},balise:{rayon:20,duree:25,pv:40},court:{etourdi:10},matiere:{mat:15}};
+const ITEM_VAL_LIB={soin:'Vie rendue',energie:'Énergie rendue',choc:'Dégâts de la décharge',etourdi:'Étourdissement (battements)',degats:'Dégâts',pow:'POW gagné',deg:'Dégâts par point de POW en trop (%)',crit:'CRIT en plus (points)',duree:'Durée (battements)',rayon:'Rayon de l’appel (cases)',pv:'PV de la balise posée',mat:'Matière {µ} rendue'};
 let ITEM_VAL=JSON.parse(JSON.stringify(ITEM_VAL_DEF));
 // chance qu'un robot abattu lâche un objet, par espèce (clé du Bestiaire)
 const DROPS_DEF={crabos:8,cafar:6,mastok:90,brochon:10,mine:0,paralyzor:25,gardien:60,artilleur:35,drone:5,soudeur:45,englueur:35};
@@ -35,8 +35,8 @@ Object.assign(ITEMS,{
     art:["   ·  ·  ·  ·  ", "  ·  ▄▄▄▄▄  ·  ", "  · █░▒█▒░█ ·  ", "  ·  ▀▀▀▀▀  ·  ", "   ·  ·  ·  ·  "],
     col:["...3..3..3..3..", "..3..wwwww..3..", "..3.w33w33w.3..", "..3..wwwww..3..", "...3..3..3..3.."]},
   // Capsules néfastes (22 novembre 2026) : mauvaises sur la foreuse, utiles lancées ailleurs. C'est ce qui fait de l'identification un pari.
-  balise:{n:'Balise',conso:1,son:'spot',eff:'Appelle les ennemis à 20 cases',
-    d:'Un émetteur qui hurle : tous les ennemis alentour convergent vers lui. Sur la foreuse, c’est une catastrophe ; lancée au loin, c’est un leurre.',
+  balise:{n:'Balise',conso:1,son:'alarme',eff:'Leurre : attire les ennemis 25 battements',
+    d:'Un émetteur qui hurle. Lancée au loin, elle reste au sol 25 battements : les ennemis à 20 cases, et tous ceux qui chassent la foreuse, l’oublient et s’acharnent sur la balise (40 PV) ; détruite, elle explose. Ils restent en chasse : pas de coup par surprise, et ensuite ils cherchent la foreuse. Sur la foreuse, c’est une catastrophe : tous savent où elle est.',
     plein:st=>false,non:'',use:st=>'',
     art:["      ) ) )    ", "     ▄▄█▄▄     ", "     █ ● █     ", "     ▀▀█▀▀     ", "    ▄▄▄█▄▄▄    "],
     col:["......r.r.r....", ".....wwwww.....", ".....w.r.w.....", ".....wwwww.....", "....wwwwwww...."]},
@@ -45,14 +45,15 @@ Object.assign(ITEMS,{
     plein:st=>false,non:'',use:st=>'',
     art:["     ▄▄▄▄▄     ", "    █  ▄▀ █    ", "    █ ▀▄  █    ", "    █  ▄▀ █    ", "     ▀▀▀▀▀     "],
     col:[".....wwwww.....", "....w..11.w....", "....w.11..w....", "....w..11.w....", ".....wwwww....."]},
-  matiere:{n:'Matière',mat:1,eff:'Matière +15',d:'Un bloc de Matière brute : il rejoint la réserve dès qu’on le ramasse.',
+  matiere:{n:'Matière {µ}',mat:1,eff:'Matière {µ} +15',d:'Un bloc de Matière {µ} brute : il rejoint la réserve dès qu’on le ramasse.',
     art:["     ▄▄        ", "   ▄████▄  ▄▄  ", "  ████████████ ", "   ▀████████▀  ", "      ▀▀▀▀     "],
     col:[".....11........", "...11w111..11..", "..111111111w11.", "...1111111111..", "......1111....."]}});
 Object.assign(FAB_PRIX,{berserk:20,camo:24,balise:12,court:16});
 const FAB_PRIX_DEF=Object.assign({},FAB_PRIX);
 
 /* ----- Ce que la foreuse sait ----- */
-// zone d'un consommable : r = 0 une case, 1 un carré de 3 × 3, 'f' le disque du fumigène ; soi : la visée s'ouvre sur la foreuse
+// zone d'effet d'un consommable : r = 0 une case, 1 l'explosion (3 × 3 et 5 cases autour), 'f' le disque du fumigène ; la visée, elle,
+// ne montre toujours qu'une case. soi : la visée s'ouvre sur la foreuse (de même pour toute capsule non identifiée)
 const CONSO={repar:{r:0,soi:1},batterie:{r:0,soi:1},fumigene:{r:'f',soi:1},charge:{r:1,soi:0},puissance:{r:0,soi:1},berserk:{r:0,soi:1},camo:{r:0,soi:1},balise:{r:0,soi:1},court:{r:0,soi:1}};
 let SAV_GARDE=null;   // pendant la génération du niveau suivant, G.st est neuf : on garde la main sur le savoir de la foreuse
 const codeTire=()=>{const L='BDFGHJKLMNPQRSTVWXZ',H='0123456789ABCDEF',l=()=>L[rnd(0,L.length-1)],h=()=>H[rnd(0,15)];return `//${l()}${l()}${rnd(2,9)}-${h()}${h()}${l()}`;};
@@ -75,12 +76,12 @@ function itemTxt(){const V=ITEM_VAL,v=k=>ITEMS[k].vrai;
   v('repar').eff=`Vie +${V.repar.soin}`;v('repar').d=`Essaim de micro-robots réparateurs : rend ${V.repar.soin} points de vie à ce qu’il touche — la foreuse, ou un ennemi.`;
   v('batterie').eff=`Énergie +${V.batterie.energie}, ou décharge`;v('batterie').d=`Sur la foreuse : rend ${V.batterie.energie} points d’énergie. Lancée sur un ennemi : ${V.batterie.choc} dégâts, et il reste étourdi ${V.batterie.etourdi} battements.`;
   v('fumigene').d='Un nuage opaque là où on le lance : il cache la vue des deux côtés. Si la foreuse est dedans, les ennemis perdent sa trace.';
-  v('charge').eff=`${V.charge.degats} dégâts, roche brisée, 3 × 3`;v('charge').d=`Un carré de 3 × 3, jusqu’à 4 cases : ${V.charge.degats} dégâts et roche brisée, même la roche dure. Très bruyante.`;
+  v('charge').eff=`${V.charge.degats} dégâts, roche brisée, 3 × 3 et plus`;v('charge').d=`Explose jusqu’à 4 cases, comme une mine : un carré de 3 × 3 et 5 cases autour, au hasard. ${V.charge.degats} dégâts, la foreuse comprise si elle est dedans, et roche brisée, même la roche dure. Très bruyante.`;
   v('puissance').eff=`POW +${V.puissance.pow}, pour toujours`;
   v('berserk').eff=`CRIT +${V.berserk.crit} pendant ${V.berserk.duree} battements`;
   v('camo').eff=`Invisible ${V.camo.duree} battements`;
   v('balise').eff=`Appelle les ennemis à ${V.balise.rayon} cases`;v('court').eff=`Énergie à zéro, ou ennemi hors service ${V.court.etourdi} battements`;
-  ITEMS.matiere.eff=`Matière +${V.matiere.mat}`;}
+  ITEMS.matiere.eff=`Matière {µ} +${V.matiere.mat}`;}
 // plans de fabrication : un objet « plan_<clé> » par objet fabricable ; jamais dans le sac, il s'apprend en le ramassant
 const ART_PLAN={art:["  ┌─────────┐  ", "  │ ┌──┐ ── │  ", "  │ │  │ ── │  ", "  │ └──┘ ── │  ", "  └─────────┘  "],col:["..wwwwwwwwwww..", "..w.2222.22.w..", "..w.2..2.22.w..", "..w.2222.22.w..", "..wwwwwwwwwww.."]};
 function plansInit(){for(const k in FAB_PRIX)if(ITEMS[k]&&!ITEMS['plan_'+k]){const o={plan:k,art:ART_PLAN.art,col:ART_PLAN.col,d:'Un plan de fabrication : une fois ramassé, le fabricateur sait produire cet objet.',eff:'Plan de fabrication'};
@@ -108,7 +109,8 @@ function butinCoffre(q){const h=p=>Math.random()<p;
   return [consoTire(),'matiere',...(h(.5)?[planTire()]:[]),...(h(.25)?['puissance']:[])];}
 // un robot abattu lâche parfois un objet (les relais d'une salle piégée, jamais : b.nd)
 function butinMort(b){if(!b||b.nd)return;const sp=BEASTS[b.sp],p=DROPS[sp.key]||0;if(Math.random()*100>=p)return;
-  const i=idx(b.x,b.y);if(blocks(G.t[i])||G.t[i]===DEEP)return;const r=Math.random(),k=r<.4?'matiere':r<.75?consoTire():r<.93?planTire():equipTire();
+  const i0=idx(b.x,b.y);if(blocks(G.t[i0])||G.t[i0]===DEEP)return;const r=Math.random(),k=r<.4?'matiere':r<.75?consoTire():r<.93?planTire():equipTire();
+  const i=caseSol(b.x,b.y,true);   // un objet déjà là : celui-ci roule sur la case libre la plus proche (22 novembre 2026)
   G.items=G.items||{};(G.items[i]=G.items[i]||[]).push(k);if(typeof vis!=='undefined'&&vis[i])sayMore(`${LeNom(sp)} lâche quelque chose.`,'good');}
 /* Butin d'exploration : les pièces secrètes, puis les culs-de-sac et les coins reculés — les cases les plus loin du trajet
    arrivée → site, là où plus rien ne mène ailleurs. Le plus reculé porte un Module de puissance, le suivant un plan,
@@ -142,17 +144,16 @@ function butinExplo(){const N=W*H,t=G.t,dep=idx(G.px,G.py),s0=G.sites&&G.sites[0
 /* ----- Ramassage : la Matière rejoint la réserve, un plan s'apprend, le reste va au sac ----- */
 function butinPrend(c,more){const l=G.items&&G.items[c];if(!l)return;const dire=more?sayMore:invSay,reste=[];
   for(const k of l){const d=ITEMS[k];
-    if(d&&d.mat){const m=ITEM_VAL.matiere.mat;G.st.matiere=(G.st.matiere||0)+m;addFx({kind:'num',x:G.px,y:G.py,txt:'+'+m,col:PAL['1'],dur:750});dire(`Matière ramassée : +${m} (réserve ${G.st.matiere}).`,'good');SFX.spot();}
-    else if(d&&d.plan){const s=savoir();if(s.plans[d.plan]){G.st.matiere=(G.st.matiere||0)+PLAN_DOUBLON;dire(`${d.n} : déjà connu, recyclé en Matière (+${PLAN_DOUBLON}).`,'info');}
+    if(d&&d.mat){const m=ITEM_VAL.matiere.mat;G.st.matiere=(G.st.matiere||0)+m;addFx({kind:'num',x:G.px,y:G.py,txt:'+'+m,col:PAL['1'],dur:750});dire(`Matière {µ} ramassée : +${m} (réserve ${G.st.matiere}).`,'good');SFX.spot();}
+    else if(d&&d.plan){const s=savoir();if(s.plans[d.plan]){G.st.matiere=(G.st.matiere||0)+PLAN_DOUBLON;dire(`${d.n} : déjà connu, recyclé en Matière {µ} (+${PLAN_DOUBLON}).`,'info');}
       else{s.plans[d.plan]=1;identifier(d.plan);dire(`${d.n} appris : le fabricateur sait maintenant le produire.`,'good');}SFX.analyse();}
     else reste.push(k);}
   if(reste.length)G.items[c]=reste;else delete G.items[c];}
 
 /* ----- Visée de tous les consommables ----- */
 const FUM_PORTEE=3;
-function viseeCases(){if(!VISEE)return [];const o=G.inv[VISEE.i],c=o&&CONSO[o.k],r=c?c.r:1,out=[];
-  if(r==='f'){for(let dy=-3;dy<=3;dy++)for(let dx=-3;dx<=3;dx++)if(dx*dx+dy*dy<=FUM_R2)out.push([VISEE.x+dx,VISEE.y+dy]);return out;}
-  for(let dy=-r;dy<=r;dy++)for(let dx=-r;dx<=r;dx++)out.push([VISEE.x+dx,VISEE.y+dy]);return out;}
+// la visée montre toujours une seule case (22 novembre 2026) : une zone dessinée trahirait la charge sismique ou le fumigène
+function viseeCases(){return VISEE?[[VISEE.x,VISEE.y]]:[];}
 function retire(c){const isB=(G.beasts||[]).includes(c);(isB?G.beasts:G.animals).splice((isB?G.beasts:G.animals).indexOf(c),1);bleed(c.x,c.y);if(isB)butinMort(c);}
 function consoCible(i,x,y){const o=G.inv[i];if(!o)return;const k=o.k,d=ITEMS[k],V=ITEM_VAL[k]||{},st=G.st,nom=d.vrai.n,connu=identifie(k);
   const moi=x===G.px&&y===G.py,b=beastAt(x,y),an=b?null:animalAt(x,y),c=b||an,sp=b?BEASTS[b.sp]:an?SPECIES[an.sp]:null;
@@ -162,7 +163,8 @@ function consoCible(i,x,y){const o=G.inv[i];if(!o)return;const k=o.k,d=ITEMS[k],
   if(k==='repar'){if(moi){const a=st.vie;st.vie=Math.min(st.vieMax,st.vie+V.soin);txt=`+${Math.round(st.vie-a)} PV`;addFx({kind:'soin',x,y,dur:1000,gr:fxGrains(12)});}
     else if(c){const m=pvDe(sp),a=c.hp??m;c.hp=Math.min(m,a+V.soin);txt=`${leNom(sp)} est réparé (+${c.hp-a} PV)`;ton='warn';num('+'+(c.hp-a),PAL['2']);addFx({kind:'soin',x,y,dur:1000,gr:fxGrains(12)});}
     else{txt='les réparobots se dispersent sans rien trouver à réparer';ton='warn';}}
-  else if(k==='batterie'){if(moi){const a=st.energie;st.energie=Math.min(st.energieMax,st.energie+V.energie);txt=`+${Math.round(st.energie-a)} énergie`;addFx({kind:'ener',x,y,dur:1000,gr:fxGrains(12)});}
+  else if(k==='batterie'){if(moi){const a=st.energie;st.energie=Math.min(st.energieMax,st.energie+V.energie);txt=`+${Math.round(st.energie-a)} énergie`;num('+'+Math.round(st.energie-a),'#ffffff');   // l'énergie regagnée, en blanc comme sa barre (22 novembre 2026)
+addFx({kind:'ener',x,y,dur:1000,gr:fxGrains(12)});}
     else if(c){c.hp=(c.hp??pvDe(sp))-V.choc;num('-'+V.choc,PAL['3']);son='laser';addFx({kind:'flash',beast:c,dur:220});
       if(c.hp<=0){retire(c);txt=`la décharge détruit ${leNom(sp)}`;}
       else{c.stun=V.etourdi;if(b){b.hunt=1;spot(b);}else{an.aware=1;spot(an);}txt=`${leNom(sp)} est électrisé : −${V.choc} PV, étourdi ${V.etourdi} battements`;}engage();}
@@ -177,19 +179,83 @@ function consoCible(i,x,y){const o=G.inv[i];if(!o)return;const k=o.k,d=ITEMS[k],
   else if(k==='camo'){if(moi){G.eff.camo=V.duree;for(const e of G.beasts||[])if(e.hunt&&Math.max(Math.abs(e.x-G.px),Math.abs(e.y-G.py))>1){e.hunt=0;forget(e);}txt=`la foreuse disparaît pendant ${V.duree} battements`;}
     else if(b){b.camo=V.duree;txt=`${leNom(sp)} disparaît pendant ${V.duree} battements`;ton='warn';}
     else{txt='le voile se dissipe sans rien couvrir';ton='warn';}}
-  else if(k==='balise'){let n=0;for(const e of G.beasts||[])if(Math.max(Math.abs(e.x-x),Math.abs(e.y-y))<=V.rayon&&!(e.stun>0)){e.hunt=1;e.mem=[x,y];if(moi)spot(e);n++;}
-    addFx({kind:'shake',amp:4,dur:250});txt=moi?`la balise hurle sur la foreuse : ${n} ennemi${n>1?'s':''} alentour ${n>1?'savent':'sait'} où elle est`:`la balise hurle là-bas : ${n} ennemi${n>1?'s':''} y ${n>1?'courent':'court'}`;ton=moi?'warn':'good';}
+  else if(k==='balise'){
+    if(moi){const camo=G.eff&&G.eff.camo>0;if(camo)G.eff.camo=0;let n=0;   /* sur la foreuse : tous savent où elle est, et le camouflage se rompt */
+      for(const e of G.beasts||[])if(Math.max(Math.abs(e.x-x),Math.abs(e.y-y))<=V.rayon&&!(e.stun>0)){e.hunt=1;e.leurre=0;spot(e);n++;}
+      addFx({kind:'shake',amp:4,dur:250});txt=`la balise hurle sur la foreuse : ${n} ennemi${n>1?'s':''} alentour ${n>1?'savent':'sait'} où elle est`+(camo?' ; le camouflage optique se rompt':'');ton='warn';}
+    else{const q=balisePose(x,y);txt=`la balise tombe au sol et hurle : ${q} ennemi${q>1?'s':''} l’${q>1?'oublient':'oublie'} pour elle, pendant ${V.duree} battements`;}}
   else if(k==='court'){if(moi){st.energie=0;txt='surtension : l’énergie tombe à zéro';ton='warn';addFx({kind:'shake',amp:5,dur:250});}
     else if(b){b.stun=V.etourdi;b.tient=0;txt=`${leNom(sp)} est hors service pendant ${V.etourdi} battements`;num('HS',PAL['3']);addFx({kind:'flash',beast:b,dur:220});}
     else{txt='la surtension se perd dans le sol';ton='warn';}}
   const neuf=identifier(k);invTake(i);sacFix();SAC_H='';
   say(`${neuf?`Capsule ${savoir().codes[k]} : c’était ${nom}. `:''}${nom} : ${txt}.`,ton);(son&&SFX[son]?SFX[son]:SFX.spot)();
   if(consoTemps())return;invChanged();}
+/* Balise posée (23 novembre 2026). Lancée ailleurs que sur la foreuse, la balise vole jusqu'à la case visée (sur la case libre
+   la plus proche si un obstacle ou une créature l'occupe), s'y pose et hurle pendant `duree` battements (25). Tant qu'elle hurle,
+   tout ennemi à `rayon` cases d'elle (20), ou qui chasse la foreuse, l'oublie et s'acharne sur la balise : il y court et
+   l'attaque (les tireurs à portée lui tirent dessus, les mines s'arment à côté) ; chaque coup la touche. Elle a `pv` PV (40),
+   barre les passages comme une créature, et explose sur sa seule case quand elle est détruite (sans dégâts alentour).
+   Les ennemis attirés restent EN CHASSE (pas de coup par surprise possible) et gardent le souvenir de la foreuse : la balise
+   éteinte ou détruite, ils la cherchent là où ils l'ont vue (ou, s'ils ne l'avaient jamais vue, autour de la balise).
+   Statut : « Balise N ». G.balises = [{id, x, y, hp, t}]. Correctifs du 23 novembre 2026, 0 h 40. */
+const baliseAt=(x,y)=>(G.balises||[]).find(q=>q.x===x&&q.y===y);
+function balisePose(x,y){const V=ITEM_VAL.balise;G.balises=G.balises||[];
+  let c=idx(x,y);if(blocks(G.t[c])||G.t[c]===DEEP||beastAt(x,y)||animalAt(x,y)||baliseAt(x,y)||(x===G.px&&y===G.py))c=caseSol(x,y,false);
+  const q={id:(G.baliseN=(G.baliseN||0)+1),x:c%W,y:(c/W)|0,hp:V.pv,t:V.duree};G.balises.push(q);
+  addFx({kind:'jet',ax:G.px,ay:G.py,bx:q.x,by:q.y,q:q.id,dur:280});addFx({kind:'shake',amp:4,dur:250});
+  return baliseAppel(q);}
+// les ennemis à portée, ou en chasse, passent sur la balise : ils oublient la foreuse
+function baliseAppel(q){const V=ITEM_VAL.balise;let n=0;
+  for(const e of G.beasts||[]){if(e.leurre===q.id){n++;continue;}if(e.stun>0)continue;
+    if(Math.max(Math.abs(e.x-q.x),Math.abs(e.y-q.y))<=V.rayon||e.hunt>0){e.leurre=q.id;e.hunt=1;e.search=0;e.tient=0;n++;}}   // en chasse, souvenir gardé
+  return n;}
+const baliseDe=e=>e.leurre?(G.balises||[]).find(q=>q.id===e.leurre)||null:null;
+// une fois par battement, avant que les ennemis jouent
+const BAL_D=new Map();   // cartes de distance vers chaque balise, refaites à chaque battement (hors de G : rien de lourd dans la sauvegarde)
+let BAL_SON=false;   // un seul bruit d'attaque sur les balises par battement, quel que soit le nombre d'attaquants (23 novembre 2026)
+function baliseTick(){BAL_D.clear();BAL_SON=false;if(!G.balises||!G.balises.length)return;
+  for(const q of [...G.balises]){if(--q.t<=0){baliseFin(q,false);continue;}baliseAppel(q);}}
+// la balise s'éteint (ou explose) : ses ennemis viennent fouiller où elle était
+function baliseFin(q,boum){const k=G.balises.indexOf(q);if(k<0)return;G.balises.splice(k,1);
+  for(const e of G.beasts||[])if(e.leurre===q.id){e.leurre=0;e.hunt=1;if(!e.mem)e.mem=[q.x,q.y];e.search=0;e.stuck=0;}   // ils reprennent la chasse : vers la foreuse s'ils la voient, sinon là où ils l'ont vue
+  const vu=vis[idx(q.x,q.y)];
+  if(boum)baliseBoom(q,vu);else if(vu)sayMore('La balise se tait.','info');}
+// un coup sur la balise (ennemi au contact ou tireur, explosion)
+function baliseCoup(q,dm,o){q.hp-=dm;if(vis[idx(q.x,q.y)])addFx({kind:'num',x:q.x,y:q.y,txt:'-'+dm,col:PAL['3'],dur:700});
+  if(q.hp<=0)baliseFin(q,true);}
+function baliseFrappe(e,sp,q,laser){const vu=beastVisible(e)||vis[idx(q.x,q.y)],proche=!BAL_SON&&(vu||cheb(e,G.px,G.py)<=10);if(proche)BAL_SON=true;   // la balise ne se dérobe pas : chaque coup la touche
+  if(laser){if(q.x!==e.x)e.dir=Math.sign(q.x-e.x);if(vu)addFx({kind:'laser',o:e,x:q.x,y:q.y,ox:0,oy:0,dur:300});if(proche)SFX.laser();}
+  else{if(vu)addFx({kind:'lunge',beast:e,dx:Math.sign(q.x-e.x),dy:Math.sign(q.y-e.y),dur:200});if(proche)SFX.bite();}
+  const cr=e.bers>0||roll(sp.crit||0);baliseCoup(q,Math.round(dmgDe(sp)*(cr?CRIT_X:1)*(1+.25*(e.pow||0))));}
+// l'explosion de la balise : sur sa seule case, sans dégâts alentour (23 novembre 2026)
+function baliseBoom(q,vu){addFx({kind:'boom',x:q.x,y:q.y,cases:[[q.x,q.y]],dur:420});
+  if(vu||cheb(q,G.px,G.py)<=10){addFx({kind:'shake',amp:5,dur:250});SFX.explode();}
+  if(vu)sayMore('La balise est détruite : elle explose.','warn');else if(cheb(q,G.px,G.py)<=10)sayMore('Une explosion, tout près.','warn');}
+/* Un ennemi qui suit une balise : il y court et l'attaque, au lieu de la foreuse. Rend true s'il a joué. */
+function baliseJoue(e,sp,boom){const q=baliseDe(e);if(!q){e.leurre=0;return false;}const d=cheb(e,q.x,q.y);
+  if(sp.mine){if(e.fuse>0){if(--e.fuse<=0)boom.push(e);return true;}if(d<=1){e.fuse=rnd(2,3);return true;}}
+  else if((sp.laser||sp.glu)&&d<=(sp.laser||sp.glu)&&d>1&&los(e.x,e.y,q.x,q.y)){if(sp.cadence){if((e.cd=(e.cd||0)-1)>0)return true;e.cd=sp.cadence;}baliseFrappe(e,sp,q,true);return true;}
+  else if(d<=1){baliseFrappe(e,sp,q,false);return true;}
+  e.mp=Math.min(2,e.mp+sp.v/5/slowOf(G.t[idx(e.x,e.y)],sp.swim));const m=mouilleOk(sp,e),kD=q.id+':'+(m?1:0);let D=BAL_D.get(kD);if(!D){D=distFrom(q.x,q.y,m);BAL_D.set(kD,D);}
+  while(e.mp>=1&&!G.over){e.mp-=1;if(cheb(e,q.x,q.y)<=1){e.mp=Math.min(e.mp,.99);break;}if(!chaseStep(e,D,(x,y)=>beastFits(e,x,y),q.x,q.y))break;}
+  return true;}
+/* F9 (23 novembre 2026, pour les essais) : au moins un exemplaire de chaque consommable existant (capsules et clé) dans le sac,
+   identifié. Une sorte déjà présente n'est pas ajoutée. S'il manque des places, F9 retire des doublons — un exemplaire à la
+   fois, toujours sur la plus grosse pile — jusqu'à ce que toutes les sortes tiennent. */
+function f9Consos(){const sortes=Object.keys(ITEMS).filter(k=>ITEMS[k].conso),manque=sortes.filter(k=>!G.inv.some(o=>o.k===k));let retires=0;
+  for(const k of sortes)if(CONSO[k])identifier(k);
+  while(sacPlaces()+manque.length>SAC_MAX){const piles=G.inv.filter(o=>ITEMS[o.k].conso&&(o.n||1)>1).sort((a,b)=>(b.n||1)-(a.n||1));if(!piles.length)break;piles[0].n--;retires++;}
+  const pris=[];for(const k of manque){if(sacPlaces()>=SAC_MAX)break;G.inv.push({k,eq:0,n:1});pris.push(k);}
+  say(!manque.length?`F9 : l’inventaire a déjà un exemplaire de chaque consommable (${sacPlaces()}/${SAC_MAX}).`
+    :`F9 : ${pris.length} consommable${pris.length>1?'s':''} ajouté${pris.length>1?'s':''}${retires?`, ${retires} doublon${retires>1?'s':''} retiré${retires>1?'s':''} pour faire de la place`:''} (${sacPlaces()}/${SAC_MAX}).`,'good');
+  SFX.spot();sacFix();SAC_H='';INV_H=null;render();}
 const fumDedans=()=>!!(G.fum&&G.fum[idx(G.px,G.py)]);
 
-/* ----- La foreuse change d'allure : engluée (teinte bio), camouflée (trame), en surrégime (rouge) ----- */
+/* ----- La foreuse change d'allure : immobilisée (damier bio / bâti), engluée (teinte bio), camouflée (trame), en surrégime (rouge) ----- */
 const ROBOT_VAR=new WeakMap();
-function robotTuile(){const base=TL['robot_'+(G.face||'u')],E=G.eff||{},mode=E.camo>0?'camo':E.glu>0?'glu':E.berserk>0?'bers':null;if(!mode||!base)return base;
+function robotTuile(){const base=TL['robot_'+(G.face||'u')],E=G.eff||{};
+  if(base&&tenuPar())return tuileEtourdie(base);   // tenue par un Bloqueur, donc immobilisée : le même damier bio / bâti qu'un ennemi étourdi (22 novembre 2026)
+  const mode=E.camo>0?'camo':E.glu>0?'glu':E.berserk>0?'bers':null;if(!mode||!base)return base;
   const col=mode==='glu'?PAL['2']:mode==='camo'?PAL['3']:(PAL['4']||'#ff3b3b'),cle=mode+col;let m=ROBOT_VAR.get(base);if(!m){m={};ROBOT_VAR.set(base,m);}if(m[cle])return m[cle];
   const c=document.createElement('canvas');c.width=c.height=16;const x=c.getContext('2d');x.drawImage(base,0,0);
   try{const im=x.getImageData(0,0,16,16),p=im.data,n=parseInt(col.slice(1),16),R=n>>16&255,Gv=n>>8&255,B=n&255;
@@ -221,14 +287,14 @@ function buildItems(){TOUT_CONNU=true;const champ=(lib,chemin,v,min,max)=>`<labe
   let h='';
   for(const [titre,test] of ITEMS_FAM){const l=Object.keys(ITEMS).filter(k=>!ITEMS[k].plan&&test(k));if(!l.length)continue;h+=`<h3>${titre}</h3>`;
     for(const k of l){const d=ITEMS[k],f=[];
-      if(k in FAB_PRIX)f.push(champ('Prix (Matière)',`prix.${k}`,FAB_PRIX[k],0,500));
+      if(k in FAB_PRIX)f.push(champ('Prix (Matière {µ})',`prix.${k}`,FAB_PRIX[k],0,500));
       for(const c in ITEM_VAL[k]||{})f.push(champ(ITEM_VAL_LIB[c]||c,`val.${k}.${c}`,ITEM_VAL[k][c],0,500));
       if(d.req!=null)f.push(champ('POW requis',`req.${k}`,d.req,0,30));
       if(d.de){f.push(champ('Dés',`de.${k}.n`,d.de.n,1,9));f.push(champ('Faces',`de.${k}.f`,d.de.f,1,30));f.push(champ('Bonus',`de.${k}.p`,d.de.p,0,60));}
       for(const m in d.mod||{})f.push(champ(MODS[m]?MODS[m][0]:m,`mod.${k}.${m}`,d.mod[m],-200,200));
-      const tu=TL[k==='cle'?'cle':'o_'+k]||TL.objet;let ic='';try{ic=tu.toDataURL();}catch(e){}
+      const tu=(k==='matiere'?TL.mat2:TL[k==='cle'?'cle':'o_'+k])||TL.objet;let ic='';try{ic=tu.toDataURL();}catch(e){}
       h+=`<div class="itl"><img src="${ic}" alt="" width="32" height="32"><div><b>${(d.vrai||d).n}</b><small>${k in FAB_PRIX?'fabricable (plan)':k==='puissance'?'se trouve, ne se fabrique pas':k==='matiere'?'butin':d.base?'équipement de départ':'se trouve'} · ${(d.vrai||d).eff||(d.slot?fabEffet(k):'')}</small></div><div class="itfs">${f.join('')||'<i>rien à régler</i>'}</div></div>`;}}
-  h+=`<h3>Butin des robots abattus (chance en %)</h3><div class="itl"><div></div><div><small>Ce qu’un robot lâche : Matière 40 %, capsule 35 %, plan 18 %, équipement 7 %.</small></div><div class="itfs">${BEASTS.map(b=>champ(b.n,`drops.${b.key}`,DROPS[b.key]||0,0,100)).join('')}</div></div>`;
+  h+=`<h3>Butin des robots abattus (chance en %)</h3><div class="itl"><div></div><div><small>Ce qu’un robot lâche : Matière {µ} 40 %, capsule 35 %, plan 18 %, équipement 7 %.</small></div><div class="itfs">${BEASTS.map(b=>champ(b.n,`drops.${b.key}`,DROPS[b.key]||0,0,100)).join('')}</div></div>`;
   $('itList').innerHTML=h;TOUT_CONNU=false;}
 function itemsLit(){const o=itemsEtat();for(const e of $('itList').querySelectorAll('input[data-c]')){const v=+e.value;if(!isFinite(v))continue;const c=e.dataset.c.split('.');let p=o;for(let n=0;n<c.length-1;n++)p=p[c[n]]=p[c[n]]||{};p[c[c.length-1]]=Math.round(v);}return o;}
 function openItems(){if(TRAV)stopTravel();if(REST)stopRest();if(EXPL)stopExplore();buildItems();$('itMsg').textContent='';$('items').hidden=false;$('items').querySelector('.mcard').focus();}

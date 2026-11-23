@@ -70,8 +70,8 @@ const ITEMS={
     use:st=>{fumPose();return 'le nuage se répand';},
     art:["       ▄       ", "     ┌───┐     ", "     │   │     ", "     │▒▒▒│     ", "     │▒▒▒│     ", "     └───┘     "],
     col:[".......w.......", ".....wwwww.....", ".....w...w.....", ".....w232w.....", ".....w323w.....", ".....wwwww....."]},
-  charge:{n:'Charge sismique',f:1,conso:1,eff:'30 dégâts, roche brisée, 3 × 3',
-    d:'Un carré de 3 × 3, jusqu’à 4 cases : 30 dégâts et roche brisée, même la roche dure. Très bruyante.',
+  charge:{n:'Charge sismique',f:1,conso:1,eff:'30 dégâts, roche brisée, 3 × 3 et plus',
+    d:'Explose jusqu’à 4 cases, comme une mine : un carré de 3 × 3 et 5 cases autour, au hasard. 30 dégâts, la foreuse comprise si elle est dedans, et roche brisée, même la roche dure. Très bruyante.',
     vise:1,plein:st=>false,non:'',
     use:st=>'',
     art:["          *    ", "        ┌─┘    ", "    ┌───┴──┐   ", "    │▓▓▓▓▓▓│   ", "    │▓▓ ▓▓▓│   ", "    └──────┘   "],
@@ -93,7 +93,7 @@ const invTest=()=>INV_TEST.map(([k,n])=>n?{k,eq:0,n}:{k,eq:k==='foreuse'||k==='u
 // partie commencée avant un ajout d'objets : on complète le sac, et il y a toujours une arme en main
 // Les armes et armures retirées le 16 novembre 2026 n'ont plus aucune trace dans le code (19 novembre 2026) : ni dessin, ni modificateur.
 const nbCles=()=>{const o=(G.inv||[]).find(o=>o.k==='cle');return o?(o.n||1):0;};   // les clés sont des objets du sac (21 novembre 2026), plus un compteur
-const itemTile=k=>k==='cle'?TL.cle:ITEMS[k]&&ITEMS[k].plan?(TL.o_plan||TL.objet):typeof identifie==='function'&&!identifie(k)?(TL.o_capsule||TL.objet):(TL['o_'+k]||TL.objet);   // tuile d'un objet posé au sol
+const itemTile=k=>k==='cle'?TL.cle:k==='matiere'?(TL.mat2||TL.objet):ITEMS[k]&&ITEMS[k].plan?(TL.o_plan||TL.objet):typeof identifie==='function'&&!identifie(k)?(TL.o_capsule||TL.objet):(TL['o_'+k]||TL.objet);   // tuile d'un objet posé au sol ; la Matière (butin) prend le dessin des éclats moyens, couleur Matière (23 novembre 2026 ; sa tuile propre est retirée)
 function invMigre(){if(G.st&&G.st.cles>0){const o=G.inv.find(o=>o.k==='cle');if(o)o.n=(o.n||1)+G.st.cles;else G.inv.push({k:'cle',eq:0,n:G.st.cles});}if(G.st)delete G.st.cles;   // ancien compteur de clés -> objet
   for(const [k,n] of INV_TEST)if(!G.inv.some(o=>o.k===k))G.inv.push(n?{k,eq:0,n}:{k,eq:0});
   G.inv=G.inv.filter(o=>ITEMS[o.k]&&!ITEMS[o.k].plan&&!ITEMS[o.k].mat);
@@ -125,7 +125,8 @@ function invApply(o,sg){const m=ITEMS[o.k].mod||{},st=G.st,v0=st.vieMax,e0=st.en
 const invCount=s=>G.inv.filter(o=>o.eq&&ITEMS[o.k].slot===s).length;
 /* Deux endroits depuis le 15 novembre 2026 : la fenêtre Équipement (armes, armures, accessoires) et le sous-menu « Inventaire »
    de la colonne (consommables). Un seul sac derrière, G.inv ; INV_SEL est l'indice RÉEL dans G.inv de l'objet choisi dans la fenêtre. */
-const SAC_MAX=10;   // places du sous-menu Inventaire : une SORTE de consommable par place, les exemplaires s'empilent
+const SAC_MAX=20;   // places du sous-menu Inventaire (22 novembre 2026 ; avant 10) : les exemplaires s'empilent à l'affichage, mais CHACUN prend une place
+const sacPlaces=()=>G.inv.reduce((t,o)=>t+(ITEMS[o.k]&&ITEMS[o.k].conso?(o.n||1):0),0);   // places occupées : un par exemplaire
 const invEquipables=()=>G.inv.map((o,i)=>i).filter(i=>!ITEMS[G.inv[i].k].conso);
 const invConsos=()=>G.inv.map((o,i)=>i).filter(i=>ITEMS[G.inv[i].k].conso);
 function invFix(){const l=invEquipables();if(!l.length){INV_SEL=-1;return;}if(!l.includes(INV_SEL))INV_SEL=l[0];}
@@ -136,19 +137,21 @@ function invChanged(){robotTiles();computeFOV();turnStealth();render();}
 const ARME_FIXE='Il faut toujours une arme en main : équipez-en une autre pour la remplacer.';
 // consommables offensifs : ennemis à r cases ou moins, et onde de choc
 const invCibles=r=>[...(G.beasts||[]),...(G.animals||[])].filter(o=>Math.max(Math.abs(o.x-G.px),Math.abs(o.y-G.py))<=r);
-/* Charge sismique : visée d'une zone de 3 × 3 (16 novembre 2026).
-   Le carré s'ouvre une case devant la foreuse ; on le déplace à la souris ou aux touches de direction, dans un rayon de VISEE_R cases
-   autour d'elle ; Entrée ou un clic valide, Échap annule (la charge n'est pas consommée). Le carré est dessiné en rouge avec la tuile
-   « Bord croisé » (10-rendu.js). La validation frappe tout ce qui occupe une des neuf cases. */
+/* Visée d'un consommable (16 novembre 2026 pour la charge sismique, 22 novembre pour tous).
+   La visée montre toujours une seule case (22 novembre 2026), pour qu'une capsule inconnue ne se trahisse pas par sa zone.
+   Elle s'ouvre sur la foreuse si la capsule n'est pas identifiée, ou si l'objet connu sert la foreuse ; sinon une case devant
+   elle. On la déplace à la souris ou aux touches de direction, dans un rayon de VISEE_R cases ; Entrée ou un clic valide,
+   Échap annule (rien n'est consommé). La case est dessinée en rouge avec la tuile « Bord croisé » (10-rendu.js).
+   La charge sismique explose comme une mine (zoneBoom, 08-faune.js) : 3 × 3 et 5 cases autour, la foreuse comprise. */
 // Tout consommable prend un battement : les ennemis jouent, les effets durables se décomptent, l'énergie remonte (16 novembre 2026)
 // act : 'use' ne fait ni bruit ni discrétion ; la charge sismique passe 'dig', aussi bruyant qu'un coup de foreuse sur la roche
 function consoTemps(act){G.turn++;lastAct=act||'use';lastRun=false;pass(DUR.attente);computeFOV();if(G.over&&G.over.dead){render();dead();return true;}return false;}
 const VISEE_R=4,VISEE_DM=30;
 const DEVANT={u:[0,-1],r:[1,0],d:[0,1],l:[-1,0]};
-function viseeStart(i){const o=G.inv[i],c=CONSO[o.k]||{},[dx,dy]=c.soi?[0,0]:DEVANT[G.face||'u'];   // 22 novembre 2026 : tout consommable se vise ; ceux qui servent la foreuse s'ouvrent sur elle
+function viseeStart(i){const o=G.inv[i],c=CONSO[o.k]||{},soi=c.soi||!identifie(o.k),[dx,dy]=soi?[0,0]:DEVANT[G.face||'u'];   // 22 novembre 2026 : tout consommable se vise ; une capsule inconnue s'ouvre sur la foreuse, comme celles qui la servent
   VISEE={i,x:Math.max(1,Math.min(W-2,G.px+dx)),y:Math.max(1,Math.min(H-2,G.py+dy))};
   invOpen(false);SAC_NAV=false;SAC_H='';
-  say(`${ITEMS[o.k].n} : choisissez la cible (déplacement ou souris), Entrée ou clic pour valider, Échap pour annuler.${c.soi?' Entrée tout de suite : sur la foreuse.':''}`,'warn');render();}
+  say(`${ITEMS[o.k].n} : choisissez la cible (déplacement ou souris), Entrée ou clic pour valider, Échap pour annuler.${soi?' Entrée tout de suite : sur la foreuse.':''}`,'warn');render();}
 function viseeVers(x,y){if(!VISEE)return;
   const cx=Math.max(G.px-VISEE_R,Math.min(G.px+VISEE_R,Math.max(1,Math.min(W-2,x)))),
         cy=Math.max(G.py-VISEE_R,Math.min(G.py+VISEE_R,Math.max(1,Math.min(H-2,y))));
@@ -159,24 +162,27 @@ function viseeOk(){if(!VISEE||G.over)return;const {i,x,y}=VISEE,o=G.inv[i];
   if(o.k!=='charge'){consoCible(i,x,y);return;}
   const neufCh=identifier('charge'),VISEE_DM=ITEM_VAL.charge.degats;camoCasse();
   VISEE=null;lastAct='dig';
-  let n=0,k=0;
-  for(const c of [...(G.beasts||[]),...(G.animals||[])]){if(Math.abs(c.x-x)>1||Math.abs(c.y-y)>1)continue;
+  let n=0,k=0,moi=0;const zone=zoneBoom(x,y);
+  for(const c of [...(G.beasts||[]),...(G.animals||[])]){if(!dansZone(zone,c.x,c.y))continue;
     const isB=(G.beasts||[]).includes(c),sp=isB?BEASTS[c.sp]:SPECIES[c.sp];n++;
     c.hp=(c.hp??pvDe(sp))-VISEE_DM;addFx({kind:'num',x:c.x,y:c.y,txt:'-'+VISEE_DM,col:PAL['3'],dur:900});
     if(c.hp<=0){k++;(isB?G.beasts:G.animals).splice((isB?G.beasts:G.animals).indexOf(c),1);bleed(c.x,c.y);if(isB)butinMort(c);}
     else if(isB){c.hunt=1;spot(c);}else{c.aware=1;c.enraged=true;spot(c);}}
   // l'onde brise aussi la roche, la montagne et la roche dure (16 novembre 2026) : c'est le seul moyen d'entamer la roche dure
   let roches=0;
-  for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){const zx=x+dx,zy=y+dy;
+  for(const [zx,zy] of zone){
     if(zx<1||zy<1||zx>=W-1||zy>=H-1)continue;const j=idx(zx,zy),v=G.t[j];
     if(v!==ROCK&&v!==MOUNT&&v!==HARD&&v!==MACHINE&&!bati(v)&&!machCasse(v))continue;
     if(machCasse(v)&&G.art)delete G.art[j];
     G.t[j]=RUBBLE;if(G.dmg)delete G.dmg[j];roches++;
     if(G.ore&&G.ore[j]&&!oreSol(G.ore[j])){const l=oreLv(G.ore[j]),mt=oreMat(G.ore[j]);G.ore[j]=(mt?'m':'')+'sol'+l;
-      sayMore(mt?'De la Matière tombe au sol.':'Des éclats de métal tombent au sol.','good');}}
+      sayMore(mt?'De la Matière {µ} tombe au sol.':'Des éclats de métal tombent au sol.','good');}}
+  for(const q of [...(G.balises||[])])if(dansZone(zone,q.x,q.y))baliseCoup(q,VISEE_DM);   // une balise posée dans la zone encaisse aussi
+  // comme la mine, la charge blesse la foreuse si elle est dans la zone (22 novembre 2026)
+  if(dansZone(zone,G.px,G.py)){moi=VISEE_DM;G.st.vie=Math.max(0,G.st.vie-moi);addFx({kind:'num',x:G.px,y:G.py,txt:'-'+moi,col:PAL['4'],dur:1000});if(G.st.vie<=0)G.over={dead:true};}
   engage();invTake(i);sacFix();SAC_H='';
-  addFx({kind:'boom',x,y,dur:420});addFx({kind:'shake',amp:8,dur:300});SFX.explode();
-  say(`${neufCh?`Capsule ${savoir().codes.charge} : c’était une charge sismique. `:''}Charge sismique : ${n?`${n} ennemi${n>1?'s':''} touché${n>1?'s':''}${k?`, ${k} abattu${k>1?'s':''}`:''}`:'personne dans la zone'}${roches?`, ${roches} case${roches>1?'s':''} de roche pulvérisée${roches>1?'s':''}`:''}.`,n||roches?'good':'warn');
+  addFx({kind:'boom',x,y,cases:zone,dur:420});addFx({kind:'shake',amp:moi?10:8,dur:300});SFX.explode();
+  say(`${neufCh?`Capsule ${savoir().codes.charge} : c’était une charge sismique. `:''}${moi?`La foreuse est prise dans l’explosion : −${moi} vie. `:''}Charge sismique : ${n?`${n} ennemi${n>1?'s':''} touché${n>1?'s':''}${k?`, ${k} abattu${k>1?'s':''}`:''}`:'personne dans la zone'}${roches?`, ${roches} case${roches>1?'s':''} de roche pulvérisée${roches>1?'s':''}`:''}.`,moi||!(n||roches)?'warn':'good');
   if(consoTemps('dig'))return;
   render();}
 function invBoum(r,dm){let n=0,k=0;lastAct='dig';
@@ -211,12 +217,19 @@ function invEquip(i){const o=G.inv[i];if(!o||G.over)return;const d=ITEMS[o.k],e=
 /* Où tombe un objet jeté (21 novembre 2026) : jamais sous la foreuse, mais sur la première case libre la plus proche — d'abord les huit
    cases adjacentes (les orthogonales avant les diagonales), puis de plus en plus loin, en suivant les cases praticables. Libre : ni obstacle,
    ni eau profonde, ni porte, ni créature, ni autre objet ou clé. Faute de place dans les environs, l'objet tombe quand même sous la foreuse. */
-function caseJet(){const lib=(x,y)=>{const t=G.t[idx(x,y)],i=idx(x,y);return !blocks(t)&&t!==DEEP&&t!==DOOR&&t!==DECK&&!beastAt(x,y)&&!animalAt(x,y)&&!(G.items&&G.items[i]&&G.items[i].length)&&!(G.cles&&G.cles[i]);};
-  const ORD=[[0,-1],[1,0],[0,1],[-1,0],[1,-1],[1,1],[-1,1],[-1,-1]],vu=new Set([idx(G.px,G.py)]),q=[[G.px,G.py]];
+/* Une case au sol pour un objet qui tombe (22 novembre 2026) : jamais sur un autre objet. On part de (x0, y0) — elle-même si
+   soi et si elle est libre —, puis les cases voisines de proche en proche, sans traverser les obstacles. Libre : praticable,
+   ni eau profonde, ni porte, ni pont du vaisseau, sans créature (sauf en partant d'elle : un robot abattu), sans objet ni clé. */
+function caseSol(x0,y0,soi){const sansObjet=i=>!(G.items&&G.items[i]&&G.items[i].length)&&!(G.cles&&G.cles[i]);
+  const lib=(x,y)=>{const t=G.t[idx(x,y)],i=idx(x,y);return !blocks(t)&&t!==DEEP&&t!==DOOR&&t!==DECK&&!beastAt(x,y)&&!animalAt(x,y)&&sansObjet(i);};
+  const i0=idx(x0,y0);if(soi&&!blocks(G.t[i0])&&G.t[i0]!==DEEP&&sansObjet(i0))return i0;
+  const ORD=[[0,-1],[1,0],[0,1],[-1,0],[1,-1],[1,1],[-1,1],[-1,-1]],vu=new Set([i0]),q=[[x0,y0]];
   for(let k=0;k<q.length&&k<600;k++){const [x,y]=q[k];
     for(const [dx,dy] of ORD){const a=x+dx,b=y+dy;if(a<1||b<1||a>=W-1||b>=H-1)continue;const j=idx(a,b);if(vu.has(j))continue;vu.add(j);
       if(blocks(G.t[j]))continue;if(lib(a,b))return j;q.push([a,b]);}}
-  return idx(G.px,G.py);}
+  return i0;}
+// objet jeté par la foreuse : jamais sous elle
+const caseJet=()=>caseSol(G.px,G.py,false);
 function invDrop(i){const o=G.inv[i];if(!o||G.over)return;const d=ITEMS[o.k];
   if(o.eq&&d.slot==='arme'){invSay(ARME_FIXE,'warn');SFX.blocked();render();return;}
   if(o.eq){invApply(o,-1);o.eq=0;}
@@ -227,9 +240,9 @@ function invDrop(i){const o=G.inv[i];if(!o||G.over)return;const d=ITEMS[o.k];
 function invPickup(more){const c=idx(G.px,G.py);if(G.items&&G.items[c]&&G.items[c].length){choixTest(c);piegeTest(c);butinPrend(c,more);}   // appât d'une salle piégée ; Matière et plans ne vont pas au sac
   const l=G.items&&G.items[c];if(!l||!l.length)return false;
   const pris=[],laisses=[];
-  for(const k of l){const pile=ITEMS[k].conso&&G.inv.find(o=>o.k===k);
+  for(const k of l){if(ITEMS[k].conso&&sacPlaces()>=SAC_MAX){laisses.push(k);continue;}   // inventaire plein : l'objet reste au sol
+    const pile=ITEMS[k].conso&&G.inv.find(o=>o.k===k);
     if(pile){pile.n=(pile.n||1)+1;pris.push(k);continue;}
-    if(ITEMS[k].conso&&invConsos().length>=SAC_MAX){laisses.push(k);continue;}   // inventaire plein : l'objet reste au sol
     G.inv.push(ITEMS[k].conso?{k,eq:0,n:1}:{k,eq:0});pris.push(k);}
   if(laisses.length)G.items[c]=laisses;else delete G.items[c];
   const dire=more?sayMore:invSay;
@@ -308,11 +321,11 @@ function sacHTML(){const l=invConsos();
       `<button class="pace del" data-x="${i}" title="Jeter un exemplaire au sol${(o.n||1)>1?' (il en restera '+((o.n||1)-1)+')':''}">[X]</button></div>`;}).join('');}
 function sacDraw(){const el=$('sac');if(!el||!G||!G.inv)return;
   const l=invConsos(),h=sacHTML();if(h!==SAC_H){el.innerHTML=h;SAC_H=h;}
-  const n=$('sacN');if(n){const txt=`[${l.length}/${SAC_MAX}]`;if(n.textContent!==txt)n.textContent=txt;n.classList.toggle('full',l.length>=SAC_MAX);}}
+  const n=$('sacN');if(n){const p=sacPlaces(),txt=`[${p}/${SAC_MAX}]`;if(n.textContent!==txt)n.textContent=txt;n.classList.toggle('full',p>=SAC_MAX);}}
 // [X] : un exemplaire du consommable tombe au sol, sur une case libre voisine (caseJet) (21 novembre 2026 ; avant, [X] détruisait toute la pile)
 function sacJeter(i){const o=G.inv[i];if(!o||G.over||!ITEMS[o.k].conso)return;const d=ITEMS[o.k],n=o.n||1;
   invTake(i);const c=caseJet();G.items=G.items||{};(G.items[c]=G.items[c]||[]).push(o.k);
-  say(`${d.n} jeté${accord(d)} au sol${n>1?` (il en reste ${n-1})`:` : une place libérée (${invConsos().length}/${SAC_MAX})`}.`);SFX.thud();
+  say(`${d.n} jeté${accord(d)} au sol${n>1?` (il en reste ${n-1})`:''} : inventaire ${sacPlaces()}/${SAC_MAX}.`);SFX.thud();
   sacFix();SAC_H='';invChanged();}
 /* Navigation au clavier (touche I) : ouvre le sous-menu s'il est replié et choisit le premier consommable.
    Ensuite ↑ ↓ pour parcourir, Entrée pour utiliser, X, Suppr ou J pour jeter un exemplaire au sol, Échap ou I pour sortir. */

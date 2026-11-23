@@ -223,7 +223,8 @@ function animalsAct(){
   turnStealth();
   if(G&&!G.over)patTick();
   if(!G.animals||G.over)return;let fled=null,swarm=null;const distSec=robotDist(false),distEau=robotDist(true),DC={};
-  for(const a of G.animals){if(G.over)break;const sp=SPECIES[a.sp];a.mp=Math.min(2,a.mp+sp.v/5/slowOf(G.t[idx(a.x,a.y)],sp.swim));
+  for(const a of G.animals){if(G.over)break;if(a.stun>0){a.stun--;continue;}   // Puce étourdie par une batterie : comme les autres robots, elle ne fait rien (22 novembre 2026 ; avant, elle n’en tenait pas compte)
+    const sp=SPECIES[a.sp];a.mp=Math.min(2,a.mp+sp.v/5/slowOf(G.t[idx(a.x,a.y)],sp.swim));
     const mA=mouilleOk(sp,a),okA=(x,y)=>animalOk(x,y,mA),dist=mA?distEau:distSec;
     const d=Math.hypot(a.x-G.px,a.y-G.py),sees=voitForeuse(a,!!a.aware);
     if(sees){if(!a.aware)alerte(a);a.aware=1;spot(a);}
@@ -255,7 +256,7 @@ function animalsAct(){
 /* ---------- Prédateurs ---------- */
 const FOOT=[[0,0]];
 const beastAt=(x,y)=>G.beasts&&G.beasts.find(b=>b.x===x&&b.y===y);
-function beastFits(b,x,y){const spB=BEASTS[b.sp],mB=mouilleOk(spB,b);
+function beastFits(b,x,y){const spB=BEASTS[b.sp],mB=mouilleOk(spB,b);if(G.balises&&G.balises.length&&FOOT.some(([dx,dy])=>baliseAt(x+dx,y+dy)))return false;   // une balise posée barre le passage
   for(const[dx,dy]of FOOT){const cx=x+dx,cy=y+dy;if(cx<1||cy<1||cx>=W-1||cy>=H-1)return false;const v=G.t[idx(cx,cy)];
   if(spB.aqua&&!isWater(v))return false;   // le brochon ne quitte jamais l'eau
   if(!(b.hunt>0)&&G.lz&&G.lz[idx(cx,cy)])return false;   // calme, il n'entre pas dans le champ d'un laser ; en chasse, il fonce (21 novembre 2026)
@@ -392,27 +393,38 @@ function effTick(){const E=G.eff;if(!E||G.over)return;
   fumTick();}
 /* Mine (19 novembre 2026) : elle fonce sur la foreuse ; arrivée à une case, elle s'arme (elle clignote) et ne bouge plus,
    puis explose 2 à 3 battements plus tard (22 novembre 2026 ; avant 1 à 3 : à 1, elle sautait au battement suivant, sans
-   laisser le temps de réagir). L'explosion frappe un carré de 3 × 3 centré sur elle : la foreuse et toute
-   créature qui s'y trouve. Ses dégâts sont ceux de sa fiche (dégâts min et max du Bestiaire). Détruite avant, elle n'explose pas. */
+   laisser le temps de réagir). L'explosion frappe un carré de 3 × 3 centré sur elle, plus 5 cases tirées au hasard parmi
+   les 12 qui le bordent par un côté (22 novembre 2026, voir zoneBoom) : la foreuse et toute créature qui s'y trouve. Ses dégâts sont ceux de sa fiche (dégâts min et max du Bestiaire). Détruite avant, elle n'explose pas. */
 /* Englueur (21 novembre 2026) : un jet de glu à distance. S'il touche, la foreuse est engluée 3 battements (pas deux fois plus
    longs, voir stepDur) ; le jet lui-même ne blesse pas. */
 function glue(b,sp){const ch=hitChance(sp.pre,robotDef());engage();if(G.px!==b.x)b.dir=Math.sign(G.px-b.x);SFX.drift();
   const rate=!roll(ch),an=Math.random()*Math.PI*2,r=rate?.8:0;addFx({kind:'boule',ax:b.x,ay:b.y,bx:G.px+Math.cos(an)*r,by:G.py+Math.sin(an)*r,dur:320});   // une boule de glu, plus un trait de laser (22 novembre 2026)
   if(rate){sayMore(`${LeNom(sp)} crache sa glu et rate (${ch} %).`);return;}
   G.eff=G.eff||{};G.eff.glu=Math.max(G.eff.glu||0,3);addFx({kind:'num',x:G.px,y:G.py,txt:'glu',col:PAL['2'],dur:900});sayMore(`${LeNom(sp)} englue la foreuse : elle avance deux fois moins vite pendant 3 battements.`,'warn');}
+/* Zone d'une explosion (mine, charge sismique ; 22 novembre 2026) : le carré de 3 × 3 centré sur (x, y), plus 5 cases tirées
+   au hasard parmi les 12 qui le bordent par un côté (les coins du 5 × 5, qui ne le touchent que par un angle, en sont exclus).
+   Rend une liste de [x, y] ; dansZone teste une case. L'effet « boom » reçoit la même liste pour dessiner les flammes. */
+const BOOM_EXTRA=5;
+function zoneBoom(x,y){const out=[],bord=[];
+  for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++)out.push([x+dx,y+dy]);
+  for(let d=-1;d<=1;d++)bord.push([x+d,y-2],[x+d,y+2],[x-2,y+d],[x+2,y+d]);
+  for(let n=0;n<BOOM_EXTRA&&bord.length;n++)out.push(bord.splice(rnd(0,bord.length-1),1)[0]);
+  return out;}
+const dansZone=(z,x,y)=>z.some(c=>c[0]===x&&c[1]===y);
 function explose(b){const sp=BEASTS[b.sp],k=G.beasts.indexOf(b);if(k>=0)G.beasts.splice(k,1);
-  const dans=o=>Math.max(Math.abs(o.x-b.x),Math.abs(o.y-b.y))<=1,vu=vis[idx(b.x,b.y)];
-  addFx({kind:'boom',x:b.x,y:b.y,dur:420});if(vu||dans({x:G.px,y:G.py})||cheb(b,G.px,G.py)<=10){addFx({kind:'shake',amp:9,dur:320});SFX.explode();}
+  const zone=zoneBoom(b.x,b.y),dans=o=>dansZone(zone,o.x,o.y),vu=vis[idx(b.x,b.y)];
+  addFx({kind:'boom',x:b.x,y:b.y,cases:zone,dur:420});if(vu||dans({x:G.px,y:G.py})||cheb(b,G.px,G.py)<=10){addFx({kind:'shake',amp:9,dur:320});SFX.explode();}
   for(const [liste,fiches] of [[G.beasts,BEASTS],[G.animals||[],SPECIES]])for(const o of [...liste])if(dans(o)){const dm=dmgDe(sp);o.hp=(o.hp??pvDe(fiches[o.sp]))-dm;
     addFx({kind:'num',x:o.x,y:o.y,txt:'-'+dm,col:PAL['3'],dur:750});if(o.hp<=0){liste.splice(liste.indexOf(o),1);bleed(o.x,o.y);if(liste===G.beasts)butinMort(o);}}
   if(dans({x:G.px,y:G.py})){const dm=dmgDe(sp);G.st.vie=Math.max(0,G.st.vie-dm);addFx({kind:'num',x:G.px,y:G.py,txt:'-'+dm,col:PAL['4'],dur:1000});
     sayMore(`La mine explose : −${dm} vie.`,'warn');if(G.st.vie<=0)G.over={dead:true};}
+  for(const q of [...(G.balises||[])])if(dans(q))baliseCoup(q,dmgDe(sp));   // une balise posée dans la zone encaisse aussi
   else if(vu)sayMore('La mine explose.','warn');
   else if(cheb(b,G.px,G.py)<=10)sayMore('Une explosion, tout près.','warn');
-  // l'explosion brise la roche et la montagne tendre du carré (22 novembre 2026) ; la roche dure, les murs et les machines
+  // l'explosion brise la roche et la montagne tendre de sa zone (22 novembre 2026) ; la roche dure, les murs et les machines
   // tiennent : seule la charge sismique en vient à bout. Le métal et la Matière qu'elles cachaient tombent au sol.
   let roches=0;
-  for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){const zx=b.x+dx,zy=b.y+dy;if(zx<1||zy<1||zx>=W-1||zy>=H-1)continue;
+  for(const [zx,zy] of zone){if(zx<1||zy<1||zx>=W-1||zy>=H-1)continue;
     const j=idx(zx,zy),v=G.t[j];if(v!==ROCK&&v!==MOUNT)continue;G.t[j]=RUBBLE;if(G.dmg)delete G.dmg[j];roches++;
     if(G.ore&&G.ore[j]&&!oreSol(G.ore[j]))G.ore[j]=(oreMat(G.ore[j])?'m':'')+'sol'+oreLv(G.ore[j]);}
   if(roches){computeFOV();if(vu)sayMore(`L’explosion pulvérise ${roches} case${roches>1?'s':''} de roche.`);}}
@@ -420,13 +432,14 @@ function explose(b){const sp=BEASTS[b.sp],k=G.beasts.indexOf(b);if(k>=0)G.beasts
    demande de l'utilisateur). Elle tire un laser jusqu'à sp.laser cases, en ligne de vue, une fois par battement : un jet
    pour toucher ordinaire, et le trait rouge se voit toujours — droit sur la foreuse s'il touche, à côté s'il rate.
    La clé interne de l'espèce reste `paralyzor`, pour que les groupes déjà réglés continuent de marcher. */
-const animVif=()=>!!(G&&G.beasts&&G.beasts.some(b=>b.fuse>0));   // une mine armée clignote : le rendu doit tourner
+const animVif=()=>!!(G&&((G.beasts&&G.beasts.some(b=>b.fuse>0))||(G.balises&&G.balises.length)));   // une mine armée clignote : le rendu doit tourner
 function beastsAct(){
   turnStealth();
-  if(!G.beasts||!G.beasts.length||G.over)return;const distSec=robotDist(false),distEau=robotDist(true),DC={};let charged=null,distVol=null;const alarms=[],boom=[];packTick();
+  if(!G.beasts||!G.beasts.length||G.over)return;baliseTick();const distSec=robotDist(false),distEau=robotDist(true),DC={};let charged=null,distVol=null;const alarms=[],boom=[];packTick();
   for(const b of G.beasts){if(G.over)break;if(b.skip){b.skip=0;continue;}const sp=BEASTS[b.sp];
     if(b.bers>0)b.bers--;if(b.camo>0)b.camo--;if(b.tient&&!nearRobot(b))b.tient=0;
     if(b.stun>0){b.stun--;continue;}                                                 // étourdi par une batterie : il ne fait rien
+    if(b.leurre&&baliseJoue(b,sp,boom))continue;                                    // attiré par une balise posée : il s'acharne sur elle (23 novembre 2026)
     b.mp=Math.min(2,b.mp+sp.v/5/slowOf(G.t[idx(b.x,b.y)],sp.swim));
     const d=Math.hypot(b.x-G.px,b.y-G.py),sees=voitForeuse(b,b.hunt>0);
     if(sees){if(!b.hunt&&sp.alarm)alarms.push(b);if(!b.hunt&&beastVisible(b))charged=charged||sp;if(!b.hunt)alerte(b);b.hunt=1;spot(b);if(G.px!==b.x)b.dir=Math.sign(G.px-b.x);

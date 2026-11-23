@@ -25,8 +25,22 @@ body{margin:0;background:var(--black);color:var(--fg);font:13px/1.45 var(--mono)
 #view{position:absolute;inset:0;width:100%;height:100%;image-rendering:pixelated;cursor:none;touch-action:manipulation}
 #fxv{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
 .col{background:var(--black);border-left:1px solid var(--line);padding-block:16px;padding-left:16px;padding-right:max(16px,env(safe-area-inset-right,0px));
-  overflow-y:auto;scrollbar-width:none;display:flex;flex-direction:column;gap:20px;min-width:0}
-.col::-webkit-scrollbar{display:none}   /* défilement à la molette ou au doigt, sans barre qui déforme la colonne */
+  overflow:hidden;display:flex;flex-direction:column;gap:5px;min-width:0;min-height:0}   /* écart réduit entre Inventaire (fixe) et Carte (qui défile) : 20, puis 10, puis 5 px */
+/* 22 novembre 2026 : seul le bas de la colonne défile, sous l'inventaire ; le haut (niveau, barres, boutons, inventaire) reste visible */
+.colfixe,.coldefil{display:flex;flex-direction:column;gap:20px;min-width:0}
+.colfixe{flex:none}
+.coldefil{flex:1 1 auto;min-height:0;overflow-y:auto;scrollbar-width:none}
+.coldefil::-webkit-scrollbar{display:none}
+#fd-pal,#fd-ctrl,.nivrow{margin-top:-15px}   /* Palette sous Lab, Contrôles sous Palette : à 5 px, comme Carte sous Inventaire (22 novembre 2026) */
+/* Contrôles : une commande par ligne, touches à gauche, effet à droite */
+.ctrl{display:grid;gap:10px;font-size:11px;line-height:1.5}
+.ctrl h3{margin:0;font-size:10px;font-weight:500;letter-spacing:.18em;text-transform:uppercase;color:var(--c3)}
+.ctrl dl{margin:0;display:grid;gap:1px}
+.ctrl dt{color:var(--fg);margin-top:5px}.ctrl dt:first-child{margin-top:0}
+.ctrl dd{margin:0 0 0 10px;color:var(--dim)}   /* la touche sur sa ligne, ce qu'elle fait en dessous */
+.ctrl kbd{margin-right:2px}   /* défilement à la molette ou au doigt, sans barre qui déforme la colonne */
+/* en tête de colonne, au-dessus de Vie : niveau, profondeur et taille, puis les deux archétypes, en capitales couleur monde */
+.carteinfo{margin:0 0 12px;display:grid;gap:3px;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--c3)}
 .col h2{font-family:var(--display);font-size:11px;font-weight:500;letter-spacing:.22em;text-transform:uppercase;color:var(--dim);margin:0 0 8px}
 .rows{display:grid;gap:5px}
 .eye{display:flex;align-items:center;gap:8px}.eyeic{color:var(--c3);flex:none}
@@ -38,6 +52,7 @@ body{margin:0;background:var(--black);color:var(--fg);font:13px/1.45 var(--mono)
 .r span:first-child{color:var(--dim)}
 .meter{display:grid;gap:3px}
 .bar2{display:grid;grid-template-columns:4.6em minmax(0,1fr) auto;align-items:center;gap:10px}
+.bar2>span:first-child{white-space:nowrap}   /* « Matière {µ} » déborde sur la colonne vide de sa ligne */
 .bnum{font-size:12px;font-variant-numeric:tabular-nums;color:var(--fg);text-align:right;min-width:6ch}
 .bar2>span:first-child{color:var(--dim)}
 .abar{white-space:nowrap;overflow:hidden;line-height:1;letter-spacing:0;font-size:12px}
@@ -45,7 +60,7 @@ body{margin:0;background:var(--black);color:var(--fg);font:13px/1.45 var(--mono)
 /* Barre ASCII : le calque plein est posé sur le fond et découpé à la largeur exacte (voir asciiBar, 11-interface) */
 .abar,.seen .an .hp{position:relative}
 .abar .af,.seen .an .hp .af{position:absolute;left:0;top:0;bottom:0;overflow:hidden}
-.abar.life{color:var(--c2)}.abar.energy{color:var(--c1)}
+.abar.life{color:var(--c2)}.abar.energy{color:#ffffff}   /* énergie en blanc depuis le 22 novembre 2026 (avant : accent) */
 .track{position:relative;height:9px;overflow:hidden}
 .track::before{content:"";position:absolute;inset:0;background:currentColor;opacity:.2}
 .track i{position:absolute;left:0;top:0;bottom:0;width:100%;background:currentColor;transition:width .2s}
@@ -76,7 +91,7 @@ body{margin:0;background:var(--black);color:var(--fg);font:13px/1.45 var(--mono)
 .seen .ter b{font-weight:400;color:var(--fg)}
 .seen .none{color:var(--dim)}
 .pal{display:grid;gap:8px}
-#mini{display:block;width:100%;image-rendering:pixelated;outline:1px solid var(--line)}
+#mini{display:block;width:100%;image-rendering:pixelated;outline:1px solid var(--line);outline-offset:-1px}   /* cadre tracé en dedans : sinon la zone qui défile rognait les côtés (22 novembre 2026) */
 .gen{display:grid;gap:8px;margin-bottom:10px}
 .gen .g{display:grid;grid-template-columns:minmax(0,1fr) 72px 58px;gap:8px;align-items:center}
 .gen label{color:var(--dim)}
@@ -90,7 +105,10 @@ body{margin:0;background:var(--black);color:var(--fg);font:13px/1.45 var(--mono)
 .modal .mcard h3{color:var(--c3)}
 .gen .sum{font-size:11px;color:var(--dim)}
 .labbtns{display:flex;flex-wrap:wrap;gap:6px}
-.labbtns button{padding:2px 8px;font-size:11px;letter-spacing:.14em;border-color:var(--c3);color:var(--c3)}
+.labbtns button,.labbtns .labbtn{padding:2px 8px;font-size:11px;letter-spacing:.14em;border-color:var(--c3);color:var(--c3)}
+/* Combat : un lien vers l'artefact du banc, habillé comme les boutons du Lab (22 novembre 2026) */
+.labbtns .labbtn{border:1px solid var(--c3);text-decoration:none;text-transform:uppercase;font-family:inherit;line-height:inherit;display:inline-flex;align-items:center}
+.labbtns .labbtn:hover,.labbtns .labbtn:focus-visible{color:var(--fg);border-color:var(--fg)}
 .labbtns button:disabled{border-color:var(--line);color:var(--dim)}
 .insp{display:grid;gap:5px;border:1px solid var(--line);padding:8px;font-size:12px}
 .insp .ih{display:flex;align-items:center;gap:8px;color:var(--fg)}
@@ -119,6 +137,7 @@ body{margin:0;background:var(--black);color:var(--fg);font:13px/1.45 var(--mono)
 #curEd{max-width:100%;image-rendering:pixelated;cursor:crosshair;touch-action:none;outline:1px solid var(--line)}
 #curPrev{width:256px;height:96px;image-rendering:pixelated;outline:1px solid var(--line)}
 .cur-tools{display:flex;flex-wrap:wrap;gap:6px}
+.cur-inks{display:grid;gap:6px}   /* deux lignes d'encres : la palette, puis blanc, noir, rouge, transparent */
 .cur-tools button{padding:4px 8px;font-size:11px;border-color:var(--line);letter-spacing:.06em}
 .cur-tools button[aria-pressed="true"]{border-color:var(--c3);color:var(--c3)}
 @media (max-width:720px){.cur-wrap{grid-template-columns:1fr}}
@@ -200,6 +219,8 @@ button:disabled{border-color:var(--line);color:var(--dim);cursor:not-allowed}
 .upg button b{color:var(--c3)}
 .upg.one{grid-template-columns:1fr}
 .card h2.huge{font-size:clamp(40px,9vw,84px);letter-spacing:.1em}
+.card h2.mort{color:#ff3b30}   /* FOREUSE DÉTRUITE : rouge, quelle que soit la palette (23 novembre 2026) */
+.overlay.noir{background:#000}   /* mort pendant une descente : le niveau ne se voit pas derrière */
 .off{position:fixed;inset:0;z-index:50;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px}
 .off[hidden]{display:none}
 .off p{margin:0;font-family:var(--display);letter-spacing:.3em;color:var(--dim);font-size:13px}
@@ -211,7 +232,8 @@ kbd{font-family:var(--mono);color:var(--fg);border:1px solid var(--line);padding
   body{overflow:auto}
   .game{grid-template-columns:minmax(0,1fr);grid-template-rows:auto auto;height:auto}
   .left{grid-template-rows:62vh auto}
-  .col{border-left:0;border-top:1px solid var(--line);padding-left:max(16px,env(safe-area-inset-left,0px))}
+  .col{border-left:0;border-top:1px solid var(--line);padding-left:max(16px,env(safe-area-inset-left,0px));overflow:visible}
+  .coldefil{overflow:visible}
   .pad{display:flex}
 }
 @media (pointer:coarse){.pad{display:flex}}
@@ -314,7 +336,7 @@ kbd{font-family:var(--mono);color:var(--fg);border:1px solid var(--line);padding
 @media (max-width:720px){.mdcols{grid-template-columns:1fr}
   #monde .mdcols{display:block;overflow-y:auto}#monde .mdcols section{display:block;margin-bottom:18px}#monde .mdcols .gen{overflow:visible}}
 .mdcols .gen .g2{grid-template-columns:minmax(0,1fr) 190px}
-.col>.btnrow>button{flex:1 1 0;min-width:0}
+.coldefil>.btnrow>button{flex:1 1 0;min-width:0}
 /* Discrétion : fenêtre large et basse (15 novembre 2026) */
 #discretion .mcard{width:min(940px,100%);gap:12px}
 .mhbtns{display:flex;gap:8px}

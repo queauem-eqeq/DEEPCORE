@@ -91,8 +91,9 @@ function tryMove(dx,dy){
   let v=G.t[idx(nx,ny)];
   G.face=dx>0?'r':dx<0?'l':dy>0?'d':'u';
   if(!diagOk(G.px,G.py,dx,dy)){say('Coin de paroi : pas de passage en diagonale.');SFX.blocked();render();return;}
+  if(G.balises&&baliseAt(nx,ny)){say('Une balise posée barre le passage.');SFX.blocked();render();return;}   // 23 novembre 2026
   const bz=beastAt(nx,ny);
-  if(bz){const sp=BEASTS[bz.sp];G.turn++;G.msg=null;engage();camoCasse();const sur=!(bz.hunt>0),cr=sur||roll((G.st.crit??5)+critBonus());   // surprise : ne vous a pas repéré
+  if(bz){const sp=BEASTS[bz.sp];G.turn++;G.msg=null;engage();camoCasse();bz.leurre=0;/* frappé, il oublie la balise */const sur=!(bz.hunt>0),cr=sur||roll((G.st.crit??5)+critBonus());   // surprise : ne vous a pas repéré
     {const ch=hitChance(robotPre(),sp.def+terrMod(nx,ny));if(!sur&&!roll(ch)){if(!bz.hunt)alerte(bz);bz.hunt=1;spot(bz);addFx({kind:'lunge',robot:true,dx,dy,dur:180});addFx({kind:'num',x:nx,y:ny,txt:'0',col:'#8aa9a2',dur:750});
       say(`La foreuse rate ${leNom(sp)} (${ch} %).`);SFX.whoosh();pass(coupDur());computeFOV();render();if(G.over&&G.over.dead)dead();return;}}
     const dm=robotDeg()*(cr?CRIT_X:1);bz.hp-=dm;if(!bz.hunt&&bz.hp>0)alerte(bz);bz.hunt=1;spot(bz);addFx({kind:'num',x:nx,y:ny,txt:'-'+dm+(cr?'!':''),col:cr?PAL['1']:PAL['3'],dur:cr?1000:750});if(cr){addFx({kind:'shake',amp:6,dur:220});SFX.crit();}
@@ -128,7 +129,7 @@ function tryMove(dx,dy){
     const i=idx(nx,ny),hp=2;G.dmg=G.dmg||{};const hits=(G.dmg[i]||0)+1;G.turn++;G.msg=null;
     {const brk=hits>=hp;addFx({kind:'lunge',robot:true,dx,dy,dur:180});}
     if(hits>=hp){delete G.dmg[i];G.t[i]=RUBBLE;SFX.break();say(v===ROCK?'Rocher brisé : il ne reste que des gravats.':'La paroi cède : passage ouvert.','good');
-      if(G.ore&&G.ore[i]&&!oreSol(G.ore[i])){const l=oreLv(G.ore[i]),mt=oreMat(G.ore[i]);G.ore[i]=(mt?'m':'')+'sol'+l;sayMore(mt?['','Un peu de Matière tombe au sol.','De la Matière tombe au sol.','Un gros bloc de Matière tombe au sol.'][l]:['','De petits éclats de métal tombent au sol.','Des éclats de métal tombent au sol.','De gros éclats de métal tombent au sol.'][l],'info');}}
+      if(G.ore&&G.ore[i]&&!oreSol(G.ore[i])){const l=oreLv(G.ore[i]),mt=oreMat(G.ore[i]);G.ore[i]=(mt?'m':'')+'sol'+l;sayMore(mt?['','Un peu de Matière {µ} tombe au sol.','De la Matière {µ} tombe au sol.','Un gros bloc de Matière {µ} tombe au sol.'][l]:['','De petits éclats de métal tombent au sol.','Des éclats de métal tombent au sol.','De gros éclats de métal tombent au sol.'][l],'info');}}
     else{G.dmg[i]=hits;SFX.crack();say(v===ROCK?'La foreuse frappe le rocher : il se fissure.':`La foreuse attaque la montagne : fissure ${hits}/${hp-1}.`,'warn');}
     pass(DUR.forage);computeFOV();render();if(G.over&&G.over.dead)dead();return;}
   // eau profonde : une fois sur deux, le courant emporte le pas dans une autre direction au hasard
@@ -152,12 +153,12 @@ function tryMove(dx,dy){
   if(G.t[idx(G.px,G.py)]===DOOR)SFX.porte();   // la foreuse pousse une porte
   {const ci=idx(G.px,G.py);if(G.cles&&G.cles[ci]){delete G.cles[ci];G.items=G.items||{};(G.items[ci]=G.items[ci]||[]).push('cle');addFx({kind:'num',x:G.px,y:G.py,txt:'clé',col:PAL['1'],dur:900});/* la clé est un objet : elle est ramassée avec les autres, juste après (invPickup) */}}
   {const oi=idx(G.px,G.py);if(G.ore&&G.ore[oi]&&oreSol(G.ore[oi])){const l=oreLv(G.ore[oi]),mt=oreMat(G.ore[oi]);delete G.ore[oi];
-    if(mt){G.st.matiere=(G.st.matiere||0)+ORE_PV[l];addFx({kind:'num',x:G.px,y:G.py,txt:'+'+ORE_PV[l],col:PAL['1'],dur:750});sayMore(`Matière récupérée : +${ORE_PV[l]} (réserve : ${G.st.matiere}).`,'good');SFX.spot();}
+    if(mt){G.st.matiere=(G.st.matiere||0)+ORE_PV[l];addFx({kind:'num',x:G.px,y:G.py,txt:'+'+ORE_PV[l],col:PAL['1'],dur:750});sayMore(`Matière {µ} récupérée : +${ORE_PV[l]} (réserve : ${G.st.matiere}).`,'good');SFX.spot();}
     else{const av=G.st.vie,ae=G.st.energie;   // les éclats refont le plein de vie ET d'énergie (16 novembre 2026)
     G.st.vie=Math.min(G.st.vieMax,G.st.vie+ORE_PV[l]);G.st.energie=Math.min(G.st.energieMax,G.st.energie+ORE_PV[l]);
     const dv=Math.round(G.st.vie-av),de=Math.round(G.st.energie-ae);
     addFx({kind:'num',x:G.px,y:G.py,txt:'+'+dv,col:PAL['2'],dur:750});   // affiché comme les dégâts, couleur des éclats
-    if(de)addFx({kind:'num',x:G.px,y:G.py,txt:'+'+de,col:PAL['1'],dur:750,stack:1});
+    if(de)addFx({kind:'num',x:G.px,y:G.py,txt:'+'+de,col:'#ffffff',dur:750,stack:1});   // l'énergie regagnée, en blanc comme sa barre (22 novembre 2026)
     sayMore(`Éclats de métal récupérés : +${dv} PV, +${de} d’énergie.`,'good');SFX.spot();
     if(dv)addFx({kind:'soin',x:G.px,y:G.py,dur:900,gr:fxGrains(9)});if(de)addFx({kind:'ener',x:G.px,y:G.py,dur:900,gr:fxGrains(9)});}}}
   invPickup(true);
@@ -180,11 +181,14 @@ function askDrill(){
 function drill(s){drilling=true;let k=0;const n=12;
   const step=()=>{$('card').innerHTML=`<div class="tag">Forage en cours · site ${s.id}</div><h2>FORAGE</h2><p class="prog">${'▮'.repeat(k)}${'·'.repeat(n-k)}</p>`;
     if(k<n){SFX.drill(k);k++;setTimeout(step,reduced?0:110);}else{SFX.done();end(s);}};step();}
-// Mort : la foreuse explose (voir explode, rendu), puis un seul bouton pour repartir
+// Mort : la foreuse explose (voir explode, rendu), puis « Déployer une nouvelle foreuse » : retour au niveau 1, intro comprise
+// « FOREUSE DÉTRUITE » toujours en rouge, quelle que soit la palette (23 novembre 2026). Détruite pendant une descente (G.over.forage),
+// l'explosion s'est jouée dans le puits : pas d'explosion sur la carte, et un fond noir plein cache le niveau.
 function dead(){if(G.over.boom)return;G.over.boom=true;if(TRAV)stopTravel();if(REST)stopRest();
-  explode(()=>{$('card').innerHTML=`<h2 class="huge">FOREUSE<br>DÉTRUITE</h2>
-    <div class="upg one"><button id="again"><span>Nouvelle exploration</span><b>▶</b></button><button id="quit"><span>Quitter</span><b>■</b></button></div>`;
-    $('overlay').hidden=false;$('again').onclick=()=>{unlock();SFX.start();nouvellePartie();};$('quit').onclick=quitGame;$('again').focus();});
+  const carte=()=>{$('card').innerHTML=`<h2 class="huge mort">FOREUSE<br>DÉTRUITE</h2>
+    <div class="upg one"><button id="again"><span>Déployer une nouvelle foreuse</span><b>▶</b></button><button id="quit"><span>Quitter</span><b>■</b></button></div>`;
+    $('overlay').classList.toggle('noir',!!G.over.forage);$('overlay').hidden=false;$('again').onclick=()=>{unlock();SFX.start();$('overlay').classList.remove('noir');deployerForeuse();};$('quit').onclick=()=>{$('overlay').classList.remove('noir');quitGame();};$('again').focus();};
+  if(G.over.forage)carte();else explode(carte);
 }
 // Quitter : une page ne peut pas fermer son onglet ; tout s'éteint (écran noir, son coupé), un bouton discret rallume le jeu
 function quitGame(){$('overlay').hidden=true;$('off').hidden=false;try{if(AC)AC.suspend();}catch(e){}$('offOn').focus();}
@@ -193,7 +197,7 @@ $('offOn').onclick=()=>{$('off').hidden=true;try{if(AC)AC.resume();}catch(e){}un
    cinématique de forage se joue et le niveau suivant commence. */
 function end(s){
   drilling=false;
-  if((G.niv||1)<NIV_MAX){$('overlay').hidden=true;playForage(()=>{niveauSuivant();render();},G.niv||1);return;}const bilan=`<div class="stats"><span>${G.turn} tours · ${G.dist} cases parcourues</span><span>Matière en réserve : ${G.st.matiere||0}</span></div>`;
+  if((G.niv||1)<NIV_MAX){$('overlay').hidden=true;playForage(()=>{niveauSuivant();render();},G.niv||1);return;}const bilan=`<div class="stats"><span>${G.turn} tours · ${G.dist} cases parcourues</span><span>Matière {µ} en réserve : ${G.st.matiere||0}</span></div>`;
   G.over={site:s.id,win:true};
   $('card').innerHTML=`<div class="tag">Site ${s.id} foré</div><h2>NOYAU<br>ATTEINT</h2>${bilan}<p>La foreuse a percé jusqu’au noyau de la planète.</p><button class="go" id="again">Nouvelle exploration</button>`;
   $('overlay').hidden=false;$('again').onclick=()=>{nouvellePartie();};$('again').focus();

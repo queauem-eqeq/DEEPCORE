@@ -259,13 +259,13 @@ function niveau(refait){drilling=false;
     if(G.batis.length||!ZONE||!(ENFOUI()||GEN.structure>0))break;}
   if(mieux&&mieux.G!==G){G=mieux.G;ZONE=mieux.ZONE;ZINFO=mieux.ZINFO;SECT=mieux.SECT;CVT=mieux.CVT;BATI_DER=mieux.BD;}
   {const o=cv&&typeof document!=='undefined'&&document.getElementById('genObt');if(o)o.textContent=obtenuTxt();}
-  G.amb=ambDouble();   // « monde · bâti », les deux archétypes, affiché dans le Statut et à l'arrivée
+  G.amb=ambDouble();G.archM=ambMNom(GEN.ambM)||'Personnalisé';G.archB=ambNom(GEN.recette,GEN.amb)||'Personnalisé';   // les deux archétypes, un par un, pour la Carte de la colonne   // « monde · bâti », les deux archétypes, affiché dans le Statut et à l'arrivée
   durcir();   // la roche dure avant les métaux : ils n'y apparaissent jamais
   {const a=W*H/(48*32);G.eff={};G.fum={};hideOre(Math.max(1,Math.round(GISEMENTS.metal*a)),Math.max(1,Math.round(GISEMENTS.mat*a)));}
-  G.sonar=1;   // sonar à émettre (voir sonarStart, 10-rendu) : il part 10 à 20 tours après l'arrivée
+  G.sonar=1;   // sonar à émettre (voir sonarStart, 10-rendu) : il part 10 à 30 tours après l’arrivée (22 novembre 2026 ; avant 10 à 20)
   G.items={};G.tracks={};G.lastDir=null;G.beasts=[];G.blood={};G.fv=2;
   G.inv=invTest();G.log=[];
-  G.st.matiere=G.st.matiere||0;G.sonarAt=(G.turn||0)+10+Math.floor(Math.random()*11);
+  G.st.matiere=G.st.matiere||0;G.sonarAt=(G.turn||0)+10+Math.floor(Math.random()*21);
   if(typeof baseFinir==='function'&&(RECETTES[GEN.recette]||{}).base)baseFinir();
   const PLANS_POSES_M=PLANS_POSES={};
   machines();
@@ -283,6 +283,11 @@ function newGame(){SANS_VAISSEAU=false;NIV_GEN=NIV_RECETTE(GEN.recette);niveau()
   else say(`Niveau ${G.niv} : la foreuse a débouché dans un réseau de cavernes. Un site de forage plus bas est signalé.`,'info');}   // arrivée par un puits
 // Nouvelle partie lancée par le joueur : la cinématique d'arrivée se rejoue (21 novembre 2026)
 function nouvellePartie(){newGame();started=true;$('overlay').hidden=true;render();playIntro();}
+/* Foreuse détruite → « Déployer une nouvelle foreuse » (22 novembre 2026) : on repart toujours du niveau 1 (recette
+   « atterrissage », avec le vaisseau), quelle que soit la recette affichée dans le menu Monde, et la cinématique d'arrivée
+   se rejoue. La foreuse est neuve : rien n'est gardé de la précédente. Le menu Monde du joueur est remis en place après. */
+function deployerForeuse(){const sauve=JSON.parse(JSON.stringify(GEN));recRange();recPrend(RECETTE_NIV(1));
+  GEN.recette='atterrissage';newGame();genRemet(sauve);started=true;$('overlay').hidden=true;render();playIntro();}
 /* Niveau suivant (21 novembre 2026) : pas de vaisseau, on arrive par le puits. Le niveau 2 (et les suivants, tant qu'ils n'ont
    pas leur recette) est généré avec la recette « cavernes » et les réglages que le joueur lui a donnés dans le menu Monde,
    quelle que soit la recette affichée ; la case « Réglages au hasard » les tire d'abord, comme pour REGEN. Le menu Monde du
@@ -310,6 +315,7 @@ function niveauSuivant(hasard){   // hasard : un archétype monde et un archéty
   niveau();   // genPlanet refait l'objet G : tout ce que la foreuse garde est remis en place juste après
   SANS_VAISSEAU=false;genRemet(sauve);
   G.inv=inv;G.st=st;G.niv=niv;G.turn=tour;G.dist=dist;G.over=null;drilling=false;SAV_GARDE=null;
+  G.sonarAt=tour+(G.sonarAt||0);   // le délai du sonar (10 à 30 battements) part de l'arrivée : niveau() l'a compté depuis 0, avant qu'on remette le compteur de tours (22 novembre 2026 : il partait tout de suite)
   eboulis();
   say(G.arrivee==='base'?`Niveau ${G.niv}${G.amb?' — '+G.amb:''}. La foreuse a traversé le plafond d’une salle : elle est dans une base enfouie. Un site de forage est signalé plus loin.`:`Niveau ${G.niv}${G.amb?' — '+G.amb:''}. La foreuse a percé le plafond et s'est écrasée plus bas. Un nouveau site de forage est signalé.`,'info');}
 const B_PORTE=i=>!!(BATI_DER&&BATI_DER.B.porte[i])||D4.some(([dx,dy])=>{const v=G.t[idx(i%W+dx,((i/W)|0)+dy)];return v===DOOR||v===LOCK;});   // devant un passage : pas de débris

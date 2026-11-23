@@ -12,7 +12,7 @@ function drawCurList(){$('curList').innerHTML=TILE_LIST.map(([g,l])=>`<div class
 function drawInks(){$('curInks').querySelectorAll('button[data-ink]').forEach(b=>{const i=b.querySelector('i');if(b.dataset.ink!=='.')i.style.background=inkCol(b.dataset.ink);});}
 const edPs=k=>tileDim(k)[0]>16?4:16;   // taille d'un pixel dans l'éditeur
 function drawCurEd(){const cv=$('curEd'),[w,h]=tileDim(edKey),ps=edPs(edKey);if(cv.width!==w*ps||cv.height!==h*ps){cv.width=w*ps;cv.height=h*ps;}cv.style.width=w*ps+'px';
-  const x=cv.getContext('2d'),r=rowsOf(edKey);x.imageSmoothingEnabled=false;$('edName').textContent=tileName(edKey)+(TILE_OV[edKey]?' · retouchée':'');
+  const x=cv.getContext('2d'),r=rowsOf(edKey);x.imageSmoothingEnabled=false;$('edName').textContent=tileName(edKey);   // sans « · retouchée » (22 novembre 2026)
   for(let j=0;j<h;j++)for(let i=0;i<w;i++){const ch=r[j][i];x.fillStyle=ch==='.'?((i+j)%2?'#07100e':'#0b1714'):inkCol(ch)||'#0b1714';x.fillRect(i*ps,j*ps,ps,ps);
     if(ch==='0'){const m=Math.max(1,ps>>2);x.fillStyle='#3a5a55';x.fillRect(i*ps+(ps>>1)-m/2,j*ps+(ps>>1)-m/2,m,m);}}
   if(ps>=8){x.fillStyle='rgba(255,255,255,.07)';for(let k=1;k<w;k++)x.fillRect(k*ps,0,1,h*ps);for(let k=1;k<h;k++)x.fillRect(0,k*ps,w*ps,1);}

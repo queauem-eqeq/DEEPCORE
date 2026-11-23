@@ -28,7 +28,7 @@ Le jeu est une page web en plusieurs fichiers (`src/`), **sans étape d'assembla
 
 ## Outils de vérification
 - `python3 outils/captures.py DOSSIER t1 t2 …` : images de l'intro à ces instants, contrôle des erreurs.
-- `python3 outils/forage.py DOSSIER t1 t2 …` : images de la cinématique de forage à ces instants (la touche F9 la lance dans le jeu).
+- `python3 outils/forage.py DOSSIER t1 t2 …` : images de la cinématique de forage à ces instants (NIV2 la lance dans le jeu ; F9 ajoute désormais un exemplaire de chaque consommable à l'inventaire).
 - `python3 outils/jeu.py DOSSIER [script.js]` : image de la partie, intro passée ; le script prépare la
   scène dans la page et renvoie ce qu'on veut lire.
 - `python3 outils/simul.py [detection|fuite|tout]` : rejoue des situations dans le moteur et mesure.
@@ -47,7 +47,7 @@ Le jeu est une page web en plusieurs fichiers (`src/`), **sans étape d'assembla
 
 ## Banc de combat
 Artefact à part (https://claude.ai/artifact/9BKRaoB4hzgdWhzYFx5A6q) qui rejoue des combats dans le vrai moteur, sur carte de taille 1.
-- `banc/banc.js`, `banc/banc.css` : le panneau ; `banc/resultats.js` : les archives affichées ; `banc/archives/` : les données brutes.
+- `banc/banc.js`, `banc/banc.css` : le panneau. Les archives (`banc/resultats.js`, `banc/archives/`) ont été **effacées le 22 novembre 2026** à la demande de l'utilisateur ; elles restent dans l'historique git. Le bouton **Générer** pose l'arène et laisse jouer soi-même, inventaire plein (2 de chaque consommable). Le Lab du jeu a un bouton **Combat** qui ouvre ce banc.
 - `python3 outils/banc.py` assemble `banc/site/` (non versionné) à partir de `src/` : c'est ce dossier qu'on publie sur l'artefact du banc
   (`publish_files`, mêmes chemins). **À republier quand le moteur change**, sinon le banc mesure l'ancien jeu.
 - `python3 outils/banc_series.py CONFIGS.json SORTIE.json [essais] [processus]` lance des séries en lot.
@@ -65,12 +65,16 @@ Artefact à part (https://claude.ai/artifact/9BKRaoB4hzgdWhzYFx5A6q) qui rejoue 
   globale (pas de modules, pas d'import/export)** : une constante déclarée dans un fichier est visible dans les suivants ;
   attention aux noms en double (`const` redéclarée = erreur de syntaxe) et aux noms qui existent déjà dans `window`.
   Un nouveau fichier doit aussi être ajouté en balise `<script>` dans `index.html`.
-  00 base · 01 sons · 02 palette · 03 tuiles (motifs 16×16) · 03b tuiles des machines · 04 vaisseau · 05 tuiles éditables · 06 réglages et ambiances ·
+  00 base · 01 sons · 02 palette · 02b police DOS (Modern DOS 8x16, CP437, domaine public : annonces des descentes) · 03 tuiles (motifs 16×16) · 03b tuiles des machines · 04 vaisseau · 05 tuiles éditables · 06 réglages et ambiances ·
   06b groupes · 07 génération de la carte · 07b bâtiments · 07c artefacts · 07d zones et tunnels · 07e cavernes · 07f machines · 07g grande base · 08 faune et prédateurs · 09 vision, déplacement, forage · 10 rendu et gouffres ·
   11 interface (mode carte, « En vue », commandes, enregistrement) · 12 souris et inspection · 13 éditeur de tuiles ·
   14 inventaire et équipement · 14b forage (cinématique et mini-jeu des mines) · 14c fabricateur · 14d objets (butin, capsules à identifier, visée, plans, Lab → Items) · 15 cinématique d'intro (qui lance aussi le jeu : rester le dernier).
+- **Règle permanente des mini-jeux ASCII (descentes, 23 novembre 2026) : jamais d'alpha ni de transparence.** Chaque case
+  dessinée est opaque (fond noir plein, puis le caractère) et reste sur la grille ; rien ne s'efface en fondu ni ne s'assombrit
+  pour disparaître : on passe par des caractères de moins en moins denses (« █ ▓ ▒ ░ · »), puis le noir. Pas d'éclair blanc
+  translucide non plus.
 - `docs/` : conception, mesures, notes sur Brogue (voir plus haut). `planches/` : planches de travail
-  (vaisseau, gouffres). `outils/` : scripts de vérification (voir plus haut).
+  (vaisseau, gouffres ; `intro-ascii/` : essai de l'arrivée en ASCII, artefact à part https://claude.ai/artifact/NqyAPH2j2Nxi5AxgQX5ZSX). `outils/` : scripts de vérification (voir plus haut).
 
 ## Après chaque modification
 1. Syntaxe : `for f in src/js/*.js; do node --check "$f"; done`.
@@ -140,7 +144,7 @@ modification, marquer la version actuelle. Dernière version à fichier unique :
   (`bz0`…`bz9`, dans l'ordre de la liste) et les retouches du joueur sont enregistrées sous ces numéros. Insérer une
   espèce décale toutes les suivantes et colle leurs retouches sur la mauvaise bête (16 novembre 2026 : le brochon,
   inséré avant le mastok, portait la tuile du mastok).
-- Tuiles : motifs 16×16 en texte. Codes : `.` transparent · `0` noir · `w` blanc · `r` danger (rouge) · `1` accent · `2` bio · `3` monde
+- Tuiles : motifs 16×16 en texte. Codes : `.` transparent · `0` noir · `w` blanc · `r` danger (rouge de la palette) · `R` rouge fixe (#d8180b, ne suit pas la palette) · `1` accent · `2` bio · `3` monde · `5` bâti (`5` et `R` : 22 novembre 2026)
   (lu « bâti » sur les tuiles de `BATI_TUILES`). Palettes à cinq couleurs, toutes tirées de LACKING64 (`02-palette.js`).
 - Pas de dépendance externe ni d'étape de compilation : ce qui est dans `src/` est ce qui est publié. Une bibliothèque
   ne peut venir que d'un des hôtes autorisés par l'artefact (cdnjs, jsdelivr, unpkg) ou être copiée dans `src/`.
