@@ -337,6 +337,7 @@ kbd{font-family:var(--mono);color:var(--fg);border:1px solid var(--line);padding
   #monde .mdcols{display:block;overflow-y:auto}#monde .mdcols section{display:block;margin-bottom:18px}#monde .mdcols .gen{overflow:visible}}
 .mdcols .gen .g2{grid-template-columns:minmax(0,1fr) 190px}
 .coldefil>.btnrow>button{flex:1 1 0;min-width:0}
+.coldefil button:focus-visible,.coldefil summary:focus-visible,.coldefil .labbtn:focus-visible{outline-offset:-2px}   /* cadre de focus tracé en dedans : la zone qui défile rognait ses côtés, comme pour la minimap (23 novembre 2026) */
 /* Discrétion : fenêtre large et basse (15 novembre 2026) */
 #discretion .mcard{width:min(940px,100%);gap:12px}
 .mhbtns{display:flex;gap:8px}

@@ -423,12 +423,14 @@ function fgDraw(F,t){const x=F.x,{w,h,cw,chh,dpr}=F;
      de gauche à droite : pavé de couleur, « 0 → i → . », puis plus rien. */
 const FG_ANN_GL='#%&$@/\\<>=+*?!;:-_|[]{}()0123456789ABCDEFGHJKLMNPQRSTUVWXYZ£¥§¶«»±÷≈∙√ⁿ²■ΣΩδ∞φε∩≡';   // caractères tirés au hasard (CP437)
 const FG_ANN_FIN=1;   // durée de la disparition (23 novembre 2026 : doublée, 0,5 s avant)
-const FG_ANN_COLS=30;   // largeur du cadre, en cases, la même aux deux descentes : le plus long message (26) + 4
+const FG_ANN_COLS=30;
+/* taille d'un pixel de police des alertes (entier), la même partout (arrivée et descentes) : le cadre tient dans 30 % de la largeur (41 % jusqu'au 23 novembre 2026, jugé trop gros) */
+const fgAnnP=w=>Math.max(1,Math.floor(w*.30/((FG_ANN_COLS+2)*8)));   // largeur du cadre, en cases, la même aux deux descentes : le plus long message (26) + 4
 const FG_ANN_RAMPE='.i0',FG_ANN_BLOC='░▒▓';
 function fgAnnonce(F,t){const x=F.x,{w,h}=F,[l1,l2]=F.jeu?['EXPLOSIFS DÉTECTÉS','ATTENTION SOUS-SOL PIÉGÉ !']:['MATIÈRE {µ} DÉTECTÉE','COLLECTE POSSIBLE'],col=F.jeu?'#ff3b30':F.pal.a,blanc=F.pal.w,gris=F.cRock2;
   const cols=FG_ANN_COLS,rows=9;   // même cadre, même taille de caractères aux deux descentes (23 novembre 2026)
   // alignée à gauche sous le tableau de bord ; un pixel de police = p pixels d'écran (entier), le cadre tenant dans 41 % de la largeur
-  const p=Math.max(1,Math.floor(w*.41/((cols+2)*8))),cw=8*p,chh=16*p,x0=(F.hudG??Math.round(w*.02))+cw,y0=(F.hudB??Math.round(h*.3))+chh+Math.round(6*(F.dpr||1));   /* sa bordure noire (une case autour) commence sous le tableau */
+  const p=fgAnnP(w),cw=8*p,chh=16*p,x0=(F.hudG??Math.round(w*.02))+cw,y0=(F.hudB??Math.round(h*.3))+chh+Math.round(6*(F.dpr||1));   /* sa bordure noire (une case autour) commence sous le tableau */
   const pa=Math.max(0,Math.min(1,(t-FG_ANN_T0)/(FG_ANN_T1-FG_ANN_T0))),q=Math.max(0,Math.min(1,(t-(FG_ANNONCE-FG_ANN_FIN))/FG_ANN_FIN)),tic=Math.floor(t*20);
   const H=(a,b,k)=>{let v=(a*73856093)^(b*19349663)^(k*83492791);v^=v<<13;v^=v>>>17;v^=v<<5;return (v>>>0)/4294967296;};
   const d1=Math.floor((cols-l1.length)/2),d2=Math.floor((cols-l2.length)/2);

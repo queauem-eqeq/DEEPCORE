@@ -252,6 +252,10 @@ function render(){
     ctx.globalAlpha=1;ctx.drawImage(img,px,py,S,S);
     const fl=FX.find(f=>f.kind==='flash'&&f.beast===b);if(fl){ctx.globalCompositeOperation='lighter';ctx.globalAlpha=1-fxP(fl);ctx.drawImage(img,px,py,S,S);ctx.drawImage(img,px,py,S,S);ctx.globalCompositeOperation='source-over';ctx.globalAlpha=1;}
     barreVie(px,py,b.hp,pvDe(BEASTS[b.sp]));}
+  // objet sous une créature (23 novembre 2026) : la créature le cache ; sa tuile, en petit, dans le coin bas droit de la case
+  if(G.items){const sous=new Set();for(const b of G.beasts||[])if(beastVisible(b)&&!beastCache(b))sous.add(idx(b.x,b.y));for(const a of G.animals||[])if(!fog||vis[idx(a.x,a.y)])sous.add(idx(a.x,a.y));
+    for(const i of sous){const l=G.items[i];if(!l||!l.length)continue;const q=Math.round(S*.5),px=(i%W-camX)*S+S-q,py=(((i/W)|0)-camY)*S+S-q;
+      ctx.globalAlpha=1;ctx.fillStyle='#000';ctx.fillRect(px-1,py-1,q+2,q+2);ctx.drawImage(itemTile(l[l.length-1]),px,py,q,q);}}
   // antenne : un ennemi hors de vue dans le disque d'une antenne allumée se montre par un point en couleur danger (22 novembre 2026)
   if(G.beasts&&fog)for(const b of G.beasts){if(vis[idx(b.x,b.y)]||!antDetecte(b))continue;const q=S/16;ctx.globalAlpha=1;ctx.fillStyle=PAL['4'];ctx.fillRect((b.x-camX)*S+6*q,(b.y-camY)*S+6*q,4*q,4*q);}
   // nuage d'un fumigène : les tuiles de nuage par-dessus le terrain et les créatures, sous la foreuse ; elles pâlissent en se dissipant

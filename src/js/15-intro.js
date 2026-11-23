@@ -62,6 +62,7 @@ function introMapImg(){ensureChasmOv();ensureSolOv();const c=document.createElem
 function playIntro(){
   if(reduced||!G||!G.ship){markIntro();return;}
   if(TRAV)stopTravel();HOV=null;if(freeCam)setFreeCam(false);   // l'intro sort du mode carte : elle se pose sur la vue centrée sur la foreuse
+  if(typeof arriveeStart==='function'){arriveeStart();return;}   // depuis le 23 novembre 2026 : l'arrivée en ASCII (14e-arrivee.js) ; la suite (intro en pixels) n'est plus jouée
   introTiming();   // nouveaux tirages : durée, chaleur, éclairs, nuages
   const R=seeded((Math.random()*1e9)|0);
   // nuages : formes procédurales (union de disques) de 6 à 24 cases de carte, posées sur la carte. Ils sont échantillonnés
@@ -87,7 +88,7 @@ function playIntro(){
     dust:null,shadow:shipShadow(),mapImg:introMapImg()};
   introCv.hidden=false;introCv.style.opacity=1;$('introSkip').hidden=false;
   requestAnimationFrame(introFrame);}
-function skipIntro(){if(!INTRO)return;const now=performance.now();if((now-INTRO.t0)/1000<T5)INTRO.t0=now-T5*1000;INTRO.ev.touch=true;INTRO.ev.reen=true;}
+function skipIntro(){if(!INTRO)return;if(INTRO.ascii){arriveeSkip();return;}const now=performance.now();if((now-INTRO.t0)/1000<T5)INTRO.t0=now-T5*1000;INTRO.ev.touch=true;INTRO.ev.reen=true;}
 function endIntro(){INTRO=null;introCv.hidden=true;$('introSkip').hidden=true;introCv.style.opacity=1;markIntro();render();}
 introCv.addEventListener('pointerdown',()=>{unlock();});
 // une case de terrain, comme dans le jeu (sans brouillard ni créatures) ; le vaisseau au sol n'est pas dessiné
@@ -228,6 +229,7 @@ function introFrame(now){const I=INTRO;if(!I)return;ensureChasmOv();ensureSolOv(
    Niv1 : la cinématique d'arrivée, puis un niveau 1 (recette « atterrissage ») aux réglages tirés au hasard.
    Niv2 : la cinématique de forage, puis un niveau 2 (recette « cavernes ») aux réglages tirés au hasard ; la foreuse garde
    ce qu'elle a. Dans les deux cas le menu Monde du joueur est remis tel qu'il était : seule la taille de carte en est reprise. */
+for(const b of ['niv1Btn','niv2Btn','niv3Btn'])$(b).addEventListener('click',e=>e.currentTarget.blur());   /* plus de cadre de focus qui reste autour du bouton après le clic */
 $('niv1Btn').onclick=()=>{unlock();if(TRAV)stopTravel();
   const sauve=JSON.parse(JSON.stringify(GEN));recRange();recPrend(RECETTE_NIV(1));hasardReglages();newGame();
   genRemet(sauve);started=true;$('overlay').hidden=true;render();playIntro();};
