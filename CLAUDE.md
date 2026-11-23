@@ -42,6 +42,10 @@ Le jeu est une page web en plusieurs fichiers (`src/`), **sans étape d'assembla
 - **Essais automatiques**, à passer à `jeu.py` et à relancer après tout changement de ces systèmes : `test-machines.js`
   (machines), `test-ennemis.js` (espèces, patrouilles, lieux), `test-forage.js` (mini-jeu), `test-descente.js` (la descente
   entière, trois niveaux) ; mesures : `mesure-ambiances.js`, `mesure-faune.js`. Chacun renvoie une ligne par essai.
+- `node outils/redecouper.js [--ecrire] [LIMITE]` (acorn requis : `npm i acorn` dans un dossier temporaire, puis `NODE_PATH`) : redécoupe les
+  lignes de `src/js` trop longues (140 caractères par défaut) sans changer le programme : l'arbre syntaxique est comparé avant
+  d'écrire. Exclus : `02b` (données) et `07e` (`animation_cavernes.py` y cherche du texte exact). Utile aussi pour aligner une
+  ancienne branche avant de la reposer sur `main`.
 - `outils/scripts/` : scripts à passer à `jeu.py` — `six-cartes.js` (six cartes côte à côte, tunnels en jaune),
   `mesure-recettes.js` (40 cartes par taille et par recette : complexes, tunnels, sorties), `cavernes.js` (six cartes de la recette cavernes, secteurs teintés ; `window.CAS` choisit les cartes), `planche-objets.js` (chaque objet : illustration ASCII et tuile au sol côte à côte), `mesure-cavernes.js` (25 cartes par réglage et par ambiance : obtenu contre visé, pièces, connexité).
 

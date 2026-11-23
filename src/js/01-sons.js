@@ -5,7 +5,8 @@ function audio(){
   if(!unlocked||!SND.on)return null;
   if(!AC){try{AC=new (window.AudioContext||window.webkitAudioContext)();MASTER=AC.createGain();
     // limiteur en sortie : quand plusieurs sons forts se superposent (tonnerres, rentrée), le total ne sature plus
-    const lim=AC.createDynamicsCompressor();lim.threshold.value=-10;lim.knee.value=6;lim.ratio.value=12;lim.attack.value=.003;lim.release.value=.25;
+    const lim=AC.createDynamicsCompressor();lim.threshold.value=-10;lim.knee.value=6;lim.ratio.value=12;lim.attack.value=.003;
+      lim.release.value=.25;
     MASTER.connect(lim);lim.connect(AC.destination);}catch(e){return null;}}
   if(AC.state==='suspended')AC.resume();MASTER.gain.value=SND.vol/100*.8;return AC;}
 function tone(f,dur,type,g,f2,delay){const a=audio();if(!a)return;const t=a.currentTime+(delay||0),o=a.createOscillator(),v=a.createGain();
@@ -17,7 +18,9 @@ function noiz(dur,g,freq,ftype,delay,f2){const a=audio();if(!a)return;const t=a.
   if(!NB){NB=a.createBuffer(1,a.sampleRate,a.sampleRate);const d=NB.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;}
   const src=a.createBufferSource(),fl=a.createBiquadFilter(),v=a.createGain();src.buffer=NB;
   fl.type=ftype||'lowpass';fl.frequency.setValueAtTime(freq,t);if(f2)fl.frequency.exponentialRampToValueAtTime(f2,t+dur);
-  v.gain.setValueAtTime(0.0001,t);v.gain.exponentialRampToValueAtTime(g,t+Math.min(.006,dur/4));v.gain.exponentialRampToValueAtTime(0.0001,t+dur);   // attaque de 6 ms : pas de clic au démarrage
+  // attaque de 6 ms : pas de clic au démarrage
+  v.gain.setValueAtTime(0.0001,t);v.gain.exponentialRampToValueAtTime(g,t+Math.min(.006,dur/4));
+    v.gain.exponentialRampToValueAtTime(0.0001,t+dur);
   src.connect(fl);fl.connect(v);v.connect(MASTER);src.start(t,Math.random()*.5);src.stop(t+dur+.02);}
 const SFX={
   step(){noiz(.06,.12,700);tone(62,.05,'square',.035);},
@@ -27,7 +30,8 @@ const SFX={
     noiz(.1*r(),.042,5000*r(),'highpass',.03);
     noiz(.08*r(),.028,7200*r(),'highpass',.075);},
   // Moteur électrique de la course : bourdon court et sifflement d'engrenage, un par pas couru
-  motor(){const r=.94+Math.random()*.12;tone(188*r,.1,'sawtooth',.04,214*r);tone(1240*r,.07,'square',.016,1460*r);noiz(.05,.02,2800,'bandpass',.01,1800);},
+  motor(){const r=.94+Math.random()*.12;tone(188*r,.1,'sawtooth',.04,214*r);tone(1240*r,.07,'square',.016,1460*r);
+    noiz(.05,.02,2800,'bandpass',.01,1800);},
   motorOn(){tone(120,.26,'sawtooth',.05,330);tone(900,.22,'square',.02,1500,.03);},
   motorOff(){tone(320,.3,'sawtooth',.045,110);tone(1450,.2,'square',.018,820,.02);},
   water(){noiz(.22,.16,1800,'bandpass',0,600);},
@@ -38,11 +42,13 @@ const SFX={
   blocked(){tone(110,.07,'square',.06,90);},
   crack(){noiz(.07,.3,3000,'highpass');tone(140,.1,'square',.1,60);noiz(.12,.12,900,'lowpass',.04);},
   crit(){noiz(.05,.35,5000,'highpass');tone(1400,.06,'square',.06,700);tone(180,.18,'sawtooth',.12,60,.02);},
-  explode(){noiz(1.1,.5,900,'lowpass',0,120);tone(70,.9,'sawtooth',.16,28);noiz(.35,.3,4000,'highpass',.02);noiz(.6,.18,600,'bandpass',.25,200);},
+  explode(){noiz(1.1,.5,900,'lowpass',0,120);tone(70,.9,'sawtooth',.16,28);noiz(.35,.3,4000,'highpass',.02);
+    noiz(.6,.18,600,'bandpass',.25,200);},
   break(){noiz(.45,.35,1500,'lowpass',0,200);tone(95,.35,'sawtooth',.12,35);noiz(.2,.15,3500,'highpass',.05);},
   spot(){tone(880,.07,'square',.05);tone(1320,.09,'square',.05,null,.08);},
   // sonar : « blip blip » répété pendant toute la durée du balayage (s, en secondes)
-  sonar(s){const n=Math.max(3,Math.ceil(s/.62));for(let i=0;i<n;i++){tone(1480,.13,'sine',.09,1380,i*.62);tone(1480,.11,'sine',.045,1380,i*.62+.17);}},
+  sonar(s){const n=Math.max(3,Math.ceil(s/.62));for(let i=0;i<n;i++){tone(1480,.13,'sine',.09,1380,i*.62);
+    tone(1480,.11,'sine',.045,1380,i*.62+.17);}},
   analyse(){[660,880,1100,1320].forEach((f,i)=>tone(f,.08,'triangle',.07,null,i*.07));},
   start(){tone(110,.6,'sawtooth',.06,440);tone(220,.6,'square',.03,880,.05);},
   drill(k){tone(48+k*6,.12,'sawtooth',.09);noiz(.1,.12,600+k*120);},
@@ -65,33 +71,44 @@ const SFX={
   alarme(){for(let i=0;i<6;i++){const f=i%2?740:988;tone(f,.22,'square',.05,null,i*.24);tone(f*2,.2,'sawtooth',.014,null,i*.24);}},
   chirp(){tone(1900,.05,'square',.035,2700);tone(2300,.05,'square',.03,1600,.07);},
   // porte de bâtiment (19 novembre 2026) : loquet qui claque, panneau lourd qui glisse en grinçant, butée sourde
-  porte(k=1){SFX.door(k);},   // toutes les portes font le bruit de celle du vaisseau (19 novembre 2026) ; k : volume (0,6 pour une créature)
+  // toutes les portes font le bruit de celle du vaisseau (19 novembre 2026) ; k : volume (0,6 pour une créature)
+  porte(k=1){SFX.door(k);},
   // serrure : la clé tourne (deux crans), le pêne recule, puis la porte s'ouvre
-  serrure(){tone(1500,.03,'square',.04,1100);tone(1300,.03,'square',.04,950,.09);noiz(.04,.12,900,'bandpass',.2);tone(110,.07,'square',.07,70,.22);},
+  serrure(){tone(1500,.03,'square',.04,1100);tone(1300,.03,'square',.04,950,.09);noiz(.04,.12,900,'bandpass',.2);
+    tone(110,.07,'square',.07,70,.22);},
   /* Porte automatique, forte et métallique : souffle pneumatique, servo, grincement de rail (deux partiels aigus non
      harmoniques). Le choc de fin de course a été retiré le 19 novembre 2026 : il ne reste que cette première partie,
      et c'est le bruit de toutes les portes — vaisseau, bâtiments, créatures (à volume réduit). */
   // tir de la sentinelle : un « piou » de laser — deux balayages qui chutent très vite de l'aigu au grave, sur un filet de souffle
   laser(){tone(2300,.2,'sawtooth',.075,170);tone(3100,.13,'square',.035,420);noiz(.1,.05,5200,'bandpass',0,1400);},
-  door(k=1){noiz(.38,.26*k,2600,'bandpass',0,700);tone(180,.22,'square',.06*k,420);tone(1240,.3,'square',.03*k,1175);tone(1873,.24,'square',.02*k,1790);},
+  door(k=1){noiz(.38,.26*k,2600,'bandpass',0,700);tone(180,.22,'square',.06*k,420);tone(1240,.3,'square',.03*k,1175);
+    tone(1873,.24,'square',.02*k,1790);},
   hyper(){tone(700,1,'sawtooth',.05,55);noiz(1.1,.13,3200,'bandpass',0,180);},
   hum(){tone(55,2.2,'sine',.06);tone(110,2.2,'sine',.02);},
   approach(){tone(70,3,'sawtooth',.035,150);noiz(3,.05,300,'lowpass',0,900);},
   reentry(dur,pk){const a=audio();if(!a)return;if(!NB)noiz(.01,.0001,100);const t=a.currentTime;
     const src=a.createBufferSource(),fl=a.createBiquadFilter(),v=a.createGain();src.buffer=NB;src.loop=true;fl.type='lowpass';
-    fl.frequency.setValueAtTime(180,t);fl.frequency.exponentialRampToValueAtTime(1500,t+pk);fl.frequency.exponentialRampToValueAtTime(220,t+dur);
+    fl.frequency.setValueAtTime(180,t);fl.frequency.exponentialRampToValueAtTime(1500,t+pk);
+      fl.frequency.exponentialRampToValueAtTime(220,t+dur);
     v.gain.setValueAtTime(.0001,t);v.gain.exponentialRampToValueAtTime(.38,t+pk);v.gain.exponentialRampToValueAtTime(.0001,t+dur);
     src.connect(fl);fl.connect(v);v.connect(MASTER);src.start(t);src.stop(t+dur+.05);
-    const o=a.createOscillator(),g=a.createGain();o.type='sawtooth';o.frequency.setValueAtTime(36,t);o.frequency.linearRampToValueAtTime(64,t+pk);o.frequency.linearRampToValueAtTime(40,t+dur);
-    g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.07,t+pk);g.gain.exponentialRampToValueAtTime(.0001,t+dur);o.connect(g);g.connect(MASTER);o.start(t);o.stop(t+dur+.05);},
+    const o=a.createOscillator(),g=a.createGain();o.type='sawtooth';o.frequency.setValueAtTime(36,t);
+      o.frequency.linearRampToValueAtTime(64,t+pk);o.frequency.linearRampToValueAtTime(40,t+dur);
+    g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.07,t+pk);g.gain.exponentialRampToValueAtTime(.0001,t+dur);
+      o.connect(g);g.connect(MASTER);o.start(t);o.stop(t+dur+.05);},
   // tonnerre : claquement, puis long grondement qui roule (bouffées irrégulières de bruit grave)
   // un tonnerre qui suit de près le précédent ne rejoue que son claquement (sinon les grondements s'empilent et saturent)
-  thunder(){const a=audio();if(!a)return;const now=a.currentTime;if(SFX.lastThunder&&now-SFX.lastThunder<1.6){noiz(.2,.22,1400,'bandpass',0,500);return;}SFX.lastThunder=now;noiz(.12,.3,3000,'lowpass');noiz(.25,.35,1400,'bandpass',.02,500);
+  thunder(){const a=audio();if(!a)return;const now=a.currentTime;
+    if(SFX.lastThunder&&now-SFX.lastThunder<1.6){noiz(.2,.22,1400,'bandpass',0,500);return;}SFX.lastThunder=now;noiz(.12,.3,3000,'lowpass');
+    noiz(.25,.35,1400,'bandpass',.02,500);
     const t=a.currentTime+.05,dur=3.4+Math.random()*.8,src=a.createBufferSource(),fl=a.createBiquadFilter(),v=a.createGain();
-    src.buffer=NB;src.loop=true;fl.type='lowpass';fl.Q.value=.7;fl.frequency.setValueAtTime(420,t);fl.frequency.exponentialRampToValueAtTime(70,t+dur);
+    src.buffer=NB;src.loop=true;fl.type='lowpass';fl.Q.value=.7;fl.frequency.setValueAtTime(420,t);
+      fl.frequency.exponentialRampToValueAtTime(70,t+dur);
     v.gain.setValueAtTime(0.0001,t);v.gain.exponentialRampToValueAtTime(.55,t+.12);let u=t+.12;
-    while(u<t+dur-.4){u+=.25+Math.random()*.45;v.gain.linearRampToValueAtTime(Math.max(.05,.5*(1-(u-t)/dur))*(.45+Math.random()*.7),u);}   // roulements
-    v.gain.exponentialRampToValueAtTime(0.0001,t+dur);src.connect(fl);fl.connect(v);v.connect(MASTER);src.start(t,Math.random()*.5);src.stop(t+dur+.05);
+    // roulements
+    while(u<t+dur-.4){u+=.25+Math.random()*.45;v.gain.linearRampToValueAtTime(Math.max(.05,.5*(1-(u-t)/dur))*(.45+Math.random()*.7),u);}
+    v.gain.exponentialRampToValueAtTime(0.0001,t+dur);src.connect(fl);fl.connect(v);v.connect(MASTER);src.start(t,Math.random()*.5);
+      src.stop(t+dur+.05);
     tone(48,1.6,'sine',.22,30,.04);},
   thrust(){noiz(4,.12,900,'lowpass',0,160);tone(62,4,'square',.03,38);},
   touchdown(){tone(72,.35,'square',.13,38);noiz(.6,.22,700,'lowpass',0,90);noiz(.3,.08,3000,'highpass',.05);},

@@ -4,7 +4,8 @@ const EYE_SVG='<svg class="eyeic" viewBox="0 0 11 7" width="22" height="14" shap
 let HOV=null,INSPECT=false,TRAV=null,lastPT='mouse',PC={k:'',p:null};
 const busy=()=>!G||!!G.over||drilling||!$('overlay').hidden;
 // créature visible sur une case (les animaux cachés par le brouillard ne bloquent pas le tracé)
-function occupant(x,y){const seenHere=!fog||vis[idx(x,y)];if(!seenHere)return null;const b=beastAt(x,y);return (b&&!beastCache(b)?b:null)||animalAt(x,y)||null;}
+function occupant(x,y){const seenHere=!fog||vis[idx(x,y)];if(!seenHere)return null;const b=beastAt(x,y);
+  return (b&&!beastCache(b)?b:null)||animalAt(x,y)||null;}
 // Plus court chemin (Dijkstra, 8 directions) sur les cases connues ; l'eau profonde est évitée autant que possible.
 // La destination peut être une créature ou une roche : la dernière étape devient alors un coup de foreuse.
 // explore : les cases jamais vues sont supposées franchissables (coût uniforme, sans regarder ce qu'elles cachent) ;
@@ -15,7 +16,9 @@ function findPath(tx,ty,explore){
   if(!tUnk&&(v===ROCK||v===MOUNT)&&(tx===0||ty===0||tx===W-1||ty===H-1))return null;
   const N=W*H,dist=new Float64Array(N).fill(Infinity),prev=new Int32Array(N).fill(-1),hp=heap(),s0=idx(G.px,G.py);dist[s0]=0;hp.push(s0,0);
   while(hp.size){const [d,c]=hp.pop();if(d>dist[c])continue;if(c===ti)break;const x=c%W,y=(c/W)|0;
-    for(const [dx,dy] of DIRS){const a=x+dx,b=y+dy;if(a<0||b<0||a>=W||b>=H)continue;const j=idx(a,b);if(!diagOk(x,y,dx,dy)&&(!fog||(G.seen[idx(x+dx,y)]&&G.seen[idx(x,y+dy)])))continue;   // coin connu seulement
+    // coin connu seulement
+    for(const [dx,dy] of DIRS){const a=x+dx,b=y+dy;if(a<0||b<0||a>=W||b>=H)continue;const j=idx(a,b);
+      if(!diagOk(x,y,dx,dy)&&(!fog||(G.seen[idx(x+dx,y)]&&G.seen[idx(x,y+dy)])))continue;
       const unk=fog&&!G.seen[j];
       if(j!==ti&&(unk?!explore:(blocks(G.t[j])||occupant(a,b))))continue;
       const w=G.t[j],nd=d+(dx&&dy?1.001:1)+(unk?.3:w===DEEP?6:w===LIQ?.4:0);
@@ -36,7 +39,8 @@ function goTo(x,y){if(busy())return;const d=Math.max(Math.abs(x-G.px),Math.abs(y
   if(d===1){tryMove(x-G.px,y-G.py);return;}
   const p=findPath(x,y)||findPath(x,y,true);if(!p){say('Destination inaccessible.');SFX.blocked();render();return;}
   const seen=new Set();for(const e of [...(G.beasts||[]),...(G.animals||[])])if(vis[idx(e.x,e.y)])seen.add(e);
-  TRAV={path:p,i:0,tx:x,ty:y,explore:p.some(([a,b])=>fog&&!G.seen[idx(a,b)]),seen,vie:G.st.vie,sites:G.sites.filter(s=>s.seen).length,tm:0};travelStep();}
+  TRAV={path:p,i:0,tx:x,ty:y,explore:p.some(([a,b])=>fog&&!G.seen[idx(a,b)]),seen,vie:G.st.vie,sites:G.sites.filter(s=>s.seen).length,
+    tm:0};travelStep();}
 function stopTravel(m){if(!TRAV)return;clearTimeout(TRAV.tm);TRAV=null;if(m)sayMore(m,'warn');render();}
 // Un pas par tour ; le trajet s'arrête au moindre imprévu
 function travelEvent(T){
@@ -47,11 +51,13 @@ function travelEvent(T){
   if(T.i<T.path.length&&siteAt(G.px,G.py))return 'Trajet interrompu : site de forage atteint.';
   return null;}
 function travelStep(){const T=TRAV;if(!T)return;if(busy()){stopTravel();return;}
-  if(T.explore){   // trajet lancé à travers l'inexploré : la route est recalculée à chaque pas avec ce que la foreuse voit, sans jamais forer
+  // trajet lancé à travers l'inexploré : la route est recalculée à chaque pas avec ce que la foreuse voit, sans jamais forer
+  if(T.explore){
     const np=findPath(T.tx,T.ty)||findPath(T.tx,T.ty,true);
     if(!np){stopTravel('La foreuse s’arrête : plus de passage vers la destination.');return;}
     T.path=np;T.i=0;
-    const [fx,fy]=np[0];if(blocks(G.t[idx(fx,fy)])){stopTravel(np.length===1?'La foreuse s’arrête : la destination est infranchissable.':'La foreuse s’arrête : passage bloqué.');return;}}
+    const [fx,fy]=np[0];
+      if(blocks(G.t[idx(fx,fy)])){stopTravel(np.length===1?'La foreuse s’arrête : la destination est infranchissable.':'La foreuse s’arrête : passage bloqué.');return;}}
   const [nx,ny]=T.path[T.i],dx=nx-G.px,dy=ny-G.py,last=T.i===T.path.length-1;
   if(Math.max(Math.abs(dx),Math.abs(dy))!==1){stopTravel('Trajet interrompu : la foreuse a dévié de sa route.');return;}
   if(!last&&occupant(nx,ny)){stopTravel('Trajet interrompu : passage bloqué.');return;}
@@ -67,14 +73,19 @@ function travelStep(){const T=TRAV;if(!T)return;if(busy()){stopTravel();return;}
    Elle ne fore jamais et n'entre dans l'eau profonde que s'il ne reste rien d'autre. Elle s'arrête au moindre événement (exploreEvent),
    à la moindre touche ou au moindre clic. Quand tout est exploré, elle rejoint le site de forage s'il est connu. */
 let EXPL=null;
-const EXPL_VUS=new WeakSet();   // créatures déjà signalées : chacune n'interrompt l'exploration qu'une fois (sinon un insectoïde qui suit la foreuse l'arrêterait sans cesse)
+// créatures déjà signalées : chacune n'interrompt l'exploration qu'une fois (sinon un insectoïde qui suit la foreuse l'arrêterait sans cesse)
+const EXPL_VUS=new WeakSet();
 function exploreScan(E,deep){const N=W*H,prev=new Int32Array(N).fill(-2),q=[idx(G.px,G.py)];prev[q[0]]=-1;const plein=G.st.vie>=G.st.vieMax;
-  const butin=j=>{if(G.cles&&G.cles[j])return 'une clé';if(G.items&&G.items[j]&&G.items[j].length&&!(G.pieges||[]).some(p=>p.on&&p.c===j)&&!(G.vit&&G.vit[j]))return 'un objet';   /* l'exploration automatique ne touche ni à l'appât d'une salle piégée ni aux vitrines : c'est au joueur de choisir */const o=G.ore&&G.ore[j];if(o&&oreSol(o)&&(oreMat(o)||!plein))return oreMat(o)?'de la Matière {µ}':'des éclats de métal';
+  const butin=j=>{if(G.cles&&G.cles[j])return 'une clé';
+    if(G.items&&G.items[j]&&G.items[j].length&&!(G.pieges||[]).some(p=>p.on&&p.c===j)&&!(G.vit&&G.vit[j]))return 'un objet';
+    /* l'exploration automatique ne touche ni à l'appât d'une salle piégée ni aux vitrines : c'est au joueur de choisir */const o=G.ore&&G.ore[j];
+    if(o&&oreSol(o)&&(oreMat(o)||!plein))return oreMat(o)?'de la Matière {µ}':'des éclats de métal';
     return null;};
   for(let k=0;k<q.length;k++){const c=q[k],x=c%W,y=(c/W)|0;
     if(k>0){if(butin(c))return {c,prev};
       if(!E.vu.has(c))for(const[dx,dy]of DIRS){const a=x+dx,b=y+dy;if(a>=0&&b>=0&&a<W&&b<H&&!G.seen[idx(a,b)])return {c,prev};}}
-    for(const[dx,dy]of DIRS){const a=x+dx,b=y+dy;if(a<1||b<1||a>=W-1||b>=H-1)continue;const j=idx(a,b);if(prev[j]!==-2||!G.seen[j])continue;const v=G.t[j];
+    for(const[dx,dy]of DIRS){const a=x+dx,b=y+dy;if(a<1||b<1||a>=W-1||b>=H-1)continue;const j=idx(a,b);
+      if(prev[j]!==-2||!G.seen[j])continue;const v=G.t[j];
       if(blocks(v)||(v===DEEP&&!deep)||!diagOk(x,y,dx,dy)||occupant(a,b))continue;
       const o=G.ore&&G.ore[j];if(plein&&o&&oreSol(o)&&!oreMat(o))continue;
       prev[j]=c;q.push(j);}}
@@ -88,11 +99,13 @@ function exploreEvent(E){
   const ef=G.eff||{};if(ef.poison>0||ef.glu>0)return 'la foreuse subit un effet';
   if(G.msg&&G.msg.c==='warn')return 'alerte';
   return null;}
-function stopExplore(m,c){if(!EXPL)return;clearTimeout(EXPL.tm);EXPL=null;$('explBtn').classList.remove('on');if(m)sayMore(m,c||'warn');render();}
+function stopExplore(m,c){if(!EXPL)return;clearTimeout(EXPL.tm);EXPL=null;$('explBtn').classList.remove('on');
+  if(m)sayMore(m,c||'warn');render();}
 function startExplore(){
   if(EXPL){stopExplore('Exploration interrompue.');return;}
   if(busy()||TRAV||REST)return;
-  if((G.beasts||[]).some(b=>b.hunt>0&&vis[idx(b.x,b.y)])){say('Un ennemi vous chasse : pas d’exploration automatique.','warn');SFX.blocked();render();return;}
+  if((G.beasts||[]).some(b=>b.hunt>0&&vis[idx(b.x,b.y)])){say('Un ennemi vous chasse : pas d’exploration automatique.','warn');
+    SFX.blocked();render();return;}
   for(const e of [...(G.beasts||[]),...(G.animals||[])])if(vis[idx(e.x,e.y)])EXPL_VUS.add(e);
   EXPL={vie:G.st.vie,sites:G.sites.filter(s=>s.seen).length,vu:new Set(),n:0,tm:0};$('explBtn').classList.add('on');
   say('Exploration automatique. Une touche ou un clic pour l’arrêter.','info');exploreStep();}
@@ -146,14 +159,16 @@ function restStep(){const T=REST;if(!T)return;if(busy()){stopRest();return;}
 function setInspect(on){INSPECT=on;$('inspTag').hidden=!on;if(on){if(freeCam)setFreeCam(false);HOV={x:G.px,y:G.py};}else HOV=null;render();}
 function moveInspect(dx,dy){const vc=Math.floor(vw/S),vr=Math.floor(vh/S);
   HOV={x:Math.max(camX,Math.min(Math.min(W,camX+vc)-1,HOV.x+dx)),y:Math.max(camY,Math.min(Math.min(H,camY+vr)-1,HOV.y+dy))};render();}
-const cellAt=ev=>{const r=cv.getBoundingClientRect();return {x:Math.floor((ev.clientX-r.left)/S)+camX,y:Math.floor((ev.clientY-r.top)/S)+camY};};
+const cellAt=ev=>{const r=cv.getBoundingClientRect();
+  return {x:Math.floor((ev.clientX-r.left)/S)+camX,y:Math.floor((ev.clientY-r.top)/S)+camY};};
 cv.addEventListener('pointerdown',ev=>{lastPT=ev.pointerType||'mouse';});
 cv.addEventListener('pointermove',ev=>{if(ev.pointerType==='touch'||!G)return;const c=cellAt(ev);if(c.x<0||c.y<0||c.x>=W||c.y>=H)return;
   if(VISEE){viseeVers(c.x,c.y);return;}
   if(!HOV||HOV.x!==c.x||HOV.y!==c.y){HOV=c;render();}});
 cv.addEventListener('pointerleave',()=>{if(INSPECT||lastPT==='touch')return;if(HOV){HOV=null;render();}});
 cv.addEventListener('click',ev=>{if(VISEE){const c=cellAt(ev);viseeVers(c.x,c.y);viseeOk();return;}
-  if(busy())return;if(EXPL){stopExplore('Exploration interrompue.');return;}if(REST){stopRest('Repos interrompu.');return;}if(TRAV){stopTravel('Trajet interrompu.');return;}
+  if(busy())return;if(EXPL){stopExplore('Exploration interrompue.');return;}if(REST){stopRest('Repos interrompu.');return;
+    }if(TRAV){stopTravel('Trajet interrompu.');return;}
   const c=cellAt(ev);if(c.x<0||c.y<0||c.x>=W||c.y>=H)return;
   // écran tactile : un premier appui inspecte et montre le trajet, un second sur la même case lance le déplacement
   if(lastPT==='touch'&&(!HOV||HOV.x!==c.x||HOV.y!==c.y)){HOV=c;render();return;}
@@ -196,13 +211,15 @@ const BEHAV={insectoide:'Suit la foreuse à 2 ou 3 cases et recule au contact. D
 function inspectHTML(){const {x,y}=HOV;if(x<0||y<0||x>=W||y>=H)return '';
   const i=idx(x,y),seen=!fog||G.seen[i],see=!fog||vis[i],d=Math.max(Math.abs(x-G.px),Math.abs(y-G.py)),dt=d?`${d} case${d>1?'s':''}`:'ici';
   const head=(ic,n,ex)=>`<div class="ih">${ic?`<img src="${ic}" alt="">`:''}<b>${n}</b><span>${ex||''}</span></div>`;
-  if(!seen&&G.ore&&G.ore[i]&&sonarVu(i,sonarR())){const o=G.ore[i];return `<div class="insp">${head('','Gisement détecté',dt)}<p><b>${oreMat(o)?'Matière {µ}':'Éclats de métal'}</b> · repéré par le sonar : ${oreMat(o)?`+${ORE_PV[oreLv(o)]} en réserve`:`+${ORE_PV[oreLv(o)]} PV`}. ${oreSol(o)?'Au sol.':'Pris dans la roche : il faudra forer.'}</p></div>`;}
+  if(!seen&&G.ore&&G.ore[i]&&sonarVu(i,sonarR())){const o=G.ore[i];
+    return `<div class="insp">${head('','Gisement détecté',dt)}<p><b>${oreMat(o)?'Matière {µ}':'Éclats de métal'}</b> · repéré par le sonar : ${oreMat(o)?`+${ORE_PV[oreLv(o)]} en réserve`:`+${ORE_PV[oreLv(o)]} PV`}. ${oreSol(o)?'Au sol.':'Pris dans la roche : il faudra forer.'}</p></div>`;}
   if(!seen)return `<div class="insp">${head('','Zone inexplorée',dt)}<p>Aucune donnée : la foreuse n’est jamais passée à portée de ce secteur.</p></div>`;
   const out=[],t=G.t[i],[tn,td]=TDESC[t]||['Terrain',''],border=x===0||y===0||x===W-1||y===H-1;
   const occ=see?occupant(x,y):null;
   if(d===0){const st=G.st;out.push(head(ICON.robot_r,'Foreuse U-7',dt),
     `<div class="kv"><span>Vie <b>${Math.ceil(st.vie)}/${st.vieMax}</b></span><span>Énergie <b>${Math.floor(st.energie)}/${st.energieMax}</b></span><span>DEF <b>${robotDef()}</b></span></div>`);}
-  else if(occ){const isB=(G.beasts||[]).includes(occ),sp=isB?BEASTS[occ.sp]:SPECIES[occ.sp],key=isB?sp.key:'insectoide',hp=Math.max(0,occ.hp??pvDe(sp));
+  else if(occ){const isB=(G.beasts||[]).includes(occ),sp=isB?BEASTS[occ.sp]:SPECIES[occ.sp],key=isB?sp.key:'insectoide',
+    hp=Math.max(0,occ.hp??pvDe(sp));
     const P=isB&&sp.pack&&G.packs?G.packs[occ.pack]:null;
     const state=isB?(occ.hunt>0?(occ.sees?'en chasse':occ.search>0?'fouille les environs':'se dirige vers votre dernière position connue'):P?(P.pause>0?'au repos':'en route'):'erre'):({attack:'attaque',flee:'recule',follow:'suit',hold:'observe',seek:'se dirige vers votre dernière position connue',search:'fouille les environs'}[occ.mode]||'ne vous a pas repéré');
     const me=hitChance(robotPre(),sp.def+terrMod(x,y)),them=isB||occ.mode==='attack'?hitChance(sp.pre,robotDef()):null;
@@ -233,7 +250,8 @@ function inspectHTML(){const {x,y}=HOV;if(x<0||y<0||x>=W||y>=H)return '';
   else if(d===1&&(t===ROCK||t===MOUNT))act=border?'':'Clic : coup de foreuse (10 énergie).';
   else if(d===1&&t===CHASM)act='';
   else if(d===1)act='Clic : avancer d’une case.';
-  else{const p=getPath();act=p?`Clic : y aller · ${p.length} tour${p.length>1?'s':''}${occ||t===ROCK||t===MOUNT?', puis frapper':''}.`:t===CHASM?'':'Inaccessible depuis votre position.';}
+  else{const p=getPath();
+    act=p?`Clic : y aller · ${p.length} tour${p.length>1?'s':''}${occ||t===ROCK||t===MOUNT?', puis frapper':''}.`:t===CHASM?'':'Inaccessible depuis votre position.';}
   if(act)out.push(`<p class="act">${act}</p>`);
   return `<div class="insp">${out.join('')}</div>`;}
 
