@@ -87,8 +87,8 @@ function mdlImage(o,c){const cv=document.createElement('canvas');mdlDessine(cv,o
 const mdlCourant=()=>MODULES[MDL_ED.i]||null;
 const mdlEsc=s=>String(s).replace(/[&<>"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));
 function mdlListe(){const L=$('mdlList');
-  L.innerHTML=MODULES.length?MODULES.map((o,i)=>`<button class="mdlit" data-i="${i}" aria-pressed="${i===MDL_ED.i}">`+
-    `<img src="${mdlImage(o,4)}" alt="" width="${o.w*4}" height="${o.h*4}"><span><b>${mdlEsc(o.nom)}</b><small>${o.w} × ${o.h}</small></span></button>`).join('')
+  L.innerHTML=MODULES.length?MODULES.map((o,i)=>`<button class="mdlit" draggable="true" data-i="${i}" aria-pressed="${i===MDL_ED.i}">`+
+    `<img src="${mdlImage(o,4)}" alt="" width="40" height="40" draggable="false"><span><b>${mdlEsc(o.nom)}</b><small>${o.w} × ${o.h}</small></span></button>`).join('')
     :'<p class="mnote">La banque est vide. « Nouveau » crée un premier module.</p>';
   mdlNombre();}
 // « Modules posés par carte » : un niveau à la fois, choisi dans le sélecteur
@@ -103,12 +103,9 @@ function mdlPinceaux(){const b=(couche,code,nom,ic)=>`<button class="mdlpn" data
   $('mdlMarq').innerHTML=MDL_MARQ.map(a=>b('m',a[0],a[1],`<img src="${mdlImage({w:1,h:1,t:['S'],m:[a[0]]},24)}" alt="" width="24" height="24">`)).join('')+
     b('m','.','Effacer','<i class="mdlgomme"></i>');}
 function mdlFiche(){const o=mdlCourant(),F=$('mdlFiche');$('mdlEd').hidden=!o;F.hidden=!o;$('mdlVide').hidden=!!o;
-  if(!o){$('mdlAvis').innerHTML='';$('mdlVar').innerHTML='';return;}
+  if(!o){$('mdlAvis').innerHTML='';return;}
   mdlDessine($('mdlCv'),o,MDL_C,true);$('mdlNom').value=o.nom;$('mdlW').value=o.w;$('mdlH').value=o.h;
   $('mdlRec').innerHTML=mdlRecs().map(([k,n])=>`<label><input type="checkbox" data-rec="${k}"${o.rec[k]?' checked':''}> ${mdlEsc(n)}</label>`).join('');
-  const vs=mdlVariantes(o);
-  $('mdlVar').innerHTML=`<small>${vs.length} variante${vs.length>1?'s':''} après rotations et miroirs</small><div>`+
-    vs.map(v=>`<img src="${mdlImage(v,4)}" alt="" width="${v.w*4}" height="${v.h*4}">`).join('')+'</div>';
   const av=mdlAvis(o);
     $('mdlAvis').innerHTML=av.length?av.map(t=>`<li>${mdlEsc(t)}</li>`).join(''):'<li class="ok">Module prêt à servir.</li>';
   MDL_ED.suppr=false;$('mdlSuppr').textContent='Supprimer';}
@@ -123,6 +120,9 @@ function mdlPose(x,y){const o=mdlCourant();if(!o||x<0||y<0||x>=o.w||y>=o.h)retur
     // un emplacement ne tient que sur une case praticable : la case devient du sol si elle ne l'est pas
     if(MDL_ED.code!=='.'&&!MDL_PRAT.includes(at))mets(o.t,'.');mets(o.m,MDL_ED.code);}
   return true;}
+// déplace le module de la place « de » pour qu'il se retrouve devant celui qui occupait la place « vers » ; la sélection suit son module
+function mdlDeplace(de,vers){if(de<0||de>=MODULES.length||vers===de||vers===de+1)return;const sel=mdlCourant(),o=MODULES.splice(de,1)[0];
+  MODULES.splice(vers>de?vers-1:vers,0,o);MDL_ED.i=Math.max(0,MODULES.indexOf(sel));mdlChange('Ordre des modules modifié.');}
 function mdlTaille(w,h){const o=mdlCourant();if(!o)return;w=Math.max(MDL_MIN,Math.min(MDL_MAX,w|0||o.w));
   h=Math.max(MDL_MIN,Math.min(MDL_MAX,h|0||o.h));
   const t=[],m=[];for(let y=0;y<h;y++){t.push(((o.t[y]||'')+mdlLigne(w,'?')).slice(0,w));m.push(((o.m[y]||'')+mdlLigne(w,'.')).slice(0,w));}
@@ -147,6 +147,16 @@ if(typeof document!=='undefined'&&$('mdlBtn')){
     MODULES_NB[MDL_ED.nbRec]=Math.max(0,Math.min(MDL_NB_MAX,Math.round(+$('mdlNbVal').value||0)));mdlChange();});
   for(const id of ['mdlTerr','mdlMarq'])$(id).addEventListener('click',ev=>{const b=ev.target.closest('.mdlpn');if(!b)return;
     MDL_ED.couche=b.dataset.couche;MDL_ED.code=b.dataset.code;mdlPinceaux();});
+  // ranger la banque : on glisse un module et on le lâche au-dessus ou au-dessous d'un autre (un filet montre où il ira)
+  {const L=$('mdlList');let de=-1;const net=()=>L.querySelectorAll('.dessus,.dessous').forEach(e=>e.classList.remove('dessus','dessous'));
+    const cible=ev=>{const b=ev.target.closest('.mdlit');if(!b||de<0)return null;const r=b.getBoundingClientRect();
+      return {b,i:+b.dataset.i,bas:ev.clientY>r.top+r.height/2};};
+    L.addEventListener('dragstart',ev=>{const b=ev.target.closest('.mdlit');if(!b)return;de=+b.dataset.i;
+      try{ev.dataTransfer.effectAllowed='move';ev.dataTransfer.setData('text/plain',String(de));}catch(e){}});
+    L.addEventListener('dragover',ev=>{const c=cible(ev);if(!c)return;ev.preventDefault();net();c.b.classList.add(c.bas?'dessous':'dessus');});
+    L.addEventListener('dragleave',ev=>{if(!L.contains(ev.relatedTarget))net();});
+    L.addEventListener('dragend',()=>{de=-1;net();});
+    L.addEventListener('drop',ev=>{const c=cible(ev);if(!c)return;ev.preventDefault();mdlDeplace(de,c.i+(c.bas?1:0));de=-1;});}
   $('mdlNom').addEventListener('change',()=>{const o=mdlCourant();if(!o)return;o.nom=$('mdlNom').value.trim().slice(0,30)||'Module';mdlChange();});
   $('mdlW').addEventListener('change',()=>mdlTaille(+$('mdlW').value,0));
     $('mdlH').addEventListener('change',()=>mdlTaille(0,+$('mdlH').value));

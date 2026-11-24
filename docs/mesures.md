@@ -784,3 +784,6 @@ ce n'est pas compté dans le tableau.
 | 3 | 0,6 | 5,05 | 0 | 2 sur 22 → 14 sur 22 |
 
 Le nombre total de butins par carte ne change pas (6 sur une carte de taille 3) : c'est leur répartition qui change.
+
+`outils/simul.py` (détection et fuite) relancé le même jour : ces mesures se font sur carte dégagée, sans butin ni clé,
+et ne dépendent pas de ce changement.

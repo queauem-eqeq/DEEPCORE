@@ -497,14 +497,19 @@ kbd{font-family:var(--mono);color:var(--fg);border:1px solid var(--line);padding
 .mdllist{display:grid;grid-template-columns:minmax(0,1fr);gap:4px;max-height:560px;overflow-y:auto;padding:3px}
 .mdlit{min-width:0;display:flex;align-items:center;gap:8px;padding:4px 6px;text-align:left;text-transform:none;letter-spacing:0;border-color:var(--line)}
 .mdlit[aria-pressed=true]{border-color:var(--c1);color:var(--c1)}
-.mdlit img,.mdlvar img,.mdlpn img{image-rendering:pixelated;flex:0 0 auto}
+.mdlit img,.mdlpn img{image-rendering:pixelated;flex:0 0 auto}
+/* miniatures de la banque : toutes dans le même carré de 40 px, le module entier dedans */
+.mdlit img{width:40px;height:40px;object-fit:contain;background:var(--black)}
+.mdlit{cursor:grab}
+.mdlit.dessus{box-shadow:0 -3px 0 var(--c1)}
+.mdlit.dessous{box-shadow:0 3px 0 var(--c1)}
 /* nom du module : sur deux lignes quand il est long, coupé au-delà */
 .mdlit span{min-width:0}
 .mdlit b{font-weight:normal;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;overflow-wrap:anywhere;line-height:1.25}
 .mdlit small{display:block;color:var(--dim)}
 .mdled{overflow:auto;max-width:100%}
 #mdlCv{display:block;image-rendering:pixelated;cursor:crosshair;touch-action:none;border:1px solid var(--line)}
-.mdlnb{display:flex;flex-wrap:wrap;gap:6px 8px;align-items:center;color:var(--dim)}
+.mdlnb{display:flex;flex-wrap:wrap;gap:6px 8px;align-items:center;color:var(--dim);border:1px solid var(--line);padding:8px 10px;width:fit-content;max-width:100%;box-sizing:border-box}
 .mdlnb small{font-size:11px}
 .mdlavis{margin:0;padding:0;list-style:none;display:grid;gap:3px;font-size:12px;color:var(--c3)}
 .mdlavis li.ok{color:var(--c1)}
@@ -517,8 +522,6 @@ kbd{font-family:var(--mono);color:var(--fg);border:1px solid var(--line);padding
 .mdlpn[aria-pressed=true]{border-color:var(--c1);outline:1px solid var(--c1)}
 .mdlgomme{display:block;width:24px;height:24px;background:repeating-linear-gradient(45deg,#0b1714 0 2px,#22332f 2px 4px)}
 .mdlrec{display:grid;gap:3px;color:var(--dim)}
-.mdlvar small{color:var(--dim);display:block;margin-bottom:4px}
-.mdlvar div{display:flex;flex-wrap:wrap;gap:6px;align-items:flex-start}
 @media (max-width:980px){#modules .mcard{width:100%}.mdlcols{grid-template-columns:minmax(0,1fr)}}
 
 /* Fenêtre Items (Lab, 22 novembre 2026) */

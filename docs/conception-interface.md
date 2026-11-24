@@ -181,17 +181,17 @@ sa liste et posera **en priorité**, avant de générer le reste. **Branché sur
   - **Emplacements**, que le jeu remplira lui-même : **Entrée** (par où le module se raccorde au reste de la carte),
     **Machine**, **Butin**, **Ennemi**. Un emplacement ne tient que sur une case praticable (sol, herbes, sol bâti,
     pont, porte) : posé ailleurs, la case devient du sol ; recouvert d'un terrain plein, il disparaît.
-- **Pose** : rotations et miroirs autorisés, soit jusqu'à **8 variantes** par module ; la fenêtre les montre et compte
-  celles qui diffèrent vraiment (un module symétrique en a moins).
+- **Pose** : rotations et miroirs autorisés, soit jusqu'à **8 variantes** par module (la fenêtre ne les montre plus).
 - **Par recette** : chaque module coche les recettes qui peuvent le tirer ; « Modules posés par carte » fixe combien en
   poser (0 à 6) pour chacune.
 - **Avertissements** sous la grille : module vide, aucune entrée, entrée qui ne touche ni le bord ni une case libre,
   aucune recette cochée.
 - **Disposition** (24 novembre 2026, à la demande du joueur) : pas de texte d'introduction. À gauche la banque ; au
-  centre le dessin, dans une colonne large de **16 cases pile**, puis « Modules posés par carte : » avec un sélecteur
-  de niveau et un champ nombre, les avertissements et les variantes ; à droite, colonne étroite : nom, taille, les
+  centre le dessin, dans une colonne large de **16 cases pile**, puis un petit encadré « Nombre de modules par carte » (sélecteur
+  de niveau et champ nombre) et les avertissements ; à droite, colonne étroite : nom, taille, les
   pinceaux en **tuiles seules** (nom au survol), les niveaux qui tirent le module, Supprimer.
-- **Liste** : le nom d'un module passe sur deux lignes quand il est long (coupé au-delà).
+- **Liste** : miniatures toutes dans le même carré de 40 px ; le nom passe sur deux lignes quand il est long (coupé
+  au-delà) ; **on range la banque en glissant un module** au-dessus ou au-dessous d'un autre (un filet montre où il ira).
 - **Gestes** : cliquer ou glisser pour peindre ; « Tout remplir » ; Nouveau, Dupliquer, Supprimer (deux clics).
 - **Enregistrement** : dans le navigateur à chaque modification (`np-modules`) ; « Enregistrer » l'envoie dans la base
   de l'artefact (champ `modules` de `reglages/courant` : `liste` et `nb`). Code : `14f-modules.js`.
