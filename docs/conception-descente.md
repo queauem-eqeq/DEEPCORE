@@ -146,13 +146,15 @@ Du niveau 2 au niveau 3, la descente se joue. `playForage(suite, 2)` ; **NIV3** 
 - **Entrée et sortie des deux descentes** : la sortie éteint l'écran case par case (« ▒ ░ · » puis le noir) ; l'entrée joue la même
   animation à l'envers (`FG_ENT`, 0,8 s : le noir se rallume case par case). La mort garde sa propre extinction.
 - **Plancher de départ et plancher d'arrivée** : la carte, vue de dessus, est lue en coupe sur la rangée de la foreuse et dressée de
-  côté (`fgCoupe`, `fgDecor`) : une case de carte = 4 colonnes, un mur = 14 rangées. Le décor est tracé **une seule fois dans son
+  côté (`fgCoupe`, `fgDecor`) : une case de carte = 4 colonnes, un mur = 14 rangées, et le décor peut descendre **sous** la ligne de
+  sol (l'eau). Le décor est tracé **une seule fois dans son
   propre canevas**, puis posé d'un bloc à chaque image (sinon deux mille caractères à retracer soixante fois par seconde). **Départ** : l'endroit réel où l'on fore, lu
   sur le niveau quitté. Un bâtiment montre ses **murs et son toit en couleur bâti**, sa **porte** percée dans le mur, au plus
   **deux ensembles de machines** en couleur monde (une antenne est un mât) ; les roches alentour dessinent une **crête** en couleur
   monde, lissée d'une case à l'autre pour qu'elle ondule, et de plus en plus dense vers sa base (« ▀ ░ ▒ ▓ »). **Les herbes** de la case et de ses
-  voisines deviennent des **touffes en ASCII** (`" , '`) en couleur bio, sur la ligne de sol, là où il n'y a ni bâtiment ni roche
-  (24 novembre 2026). **Arrivée** : le même dessin, lu sur le niveau d'arrivée, posé sur le sol de la caverne. Son abscisse se fige
+  voisines deviennent des **touffes en ASCII** (`" , '`) en couleur bio, sur la ligne de sol, là où il n'y a ni bâtiment, ni roche,
+  ni eau. **L'eau** se montre avec sa profondeur, en couleur eau : une surface `~ ≈` sur la ligne de sol, puis **une rangée sous la
+  ligne pour les hauts-fonds et trois pour l'eau profonde**, de plus en plus denses vers le fond (24 novembre 2026). **Arrivée** : le même dessin, lu sur le niveau d'arrivée, posé sur le sol de la caverne. Son abscisse se fige
   dès que le décor pourrait entrer dans le champ, et non au percement : sinon il apparaissait d'un coup alors que le sol de la
   caverne était déjà visible (mesuré : figé 3 rangées avant d'être visible). Le niveau d'arrivée est donc
   **généré avant la scène** (`descendre()`, `14b-forage.js`), qui se joue par-dessus la partie déjà changée.

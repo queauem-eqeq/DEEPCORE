@@ -190,6 +190,8 @@ function fgCoupe(cx,cy){
     for(let j=-2;j<=2;j++){const v=T(cx+d,cy+j),c=j===0;   // murs, portes et sol : la rangée de la foreuse seule ; machines : une rangée de chaque côté
       if(c&&bati(v))k.b=1;else if(c&&v===DOOR)k.porte=1;else if(c&&v===FLOOR)k.sol=1;
       else if(Math.abs(j)<=1&&v===GRASS)k.herbe=1;
+      else if(Math.abs(j)<=1&&v===LIQ)k.eau=Math.max(k.eau||0,1);
+      else if(Math.abs(j)<=1&&v===DEEP)k.eau=3;
       else if(Math.abs(j)<=1&&(v===ANTENNA||v===PYLON))k.ant=1;else if(Math.abs(j)<=1&&FG_MACH.has(v))k.m=1;
       else if(v===HARD)k.r=Math.max(k.r,7);else if(v===MOUNT)k.r=Math.max(k.r,5);else if(v===ROCK)k.r=Math.max(k.r,3);}
     col.push(k);}
@@ -222,23 +224,31 @@ function fgCoupe(cx,cy){
       for(let h=1;h<=hh;h++){const prof=hh-h;   // du sommet vers le bas : la roche s'épaissit
         put(x,h,prof===0?'▀':prof===1?(hs(x,h+3)<.5?'░':'▒'):prof<4?'▒':'▓','m');}}}
   // herbes : des touffes sur la ligne de sol, là où il n'y a ni bâtiment ni roche (24 novembre 2026)
-  for(let d=-FG_DM;d<=FG_DM;d++){const k=K(d);if(!k.herbe||k.b||(dedans&&d>=L&&d<=R)||hr[d+FG_DM])continue;
+  for(let d=-FG_DM;d<=FG_DM;d++){const k=K(d);if(!k.herbe||k.eau||k.b||(dedans&&d>=L&&d<=R)||hr[d+FG_DM])continue;
     for(let i=0;i<FG_TW;i++){const x=x0(d)+i,r=hs(x,21);if(r<.22)continue;
       put(x,1,r<.5?'"':r<.78?',':"'",'v');if(r>.93)put(x,2,"'",'v');}}
-  return {cells,cb:PAL['5'],cm:PAL['3'],cv:PAL['2']};}
+  /* l'eau (24 novembre 2026) : la surface sur la ligne de sol, et sa profondeur en dessous — une rangée pour les hauts-fonds,
+     trois pour l'eau profonde, de plus en plus dense vers le fond. */
+  for(let d=-FG_DM;d<=FG_DM;d++){const k=K(d);if(!k.eau||k.b||(dedans&&d>=L&&d<=R))continue;
+    for(let i=0;i<FG_TW;i++){const x=x0(d)+i,r=hs(x,31);
+      put(x,0,r<.5?'~':'≈','e');
+      for(let q=1;q<k.eau;q++)put(x,-q,q<2?'▒':'▓','e');}}
+  return {cells,cb:PAL['5'],cm:PAL['3'],cv:PAL['2'],ce:PAL['e']||PAL['3']};}
 /* Le décor est dessiné une seule fois dans son propre canevas, puis posé d'un bloc à chaque image : sinon ce sont deux mille
    caractères à retracer soixante fois par seconde. */
-function fgDecorCv(F,D){if(D.cv&&D.cwv===F.cw)return;
-  let x0=1e9,x1=-1e9,h1=0;for(const c of D.cells){if(c.x<x0)x0=c.x;if(c.x>x1)x1=c.x;if(c.h>h1)h1=c.h;}
-  if(!D.cells.length||h1<1){D.cv=null;D.cwv=F.cw;return;}
-  const cv=document.createElement('canvas');cv.width=(x1-x0+1)*F.cw;cv.height=h1*F.chh;const g=cv.getContext('2d');
-  for(const c of D.cells){if(c.h<1)continue;const px=(c.x-x0)*F.cw,py=(h1-c.h)*F.chh;
-    g.fillStyle='#000';g.fillRect(px,py,F.cw,F.chh);g.drawImage(fgGlyph(F,c.ch,c.c==='b'?D.cb:c.c==='v'?(D.cv||D.cm):D.cm),px,py);}
-  D.cv=cv;D.cwv=F.cw;D.x0=x0;D.h1=h1;}
-function fgDecor(F,D,gy,ox){if(!D)return;fgDecorCv(F,D);if(!D.cv)return;
+function fgDecorCv(F,D){if(D.img&&D.cwv===F.cw)return;
+  let x0=1e9,x1=-1e9,h1=-1e9,h0=1e9;
+  for(const c of D.cells){if(c.x<x0)x0=c.x;if(c.x>x1)x1=c.x;if(c.h>h1)h1=c.h;if(c.h<h0)h0=c.h;}
+  if(!D.cells.length){D.img=null;D.cwv=F.cw;return;}
+  const teinte=c=>c==='b'?D.cb:c==='v'?(D.cv||D.cm):c==='e'?(D.ce||D.cm):D.cm;
+  const cv=document.createElement('canvas');cv.width=(x1-x0+1)*F.cw;cv.height=(h1-h0+1)*F.chh;const g=cv.getContext('2d');
+  for(const c of D.cells){const px=(c.x-x0)*F.cw,py=(h1-c.h)*F.chh;
+    g.fillStyle='#000';g.fillRect(px,py,F.cw,F.chh);g.drawImage(fgGlyph(F,c.ch,teinte(c.c)),px,py);}
+  D.img=cv;D.cwv=F.cw;D.x0=x0;D.h1=h1;}
+function fgDecor(F,D,gy,ox){if(!D)return;fgDecorCv(F,D);if(!D.img)return;
   const px=Math.round((ox+D.x0-F.camX)*F.cw+F.w/2),py=Math.round((gy-D.h1-F.camY)*F.chh);
-  if(px>F.w||px+D.cv.width<0||py>F.h||py+D.cv.height<0)return;
-  F.x.drawImage(D.cv,px,py);}
+  if(px>F.w||px+D.img.width<0||py>F.h||py+D.img.height<0)return;
+  F.x.drawImage(D.img,px,py);}
 function playForage(suite,niv,opt){
   if(reduced||FORAGE){suite&&suite();return;}
   unlock();if(typeof TRAV!=='undefined'&&TRAV)stopTravel();
@@ -414,7 +424,7 @@ function forageFrame(now){const F=FORAGE;if(!F)return;
         mot:.05+.05*sp+(F.ph===0?.07*ig:0),motF:36+ig*10+sp*38+F.hs*8});}
   /* Le décor d'arrivée se fige dès qu'il pourrait entrer dans le champ, et non au percement : sinon il apparaissait d'un coup
      alors que le sol de la caverne était déjà à l'écran (24 novembre 2026). */
-  if(F.ox==null&&F.decA){fgDecorCv(F,F.decA);if(F.decA.cv&&F.fl-F.decA.h1<F.camY+F.R+3)F.ox=Math.round(F.cx);}
+  if(F.ox==null&&F.decA){fgDecorCv(F,F.decA);if(F.decA.img&&F.fl-F.decA.h1<F.camY+F.R+3)F.ox=Math.round(F.cx);}
   if(!F.sansRendu)fgDraw(F,t);   // sansRendu : pour rejouer la scène en accéléré dans les essais (outils/scripts/test-forage.js)
   if(F.ph===4&&t>=F.tFade+F.fadeLen){endForage();return;}
   requestAnimationFrame(forageFrame);}
