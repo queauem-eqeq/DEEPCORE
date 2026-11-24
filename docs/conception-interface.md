@@ -187,8 +187,8 @@ sa liste et posera **en priorité**, avant de générer le reste. **Branché sur
 - **Avertissements** sous la grille : module vide, aucune entrée, entrée qui ne touche ni le bord ni une case libre,
   aucune recette cochée.
 - **Disposition** (24 novembre 2026, à la demande du joueur) : pas de texte d'introduction. À gauche la banque ; au
-  centre le dessin, dans une colonne large de **16 cases pile**, puis un petit encadré « Nombre de modules par carte » (sélecteur
-  de niveau et champ nombre) et les avertissements ; à droite, colonne étroite : nom, taille, les
+  centre le dessin, dans une colonne large de **16 cases pile**, puis les avertissements, et **tout en bas de la colonne** un petit encadré
+  « Nombre de modules par carte » (sélecteur de niveau et champ nombre) ; à droite, colonne étroite : nom, taille, les
   pinceaux en **tuiles seules** (nom au survol), les niveaux qui tirent le module, Supprimer.
 - **Liste** : miniatures toutes dans le même carré de 40 px ; le nom passe sur deux lignes quand il est long (coupé
   au-delà) ; **on range la banque en glissant un module** au-dessus ou au-dessous d'un autre (un filet montre où il ira).
