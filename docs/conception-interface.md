@@ -24,6 +24,8 @@ Partie du document de conception (sommaire et règles à ne pas casser : `concep
   dans un champ modifiable, puis **Rétablir** et **Enregistrer**, enfin la liste des palettes. Cliquer une teinte (Bio, par
   exemple) ouvre le nuancier à sa place fixe ; choisir une couleur l'applique aussitôt ; recliquer la même teinte le referme
   (Échap aussi). Le nuancier fait **4 rangées de 16 cases**, deux fois plus petites qu'avant.
+- Le nuancier se cache par l'attribut `hidden`, qu'une règle `.cgrid[hidden]{display:none}` doit rendre effective : sans elle, le
+  `display:grid` de la classe l'emporte et le nuancier reste affiché, simplement inerte.
 - **Le nuancier est sous les teintes, pas au-dessus** : placé au-dessus, il faisait descendre les cinq pastilles de 55 px en
   s'ouvrant ; le second clic, au même endroit, tombait sur la teinte voisine et le nuancier ne se refermait jamais.
 - **Un seul ordre partout** : **#1 Monde, #2 Bâti, #3 Bio, #4 Accent, #5 Danger** — les cinq teintes du menu, les pastilles des
