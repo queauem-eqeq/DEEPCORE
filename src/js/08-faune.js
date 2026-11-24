@@ -480,7 +480,7 @@ function explose(b){const sp=BEASTS[b.sp],k=G.beasts.indexOf(b);if(k>=0)G.beasts
   // et la Matière que la roche cachait tombent au sol.
   let roches=0,bat=0;
   for(const [zx,zy] of zone){if(zx<1||zy<1||zx>=W-1||zy>=H-1)continue;
-    const j=idx(zx,zy),v=G.t[j],dur=v===MACHINE||v===DOOR||bati(v)||machCasse(v);if(v!==ROCK&&v!==MOUNT&&!dur)continue;
+    const j=idx(zx,zy),v=G.t[j],dur=v===MACHINE||v===DOOR||v===VITRE||bati(v)||machCasse(v);if(v!==ROCK&&v!==MOUNT&&!dur)continue;
     if(machCasse(v)&&G.art)delete G.art[j];
     G.t[j]=RUBBLE;if(G.dmg)delete G.dmg[j];if(dur)bat++;else roches++;
     if(G.ore&&G.ore[j]&&!oreSol(G.ore[j]))G.ore[j]=(oreMat(G.ore[j])?'m':'')+'sol'+oreLv(G.ore[j]);}

@@ -94,6 +94,10 @@ molette ou fine barre pour remonter jusqu'aux 200 derniers messages ; un nouveau
 - **Mini-carte** pleine largeur ; ennemis en points rouges ; un clic recentre la vue ; bouton maintenu + glisser =
   défilement en temps réel. Saisie à l'intérieur, le cadre suit le pointeur sans sauter ; à l'extérieur, il se
   centre d'abord sous le pointeur.
+- **Tile editor, pipette de remplacement** (24 novembre 2026) : choisir une couleur, cliquer **Pipette**, puis cliquer
+  dans la tuile sur la couleur à remplacer : **tous les pixels de cette couleur** prennent la couleur choisie (le
+  transparent compte comme une couleur, dans les deux sens). La pipette se désarme après un remplacement ; un clic
+  droit l'annule. « Rétablir » revient au dessin de référence.
 - **Tile editor** (Lab) : encres sur deux lignes — les cinq couleurs de la palette (**#1 Monde, #2 Bâti, #3 Bio, #4 Accent,
   #5 Danger**, le même ordre et les mêmes numéros que le menu Palette depuis le 24 novembre 2026), puis Blanc, Noir, **Rouge fixe** (`R`, #d8180b, le même avec toutes les palettes) et Transparent.
   S'ajoute **Monde foncé** (`d`), l'encre de la roche dure (24 novembre 2026).
@@ -168,3 +172,31 @@ Au chargement, la base n'est relue que si elle est **plus récente que les retou
 
 **L'utilisateur règle ses tuiles et ses stats dans l'artefact**, seule version dont la session peut relire les réglages (pas de base sur GitHub Pages ni dans la copie du disque). Procédure de recopie dans le code : `CLAUDE.md`.
 
+### Lab → Modules : la banque de morceaux de carte (24 novembre 2026)
+
+**But** : des salles, couloirs, agencements de murs ou de montagne **dessinés à la main**, que chaque recette tirera dans
+sa liste et posera **en priorité**, avant de générer le reste. **Branché sur le niveau 1 depuis le 24 novembre 2026** (voir « Modules » dans
+`conception-carte.md`) ; les niveaux 2, 3 et la recette classique ne s'en servent pas encore.
+
+- **Un module** : de 3 × 3 à **16 × 16** cases, un nom, deux couches.
+  - **Terrain**, une case à la fois : Libre (laissée au choix de la génération, ce qui permet des formes non
+    rectangulaires), Sol, Rocher, Montagne, Roche dure, Eau, Eau profonde, Herbes hautes, Herbes basses, Mur, Mur vitré, Sol bâti, Sol (pont), Gouffre,
+    Porte, Pilier.
+  - **Emplacements**, que le jeu remplira lui-même : **Entrée** (par où le module se raccorde au reste de la carte),
+    **Machine**, **Butin**, **Ennemi**. Un emplacement ne tient que sur une case praticable (sol, herbes, sol bâti,
+    pont, porte) : posé ailleurs, la case devient du sol ; recouvert d'un terrain plein, il disparaît.
+- **Pose** : rotations et miroirs autorisés, soit jusqu'à **8 variantes** par module (la fenêtre ne les montre plus).
+- **Par recette** : chaque module coche les recettes qui peuvent le tirer ; « Modules posés par carte » fixe combien en
+  poser (0 à 6) pour chacune.
+- **Avertissements** sous la grille : module vide, aucune entrée, entrée qui ne touche ni le bord ni une case libre,
+  aucune recette cochée.
+- **Disposition** (24 novembre 2026, à la demande du joueur) : pas de texte d'introduction. À gauche la banque ; au
+  centre le dessin, dans une colonne large de **16 cases pile**, puis les avertissements, et **tout en bas de la colonne** un petit encadré
+  « Nombre de modules par carte » (sélecteur de niveau et champ nombre) ; à droite, colonne étroite : nom, taille, les
+  pinceaux en **tuiles seules** (nom au survol), les niveaux qui tirent le module, Supprimer.
+- **Liste** : miniatures toutes dans le même carré de 40 px ; le nom passe sur deux lignes quand il est long (coupé
+  au-delà) ; **on range la banque en glissant un module** au-dessus ou au-dessous d'un autre (un filet montre où il ira).
+- **Gestes** : cliquer ou glisser pour peindre ; « Tout remplir » ; Nouveau, Dupliquer, Supprimer (deux clics).
+- **Enregistrement** : dans le navigateur à chaque modification (`np-modules`) ; « Enregistrer » l'envoie dans la base
+  de l'artefact (champ `modules` de `reglages/courant` : `liste` et `nb`). Code : `14f-modules.js`.
+- **Reste à faire** : brancher les niveaux 2 (cavernes), 3 (grande base) et la recette classique.

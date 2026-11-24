@@ -17,7 +17,7 @@ function sayMore(m,c){G.msg=G.msg?{m:G.msg.m+' '+m,c:c||G.msg.c}:{m,c:c||''};log
 const blocks=v=>v===ROCK||v===MOUNT||v===HARD||v===CHASM||v===SHIP||v===WALL||v===PILLAR||v===LOCK||v===SECRET||v>=MACHINE;
 // Diagonales comme dans Brogue : un pas (ou un coup) en diagonale est impossible si l'une des deux cases voisines
 // orthogonales est une paroi (rocher, montagne, coque du vaisseau) — on ne coupe pas les coins. Vaut pour tout le monde.
-const wallish=v=>v===ROCK||v===MOUNT||v===SHIP||v===WALL||v===PILLAR||v===LOCK||v===SECRET;
+const wallish=v=>v===ROCK||v===MOUNT||v===SHIP||v===WALL||v===PILLAR||v===LOCK||v===SECRET||v===VITRE;
 const diagOk=(x,y,dx,dy,t)=>{t=t||G.t;return !(dx&&dy)||(!wallish(t[idx(x+dx,y)])&&!wallish(t[idx(x,y+dy)]));};
 const sc=f=>{const a=new Float32Array(W*H);for(let y=0;y<H;y++)for(let x=0;x<W;x++)a[idx(x,y)]=f(x,y);return a;};
 function rankFill(t,score,n,val){const c=[];for(let i=0;i<W*H;i++)if(t[i]===GROUND)c.push(i);
@@ -318,7 +318,8 @@ function niveau(refait){drilling=false;
   PLANS_POSES=PLANS_POSES_M;butinExplo();   // butin des pièces secrètes, des culs-de-sac et des coins reculés (22 novembre 2026)
   // garde-fou : un site inatteignable, la carte est refaite (trois fois au plus)
   if(G.sites[0]&&accesSite()<0&&(refait||0)<3)return niveau((refait||0)+1);
-  spawnGroupes();lastAct='move';palBiome(null);buildTiles();turnStealth();computeFOV();}
+  spawnGroupes();mdlRemplit();   // butin et ennemis des emplacements de modules (07b)
+  lastAct='move';palBiome(null);buildTiles();turnStealth();computeFOV();}
 /* Le niveau d'une carte générée depuis le menu (REGEN, GÉNÉRER LA CARTE) est celui de sa recette (22 novembre 2026 ; avant,
    toujours 1) : une carte « cavernes » est un niveau 2, une « base » un niveau 3, et prend la faune (fenêtre LIFE) et les
    artefacts de ce niveau. La descente reprend de là. */
