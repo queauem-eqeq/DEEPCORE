@@ -1,5 +1,5 @@
 /* ---------- Tile editor ---------- */
-let edKey='cursor',edInk='3',symH=false,symV=false,curDown=null;
+let edKey='cursor',edInk='3',symH=false,symV=false,curDown=null,edPip=false;
 const TERRAIN=new Set(TILE_LIST[2][1].map(([k])=>k));
 const tileName=k=>{for(const [,l] of TILE_LIST)for(const [kk,n] of l)if(kk===k)return n;return k;};
 const tileImg=k=>k==='cursor'?CURT:TL[k];
@@ -39,8 +39,16 @@ function curPaint(ev){const [w,h]=tileDim(edKey),r=$('curEd').getBoundingClientR
   const pts=[[px,py]];if(symH)pts.push([w-1-px,py]);if(symV)pts.push([px,h-1-py]);if(symH&&symV)pts.push([w-1-px,h-1-py]);let ch=false;
   for(const [a,b] of pts)if(rows[b][a]!==curDown){rows[b][a]=curDown;ch=true;}
   if(ch){TILE_OV[edKey]=rows.map(l=>l.join(''));tileChanged();}}
+/* Pipette de remplacement (24 novembre 2026) : la couleur choisie + la pipette + un clic dans la tuile. Tous les pixels de la
+   couleur cliquée prennent la couleur choisie (le transparent compte comme une couleur, dans les deux sens). La pipette se
+   désarme après un remplacement : un clic de trop ne repeint pas toute la tuile. */
+function curPipette(on){edPip=!!on;$('curPip').setAttribute('aria-pressed',edPip);$('curEd').classList.toggle('pip',edPip);}
+function curRemplace(ev){const [w,h]=tileDim(edKey),r=$('curEd').getBoundingClientRect(),px=Math.floor((ev.clientX-r.left)/r.width*w),
+  py=Math.floor((ev.clientY-r.top)/r.height*h);if(px<0||py<0||px>=w||py>=h)return;
+  const rows=rowsOf(edKey),de=rows[py][px];curPipette(false);if(de===edInk)return;
+  TILE_OV[edKey]=rows.map(l=>l.split(de).join(edInk));tileChanged();}
 function openCur(){if(TRAV)stopTravel();drawInks();drawCurList();drawCurEd();drawCurPrev();$('viseurs').hidden=false;$('curClose').focus();}
-function closeCur(){$('viseurs').hidden=true;$('curBtn').focus();render();}
+function closeCur(){curPipette(false);$('viseurs').hidden=true;$('curBtn').focus();render();}
 $('curBtn').onclick=openCur;$('curClose').onclick=closeCur;
 $('viseurs').addEventListener('click',e=>{if(e.target===$('viseurs'))closeCur();});
 $('curList').addEventListener('click',e=>{const b=e.target.closest('button[data-k]');if(!b)return;edKey=b.dataset.k;
@@ -50,7 +58,9 @@ $('curInks').addEventListener('click',e=>{const b=e.target.closest('button[data-
 $('symH').onclick=()=>{symH=!symH;$('symH').setAttribute('aria-pressed',symH);};
 $('symV').onclick=()=>{symV=!symV;$('symV').setAttribute('aria-pressed',symV);};
 $('curEd').addEventListener('contextmenu',e=>e.preventDefault());
-$('curEd').addEventListener('pointerdown',e=>{e.preventDefault();$('curEd').setPointerCapture(e.pointerId);curDown=e.button===2?'.':edInk;curPaint(e);});
+$('curPip').onclick=()=>curPipette(!edPip);
+$('curEd').addEventListener('pointerdown',e=>{e.preventDefault();if(edPip){if(e.button!==2)curRemplace(e);else curPipette(false);return;}
+  $('curEd').setPointerCapture(e.pointerId);curDown=e.button===2?'.':edInk;curPaint(e);});
 $('curEd').addEventListener('pointermove',e=>{if(curDown!=null)curPaint(e);});
 $('curEd').addEventListener('pointerup',()=>{curDown=null;});$('curEd').addEventListener('pointercancel',()=>{curDown=null;});
 $('curOutline').onclick=()=>{TILE_OV[edKey]=curOutline(rowsOf(edKey).map(l=>l.replace(/0/g,'.')));tileChanged();};

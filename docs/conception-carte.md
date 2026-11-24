@@ -422,6 +422,44 @@ pièce ils deviennent du sol, sous un mur du mur) ; seuls le vaisseau et le bord
   éloignées les unes des autres, de préférence sur un dehors déjà praticable. **Si l'entrée donne sur de la roche,
   un couloir est percé** jusqu'au reste de la carte. Un terrain enfermé entre des murs devient du mur plein. Dans
   la recette `atterrissage`, le complexe n'a **qu'une porte**, du côté le plus enfoncé dans le massif.
+- **Modules** (24 novembre 2026, **niveau 1 seulement**) : les morceaux dessinés dans Lab → Modules deviennent des
+  **pièces du complexe**. La recette tire sans remise le nombre réglé (« Modules posés par carte ») parmi ceux qui la
+  cochent et qui ont au moins une entrée ; chacun est tourné ou retourné au hasard.
+  - **Pose en priorité** : le premier module tient lieu de **première pièce** du complexe ; les suivants se collent aux
+    pièces déjà posées, parfois au bout d'un couloir de 2 à 5 cases. Un module qui ne trouve pas sa place est
+    **abandonné** (la carte en reçoit moins), et la seconde moitié des essais se fait sans modules : la carte se
+    génère toujours.
+  - **Entrées** : on n'entre dans un module et on n'en sort **que par ses entrées**. Sur une **porte** du bord ou dans
+    une **brèche du mur** (un mur de chaque côté), la case est le passage lui-même : porte, ou ouverture si c'était
+    une brèche. Sur un sol du bord sans mur autour, la porte est créée juste dehors. **Une entrée qui ne sert pas est
+    murée.**
+  - **Le dessin est respecté** : ses murs ne sont jamais percés (ni raccourcis, ni porte d'entrée du complexe, ni
+    pièce secrète creusée dedans), pas de piliers ajoutés, pas de porte retirée ou dérobée. Un sol au bord du module
+    reçoit un mur juste dehors, comme toute pièce. Les **portes verrouillées** restent possibles sur ses entrées.
+  - **Le site de forage** n'est jamais dans un module.
+  - **Gouffre et pont** (24 novembre 2026) : un module peut contenir des cases Gouffre et des cases « Sol (pont) » ;
+    le pont se dessine avec la tuile `solPont`, **retouchable à part** dans l'éditeur de tuiles (groupe du bâti) et
+    utilisée par tous les ponts de bâtiment. Au départ, c'est le même dessin que le sol bâti. **En extérieur, un pont
+    est du sol, et le gouffre lui fait le même rebord irrégulier qu'au reste de la berge** (rendu : un pont
+    d'extérieur compte comme du sol pour la lèvre du gouffre, et porte la tuile du sol), comme tous les ponts naturels : un pont de module n'est « bâti » que
+    si son gouffre touche du bâti du module (sol bâti, porte, pilier, mur, vitre).
+  - **Mur vitré** (24 novembre 2026) : terrain `VITRE`, tuile `vitre` (retouchable, groupe du bâti). **Infranchissable
+    comme un mur, mais on voit au travers, dans les deux sens** : la foreuse voit dehors, les créatures voient dedans.
+    La foreuse ne l'entame pas ; la charge sismique le réduit en gravats. Il ne compte pas comme une paroi pour la
+    discrétion. **Seuls les modules en posent** (pinceau « Mur vitré » de Lab → Modules) : la génération ordinaire
+    n'en met nulle part. Dans un module, il vaut un mur : il ferme une brèche d'entrée comme un mur plein.
+  - **Emplacements** : **Machine** = une machine de décor ; **Butin** = un consommable (6 fois sur 10) ou de la
+    Matière ; **Ennemi** = une espèce tirée parmi les groupes du niveau, seule et sans patrouille. Un emplacement
+    déjà occupé (clé, artefact, créature) est laissé tel quel.
+  - Mesuré le 24 novembre sur les trois modules du joueur (15 cartes chacun) : posé 15 fois sur 15, site toujours
+    atteignable. Code : `mdlTirage`, `mdlPrepare`, `accretion`, `mdlMachines`, `mdlRemplit` (`07b-batiments.js`) ;
+    `G.mods` garde les modules posés.
+- **Clés** (24 novembre 2026) : une clé par porte verrouillée, sur un sol bâti atteignable toutes serrures fermées,
+  jamais contre une porte, et **assez loin des portes verrouillées : entre 18 et 45 pas de marche de la serrure la
+  plus proche** (`CLE_LOIN`, `CLE_MAX`, `07b-batiments.js`). Si la carte n'offre pas assez de tels endroits : plus
+  loin encore, puis dehors à la même règle, puis les endroits les plus éloignés qu'elle a. Avant, la clé était posée
+  loin de l'entrée, sans regarder la serrure : au niveau 1, la médiane était de 8 pas (16 clés sur 17 à moins de 18
+  pas) ; elle est de 26 pas, aucune à moins de 18.
 - **Petites pièces** : une pièce de moins de 8 cases dont tous les passages sont des portes en perd une, remplacée
   par une ouverture (jamais une porte d'entrée).
 - **Ouvertures sans porte** : part des passages intérieurs laissés ouverts (25 % par défaut) — on voit à travers,

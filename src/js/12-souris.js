@@ -195,6 +195,7 @@ const TDESC={[GROUND]:['Sol rocheux','Praticable. Les points au sol se densifien
   [STATION]:['Station de réparation','Avancer dessus remet la vie et l’énergie au maximum, une seule fois. Le bruit attire les ennemis à 12 cases.'],
   [CHARGEUR]:['Distributeur de pile','Sa pile attend à côté de lui. Avancer dessus la rappelle : utile si elle est coincée.'],
   [FABRIC]:['Fabricateur','Avancer dessus ouvre la liste de fabrication : des objets contre de la Matière {µ}.'],
+  [VITRE]:['Mur vitré','Infranchissable, mais on voit au travers, dans les deux sens : les créatures aussi. La foreuse ne l’entame pas : seule une charge sismique l’ouvre.'],
   [PILLAR]:['Pilier','Infranchissable et opaque : il coupe la ligne de vue. Compte comme une paroi pour la discrétion.'],
   [LIQ]:['Eau peu profonde','Praticable par tous. Défense −20 pour qui s’y trouve ; pas deux fois plus lent, sauf pour les crabos qui nagent.'],
   [DEEP]:['Eau profonde','Praticable par tous. Défense −20, pas deux fois plus lent (sauf crabos), et le courant fait dévier la foreuse. Les créatures, elles, nagent droit.'],
@@ -246,7 +247,7 @@ function inspectHTML(){const {x,y}=HOV;if(x<0||y<0||x>=W||y>=H)return '';
   if(d===0)act=s?'<kbd>F</kbd> ou clic : forer ce site.':'';
   else if(d===1&&occ)act='Clic : frapper avec la foreuse.';
   else if(d===1&&t===LOCK)act=nbCles()>0?'Clic : ouvrir avec une clé.':'';
-  else if(d===1&&(t===HARD||bati(t)))act='';
+  else if(d===1&&(t===HARD||t===VITRE||bati(t)))act='';
   else if(d===1&&(t===ROCK||t===MOUNT))act=border?'':'Clic : coup de foreuse (10 énergie).';
   else if(d===1&&t===CHASM)act='';
   else if(d===1)act='Clic : avancer d’une case.';

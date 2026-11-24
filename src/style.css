@@ -144,6 +144,7 @@ body{margin:0;background:var(--black);color:var(--fg);font:13px/1.45 var(--mono)
 #curEd{max-width:100%;image-rendering:pixelated;cursor:crosshair;touch-action:none;outline:1px solid var(--line)}
 #curPrev{width:256px;height:96px;image-rendering:pixelated;outline:1px solid var(--line)}
 .cur-tools{display:flex;flex-wrap:wrap;gap:6px}
+#curEd.pip{cursor:copy;outline:1px solid var(--c3)}   /* pipette armée */
 .cur-inks{display:grid;gap:6px}   /* deux lignes d'encres : la palette, puis blanc, noir, rouge, transparent */
 .cur-tools button{padding:4px 8px;font-size:11px;border-color:var(--line);letter-spacing:.06em}
 .cur-tools button[aria-pressed="true"]{border-color:var(--c3);color:var(--c3)}
@@ -482,6 +483,49 @@ kbd{font-family:var(--mono);color:var(--fg);border:1px solid var(--line);padding
 ::-webkit-scrollbar-track,::-webkit-scrollbar-corner{background:transparent}
 ::-webkit-scrollbar-thumb{background:var(--dim)}
 ::-webkit-scrollbar-thumb:hover{background:var(--fg)}
+
+/* Fenêtre Modules (Lab, 24 novembre 2026). Trois colonnes : la banque, le dessin (pile 16 cases de 32 px, plus le filet), les outils. */
+#modules .mcard{width:fit-content;max-width:100%;max-height:calc(100vh - 40px);max-height:calc(100dvh - 40px);display:flex;flex-direction:column;overflow:hidden}
+#modules .mcard>*{flex:0 0 auto}
+#modules .mhead{display:flex;gap:8px;align-items:center}
+#modules .mhead h2{margin-right:auto}
+#modules h3{color:var(--c3);margin:6px 0 0;font-size:inherit}
+#modules input[type=text],#modules input[type=number],#modules select{background:var(--black);color:var(--fg);border:1px solid var(--line);font:inherit;padding:2px 4px}
+#modules input[type=number]{width:48px}
+.mdlcols{flex:1 1 auto!important;min-height:0;overflow-y:auto;display:grid;grid-template-columns:200px 514px 152px;gap:16px;align-items:start;padding:3px 6px 3px 3px}
+.mdled[hidden],.mdlfiche[hidden]{display:none}
+.mdlside,.mdlfiche,.mdlmid{display:grid;grid-template-columns:minmax(0,1fr);gap:8px;align-content:start;min-width:0}
+.mdllist{display:grid;grid-template-columns:minmax(0,1fr);gap:4px;max-height:560px;overflow-y:auto;padding:3px}
+.mdlit{min-width:0;display:flex;align-items:center;gap:8px;padding:4px 6px;text-align:left;text-transform:none;letter-spacing:0;border-color:var(--line)}
+.mdlit[aria-pressed=true]{border-color:var(--c1);color:var(--c1)}
+.mdlit img,.mdlpn img{image-rendering:pixelated;flex:0 0 auto}
+/* miniatures de la banque : toutes dans le même carré de 40 px, le module entier dedans */
+.mdlit img{width:40px;height:40px;object-fit:contain;background:var(--black)}
+.mdlit{cursor:grab}
+.mdlit.dessus{box-shadow:0 -3px 0 var(--c1)}
+.mdlit.dessous{box-shadow:0 3px 0 var(--c1)}
+/* nom du module : sur deux lignes quand il est long, coupé au-delà */
+.mdlit span{min-width:0}
+.mdlit b{font-weight:normal;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;overflow-wrap:anywhere;line-height:1.25}
+.mdlit small{display:block;color:var(--dim)}
+.mdled{overflow:auto;max-width:100%}
+#mdlCv{display:block;image-rendering:pixelated;cursor:crosshair;touch-action:none;border:1px solid var(--line)}
+/* colonne centrale : aussi haute que la plus haute des trois, l'encadré du nombre de modules tout en bas */
+.mdlmid{align-self:stretch;display:flex;flex-direction:column}
+.mdlnb{margin-top:auto;align-self:flex-start;display:grid;grid-template-columns:auto auto auto;gap:6px 8px;align-items:center;color:var(--dim);border:1px solid var(--line);padding:8px 10px;width:fit-content;max-width:100%;box-sizing:border-box}
+.mdlnb small{font-size:11px;grid-column:1/-1}
+.mdlavis{margin:0;padding:0;list-style:none;display:grid;gap:3px;font-size:12px;color:var(--c3)}
+.mdlavis li.ok{color:var(--c1)}
+.mdlch{display:grid;grid-template-columns:minmax(0,1fr);gap:3px;color:var(--dim)}
+.mdlch input{width:100%;box-sizing:border-box}
+.mdltaille{display:flex;gap:10px;color:var(--dim)}
+/* pinceaux : la tuile seule, le nom au survol */
+.mdlpns{display:flex;flex-wrap:wrap;gap:4px}
+.mdlpn{display:block;padding:3px;line-height:0;border-color:var(--line)}
+.mdlpn[aria-pressed=true]{border-color:var(--c1);outline:1px solid var(--c1)}
+.mdlgomme{display:block;width:24px;height:24px;background:repeating-linear-gradient(45deg,#0b1714 0 2px,#22332f 2px 4px)}
+.mdlrec{display:grid;gap:3px;color:var(--dim)}
+@media (max-width:980px){#modules .mcard{width:100%}.mdlcols{grid-template-columns:minmax(0,1fr)}}
 
 /* Fenêtre Items (Lab, 22 novembre 2026) */
 #items .mcard{width:min(940px,100%);max-height:calc(100vh - 40px);max-height:calc(100dvh - 40px);display:flex;flex-direction:column;overflow:hidden}

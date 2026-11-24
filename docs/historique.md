@@ -295,3 +295,8 @@ Ce qui a été remplacé, et pourquoi (demandes de l'utilisateur, « chaque mach
 - **La foreuse toujours au centre de la vue, avec de la roche dure dessinée au-delà de la carte** (essayé le 23 novembre
   2026, retiré le même jour à la demande : « map trafiquée »). La caméra reste bornée au bord de la carte ; à l'arrivée,
   c'est le glissement amorti vers la place du vaisseau, commencé dès la descente, qui absorbe le décalage.
+
+## 24 novembre 2026 — les mines éventrent le bâti
+- **Les murs, les portes et les machines résistaient à l'explosion d'une mine** (règle du 22 novembre 2026 : seule la charge
+  sismique en venait à bout). Retiré à la demande : l'explosion d'une mine les détruit désormais, la roche dure exceptée.
+  La charge sismique détruit aussi les portes, qu'elle épargnait par oubli.

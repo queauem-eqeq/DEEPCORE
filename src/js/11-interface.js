@@ -207,6 +207,8 @@ function applySaved(d){
       if(Array.isArray(pp.couleurs)&&pp.couleurs.length===PAL_N)t.c=pp.couleurs.slice();
       if(typeof pp.nom==='string'&&pp.nom.trim())t.n=pp.nom;});
     savePresets();const ai=PRESETS.findIndex(x=>x.n===d.palette.active);usePreset(ai>=0?ai:PRESET_ACTIVE);}
+  // banque de modules (Lab → Modules, 24 novembre 2026)
+  if(d.modules&&typeof modulesApplique==='function'){modulesApplique(d.modules);saveModules();}
   if(d.tuiles&&typeof d.tuiles==='object'){TILE_OV={};
     for(const k in d.tuiles)if(PAT_ORIG[k]&&validTile(d.tuiles[k],k))TILE_OV[k]=d.tuiles[k].slice();saveTiles();
     commitTileBase();buildTiles();}
@@ -228,7 +230,7 @@ async function saveSettings(b,m,journal){b=b instanceof HTMLElement?b:$('saveBtn
     mondes:JSON.parse(JSON.stringify(MONDES)),
     planete:{largeur:W,hauteur:H},robot:G&&G.st?Object.assign({},G.st):null,
     palette:{active:PRESETS[PRESET_ACTIVE].n,palettes:PRESETS.map(p=>({nom:p.n,couleurs:p.c.slice()}))},
-    tuiles:Object.assign({},TILE_OV)};
+    tuiles:Object.assign({},TILE_OV),modules:typeof modulesEtat==='function'?modulesEtat():null};
   try{await DB.doc('reglages/courant').set(data);commitTileBase();try{localStorage.setItem('np-maj',String(Date.parse(data.enregistreLe)));
     }catch(e){}if(!$('viseurs').hidden)drawCurEd();const t=new Date();m.className='saved ok';
     m.textContent=`Réglages enregistrés à ${String(t.getHours()).padStart(2,'0')}:${String(t.getMinutes()).padStart(2,'0')}.`;

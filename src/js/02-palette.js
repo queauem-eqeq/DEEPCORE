@@ -54,7 +54,7 @@ const EAU=[-12,-8,0];   // choix du 21 novembre 2026 après essai de six variant
 const HARD_CLAIR=16;   // la roche dure : la couleur monde en plus sombre (clarté −16), code d'encre 'd'
 const EAU_TUILES=['liq0','liq1','deep0','deep1','wade','wadeDeep'];
 // dessinées en couleur bâti : l'encre '3' y est lue '5'
-const BATI_TUILES=['wall','wallFace','floor','door','doorOpen','doorOpenV','pillar','lock','niche','nicheOuverte'];
+const BATI_TUILES=['wall','wallFace','floor','solPont','door','doorOpen','doorOpenV','pillar','vitre','lock','niche','nicheOuverte'];
 function palBiome(t){TEINTE=t||[0,0,0,0,0];const U=PAL_NIV||PAL_U;
   PAL={'1':teinter(U['1'],TEINTE[0]),'2':teinter(U['2'],TEINTE[1]),'3':teinter(U['3'],TEINTE[2],TEINTE[3],TEINTE[4]),
   '4':U['4']||'#d8180b','5':U['5']||U['3']};PAL['e']=teinter(PAL['3'],EAU[0],EAU[1],EAU[2]);

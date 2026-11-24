@@ -120,29 +120,46 @@ function butinMort(b){if(!b||b.nd)return;const sp=BEASTS[b.sp],p=DROPS[sp.key]||
   const i=caseSol(b.x,b.y,true);   // un objet déjà là : celui-ci roule sur la case libre la plus proche (22 novembre 2026)
   G.items=G.items||{};(G.items[i]=G.items[i]||[]).push(k);
     if(typeof vis!=='undefined'&&vis[i])sayMore(`${LeNom(sp)} lâche quelque chose.`,'good');}
-/* Butin d'exploration : les pièces secrètes, puis les culs-de-sac et les coins reculés — les cases les plus loin du trajet
-   arrivée → site, là où plus rien ne mène ailleurs. Le plus reculé porte un Module de puissance, le suivant un plan,
-   puis une capsule, et le reste de la Matière. Appelé à la fin de la génération, après les machines. */
+/* Butin d'exploration. Ordre de priorité des lieux (24 novembre 2026) : pièces secrètes > pièces fermées à clé > culs-de-sac
+   > autres salles. Les pièces secrètes reçoivent chacune leur lot. Les autres lieux se partagent 5 à 10 butins, choisis dans cet
+   ordre ; un Module de puissance, un plan et une capsule y sont tirés au sort, les lieux prioritaires pesant plus lourd (une
+   préférence, pas une règle fixe), et le reste reçoit de la Matière.
+   – fermée à clé : une zone qu'on n'atteint qu'en ouvrant une porte verrouillée ; une case par zone, la plus reculée ;
+   – cul-de-sac : une case d'où plus rien ne mène ailleurs, loin du trajet arrivée → site ;
+   – autres salles : s'il reste des butins à poser, le sol bâti le plus à l'écart du trajet.
+   Appelé à la fin de la génération, après les machines. */
+// poids d'un lieu dans le tirage des meilleurs butins : une pièce fermée à clé pèse six culs-de-sac
+const BUTIN_POIDS={ferme:6,impasse:1,autres:.5};
 function butinExplo(){const N=W*H,t=G.t,dep=idx(G.px,G.py),s0=G.sites&&G.sites[0],site=s0?idx(s0.x,s0.y):-1;G.items=G.items||{};
-  G.butinN={secret:0,explo:0};
+  G.butinN={secret:0,explo:0,ferme:0,impasse:0,autres:0};
   const pose=(i,k)=>{(G.items[i]=G.items[i]||[]).push(k);};
-  const bfs=(src,secret)=>{const d=new Int32Array(N).fill(-1),q=src.slice();for(const c of q)d[c]=0;
+  const bfs=(src,secret,ferme,eau)=>{const d=new Int32Array(N).fill(-1),q=src.slice();for(const c of q)d[c]=0;
     for(let a=0;a<q.length;a++){const c=q[a],x=c%W,y=(c/W)|0;for(const [dx,dy] of D4){const X=x+dx,Y=y+dy;
       if(X<1||Y<1||X>=W-1||Y>=H-1)continue;const j=idx(X,Y),v=t[j];
-      if(d[j]<0&&(!blocks(v)||v===LOCK||(secret&&v===SECRET))&&v!==DEEP){d[j]=d[c]+1;q.push(j);}}}return d;};
-  const d=bfs([dep],false),ds=bfs([dep],true);
+      if(d[j]<0&&(!blocks(v)||(v===LOCK&&!ferme)||(secret&&v===SECRET))&&(eau||v!==DEEP)){d[j]=d[c]+1;q.push(j);}}}return d;};
+  const d=bfs([dep],false),d0=bfs([dep],false,true);   // d0 : sans ouvrir aucune serrure
   const libre=i=>(t[i]===FLOOR||t[i]===GROUND||t[i]===FLAT||t[i]===RUBBLE)&&i!==site&&i!==dep&&!(G.items[i]&&G.items[i].length)&&!(G.cles&&G.cles[i])&&!(G.lz&&G.lz[i])&&!(G.soc&&G.soc[i]!=null)&&!(G.ore&&G.ore[i])&&!(G.sites||[]).some(s=>idx(s.x,s.y)===i);
-  // pièces secrètes : ce qu'on n'atteint qu'en passant une porte dérobée ; le butin est au fond
+  // pièces secrètes : ce qu'on n'atteint qu'en passant une porte dérobée ; le butin est au fond.
+  // Ici l'eau profonde se traverse (24 novembre 2026) : sans cela, une pièce secrète située au-delà d'un bras d'eau profonde
+  // n'était pas vue du tout et restait vide (16 pièces sur 56 au niveau 2).
+  const dE=bfs([dep],false,false,true),dsE=bfs([dep],true,false,true);
   const vu=new Uint8Array(N);
-  for(let i=0;i<N;i++){if(vu[i]||ds[i]<0||d[i]>=0||blocks(t[i]))continue;const comp=[i];vu[i]=1;
+  for(let i=0;i<N;i++){if(vu[i]||dsE[i]<0||dE[i]>=0||blocks(t[i]))continue;const comp=[i];vu[i]=1;
     for(let a=0;a<comp.length;a++){const c=comp[a],x=c%W,y=(c/W)|0;for(const [dx,dy] of D4){const j=idx(x+dx,y+dy);
-      if(j>=0&&j<N&&!vu[j]&&ds[j]>=0&&d[j]<0&&!blocks(t[j])){vu[j]=1;comp.push(j);}}}
-    const c=comp.filter(libre).sort((a,b)=>ds[b]-ds[a]);if(!c.length)continue;
+      if(j>=0&&j<N&&!vu[j]&&dsE[j]>=0&&dE[j]<0&&!blocks(t[j])){vu[j]=1;comp.push(j);}}}
+    const c=comp.filter(libre).sort((a,b)=>dsE[b]-dsE[a]);if(!c.length)continue;
     butinCoffre('secret').forEach((k,n)=>pose(c[Math.min(n,c.length-1)],k));G.butinN.secret++;}
   // trajet principal, puis l'écart de chaque case à ce trajet
   const chemin=[dep];if(site>=0&&d[site]>=0){let c=site;while(c!==dep){chemin.push(c);const x=c%W,y=(c/W)|0;let m=c;
     for(const [dx,dy] of D4){const j=idx(x+dx,y+dy);if(d[j]>=0&&d[j]<d[m])m=j;}if(m===c)break;c=m;}}
   const dc=bfs(chemin,false),nb=Math.max(5,Math.min(10,Math.round(N/600))),pris=[];
+  // pièces fermées à clé : chaque zone qu'on n'atteint qu'en ouvrant une serrure ; sa case la plus à l'écart du trajet, puis la plus loin
+  {const vuF=new Uint8Array(N),ferm=[];
+    for(let i=0;i<N;i++){if(vuF[i]||d[i]<0||d0[i]>=0||blocks(t[i]))continue;const comp=[i];vuF[i]=1;
+      for(let a=0;a<comp.length;a++){const c=comp[a],x=c%W,y=(c/W)|0;for(const [dx,dy] of D4){const j=idx(x+dx,y+dy);
+        if(j>=0&&j<N&&!vuF[j]&&d[j]>=0&&d0[j]<0&&!blocks(t[j])){vuF[j]=1;comp.push(j);}}}
+      const c=comp.filter(libre).sort((a,b)=>dc[b]-dc[a]||d[b]-d[a]);if(c.length)ferm.push(c[0]);}
+    ferm.sort((a,b)=>dc[b]-dc[a]);for(const i of ferm)if(pris.length<nb)pris.push(i);G.butinN.ferme=pris.length;}
   // rien ne mène plus loin, et un mur au moins sur trois côtés : un fond de cul-de-sac ou un coin. On commence par les plus reculés
   // (12 pas d'écart au trajet, 10 cases entre deux butins), puis on desserre si la carte en offre trop peu.
   for(const [ecart,esp] of [[12,10],[8,8],[5,6]]){if(pris.length>=nb)break;const cand=[];
@@ -154,7 +171,24 @@ function butinExplo(){const N=W*H,t=G.t,dep=idx(G.px,G.py),s0=G.sites&&G.sites[0
     cand.sort((a,b)=>dc[b]-dc[a]);
     for(const i of cand){if(pris.length>=nb)break;
       if(pris.some(j=>Math.max(Math.abs(i%W-j%W),Math.abs(((i/W)|0)-((j/W)|0)))<esp))continue;pris.push(i);}}
-  pris.forEach((i,n)=>pose(i,n===0?'puissance':n===1?planTire():n===2?consoTire():'matiere'));G.butinN.explo=pris.length;}
+  G.butinN.impasse=pris.length-G.butinN.ferme;
+  // autres salles : s'il reste des butins, le sol bâti le plus à l'écart du trajet, jamais contre une porte
+  if(pris.length<nb){const cand=[];
+    for(let y=2;y<H-2;y++)for(let x=2;x<W-2;x++){const i=idx(x,y);if(t[i]!==FLOOR||d[i]<0||dc[i]<3||!libre(i)||pris.includes(i))continue;
+      if(!DIRS.some(([dx,dy])=>{const v=t[idx(x+dx,y+dy)];return v===DOOR||v===LOCK||v===SECRET;}))cand.push(i);}
+    cand.sort((a,b)=>dc[b]-dc[a]);
+    for(const i of cand){if(pris.length>=nb)break;
+      if(pris.some(j=>Math.max(Math.abs(i%W-j%W),Math.abs(((i/W)|0)-((j/W)|0)))<8))continue;pris.push(i);G.butinN.autres++;}}
+  // Qui reçoit quoi : une PRÉFÉRENCE, pas une règle fixe (24 novembre 2026). Le Module de puissance, puis le plan, puis la capsule
+  // sont tirés au sort parmi les lieux encore vides, chaque lieu pesant selon sa priorité (BUTIN_POIDS) ; le reste reçoit de la Matière.
+  {const nF=G.butinN.ferme,nI=G.butinN.impasse,poids=pris.map((_,n)=>n<nF?BUTIN_POIDS.ferme:n<nF+nI?BUTIN_POIDS.impasse:BUTIN_POIDS.autres),
+      lot=pris.map(()=>null);
+    for(const k of ['puissance','plan','conso']){const vides=pris.map((_,n)=>n).filter(n=>!lot[n]);if(!vides.length)break;
+      let r=Math.random()*vides.reduce((a,n)=>a+poids[n],0),choix=vides[vides.length-1];
+      for(const n of vides){r-=poids[n];if(r<0){choix=n;break;}}
+      lot[choix]=k;}
+    pris.forEach((i,n)=>pose(i,lot[n]==='plan'?planTire():lot[n]==='conso'?consoTire():lot[n]||'matiere'));}
+  G.butinN.explo=pris.length;}
 
 /* ----- Ramassage : la Matière rejoint la réserve, un plan s'apprend, le reste va au sac ----- */
 function butinPrend(c,more){const l=G.items&&G.items[c];if(!l)return;const dire=more?sayMore:invSay,reste=[];

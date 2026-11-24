@@ -31,7 +31,7 @@
           <div class="cur-tools"><button class="ink" data-ink="3" aria-pressed="true" aria-label="Monde" title="#1 Monde"><i></i></button><button class="ink" data-ink="5" aria-pressed="false" aria-label="Bâti" title="#2 Bâti"><i></i></button><button class="ink" data-ink="2" aria-pressed="false" aria-label="Bio" title="#3 Bio"><i></i></button><button class="ink" data-ink="1" aria-pressed="false" aria-label="Accent" title="#4 Accent"><i></i></button><button class="ink" data-ink="r" aria-pressed="false" aria-label="Danger" title="#5 Danger"><i></i></button></div>
           <div class="cur-tools"><button class="ink" data-ink="w" aria-pressed="false" aria-label="Blanc" title="Blanc"><i></i></button><button class="ink" data-ink="0" aria-pressed="false" aria-label="Noir" title="Noir"><i></i></button><button class="ink" data-ink="R" aria-pressed="false" aria-label="Rouge" title="Rouge (fixe, ne suit pas la palette)"><i></i></button><button class="ink" data-ink="d" aria-pressed="false" aria-label="Monde foncé" title="Monde foncé (roche dure)"><i></i></button><button class="ink" data-ink="." aria-pressed="false" aria-label="Transparent" title="Transparent"><i class="er"></i></button></div>
         </div>
-        <div class="cur-tools" id="curSyms"><button id="symH" aria-pressed="false">Miroir ↔</button><button id="symV" aria-pressed="false">Miroir ↕</button></div>
+        <div class="cur-tools" id="curSyms"><button id="symH" aria-pressed="false">Miroir ↔</button><button id="symV" aria-pressed="false">Miroir ↕</button><button id="curPip" aria-pressed="false" title="Remplacer une couleur : choisir la nouvelle couleur, activer la pipette, puis cliquer dans la tuile sur la couleur à remplacer. Tous les pixels de cette couleur changent.">Pipette</button></div>
         <div class="cur-tools"><button id="curOutline">Contour auto</button><button id="curClear">Vider</button><button id="curReset" title="Revenir à la tuile de référence (le dessin d’origine, ou la dernière version chargée de la base)">Rétablir</button></div>
         <div class="cur-tools"><button class="go" id="saveBtn" title="Enregistrer les tuiles retouchées (et les autres réglages) dans la base du jeu, lisible par Claude et par vos autres appareils">Enregistrer</button></div>
         <div class="saved" id="saveMsg" role="status"></div>
@@ -61,6 +61,36 @@
     <div class="mhead"><h2 id="itTitle">Items</h2><span class="saved" id="itMsg" role="status"></span><button id="itReset" title="Rétablir toutes les valeurs d’origine">Rétablir</button><button id="itSave">Enregistrer</button><button id="itClose" aria-label="Fermer les items">Fermer</button></div>
     <p class="mnote">Tout ce qui existe : prix de fabrication, effets, équipement, et la chance qu’un robot abattu lâche un objet. Une valeur modifiée vaut tout de suite ; « Enregistrer » l’envoie dans la base de l’artefact.</p>
     <div class="itliste" id="itList"></div>
+  </div>
+</div>
+<!-- Fenêtre Modules (Lab, 24 novembre 2026) : la banque de morceaux de carte dessinés à la main, et leur éditeur. -->
+<div class="modal" id="modules" role="dialog" aria-modal="true" aria-labelledby="mdlTitle" hidden>
+  <div class="mcard wide" tabindex="-1">
+    <div class="mhead"><h2 id="mdlTitle">Modules</h2><span class="saved" id="mdlMsg" role="status"></span><button id="mdlSave">Enregistrer</button><button id="mdlClose" aria-label="Fermer les modules">Fermer</button></div>
+    <div class="mdlcols">
+      <section class="mdlside" aria-label="Banque de modules">
+        <div class="cur-tools"><button id="mdlNew">Nouveau</button><button id="mdlDup">Dupliquer</button></div>
+        <div class="mdllist" id="mdlList"></div>
+      </section>
+      <section class="mdlmid" aria-label="Dessin du module">
+        <div class="mdled" id="mdlEd"><canvas id="mdlCv" width="252" height="196" aria-label="Grille du module : cliquer ou glisser pour peindre"></canvas></div>
+        <p class="mnote" id="mdlVide" hidden>Aucun module sélectionné.</p>
+        <ul class="mdlavis" id="mdlAvis"></ul>
+        <div class="mdlnb"><label for="mdlNbRec">Nombre de modules par carte</label><select id="mdlNbRec" aria-label="Niveau"></select><input type="number" id="mdlNbVal" min="0" max="6" step="1" aria-label="Nombre de modules posés par carte"><small id="mdlNbDispo"></small></div>
+      </section>
+      <section class="mdlfiche" id="mdlFiche" aria-label="Réglages du module">
+        <label class="mdlch">Nom <input type="text" id="mdlNom" maxlength="30" autocomplete="off" spellcheck="false"></label>
+        <div class="mdltaille"><label>L <input type="number" id="mdlW" min="3" max="16" step="1" aria-label="Largeur" title="Largeur"></label><label>H <input type="number" id="mdlH" min="3" max="16" step="1" aria-label="Hauteur" title="Hauteur"></label></div>
+        <h3>Terrain</h3>
+        <div class="mdlpns" id="mdlTerr"></div>
+        <div class="cur-tools"><button id="mdlFill" title="Peint tout le module avec le terrain choisi">Tout remplir</button></div>
+        <h3>Emplacements</h3>
+        <div class="mdlpns" id="mdlMarq"></div>
+        <h3>Tiré par</h3>
+        <div class="mdlrec" id="mdlRec"></div>
+        <div class="cur-tools"><button id="mdlSuppr">Supprimer</button></div>
+      </section>
+    </div>
   </div>
 </div>
 <!-- Fenêtre Artefacts (Lab, 20 novembre 2026) : les systèmes greffés sur chaque carte, avec leur fréquence. -->
@@ -179,6 +209,7 @@
           <button id="bestBtn">Bestiaire</button>
           <button id="grBtn" aria-haspopup="dialog" title="Créer et régler les groupes d’ennemis">Groupes</button>
           <button id="artBtn" aria-haspopup="dialog" title="Antennes, pièces d’herbe, machines, terminaux">Artefacts</button>
+          <button id="mdlBtn" aria-haspopup="dialog" title="Banque de salles, couloirs et agencements dessinés à la main">Modules</button>
           <button id="itBtn" aria-haspopup="dialog" title="Tous les objets : prix, effets, butin des robots">Items</button>
           <button id="discBtn">Discrétion</button>
           <button id="curBtn">Tile editor</button>
@@ -270,4 +301,5 @@
 <script src="js/14d-objets.js"></script>
 <script src="js/14b-forage.js"></script>
 <script src="js/14e-arrivee.js"></script>
+<script src="js/14f-modules.js"></script>
 <script src="js/15-intro.js"></script>
