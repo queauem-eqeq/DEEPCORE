@@ -22,6 +22,9 @@ function noiz(dur,g,freq,ftype,delay,f2){const a=audio();if(!a)return;const t=a.
   v.gain.setValueAtTime(0.0001,t);v.gain.exponentialRampToValueAtTime(g,t+Math.min(.006,dur/4));
     v.gain.exponentialRampToValueAtTime(0.0001,t+dur);
   src.connect(fl);fl.connect(v);v.connect(MASTER);src.start(t,Math.random()*.5);src.stop(t+dur+.02);}
+// hasard propre aux variations de sons : il ne consomme pas celui du jeu (une partie rejouée reste identique)
+let SGRAINE=(Date.now()^0x9e3779b9)>>>0;
+function sAlea(){SGRAINE=(SGRAINE*1664525+1013904223)>>>0;return SGRAINE/4294967296;}
 const SFX={
   step(){noiz(.06,.12,700);tone(62,.05,'square',.035);},
   // Herbe : froufrou — trois coups de brosse décalés, filtrés en bande montante, légèrement tirés au hasard
@@ -41,7 +44,33 @@ const SFX={
   whoosh(){noiz(.16,.12,1200,'bandpass',0,3000);},
   blocked(){tone(110,.07,'square',.06,90);},
   crack(){noiz(.07,.3,3000,'highpass');tone(140,.1,'square',.1,60);noiz(.12,.12,900,'lowpass',.04);},
-  crit(){noiz(.05,.35,5000,'highpass');tone(1400,.06,'square',.06,700);tone(180,.18,'sawtooth',.12,60,.02);},
+  /* Coups de combat variés (24 novembre 2026) : chaque bruit de coup existe en plusieurs versions, tirées au hasard sans
+     jamais rejouer deux fois de suite la même, et chaque coup est en plus légèrement désaccordé (hauteur ±8 %, force ±10 %).
+     coup : la foreuse frappe une créature (4 versions) · bite : une créature frappe (4) · crit : coup critique (3).
+     crack reste le bruit du coup sur la roche. */
+  varie(nom,n){let i;do{i=Math.floor(sAlea()*n);}while(n>1&&i===SFX.dernier[nom]);SFX.dernier[nom]=i;return i;},
+  dernier:{},
+  coup(){const r=.92+sAlea()*.16,k=.9+sAlea()*.2;
+    switch(SFX.varie('coup',4)){
+      // sec : le claquement d'origine
+      case 0:noiz(.07,.3*k,3000*r,'highpass');tone(140*r,.1,'square',.1*k,60*r);noiz(.12,.12*k,900*r,'lowpass',.04);break;
+      // lourd : plus sourd, plus long
+      case 1:noiz(.05,.26*k,1800*r,'bandpass');tone(105*r,.14,'square',.11*k,48*r);noiz(.15,.13*k,600*r,'lowpass',.03);break;
+      // métallique : attaque aiguë et tintement bref
+      case 2:noiz(.05,.3*k,4200*r,'highpass');tone(190*r,.08,'sawtooth',.09*k,75*r);tone(820*r,.04,'square',.03*k,400*r);
+        noiz(.1,.1*k,1200*r,'lowpass',.035);break;
+      // doublé : deux chocs rapprochés
+      default:noiz(.04,.24*k,2600*r,'highpass');tone(125*r,.09,'square',.1*k,55*r);noiz(.06,.17*k,2000*r,'bandpass',.055);
+        tone(95*r,.1,'square',.07*k,45*r,.055);}},
+  crit(){const r=.94+sAlea()*.12,k=.92+sAlea()*.16;
+    switch(SFX.varie('crit',3)){
+      case 0:noiz(.05,.35*k,5000*r,'highpass');tone(1400*r,.06,'square',.06*k,700*r);tone(180*r,.18,'sawtooth',.12*k,60*r,.02);break;
+      // plus grave, avec une retombée
+      case 1:noiz(.06,.34*k,3800*r,'highpass');tone(1100*r,.07,'square',.055*k,480*r);tone(150*r,.22,'sawtooth',.13*k,48*r,.02);
+        noiz(.12,.1*k,700*r,'lowpass',.06);break;
+      // plus tranchant : deux éclats aigus
+      default:noiz(.04,.33*k,6200*r,'highpass');tone(1750*r,.05,'square',.055*k,900*r);tone(1300*r,.05,'square',.04*k,620*r,.045);
+        tone(205*r,.17,'sawtooth',.115*k,70*r,.02);}},
   explode(){noiz(1.1,.5,900,'lowpass',0,120);tone(70,.9,'sawtooth',.16,28);noiz(.35,.3,4000,'highpass',.02);
     noiz(.6,.18,600,'bandpass',.25,200);},
   break(){noiz(.45,.35,1500,'lowpass',0,200);tone(95,.35,'sawtooth',.12,35);noiz(.2,.15,3500,'highpass',.05);},
@@ -53,7 +82,18 @@ const SFX={
   start(){tone(110,.6,'sawtooth',.06,440);tone(220,.6,'square',.03,880,.05);},
   drill(k){tone(48+k*6,.12,'sawtooth',.09);noiz(.1,.12,600+k*120);},
   roar(){tone(140,.45,'sawtooth',.1,55);noiz(.35,.12,500,'lowpass',.05);},
-  bite(){tone(90,.15,'square',.14,40);noiz(.12,.2,2500,'highpass');tone(600,.08,'square',.05,200,.05);},
+  bite(){const r=.92+sAlea()*.16,k=.9+sAlea()*.2;
+    switch(SFX.varie('bite',4)){
+      // la morsure d'origine
+      case 0:tone(90*r,.15,'square',.14*k,40*r);noiz(.12,.2*k,2500*r,'highpass');tone(600*r,.08,'square',.05*k,200*r,.05);break;
+      // coup de griffe : raclement aigu qui descend
+      case 1:noiz(.13,.2*k,4200*r,'bandpass',0,1500*r);tone(110*r,.12,'square',.12*k,50*r,.02);
+        tone(480*r,.07,'square',.04*k,170*r,.06);break;
+      // coup de boutoir : sourd et lourd
+      case 2:tone(72*r,.19,'square',.15*k,34*r);noiz(.1,.17*k,1300*r,'lowpass');noiz(.06,.1*k,3200*r,'highpass',.03);break;
+      // claquement de mâchoires : deux temps
+      default:tone(100*r,.1,'square',.13*k,46*r);noiz(.06,.19*k,3000*r,'highpass');noiz(.07,.16*k,2200*r,'highpass',.07);
+        tone(700*r,.06,'square',.045*k,240*r,.07);}},
   // Consommables (16 novembre 2026) : réparobots (petits servos et soudure), batterie (décharge qui monte), purge (vidange sous pression)
   repair(){tone(520,.1,'triangle',.05,780);tone(780,.12,'triangle',.05,1040,.09);
     noiz(.3,.05,2800,'bandpass',0,1400);tone(1180,.22,'sine',.045,1560,.2);},

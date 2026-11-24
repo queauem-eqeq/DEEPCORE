@@ -119,7 +119,7 @@ function tryMove(dx,dy){
     const tag=sur?'Coup par surprise ! ':cr?'Coup critique ! ':'';
     if(bz.hp<=0){G.beasts.splice(G.beasts.indexOf(bz),1);bleed(bz.x,bz.y);butinMort(bz);
       say(`${tag}La foreuse abat ${leNom(sp)}.`,'good');SFX.break();}
-    else{say(`${tag}La foreuse percute ${leNom(sp)} : −${dm} PV (${bz.hp}/${pvDe(sp)}).`,'warn');SFX.crack();}
+    else{say(`${tag}La foreuse percute ${leNom(sp)} : −${dm} PV (${bz.hp}/${pvDe(sp)}).`,'warn');SFX.coup();}
     pass(coupDur());computeFOV();render();if(G.over&&G.over.dead)dead();return;}
   const an=animalAt(nx,ny);
   if(an){const sp=SPECIES[an.sp];G.turn++;G.msg=null;engage();camoCasse();const sur=!an.aware,cr=sur||roll((G.st.crit??5)+critBonus());
@@ -130,7 +130,7 @@ function tryMove(dx,dy){
       addFx({kind:'num',x:nx,y:ny,txt:'-'+dm+(cr?'!':''),col:cr?PAL['1']:PAL['3'],dur:cr?1000:750});
       if(cr){addFx({kind:'shake',amp:6,dur:220});SFX.crit();}addFx({kind:'lunge',robot:true,dx,dy,dur:180});
     if(an.hp<=0){G.animals.splice(G.animals.indexOf(an),1);bleed(an.x,an.y);say(`${tag}La foreuse écrase ${leNom(sp)}.`,'warn');SFX.squish();}
-    else{if(!an.aware)alerte(an);an.aware=1;an.enraged=true;spot(an);say(`${tag}La foreuse heurte ${leNom(sp)}.`);SFX.crack();}
+    else{if(!an.aware)alerte(an);an.aware=1;an.enraged=true;spot(an);say(`${tag}La foreuse heurte ${leNom(sp)}.`);SFX.coup();}
    pass(coupDur());computeFOV();render();if(G.over&&G.over.dead)dead();return;}
   // Bloqueur (22 novembre 2026)
   {const bl=tenuPar();
