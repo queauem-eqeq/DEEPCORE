@@ -293,7 +293,7 @@ function fgMines(F,dt){const bas=F.R*1.15;   // bien sous le bas de l'écran (0,
     for(let i=0,n=Math.random()<.5?0:1;i<n;i++){const sd=Math.random()<.5?-1:1,xf=Math.round(F.camX+sd*fgRnd(14,F.C*.5));
       if(Math.abs(xf-F.cx)<12)continue;fgMPose(F,xf,F.mNext+Math.round(fgRnd(-4,4)));}
     // rangées espacées quand la descente a été allongée de 5 secondes, pour ne pas doubler les dégâts
-    F.mNext+=Math.round(fgRnd(19,26)*(1-.25*p));}   // rangées plus espacées : il y avait un peu trop de mines (24 novembre 2026)
+    F.mNext+=Math.round(fgRnd(13,19)*(1-.25*p));}   // rangées plus espacées : il y avait un peu trop de mines (24 novembre 2026)
   for(const m of F.mines){if(!m.ok||Math.abs(m.y-F.d)>1.4||Math.abs(m.x-F.cx)>FG_R-1)continue;m.ok=0;F.touche++;F.stun=.45;F.imp=1.6;
     fgBoom(F,'impact');fgExploseMine(F,m);   /* la mine explose comme la foreuse : cratère, onde de choc, éclats */
     for(let i=0;i<8;i++)fgSmoke(F,m.x+fgRnd(-4,4),m.y+fgRnd(-2,2),fgRnd(-9,9),fgRnd(-6,3),fgRnd(1.2,2),1,2.4);

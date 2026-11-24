@@ -126,8 +126,8 @@ Du niveau 2 au niveau 3, la descente se joue. `playForage(suite, 2)` ; **NIV3** 
   7 × 3, d'où un écart minimum de 12 colonnes ou 8 rangées (`fgMPose`, `FG_MDX`, `FG_MDY`), les rangées précédentes comprises. Si la
   place est prise, la mine glisse de 12 colonnes, jusqu'à deux fois de chaque côté, puis renonce. Vérifié : 241 mines posées, aucune
   paire trop proche.
-- **Moins de mines** (24 novembre 2026) : rangées espacées de 19 à 26 lignes (17 à 25 avant), mines des côtés ramenées de une ou deux
-  à zéro ou une. Environ **30 mines par descente** au lieu de 52.
+- **Moins de mines** (24 novembre 2026) : rangées espacées de 13 à 19 lignes, mines des côtés ramenées de une ou deux à zéro ou une.
+  Environ **42 mines par descente** au lieu de 52 (réglé par l'utilisateur, après un essai à 30).
 - Toucher une mine (elle saute dès qu'elle est dans le puits) coûte **12 points de vie** (`FG_MINE_DM`), de la vraie vie de la
   foreuse. **À zéro, la foreuse explose** : écran « FOREUSE DÉTRUITE », pas de niveau 3.
 - Échap passe la scène contre **30 points de vie** (`FG_PASSE_DM`), sans jamais tuer. Espace et Entrée ne passent plus.
@@ -137,9 +137,9 @@ Du niveau 2 au niveau 3, la descente se joue. `playForage(suite, 2)` ; **NIV3** 
   27 secondes environ ; les rangées de mines sont espacées de 17 à 25 lignes pour ne pas doubler les dégâts, 23 mines
   environ) ; **la roche dure du mini-jeu est en couleur bio** (le basalte était gris) ; **les commandes de direction sont
   inversées aux deux descentes** : la touche de gauche pousse la foreuse à droite, et l'inverse, au clavier comme au doigt.
-- Mesuré (`outils/scripts/test-forage.js`, vingt descentes par pilote, 24 novembre 2026) : sans diriger, 5,1 mines touchées et
-  61 points perdus, **aucune foreuse détruite** ; pilote maladroit, 2,8 mines et 33 points ; pilote attentif, 0,5 mine et 5 points.
-  (23 novembre, avec deux fois plus de mines : 8 touchées, 91 points, 9 détruites sur 20.)
+- Mesuré (`outils/scripts/test-forage.js`, vingt descentes par pilote, 24 novembre 2026, à 42 mines) : sans diriger, 7,8 mines
+  touchées et 89 points perdus, 9 foreuses détruites sur 20 ; pilote maladroit, 3,3 mines et 40 points ; pilote attentif, 0,8 mine
+  et 10 points. (À 30 mines : 5,1 touchées, 61 points, aucune détruite.)
 
 ### Transitions, plancher et palettes des descentes (23 novembre 2026)
 
