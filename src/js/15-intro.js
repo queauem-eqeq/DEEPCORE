@@ -294,7 +294,9 @@ function openPick(k){const grid=$('cgrid');if(pickKey===k){closePick();return;}p
   grid.hidden=false;}
 function closePick(){pickKey=null;$('cgrid').hidden=true;PAL_CLES.forEach(x=>$('pc'+x).setAttribute('aria-expanded','false'));}
 function applyColor(k,c){const j=+k-1;PRESETS[PRESET_ACTIVE].c[j]=c;savePresets();drawPresets();setPal(Object.assign({},PAL_U,{[k]:c}));}
-PAL_CLES.forEach(k=>$('pc'+k).addEventListener('click',e=>{e.preventDefault();openPick(k);}));
+/* stopPropagation : sans lui, le clic remonte au <label for=…>, qui le renvoie au bouton — openPick était appelé deux fois et le
+   nuancier se rouvrait aussitôt refermé (24 novembre 2026). */
+PAL_CLES.forEach(k=>$('pc'+k).addEventListener('click',e=>{e.preventDefault();e.stopPropagation();openPick(k);}));
 // la palette reste ouverte pour essayer d'autres couleurs (21 novembre 2026) ; on la ferme en recliquant sur la pastille ou avec Échap
 $('cgrid').addEventListener('click',e=>{const b=e.target.closest('button[data-c]');if(!b||!pickKey)return;const k=pickKey;applyColor(k,b.dataset.c);
   $('cgrid').querySelectorAll('button[data-c]').forEach(x=>x.setAttribute('aria-selected',x===b));});

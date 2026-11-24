@@ -24,6 +24,9 @@ Partie du document de conception (sommaire et règles à ne pas casser : `concep
   cours** dans un champ modifiable, puis **Rétablir** et **Enregistrer**, enfin la liste des palettes. Cliquer une teinte (Bio, par
   exemple) ouvre le nuancier à sa place fixe sous le titre ; choisir une couleur l'applique aussitôt ; recliquer la même teinte le
   referme (Échap aussi). Le nuancier fait **4 rangées de 16 cases**, deux fois plus petites qu'avant.
+- **Un seul ordre partout** : **#1 Monde, #2 Bâti, #3 Bio, #4 Accent, #5 Danger** — les cinq teintes du menu, les pastilles des
+  palettes et les encres du Tile editor suivent le même, avec les mêmes numéros (24 novembre 2026).
+- Le cadre de la teinte sélectionnée déborde de 3 px : la pastille garde cette marge à droite, sinon la colonne défilante le coupait.
 - **Le nom d'une palette se modifie** : il est enregistré avec ses couleurs (`np-presets`, `{n, c}`), et les palettes relues depuis
   l'artefact sont retrouvées **par rang** et non par nom, qui n'est plus fixe.
 - **Toutes les couleurs viennent de LACKING64** (lospec.com/palette-list/lacking64) : 8 palettes neuves, toutes modifiables
@@ -87,8 +90,8 @@ molette ou fine barre pour remonter jusqu'aux 200 derniers messages ; un nouveau
 - **Mini-carte** pleine largeur ; ennemis en points rouges ; un clic recentre la vue ; bouton maintenu + glisser =
   défilement en temps réel. Saisie à l'intérieur, le cadre suit le pointeur sans sauter ; à l'extérieur, il se
   centre d'abord sous le pointeur.
-- **Tile editor** (Lab) : encres sur deux lignes — les cinq couleurs de la palette (Monde, Bio, Accent,
-  Danger, Bâti), puis Blanc, Noir, **Rouge fixe** (`R`, #d8180b, le même avec toutes les palettes) et Transparent.
+- **Tile editor** (Lab) : encres sur deux lignes — les cinq couleurs de la palette (**#1 Monde, #2 Bâti, #3 Bio, #4 Accent,
+  #5 Danger**, le même ordre et les mêmes numéros que le menu Palette depuis le 24 novembre 2026), puis Blanc, Noir, **Rouge fixe** (`R`, #d8180b, le même avec toutes les palettes) et Transparent.
   Nouveaux codes de tuile : `5` (bâti) et `R` (rouge fixe). 
 - Sous **REGEN · MONDE · LIFE**, une rangée **NIV1 · NIV2 · NIV3** .
 - Sous-menus repliables : **Inventaire**, **Carte**, **Lab** (Bestiaire, Groupes, Artefacts, Items, Discrétion, Tile editor, **Combat** : un lien qui ouvre le banc dans un autre onglet), **Palette**, **Contrôles** (l'aide des touches, une commande par ligne : la touche, puis ce qu'elle fait ; trois groupes : Se déplacer, Objets, Voir).
