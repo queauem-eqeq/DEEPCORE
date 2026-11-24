@@ -422,6 +422,27 @@ pièce ils deviennent du sol, sous un mur du mur) ; seuls le vaisseau et le bord
   éloignées les unes des autres, de préférence sur un dehors déjà praticable. **Si l'entrée donne sur de la roche,
   un couloir est percé** jusqu'au reste de la carte. Un terrain enfermé entre des murs devient du mur plein. Dans
   la recette `atterrissage`, le complexe n'a **qu'une porte**, du côté le plus enfoncé dans le massif.
+- **Modules** (24 novembre 2026, **niveau 1 seulement**) : les morceaux dessinés dans Lab → Modules deviennent des
+  **pièces du complexe**. La recette tire sans remise le nombre réglé (« Modules posés par carte ») parmi ceux qui la
+  cochent et qui ont au moins une entrée ; chacun est tourné ou retourné au hasard.
+  - **Pose en priorité** : le premier module tient lieu de **première pièce** du complexe ; les suivants se collent aux
+    pièces déjà posées, parfois au bout d'un couloir de 2 à 5 cases. Un module qui ne trouve pas sa place est
+    **abandonné** (la carte en reçoit moins), et la seconde moitié des essais se fait sans modules : la carte se
+    génère toujours.
+  - **Entrées** : on n'entre dans un module et on n'en sort **que par ses entrées**. Sur une **porte** du bord ou dans
+    une **brèche du mur** (un mur de chaque côté), la case est le passage lui-même : porte, ou ouverture si c'était
+    une brèche. Sur un sol du bord sans mur autour, la porte est créée juste dehors. **Une entrée qui ne sert pas est
+    murée.**
+  - **Le dessin est respecté** : ses murs ne sont jamais percés (ni raccourcis, ni porte d'entrée du complexe, ni
+    pièce secrète creusée dedans), pas de piliers ajoutés, pas de porte retirée ou dérobée. Un sol au bord du module
+    reçoit un mur juste dehors, comme toute pièce. Les **portes verrouillées** restent possibles sur ses entrées.
+  - **Le site de forage** n'est jamais dans un module.
+  - **Emplacements** : **Machine** = une machine de décor ; **Butin** = un consommable (6 fois sur 10) ou de la
+    Matière ; **Ennemi** = une espèce tirée parmi les groupes du niveau, seule et sans patrouille. Un emplacement
+    déjà occupé (clé, artefact, créature) est laissé tel quel.
+  - Mesuré le 24 novembre sur les trois modules du joueur (15 cartes chacun) : posé 15 fois sur 15, site toujours
+    atteignable. Code : `mdlTirage`, `mdlPrepare`, `accretion`, `mdlMachines`, `mdlRemplit` (`07b-batiments.js`) ;
+    `G.mods` garde les modules posés.
 - **Petites pièces** : une pièce de moins de 8 cases dont tous les passages sont des portes en perd une, remplacée
   par une ouverture (jamais une porte d'entrée).
 - **Ouvertures sans porte** : part des passages intérieurs laissés ouverts (25 % par défaut) — on voit à travers,

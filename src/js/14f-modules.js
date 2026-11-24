@@ -6,8 +6,8 @@
      ces cases lui-même ; un emplacement ne tient que sur une case praticable (MDL_PRAT).
    Chaque module dit dans quelles recettes il peut être tiré (« rec ») ; MODULES_NB donne, par recette, combien en poser
    par carte. Posé, un module pourra être tourné et retourné : mdlVariantes en donne jusqu'à huit.
-   LA GÉNÉRATION NE S'EN SERT PAS ENCORE : ce fichier ne fait que l'éditeur et la banque (np-modules dans le navigateur,
-   champ « modules » de reglages/courant dans la base de l'artefact). */
+   Ce fichier fait l'éditeur et la banque (np-modules dans le navigateur, champ « modules » de reglages/courant dans la base
+   de l'artefact). La pose est dans 07b-batiments.js (mdlTirage, mdlPrepare, accretion) : NIVEAU 1 SEULEMENT pour l'instant. */
 const MDL_TERR=[['?','Libre',''],['.','Sol','ground0'],['R','Rocher','rock'],['M','Montagne','mtBody'],['H','Roche dure','hardBody'],
   ['E','Eau','liq0'],['P','Eau profonde','deep0'],['G','Herbes hautes','grass0'],['F','Herbes basses','flat0'],['X','Mur','wall'],
   ['S','Sol bâti','floor'],['D','Porte','door'],['O','Pilier','pillar']];
@@ -53,7 +53,7 @@ function mdlAvis(o){const a=[],plein=o.t.some(l=>/[^?]/.test(l));if(!plein)retur
   for(let y=0;y<o.h;y++)for(let x=0;x<o.w;x++){if(o.m[y][x]!=='x')continue;entrees++;
     const bord=x===0||y===0||x===o.w-1||y===o.h-1||[[1,0],[-1,0],[0,1],[0,-1]].some(([dx,dy])=>o.t[y+dy][x+dx]==='?');
     if(!bord)dedans++;}
-  if(!entrees)a.push('Aucune entrée : le jeu ne saura pas par où raccorder ce module au reste de la carte.');
+  if(!entrees)a.push('Aucune entrée : ce module ne sera pas posé, le jeu ne saurait pas par où le raccorder.');
   if(dedans)a.push(`${dedans} entrée${dedans>1?'s':''} à l’intérieur : une entrée doit toucher le bord du module ou une case libre.`);
   if(!Object.keys(o.rec).length)a.push('Aucune recette cochée : ce module ne sera jamais tiré.');
   return a;}

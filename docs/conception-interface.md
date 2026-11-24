@@ -171,8 +171,8 @@ Au chargement, la base n'est relue que si elle est **plus récente que les retou
 ### Lab → Modules : la banque de morceaux de carte (24 novembre 2026)
 
 **But** : des salles, couloirs, agencements de murs ou de montagne **dessinés à la main**, que chaque recette tirera dans
-sa liste et posera **en priorité**, avant de générer le reste. **Seuls l'éditeur et la banque existent pour l'instant :
-la génération ne s'en sert pas encore** (choix du 24 novembre : éditeur d'abord).
+sa liste et posera **en priorité**, avant de générer le reste. **Branché sur le niveau 1 depuis le 24 novembre 2026** (voir « Modules » dans
+`conception-carte.md`) ; les niveaux 2, 3 et la recette classique ne s'en servent pas encore.
 
 - **Un module** : de 3 × 3 à **16 × 16** cases, un nom, deux couches.
   - **Terrain**, une case à la fois : Libre (laissée au choix de la génération, ce qui permet des formes non
@@ -190,6 +190,4 @@ la génération ne s'en sert pas encore** (choix du 24 novembre : éditeur d'abo
 - **Gestes** : cliquer ou glisser pour peindre ; « Tout remplir » ; Nouveau, Dupliquer, Supprimer (deux clics).
 - **Enregistrement** : dans le navigateur à chaque modification (`np-modules`) ; « Enregistrer » l'envoie dans la base
   de l'artefact (champ `modules` de `reglages/courant` : `liste` et `nb`). Code : `14f-modules.js`.
-- **Reste à faire, côté génération** : réserver la place des modules avant le reste, raccorder leurs entrées (le plus
-  délicat en cavernes), remplir les emplacements en respectant les règles des machines, et accepter d'en poser moins
-  quand la carte est trop petite.
+- **Reste à faire** : brancher les niveaux 2 (cavernes), 3 (grande base) et la recette classique.
