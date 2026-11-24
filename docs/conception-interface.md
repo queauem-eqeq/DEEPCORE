@@ -20,10 +20,12 @@ Partie du document de conception (sommaire et règles à ne pas casser : `concep
   (`PRESET_ACTIVE`). La recopie **fusionne** : les tuiles déjà adoptées et absentes de la base sont gardées telles quelles.
 - **Une palette par niveau** (23 novembre 2026) : à chaque niveau suivant, la palette est tirée au hasard parmi les prédéfinies (jamais la
   même deux fois de suite) ; la palette choisie par le joueur n'est pas modifiée et revient au niveau 1. Voir `conception-descente.md`.
-- **Menu Palette** (24 novembre 2026, de haut en bas) : le **nuancier** sous le titre, les cinq teintes, le **nom de la palette en
-  cours** dans un champ modifiable, puis **Rétablir** et **Enregistrer**, enfin la liste des palettes. Cliquer une teinte (Bio, par
-  exemple) ouvre le nuancier à sa place fixe sous le titre ; choisir une couleur l'applique aussitôt ; recliquer la même teinte le
-  referme (Échap aussi). Le nuancier fait **4 rangées de 16 cases**, deux fois plus petites qu'avant.
+- **Menu Palette** (24 novembre 2026, de haut en bas) : les **cinq teintes**, le **nuancier**, le **nom de la palette en cours**
+  dans un champ modifiable, puis **Rétablir** et **Enregistrer**, enfin la liste des palettes. Cliquer une teinte (Bio, par
+  exemple) ouvre le nuancier à sa place fixe ; choisir une couleur l'applique aussitôt ; recliquer la même teinte le referme
+  (Échap aussi). Le nuancier fait **4 rangées de 16 cases**, deux fois plus petites qu'avant.
+- **Le nuancier est sous les teintes, pas au-dessus** : placé au-dessus, il faisait descendre les cinq pastilles de 55 px en
+  s'ouvrant ; le second clic, au même endroit, tombait sur la teinte voisine et le nuancier ne se refermait jamais.
 - **Un seul ordre partout** : **#1 Monde, #2 Bâti, #3 Bio, #4 Accent, #5 Danger** — les cinq teintes du menu, les pastilles des
   palettes et les encres du Tile editor suivent le même, avec les mêmes numéros (24 novembre 2026).
 - Le cadre de la teinte sélectionnée déborde de 3 px : la pastille garde cette marge à droite, sinon la colonne défilante le coupait.
