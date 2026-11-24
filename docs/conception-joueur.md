@@ -44,11 +44,24 @@ Essais : `outils/scripts/test-machines.js` (33 vérifications dans le vrai moteu
 
 ### Butin d'exploration (`butinExplo`, `14d-objets.js`)
 
-Posé à la fin de la génération, sur toutes les recettes. **Pièces secrètes** : chacune reçoit un lot au fond (capsule,
-Matière, une fois sur deux un plan, une fois sur quatre un Module de puissance). **Culs-de-sac et coins reculés** : les cases
-d'où plus rien ne mène ailleurs, entourées d'obstacles sur trois côtés au moins, et les plus loin du trajet arrivée → site ;
-5 à 10 par carte (6 sur une carte de taille 3), espacées. La plus reculée porte un **Module de puissance**, la suivante un
-**plan**, la troisième une **capsule**, les autres de la **Matière** (15). Mesures : `docs/mesures.md`.
+Posé à la fin de la génération, sur toutes les recettes. **Ordre de priorité des lieux** (24 novembre 2026) :
+**pièce secrète > pièce fermée à clé > cul-de-sac > autres salles.**
+
+- **Pièces secrètes** : chacune reçoit un lot au fond (capsule, Matière, une fois sur deux un plan, une fois sur quatre
+  un Module de puissance), en plus du reste.
+- Les autres lieux se partagent **5 à 10 butins par carte** (6 sur une carte de taille 3), servis dans l'ordre de
+  priorité : le premier lieu porte un **Module de puissance**, le suivant un **plan**, le troisième une **capsule**,
+  les autres de la **Matière** (15).
+  - **Pièce fermée à clé** : une zone qu'on n'atteint qu'en ouvrant une porte verrouillée ; un butin par zone, sur sa
+    case la plus à l'écart du trajet arrivée → site. Dès qu'une carte a une serrure, **le Module de puissance est
+    derrière elle**.
+  - **Cul-de-sac et coin reculé** : une case d'où plus rien ne mène ailleurs, entourée d'obstacles sur trois côtés au
+    moins, les plus loin du trajet d'abord ; espacés.
+  - **Autres salles** : seulement s'il reste des butins à poser ; le sol bâti le plus à l'écart du trajet, jamais
+    contre une porte, à 8 cases au moins d'un autre butin.
+- Mesuré le 24 novembre 2026 (20 cartes par niveau, taille 3) : 0,6 à 0,8 butin derrière une serrure par carte, 5,1 à
+  5,2 en cul-de-sac, aucun en « autres salles » (les culs-de-sac suffisent). Module de puissance derrière une serrure
+  ou une porte dérobée : 16 sur 20 au niveau 1 (2 sur 22 avant). Mesures : `docs/mesures.md`.
 
 ### Fabricateur (`14c-fabricateur.js`)
 

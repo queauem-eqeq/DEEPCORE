@@ -454,6 +454,12 @@ pièce ils deviennent du sol, sous un mur du mur) ; seuls le vaisseau et le bord
   - Mesuré le 24 novembre sur les trois modules du joueur (15 cartes chacun) : posé 15 fois sur 15, site toujours
     atteignable. Code : `mdlTirage`, `mdlPrepare`, `accretion`, `mdlMachines`, `mdlRemplit` (`07b-batiments.js`) ;
     `G.mods` garde les modules posés.
+- **Clés** (24 novembre 2026) : une clé par porte verrouillée, sur un sol bâti atteignable toutes serrures fermées,
+  jamais contre une porte, et **assez loin des portes verrouillées : entre 18 et 45 pas de marche de la serrure la
+  plus proche** (`CLE_LOIN`, `CLE_MAX`, `07b-batiments.js`). Si la carte n'offre pas assez de tels endroits : plus
+  loin encore, puis dehors à la même règle, puis les endroits les plus éloignés qu'elle a. Avant, la clé était posée
+  loin de l'entrée, sans regarder la serrure : au niveau 1, la médiane était de 8 pas (16 clés sur 17 à moins de 18
+  pas) ; elle est de 26 pas, aucune à moins de 18.
 - **Petites pièces** : une pièce de moins de 8 cases dont tous les passages sont des portes en perd une, remplacée
   par une ouverture (jamais une porte d'entrée).
 - **Ouvertures sans porte** : part des passages intérieurs laissés ouverts (25 % par défaut) — on voit à travers,

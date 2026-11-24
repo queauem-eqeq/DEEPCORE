@@ -761,3 +761,26 @@ pour 4,7 avec des cavernes de 400 cases, 24 pour 30 avec des cavernes de 50 case
 départ, 28,8 pour 29,5 en « Cité enfouie » ; toutes les cartes sont entièrement reliées. Avant la refonte : une seule
 caverne faisait 82 à 87 % de la surface quel que soit le nombre demandé, et 14 % de surface bâtie demandés en donnaient
 9 à 10.
+
+## Butin par priorité de lieu et clés loin des serrures (24 novembre 2026)
+
+20 cartes par niveau, taille 3, mesurées dans le moteur (script jetable passé à `outils/jeu.py`). « Pas » : distance
+de marche de la clé à la porte verrouillée la plus proche, serrures fermées.
+
+| Niveau | Clé → serrure, avant (min / médiane) | à moins de 18 pas, avant | Clé → serrure, après (min / médiane) | à moins de 18 pas, après |
+|---|---|---|---|---|
+| 1 (atterrissage) | 2 / 8 | 16 sur 17 | 18 / 26 | 0 sur 17 |
+| 2 (cavernes) | 2 / 24 | 8 sur 19 | 18 / 27 | 0 sur 17 |
+| 3 (grande base) | 2 / 32 | 5 sur 18 | 18 / 29 | 0 sur 18 |
+
+Au niveau 3, deux clés par série (avant comme après) se retrouvent coupées de toute serrure quand on mesure en fin de
+génération : une machine posée ensuite (pont à levier, par exemple) sépare la clé de la porte. Ce n'est pas nouveau et
+ce n'est pas compté dans le tableau.
+
+| Niveau | Butins derrière une serrure | en cul-de-sac | autres salles | Module de puissance derrière serrure ou porte dérobée, avant → après |
+|---|---|---|---|---|
+| 1 | 0,8 par carte | 5,2 | 0 | 2 sur 22 → 16 sur 20 |
+| 2 | 0,6 | 5,2 | 0 | 6 sur 25 → 16 sur 24 |
+| 3 | 0,6 | 5,05 | 0 | 2 sur 22 → 14 sur 22 |
+
+Le nombre total de butins par carte ne change pas (6 sur une carte de taille 3) : c'est leur répartition qui change.

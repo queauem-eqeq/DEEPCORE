@@ -375,6 +375,9 @@ function siteAuFond(B,strs){const S=strs.reduce((a,b)=>b.emprise>a.emprise?b:a),
 // Portes verrouillées et clés (19 novembre 2026). Une porte ne peut être verrouillée que si elle est le seul passage vers ce
 // qu'il y a derrière ; on préfère celle qui enferme le site de forage. Les clés sont posées là où l'on arrive sans rien ouvrir :
 // on peut donc toujours toutes les ramasser avant la première serrure, aucune impasse possible.
+// Une clé se pose entre CLE_LOIN et CLE_MAX pas de marche de la porte verrouillée la plus proche : assez loin pour la chercher,
+// pas à l'autre bout de la carte.
+const CLE_LOIN=18,CLE_MAX=45;
 function verrous(B,strs,sec){const n=GEN.sVerrous||0,t=G.t,N=W*H;if(n<=0)return;
   const dehors=()=>{const vu=new Uint8Array(N),q=[idx(G.px,G.py)];vu[q[0]]=1;
     for(let k=0;k<q.length;k++){const c=q[k],x=c%W,y=(c/W)|0;for(const [dx,dy] of D4){const j=idx(x+dx,y+dy);
@@ -389,15 +392,24 @@ function verrous(B,strs,sec){const n=GEN.sVerrous||0,t=G.t,N=W*H;if(n<=0)return;
       if(!best||note>best.note)best={p,note};}
     if(!best)break;t[best.p]=LOCK;poses++;}
   if(!poses)return;
-  // les clés : sur un sol bâti atteignable toutes serrures fermées, loin de l'entrée ; à défaut n'importe où dehors
-  const vu=dehors(),d=new Int32Array(N).fill(-1),q=[idx(G.px,G.py)];d[q[0]]=0;
+  // les clés : sur un sol bâti atteignable toutes serrures fermées, ASSEZ LOIN DES PORTES VERROUILLÉES (24 novembre 2026) : entre
+  // CLE_LOIN et CLE_MAX pas de marche de la serrure la plus proche ; à défaut plus loin encore, à défaut les plus éloignés que la carte offre.
+  // À défaut de sol bâti, n'importe où dehors, à la même règle.
+  const vu=dehors(),d=new Int32Array(N).fill(-1),q=[];
+  for(let i=0;i<N;i++)if(t[i]===LOCK)for(const [dx,dy] of D4){const j=idx(i%W+dx,((i/W)|0)+dy);if(vu[j]&&d[j]<0){d[j]=1;q.push(j);}}
   for(let k=0;k<q.length;k++){const c=q[k],x=c%W,y=(c/W)|0;for(const [dx,dy] of D4){const j=idx(x+dx,y+dy);
     if(d[j]<0&&!blocks(t[j])){d[j]=d[c]+1;q.push(j);}}}
+  const loin=l=>{l.sort((a,b)=>d[b]-d[a]);const ok=l.filter(i=>d[i]>=CLE_LOIN),bande=ok.filter(i=>d[i]<=CLE_MAX);
+    return bande.length>=poses?bande:ok.length>=poses?ok:l.slice(0,Math.max(poses,Math.ceil(l.length/4)));};
   let lieux=[];
-    for(let i=0;i<N;i++)if(vu[i]&&t[i]===FLOOR&&B.own[i]&&i!==site&&!D4.some(([dx,dy])=>{const w=t[idx(i%W+dx,((i/W)|0)+dy)];return w===DOOR||w===LOCK;}))lieux.push(i);
-  if(lieux.length<poses){lieux=[];for(let i=0;i<N;i++)if(vu[i]&&(t[i]===GROUND||t[i]===FLAT)&&d[i]>8)lieux.push(i);}
-  lieux.sort((a,b)=>d[b]-d[a]);lieux=lieux.slice(0,Math.max(poses,Math.ceil(lieux.length/2)));   // la moitié la plus lointaine
-  for(let k=0;k<poses&&lieux.length;k++){const i=lieux.splice(rnd(0,lieux.length-1),1)[0];G.cles[i]=1;}
+  for(let i=0;i<N;i++)if(vu[i]&&d[i]>0&&t[i]===FLOOR&&B.own[i]&&i!==site&&
+    !D4.some(([dx,dy])=>{const w=t[idx(i%W+dx,((i/W)|0)+dy)];return w===DOOR||w===LOCK;}))lieux.push(i);
+  lieux=loin(lieux);
+  if(lieux.length<poses||d[lieux[0]]<CLE_LOIN){const l2=[];for(let i=0;i<N;i++)if(vu[i]&&d[i]>0&&(t[i]===GROUND||t[i]===FLAT))l2.push(i);
+    const f=loin(l2);if(lieux.length<poses||(f.length>=poses&&d[f[0]]>=CLE_LOIN))lieux=f;}
+  const dCle=[];
+  for(let k=0;k<poses&&lieux.length;k++){const i=lieux.splice(rnd(0,lieux.length-1),1)[0];G.cles[i]=1;dCle.push(d[i]);}
+  G.cleDist=dCle;   // pour les mesures : distance de marche de chaque clé à la serrure la plus proche
   // jamais plus de clés que de serrures (19 novembre 2026) : les pièces secrètes ne reçoivent plus de clé en surplus
   G.verrous=poses;}
 // Une petite pièce (moins de 8 cases) fermée par des portes en perd une : le passage reste ouvert (19 novembre 2026).
