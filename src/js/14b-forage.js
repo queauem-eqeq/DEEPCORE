@@ -189,6 +189,7 @@ function fgCoupe(cx,cy){
   for(let d=-FG_DM;d<=FG_DM;d++){const k={b:0,porte:0,sol:0,m:0,ant:0,r:0};
     for(let j=-2;j<=2;j++){const v=T(cx+d,cy+j),c=j===0;   // murs, portes et sol : la rangée de la foreuse seule ; machines : une rangée de chaque côté
       if(c&&bati(v))k.b=1;else if(c&&v===DOOR)k.porte=1;else if(c&&v===FLOOR)k.sol=1;
+      else if(Math.abs(j)<=1&&v===GRASS)k.herbe=1;
       else if(Math.abs(j)<=1&&(v===ANTENNA||v===PYLON))k.ant=1;else if(Math.abs(j)<=1&&FG_MACH.has(v))k.m=1;
       else if(v===HARD)k.r=Math.max(k.r,7);else if(v===MOUNT)k.r=Math.max(k.r,5);else if(v===ROCK)k.r=Math.max(k.r,3);}
     col.push(k);}
@@ -220,7 +221,11 @@ function fgCoupe(cx,cy){
     for(let i=0;i<FG_TW;i++){const x=x0(d)+i,hh=Math.max(1,Math.round(moy+hs(x,7)*3-1.5));
       for(let h=1;h<=hh;h++){const prof=hh-h;   // du sommet vers le bas : la roche s'épaissit
         put(x,h,prof===0?'▀':prof===1?(hs(x,h+3)<.5?'░':'▒'):prof<4?'▒':'▓','m');}}}
-  return {cells,cb:PAL['5'],cm:PAL['3']};}
+  // herbes : des touffes sur la ligne de sol, là où il n'y a ni bâtiment ni roche (24 novembre 2026)
+  for(let d=-FG_DM;d<=FG_DM;d++){const k=K(d);if(!k.herbe||k.b||(dedans&&d>=L&&d<=R)||hr[d+FG_DM])continue;
+    for(let i=0;i<FG_TW;i++){const x=x0(d)+i,r=hs(x,21);if(r<.22)continue;
+      put(x,1,r<.5?'"':r<.78?',':"'",'v');if(r>.93)put(x,2,"'",'v');}}
+  return {cells,cb:PAL['5'],cm:PAL['3'],cv:PAL['2']};}
 /* Le décor est dessiné une seule fois dans son propre canevas, puis posé d'un bloc à chaque image : sinon ce sont deux mille
    caractères à retracer soixante fois par seconde. */
 function fgDecorCv(F,D){if(D.cv&&D.cwv===F.cw)return;
@@ -228,7 +233,7 @@ function fgDecorCv(F,D){if(D.cv&&D.cwv===F.cw)return;
   if(!D.cells.length||h1<1){D.cv=null;D.cwv=F.cw;return;}
   const cv=document.createElement('canvas');cv.width=(x1-x0+1)*F.cw;cv.height=h1*F.chh;const g=cv.getContext('2d');
   for(const c of D.cells){if(c.h<1)continue;const px=(c.x-x0)*F.cw,py=(h1-c.h)*F.chh;
-    g.fillStyle='#000';g.fillRect(px,py,F.cw,F.chh);g.drawImage(fgGlyph(F,c.ch,c.c==='b'?D.cb:D.cm),px,py);}
+    g.fillStyle='#000';g.fillRect(px,py,F.cw,F.chh);g.drawImage(fgGlyph(F,c.ch,c.c==='b'?D.cb:c.c==='v'?(D.cv||D.cm):D.cm),px,py);}
   D.cv=cv;D.cwv=F.cw;D.x0=x0;D.h1=h1;}
 function fgDecor(F,D,gy,ox){if(!D)return;fgDecorCv(F,D);if(!D.cv)return;
   const px=Math.round((ox+D.x0-F.camX)*F.cw+F.w/2),py=Math.round((gy-D.h1-F.camY)*F.chh);
@@ -361,7 +366,7 @@ function forageFrame(now){const F=FORAGE;if(!F)return;
     if(F.jeu)fgMines(F,dt);else fgAmas(F);
     for(let y=Math.floor(dPrev);y<=Math.floor(F.d);y++)fgCreuse(F,y);
     F.nx=F.cx;F.ny=F.d;
-    if(F.d>=F.D0){F.d=F.D0;F.ny=F.d;F.ph=2;F.ox=Math.round(F.cx);F.tF=t;F.vy=Math.max(7,(F.d-dPrev)/dt);F.side=F.vx<-1?-1:1;F.vx*=.3;fgBoom(F,'perce');
+    if(F.d>=F.D0){F.d=F.D0;F.ny=F.d;F.ph=2;if(F.ox==null)F.ox=Math.round(F.cx);F.tF=t;F.vy=Math.max(7,(F.d-dPrev)/dt);F.side=F.vx<-1?-1:1;F.vx*=.3;fgBoom(F,'perce');
       F.flash=.35;F.imp=.5;
       fgChips(F,70,F.cx,F.D0+1,9,4,34);
         for(let i=0;i<10;i++)fgSmoke(F,F.cx+fgRnd(-5,5),F.D0+fgRnd(0,3),fgRnd(-6,6),fgRnd(-1,5),fgRnd(1.4,2.2),1.1,2.2);}}
@@ -407,6 +412,9 @@ function forageFrame(now){const F=FORAGE;if(!F)return;
     F.snd.update({vol:F.ph===0?.55*ig:F.ph===1?.9:F.ph===2?.5:F.ph===3?.14:0,rum:.18+.5*F.hs+(F.ph===0?.25*ig:0)+F.imp*.5,rumF:90+F.hs*190+F.imp*260,
       grind:F.ph===1?.1+.3*F.hs+.04*sp:F.ph===0?.04*ig:0,grindF:700+F.hs*1700+sp*400,rot:14+sp*10+(F.ph===0?6*ig:0),
         mot:.05+.05*sp+(F.ph===0?.07*ig:0),motF:36+ig*10+sp*38+F.hs*8});}
+  /* Le décor d'arrivée se fige dès qu'il pourrait entrer dans le champ, et non au percement : sinon il apparaissait d'un coup
+     alors que le sol de la caverne était déjà à l'écran (24 novembre 2026). */
+  if(F.ox==null&&F.decA){fgDecorCv(F,F.decA);if(F.decA.cv&&F.fl-F.decA.h1<F.camY+F.R+3)F.ox=Math.round(F.cx);}
   if(!F.sansRendu)fgDraw(F,t);   // sansRendu : pour rejouer la scène en accéléré dans les essais (outils/scripts/test-forage.js)
   if(F.ph===4&&t>=F.tFade+F.fadeLen){endForage();return;}
   requestAnimationFrame(forageFrame);}

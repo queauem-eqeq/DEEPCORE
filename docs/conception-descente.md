@@ -150,7 +150,11 @@ Du niveau 2 au niveau 3, la descente se joue. `playForage(suite, 2)` ; **NIV3** 
   propre canevas**, puis posé d'un bloc à chaque image (sinon deux mille caractères à retracer soixante fois par seconde). **Départ** : l'endroit réel où l'on fore, lu
   sur le niveau quitté. Un bâtiment montre ses **murs et son toit en couleur bâti**, sa **porte** percée dans le mur, au plus
   **deux ensembles de machines** en couleur monde (une antenne est un mât) ; les roches alentour dessinent une **crête** en couleur
-  monde, lissée d'une case à l'autre pour qu'elle ondule, et de plus en plus dense vers sa base (« ▀ ░ ▒ ▓ »). **Arrivée** : le même dessin, lu sur le niveau d'arrivée, posé sur le sol de la caverne. Le niveau d'arrivée est donc
+  monde, lissée d'une case à l'autre pour qu'elle ondule, et de plus en plus dense vers sa base (« ▀ ░ ▒ ▓ »). **Les herbes** de la case et de ses
+  voisines deviennent des **touffes en ASCII** (`" , '`) en couleur bio, sur la ligne de sol, là où il n'y a ni bâtiment ni roche
+  (24 novembre 2026). **Arrivée** : le même dessin, lu sur le niveau d'arrivée, posé sur le sol de la caverne. Son abscisse se fige
+  dès que le décor pourrait entrer dans le champ, et non au percement : sinon il apparaissait d'un coup alors que le sol de la
+  caverne était déjà visible (mesuré : figé 3 rangées avant d'être visible). Le niveau d'arrivée est donc
   **généré avant la scène** (`descendre()`, `14b-forage.js`), qui se joue par-dessus la partie déjà changée.
 - **Palette par niveau** : à chaque niveau, la palette change (`palNiveauSuivant`, `02-palette.js`), tirée au hasard parmi les
   palettes prédéfinies, jamais la même deux fois de suite ; elle ne touche pas à la palette choisie par le joueur, que reprend le
