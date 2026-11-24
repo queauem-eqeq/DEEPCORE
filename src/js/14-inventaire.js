@@ -180,7 +180,7 @@ function viseeOk(){if(!VISEE||G.over)return;const {i,x,y}=VISEE,o=G.inv[i];
   let roches=0;
   for(const [zx,zy] of zone){
     if(zx<1||zy<1||zx>=W-1||zy>=H-1)continue;const j=idx(zx,zy),v=G.t[j];
-    if(v!==ROCK&&v!==MOUNT&&v!==HARD&&v!==MACHINE&&!bati(v)&&!machCasse(v))continue;
+    if(v!==ROCK&&v!==MOUNT&&v!==HARD&&v!==MACHINE&&v!==DOOR&&!bati(v)&&!machCasse(v))continue;
     if(machCasse(v)&&G.art)delete G.art[j];
     G.t[j]=RUBBLE;if(G.dmg)delete G.dmg[j];roches++;
     if(G.ore&&G.ore[j]&&!oreSol(G.ore[j])){const l=oreLv(G.ore[j]),mt=oreMat(G.ore[j]);G.ore[j]=(mt?'m':'')+'sol'+l;

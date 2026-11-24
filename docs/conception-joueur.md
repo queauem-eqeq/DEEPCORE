@@ -36,7 +36,7 @@ retouchables dans le Tile editor (groupe « Machines »).
   pas dans le champ d'un laser (`G.lz`), un ennemi en chasse le traverse : on peut l'y attirer.
 - Un rayon s'arrête à une porte : jamais de piège sur une case de passage ni devant une porte.
 - La pose d'une pile et de son socle est vérifiée par un parcours de type « sokoban » sur le sol et les portes à 18 pas du socle (3 poussées au moins) ; à sa place, la pile ne coupe aucun passage.
-- Une charge sismique détruit tourelle, pylône, grille, levier, station, chargeur et fabricateur.
+- Une charge sismique ou l'explosion d'une mine (24 novembre 2026) détruit tourelle, pylône, grille, levier, station, chargeur et fabricateur, ainsi que les murs, les piliers et les portes.
 - État dans `G` (sauvegardé) : `G.mt`, `G.las`, `G.lz`, `G.circ`, `G.soc`, `G.piles`, `G.pieges`, `G.niche`, `G.choix`, `G.vit`. `accesSite()` dit si le site reste
   atteignable, leviers et socles compris.
 

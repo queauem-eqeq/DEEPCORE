@@ -11,7 +11,7 @@ const GROUND=0,ROCK=1,MOUNT=2,LIQ=3,GRASS=4,FLAT=5,DEEP=6,CHASM=7,BRIDGE=8,RUBBL
   PILLAR=17,LOCK=18,SECRET=19,MACHINE=20,ANTENNA=21,TERMINAL=22,TURRET=23,PYLON=24,PILE=25,FABRIC=26,LEVIER=27,GRILLE=28,
   STATION=29,CHARGEUR=30;
 // Bâtiments (18 novembre 2026) : WALL = mur bâti, FLOOR = sol bâti, DOOR = porte (fermée tant que personne n'est dessus), PILLAR = pilier.
-// Murs et piliers : infranchissables, opaques, et la foreuse ne les entame pas ; seule la charge sismique les ouvre.
+// Murs et piliers : infranchissables, opaques, et la foreuse ne les entame pas ; seules une charge sismique ou l'explosion d'une mine les ouvrent.
 const bati=v=>v===WALL||v===PILLAR||v===LOCK||v===SECRET;
 // HARD = roche dure (16 novembre 2026) : au cœur des massifs, impossible à creuser ; seule la charge sismique en vient à bout.
 // FLAT = herbes basses (13 novembre 2026 : les herbes couchées et les herbes basses n'en font plus qu'une).

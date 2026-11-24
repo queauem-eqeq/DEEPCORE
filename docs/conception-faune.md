@@ -117,8 +117,9 @@ s au pluriel sur un nom qui en porte déjà un : « la puce », « la torpille �
   au hasard parmi les 12 qui le bordent par un côté** (les coins du 5 × 5 exclus), à la foreuse et à
   toute créature qui s'y trouve. Les flammes se dessinent sur toute la zone, si bien qu'aucune explosion n'a la même forme. Détruite avant, elle n'explose pas ; elle n'a pas d'autre attaque.
   **L'explosion brise la roche et la montagne tendre** du carré : elles deviennent des gravats, et le
-  métal ou la Matière qu'elles cachaient tombent au sol, sur toute la zone. La roche dure, les murs et les machines tiennent : seule la
-  charge sismique en vient à bout.
+  métal ou la Matière qu'elles cachaient tombent au sol, sur toute la zone. **Elle détruit aussi les murs, les portes
+  (même verrouillées ou secrètes), les piliers et les machines** de sa zone (24 novembre 2026), qui deviennent des gravats : une mine
+  attirée contre un mur ouvre un passage. Seule la roche dure tient : la charge sismique reste le seul moyen de l'entamer.
   L'animation pose sur chaque case du carré les tuiles **boom0** (éclair blanc), **boom1** (damier accent) puis
   **boom2** (braises monde), qui alternent avec une variante décalée pour crépiter ; elles se retouchent au Tile
   editor, groupe FX. **La charge sismique montre la même**.
