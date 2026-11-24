@@ -139,7 +139,7 @@ function lungeOff(match){if(reduced)return [0,0];const f=FX.find(match);if(!f)re
 function put(t,x,y,a){ctx.globalAlpha=a;ctx.drawImage(t,ox+(x-camX)*S,oy+(y-camY)*S,S,S);}
 /* ---------- Gouffres lisibles (variante D′) ----------
    Lèvre irrégulière couleur sol (1 à 3 pixels, ondulation lente) sur chaque côté de gouffre qui touche le sol,
-   et sous chaque pixel de bord tourné vers le nord (bord, flanc, éperon, dessous de pont) une paroi en dégradé plein :
+   (un pont d'extérieur compte comme du sol), et sous chaque pixel de bord tourné vers le nord (bord, flanc, éperon, dessous de pont) une paroi en dégradé plein :
    7 teintes sur 7 pixels, de la couleur monde atténuée jusqu'au noir. Calculé une fois par planète et par palette,
    dans une image de la taille de la carte (16 pixels par case), puis recopié case par case au rendu. */
 let CHASM_OV=null,CHASM_KEY='';
@@ -148,7 +148,9 @@ const hash3=(a,b,c)=>{let h=(a*73856093)^(b*19349663)^(c*83492791);h=Math.imul(h
 const lipD=(gx,gy,side,i)=>{const s=hash3(gx,gy,side);
   return 1+Math.min(2,Math.floor((Math.sin(i*.42+s*20)+Math.sin(i*.95+s*7)*.35+1.35)/2.7*3));};
 const isCh=(x,y)=>x>=0&&y>=0&&x<W&&y<H&&G.t[idx(x,y)]===CHASM;
-const solid=(x,y)=>!(x>=0&&y>=0&&x<W&&y<H)||(G.t[idx(x,y)]!==CHASM&&G.t[idx(x,y)]!==BRIDGE);   // côté « sol » (pas gouffre, pas pont)
+// côté « sol » : ni gouffre, ni pont de bâtiment. Un pont d'extérieur compte comme du sol (24 novembre 2026) : le gouffre lui fait
+// donc le même rebord irrégulier qu'au reste de la berge.
+const solid=(x,y)=>{if(!(x>=0&&y>=0&&x<W&&y<H))return true;const i=idx(x,y),v=G.t[i];return v!==CHASM&&(v!==BRIDGE||!(G.pb&&G.pb[i]));};
 function chasmLip(cx,cy){const N=solid(cx,cy-1),Sd=solid(cx,cy+1),Wd=solid(cx-1,cy),E=solid(cx+1,cy),lip=new Uint8Array(256);
   const cor=(dx,dy,a,b)=>solid(cx+dx,cy+dy)&&isCh(cx+dx,cy)&&isCh(cx,cy+dy)&&a+b<3;
   for(let j=0;j<16;j++)for(let i=0;i<16;i++){
@@ -232,7 +234,7 @@ function render(){
     if(t!==CHASM)voile(x,y,(x-camX)*S,(y-camY)*S,k,null,pb||t>=WALL);   // rien de bâti ne porte la texture du sol naturel
     if(pb)put(TL.solPont,x,y,.5*k);
     if(t>=WALL)batiTuile(t,x,y,(tl,a)=>put(tl,x,y,a*k));else
-    if(t!==BRIDGE)put(TL.ground0,x,y,.6*k);   // sol uniforme : plus de variations près des sites (13 novembre 2026)
+    if(!pb)put(TL.ground0,x,y,.6*k);   // sol uniforme : plus de variations près des sites (13 novembre 2026)
     if(t===ROCK)put(h%3===0?TL.rock2:h%3===1?TL.rock:TL.rock3,x,y,.95*k);   // trois rochers, à parts égales (24 novembre 2026)
     // sous de la roche dure, la crête se pose sur un fond de roche dure
     // au bord haut de la carte, la case est traitée comme prolongée vers le haut : pas de crête sur la première rangée (24 novembre 2026)
