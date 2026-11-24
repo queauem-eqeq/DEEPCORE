@@ -787,3 +787,15 @@ Le nombre total de butins par carte ne change pas (6 sur une carte de taille 3) 
 
 `outils/simul.py` (détection et fuite) relancé le même jour : ces mesures se font sur carte dégagée, sans butin ni clé,
 et ne dépendent pas de ce changement.
+
+**Tirage pondéré (même jour, plus tard).** Le tableau ci-dessus mesurait un ordre fixe (le Module de puissance toujours
+au premier lieu servi). À la demande du joueur, c'est devenu une préférence : tirage au sort pondéré (`BUTIN_POIDS`,
+fermée à clé 6, cul-de-sac 1, autre 0,5). 30 cartes par niveau, en ne comptant que les cartes qui ont une pièce fermée
+garnie :
+
+| Niveau | Cartes avec pièce fermée garnie | Module de puissance derrière la serrure | Plan derrière la serrure |
+|---|---|---|---|
+| 1 | 19 | 11 | 5 |
+| 2 | 22 | 11 | 8 |
+| 3 | 22 | 16 | 7 |
+| Total | 63 | 38 (60 %) | 20 (32 %) |

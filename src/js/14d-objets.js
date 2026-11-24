@@ -121,12 +121,15 @@ function butinMort(b){if(!b||b.nd)return;const sp=BEASTS[b.sp],p=DROPS[sp.key]||
   G.items=G.items||{};(G.items[i]=G.items[i]||[]).push(k);
     if(typeof vis!=='undefined'&&vis[i])sayMore(`${LeNom(sp)} lâche quelque chose.`,'good');}
 /* Butin d'exploration. Ordre de priorité des lieux (24 novembre 2026) : pièces secrètes > pièces fermées à clé > culs-de-sac
-   > autres salles. Les pièces secrètes reçoivent chacune leur lot. Les autres lieux se partagent 5 à 10 butins, servis dans cet
-   ordre : le premier porte un Module de puissance, le suivant un plan, puis une capsule, et le reste de la Matière.
+   > autres salles. Les pièces secrètes reçoivent chacune leur lot. Les autres lieux se partagent 5 à 10 butins, choisis dans cet
+   ordre ; un Module de puissance, un plan et une capsule y sont tirés au sort, les lieux prioritaires pesant plus lourd (une
+   préférence, pas une règle fixe), et le reste reçoit de la Matière.
    – fermée à clé : une zone qu'on n'atteint qu'en ouvrant une porte verrouillée ; une case par zone, la plus reculée ;
    – cul-de-sac : une case d'où plus rien ne mène ailleurs, loin du trajet arrivée → site ;
    – autres salles : s'il reste des butins à poser, le sol bâti le plus à l'écart du trajet.
    Appelé à la fin de la génération, après les machines. */
+// poids d'un lieu dans le tirage des meilleurs butins : une pièce fermée à clé pèse six culs-de-sac
+const BUTIN_POIDS={ferme:6,impasse:1,autres:.5};
 function butinExplo(){const N=W*H,t=G.t,dep=idx(G.px,G.py),s0=G.sites&&G.sites[0],site=s0?idx(s0.x,s0.y):-1;G.items=G.items||{};
   G.butinN={secret:0,explo:0,ferme:0,impasse:0,autres:0};
   const pose=(i,k)=>{(G.items[i]=G.items[i]||[]).push(k);};
@@ -173,7 +176,16 @@ function butinExplo(){const N=W*H,t=G.t,dep=idx(G.px,G.py),s0=G.sites&&G.sites[0
     cand.sort((a,b)=>dc[b]-dc[a]);
     for(const i of cand){if(pris.length>=nb)break;
       if(pris.some(j=>Math.max(Math.abs(i%W-j%W),Math.abs(((i/W)|0)-((j/W)|0)))<8))continue;pris.push(i);G.butinN.autres++;}}
-  pris.forEach((i,n)=>pose(i,n===0?'puissance':n===1?planTire():n===2?consoTire():'matiere'));G.butinN.explo=pris.length;}
+  // Qui reçoit quoi : une PRÉFÉRENCE, pas une règle fixe (24 novembre 2026). Le Module de puissance, puis le plan, puis la capsule
+  // sont tirés au sort parmi les lieux encore vides, chaque lieu pesant selon sa priorité (BUTIN_POIDS) ; le reste reçoit de la Matière.
+  {const nF=G.butinN.ferme,nI=G.butinN.impasse,poids=pris.map((_,n)=>n<nF?BUTIN_POIDS.ferme:n<nF+nI?BUTIN_POIDS.impasse:BUTIN_POIDS.autres),
+      lot=pris.map(()=>null);
+    for(const k of ['puissance','plan','conso']){const vides=pris.map((_,n)=>n).filter(n=>!lot[n]);if(!vides.length)break;
+      let r=Math.random()*vides.reduce((a,n)=>a+poids[n],0),choix=vides[vides.length-1];
+      for(const n of vides){r-=poids[n];if(r<0){choix=n;break;}}
+      lot[choix]=k;}
+    pris.forEach((i,n)=>pose(i,lot[n]==='plan'?planTire():lot[n]==='conso'?consoTire():lot[n]||'matiere'));}
+  G.butinN.explo=pris.length;}
 
 /* ----- Ramassage : la Matière rejoint la réserve, un plan s'apprend, le reste va au sac ----- */
 function butinPrend(c,more){const l=G.items&&G.items[c];if(!l)return;const dire=more?sayMore:invSay,reste=[];

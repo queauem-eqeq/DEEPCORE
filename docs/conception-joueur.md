@@ -49,19 +49,21 @@ Posé à la fin de la génération, sur toutes les recettes. **Ordre de priorit�
 
 - **Pièces secrètes** : chacune reçoit un lot au fond (capsule, Matière, une fois sur deux un plan, une fois sur quatre
   un Module de puissance), en plus du reste.
-- Les autres lieux se partagent **5 à 10 butins par carte** (6 sur une carte de taille 3), servis dans l'ordre de
-  priorité : le premier lieu porte un **Module de puissance**, le suivant un **plan**, le troisième une **capsule**,
-  les autres de la **Matière** (15).
+- Les autres lieux se partagent **5 à 10 butins par carte** (6 sur une carte de taille 3). Les lieux sont **choisis**
+  dans l'ordre de priorité :
   - **Pièce fermée à clé** : une zone qu'on n'atteint qu'en ouvrant une porte verrouillée ; un butin par zone, sur sa
-    case la plus à l'écart du trajet arrivée → site. Dès qu'une carte a une serrure, **le Module de puissance est
-    derrière elle**.
+    case la plus à l'écart du trajet arrivée → site.
   - **Cul-de-sac et coin reculé** : une case d'où plus rien ne mène ailleurs, entourée d'obstacles sur trois côtés au
     moins, les plus loin du trajet d'abord ; espacés.
   - **Autres salles** : seulement s'il reste des butins à poser ; le sol bâti le plus à l'écart du trajet, jamais
     contre une porte, à 8 cases au moins d'un autre butin.
-- Mesuré le 24 novembre 2026 (20 cartes par niveau, taille 3) : 0,6 à 0,8 butin derrière une serrure par carte, 5,1 à
-  5,2 en cul-de-sac, aucun en « autres salles » (les culs-de-sac suffisent). Module de puissance derrière une serrure
-  ou une porte dérobée : 16 sur 20 au niveau 1 (2 sur 22 avant). Mesures : `docs/mesures.md`.
+- **Qui reçoit quoi : une préférence, pas une règle fixe** (demande du 24 novembre 2026, pour que le meilleur butin ne
+  soit pas toujours au même genre d'endroit). Un **Module de puissance**, puis un **plan**, puis une **capsule** sont
+  tirés au sort parmi les lieux encore vides ; chaque lieu pèse selon sa priorité (`BUTIN_POIDS` : fermée à clé 6,
+  cul-de-sac 1, autre salle 0,5). Les lieux restants reçoivent de la **Matière** (15).
+- Mesuré le 24 novembre 2026 (30 cartes par niveau, taille 3) : 0,6 à 0,7 butin derrière une serrure par carte, 5,2 à
+  5,4 en cul-de-sac, aucun en « autres salles » (les culs-de-sac suffisent). Sur les 63 cartes qui avaient une pièce
+  fermée garnie, le Module de puissance y était **38 fois (60 %)** et le plan 20 fois (32 %). Mesures : `docs/mesures.md`.
 
 ### Fabricateur (`14c-fabricateur.js`)
 
