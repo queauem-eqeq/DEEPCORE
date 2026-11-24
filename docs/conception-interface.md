@@ -96,7 +96,13 @@ molette ou fine barre pour remonter jusqu'aux 200 derniers messages ; un nouveau
   centre d'abord sous le pointeur.
 - **Tile editor** (Lab) : encres sur deux lignes — les cinq couleurs de la palette (**#1 Monde, #2 Bâti, #3 Bio, #4 Accent,
   #5 Danger**, le même ordre et les mêmes numéros que le menu Palette depuis le 24 novembre 2026), puis Blanc, Noir, **Rouge fixe** (`R`, #d8180b, le même avec toutes les palettes) et Transparent.
-  Nouveaux codes de tuile : `5` (bâti) et `R` (rouge fixe). 
+  S'ajoute **Monde foncé** (`d`), l'encre de la roche dure (24 novembre 2026).
+  Nouveaux codes de tuile : `5` (bâti), `R` (rouge fixe) et `d` (monde foncé).
+- **Montagne dure** (`hardBody`) et **Crête dure** (`hardTop`) sont retouchables depuis le 24 novembre 2026 : sans retouche elles
+  suivent la montagne tendre en encre foncée, avec retouche elles vivent leur vie ; le fond de crête (`hardTopBg`) suit la crête dure.
+  **Rocher 3** (`rock3`) s'ajoute aux deux premiers.
+- **Les menus ne se sélectionnent pas** : deux clics rapides sur un titre le surlignaient en bleu (`user-select:none` sur la
+  colonne ; le journal et les champs de saisie restent sélectionnables). 
 - Sous **REGEN · MONDE · LIFE**, une rangée **NIV1 · NIV2 · NIV3** .
 - Sous-menus repliables : **Inventaire**, **Carte**, **Lab** (Bestiaire, Groupes, Artefacts, Items, Discrétion, Tile editor, **Combat** : un lien qui ouvre le banc dans un autre onglet), **Palette**, **Contrôles** (l'aide des touches, une commande par ligne : la touche, puis ce qu'elle fait ; trois groupes : Se déplacer, Objets, Voir).
 

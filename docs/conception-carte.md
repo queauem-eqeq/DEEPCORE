@@ -20,7 +20,9 @@ Partie du document de conception (sommaire et règles à ne pas casser : `concep
   **profondeur** dans le massif (distance au premier terrain qui n'est pas de la montagne, en 4 directions) : rien
   à une ou deux cases, puis 30 %, 65 %, 90 %, 100 %. Écorce tendre, cœur impénétrable. Posée **avant** les métaux,
   qui n'apparaissent jamais dedans.
-    **La rangée extérieure de la carte est en roche dure.** **Dessin** : pas de tuile propre ; elle reprend celles de la montagne tendre (`mtBody`, `mtTop`, retouches comprises) en encre foncée (`PAL['d']` = couleur monde, clarté −16, `HARD_CLAIR`). La case dont le haut n'est pas de la roche dure porte la crête irrégulière, posée sur un fond de roche tendre (`softTopBg`) quand la case du dessus est de la montagne ou du rocher ; seule la partie au-dessus de la ligne de crête est un fond (`hardTopBg`, `softTopBg`). La crête d'une montagne tendre située sous de la roche dure se pose sur un fond de roche dure.
+    **Pas de crête sur la rangée du haut de la carte** (24 novembre 2026) : une case du bord haut est traitée comme prolongée
+    vers le haut, donc elle porte le corps de la montagne et non la crête, qui laissait croire à un sommet au ras du bord.
+    **La rangée extérieure de la carte est en roche dure.** **Dessin** : par défaut elle reprend celles de la montagne tendre (`mtBody`, `mtTop`, retouches comprises) en encre foncée (`PAL['d']` = couleur monde, clarté −16, `HARD_CLAIR`). La case dont le haut n'est pas de la roche dure porte la crête irrégulière, posée sur un fond de roche tendre (`softTopBg`) quand la case du dessus est de la montagne ou du rocher ; seule la partie au-dessus de la ligne de crête est un fond (`hardTopBg`, `softTopBg`). La crête d'une montagne tendre située sous de la roche dure se pose sur un fond de roche dure.
 - Relief : méthode **Automate cellulaire**, **Bruit** ou **Mixte** ; réglages Remplissage (35-70 %) et Itérations (1-10).
 - Connectivité garantie : les zones isolées sont reliées par le plus court chemin (pont sur gouffre, col dans la
   montagne, rocher dégagé) ; petites poches comblées.
@@ -364,7 +366,7 @@ Code : `07c-artefacts.js`, appelé à la fin de la génération des bâtiments.
 | Terrain | Passage | Vue | Effet |
 |---|---|---|---|
 | Sol rocheux | oui | libre | texture « plaques rugueuses » (`conception-interface.md`) |
-| Rocher | brisé en 2 coups | libre | laisse des gravats |
+| Rocher | brisé en 2 coups | libre | laisse des gravats ; **trois dessins tirés à parts égales** (`rock`, `rock2`, `rock3`, 24 novembre 2026) |
 | Montagne | brisée en 2 coups (sauf bord de carte) | bloquée | 10 % contiennent des éclats de métal |
 | Roche dure | **indestructible à la foreuse** | bloquée | le cœur des massifs ; seule une **charge sismique** la brise. **Pas de métal** dedans |
 | Eau peu profonde | oui | libre | −20 de défense ; **terrain lent : pas ×1,5**, sauf pour les nageurs |

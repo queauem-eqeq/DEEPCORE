@@ -27,6 +27,10 @@ body{margin:0;background:var(--black);color:var(--fg);font:13px/1.45 var(--mono)
 .col{background:var(--black);border-left:1px solid var(--line);padding-block:16px;padding-left:16px;padding-right:max(16px,env(safe-area-inset-right,0px));
   overflow:hidden;display:flex;flex-direction:column;gap:5px;min-width:0;min-height:0}   /* écart réduit entre Inventaire (fixe) et Carte (qui défile) : 20, puis 10, puis 5 px */
 /* 22 novembre 2026 : seul le bas de la colonne défile, sous l'inventaire ; le haut (niveau, barres, boutons, inventaire) reste visible */
+/* Pas de sélection de texte dans les menus : deux clics rapides sur un titre (ouvrir puis refermer) le surlignaient en bleu
+   (24 novembre 2026). Le journal et les champs de saisie restent sélectionnables. */
+.col{-webkit-user-select:none;user-select:none}
+.col input,.col textarea{-webkit-user-select:text;user-select:text}
 .colfixe,.coldefil{display:flex;flex-direction:column;gap:20px;min-width:0}
 .colfixe{flex:none}
 .coldefil{flex:1 1 auto;min-height:0;overflow-y:auto;scrollbar-width:none}
