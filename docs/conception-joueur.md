@@ -243,3 +243,9 @@ inconnue sur soi peut coûter cher, la lancer sur un ennemi peut le servir. Fabr
 autres gardent le petit bip d'usage. Pixel art strict : taille fixe, opaques, calés sur la grille des pixels de
 tuile, chaque grain apparaît à son heure et s'efface d'un coup.
 
+**Bruits de coup variés** (24 novembre 2026) : en combat, chaque bruit de coup existe en plusieurs versions tirées au
+hasard, jamais deux fois la même de suite, et chaque coup est légèrement désaccordé (hauteur ±8 %, force ±10 %) :
+**4 versions** quand la foreuse frappe une créature (sec, lourd, métallique, doublé), **4** quand une créature frappe
+(morsure, griffe, boutoir, mâchoires), **3** pour le coup critique. Le coup sur la roche garde son bruit unique.
+Réglage : `coup`, `bite` et `crit` dans `01-sons.js`.
+
