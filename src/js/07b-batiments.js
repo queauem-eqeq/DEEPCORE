@@ -321,6 +321,15 @@ function batiments(){BATI_DER=null;
       if(ok&&connectedAll(t)){
         G.batis=strs.map(S=>({style:S.st.n,pieces:S.pieces.filter(p=>p.g!=='couloir').length,cases:S.emprise,entrees:S.entrees.map(e=>[e.x,e.y])}));
         G.pb={};for(const i of garde)if(t[i]===BRIDGE)G.pb[i]=1;   // les ponts des pièces, pour le rendu
+        // pont d'un module : « bâti » seulement si son gouffre touche du bâti du module (sol bâti, porte, pilier, mur, vitre) ;
+        // sinon c'est un pont d'extérieur, dessiné comme tous les autres : du sol, bordé par le rebord du gouffre
+        for(const S of strs)for(const p of S.pieces){if(!p.mod)continue;const dedans=new Set(p.c),vu=new Set();
+          for(const i0 of p.c){if(vu.has(i0)||(t[i0]!==BRIDGE&&t[i0]!==CHASM))continue;const zone=[i0];let batiVu=false;vu.add(i0);
+            for(let h=0;h<zone.length;h++){const c=zone[h],cx=c%W,cy=(c/W)|0;
+              for(const [dx,dy] of D4){const j=idx(cx+dx,cy+dy),v=t[j];
+                if(dedans.has(j)&&(v===BRIDGE||v===CHASM)){if(!vu.has(j)){vu.add(j);zone.push(j);}}
+                else if(B.fixe[j]||(dedans.has(j)&&(v===FLOOR||v===DOOR||v===PILLAR||v===LOCK)))batiVu=true;}}
+            if(!batiVu)for(const c of zone)delete G.pb[c];}}
         siteAuFond(B,strs);petites(B,strs);const sec=secrets(B,strs);verrous(B,strs,sec);artefacts(B,strs);mdlMachines(strs);
           BATI_DER={B,strs};return;}
     }

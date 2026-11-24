@@ -439,7 +439,9 @@ pièce ils deviennent du sol, sous un mur du mur) ; seuls le vaisseau et le bord
   - **Le site de forage** n'est jamais dans un module.
   - **Gouffre et pont** (24 novembre 2026) : un module peut contenir des cases Gouffre et des cases « Sol (pont) » ;
     le pont se dessine avec la tuile `solPont`, **retouchable à part** dans l'éditeur de tuiles (groupe du bâti) et
-    utilisée par tous les ponts de bâtiment. Au départ, c'est le même dessin que le sol bâti.
+    utilisée par tous les ponts de bâtiment. Au départ, c'est le même dessin que le sol bâti. **En extérieur, un pont
+    reste du sol bordé par le rebord du gouffre**, comme tous les ponts naturels : un pont de module n'est « bâti » que
+    si son gouffre touche du bâti du module (sol bâti, porte, pilier, mur, vitre).
   - **Mur vitré** (24 novembre 2026) : terrain `VITRE`, tuile `vitre` (retouchable, groupe du bâti). **Infranchissable
     comme un mur, mais on voit au travers, dans les deux sens** : la foreuse voit dehors, les créatures voient dedans.
     La foreuse ne l'entame pas ; la charge sismique le réduit en gravats. Il ne compte pas comme une paroi pour la
