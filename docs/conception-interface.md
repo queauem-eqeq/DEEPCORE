@@ -168,3 +168,28 @@ Au chargement, la base n'est relue que si elle est **plus récente que les retou
 
 **L'utilisateur règle ses tuiles et ses stats dans l'artefact**, seule version dont la session peut relire les réglages (pas de base sur GitHub Pages ni dans la copie du disque). Procédure de recopie dans le code : `CLAUDE.md`.
 
+### Lab → Modules : la banque de morceaux de carte (24 novembre 2026)
+
+**But** : des salles, couloirs, agencements de murs ou de montagne **dessinés à la main**, que chaque recette tirera dans
+sa liste et posera **en priorité**, avant de générer le reste. **Seuls l'éditeur et la banque existent pour l'instant :
+la génération ne s'en sert pas encore** (choix du 24 novembre : éditeur d'abord).
+
+- **Un module** : de 3 × 3 à **16 × 16** cases, un nom, deux couches.
+  - **Terrain**, une case à la fois : Libre (laissée au choix de la génération, ce qui permet des formes non
+    rectangulaires), Sol, Rocher, Montagne, Roche dure, Eau, Eau profonde, Herbes hautes, Herbes basses, Mur, Sol bâti,
+    Porte, Pilier.
+  - **Emplacements**, que le jeu remplira lui-même : **Entrée** (par où le module se raccorde au reste de la carte),
+    **Machine**, **Butin**, **Ennemi**. Un emplacement ne tient que sur une case praticable (sol, herbes, sol bâti,
+    porte) : posé ailleurs, la case devient du sol ; recouvert d'un terrain plein, il disparaît.
+- **Pose** : rotations et miroirs autorisés, soit jusqu'à **8 variantes** par module ; la fenêtre les montre et compte
+  celles qui diffèrent vraiment (un module symétrique en a moins).
+- **Par recette** : chaque module coche les recettes qui peuvent le tirer ; « Modules posés par carte » fixe combien en
+  poser (0 à 6) pour chacune.
+- **Avertissements** sous la grille : module vide, aucune entrée, entrée qui ne touche ni le bord ni une case libre,
+  aucune recette cochée.
+- **Gestes** : cliquer ou glisser pour peindre ; « Tout remplir » ; Nouveau, Dupliquer, Supprimer (deux clics).
+- **Enregistrement** : dans le navigateur à chaque modification (`np-modules`) ; « Enregistrer » l'envoie dans la base
+  de l'artefact (champ `modules` de `reglages/courant` : `liste` et `nb`). Code : `14f-modules.js`.
+- **Reste à faire, côté génération** : réserver la place des modules avant le reste, raccorder leurs entrées (le plus
+  délicat en cavernes), remplir les emplacements en respectant les règles des machines, et accepter d'en poser moins
+  quand la carte est trop petite.

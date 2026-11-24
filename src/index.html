@@ -63,6 +63,39 @@
     <div class="itliste" id="itList"></div>
   </div>
 </div>
+<!-- Fenêtre Modules (Lab, 24 novembre 2026) : la banque de morceaux de carte dessinés à la main, et leur éditeur. -->
+<div class="modal" id="modules" role="dialog" aria-modal="true" aria-labelledby="mdlTitle" hidden>
+  <div class="mcard wide" tabindex="-1">
+    <div class="mhead"><h2 id="mdlTitle">Modules</h2><span class="saved" id="mdlMsg" role="status"></span><button id="mdlSave">Enregistrer</button><button id="mdlClose" aria-label="Fermer les modules">Fermer</button></div>
+    <p class="mnote">Des morceaux de carte dessinés à la main (3 × 3 à 16 × 16), que chaque recette pourra tirer et poser avant de générer le reste. La banque se remplit ici ; <b>la génération ne s’en sert pas encore</b>.</p>
+    <div class="mdlcols">
+      <section class="mdlside" aria-label="Banque de modules">
+        <div class="cur-tools"><button id="mdlNew">Nouveau</button><button id="mdlDup">Dupliquer</button></div>
+        <div class="mdllist" id="mdlList"></div>
+        <h3>Modules posés par carte</h3>
+        <div class="mdlnb" id="mdlNb"></div>
+      </section>
+      <section class="mdled" id="mdlEd" aria-label="Dessin du module">
+        <div class="mdlcvwrap"><canvas id="mdlCv" width="252" height="196" aria-label="Grille du module : cliquer ou glisser pour peindre"></canvas></div>
+        <ul class="mdlavis" id="mdlAvis"></ul>
+      </section>
+      <p class="mnote" id="mdlVide" hidden>Aucun module sélectionné.</p>
+      <section class="mdlfiche" id="mdlFiche" aria-label="Réglages du module">
+        <label class="mdlch">Nom <input type="text" id="mdlNom" maxlength="30" autocomplete="off" spellcheck="false"></label>
+        <div class="mdltaille"><label>Largeur <input type="number" id="mdlW" min="3" max="16" step="1"></label><label>Hauteur <input type="number" id="mdlH" min="3" max="16" step="1"></label></div>
+        <h3>Terrain</h3>
+        <div class="mdlpns" id="mdlTerr"></div>
+        <div class="cur-tools"><button id="mdlFill" title="Peint tout le module avec le terrain choisi">Tout remplir</button></div>
+        <h3>Emplacements <small>remplis par le jeu</small></h3>
+        <div class="mdlpns" id="mdlMarq"></div>
+        <h3>Recettes qui peuvent le tirer</h3>
+        <div class="mdlrec" id="mdlRec"></div>
+        <div class="mdlvar" id="mdlVar"></div>
+        <div class="cur-tools"><button id="mdlSuppr">Supprimer</button></div>
+      </section>
+    </div>
+  </div>
+</div>
 <!-- Fenêtre Artefacts (Lab, 20 novembre 2026) : les systèmes greffés sur chaque carte, avec leur fréquence. -->
 <div class="modal" id="artefacts" role="dialog" aria-modal="true" aria-labelledby="artTitle" hidden>
   <div class="mcard" tabindex="-1">
@@ -179,6 +212,7 @@
           <button id="bestBtn">Bestiaire</button>
           <button id="grBtn" aria-haspopup="dialog" title="Créer et régler les groupes d’ennemis">Groupes</button>
           <button id="artBtn" aria-haspopup="dialog" title="Antennes, pièces d’herbe, machines, terminaux">Artefacts</button>
+          <button id="mdlBtn" aria-haspopup="dialog" title="Banque de salles, couloirs et agencements dessinés à la main">Modules</button>
           <button id="itBtn" aria-haspopup="dialog" title="Tous les objets : prix, effets, butin des robots">Items</button>
           <button id="discBtn">Discrétion</button>
           <button id="curBtn">Tile editor</button>
@@ -270,4 +304,5 @@
 <script src="js/14d-objets.js"></script>
 <script src="js/14b-forage.js"></script>
 <script src="js/14e-arrivee.js"></script>
+<script src="js/14f-modules.js"></script>
 <script src="js/15-intro.js"></script>
