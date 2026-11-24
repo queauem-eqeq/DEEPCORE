@@ -8,7 +8,7 @@ const CURSOR_DEF=curOutline(curGen((x,y)=>((y===0||y===15)&&(x<5||x>10))||((x===
 const TILE_LIST=[
   ['Viseur',[['cursor','Viseur']]],
   ['Foreuse et faune',[['robot_u','Foreuse'],['an0r',SPECIES[0].n],...BEASTS.map((b,i)=>['bz'+i+'r',b.n])]],
-  ['Terrain',[['ground0','Sol'],['rock','Rocher'],['rock2','Rocher 2'],['mtTop','Crête'],['mtBody','Montagne'],['wall','Mur'],['wallFace','Mur (face)'],['floor','Sol bâti'],['door','Porte'],['doorOpen','Porte ouverte'],['doorOpenV','Porte ouverte (côté)'],['pillar','Pilier'],['lock','Porte verrouillée'],['cle','Clé'],['liq0','Eau A'],['liq1','Eau B'],['deep0','Eau profonde'],['grass0','Herbes hautes'],['flat0','Herbes basses'],['rubble','Gravats'],['crackH','Fissures'],['wade','Remous'],['wadeDeep','Remous profond']]],
+  ['Terrain',[['ground0','Sol'],['rock','Rocher'],['rock2','Rocher 2'],['rock3','Rocher 3'],['mtTop','Crête'],['mtBody','Montagne'],['hardTop','Crête dure'],['hardBody','Montagne dure'],['wall','Mur'],['wallFace','Mur (face)'],['floor','Sol bâti'],['door','Porte'],['doorOpen','Porte ouverte'],['doorOpenV','Porte ouverte (côté)'],['pillar','Pilier'],['lock','Porte verrouillée'],['cle','Clé'],['liq0','Eau A'],['liq1','Eau B'],['deep0','Eau profonde'],['grass0','Herbes hautes'],['flat0','Herbes basses'],['rubble','Gravats'],['crackH','Fissures'],['wade','Remous'],['wadeDeep','Remous profond']]],
   ['Objets au sol',[['o_foreuse','Foreuse'],['o_usine','Coque d’usine'],['o_servo','Servomoteur'],['o_optique','Téléobjectif'],['o_viseur','Viseur laser'],['o_conden','Condensateur'],['o_gyro','Gyroscope'],['o_stabil','Stabilisateur'],['o_accu','Accumulateur'],['o_repar','Réparobots'],['o_batterie','Batterie'],['o_fumigene','Fumigène'],['o_charge','Charge sismique'],['o_vrille','Vrille rapide'],['o_trepan','Trépan lourd'],['o_carene','Carène légère'],['o_blindage','Blindage composite'],['o_capsule','Consommable non identifié'],['o_puissance','Module de puissance'],['o_berserk','Surrégime'],['o_camo','Camouflage optique'],['o_balise','Balise'],['o_court','Court-circuit'],['o_plan','Plan de fabrication']]],
   ['Objets',[['siteUnknown','Site'],['objet','Objet au sol (générique)'],['ore1','Éclats petits (montagne)'],['ore2','Éclats moyens (montagne)'],['ore','Éclats gros (montagne)'],['oreSol1','Éclats petits (sol)'],['oreSol2','Éclats moyens (sol)'],['oreSol','Éclats gros (sol)']]],
   ['Artefacts',[['antenne','Antenne'],['antenneOn','Antenne allumée'],['terminal','Terminal'],['mach0','Tuyaux'],['mach1','Serveur'],['mach2','Caisses'],['mach3','Ordinateur'],['mach4','Établi'],['mach5','Cuve'],['mach6','Générateur'],['mach7','Console'],['mach8','Turbine'],['mach9','Armoire électrique']]],
@@ -21,7 +21,7 @@ const TILE_DEPS={robot_u:['robot_u','robot_r','robot_d','robot_l'],an0r:['an0r',
 BEASTS.forEach((_,i)=>{TILE_DEPS['bz'+i+'r']=['bz'+i+'r','bz'+i+'l'];});
 const tileDim=k=>k==='ship'?[SGW*16,SGH*16]:[16,16];
 const validTile=(r,k)=>{const [w,h]=tileDim(k);
-  return Array.isArray(r)&&r.length===h&&r.every(l=>typeof l==='string'&&l.length===w&&/^[.0w123r5R]+$/.test(l));};
+  return Array.isArray(r)&&r.length===h&&r.every(l=>typeof l==='string'&&l.length===w&&/^[.0w123r5Rd]+$/.test(l));};
 const PAT_ORIG={};
 let TILE_OV={},TILE_BASE={};   // TILE_BASE : dernières tuiles enregistrées, auxquelles « Rétablir » revient
 try{const o=JSON.parse(localStorage.getItem('np-tiles-base')||'null');
@@ -45,13 +45,15 @@ for(const k of ['an0',...BEASTS.map((_,i)=>'bz'+i)])PAT[k+'l']=(x,y)=>TF(k+'r')(
 // mine armée : la tuile de la mine, bio en rouge et accent en blanc ; elle alterne avec la tuile normale (clignotement)
 // Roche dure (21 novembre 2026) : mêmes dessins que la montagne tendre (retouches comprises), en encre foncée 'd'
 PAT.hardBody=(x,y)=>{const c=TF('mtBody')(x,y);return c==='3'?'d':c;};PAT.hardTop=(x,y)=>{const c=TF('mtTop')(x,y);return c==='3'?'d':c;};
+// retouchables comme les autres (24 novembre 2026) : sans retouche, elles suivent la montagne tendre ; avec, elles vivent leur vie
+for(const k of ['hardBody','hardTop']){PAT_ORIG[k]=PAT[k];PAT[k]=(x,y)=>TF(k)(x,y);}
 // Fonds des crêtes : seule la partie AU-DESSUS de la ligne de crête est un fond, le reste garde ses trous (sinon la crête sombre paraît plus claire)
 const crestY=(f,x)=>{for(let y=0;y<16;y++)if(f(x,y)!=='.')return y;return 16;};
 // crête de roche dure : fond de roche tendre
-PAT.hardTopBg=(x,y)=>{const f=TF('mtTop');return y<crestY(f,x)&&TF('mtBody')(x,y)==='3'?'3':'.';};
+PAT.hardTopBg=(x,y)=>{const f=TF('hardTop');return y<crestY(f,x)&&TF('mtBody')(x,y)==='3'?'3':'.';};
 // crête de roche tendre sous de la roche dure : fond de roche dure
 PAT.softTopBg=(x,y)=>{const f=TF('mtTop');return y<crestY(f,x)&&TF('mtBody')(x,y)==='3'?'d':'.';};
-TILE_DEPS.mtBody=['mtBody','hardBody','hardTopBg','softTopBg'];TILE_DEPS.mtTop=['mtTop','hardTop','hardTopBg','softTopBg'];
+TILE_DEPS.mtBody=['mtBody','hardBody','hardTopBg','softTopBg'];TILE_DEPS.mtTop=['mtTop','hardTop','hardTopBg','softTopBg'];TILE_DEPS.hardTop=['hardTop','hardTopBg'];
 PAT.mineA=(x,y)=>{const c=TF('bz'+MINE_I+'r')(x,y);return c==='2'?'r':c==='1'?'w':c==='r'?'w':c;};TILE_DEPS['bz'+MINE_I+'r'].push('mineA');
 PAT.deep1=(x,y)=>TF('deep0')((x+14)%16,y);
 // FX (22 novembre 2026) : rayons en rouge vif ('L'), l'horizontal tourné du vertical ; variantes décalées des explosions pour le crépitement

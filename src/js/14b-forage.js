@@ -180,7 +180,7 @@ function fgBoom(F,k){
    d'arrivée. La carte (vue de dessus) est lue en coupe, sur une bande de cinq rangées autour de la foreuse, puis dressée de côté :
    une case de carte = FG_TW colonnes, un mur = FG_HM rangées. Murs et toit du bâtiment en couleur bâti, machines et roches en couleur
    monde, la porte percée dans le mur. fgCoupe rend des cellules {x (colonnes depuis la foreuse), h (rangées au-dessus du sol), ch, c}. */
-const FG_TW=4,FG_HM=14,FG_DM=22;
+const FG_TW=4,FG_HM=14,FG_DM=22,FG_EAU_BAS=3,FG_EAU_FOND=7;   // profondeur de l'eau en cases : hauts-fonds, eau profonde
 const FG_MACH=new Set([MACHINE,ANTENNA,TERMINAL,TURRET,PYLON,PILE,FABRIC,LEVIER,GRILLE,STATION,CHARGEUR]);
 function fgCoupe(cx,cy){
   const T=(x,y)=>x<0||y<0||x>=W||y>=H?GROUND:G.t[idx(x,y)],col=[],cells=[],vu=new Set();
@@ -189,6 +189,9 @@ function fgCoupe(cx,cy){
   for(let d=-FG_DM;d<=FG_DM;d++){const k={b:0,porte:0,sol:0,m:0,ant:0,r:0};
     for(let j=-2;j<=2;j++){const v=T(cx+d,cy+j),c=j===0;   // murs, portes et sol : la rangée de la foreuse seule ; machines : une rangée de chaque côté
       if(c&&bati(v))k.b=1;else if(c&&v===DOOR)k.porte=1;else if(c&&v===FLOOR)k.sol=1;
+      else if(Math.abs(j)<=1&&v===GRASS)k.herbe=1;
+      else if(Math.abs(j)<=1&&v===LIQ)k.eau=Math.max(k.eau||0,FG_EAU_BAS);
+      else if(Math.abs(j)<=1&&v===DEEP)k.eau=FG_EAU_FOND;
       else if(Math.abs(j)<=1&&(v===ANTENNA||v===PYLON))k.ant=1;else if(Math.abs(j)<=1&&FG_MACH.has(v))k.m=1;
       else if(v===HARD)k.r=Math.max(k.r,7);else if(v===MOUNT)k.r=Math.max(k.r,5);else if(v===ROCK)k.r=Math.max(k.r,3);}
     col.push(k);}
@@ -220,20 +223,41 @@ function fgCoupe(cx,cy){
     for(let i=0;i<FG_TW;i++){const x=x0(d)+i,hh=Math.max(1,Math.round(moy+hs(x,7)*3-1.5));
       for(let h=1;h<=hh;h++){const prof=hh-h;   // du sommet vers le bas : la roche s'épaissit
         put(x,h,prof===0?'▀':prof===1?(hs(x,h+3)<.5?'░':'▒'):prof<4?'▒':'▓','m');}}}
-  return {cells,cb:PAL['5'],cm:PAL['3']};}
+  /* Herbes : de hautes tiges, pas des touffes au ras du sol (24 novembre 2026, demande de l'utilisateur) — 2 à 6 rangées,
+     droites ou penchées, avec un épi au sommet ; des trous pour que la rangée ne fasse pas un mur. */
+  const HERBE_EPI='¤#*:',HERBE_PIED='│└┘';
+  for(let d=-FG_DM;d<=FG_DM;d++){const k=K(d);if(!k.herbe||k.eau||k.b||(dedans&&d>=L&&d<=R)||hr[d+FG_DM])continue;
+    for(let i=0;i<FG_TW;i++){const x=x0(d)+i,r=hs(x,21);if(r<.3)continue;
+      const haut=2+Math.floor(hs(x,22)*5),pen=hs(x,23);
+      for(let q=1;q<=haut;q++){
+        const ch=q===haut?HERBE_EPI[Math.floor(hs(x,24+q)*4)]
+          :q===1?HERBE_PIED[Math.floor(hs(x,25)*3)]
+          :pen<.28?'/':pen>.72?'\\':'│';
+        put(x,q,ch,'v');}}}
+  /* L'eau (24 novembre 2026) : la surface sur la ligne de sol, et sa profondeur en dessous — trois cases pour les hauts-fonds,
+     sept pour l'eau profonde, de plus en plus sombres et denses vers le fond. */
+  {const ce=PAL['e']||PAL['3'];
+   for(let d=-FG_DM;d<=FG_DM;d++){const k=K(d);if(!k.eau||k.b||(dedans&&d>=L&&d<=R))continue;
+    for(let i=0;i<FG_TW;i++){const x=x0(d)+i,r=hs(x,31);
+      put(x,0,r<.5?'~':'≈',ce);
+      for(let q=1;q<k.eau;q++){const u=q/(k.eau-1);
+        put(x,-q,u<.4?'▒':u<.75?'▓':'█',fgMix(ce,1-.72*u));}}}}
+  return {cells,cb:PAL['5'],cm:PAL['3'],cv:PAL['2'],ce:PAL['e']||PAL['3']};}
 /* Le décor est dessiné une seule fois dans son propre canevas, puis posé d'un bloc à chaque image : sinon ce sont deux mille
    caractères à retracer soixante fois par seconde. */
-function fgDecorCv(F,D){if(D.cv&&D.cwv===F.cw)return;
-  let x0=1e9,x1=-1e9,h1=0;for(const c of D.cells){if(c.x<x0)x0=c.x;if(c.x>x1)x1=c.x;if(c.h>h1)h1=c.h;}
-  if(!D.cells.length||h1<1){D.cv=null;D.cwv=F.cw;return;}
-  const cv=document.createElement('canvas');cv.width=(x1-x0+1)*F.cw;cv.height=h1*F.chh;const g=cv.getContext('2d');
-  for(const c of D.cells){if(c.h<1)continue;const px=(c.x-x0)*F.cw,py=(h1-c.h)*F.chh;
-    g.fillStyle='#000';g.fillRect(px,py,F.cw,F.chh);g.drawImage(fgGlyph(F,c.ch,c.c==='b'?D.cb:D.cm),px,py);}
-  D.cv=cv;D.cwv=F.cw;D.x0=x0;D.h1=h1;}
-function fgDecor(F,D,gy,ox){if(!D)return;fgDecorCv(F,D);if(!D.cv)return;
+function fgDecorCv(F,D){if(D.img&&D.cwv===F.cw)return;
+  let x0=1e9,x1=-1e9,h1=-1e9,h0=1e9;
+  for(const c of D.cells){if(c.x<x0)x0=c.x;if(c.x>x1)x1=c.x;if(c.h>h1)h1=c.h;if(c.h<h0)h0=c.h;}
+  if(!D.cells.length){D.img=null;D.cwv=F.cw;return;}
+  const teinte=c=>c==='b'?D.cb:c==='v'?(D.cv||D.cm):c==='e'?(D.ce||D.cm):/^[#r]/.test(c)?c:D.cm;   // une case peut porter sa propre couleur
+  const cv=document.createElement('canvas');cv.width=(x1-x0+1)*F.cw;cv.height=(h1-h0+1)*F.chh;const g=cv.getContext('2d');
+  for(const c of D.cells){const px=(c.x-x0)*F.cw,py=(h1-c.h)*F.chh;
+    g.fillStyle='#000';g.fillRect(px,py,F.cw,F.chh);g.drawImage(fgGlyph(F,c.ch,teinte(c.c)),px,py);}
+  D.img=cv;D.cwv=F.cw;D.x0=x0;D.h1=h1;}
+function fgDecor(F,D,gy,ox){if(!D)return;fgDecorCv(F,D);if(!D.img)return;
   const px=Math.round((ox+D.x0-F.camX)*F.cw+F.w/2),py=Math.round((gy-D.h1-F.camY)*F.chh);
-  if(px>F.w||px+D.cv.width<0||py>F.h||py+D.cv.height<0)return;
-  F.x.drawImage(D.cv,px,py);}
+  if(px>F.w||px+D.img.width<0||py>F.h||py+D.img.height<0)return;
+  F.x.drawImage(D.img,px,py);}
 function playForage(suite,niv,opt){
   if(reduced||FORAGE){suite&&suite();return;}
   unlock();if(typeof TRAV!=='undefined'&&TRAV)stopTravel();
@@ -274,25 +298,26 @@ function skipForage(){const F=FORAGE;if(!F||F.ph>=4)return;
 /* Mines du mini-jeu. Elles naissent une par une, juste sous le bas de l'écran : sept sur dix sont visées sur la route de la foreuse
    (là où elle sera si elle ne tourne pas), les autres semées plus loin ; une fois sur quatre, une seconde mine vient à côté et ne
    laisse qu'un couloir. L'écart entre deux rangées se resserre avec la profondeur. Une mine saute dès qu'elle est dans le puits. */
-/* Deux mines ne se chevauchent jamais (23 novembre 2026) : le pavé d'une mine occupe 9 colonnes sur 5 rangées (fond noir compris),
-   donc toute nouvelle mine garde cet écart avec celles déjà posées, y compris celles des rangées précédentes. */
-const FG_MDX=9,FG_MDY=5;
+/* Deux mines gardent au moins cinq cases de vide entre elles (24 novembre 2026 ; avant : elles se touchaient sans se chevaucher).
+   Le pavé fait 7 colonnes sur 3 rangées, d'où 7+5 et 3+5 : toute nouvelle mine garde cet écart avec celles déjà posées, y compris
+   celles des rangées précédentes. */
+const FG_MDX=12,FG_MDY=8;
 const fgMLibre=(F,x,y)=>!F.mines.some(m=>m.ok&&Math.abs(m.x-x)<FG_MDX&&Math.abs(m.y-y)<FG_MDY);
 /* pose une mine en (x, y) ; si la place est prise, essaie un peu plus loin sur les côtés, puis renonce */
 function fgMPose(F,x,y){
   for(let k=0;k<5;k++){const xx=x+(k?(k&1?1:-1)*FG_MDX*((k+1)>>1):0);
     if(fgMLibre(F,xx,y)){F.mines.push({x:xx,y,ok:1});return true;}}
   return false;}
-function fgMines(F,dt){const bas=F.R*.7;
+function fgMines(F,dt){const bas=F.R*1.15;   // bien sous le bas de l'écran (0,7 R) : sinon la rangée apparaissait à vue (24 novembre 2026)
   while(F.mNext<F.D0-16&&F.d+bas>=F.mNext){const p=F.d/F.D0,vise=Math.random()<.7,
     x=Math.round(F.cx+F.vx*.9+(vise?fgRnd(-4,4):(Math.random()<.5?-1:1)*fgRnd(12,26)));
     fgMPose(F,x,F.mNext);
       if(Math.random()<.25)fgMPose(F,x+(Math.random()<.5?-1:1)*Math.round(fgRnd(15,19)),F.mNext+Math.round(fgRnd(-2,2)));
     // plus loin sur les côtés, sur toute la largeur de l'écran : des mines qui ne dépendent pas de la route de la foreuse (23 novembre 2026)
-    for(let i=0,n=Math.random()<.5?1:2;i<n;i++){const sd=Math.random()<.5?-1:1,xf=Math.round(F.camX+sd*fgRnd(14,F.C*.5));
+    for(let i=0,n=Math.random()<.5?0:1;i<n;i++){const sd=Math.random()<.5?-1:1,xf=Math.round(F.camX+sd*fgRnd(14,F.C*.5));
       if(Math.abs(xf-F.cx)<12)continue;fgMPose(F,xf,F.mNext+Math.round(fgRnd(-4,4)));}
     // rangées espacées quand la descente a été allongée de 5 secondes, pour ne pas doubler les dégâts
-    F.mNext+=Math.round(fgRnd(17,25)*(1-.3*p));}
+    F.mNext+=Math.round(fgRnd(13,19)*(1-.25*p));}   // rangées plus espacées : il y avait un peu trop de mines (24 novembre 2026)
   for(const m of F.mines){if(!m.ok||Math.abs(m.y-F.d)>1.4||Math.abs(m.x-F.cx)>FG_R-1)continue;m.ok=0;F.touche++;F.stun=.45;F.imp=1.6;
     fgBoom(F,'impact');fgExploseMine(F,m);   /* la mine explose comme la foreuse : cratère, onde de choc, éclats */
     for(let i=0;i<8;i++)fgSmoke(F,m.x+fgRnd(-4,4),m.y+fgRnd(-2,2),fgRnd(-9,9),fgRnd(-6,3),fgRnd(1.2,2),1,2.4);
@@ -303,7 +328,9 @@ function fgMines(F,dt){const bas=F.R*.7;
    il faut tourner un peu pour passer dessus. Il est récolté si le puits le touche (moitié de largeur du puits + 2 cases). */
 function fgAmas(F){
   for(const A of F.amasL){
-    if(!A.c){if(F.d+F.R*.6<A.y)continue;const sd=A.loin||(Math.random()<.5?-1:1);let ax=0;
+    // l'amas naît bien sous le bas de l'écran (0,7 R) : sinon on le voyait apparaître (24 novembre 2026)
+    if(!A.c){if(F.d+F.R*1.15<A.y)continue;
+      const sd=A.loin||(Math.random()<.5?-1:1);let ax=0;
       // les taches ne se posent pas l'une sur l'autre : on cherche une place libre avant de renoncer (23 novembre 2026)
       for(let k=0;k<6;k++){ax=Math.round(F.cx+F.vx*.6+sd*(A.loin?fgRnd(26,Math.max(30,F.C*.48)):fgRnd(9,14)));
         if(!F.amasL.some(O=>O!==A&&O.c&&Math.abs(O.y-A.y)<7&&Math.abs(O.c[0].x-ax)<11))break;ax=NaN;}
@@ -358,7 +385,7 @@ function forageFrame(now){const F=FORAGE;if(!F)return;
     if(F.jeu)fgMines(F,dt);else fgAmas(F);
     for(let y=Math.floor(dPrev);y<=Math.floor(F.d);y++)fgCreuse(F,y);
     F.nx=F.cx;F.ny=F.d;
-    if(F.d>=F.D0){F.d=F.D0;F.ny=F.d;F.ph=2;F.ox=Math.round(F.cx);F.tF=t;F.vy=Math.max(7,(F.d-dPrev)/dt);F.side=F.vx<-1?-1:1;F.vx*=.3;fgBoom(F,'perce');
+    if(F.d>=F.D0){F.d=F.D0;F.ny=F.d;F.ph=2;if(F.ox==null)F.ox=Math.round(F.cx);F.tF=t;F.vy=Math.max(7,(F.d-dPrev)/dt);F.side=F.vx<-1?-1:1;F.vx*=.3;fgBoom(F,'perce');
       F.flash=.35;F.imp=.5;
       fgChips(F,70,F.cx,F.D0+1,9,4,34);
         for(let i=0;i<10;i++)fgSmoke(F,F.cx+fgRnd(-5,5),F.D0+fgRnd(0,3),fgRnd(-6,6),fgRnd(-1,5),fgRnd(1.4,2.2),1.1,2.2);}}
@@ -404,6 +431,9 @@ function forageFrame(now){const F=FORAGE;if(!F)return;
     F.snd.update({vol:F.ph===0?.55*ig:F.ph===1?.9:F.ph===2?.5:F.ph===3?.14:0,rum:.18+.5*F.hs+(F.ph===0?.25*ig:0)+F.imp*.5,rumF:90+F.hs*190+F.imp*260,
       grind:F.ph===1?.1+.3*F.hs+.04*sp:F.ph===0?.04*ig:0,grindF:700+F.hs*1700+sp*400,rot:14+sp*10+(F.ph===0?6*ig:0),
         mot:.05+.05*sp+(F.ph===0?.07*ig:0),motF:36+ig*10+sp*38+F.hs*8});}
+  /* Le décor d'arrivée se fige dès qu'il pourrait entrer dans le champ, et non au percement : sinon il apparaissait d'un coup
+     alors que le sol de la caverne était déjà à l'écran (24 novembre 2026). */
+  if(F.ox==null&&F.decA){fgDecorCv(F,F.decA);if(F.decA.img&&F.fl-F.decA.h1<F.camY+F.R+3)F.ox=Math.round(F.cx);}
   if(!F.sansRendu)fgDraw(F,t);   // sansRendu : pour rejouer la scène en accéléré dans les essais (outils/scripts/test-forage.js)
   if(F.ph===4&&t>=F.tFade+F.fadeLen){endForage();return;}
   requestAnimationFrame(forageFrame);}

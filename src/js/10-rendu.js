@@ -233,11 +233,12 @@ function render(){
     if(pb)put(TL.floor,x,y,.5*k);
     if(t>=WALL)batiTuile(t,x,y,(tl,a)=>put(tl,x,y,a*k));else
     if(t!==BRIDGE)put(TL.ground0,x,y,.6*k);   // sol uniforme : plus de variations près des sites (13 novembre 2026)
-    if(t===ROCK)put(h%3?TL.rock:TL.rock2,x,y,.95*k);
+    if(t===ROCK)put(h%3===0?TL.rock2:h%3===1?TL.rock:TL.rock3,x,y,.95*k);   // trois rochers, à parts égales (24 novembre 2026)
     // sous de la roche dure, la crête se pose sur un fond de roche dure
-    else if(t===MOUNT){const up=y>0?G.t[idx(x,y-1)]:-1;if(up===MOUNT)put(TL.mtBody,x,y,.9*k);else{if(up===HARD)put(TL.softTopBg,x,y,.9*k);
+    // au bord haut de la carte, la case est traitée comme prolongée vers le haut : pas de crête sur la première rangée (24 novembre 2026)
+    else if(t===MOUNT){const up=y>0?G.t[idx(x,y-1)]:t;if(up===MOUNT)put(TL.mtBody,x,y,.9*k);else{if(up===HARD)put(TL.softTopBg,x,y,.9*k);
       put(TL.mtTop,x,y,.9*k);}}
-    else if(t===HARD){const up=y>0?G.t[idx(x,y-1)]:-1;   // comme la montagne : crête irrégulière en haut, posée sur de la roche tendre
+    else if(t===HARD){const up=y>0?G.t[idx(x,y-1)]:t;   // comme la montagne : crête irrégulière en haut, posée sur de la roche tendre
       if(up!==HARD){if(up===MOUNT||up===ROCK)put(TL.hardTopBg,x,y,.9*k);put(TL.hardTop,x,y,.9*k);}else put(TL.hardBody,x,y,.9*k);}
     else if((t===SHIP||t===DECK)&&G.ship){const sk=TL['ship_'+(x-G.ship.x)+'_'+(y-G.ship.y)];if(sk)put(sk,x,y,k);}
     if(t===MOUNT&&G.ore&&G.ore[i]&&!oreSol(G.ore[i]))put(oreTile(G.ore[i],false),x,y,k);
@@ -298,7 +299,9 @@ function render(){
     const pv=ITEM_VAL.balise.pv;if(q.hp<pv){const w=S-6;ctx.fillStyle='#000';ctx.fillRect(px+3,py-4,w,3);ctx.fillStyle=PAL['4'];
       ctx.fillRect(px+3,py-4,Math.round(w*Math.max(0,q.hp)/pv),3);}}
   // barre de vie au-dessus d'une créature blessée (insectoïdes compris depuis le 16 novembre 2026 : ils en étaient privés)
-  const barreVie=(px,py,hp,pv)=>{if(hp>=pv)return;const w=S-6;ctx.fillStyle='#000';ctx.fillRect(px+3,py-4,w,3);ctx.fillStyle=PAL['4'];
+  const barreVie=(px,py,hp,pv)=>{if(hp>=pv)return;const w=S-6;ctx.fillStyle='#000';ctx.fillRect(px+3,py-4,w,3);
+    // rouge fixe, jamais la couleur danger de la palette (24 novembre 2026) : la barre se lit pareil avec toutes les palettes
+    ctx.fillStyle=ROUGE_FIXE;
     ctx.fillRect(px+3,py-4,Math.round(w*Math.max(0,hp)/pv),3);};
   if(G.animals)for(const a of G.animals)if(!fog||vis[idx(a.x,a.y)]){const [lx,ly]=lungeOff(f=>f.kind==='lunge'&&f.beast===a);
     const px=(a.x-camX)*S+lx,py=(a.y-camY)*S+ly;ctx.globalAlpha=1;{const t=TL['an'+a.sp+(a.dir<0?'l':'r')];

@@ -96,7 +96,15 @@ molette ou fine barre pour remonter jusqu'aux 200 derniers messages ; un nouveau
   centre d'abord sous le pointeur.
 - **Tile editor** (Lab) : encres sur deux lignes — les cinq couleurs de la palette (**#1 Monde, #2 Bâti, #3 Bio, #4 Accent,
   #5 Danger**, le même ordre et les mêmes numéros que le menu Palette depuis le 24 novembre 2026), puis Blanc, Noir, **Rouge fixe** (`R`, #d8180b, le même avec toutes les palettes) et Transparent.
-  Nouveaux codes de tuile : `5` (bâti) et `R` (rouge fixe). 
+  S'ajoute **Monde foncé** (`d`), l'encre de la roche dure (24 novembre 2026).
+  Nouveaux codes de tuile : `5` (bâti), `R` (rouge fixe) et `d` (monde foncé).
+- **Montagne dure** (`hardBody`) et **Crête dure** (`hardTop`) sont retouchables depuis le 24 novembre 2026 : sans retouche elles
+  suivent la montagne tendre en encre foncée, avec retouche elles vivent leur vie ; le fond de crête (`hardTopBg`) suit la crête dure.
+  **Rocher 3** (`rock3`) s'ajoute aux deux premiers.
+- **Les barres de vie des ennemis** sont en **rouge fixe** (`ROUGE_FIXE`, #d8180b), jamais la couleur danger de la palette : elles se
+  lisent pareil quelle que soit la palette (24 novembre 2026).
+- **Les menus ne se sélectionnent pas** : deux clics rapides sur un titre le surlignaient en bleu (`user-select:none` sur la
+  colonne ; le journal et les champs de saisie restent sélectionnables). 
 - Sous **REGEN · MONDE · LIFE**, une rangée **NIV1 · NIV2 · NIV3** .
 - Sous-menus repliables : **Inventaire**, **Carte**, **Lab** (Bestiaire, Groupes, Artefacts, Items, Discrétion, Tile editor, **Combat** : un lien qui ouvre le banc dans un autre onglet), **Palette**, **Contrôles** (l'aide des touches, une commande par ligne : la touche, puis ce qu'elle fait ; trois groupes : Se déplacer, Objets, Voir).
 
@@ -141,6 +149,9 @@ X : inspection au clavier · R : courir / marcher · T : équipement · I : inve
 F : forer · Espace / 5 : attendre · P : repos · V : portée de discrétion · B : brouillard · ! : son · M : mode
 carte (déplacements = défilement, Maj = plus vite, Échap ou M pour revenir ; Espace / 5 y attendent toujours, pour les
 essais, sans bouger la vue ).
+
+Le panneau **Contrôles** met la touche et ce qu'elle fait **sur la même ligne**, le texte repassant à la ligne normalement
+(24 novembre 2026 ; avant, la touche était seule sur sa ligne). Il a une section **Réglages** pour F6.
 
 **F6** : enregistre **tout** dans la base de l'artefact (bestiaire, tuiles, palettes, stats de la foreuse, LIFE, Monde, objets,
 artefacts, groupes) — le même enregistrement que les boutons « Enregistrer » du Lab (24 novembre 2026). **F9** : un exemplaire de
