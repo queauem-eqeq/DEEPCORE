@@ -10,7 +10,7 @@
 3. L'empreinte (outils/scripts/empreinte.js) : avec un hasard fixé, trois recettes générées puis 250 actions jouées.
    Comparée à outils/empreinte-reference.txt. Un nettoyage qui ne doit rien changer au jeu doit la laisser
    identique ; un changement de règle la modifie, et c'est alors voulu : relancer avec --maj.
-   (La recette « cavernes » n'est pas reproductible à hasard fixé : elle n'entre pas dans l'empreinte.)
+   (Les recettes « cavernes » et « base » ne sont pas reproductibles à hasard fixé : elles n'entrent pas dans l'empreinte.)
 Code de sortie 0 si tout va bien.
 """
 import os, pathlib, subprocess, sys
@@ -50,7 +50,11 @@ def main():
         if not page:
             print('   ', s.strip().splitlines()[-3:])
     s = jeu(RACINE / 'outils' / 'scripts' / 'empreinte.js', sans_anim=True)
-    lignes = [l.replace('résultat : ', '') for l in s.splitlines() if ' · carte ' in l and not l.replace('résultat : ', '').startswith('cavernes')]
+    # « cavernes » et « base » ne sont pas reproductibles à hasard fixé : elles sortent de l'empreinte (base ajoutée le 24 novembre
+    # 2026 — elle changeait une fois sur trois et faisait crier au loup).
+    HORS = ('cavernes', 'base')
+    lignes = [l.replace('résultat : ', '') for l in s.splitlines()
+              if ' · carte ' in l and not l.replace('résultat : ', '').startswith(HORS)]
     emp = '\n'.join(lignes) + '\n'
     if '--maj' in sys.argv:
         REF.write_text(emp)
