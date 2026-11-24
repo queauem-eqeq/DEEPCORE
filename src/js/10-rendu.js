@@ -299,7 +299,9 @@ function render(){
     const pv=ITEM_VAL.balise.pv;if(q.hp<pv){const w=S-6;ctx.fillStyle='#000';ctx.fillRect(px+3,py-4,w,3);ctx.fillStyle=PAL['4'];
       ctx.fillRect(px+3,py-4,Math.round(w*Math.max(0,q.hp)/pv),3);}}
   // barre de vie au-dessus d'une créature blessée (insectoïdes compris depuis le 16 novembre 2026 : ils en étaient privés)
-  const barreVie=(px,py,hp,pv)=>{if(hp>=pv)return;const w=S-6;ctx.fillStyle='#000';ctx.fillRect(px+3,py-4,w,3);ctx.fillStyle=PAL['4'];
+  const barreVie=(px,py,hp,pv)=>{if(hp>=pv)return;const w=S-6;ctx.fillStyle='#000';ctx.fillRect(px+3,py-4,w,3);
+    // rouge fixe, jamais la couleur danger de la palette (24 novembre 2026) : la barre se lit pareil avec toutes les palettes
+    ctx.fillStyle=ROUGE_FIXE;
     ctx.fillRect(px+3,py-4,Math.round(w*Math.max(0,hp)/pv),3);};
   if(G.animals)for(const a of G.animals)if(!fog||vis[idx(a.x,a.y)]){const [lx,ly]=lungeOff(f=>f.kind==='lunge'&&f.beast===a);
     const px=(a.x-camX)*S+lx,py=(a.y-camY)*S+ly;ctx.globalAlpha=1;{const t=TL['an'+a.sp+(a.dir<0?'l':'r')];

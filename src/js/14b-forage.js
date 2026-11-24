@@ -274,25 +274,26 @@ function skipForage(){const F=FORAGE;if(!F||F.ph>=4)return;
 /* Mines du mini-jeu. Elles naissent une par une, juste sous le bas de l'écran : sept sur dix sont visées sur la route de la foreuse
    (là où elle sera si elle ne tourne pas), les autres semées plus loin ; une fois sur quatre, une seconde mine vient à côté et ne
    laisse qu'un couloir. L'écart entre deux rangées se resserre avec la profondeur. Une mine saute dès qu'elle est dans le puits. */
-/* Deux mines ne se chevauchent jamais (23 novembre 2026) : le pavé d'une mine occupe 9 colonnes sur 5 rangées (fond noir compris),
-   donc toute nouvelle mine garde cet écart avec celles déjà posées, y compris celles des rangées précédentes. */
-const FG_MDX=9,FG_MDY=5;
+/* Deux mines gardent au moins cinq cases de vide entre elles (24 novembre 2026 ; avant : elles se touchaient sans se chevaucher).
+   Le pavé fait 7 colonnes sur 3 rangées, d'où 7+5 et 3+5 : toute nouvelle mine garde cet écart avec celles déjà posées, y compris
+   celles des rangées précédentes. */
+const FG_MDX=12,FG_MDY=8;
 const fgMLibre=(F,x,y)=>!F.mines.some(m=>m.ok&&Math.abs(m.x-x)<FG_MDX&&Math.abs(m.y-y)<FG_MDY);
 /* pose une mine en (x, y) ; si la place est prise, essaie un peu plus loin sur les côtés, puis renonce */
 function fgMPose(F,x,y){
   for(let k=0;k<5;k++){const xx=x+(k?(k&1?1:-1)*FG_MDX*((k+1)>>1):0);
     if(fgMLibre(F,xx,y)){F.mines.push({x:xx,y,ok:1});return true;}}
   return false;}
-function fgMines(F,dt){const bas=F.R*.7;
+function fgMines(F,dt){const bas=F.R*1.15;   // bien sous le bas de l'écran (0,7 R) : sinon la rangée apparaissait à vue (24 novembre 2026)
   while(F.mNext<F.D0-16&&F.d+bas>=F.mNext){const p=F.d/F.D0,vise=Math.random()<.7,
     x=Math.round(F.cx+F.vx*.9+(vise?fgRnd(-4,4):(Math.random()<.5?-1:1)*fgRnd(12,26)));
     fgMPose(F,x,F.mNext);
       if(Math.random()<.25)fgMPose(F,x+(Math.random()<.5?-1:1)*Math.round(fgRnd(15,19)),F.mNext+Math.round(fgRnd(-2,2)));
     // plus loin sur les côtés, sur toute la largeur de l'écran : des mines qui ne dépendent pas de la route de la foreuse (23 novembre 2026)
-    for(let i=0,n=Math.random()<.5?1:2;i<n;i++){const sd=Math.random()<.5?-1:1,xf=Math.round(F.camX+sd*fgRnd(14,F.C*.5));
+    for(let i=0,n=Math.random()<.5?0:1;i<n;i++){const sd=Math.random()<.5?-1:1,xf=Math.round(F.camX+sd*fgRnd(14,F.C*.5));
       if(Math.abs(xf-F.cx)<12)continue;fgMPose(F,xf,F.mNext+Math.round(fgRnd(-4,4)));}
     // rangées espacées quand la descente a été allongée de 5 secondes, pour ne pas doubler les dégâts
-    F.mNext+=Math.round(fgRnd(17,25)*(1-.3*p));}
+    F.mNext+=Math.round(fgRnd(19,26)*(1-.25*p));}   // rangées plus espacées : il y avait un peu trop de mines (24 novembre 2026)
   for(const m of F.mines){if(!m.ok||Math.abs(m.y-F.d)>1.4||Math.abs(m.x-F.cx)>FG_R-1)continue;m.ok=0;F.touche++;F.stun=.45;F.imp=1.6;
     fgBoom(F,'impact');fgExploseMine(F,m);   /* la mine explose comme la foreuse : cratère, onde de choc, éclats */
     for(let i=0;i<8;i++)fgSmoke(F,m.x+fgRnd(-4,4),m.y+fgRnd(-2,2),fgRnd(-9,9),fgRnd(-6,3),fgRnd(1.2,2),1,2.4);
@@ -303,7 +304,9 @@ function fgMines(F,dt){const bas=F.R*.7;
    il faut tourner un peu pour passer dessus. Il est récolté si le puits le touche (moitié de largeur du puits + 2 cases). */
 function fgAmas(F){
   for(const A of F.amasL){
-    if(!A.c){if(F.d+F.R*.6<A.y)continue;const sd=A.loin||(Math.random()<.5?-1:1);let ax=0;
+    // l'amas naît bien sous le bas de l'écran (0,7 R) : sinon on le voyait apparaître (24 novembre 2026)
+    if(!A.c){if(F.d+F.R*1.15<A.y)continue;
+      const sd=A.loin||(Math.random()<.5?-1:1);let ax=0;
       // les taches ne se posent pas l'une sur l'autre : on cherche une place libre avant de renoncer (23 novembre 2026)
       for(let k=0;k<6;k++){ax=Math.round(F.cx+F.vx*.6+sd*(A.loin?fgRnd(26,Math.max(30,F.C*.48)):fgRnd(9,14)));
         if(!F.amasL.some(O=>O!==A&&O.c&&Math.abs(O.y-A.y)<7&&Math.abs(O.c[0].x-ax)<11))break;ax=NaN;}
