@@ -142,6 +142,9 @@ F : forer · Espace / 5 : attendre · P : repos · V : portée de discrétion ·
 carte (déplacements = défilement, Maj = plus vite, Échap ou M pour revenir ; Espace / 5 y attendent toujours, pour les
 essais, sans bouger la vue ).
 
+Le panneau **Contrôles** met la touche et ce qu'elle fait **sur la même ligne**, le texte repassant à la ligne normalement
+(24 novembre 2026 ; avant, la touche était seule sur sa ligne). Il a une section **Réglages** pour F6.
+
 **F6** : enregistre **tout** dans la base de l'artefact (bestiaire, tuiles, palettes, stats de la foreuse, LIFE, Monde, objets,
 artefacts, groupes) — le même enregistrement que les boutons « Enregistrer » du Lab (24 novembre 2026). **F9** : un exemplaire de
 chaque consommable dans l'inventaire.
