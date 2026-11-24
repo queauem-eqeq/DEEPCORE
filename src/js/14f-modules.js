@@ -13,7 +13,7 @@ const MDL_TERR=[['?','Libre',''],['.','Sol','ground0'],['R','Rocher','rock'],['M
   ['S','Sol bâti','floor'],['B','Sol (pont)','solPont'],['C','Gouffre',''],['D','Porte','door'],['O','Pilier','pillar']];
 const MDL_MARQ=[['x','Entrée','1','E'],['m','Machine','5','M'],['b','Butin','2','B'],['e','Ennemi','4','!']];
 const MDL_PRAT='.GFSDB',MDL_MIN=3,MDL_MAX=16,MDL_NB_MAX=6,MDL_C=32;
-let MODULES=[],MODULES_NB={},MDL_ED={i:0,couche:'t',code:'X',suppr:false};
+let MODULES=[],MODULES_NB={},MDL_ED={i:0,couche:'t',code:'X',suppr:false,nbRec:''};
 const mdlRecs=()=>Object.keys(RECETTES).map(k=>[k,String(RECETTES[k].n||k).split(' :')[0]]);
 const mdlLigne=(n,c)=>c.repeat(n);
 function mdlNeuf(){const w=9,h=7,t=[],m=[];for(let y=0;y<h;y++){t.push(mdlLigne(w,y===0||y===h-1?'X':'S').replace(/^.|.$/g,'X'));
@@ -90,15 +90,20 @@ function mdlListe(){const L=$('mdlList');
   L.innerHTML=MODULES.length?MODULES.map((o,i)=>`<button class="mdlit" data-i="${i}" aria-pressed="${i===MDL_ED.i}">`+
     `<img src="${mdlImage(o,4)}" alt="" width="${o.w*4}" height="${o.h*4}"><span><b>${mdlEsc(o.nom)}</b><small>${o.w} × ${o.h}</small></span></button>`).join('')
     :'<p class="mnote">La banque est vide. « Nouveau » crée un premier module.</p>';
-  $('mdlNb').innerHTML=mdlRecs().map(([k,n])=>`<label>${mdlEsc(n)} <input type="number" min="0" max="${MDL_NB_MAX}" step="1" data-nb="${k}" `+
-    `value="${MODULES_NB[k]||0}"><small>${MODULES.filter(o=>o.rec[k]).length} dispo.</small></label>`).join('');}
+  mdlNombre();}
+// « Modules posés par carte » : un niveau à la fois, choisi dans le sélecteur
+function mdlNombre(){const S=$('mdlNbRec'),recs=mdlRecs();if(!recs.some(([k])=>k===MDL_ED.nbRec))MDL_ED.nbRec=recs[0][0];
+  S.innerHTML=recs.map(([k,n])=>`<option value="${k}"${k===MDL_ED.nbRec?' selected':''}>${mdlEsc(n)}</option>`).join('');
+  const k=MDL_ED.nbRec,d=MODULES.filter(o=>o.rec[k]).length;$('mdlNbVal').value=MODULES_NB[k]||0;
+  $('mdlNbDispo').textContent=`${d} module${d>1?'s':''} pour ce niveau`;}
 function mdlPinceaux(){const b=(couche,code,nom,ic)=>`<button class="mdlpn" data-couche="${couche}" data-code="${code}" title="${mdlEsc(nom)}" `+
-    `aria-pressed="${MDL_ED.couche===couche&&MDL_ED.code===code}">${ic}<span>${mdlEsc(nom)}</span></button>`;
+    `aria-label="${mdlEsc(nom)}" aria-pressed="${MDL_ED.couche===couche&&MDL_ED.code===code}">${ic}</button>`;
   const tuile=cle=>{const o={w:1,h:1,t:[cle],m:['.']};return `<img src="${mdlImage(o,24)}" alt="" width="24" height="24">`;};
   $('mdlTerr').innerHTML=MDL_TERR.map(a=>b('t',a[0],a[1],tuile(a[0]))).join('');
   $('mdlMarq').innerHTML=MDL_MARQ.map(a=>b('m',a[0],a[1],`<img src="${mdlImage({w:1,h:1,t:['S'],m:[a[0]]},24)}" alt="" width="24" height="24">`)).join('')+
     b('m','.','Effacer','<i class="mdlgomme"></i>');}
-function mdlFiche(){const o=mdlCourant(),F=$('mdlFiche');$('mdlEd').hidden=!o;F.hidden=!o;$('mdlVide').hidden=!!o;if(!o)return;
+function mdlFiche(){const o=mdlCourant(),F=$('mdlFiche');$('mdlEd').hidden=!o;F.hidden=!o;$('mdlVide').hidden=!!o;
+  if(!o){$('mdlAvis').innerHTML='';$('mdlVar').innerHTML='';return;}
   mdlDessine($('mdlCv'),o,MDL_C,true);$('mdlNom').value=o.nom;$('mdlW').value=o.w;$('mdlH').value=o.h;
   $('mdlRec').innerHTML=mdlRecs().map(([k,n])=>`<label><input type="checkbox" data-rec="${k}"${o.rec[k]?' checked':''}> ${mdlEsc(n)}</label>`).join('');
   const vs=mdlVariantes(o);
@@ -137,8 +142,9 @@ if(typeof document!=='undefined'&&$('mdlBtn')){
     if(!MDL_ED.suppr){MDL_ED.suppr=true;$('mdlSuppr').textContent='Confirmer ?';return;}
     MODULES.splice(MDL_ED.i,1);MDL_ED.i=Math.max(0,Math.min(MDL_ED.i,MODULES.length-1));mdlChange('Module supprimé.');};
   $('mdlList').addEventListener('click',ev=>{const b=ev.target.closest('.mdlit');if(!b)return;MDL_ED.i=+b.dataset.i;mdlListe();mdlFiche();});
-  $('mdlNb').addEventListener('change',ev=>{const k=ev.target.dataset.nb;if(!k)return;
-    MODULES_NB[k]=Math.max(0,Math.min(MDL_NB_MAX,Math.round(+ev.target.value||0)));mdlChange();});
+  $('mdlNbRec').addEventListener('change',()=>{MDL_ED.nbRec=$('mdlNbRec').value;mdlNombre();});
+  $('mdlNbVal').addEventListener('change',()=>{
+    MODULES_NB[MDL_ED.nbRec]=Math.max(0,Math.min(MDL_NB_MAX,Math.round(+$('mdlNbVal').value||0)));mdlChange();});
   for(const id of ['mdlTerr','mdlMarq'])$(id).addEventListener('click',ev=>{const b=ev.target.closest('.mdlpn');if(!b)return;
     MDL_ED.couche=b.dataset.couche;MDL_ED.code=b.dataset.code;mdlPinceaux();});
   $('mdlNom').addEventListener('change',()=>{const o=mdlCourant();if(!o)return;o.nom=$('mdlNom').value.trim().slice(0,30)||'Module';mdlChange();});

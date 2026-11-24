@@ -67,30 +67,28 @@
 <div class="modal" id="modules" role="dialog" aria-modal="true" aria-labelledby="mdlTitle" hidden>
   <div class="mcard wide" tabindex="-1">
     <div class="mhead"><h2 id="mdlTitle">Modules</h2><span class="saved" id="mdlMsg" role="status"></span><button id="mdlSave">Enregistrer</button><button id="mdlClose" aria-label="Fermer les modules">Fermer</button></div>
-    <p class="mnote">Des morceaux de carte dessinés à la main (3 × 3 à 16 × 16), que chaque recette pourra tirer et poser avant de générer le reste. <b>Niveau 1 : branché</b> — les modules tirés deviennent des pièces du complexe, reliées par leurs entrées (REGEN ou NIV1 pour voir). Niveaux 2, 3 et Classique : pas encore.</p>
     <div class="mdlcols">
       <section class="mdlside" aria-label="Banque de modules">
         <div class="cur-tools"><button id="mdlNew">Nouveau</button><button id="mdlDup">Dupliquer</button></div>
         <div class="mdllist" id="mdlList"></div>
-        <h3>Modules posés par carte</h3>
-        <div class="mdlnb" id="mdlNb"></div>
       </section>
-      <section class="mdled" id="mdlEd" aria-label="Dessin du module">
-        <div class="mdlcvwrap"><canvas id="mdlCv" width="252" height="196" aria-label="Grille du module : cliquer ou glisser pour peindre"></canvas></div>
+      <section class="mdlmid" aria-label="Dessin du module">
+        <div class="mdled" id="mdlEd"><canvas id="mdlCv" width="252" height="196" aria-label="Grille du module : cliquer ou glisser pour peindre"></canvas></div>
+        <p class="mnote" id="mdlVide" hidden>Aucun module sélectionné.</p>
+        <div class="mdlnb"><label for="mdlNbRec">Modules posés par carte :</label><select id="mdlNbRec" aria-label="Niveau"></select><input type="number" id="mdlNbVal" min="0" max="6" step="1" aria-label="Nombre de modules posés par carte"><small id="mdlNbDispo"></small></div>
         <ul class="mdlavis" id="mdlAvis"></ul>
+        <div class="mdlvar" id="mdlVar"></div>
       </section>
-      <p class="mnote" id="mdlVide" hidden>Aucun module sélectionné.</p>
       <section class="mdlfiche" id="mdlFiche" aria-label="Réglages du module">
         <label class="mdlch">Nom <input type="text" id="mdlNom" maxlength="30" autocomplete="off" spellcheck="false"></label>
-        <div class="mdltaille"><label>Largeur <input type="number" id="mdlW" min="3" max="16" step="1"></label><label>Hauteur <input type="number" id="mdlH" min="3" max="16" step="1"></label></div>
+        <div class="mdltaille"><label>L <input type="number" id="mdlW" min="3" max="16" step="1" aria-label="Largeur" title="Largeur"></label><label>H <input type="number" id="mdlH" min="3" max="16" step="1" aria-label="Hauteur" title="Hauteur"></label></div>
         <h3>Terrain</h3>
         <div class="mdlpns" id="mdlTerr"></div>
         <div class="cur-tools"><button id="mdlFill" title="Peint tout le module avec le terrain choisi">Tout remplir</button></div>
-        <h3>Emplacements <small>remplis par le jeu</small></h3>
+        <h3>Emplacements</h3>
         <div class="mdlpns" id="mdlMarq"></div>
-        <h3>Recettes qui peuvent le tirer</h3>
+        <h3>Tiré par</h3>
         <div class="mdlrec" id="mdlRec"></div>
-        <div class="mdlvar" id="mdlVar"></div>
         <div class="cur-tools"><button id="mdlSuppr">Supprimer</button></div>
       </section>
     </div>
