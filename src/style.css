@@ -499,7 +499,9 @@ kbd{font-family:var(--mono);color:var(--fg);border:1px solid var(--line);padding
 .mdlit{min-width:0;display:flex;align-items:center;gap:8px;padding:4px 6px;text-align:left;text-transform:none;letter-spacing:0;border-color:var(--line)}
 .mdlit[aria-pressed=true]{border-color:var(--c1);color:var(--c1)}
 .mdlit img,.mdlvar img,.mdlpn img{image-rendering:pixelated;flex:0 0 auto}
-.mdlit span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* nom du module : sur deux lignes quand il est long, coupé au-delà */
+.mdlit span{min-width:0}
+.mdlit b{font-weight:normal;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;overflow-wrap:anywhere;line-height:1.25}
 .mdlit small,.mdlnb small{display:block;color:var(--dim)}
 .mdlnb{display:grid;gap:4px}
 .mdlnb label{display:grid;grid-template-columns:1fr auto;gap:2px 8px;align-items:center;color:var(--dim)}

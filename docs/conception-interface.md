@@ -187,6 +187,7 @@ sa liste et posera **en priorité**, avant de générer le reste. **Branché sur
   poser (0 à 6) pour chacune.
 - **Avertissements** sous la grille : module vide, aucune entrée, entrée qui ne touche ni le bord ni une case libre,
   aucune recette cochée.
+- **Liste** : le nom d'un module passe sur deux lignes quand il est long (coupé au-delà).
 - **Gestes** : cliquer ou glisser pour peindre ; « Tout remplir » ; Nouveau, Dupliquer, Supprimer (deux clics).
 - **Enregistrement** : dans le navigateur à chaque modification (`np-modules`) ; « Enregistrer » l'envoie dans la base
   de l'artefact (champ `modules` de `reglages/courant` : `liste` et `nb`). Code : `14f-modules.js`.

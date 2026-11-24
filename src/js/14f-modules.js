@@ -86,7 +86,7 @@ const mdlCourant=()=>MODULES[MDL_ED.i]||null;
 const mdlEsc=s=>String(s).replace(/[&<>"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));
 function mdlListe(){const L=$('mdlList');
   L.innerHTML=MODULES.length?MODULES.map((o,i)=>`<button class="mdlit" data-i="${i}" aria-pressed="${i===MDL_ED.i}">`+
-    `<img src="${mdlImage(o,4)}" alt="" width="${o.w*4}" height="${o.h*4}"><span>${mdlEsc(o.nom)}<small>${o.w} × ${o.h}</small></span></button>`).join('')
+    `<img src="${mdlImage(o,4)}" alt="" width="${o.w*4}" height="${o.h*4}"><span><b>${mdlEsc(o.nom)}</b><small>${o.w} × ${o.h}</small></span></button>`).join('')
     :'<p class="mnote">La banque est vide. « Nouveau » crée un premier module.</p>';
   $('mdlNb').innerHTML=mdlRecs().map(([k,n])=>`<label>${mdlEsc(n)} <input type="number" min="0" max="${MDL_NB_MAX}" step="1" data-nb="${k}" `+
     `value="${MODULES_NB[k]||0}"><small>${MODULES.filter(o=>o.rec[k]).length} dispo.</small></label>`).join('');}
