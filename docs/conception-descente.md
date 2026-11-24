@@ -13,8 +13,8 @@ Partie du document de conception (sommaire et règles à ne pas casser : `concep
   Deux chiffres flottants, et les deux effets visuels (croix rouges et flèches bio) partent ensemble.
 - **Destruction d'un ennemi** : une **gerbe d'étincelles** (35 à 50) qui filent droit, très vite, avec une courte
   traîne, éteintes en un quart de seconde, et **14 à 22 débris de carcasse** projetés en l'air qui retombent,
-  **rebondissent une ou deux fois**, puis **restent au sol** (sauf dans l'eau, un gouffre ou un obstacle). **Deux
-  couleurs seulement, monde et accent.** Au plus 1 500 débris gardés sur la carte ; ils restent en souvenir
+  **rebondissent une ou deux fois**, puis **restent au sol** (sauf dans l'eau, un gouffre ou un obstacle). **Une
+  seule couleur : le monde.** Au plus 1 500 débris gardés sur la carte ; ils restent en souvenir
   (atténués) hors de vue. Pixel art strict, sans opacité.
 - **Foreuse endommagée** : sous **50 PV** elle **fume** (grains gris opaques de 1 ou 2 pixels de tuile, qui montent
   en ondulant et disparaissent d'un coup, et restent sur place quand elle avance, comme une traînée) ; sous **20
@@ -94,8 +94,9 @@ Pour le passage au niveau suivant. Vue **de côté**, tout en **caractères ASCI
 - **Vérification** : `python3 outils/forage.py DOSSIER [t1 t2 …]`. Mesuré le 21 novembre 2026 : 52 images par seconde.
 - **Amas de Matière (demande de l'utilisateur)** : à la première descente, **plusieurs amas irréguliers de
   20 caractères**, couleur accent. **Chaque caractère touché par le puits rapporte 1 de Matière.** Trois amas naissent près de
-  la route (9 à 14 cases à côté : il faut tourner), six loin à gauche et à droite, hors d'atteinte, pour que le sous-sol ait
-  l'air d'exister aussi sur les côtés. Maximum 60 par descente ; mesuré : 6 sans piloter, 54 en visant (`test-forage.js`).
+  la route (9 à 14 cases à côté : il faut tourner), seize loin à gauche et à droite (jusqu'au bord de l'écran), hors d'atteinte, pour que le sous-sol ait
+  l'air d'exister aussi sur les côtés (23 novembre 2026 : six avant). Deux taches ne se posent pas l'une sur l'autre (7 rangées et 11 colonnes d'écart au minimum) : celle qui n'a pas de place est
+  abandonnée. Maximum 60 par descente ; mesuré : 6 sans piloter, 54 en visant (`test-forage.js`).
   
 - **Annonce en gros** : alignée à gauche, juste sous le tableau de bord, dans un cadre plein à fond noir avec deux bandes de chantier. Tout en **police DOS** (Modern DOS 8x16, CP437, domaine public : `02b-police-dos.js`, `dosCar`, `dosTexte`), un pixel de police calé sur des pixels d'écran, d'après les références de l'utilisateur (`F:\WORK\IAZONE\DEEPCORE\REF`). **Apparition** (2 s), de gauche à droite avec du désordre : chaque case monte en densité « . → i → 0 », puis montre des caractères au hasard sur des pavés de couleur (couleur de l'alerte ou gris, en inverse vidéo) avant de se figer ; le rebord et les bandes montent en « ░ ▒ ▓ █ ». Le message reste 4 s. **Disparition** (1 s), colonne par colonne de gauche à droite, à rebours : pavés, « 0 → i → . », plus rien ; la roche reparaît derrière. Première descente : « MATIÈRE {µ} DÉTECTÉE / COLLECTE POSSIBLE » (couleur accent) ; seconde : « EXPLOSIFS DÉTECTÉS / ATTENTION SOUS-SOL PIÉGÉ ! » (rouge). Le cadre a **la même taille aux deux descentes et à l'arrivée** (30 cases de large, règle `fgAnnP`, 30 % de la largeur de l'écran) ; deux lignes sont réservées sous le tableau de bord pour ses alertes qui clignotent, que l'annonce ne cache pas.
 
@@ -118,7 +119,12 @@ Du niveau 2 au niveau 3, la descente se joue. `playForage(suite, 2)` ; **NIV3** 
 - Caractères d'un 52ᵉ de la hauteur d'écran, comme à la première descente. La foreuse est tenue en haut de l'écran : on voit 0,7 écran devant elle (aux deux descentes). La descente est plus longue que la première et la foreuse répond plus vite aux commandes.
 - Des **mines explosives** naissent juste sous le bas de l'écran, par rangées de plus en plus
   serrées. Sept sur dix sont visées sur la route de la foreuse ; une fois sur quatre, une seconde mine vient à côté.
-  Une mine est un pavé plein de 7 × 3 caractères, rouge et blanc en alternance.
+  Une mine est un pavé plein de 7 × 3 caractères, rouge et blanc en alternance. **Une ou deux mines de plus par rangée** sont
+  semées sur toute la largeur de l'écran, indépendamment de la route de la foreuse (au moins 12 colonnes d'elle), pour que les mines
+  n'existent pas seulement sous elle (23 novembre 2026).
+- **Deux mines ne se chevauchent jamais** : le pavé occupe 9 colonnes sur 5 rangées (fond noir compris), et toute mine posée garde cet
+  écart avec celles déjà en place, les rangées précédentes comprises (`fgMPose`, `FG_MDX`, `FG_MDY`). Si la place est prise, la mine
+  glisse de 9 colonnes, jusqu'à deux fois de chaque côté, puis renonce. Vérifié : 420 mines posées, aucune paire qui se chevauche.
 - Toucher une mine (elle saute dès qu'elle est dans le puits) coûte **12 points de vie** (`FG_MINE_DM`), de la vraie vie de la
   foreuse. **À zéro, la foreuse explose** : écran « FOREUSE DÉTRUITE », pas de niveau 3.
 - Échap passe la scène contre **30 points de vie** (`FG_PASSE_DM`), sans jamais tuer. Espace et Entrée ne passent plus.
@@ -128,8 +134,25 @@ Du niveau 2 au niveau 3, la descente se joue. `playForage(suite, 2)` ; **NIV3** 
   27 secondes environ ; les rangées de mines sont espacées de 17 à 25 lignes pour ne pas doubler les dégâts, 23 mines
   environ) ; **la roche dure du mini-jeu est en couleur bio** (le basalte était gris) ; **les commandes de direction sont
   inversées aux deux descentes** : la touche de gauche pousse la foreuse à droite, et l'inverse, au clavier comme au doigt.
-- Mesuré (`outils/scripts/test-forage.js`, douze descentes par pilote) : sans diriger, 6,5 mines
-  touchées et 75 points perdus, 4 foreuses détruites sur 12 ; pilote maladroit, 41 points ; pilote attentif, 6 points.
+- Mesuré (`outils/scripts/test-forage.js`, douze descentes par pilote) : sans diriger, 8 mines
+  touchées et 91 points perdus, 9 foreuses détruites sur 20 ; pilote maladroit, 54 points ; pilote attentif, 13 points (mesuré le
+  23 novembre 2026, avec les mines des côtés ; avant : 6,5 mines, 75 points, 4 détruites sur 12).
+
+### Transitions, plancher et palettes des descentes (23 novembre 2026)
+
+- **Entrée et sortie des deux descentes** : la sortie éteint l'écran case par case (« ▒ ░ · » puis le noir) ; l'entrée joue la même
+  animation à l'envers (`FG_ENT`, 0,8 s : le noir se rallume case par case). La mort garde sa propre extinction.
+- **Plancher de départ et plancher d'arrivée** : la carte, vue de dessus, est lue en coupe sur la rangée de la foreuse et dressée de
+  côté (`fgCoupe`, `fgDecor`) : une case de carte = 4 colonnes, un mur = 14 rangées. Le décor est tracé **une seule fois dans son
+  propre canevas**, puis posé d'un bloc à chaque image (sinon deux mille caractères à retracer soixante fois par seconde). **Départ** : l'endroit réel où l'on fore, lu
+  sur le niveau quitté. Un bâtiment montre ses **murs et son toit en couleur bâti**, sa **porte** percée dans le mur, au plus
+  **deux ensembles de machines** en couleur monde (une antenne est un mât) ; les roches alentour dessinent une **crête** en couleur
+  monde, lissée d'une case à l'autre pour qu'elle ondule, et de plus en plus dense vers sa base (« ▀ ░ ▒ ▓ »). **Arrivée** : le même dessin, lu sur le niveau d'arrivée, posé sur le sol de la caverne. Le niveau d'arrivée est donc
+  **généré avant la scène** (`descendre()`, `14b-forage.js`), qui se joue par-dessus la partie déjà changée.
+- **Palette par niveau** : à chaque niveau, la palette change (`palNiveauSuivant`, `02-palette.js`), tirée au hasard parmi les
+  palettes prédéfinies, jamais la même deux fois de suite ; elle ne touche pas à la palette choisie par le joueur, que reprend le
+  niveau 1. Pendant la descente, **les roches passent de la palette du départ à celle de l'arrivée** (14 paliers de profondeur,
+  `fgMC`) ; leur gris prend un peu de la couleur monde. **La foreuse garde les couleurs du départ.**
 
 ### Enchaînement dans le jeu
 
@@ -142,8 +165,7 @@ La descente compte `NIV_MAX = 3` niveaux (table `NIVEAUX`, `00-base.js`).
   descente : REGEN sur la recette cavernes n'en pose pas.
 - `G.niv` porte le numéro du niveau ; le panneau affiche « Niveau N · largeur × hauteur ».
 - **Forer le site du dernier niveau** gagne la partie comme avant (« NOYAU ATTEINT »). **Forer celui d'un niveau
-  précédent** (`end`, `09-vision-deplacement-forage.js`) ferme l'écran de forage, joue la cinématique, puis appelle
-  `niveauSuivant()`.
+  précédent** (`end`, `09-vision-deplacement-forage.js`) ferme l'écran de forage et lance `descendre()` : `niveauSuivant()` est appelé **avant** la scène (voir ci-dessus).
 - `niveauSuivant()` : le niveau 2 est généré avec **la recette « cavernes » et les réglages que le joueur lui a
   donnés dans le menu Monde** (ceux gardés dans `GEN.rec.cavernes`, archétype bâti compris ; les valeurs de départ s'il n'y
   a jamais touché), quelle que soit la recette affichée dans le menu (`RECETTE_NIV`). La taille de carte, l'eau et

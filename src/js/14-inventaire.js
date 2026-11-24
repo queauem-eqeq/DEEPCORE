@@ -225,11 +225,13 @@ function invEquip(i){const o=G.inv[i];if(!o||G.over)return;const d=ITEMS[o.k],e=
    ni eau profonde, ni porte, ni créature, ni autre objet ou clé. Faute de place dans les environs, l'objet tombe quand même sous la foreuse. */
 /* Une case au sol pour un objet qui tombe (22 novembre 2026) : jamais sur un autre objet. On part de (x0, y0) — elle-même si
    soi et si elle est libre —, puis les cases voisines de proche en proche, sans traverser les obstacles. Libre : praticable,
-   ni eau profonde, ni porte, ni pont du vaisseau, sans créature (sauf en partant d'elle : un robot abattu), sans objet ni clé. */
+   ni eau profonde, ni porte, ni pont du vaisseau, sans créature (sauf en partant d'elle : un robot abattu), sans objet ni clé, **jamais sous la foreuse**. */
 function caseSol(x0,y0,soi){const sansObjet=i=>!(G.items&&G.items[i]&&G.items[i].length)&&!(G.cles&&G.cles[i]);
   const lib=(x,y)=>{const t=G.t[idx(x,y)],i=idx(x,y);
-    return !blocks(t)&&t!==DEEP&&t!==DOOR&&t!==DECK&&!beastAt(x,y)&&!animalAt(x,y)&&sansObjet(i);};
-  const i0=idx(x0,y0);if(soi&&!blocks(G.t[i0])&&G.t[i0]!==DEEP&&sansObjet(i0))return i0;
+    return !blocks(t)&&t!==DEEP&&t!==DOOR&&t!==DECK&&!beastAt(x,y)&&!animalAt(x,y)&&!(x===G.px&&y===G.py)&&sansObjet(i);};
+  const i0=idx(x0,y0);
+  // jamais sous la foreuse (24 novembre 2026) : un objet qui tomberait là roule sur la case libre la plus proche
+  if(soi&&!blocks(G.t[i0])&&G.t[i0]!==DEEP&&!(x0===G.px&&y0===G.py)&&sansObjet(i0))return i0;
   const ORD=[[0,-1],[1,0],[0,1],[-1,0],[1,-1],[1,1],[-1,1],[-1,-1]],vu=new Set([i0]),q=[[x0,y0]];
   for(let k=0;k<q.length&&k<600;k++){const [x,y]=q[k];
     for(const [dx,dy] of ORD){const a=x+dx,b=y+dy;if(a<1||b<1||a>=W-1||b>=H-1)continue;const j=idx(a,b);if(vu.has(j))continue;vu.add(j);

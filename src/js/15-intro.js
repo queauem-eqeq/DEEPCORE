@@ -270,25 +270,33 @@ $('niv1Btn').onclick=()=>{unlock();if(TRAV)stopTravel();
   const sauve=JSON.parse(JSON.stringify(GEN));recRange();recPrend(RECETTE_NIV(1));hasardReglages();newGame();
   genRemet(sauve);started=true;$('overlay').hidden=true;render();playIntro();};
 $('niv2Btn').onclick=()=>{unlock();if(TRAV)stopTravel();$('overlay').hidden=true;started=true;
-  playForage(()=>{G.niv=1;niveauSuivant(true);render();},1);};
+  descendre(1,true,()=>{G.niv=1;});};
 // Niv3 : la seconde descente (mini-jeu des mines), puis une grande base aux réglages tirés au hasard
 $('niv3Btn').onclick=()=>{unlock();if(TRAV)stopTravel();$('overlay').hidden=true;started=true;
-  playForage(()=>{G.niv=2;niveauSuivant(true);render();},2);};
-function savePresets(){try{localStorage.setItem('np-presets',JSON.stringify(PRESETS.map(p=>p.c)));
+  descendre(2,true,()=>{G.niv=2;});};
+function savePresets(){try{localStorage.setItem('np-presets',JSON.stringify(PRESETS.map(p=>({n:p.n,c:p.c}))));
   localStorage.setItem('np-preset-active',PRESET_ACTIVE);}catch(e){}touchLocal();}
 function drawPresets(){$('presets').innerHTML=PRESETS.map((p,i)=>`<button data-p="${i}" title="${p.n}" aria-label="Palette ${p.n}" aria-pressed="${i===PRESET_ACTIVE}">${[2,4,1,0,3].map(j=>`<i style="background:${p.c[j]}"></i>`).join('')}</button>`).join('');
-  $('palName').textContent=PRESETS[PRESET_ACTIVE].n;}
+  if($('palName')!==document.activeElement)$('palName').value=PRESETS[PRESET_ACTIVE].n;}
+/* Nom de la palette en cours, modifiable (24 novembre 2026) : la liste des palettes se rafraîchit, sans toucher au champ en cours de saisie. */
+function renommePalette(){const v=$('palName').value.trim();if(!v||v===PRESETS[PRESET_ACTIVE].n)return;
+  PRESETS[PRESET_ACTIVE].n=v;savePresets();drawPresets();}
+$('palName').addEventListener('input',renommePalette);
+$('palName').addEventListener('blur',()=>{$('palName').value=PRESETS[PRESET_ACTIVE].n;});
+$('palSave').onclick=()=>saveSettings($('palSave'),$('palMsg'));
 function usePreset(i){closePick();PRESET_ACTIVE=i;const c=PRESETS[i].c;savePresets();drawPresets();setPal(palDe(c));}
-// Sélecteur de teinte : les 64 couleurs de LACKING64 (02-palette), depuis le 22 novembre 2026.
+/* Sélecteur de teinte : les 64 couleurs de LACKING64 (02-palette), depuis le 22 novembre 2026. Le nuancier vit sous le titre
+   « Palette », au-dessus des cinq teintes (24 novembre 2026) : cliquer une teinte l'ouvre, recliquer la même le referme. */
 let pickKey=null;
 function openPick(k){const grid=$('cgrid');if(pickKey===k){closePick();return;}pickKey=k;
   PAL_CLES.forEach(x=>$('pc'+x).setAttribute('aria-expanded',x===k));
-  $('pc'+k).closest('label').after(grid);
   grid.innerHTML=LACKING64.map(c=>`<button role="option" data-c="${c}" style="background:${c}" title="${c}" aria-label="${c}" aria-selected="${c.toLowerCase()===String(PAL_U[k]).toLowerCase()}"></button>`).join('');
   grid.hidden=false;}
 function closePick(){pickKey=null;$('cgrid').hidden=true;PAL_CLES.forEach(x=>$('pc'+x).setAttribute('aria-expanded','false'));}
 function applyColor(k,c){const j=+k-1;PRESETS[PRESET_ACTIVE].c[j]=c;savePresets();drawPresets();setPal(Object.assign({},PAL_U,{[k]:c}));}
-PAL_CLES.forEach(k=>$('pc'+k).addEventListener('click',e=>{e.preventDefault();openPick(k);}));
+/* stopPropagation : sans lui, le clic remonte au <label for=…>, qui le renvoie au bouton — openPick était appelé deux fois et le
+   nuancier se rouvrait aussitôt refermé (24 novembre 2026). */
+PAL_CLES.forEach(k=>$('pc'+k).addEventListener('click',e=>{e.preventDefault();e.stopPropagation();openPick(k);}));
 // la palette reste ouverte pour essayer d'autres couleurs (21 novembre 2026) ; on la ferme en recliquant sur la pastille ou avec Échap
 $('cgrid').addEventListener('click',e=>{const b=e.target.closest('button[data-c]');if(!b||!pickKey)return;const k=pickKey;applyColor(k,b.dataset.c);
   $('cgrid').querySelectorAll('button[data-c]').forEach(x=>x.setAttribute('aria-selected',x===b));});

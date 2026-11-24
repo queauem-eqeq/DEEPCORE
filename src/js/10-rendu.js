@@ -26,7 +26,7 @@ const SMOKE={p:[],raf:0,last:0,acc:0,accF:0};
    Pixel art strict : grains opaques de 1 ou 2 pixels de tuile, calés sur la grille, qui disparaissent d'un coup. */
 const SPLAT_MAX=1500;
 // deux couleurs seulement : monde et accent
-function gore(x,y){const cx=(x+.5)*S,cy=(y+.5)*S,deb=[PAL['3'],PAL['3'],PAL['1']],ETINC_COLS=[PAL['1'],PAL['1'],PAL['3']];
+function gore(x,y){const cx=(x+.5)*S,cy=(y+.5)*S,deb=[PAL['3']],ETINC_COLS=[PAL['3']];
   for(let j=0,n=34+((Math.random()*14)|0);j<n;j++){const an=Math.random()*Math.PI*2,v=150+Math.random()*330;
     SMOKE.p.push({x:cx+Math.cos(an)*4,y:cy+Math.sin(an)*4,vx:Math.cos(an)*v,vy:Math.sin(an)*v-40,a:0,l:.1+Math.random()*.3,sz:2,c:ETINC_COLS[(Math.random()*ETINC_COLS.length)|0],spark:true});}
   for(let j=0,n=14+((Math.random()*8)|0);j<n;j++){const an=Math.random()*Math.PI*2,v=50+Math.random()*150,r0=2+Math.random()*5;
@@ -260,13 +260,19 @@ function render(){
   // gisements détectés par le sonar, même hors de vue
   {const sr=sonarR();if(sr>0&&G.ore&&fog)for(const k in G.ore){const i=+k;if(G.seen[i]||!sonarVu(i,sr))continue;
     put(oreTile(G.ore[k],oreSol(G.ore[k])),i%W,(i/W)|0,1);}}
-  if(G.cles)for(const k in G.cles){const i=+k;if(fog&&!G.seen[i])continue;put(TL.cle,i%W,(i/W)|0,fog&&!vis[i]?.35:1);}   // clés au sol
+  /* Un objet au sol ne se voit jamais sous la foreuse ni sous une créature (24 novembre 2026) : sa tuile n'est pas dessinée.
+     Sous une créature, un petit + blanc dit qu'il y a quelque chose ; sous la foreuse, rien. L'objet réapparaît dès que la case est libre. */
+  const CACHE=new Set([idx(G.px,G.py)]),SOUS=new Set();
+  for(const bt of G.beasts||[])if(beastVisible(bt)&&!beastCache(bt))SOUS.add(idx(bt.x,bt.y));
+  for(const an of G.animals||[])if(!fog||vis[idx(an.x,an.y)])SOUS.add(idx(an.x,an.y));
+  for(const i of SOUS)CACHE.add(i);
+  if(G.cles)for(const k in G.cles){const i=+k;if(fog&&!G.seen[i]||CACHE.has(i))continue;put(TL.cle,i%W,(i/W)|0,fog&&!vis[i]?.35:1);}   // clés au sol
   // vitrines : le socle sous le lot (22 novembre 2026)
   if(G.vit)for(const k in G.vit){const i=+k;if(fog&&!G.seen[i])continue;
     put(G.vit[k]===2?TL.vitrineOff:TL.vitrine,i%W,(i/W)|0,fog&&!vis[i]?.35:1);}
   // un objet au sol : sa tuile (le dernier posé s'il y en a plusieurs)
   // objets posés au sol
-  if(G.items)for(const k in G.items){const i=+k,l=G.items[k];if(!l||!l.length||fog&&!G.seen[i])continue;
+  if(G.items)for(const k in G.items){const i=+k,l=G.items[k];if(!l||!l.length||fog&&!G.seen[i]||CACHE.has(i))continue;
     put(itemTile(l[l.length-1]),i%W,(i/W)|0,fog&&!vis[i]?.35:1);}
   // débris au sol
   if(G.splat)for(const [px,py,c,sz] of G.splat){const i=idx(Math.floor(px/S),Math.floor(py/S));if(fog&&!G.seen[i])continue;
@@ -306,11 +312,10 @@ function render(){
     const fl=FX.find(f=>f.kind==='flash'&&f.beast===b);if(fl){ctx.globalCompositeOperation='lighter';ctx.globalAlpha=1-fxP(fl);
       ctx.drawImage(img,px,py,S,S);ctx.drawImage(img,px,py,S,S);ctx.globalCompositeOperation='source-over';ctx.globalAlpha=1;}
     barreVie(px,py,b.hp,pvDe(BEASTS[b.sp]));}
-  // objet sous une créature (23 novembre 2026) : la créature le cache ; sa tuile, en petit, dans le coin bas droit de la case
-  if(G.items){const sous=new Set();for(const b of G.beasts||[])if(beastVisible(b)&&!beastCache(b))sous.add(idx(b.x,b.y));
-    for(const a of G.animals||[])if(!fog||vis[idx(a.x,a.y)])sous.add(idx(a.x,a.y));
-    for(const i of sous){const l=G.items[i];if(!l||!l.length)continue;const q=Math.round(S*.5),px=(i%W-camX)*S+S-q,py=(((i/W)|0)-camY)*S+S-q;
-      ctx.globalAlpha=1;ctx.fillStyle='#000';ctx.fillRect(px-1,py-1,q+2,q+2);ctx.drawImage(itemTile(l[l.length-1]),px,py,q,q);}}
+  // objet sous une créature : la créature le cache ; un petit + blanc de 3 × 3 pixels de tuile dans le coin bas droit de la case
+  // (23 novembre 2026 ; avant : la tuile de l'objet en petit)
+  {for(const i of SOUS){const l=G.items&&G.items[i];if(!(l&&l.length)&&!(G.cles&&G.cles[i]))continue;const q=S/16,px=(i%W-camX)*S+12*q,py=(((i/W)|0)-camY)*S+12*q;
+      ctx.globalAlpha=1;ctx.fillStyle='#ffffff';ctx.fillRect(px+q,py,q,3*q);ctx.fillRect(px,py+q,3*q,q);}}
   // antenne : un ennemi hors de vue dans le disque d'une antenne allumée se montre par un point en couleur danger (22 novembre 2026)
   if(G.beasts&&fog)for(const b of G.beasts){if(vis[idx(b.x,b.y)]||!antDetecte(b))continue;const q=S/16;ctx.globalAlpha=1;
     ctx.fillStyle=PAL['4'];ctx.fillRect((b.x-camX)*S+6*q,(b.y-camY)*S+6*q,4*q,4*q);}

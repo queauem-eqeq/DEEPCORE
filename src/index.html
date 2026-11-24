@@ -28,7 +28,7 @@
         <canvas id="curEd" width="256" height="256" aria-label="Éditeur de tuile : grille de 16 sur 16 pixels"></canvas>
         <div class="cur-inks" id="curInks">
           <!-- 22 novembre 2026 : ligne 1, les cinq couleurs de la palette ; ligne 2, blanc, noir, rouge fixe et transparent -->
-          <div class="cur-tools"><button class="ink" data-ink="3" aria-pressed="true" aria-label="Monde" title="#1 Monde"><i></i></button><button class="ink" data-ink="2" aria-pressed="false" aria-label="Bio" title="#2 Bio"><i></i></button><button class="ink" data-ink="1" aria-pressed="false" aria-label="Accent" title="#3 Accent"><i></i></button><button class="ink" data-ink="r" aria-pressed="false" aria-label="Danger" title="#4 Danger"><i></i></button><button class="ink" data-ink="5" aria-pressed="false" aria-label="Bâti" title="#5 Bâti"><i></i></button></div>
+          <div class="cur-tools"><button class="ink" data-ink="3" aria-pressed="true" aria-label="Monde" title="#1 Monde"><i></i></button><button class="ink" data-ink="5" aria-pressed="false" aria-label="Bâti" title="#2 Bâti"><i></i></button><button class="ink" data-ink="2" aria-pressed="false" aria-label="Bio" title="#3 Bio"><i></i></button><button class="ink" data-ink="1" aria-pressed="false" aria-label="Accent" title="#4 Accent"><i></i></button><button class="ink" data-ink="r" aria-pressed="false" aria-label="Danger" title="#5 Danger"><i></i></button></div>
           <div class="cur-tools"><button class="ink" data-ink="w" aria-pressed="false" aria-label="Blanc" title="Blanc"><i></i></button><button class="ink" data-ink="0" aria-pressed="false" aria-label="Noir" title="Noir"><i></i></button><button class="ink" data-ink="R" aria-pressed="false" aria-label="Rouge" title="Rouge (fixe, ne suit pas la palette)"><i></i></button><button class="ink" data-ink="." aria-pressed="false" aria-label="Transparent" title="Transparent"><i class="er"></i></button></div>
         </div>
         <div class="cur-tools" id="curSyms"><button id="symH" aria-pressed="false">Miroir ↔</button><button id="symV" aria-pressed="false">Miroir ↕</button></div>
@@ -189,13 +189,16 @@
     <details class="fold" id="fd-pal">
       <summary><h2>Palette</h2></summary>
       <div class="pal">
+        <!-- même ordre que les pastilles des palettes (24 novembre 2026) : monde, bâti, bio, accent, danger -->
         <label for="pc3">#1 Monde <button class="swb" id="pc3" data-k="3" aria-expanded="false" aria-label="Couleur 1 : monde"></button></label>
-        <label for="pc2">#2 Bio <button class="swb" id="pc2" data-k="2" aria-expanded="false" aria-label="Couleur 2 : bio"></button></label>
-        <label for="pc1">#3 Accent <button class="swb" id="pc1" data-k="1" aria-expanded="false" aria-label="Couleur 3 : accent"></button></label>
-        <label for="pc4">#4 Danger <button class="swb" id="pc4" data-k="4" aria-expanded="false" aria-label="Couleur 4 : danger"></button></label>
-        <label for="pc5">#5 Bâti <button class="swb" id="pc5" data-k="5" aria-expanded="false" aria-label="Couleur 5 : bâti"></button></label>
+        <label for="pc5">#2 Bâti <button class="swb" id="pc5" data-k="5" aria-expanded="false" aria-label="Couleur 2 : bâti"></button></label>
+        <label for="pc2">#3 Bio <button class="swb" id="pc2" data-k="2" aria-expanded="false" aria-label="Couleur 3 : bio"></button></label>
+        <label for="pc1">#4 Accent <button class="swb" id="pc1" data-k="1" aria-expanded="false" aria-label="Couleur 4 : accent"></button></label>
+        <label for="pc4">#5 Danger <button class="swb" id="pc4" data-k="4" aria-expanded="false" aria-label="Couleur 5 : danger"></button></label>
         <div class="cgrid" id="cgrid" role="listbox" aria-label="Nuancier LACKING64, 64 couleurs" hidden></div>
-        <div class="pnm"><span id="palName">Origine</span><button id="palReset" title="Rétablir les couleurs d’origine de cette palette">Rétablir</button></div>
+        <input class="pnm-nom" id="palName" type="text" maxlength="24" spellcheck="false" aria-label="Nom de la palette en cours">
+        <div class="pnm"><button id="palReset" title="Rétablir les couleurs d’origine de cette palette">Rétablir</button><button id="palSave" title="Enregistrer tous les réglages dans l’artefact (F6)">Enregistrer</button></div>
+        <div class="saved" id="palMsg" role="status"></div>
         <div class="presets" id="presets"></div>
       </div>
     </details>

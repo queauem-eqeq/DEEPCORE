@@ -224,6 +224,9 @@ function drill(s){drilling=true;let k=0;const n=12;
 // « FOREUSE DÉTRUITE » toujours en rouge, quelle que soit la palette (23 novembre 2026). Détruite pendant une descente (G.over.forage),
 // l'explosion s'est jouée dans le puits : pas d'explosion sur la carte, et un fond noir plein cache le niveau.
 function dead(){if(G.over.boom)return;G.over.boom=true;if(TRAV)stopTravel();if(REST)stopRest();
+  // à la mort, toutes les capsules se dévoilent dans l'inventaire (23 novembre 2026)
+  let devoile=0;for(const k in CONSO)if(identifier(k))devoile++;
+  if(devoile){say('La foreuse détruite, toutes les capsules se dévoilent.','warn');try{side();}catch(e){}}
   const carte=()=>{$('card').innerHTML=`<h2 class="huge mort">FOREUSE<br>DÉTRUITE</h2>
     <div class="upg one"><button id="again"><span>Déployer une nouvelle foreuse</span><b>▶</b></button><button id="quit"><span>Quitter</span><b>■</b></button></div>`;
     $('overlay').classList.toggle('noir',!!G.over.forage);$('overlay').hidden=false;$('again').onclick=()=>{unlock();SFX.start();
@@ -238,7 +241,7 @@ $('offOn').onclick=()=>{$('off').hidden=true;try{if(AC)AC.resume();}catch(e){}un
    cinématique de forage se joue et le niveau suivant commence. */
 function end(s){
   drilling=false;
-  if((G.niv||1)<NIV_MAX){$('overlay').hidden=true;playForage(()=>{niveauSuivant();render();},G.niv||1);return;
+  if((G.niv||1)<NIV_MAX){$('overlay').hidden=true;descendre(G.niv||1);return;
     }const bilan=`<div class="stats"><span>${G.turn} tours · ${G.dist} cases parcourues</span><span>Matière {µ} en réserve : ${G.st.matiere||0}</span></div>`;
   G.over={site:s.id,win:true};
   $('card').innerHTML=`<div class="tag">Site ${s.id} foré</div><h2>NOYAU<br>ATTEINT</h2>${bilan}<p>La foreuse a percé jusqu’au noyau de la planète.</p><button class="go" id="again">Nouvelle exploration</button>`;

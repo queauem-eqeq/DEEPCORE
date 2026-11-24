@@ -5,13 +5,34 @@ Partie du document de conception (sommaire et règles à ne pas casser : `concep
 ## 2. Direction visuelle
 
 - Tuiles pixel art 16 × 16, affichées en 32 × 32 ; fond quasi noir. Pas d'effet d'écran.
-- **Un objet sous une créature** : la créature le cache, mais sa tuile s'affiche en petit (moitié de case,
-  sur fond noir) dans le coin bas droit de la case, tant que la créature est dessus.
+- **Un objet au sol ne se voit jamais sous la foreuse ni sous une créature** (24 novembre 2026) : sa tuile n'est pas dessinée, et il
+  reste invisible tant que la case n'est pas libérée (créature partie ou tuée). Sous une **créature**, un petit **+ blanc de 3 × 3
+  pixels de tuile** dans le coin bas droit de la case dit qu'il y a quelque chose ; **sous la foreuse, rien du tout**. La règle vaut
+  aussi pour les clés au sol.
 - **Palette à cinq couleurs** (trois avant), dans cet ordre dans le menu : **#1 Monde** (sol, rochers,
   montagnes), **#2 Bio**, **#3 Accent**, **#4 Danger** (lasers, dégâts, alertes : l'ancien rouge fixe), **#5 Bâti** (murs, sols,
   portes et piliers des bâtiments, pour que l'intérieur ne se confonde plus avec la montagne). Le blanc reste fixe. Dans le
   code les clés sont `3` monde, `2` bio, `1` accent, `4` danger, `5` bâti ; les encres `r` et `L` des tuiles se lisent en
   couleur danger, et l'encre `3` se lit en couleur bâti sur les tuiles de `BATI_TUILES` (`02-palette.js`).
+- **Réglages du joueur adoptés le 23 novembre 2026** : les dessins retouchés dans l'artefact (`reglages/courant`) sont recopiés dans
+  `TUILES_JOUEUR` (`03-tuiles.js`) et `TUILES_JOUEUR_B` (`03b-tuiles-machines.js`) — bz6r, bz7r, mach5, robot_u, siteUnknown, niche,
+  stationOff, chargeur, o_capsule, o_plan — et la palette **Désert** retouchée dans `PRESETS` ; **Désert** devient la palette de départ
+  (`PRESET_ACTIVE`). La recopie **fusionne** : les tuiles déjà adoptées et absentes de la base sont gardées telles quelles.
+- **Une palette par niveau** (23 novembre 2026) : à chaque niveau suivant, la palette est tirée au hasard parmi les prédéfinies (jamais la
+  même deux fois de suite) ; la palette choisie par le joueur n'est pas modifiée et revient au niveau 1. Voir `conception-descente.md`.
+- **Menu Palette** (24 novembre 2026, de haut en bas) : les **cinq teintes**, le **nuancier**, le **nom de la palette en cours**
+  dans un champ modifiable, puis **Rétablir** et **Enregistrer**, enfin la liste des palettes. Cliquer une teinte (Bio, par
+  exemple) ouvre le nuancier à sa place fixe ; choisir une couleur l'applique aussitôt ; recliquer la même teinte le referme
+  (Échap aussi). Le nuancier fait **4 rangées de 16 cases**, deux fois plus petites qu'avant.
+- Le nuancier se cache par l'attribut `hidden`, qu'une règle `.cgrid[hidden]{display:none}` doit rendre effective : sans elle, le
+  `display:grid` de la classe l'emporte et le nuancier reste affiché, simplement inerte.
+- **Le nuancier est sous les teintes, pas au-dessus** : placé au-dessus, il faisait descendre les cinq pastilles de 55 px en
+  s'ouvrant ; le second clic, au même endroit, tombait sur la teinte voisine et le nuancier ne se refermait jamais.
+- **Un seul ordre partout** : **#1 Monde, #2 Bâti, #3 Bio, #4 Accent, #5 Danger** — les cinq teintes du menu, les pastilles des
+  palettes et les encres du Tile editor suivent le même, avec les mêmes numéros (24 novembre 2026).
+- Le cadre de la teinte sélectionnée déborde de 3 px : la pastille garde cette marge à droite, sinon la colonne défilante le coupait.
+- **Le nom d'une palette se modifie** : il est enregistré avec ses couleurs (`np-presets`, `{n, c}`), et les palettes relues depuis
+  l'artefact sont retrouvées **par rang** et non par nom, qui n'est plus fixe.
 - **Toutes les couleurs viennent de LACKING64** (lospec.com/palette-list/lacking64) : 8 palettes neuves, toutes modifiables
   (Braise, Lagon, Désert, Jungle, Améthyste, Cendre, Glacier, Magma ; Braise par défaut, la plus proche de l'ancienne
   Rouille), et le **sélecteur de teinte montre les 64 couleurs de LACKING64**. Il reste ouvert après un choix ; on le ferme
@@ -61,7 +82,9 @@ molette ou fine barre pour remonter jusqu'aux 200 derniers messages ; un nouveau
   remplissage est un **calque de `█` découpé à la largeur exacte** posé sur un fond de `░`, donc juste à toute
   largeur de colonne et à toute taille de police.
 - **En vue** (sous la Carte) : la fiche d'inspection de la case survolée, puis les créatures visibles (icône,
-  barre de vie ASCII, colonnes TOUCHER / SUBIR colorées).
+  barre de vie ASCII, colonnes TOUCHER / SUBIR colorées). Une créature **en chasse** porte un cadre couleur monde autour de son
+  icône. La colonne de l'icône fait 20 px, pas 16 : le cadre déborde de 2 px de chaque côté et la colonne défilante
+  (`overflow-y:auto`) lui coupait son bord gauche (24 novembre 2026).
 - **En tête de colonne, au-dessus de Vie**  : trois lignes en capitales couleur monde, sans étiquette — `NIVEAU 2 · −1564 M · 96×64` (le niveau, sa profondeur et la taille de la carte ; la
   profondeur vaut 0 au niveau 1, puis la fin de chaque descente, les mêmes chiffres que le compteur PROFONDEUR des
   cinématiques de forage, qui part de la profondeur du niveau quitté : `profNiv`, 14b), puis l'**archétype monde** et
@@ -71,8 +94,8 @@ molette ou fine barre pour remonter jusqu'aux 200 derniers messages ; un nouveau
 - **Mini-carte** pleine largeur ; ennemis en points rouges ; un clic recentre la vue ; bouton maintenu + glisser =
   défilement en temps réel. Saisie à l'intérieur, le cadre suit le pointeur sans sauter ; à l'extérieur, il se
   centre d'abord sous le pointeur.
-- **Tile editor** (Lab) : encres sur deux lignes — les cinq couleurs de la palette (Monde, Bio, Accent,
-  Danger, Bâti), puis Blanc, Noir, **Rouge fixe** (`R`, #d8180b, le même avec toutes les palettes) et Transparent.
+- **Tile editor** (Lab) : encres sur deux lignes — les cinq couleurs de la palette (**#1 Monde, #2 Bâti, #3 Bio, #4 Accent,
+  #5 Danger**, le même ordre et les mêmes numéros que le menu Palette depuis le 24 novembre 2026), puis Blanc, Noir, **Rouge fixe** (`R`, #d8180b, le même avec toutes les palettes) et Transparent.
   Nouveaux codes de tuile : `5` (bâti) et `R` (rouge fixe). 
 - Sous **REGEN · MONDE · LIFE**, une rangée **NIV1 · NIV2 · NIV3** .
 - Sous-menus repliables : **Inventaire**, **Carte**, **Lab** (Bestiaire, Groupes, Artefacts, Items, Discrétion, Tile editor, **Combat** : un lien qui ouvre le banc dans un autre onglet), **Palette**, **Contrôles** (l'aide des touches, une commande par ligne : la touche, puis ce qu'elle fait ; trois groupes : Se déplacer, Objets, Voir).
@@ -118,6 +141,10 @@ X : inspection au clavier · R : courir / marcher · T : équipement · I : inve
 F : forer · Espace / 5 : attendre · P : repos · V : portée de discrétion · B : brouillard · ! : son · M : mode
 carte (déplacements = défilement, Maj = plus vite, Échap ou M pour revenir ; Espace / 5 y attendent toujours, pour les
 essais, sans bouger la vue ).
+
+**F6** : enregistre **tout** dans la base de l'artefact (bestiaire, tuiles, palettes, stats de la foreuse, LIFE, Monde, objets,
+artefacts, groupes) — le même enregistrement que les boutons « Enregistrer » du Lab (24 novembre 2026). **F9** : un exemplaire de
+chaque consommable dans l'inventaire.
 
 ## 10. Sauvegarde des réglages
 

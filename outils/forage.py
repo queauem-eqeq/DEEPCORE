@@ -16,13 +16,13 @@ async def main():
     errs=[];pg.on('pageerror',lambda e:errs.append(str(e)))
     await pg.add_init_script("try{localStorage.setItem('np-intro','vu')}catch(e){}")
     await pg.goto(GAME);await pg.wait_for_timeout(800)
-    await pg.evaluate("window.__fin=false;playForage(()=>{window.__fin=true},%d)"%NIV);t0=time.time()
+    await pg.evaluate("descendre(%d)"%NIV);t0=time.time()   # la vraie descente : décor, palettes, niveau suivant généré avant
     for k,ts in enumerate(TIMES):
       d=ts-(time.time()-t0)
       if d>0: await pg.wait_for_timeout(int(d*1000))
       await pg.screenshot(path=str(OUT/f'f{k:02d}_{ts:04.1f}s.png'))
     await pg.wait_for_timeout(5000)
-    print('terminée :',await pg.evaluate('window.__fin'),'· durée vue',round(time.time()-t0,1),'s')
+    print('terminée :',await pg.evaluate('FORAGE===null'),'· durée vue',round(time.time()-t0,1),'s')
     print('erreurs :',errs)
     await b.close()
 asyncio.run(main())
