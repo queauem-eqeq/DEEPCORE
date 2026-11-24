@@ -180,7 +180,7 @@ function fgBoom(F,k){
    d'arrivée. La carte (vue de dessus) est lue en coupe, sur une bande de cinq rangées autour de la foreuse, puis dressée de côté :
    une case de carte = FG_TW colonnes, un mur = FG_HM rangées. Murs et toit du bâtiment en couleur bâti, machines et roches en couleur
    monde, la porte percée dans le mur. fgCoupe rend des cellules {x (colonnes depuis la foreuse), h (rangées au-dessus du sol), ch, c}. */
-const FG_TW=4,FG_HM=14,FG_DM=22;
+const FG_TW=4,FG_HM=14,FG_DM=22,FG_EAU_BAS=3,FG_EAU_FOND=7;   // profondeur de l'eau en cases : hauts-fonds, eau profonde
 const FG_MACH=new Set([MACHINE,ANTENNA,TERMINAL,TURRET,PYLON,PILE,FABRIC,LEVIER,GRILLE,STATION,CHARGEUR]);
 function fgCoupe(cx,cy){
   const T=(x,y)=>x<0||y<0||x>=W||y>=H?GROUND:G.t[idx(x,y)],col=[],cells=[],vu=new Set();
@@ -190,8 +190,8 @@ function fgCoupe(cx,cy){
     for(let j=-2;j<=2;j++){const v=T(cx+d,cy+j),c=j===0;   // murs, portes et sol : la rangée de la foreuse seule ; machines : une rangée de chaque côté
       if(c&&bati(v))k.b=1;else if(c&&v===DOOR)k.porte=1;else if(c&&v===FLOOR)k.sol=1;
       else if(Math.abs(j)<=1&&v===GRASS)k.herbe=1;
-      else if(Math.abs(j)<=1&&v===LIQ)k.eau=Math.max(k.eau||0,1);
-      else if(Math.abs(j)<=1&&v===DEEP)k.eau=3;
+      else if(Math.abs(j)<=1&&v===LIQ)k.eau=Math.max(k.eau||0,FG_EAU_BAS);
+      else if(Math.abs(j)<=1&&v===DEEP)k.eau=FG_EAU_FOND;
       else if(Math.abs(j)<=1&&(v===ANTENNA||v===PYLON))k.ant=1;else if(Math.abs(j)<=1&&FG_MACH.has(v))k.m=1;
       else if(v===HARD)k.r=Math.max(k.r,7);else if(v===MOUNT)k.r=Math.max(k.r,5);else if(v===ROCK)k.r=Math.max(k.r,3);}
     col.push(k);}
@@ -223,16 +223,25 @@ function fgCoupe(cx,cy){
     for(let i=0;i<FG_TW;i++){const x=x0(d)+i,hh=Math.max(1,Math.round(moy+hs(x,7)*3-1.5));
       for(let h=1;h<=hh;h++){const prof=hh-h;   // du sommet vers le bas : la roche s'épaissit
         put(x,h,prof===0?'▀':prof===1?(hs(x,h+3)<.5?'░':'▒'):prof<4?'▒':'▓','m');}}}
-  // herbes : des touffes sur la ligne de sol, là où il n'y a ni bâtiment ni roche (24 novembre 2026)
+  /* Herbes : de hautes tiges, pas des touffes au ras du sol (24 novembre 2026, demande de l'utilisateur) — 2 à 6 rangées,
+     droites ou penchées, avec un épi au sommet ; des trous pour que la rangée ne fasse pas un mur. */
+  const HERBE_EPI='¤#*:',HERBE_PIED='│└┘';
   for(let d=-FG_DM;d<=FG_DM;d++){const k=K(d);if(!k.herbe||k.eau||k.b||(dedans&&d>=L&&d<=R)||hr[d+FG_DM])continue;
-    for(let i=0;i<FG_TW;i++){const x=x0(d)+i,r=hs(x,21);if(r<.22)continue;
-      put(x,1,r<.5?'"':r<.78?',':"'",'v');if(r>.93)put(x,2,"'",'v');}}
-  /* l'eau (24 novembre 2026) : la surface sur la ligne de sol, et sa profondeur en dessous — une rangée pour les hauts-fonds,
-     trois pour l'eau profonde, de plus en plus dense vers le fond. */
-  for(let d=-FG_DM;d<=FG_DM;d++){const k=K(d);if(!k.eau||k.b||(dedans&&d>=L&&d<=R))continue;
+    for(let i=0;i<FG_TW;i++){const x=x0(d)+i,r=hs(x,21);if(r<.3)continue;
+      const haut=2+Math.floor(hs(x,22)*5),pen=hs(x,23);
+      for(let q=1;q<=haut;q++){
+        const ch=q===haut?HERBE_EPI[Math.floor(hs(x,24+q)*4)]
+          :q===1?HERBE_PIED[Math.floor(hs(x,25)*3)]
+          :pen<.28?'/':pen>.72?'\\':'│';
+        put(x,q,ch,'v');}}}
+  /* L'eau (24 novembre 2026) : la surface sur la ligne de sol, et sa profondeur en dessous — trois cases pour les hauts-fonds,
+     sept pour l'eau profonde, de plus en plus sombres et denses vers le fond. */
+  {const ce=PAL['e']||PAL['3'];
+   for(let d=-FG_DM;d<=FG_DM;d++){const k=K(d);if(!k.eau||k.b||(dedans&&d>=L&&d<=R))continue;
     for(let i=0;i<FG_TW;i++){const x=x0(d)+i,r=hs(x,31);
-      put(x,0,r<.5?'~':'≈','e');
-      for(let q=1;q<k.eau;q++)put(x,-q,q<2?'▒':'▓','e');}}
+      put(x,0,r<.5?'~':'≈',ce);
+      for(let q=1;q<k.eau;q++){const u=q/(k.eau-1);
+        put(x,-q,u<.4?'▒':u<.75?'▓':'█',fgMix(ce,1-.72*u));}}}}
   return {cells,cb:PAL['5'],cm:PAL['3'],cv:PAL['2'],ce:PAL['e']||PAL['3']};}
 /* Le décor est dessiné une seule fois dans son propre canevas, puis posé d'un bloc à chaque image : sinon ce sont deux mille
    caractères à retracer soixante fois par seconde. */
@@ -240,7 +249,7 @@ function fgDecorCv(F,D){if(D.img&&D.cwv===F.cw)return;
   let x0=1e9,x1=-1e9,h1=-1e9,h0=1e9;
   for(const c of D.cells){if(c.x<x0)x0=c.x;if(c.x>x1)x1=c.x;if(c.h>h1)h1=c.h;if(c.h<h0)h0=c.h;}
   if(!D.cells.length){D.img=null;D.cwv=F.cw;return;}
-  const teinte=c=>c==='b'?D.cb:c==='v'?(D.cv||D.cm):c==='e'?(D.ce||D.cm):D.cm;
+  const teinte=c=>c==='b'?D.cb:c==='v'?(D.cv||D.cm):c==='e'?(D.ce||D.cm):/^[#r]/.test(c)?c:D.cm;   // une case peut porter sa propre couleur
   const cv=document.createElement('canvas');cv.width=(x1-x0+1)*F.cw;cv.height=(h1-h0+1)*F.chh;const g=cv.getContext('2d');
   for(const c of D.cells){const px=(c.x-x0)*F.cw,py=(h1-c.h)*F.chh;
     g.fillStyle='#000';g.fillRect(px,py,F.cw,F.chh);g.drawImage(fgGlyph(F,c.ch,teinte(c.c)),px,py);}

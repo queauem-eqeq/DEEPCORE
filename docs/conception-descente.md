@@ -152,9 +152,11 @@ Du niveau 2 au niveau 3, la descente se joue. `playForage(suite, 2)` ; **NIV3** 
   sur le niveau quitté. Un bâtiment montre ses **murs et son toit en couleur bâti**, sa **porte** percée dans le mur, au plus
   **deux ensembles de machines** en couleur monde (une antenne est un mât) ; les roches alentour dessinent une **crête** en couleur
   monde, lissée d'une case à l'autre pour qu'elle ondule, et de plus en plus dense vers sa base (« ▀ ░ ▒ ▓ »). **Les herbes** de la case et de ses
-  voisines deviennent des **touffes en ASCII** (`" , '`) en couleur bio, sur la ligne de sol, là où il n'y a ni bâtiment, ni roche,
-  ni eau. **L'eau** se montre avec sa profondeur, en couleur eau : une surface `~ ≈` sur la ligne de sol, puis **une rangée sous la
-  ligne pour les hauts-fonds et trois pour l'eau profonde**, de plus en plus denses vers le fond (24 novembre 2026). **Arrivée** : le même dessin, lu sur le niveau d'arrivée, posé sur le sol de la caverne. Son abscisse se fige
+  voisines deviennent de **hautes tiges en ASCII** en couleur bio — 2 à 6 rangées, droites (`│`) ou penchées (`/ \`), pied `│ └ ┘`,
+  épi `¤ # * :`, avec des trous pour que la rangée ne fasse pas un mur —, là où il n'y a ni bâtiment, ni roche, ni eau.
+  **L'eau** se montre avec sa profondeur, en couleur eau : une surface `~ ≈` sur la ligne de sol, puis **trois cases de profondeur
+  pour les hauts-fonds et sept pour l'eau profonde** (`FG_EAU_BAS`, `FG_EAU_FOND`), de plus en plus denses (`▒ ▓ █`) et **de plus en
+  plus sombres** vers le fond (24 novembre 2026). **Arrivée** : le même dessin, lu sur le niveau d'arrivée, posé sur le sol de la caverne. Son abscisse se fige
   dès que le décor pourrait entrer dans le champ, et non au percement : sinon il apparaissait d'un coup alors que le sol de la
   caverne était déjà visible (mesuré : figé 3 rangées avant d'être visible). Le niveau d'arrivée est donc
   **généré avant la scène** (`descendre()`, `14b-forage.js`), qui se joue par-dessus la partie déjà changée.
