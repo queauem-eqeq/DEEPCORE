@@ -1,7 +1,7 @@
 /* ---------- Éditeur de modules (Lab → Modules, 24 novembre 2026) ----------
    Un module est un morceau de carte dessiné à la main (salle, couloir, agencement de murs ou de montagne), de 3 × 3 à
    16 × 16 cases. Il est fait de deux couches :
-   – « t », le terrain, une lettre par case (MDL_TERR) ; « ? » = case libre, laissée au choix de la génération ;
+   – « t », le terrain, une lettre par case (MDL_TERR ; V = mur vitré, B = sol de pont, C = gouffre) ; « ? » = case libre, laissée au choix de la génération ;
    – « m », les emplacements (MDL_MARQ) : entrée (raccord au reste de la carte), machine, butin, ennemi. Le jeu remplira
      ces cases lui-même ; un emplacement ne tient que sur une case praticable (MDL_PRAT).
    Chaque module dit dans quelles recettes il peut être tiré (« rec ») ; MODULES_NB donne, par recette, combien en poser
@@ -9,10 +9,10 @@
    Ce fichier fait l'éditeur et la banque (np-modules dans le navigateur, champ « modules » de reglages/courant dans la base
    de l'artefact). La pose est dans 07b-batiments.js (mdlTirage, mdlPrepare, accretion) : NIVEAU 1 SEULEMENT pour l'instant. */
 const MDL_TERR=[['?','Libre',''],['.','Sol','ground0'],['R','Rocher','rock'],['M','Montagne','mtBody'],['H','Roche dure','hardBody'],
-  ['E','Eau','liq0'],['P','Eau profonde','deep0'],['G','Herbes hautes','grass0'],['F','Herbes basses','flat0'],['X','Mur','wall'],
-  ['S','Sol bâti','floor'],['D','Porte','door'],['O','Pilier','pillar']];
+  ['E','Eau','liq0'],['P','Eau profonde','deep0'],['G','Herbes hautes','grass0'],['F','Herbes basses','flat0'],['X','Mur','wall'],['V','Mur vitré','vitre'],
+  ['S','Sol bâti','floor'],['B','Sol (pont)','solPont'],['C','Gouffre',''],['D','Porte','door'],['O','Pilier','pillar']];
 const MDL_MARQ=[['x','Entrée','1','E'],['m','Machine','5','M'],['b','Butin','2','B'],['e','Ennemi','4','!']];
-const MDL_PRAT='.GFSD',MDL_MIN=3,MDL_MAX=16,MDL_NB_MAX=6,MDL_C=32;
+const MDL_PRAT='.GFSDB',MDL_MIN=3,MDL_MAX=16,MDL_NB_MAX=6,MDL_C=32;
 let MODULES=[],MODULES_NB={},MDL_ED={i:0,couche:'t',code:'X',suppr:false};
 const mdlRecs=()=>Object.keys(RECETTES).map(k=>[k,String(RECETTES[k].n||k).split(' :')[0]]);
 const mdlLigne=(n,c)=>c.repeat(n);
@@ -66,8 +66,10 @@ function mdlDessine(cv,o,c,grille){cv.width=o.w*c;cv.height=o.h*c;const g=cv.get
     if(ch==='?'){g.fillStyle='#0b1714';g.fillRect(X,Y,c,c);g.fillStyle='#22332f';
       for(let k=0;k<c;k+=Math.max(2,c>>2))g.fillRect(X+k,Y+k,Math.max(1,c>>3),Math.max(1,c>>3));}
     else{const cle=(MDL_TERR.find(a=>a[0]===ch)||[])[2];
-      if(ch!=='S'&&ch!=='X'&&tl.ground0)g.drawImage(tl.ground0,0,0,16,16,X,Y,c,c);
-      if(ch==='D'&&tl.floor)g.drawImage(tl.floor,0,0,16,16,X,Y,c,c);
+      if(!'SXVBC'.includes(ch)&&tl.ground0)g.drawImage(tl.ground0,0,0,16,16,X,Y,c,c);
+      // gouffre : un trou noir cerné ; il n'a pas de tuile, le jeu le dessine d'après ses voisins
+      if(ch==='C'){const d=Math.max(1,c>>3);g.fillStyle='#3a2a1c';g.fillRect(X,Y,c,c);g.fillStyle='#000';g.fillRect(X+d,Y+d,c-2*d,c-2*d);}
+      if((ch==='D'||ch==='V')&&tl.floor)g.drawImage(tl.floor,0,0,16,16,X,Y,c,c);
       if(tl[cle])g.drawImage(tl[cle],0,0,16,16,X,Y,c,c);}
     const mq=MDL_MARQ.find(a=>a[0]===o.m[y][x]);
     if(mq){const col=(typeof PAL!=='undefined'&&PAL[mq[2]])||'#fff',d=Math.max(1,Math.round(c*.18));

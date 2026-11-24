@@ -9,6 +9,7 @@ function batiTuile(t,x,y,put){
     {const nc=G.niche&&G.niche[idx(x,y)];if(nc)put(nc===2?TL.nicheOuverte:TL.niche,1);}return;}
   put(TL.floor,.5);
   if(t===PILLAR)put(TL.pillar,.95);
+  else if(t===VITRE)put(TL.vitre,.95);
   else if(t===MACHINE)put(TL['mach'+((G.art&&G.art[idx(x,y)])||0)],1);
   else if(t===ANTENNA)put(G.art&&(G.art[idx(x,y)]===1||G.art[idx(x,y)]===2)?TL.antenneOn:TL.antenne,1);
   else if(t===TERMINAL)put(TL.terminal,1);
@@ -41,19 +42,19 @@ function formePiece(st){
 }
 /* Modules dessinés à la main (Lab → Modules, 14f) posés comme des pièces du complexe (24 novembre 2026, niveau 1 seulement).
    Un module devient une pièce de genre « module » : ses cases autres que le mur sont « possédées » (own) et gardent leur
-   terrain (B.sol) ; ses murs sont figés (B.fixe : personne ne les perce ni ne les possède). Ses ENTRÉES sont les seuls endroits
+   terrain (B.sol) ; ses murs sont figés (B.fixe, 1 = mur, 2 = mur vitré : personne ne les perce ni ne les possède). Ses ENTRÉES sont les seuls endroits
    où une autre pièce peut s'y coller : une entrée posée sur une porte du bord, ou dans une brèche du mur, EST le passage ;
    posée sur un sol du bord sans mur de part et d'autre, la porte est créée juste dehors. Une entrée qui ne sert pas est murée. Le premier module tiré remplace la première pièce du complexe ; les suivants se collent
    aux pièces déjà posées par une de leurs entrées. Un module qui ne trouve pas sa place est abandonné : la carte en reçoit moins. */
-const MDL_SOL={'.':GROUND,R:ROCK,M:MOUNT,H:HARD,E:LIQ,P:DEEP,G:GRASS,F:FLAT,S:FLOOR,D:DOOR,O:PILLAR};
+const MDL_SOL={V:VITRE,C:CHASM,B:BRIDGE,'.':GROUND,R:ROCK,M:MOUNT,H:HARD,E:LIQ,P:DEEP,G:GRASS,F:FLAT,S:FLOOR,D:DOOR,O:PILLAR};
 // une variante prête à poser : cases possédées [x,y,terrain], murs [x,y], entrées {x,y,dx,dy,porte}, emplacements [x,y,genre]
 function mdlPrepare(v,nom){const own=[],mur=[],ent=[],marq=[],hors=(x,y)=>x<0||y<0||x>=v.w||y>=v.h||v.t[y][x]==='?',
-    plein=(x,y)=>hors(x,y)||v.t[y][x]==='X';
+    plein=(x,y)=>hors(x,y)||v.t[y][x]==='X'||v.t[y][x]==='V';
   for(let y=0;y<v.h;y++)for(let x=0;x<v.w;x++){const ch=v.t[y][x],m=v.m[y][x];if(ch==='?')continue;
-    if(ch==='X'){mur.push([x,y]);continue;}
+    if(ch==='X'||ch==='V'){mur.push([x,y,ch==='V'?2:1]);continue;}   // 2 : mur vitré
     if(m==='x'){
       // sur une porte, ou dans une brèche du mur (un mur de chaque côté) : la case EST le passage, dehors d'un côté, dedans de l'autre
-      const estMur=(a,b)=>!hors(a,b)&&v.t[b][a]==='X',
+      const estMur=(a,b)=>!hors(a,b)&&(v.t[b][a]==='X'||v.t[b][a]==='V'),
         d=D4.find(([dx,dy])=>hors(x+dx,y+dy)&&!plein(x-dx,y-dy)&&(ch==='D'||(estMur(x+dy,y+dx)&&estMur(x-dy,y-dx))));
       if(d){ent.push({x,y,dx:d[0],dy:d[1],porte:true,v:ch==='D'?DOOR:FLOOR});mur.push([x,y]);continue;}
       for(const [dx,dy] of D4)if(hors(x+dx,y+dy))ent.push({x,y,dx,dy,porte:false});}
@@ -82,7 +83,7 @@ function accretion(B,lot,cible,st,dep){   // dep (cavernes) : cadre où tirer la
   const mPose=(P,ox,oy,util)=>{const id=base+pieces.length+1,p={id,g:'module',c:[],mod:{nom:P.nom,ent:[],marq:[]}};
     const empr=(x,y)=>{for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){const j=idx(x+dx,y+dy);if(!pied[j]){pied[j]=1;emprise++;}}};
     for(const [x,y,v] of P.own){const i=idx(x+ox,y+oy);own[i]=id;B.sol[i]=v;p.c.push(i);empr(x+ox,y+oy);}
-    for(const [x,y] of P.mur){fixe[idx(x+ox,y+oy)]=1;empr(x+ox,y+oy);}
+    for(const [x,y,g] of P.mur){fixe[idx(x+ox,y+oy)]=g||1;empr(x+ox,y+oy);}
     for(const e of P.ent){const ci=idx(e.x+ox+(e.porte?0:e.dx),e.y+oy+(e.porte?0:e.dy));if(e.porte)B.sol[ci]=e.v;
       p.mod.ent.push({ci,dx:e.dx,dy:e.dy,porte:e.porte,pris:e===util});}
     for(const [x,y,k] of P.marq)p.mod.marq.push([idx(x+ox,y+oy),k]);
@@ -301,7 +302,7 @@ function batiments(){BATI_DER=null;
       for(let i=0;i<N;i++){if(B.own[i]&&garde.has(i))t[i]=FLOOR;}
       for(let i=0;i<N;i++){if(t[i]>=WALL||(B.own[i]&&garde.has(i)))continue;const x=i%W,y=(i/W)|0;
         // mur d'un module, tel que dessiné ; une entrée qui a servi est une porte (ou une ouverture, si c'était une brèche), les autres sont murées
-        if(B.fixe[i]){t[i]=B.porte[i]?B.sol[i]:WALL;continue;}
+        if(B.fixe[i]){t[i]=B.porte[i]?B.sol[i]:B.fixe[i]===2?VITRE:WALL;continue;}
         // porte, ou simple ouverture
         if(B.porte[i]&&D4.some(([dx,dy])=>garde.has(idx(x+dx,y+dy)))){t[i]=Math.random()*100<(GEN.sOuvert||0)?FLOOR:DOOR;continue;}
         let m=false;for(let dy=-1;dy<=1&&!m;dy++)for(let dx=-1;dx<=1;dx++){const a=x+dx,b=y+dy;

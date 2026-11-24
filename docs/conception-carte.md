@@ -437,6 +437,14 @@ pièce ils deviennent du sol, sous un mur du mur) ; seuls le vaisseau et le bord
     pièce secrète creusée dedans), pas de piliers ajoutés, pas de porte retirée ou dérobée. Un sol au bord du module
     reçoit un mur juste dehors, comme toute pièce. Les **portes verrouillées** restent possibles sur ses entrées.
   - **Le site de forage** n'est jamais dans un module.
+  - **Gouffre et pont** (24 novembre 2026) : un module peut contenir des cases Gouffre et des cases « Sol (pont) » ;
+    le pont se dessine avec la tuile `solPont`, **retouchable à part** dans l'éditeur de tuiles (groupe du bâti) et
+    utilisée par tous les ponts de bâtiment. Au départ, c'est le même dessin que le sol bâti.
+  - **Mur vitré** (24 novembre 2026) : terrain `VITRE`, tuile `vitre` (retouchable, groupe du bâti). **Infranchissable
+    comme un mur, mais on voit au travers, dans les deux sens** : la foreuse voit dehors, les créatures voient dedans.
+    La foreuse ne l'entame pas ; la charge sismique le réduit en gravats. Il ne compte pas comme une paroi pour la
+    discrétion. **Seuls les modules en posent** (pinceau « Mur vitré » de Lab → Modules) : la génération ordinaire
+    n'en met nulle part. Dans un module, il vaut un mur : il ferme une brèche d'entrée comme un mur plein.
   - **Emplacements** : **Machine** = une machine de décor ; **Butin** = un consommable (6 fois sur 10) ou de la
     Matière ; **Ennemi** = une espèce tirée parmi les groupes du niveau, seule et sans patrouille. Un emplacement
     déjà occupé (clé, artefact, créature) est laissé tel quel.

@@ -176,11 +176,11 @@ sa liste et posera **en priorité**, avant de générer le reste. **Branché sur
 
 - **Un module** : de 3 × 3 à **16 × 16** cases, un nom, deux couches.
   - **Terrain**, une case à la fois : Libre (laissée au choix de la génération, ce qui permet des formes non
-    rectangulaires), Sol, Rocher, Montagne, Roche dure, Eau, Eau profonde, Herbes hautes, Herbes basses, Mur, Sol bâti,
+    rectangulaires), Sol, Rocher, Montagne, Roche dure, Eau, Eau profonde, Herbes hautes, Herbes basses, Mur, Mur vitré, Sol bâti, Sol (pont), Gouffre,
     Porte, Pilier.
   - **Emplacements**, que le jeu remplira lui-même : **Entrée** (par où le module se raccorde au reste de la carte),
     **Machine**, **Butin**, **Ennemi**. Un emplacement ne tient que sur une case praticable (sol, herbes, sol bâti,
-    porte) : posé ailleurs, la case devient du sol ; recouvert d'un terrain plein, il disparaît.
+    pont, porte) : posé ailleurs, la case devient du sol ; recouvert d'un terrain plein, il disparaît.
 - **Pose** : rotations et miroirs autorisés, soit jusqu'à **8 variantes** par module ; la fenêtre les montre et compte
   celles qui diffèrent vraiment (un module symétrique en a moins).
 - **Par recette** : chaque module coche les recettes qui peuvent le tirer ; « Modules posés par carte » fixe combien en
