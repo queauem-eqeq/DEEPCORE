@@ -101,6 +101,8 @@ molette ou fine barre pour remonter jusqu'aux 200 derniers messages ; un nouveau
 - **Montagne dure** (`hardBody`) et **Crête dure** (`hardTop`) sont retouchables depuis le 24 novembre 2026 : sans retouche elles
   suivent la montagne tendre en encre foncée, avec retouche elles vivent leur vie ; le fond de crête (`hardTopBg`) suit la crête dure.
   **Rocher 3** (`rock3`) s'ajoute aux deux premiers.
+- **Les barres de vie des ennemis** sont en **rouge fixe** (`ROUGE_FIXE`, #d8180b), jamais la couleur danger de la palette : elles se
+  lisent pareil quelle que soit la palette (24 novembre 2026).
 - **Les menus ne se sélectionnent pas** : deux clics rapides sur un titre le surlignaient en bleu (`user-select:none` sur la
   colonne ; le journal et les champs de saisie restent sélectionnables). 
 - Sous **REGEN · MONDE · LIFE**, une rangée **NIV1 · NIV2 · NIV3** .

@@ -93,7 +93,7 @@ Pour le passage au niveau suivant. Vue **de côté**, tout en **caractères ASCI
   changement de matière, fracas du plafond, de l'impact et de la machine qui se couche).
 - **Vérification** : `python3 outils/forage.py DOSSIER [t1 t2 …]`. Mesuré le 21 novembre 2026 : 52 images par seconde.
 - **Amas de Matière (demande de l'utilisateur)** : à la première descente, **plusieurs amas irréguliers de
-  20 caractères**, couleur accent. **Chaque caractère touché par le puits rapporte 1 de Matière.** Trois amas naissent près de
+  20 caractères**, couleur accent. **Chaque caractère touché par le puits rapporte 1 de Matière.** Ils naissent eux aussi **bien sous le bas de l'écran** (1,15 écran ; mesuré : au moins 25 rangées sous le bord une fois la descente lancée). Trois amas naissent près de
   la route (9 à 14 cases à côté : il faut tourner), seize loin à gauche et à droite (jusqu'au bord de l'écran), hors d'atteinte, pour que le sous-sol ait
   l'air d'exister aussi sur les côtés (23 novembre 2026 : six avant). Deux taches ne se posent pas l'une sur l'autre (7 rangées et 11 colonnes d'écart au minimum) : celle qui n'a pas de place est
   abandonnée. Maximum 60 par descente ; mesuré : 6 sans piloter, 54 en visant (`test-forage.js`).
@@ -117,14 +117,17 @@ Partout, mort en descente ou non, « FOREUSE DÉTRUITE » est **toujours rouge**
 Du niveau 2 au niveau 3, la descente se joue. `playForage(suite, 2)` ; **NIV3** pour l'essayer.
 
 - Caractères d'un 52ᵉ de la hauteur d'écran, comme à la première descente. La foreuse est tenue en haut de l'écran : on voit 0,7 écran devant elle (aux deux descentes). La descente est plus longue que la première et la foreuse répond plus vite aux commandes.
-- Des **mines explosives** naissent juste sous le bas de l'écran, par rangées de plus en plus
-  serrées. Sept sur dix sont visées sur la route de la foreuse ; une fois sur quatre, une seconde mine vient à côté.
-  Une mine est un pavé plein de 7 × 3 caractères, rouge et blanc en alternance. **Une ou deux mines de plus par rangée** sont
+- Des **mines explosives** naissent **bien sous le bas de l'écran** (1,15 écran sous la foreuse, qui en voit 0,7 : avant, la rangée
+  apparaissait à vue), par rangées de plus en plus serrées. Sept sur dix sont visées sur la route de la foreuse ; une fois sur quatre, une seconde mine vient à côté.
+  Une mine est un pavé plein de 7 × 3 caractères, rouge et blanc en alternance. **Une mine de plus par rangée** une fois sur deux est
   semées sur toute la largeur de l'écran, indépendamment de la route de la foreuse (au moins 12 colonnes d'elle), pour que les mines
   n'existent pas seulement sous elle (23 novembre 2026).
-- **Deux mines ne se chevauchent jamais** : le pavé occupe 9 colonnes sur 5 rangées (fond noir compris), et toute mine posée garde cet
-  écart avec celles déjà en place, les rangées précédentes comprises (`fgMPose`, `FG_MDX`, `FG_MDY`). Si la place est prise, la mine
-  glisse de 9 colonnes, jusqu'à deux fois de chaque côté, puis renonce. Vérifié : 420 mines posées, aucune paire qui se chevauche.
+- **Deux mines gardent au moins cinq cases de vide entre elles** (24 novembre 2026 ; avant, elles pouvaient se toucher) : le pavé fait
+  7 × 3, d'où un écart minimum de 12 colonnes ou 8 rangées (`fgMPose`, `FG_MDX`, `FG_MDY`), les rangées précédentes comprises. Si la
+  place est prise, la mine glisse de 12 colonnes, jusqu'à deux fois de chaque côté, puis renonce. Vérifié : 241 mines posées, aucune
+  paire trop proche.
+- **Moins de mines** (24 novembre 2026) : rangées espacées de 19 à 26 lignes (17 à 25 avant), mines des côtés ramenées de une ou deux
+  à zéro ou une. Environ **30 mines par descente** au lieu de 52.
 - Toucher une mine (elle saute dès qu'elle est dans le puits) coûte **12 points de vie** (`FG_MINE_DM`), de la vraie vie de la
   foreuse. **À zéro, la foreuse explose** : écran « FOREUSE DÉTRUITE », pas de niveau 3.
 - Échap passe la scène contre **30 points de vie** (`FG_PASSE_DM`), sans jamais tuer. Espace et Entrée ne passent plus.
@@ -134,9 +137,9 @@ Du niveau 2 au niveau 3, la descente se joue. `playForage(suite, 2)` ; **NIV3** 
   27 secondes environ ; les rangées de mines sont espacées de 17 à 25 lignes pour ne pas doubler les dégâts, 23 mines
   environ) ; **la roche dure du mini-jeu est en couleur bio** (le basalte était gris) ; **les commandes de direction sont
   inversées aux deux descentes** : la touche de gauche pousse la foreuse à droite, et l'inverse, au clavier comme au doigt.
-- Mesuré (`outils/scripts/test-forage.js`, douze descentes par pilote) : sans diriger, 8 mines
-  touchées et 91 points perdus, 9 foreuses détruites sur 20 ; pilote maladroit, 54 points ; pilote attentif, 13 points (mesuré le
-  23 novembre 2026, avec les mines des côtés ; avant : 6,5 mines, 75 points, 4 détruites sur 12).
+- Mesuré (`outils/scripts/test-forage.js`, vingt descentes par pilote, 24 novembre 2026) : sans diriger, 5,1 mines touchées et
+  61 points perdus, **aucune foreuse détruite** ; pilote maladroit, 2,8 mines et 33 points ; pilote attentif, 0,5 mine et 5 points.
+  (23 novembre, avec deux fois plus de mines : 8 touchées, 91 points, 9 détruites sur 20.)
 
 ### Transitions, plancher et palettes des descentes (23 novembre 2026)
 
