@@ -144,6 +144,7 @@ body{margin:0;background:var(--black);color:var(--fg);font:13px/1.45 var(--mono)
 #curEd{max-width:100%;image-rendering:pixelated;cursor:crosshair;touch-action:none;outline:1px solid var(--line)}
 #curPrev{width:256px;height:96px;image-rendering:pixelated;outline:1px solid var(--line)}
 .cur-tools{display:flex;flex-wrap:wrap;gap:6px}
+#curEd.pip{cursor:copy;outline:1px solid var(--c3)}   /* pipette armée */
 .cur-inks{display:grid;gap:6px}   /* deux lignes d'encres : la palette, puis blanc, noir, rouge, transparent */
 .cur-tools button{padding:4px 8px;font-size:11px;border-color:var(--line);letter-spacing:.06em}
 .cur-tools button[aria-pressed="true"]{border-color:var(--c3);color:var(--c3)}

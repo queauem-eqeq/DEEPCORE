@@ -94,6 +94,10 @@ molette ou fine barre pour remonter jusqu'aux 200 derniers messages ; un nouveau
 - **Mini-carte** pleine largeur ; ennemis en points rouges ; un clic recentre la vue ; bouton maintenu + glisser =
   défilement en temps réel. Saisie à l'intérieur, le cadre suit le pointeur sans sauter ; à l'extérieur, il se
   centre d'abord sous le pointeur.
+- **Tile editor, pipette de remplacement** (24 novembre 2026) : choisir une couleur, cliquer **Pipette**, puis cliquer
+  dans la tuile sur la couleur à remplacer : **tous les pixels de cette couleur** prennent la couleur choisie (le
+  transparent compte comme une couleur, dans les deux sens). La pipette se désarme après un remplacement ; un clic
+  droit l'annule. « Rétablir » revient au dessin de référence.
 - **Tile editor** (Lab) : encres sur deux lignes — les cinq couleurs de la palette (**#1 Monde, #2 Bâti, #3 Bio, #4 Accent,
   #5 Danger**, le même ordre et les mêmes numéros que le menu Palette depuis le 24 novembre 2026), puis Blanc, Noir, **Rouge fixe** (`R`, #d8180b, le même avec toutes les palettes) et Transparent.
   S'ajoute **Monde foncé** (`d`), l'encre de la roche dure (24 novembre 2026).
