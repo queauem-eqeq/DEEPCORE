@@ -48,7 +48,11 @@ Posé à la fin de la génération, sur toutes les recettes. **Ordre de priorit�
 **pièce secrète > pièce fermée à clé > cul-de-sac > autres salles.**
 
 - **Pièces secrètes** : chacune reçoit un lot au fond (capsule, Matière, une fois sur deux un plan, une fois sur quatre
-  un Module de puissance), en plus du reste.
+  un Module de puissance), en plus du reste. Une « pièce secrète » est ici **tout ce qu'on n'atteint qu'en passant
+  une porte dérobée** : une suite de plusieurs salles derrière la même porte ne reçoit qu'un lot, dans la plus
+  reculée ; une porte dérobée qui ne fait que relier deux endroits déjà accessibles (un raccourci) ne cache rien.
+  **Corrigé le 24 novembre 2026** : une pièce secrète située au-delà d'un bras d'eau profonde n'était pas vue et
+  restait vide (16 sur 56 au niveau 2, 4 sur 40 au niveau 3, sur 60 cartes) ; plus aucune après correction.
 - Les autres lieux se partagent **5 à 10 butins par carte** (6 sur une carte de taille 3). Les lieux sont **choisis**
   dans l'ordre de priorité :
   - **Pièce fermée à clé** : une zone qu'on n'atteint qu'en ouvrant une porte verrouillée ; un butin par zone, sur sa

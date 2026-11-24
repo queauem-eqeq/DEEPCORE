@@ -133,18 +133,21 @@ const BUTIN_POIDS={ferme:6,impasse:1,autres:.5};
 function butinExplo(){const N=W*H,t=G.t,dep=idx(G.px,G.py),s0=G.sites&&G.sites[0],site=s0?idx(s0.x,s0.y):-1;G.items=G.items||{};
   G.butinN={secret:0,explo:0,ferme:0,impasse:0,autres:0};
   const pose=(i,k)=>{(G.items[i]=G.items[i]||[]).push(k);};
-  const bfs=(src,secret,ferme)=>{const d=new Int32Array(N).fill(-1),q=src.slice();for(const c of q)d[c]=0;
+  const bfs=(src,secret,ferme,eau)=>{const d=new Int32Array(N).fill(-1),q=src.slice();for(const c of q)d[c]=0;
     for(let a=0;a<q.length;a++){const c=q[a],x=c%W,y=(c/W)|0;for(const [dx,dy] of D4){const X=x+dx,Y=y+dy;
       if(X<1||Y<1||X>=W-1||Y>=H-1)continue;const j=idx(X,Y),v=t[j];
-      if(d[j]<0&&(!blocks(v)||(v===LOCK&&!ferme)||(secret&&v===SECRET))&&v!==DEEP){d[j]=d[c]+1;q.push(j);}}}return d;};
-  const d=bfs([dep],false),ds=bfs([dep],true),d0=bfs([dep],false,true);   // d0 : sans ouvrir aucune serrure
+      if(d[j]<0&&(!blocks(v)||(v===LOCK&&!ferme)||(secret&&v===SECRET))&&(eau||v!==DEEP)){d[j]=d[c]+1;q.push(j);}}}return d;};
+  const d=bfs([dep],false),d0=bfs([dep],false,true);   // d0 : sans ouvrir aucune serrure
   const libre=i=>(t[i]===FLOOR||t[i]===GROUND||t[i]===FLAT||t[i]===RUBBLE)&&i!==site&&i!==dep&&!(G.items[i]&&G.items[i].length)&&!(G.cles&&G.cles[i])&&!(G.lz&&G.lz[i])&&!(G.soc&&G.soc[i]!=null)&&!(G.ore&&G.ore[i])&&!(G.sites||[]).some(s=>idx(s.x,s.y)===i);
-  // pièces secrètes : ce qu'on n'atteint qu'en passant une porte dérobée ; le butin est au fond
+  // pièces secrètes : ce qu'on n'atteint qu'en passant une porte dérobée ; le butin est au fond.
+  // Ici l'eau profonde se traverse (24 novembre 2026) : sans cela, une pièce secrète située au-delà d'un bras d'eau profonde
+  // n'était pas vue du tout et restait vide (16 pièces sur 56 au niveau 2).
+  const dE=bfs([dep],false,false,true),dsE=bfs([dep],true,false,true);
   const vu=new Uint8Array(N);
-  for(let i=0;i<N;i++){if(vu[i]||ds[i]<0||d[i]>=0||blocks(t[i]))continue;const comp=[i];vu[i]=1;
+  for(let i=0;i<N;i++){if(vu[i]||dsE[i]<0||dE[i]>=0||blocks(t[i]))continue;const comp=[i];vu[i]=1;
     for(let a=0;a<comp.length;a++){const c=comp[a],x=c%W,y=(c/W)|0;for(const [dx,dy] of D4){const j=idx(x+dx,y+dy);
-      if(j>=0&&j<N&&!vu[j]&&ds[j]>=0&&d[j]<0&&!blocks(t[j])){vu[j]=1;comp.push(j);}}}
-    const c=comp.filter(libre).sort((a,b)=>ds[b]-ds[a]);if(!c.length)continue;
+      if(j>=0&&j<N&&!vu[j]&&dsE[j]>=0&&dE[j]<0&&!blocks(t[j])){vu[j]=1;comp.push(j);}}}
+    const c=comp.filter(libre).sort((a,b)=>dsE[b]-dsE[a]);if(!c.length)continue;
     butinCoffre('secret').forEach((k,n)=>pose(c[Math.min(n,c.length-1)],k));G.butinN.secret++;}
   // trajet principal, puis l'écart de chaque case à ce trajet
   const chemin=[dep];if(site>=0&&d[site]>=0){let c=site;while(c!==dep){chemin.push(c);const x=c%W,y=(c/W)|0;let m=c;
