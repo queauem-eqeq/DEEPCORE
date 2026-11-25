@@ -77,10 +77,13 @@ const SLOW={[LIQ]:1.5,[DEEP]:2};                        // terrains lents : eau 
 const SPRINT_COST=5,SPRINT_MULT=.5;                     // course : énergie par pas, et durée du pas multipliée
 const WAIT_REGEN=2;                                     // attendre sur place : recharge d'énergie multipliée
 const slowOf=(v,swim)=>swim?1:(SLOW[v]||1);             // les nageurs (crabos) ne sont pas ralentis par l'eau
+/* La foreuse compte comme les créatures depuis le 26 novembre 2026 : deux durées, le pas et le coup, en base 100.
+   G.st.pas et G.st.coup sont des modificateurs que l'équipement ajoute ou retire — négatif, c'est plus rapide.
+   Avant, le pas se réglait par une VIT en base 5 (durée = 100 × 5 ÷ VIT) : deux unités pour une même chose. */
 const coupDur=()=>Math.max(25,DUR.coup+(G.st.coup||0));   // une arme peut allonger ou raccourcir le coup (14-inventaire)
-const robotVit=()=>Math.max(1,G.st.vitesse||5);
+const robotPas=()=>Math.max(25,DUR.pas+(G.st.pas||0));    // un accessoire ou une armure peut alourdir ou alléger le pas
 // englué : pas deux fois plus longs
-function stepDur(v,run){return DUR.pas*5/robotVit()*slowOf(v)*(run?SPRINT_MULT:1)*(G.eff&&G.eff.glu>0?2:1);}
+function stepDur(v,run){return robotPas()*slowOf(v)*(run?SPRINT_MULT:1)*(G.eff&&G.eff.glu>0?2:1);}
 // Une créature qui pousse une porte à portée de vue s'entend (19 novembre 2026) : on compare les portes occupées avant et après le battement.
 function portesPrises(){const s=new Set();for(const l of [G.animals,G.beasts])for(const o of l||[]){const i=idx(o.x,o.y);
   if(G.t[i]===DOOR)s.add(i);}return s;}

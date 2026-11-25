@@ -116,7 +116,7 @@ PAT.crackH=(x,y)=>{const c=(a,b)=>PAT.crack2[b]&&PAT.crack2[b][a]==='0';
   if(x>=11&&y<=4&&x-y>=10)return '0';if(x<=4&&y>=11&&y-x>=10)return '0';
   if((x-6)**2+(y-10)**2<=2||(x-11)**2+(y-8)**2<=1)return '0';return '.';};
 PAT.rubble=["................","..33.......3....","..3.....33......","........3...33..","....3.......3...",".33......3......","..........33....","...3..3.........","..33.......3....","........33......",".3...3......33..","...........3....","....33..........","..........3..3..",".3..3...........","................"];
-// Petits animaux : v = vitesse (5 = celle du robot), d = portée de détection en cases
+// Petits animaux : dpas et dcoup = durées d'un pas et d'un coup (100 = l'allure de base), d = portée de détection en cases
 const SPECIES=[
   {n:'Puce',fem:true,dpas:75,dcoup:50,pv:10,dmin:2,dmax:3,pre:80,def:20,crit:2,b:'2',a:'3',rx:4,ry:2,hr:1.6,legs:3,ears:'antennes',tail:'',pat:'rayures',
    // dessin robotique adopté comme norme le 17 novembre 2026
@@ -153,7 +153,7 @@ function critter(p){const cx=7,cy=9,hx=cx+p.rx+1,hy=cy-p.ry+1,top=hy-Math.ceil(p
     if(p.tail==='pompon'&&x===tx-1&&(y===cy-1||y===cy))return p.b;
     if(p.tail==='boucle'&&((x===tx-1&&y===cy)||(x===tx-2&&y===cy-1)||(x===tx-2&&y===cy-2)||(x===tx-1&&y===cy-3)))return p.b;
     return '.';};}
-// Animal agressif (1 case) : v = vitesse, d = détection, pv = points de vie
+// Animal agressif (1 case) : dpas et dcoup = durées d'un pas et d'un coup, d = détection, pv = points de vie
 const BEASTS=[
   {n:'Crabot',key:'crabos',nb:15,role:'Chasse le robot',dpas:100,dcoup:100,pv:22,dmin:3,dmax:6,pre:65,def:0,crit:2,swim:true,nage:true,
     rows:["................",

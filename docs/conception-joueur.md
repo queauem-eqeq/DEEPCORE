@@ -92,8 +92,8 @@ Tous les prix se règlent dans **Lab → Items**.
 Repère : une carte de taille 3 porte deux gisements de Matière de 30 à 50, soit 70 à 80 par niveau, plus le butin au sol
 (2 à 4 blocs de 15) et ce que lâchent les robots : 120 à 150 par niveau en explorant tout.
 Quatre pièces nouvelles (choix de l'utilisateur, « consommables + équipement ») : **Vrille rapide** (1d4+4, coup −30,
-CRIT +5, POW 9), **Trépan lourd** (2d6+6 ; coup +25, POW 12), **Carène légère** (DEF +5, VIT +1, DIS −1, POW 9),
-**Blindage composite** (DEF +25 ; VIT −1, POW 12). Leurs tuiles au sol sont la tuile générique, à dessiner.
+CRIT +5, POW 9), **Trépan lourd** (2d6+6 ; coup +25, POW 12), **Carène légère** (DEF +5, pas −10, DIS −1, POW 9),
+**Blindage composite** (DEF +25 ; pas +25, POW 12). Leurs tuiles au sol sont la tuile générique, à dessiner.
 
 ## 5. Foreuse
 
@@ -101,7 +101,7 @@ CRIT +5, POW 9), **Trépan lourd** (2d6+6 ; coup +25, POW 12), **Carène légèr
 |---|---|---|
 | Vie | 100 | **pas de réparation automatique** |
 | Énergie | 100 | se recharge de POW par battement, **× 2 en attendant sur place** ; se déplacer ne coûte rien, un coup sur la roche 10, frapper un animal rien |
-| VIT | 5 | **vitesse de déplacement** : un pas dure 100 × 5 ÷ VIT. À 5, un pas = un battement. Ne joue ni sur les coups ni sur le forage |
+| PAS | 100 | **durée d'un déplacement**, en unités de temps comme pour les créatures : 100 = un battement. Plus c'est bas, plus la foreuse marche vite. Ne joue ni sur les coups ni sur le forage |
 | EYE | 10 | rayon de vision |
 | DEG | 0 | **bonus fixe** ajouté au jet de dés de l'arme |
 | PRE | 100 | précision |
@@ -131,7 +131,7 @@ Le jeu compte en **unités de temps**, pas en tours.
 
 - Chaque action de la foreuse a une **durée** (table `DUR` dans `09`) : pas 100, coup de foreuse 100, coup sur la
   roche 100, attendre 100.
-- Durée d'un pas = 100 × 5 ÷ VIT × terrain (eau peu profonde 1,5 ; eau profonde 2) × 0,5 en course.
+- Durée d'un pas = PAS × terrain (eau peu profonde 1,5 ; eau profonde 2) × 0,5 en course × 2 si la foreuse est engluée.
 - Le monde **bat toutes les 100 unités**. À chaque battement : la détection et la perte de trace sont tirées,
   l'énergie remonte de POW, les effets s'épuisent (étourdi, glu, mèche d'une mine), le Soudeur répare, les machines
   tournent. Une action de 50 laisse passer un battement une fois sur deux ; une action de 200 en laisse passer deux.
@@ -162,7 +162,11 @@ ni frapper deux fois. Maintenant elles comptent le temps comme la foreuse.
 - Ce qui apparaît : **la charge** (venir au contact et frapper pendant une seule action de la foreuse) et la **double
   frappe** (`dcoup` 50). Une phase tirée au hasard à la naissance évite que toutes les bêtes d'une espèce agissent au
   même instant.
-- Reste en VIT : la **foreuse**, dont la vitesse se règle encore par objets (durée d'un pas = 100 × 5 ÷ VIT).
+- **La foreuse compte pareil** (26 novembre 2026) : sa VIT en base 5 a disparu, remplacée par **PAS**, en base 100 comme
+  COUP et comme les créatures. `G.st.pas` et `G.st.coup` sont des modificateurs que l'équipement ajoute ou retire,
+  **négatif = plus rapide** ; la colonne affiche la durée obtenue. Objets adaptés : Servomoteur **pas −25**, Carène
+  légère **pas −10**, Blindage composite **pas +25**. Une partie d'avant est convertie une fois, en recalculant le
+  modificateur depuis l'équipement porté (pas depuis le total, qui dériverait au premier objet retiré).
 
 ## 6. Combat
 
@@ -263,7 +267,7 @@ inconnue sur soi peut coûter cher, la lancer sur un ennemi peut le servir. Fabr
 |---|---|---|---|
 | Foreuse | arme | 10 | **seule arme** : dégâts **1d6+5** (6 à 11), coup 100 |
 | Coque d'usine | armure | 10 | **seule armure** : DEF +10 (déjà compris dans les stats de départ) |
-| Servomoteur | accessoire | – | VIT +2 |
+| Servomoteur | accessoire | – | Pas −25 (la foreuse marche plus vite) |
 | Téléobjectif | accessoire | – | EYE +3 |
 | Viseur laser | accessoire | – | CRIT +10 % |
 | Condensateur | accessoire | – | POW +1 |

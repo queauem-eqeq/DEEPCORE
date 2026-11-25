@@ -118,7 +118,7 @@ molette ou fine barre pour remonter jusqu'aux 200 derniers messages ; un nouveau
 - Le curseur système est masqué sur la carte ; le **viseur** est dessiné sur la case survolée. Dès qu'on appuie sur
   une touche, viseur, fiche et trajet disparaissent jusqu'au prochain mouvement de souris.
 - **Survol** : fiche complète dans « En vue » — terrain et ses effets, distance, créature (état, PV, DÉG, PRE, DEF
-  modifiée, VIT, chances Toucher / Subir, comportement), site, roche fissurée, bord indestructible, objets posés,
+  modifiée, durées du pas et du coup, chances Toucher / Subir, comportement), site, roche fissurée, bord indestructible, objets posés,
   « souvenir » si la case est hors de vue, et l'action du clic (« y aller · N tours », « frapper », « forer »).
 - **Trajet** : le plus court chemin (Dijkstra, 8 directions, cases connues seulement, eau profonde évitée,
   créatures visibles contournées), montré par un petit rond blanc (4 × 4 pixels de tuile, opacité 70 %) au centre

@@ -17,12 +17,12 @@ Object.assign(ITEMS,{
     d:'Une tête de forage massive : chaque coup compte double, mais il faut le temps de l’armer.',
     art:["  ▄▄▄▄▄▄▄▄▄▄▄  ", "  █▓▓▓▓▓▓▓▓▓█  ", " ▐▒▒▒▒▒▒▒▒▒▒▒▌ ", " ▐▒▒▒▒▒▒▒▒▒▒▒▌ ", "  ▀▒▒▒▒▒▒▒▒▒▀  ", "    ▀▀▀▀▀▀▀    "],
     col:["..33333333333..", "..31111111113..", ".2111111111112.", ".2111111111112.", "..21111111112..", "....2222222...."]},
-  carene:{n:'Carène légère',f:1,slot:'armure',req:9,mod:{def:5,vitesse:1,dis:-1},
+  carene:{n:'Carène légère',f:1,slot:'armure',req:9,mod:{def:5,pas:-10,dis:-1},
     d:'Une coque allégée : moins de protection, mais la foreuse va plus vite et s’entend de moins loin.',
     art:["   ▄       ▄   ", "   █▀▀▀▀▀▀▀█   ", "   █░░░█░░░█   ", "    ▀▄░░░▄▀    ", "      ▀▀▀      "],
     col:["...3.......3...", "...333333333...", "...322232223...", "....3322233....", "......333......"]},
   // DEF +25 depuis le 22 novembre 2026 (+18 : aucun gain mesuré)
-  blindage:{n:'Blindage composite',slot:'armure',req:12,mod:{def:25,vitesse:-1},
+  blindage:{n:'Blindage composite',slot:'armure',req:12,mod:{def:25,pas:25},
     
     d:'Des plaques épaisses : la foreuse encaisse bien mieux, et se traîne un peu.',
     art:[" ▄▄         ▄▄ ", " █▓█▀▀▀▀▀▀▀█▓█ ", " █▓▒▒▒▐█▌▒▒▒▓█ ", " █▓▒▒▒▒▒▒▒▒▒▓█ ", "  ▀▄▓▓▓▓▓▓▓▄▀  ", "    ▀▀▀▀▀▀▀    "],
