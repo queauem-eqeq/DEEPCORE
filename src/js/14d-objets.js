@@ -97,7 +97,7 @@ const tenuPar=()=>(G.beasts||[]).find(b=>b.tient&&!(b.stun>0)&&Math.max(Math.abs
 
 /* ----- Butin ----- */
 // objets simples d'abord, les meilleurs plus bas
-const PLAN_RANG=k=>{const d=ITEMS[k];return ['repar','batterie','fumigene','cle','balise'].includes(k)?1:d.conso||d.slot==='acc'?2:3;};
+const PLAN_RANG=k=>{const d=ITEMS[k];return ['repar','batterie','fumigene','balise'].includes(k)?1:d.conso||d.slot==='acc'?2:3;};
 const nivCarte=()=>nivBorne((typeof G!=='undefined'&&G&&G.niv)||(typeof NIV_GEN==='number'?NIV_GEN:1));
 let PLANS_POSES={};   // plans déjà posés sur la carte en cours de génération : pas deux fois le même
 function planTire(){const s=savoir(),niv=nivCarte(),lib=Object.keys(FAB_PRIX).filter(k=>ITEMS[k]&&!s.plans[k]&&!PLANS_POSES[k]);
@@ -114,7 +114,8 @@ function butinCoffre(q){const h=p=>Math.random()<p;
   if(q==='piege')return [h(.5)?planTire():equipTire(),consoTire(),'matiere'];
   return [consoTire(),'matiere',...(h(.5)?[planTire()]:[]),...(h(.25)?['puissance']:[])];}
 // un robot abattu lâche parfois un objet (les relais d'une salle piégée, jamais : b.nd)
-function butinMort(b){if(!b||b.nd)return;const sp=BEASTS[b.sp],p=DROPS[sp.key]||0;if(Math.random()*100>=p)return;
+// Un objet au plus par robot, quel que soit le nombre de coups qui l'achèvent au même battement (b.butin, 25 novembre 2026).
+function butinMort(b){if(!b||b.nd||b.butin)return;b.butin=1;const sp=BEASTS[b.sp],p=DROPS[sp.key]||0;if(Math.random()*100>=p)return;
   const i0=idx(b.x,b.y);if(blocks(G.t[i0])||G.t[i0]===DEEP)return;
     const r=Math.random(),k=r<.4?'matiere':r<.75?consoTire():r<.93?planTire():equipTire();
   const i=caseSol(b.x,b.y,true);   // un objet déjà là : celui-ci roule sur la case libre la plus proche (22 novembre 2026)
@@ -193,6 +194,8 @@ function butinExplo(){const N=W*H,t=G.t,dep=idx(G.px,G.py),s0=G.sites&&G.sites[0
 /* ----- Ramassage : la Matière rejoint la réserve, un plan s'apprend, le reste va au sac ----- */
 function butinPrend(c,more){const l=G.items&&G.items[c];if(!l)return;const dire=more?sayMore:invSay,reste=[];
   for(const k of l){const d=ITEMS[k];
+    // la clé ne se fabrique plus (25 novembre 2026) : un plan de clé resté au sol d'une ancienne partie se recycle en Matière
+    if(k==='plan_cle'){G.st.matiere=(G.st.matiere||0)+PLAN_DOUBLON;dire(`Plan périmé, recyclé en Matière {µ} (+${PLAN_DOUBLON}).`,'info');continue;}
     if(d&&d.mat){const m=ITEM_VAL.matiere.mat;G.st.matiere=(G.st.matiere||0)+m;
       addFx({kind:'num',x:G.px,y:G.py,txt:'+'+m,col:PAL['1'],dur:750});
       dire(`Matière {µ} ramassée : +${m} (réserve ${G.st.matiere}).`,'good');SFX.spot();}
@@ -307,7 +310,7 @@ function baliseJoue(e,sp,boom){const q=baliseDe(e);if(!q){e.leurre=0;return fals
   else if((sp.laser||sp.glu)&&d<=(sp.laser||sp.glu)&&d>1&&los(e.x,e.y,q.x,q.y)){if(sp.cadence){if((e.cd=(e.cd||0)-1)>0)return true;
     e.cd=sp.cadence;}baliseFrappe(e,sp,q,true);return true;}
   else if(d<=1){baliseFrappe(e,sp,q,false);return true;}
-  e.mp=Math.min(2,e.mp+sp.v/5/slowOf(G.t[idx(e.x,e.y)],sp.swim));const m=mouilleOk(sp,e),kD=q.id+':'+(m?1:0);let D=BAL_D.get(kD);
+  e.mp=Math.min(2,e.mp+sp.v/5/slowOf(G.t[idx(e.x,e.y)],eauLibre(sp)));const m=mouilleOk(sp,e),kD=q.id+':'+(m?1:0);let D=BAL_D.get(kD);
     if(!D){D=distFrom(q.x,q.y,m);BAL_D.set(kD,D);}
   while(e.mp>=1&&!G.over){e.mp-=1;if(cheb(e,q.x,q.y)<=1){e.mp=Math.min(e.mp,.99);break;
     }if(!chaseStep(e,D,(x,y)=>beastFits(e,x,y),q.x,q.y))break;}

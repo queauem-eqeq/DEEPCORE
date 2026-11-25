@@ -9,7 +9,7 @@
    styles quand aucun n'est choisi.
    Tout est mémorisé dans le navigateur sous np-groupes. */
 const PATS=[['errance','Errance'],['voyage','Voyage en bande'],['ronde','Ronde'],['territoire','Territoire'],['sentinelle','Sentinelle'],['affut','Affût'],['navette','Navette'],['garde','Garde']];
-const ESPECES=()=>[['insectoide',SPECIES[0].n],...BEASTS.map(b=>[b.key,b.n])];
+const ESPECES=()=>[['puce',SPECIES[0].n],...BEASTS.map(b=>[b.key,b.n])];
 /* Lieux et densité (21 novembre 2026). La carte a trois sortes de lieux : l'extérieur (terrain naturel, poches et cavernes comprises),
    le bâti (sol des bâtiments) et les tunnels. Le budget de menace de chaque niveau est réparti directement entre eux
    (GROUPES.niv[n].part, en % du budget, ramenés à 100 ; un lieu absent de la carte rend sa part aux autres, et un lieu ne reçoit
@@ -42,14 +42,14 @@ const GROUPES_DEF=()=>groupesSains({budget:80,v:2,pente:20,liste:[
   {"cout":3,"f":2,"m":[{"k":"crabos","max":2,"min":1}],"n":"Crabots","on":1,"pats":["voyage","ronde","navette","sentinelle"],"lieux":[]},
   {"cout":7,"f":2,"m":[{"k":"crabos","max":6,"min":4}],"n":"Large crabot groupe","on":1,"pats":["voyage","navette","ronde"],"lieux":[]},
   {"cout":5,"f":2,"m":[{"k":"cafar","max":4,"min":3}],"n":"Bande de relais","on":1,"pats":["voyage","errance","ronde"],"lieux":[]},
-  {"cout":7,"f":0,"m":[{"k":"paralyzor","max":1,"min":1},{"k":"crabos","max":1,"min":1},{"k":"cafar","max":1,"min":1},{"k":"mine","max":1,"min":1},{"k":"insectoide","max":1,"min":1}],"n":"Family","on":1,"pats":["territoire","ronde"],"lieux":[]},
-  {"cout":8,"f":0,"m":[{"k":"insectoide","max":5,"min":3},{"k":"paralyzor","max":1,"min":1}],"n":"3-5 puces + sentinelles","on":1,"pats":["voyage"],"lieux":[]},
+  {"cout":7,"f":0,"m":[{"k":"paralyzor","max":1,"min":1},{"k":"crabos","max":1,"min":1},{"k":"cafar","max":1,"min":1},{"k":"mine","max":1,"min":1},{"k":"puce","max":1,"min":1}],"n":"Family","on":1,"pats":["territoire","ronde"],"lieux":[]},
+  {"cout":8,"f":0,"m":[{"k":"puce","max":5,"min":3},{"k":"paralyzor","max":1,"min":1}],"n":"3-5 puces + sentinelles","on":1,"pats":["voyage"],"lieux":[]},
   {"cout":3,"f":1,"m":[{"k":"mine","max":2,"min":1}],"n":"1-2 Mines","on":1,"pats":["errance"],"lieux":[]},
   {"cout":6,"f":1,"m":[{"k":"mine","max":3,"min":3},{"k":"paralyzor","max":2,"min":2}],"n":"Mines & Sentinelles","on":1,"pats":["navette","ronde"],"lieux":[]},
   {"cout":3,"f":1,"m":[{"k":"paralyzor","max":3,"min":2}],"n":"2-3 sentinelles","on":1,"pats":["territoire","ronde","navette"],"lieux":[]},
   {"cout":3,"f":0,"m":[{"k":"brochon","max":2,"min":1}],"n":"Banc de torpilles","on":1,"pats":["errance"],"lieux":["ext"]},
   {"cout":11,"f":1,"m":[{"k":"mastok","max":1,"min":1}],"n":"Broyeur solitaire","on":1,"pats":["territoire","garde","sentinelle"],"lieux":[]},
-  {"cout":10,"f":0,"m":[{"k":"insectoide","max":8,"min":6},{"k":"mine","max":1,"min":0}],"n":"Puces en groupes","on":1,"pats":["voyage"],"lieux":[]},
+  {"cout":10,"f":0,"m":[{"k":"puce","max":8,"min":6},{"k":"mine","max":1,"min":0}],"n":"Puces en groupes","on":1,"pats":["voyage"],"lieux":[]},
   {"cout":10,"f":1,"m":[{"k":"gardien","max":1,"min":1},{"k":"paralyzor","max":2,"min":1}],"n":"Poste de garde","on":1,"pats":["garde"],"lieux":[]},
   {"cout":13,"f":1,"m":[{"k":"artilleur","max":2,"min":2},{"k":"gardien","max":1,"min":0}],"n":"Batterie","on":1,"pats":["garde","sentinelle"],"lieux":[]},
   {"cout":3,"f":1,"m":[{"k":"drone","max":5,"min":3}],"n":"Essaim de drones","on":1,"pats":["voyage","navette","ronde"],"lieux":["bati","ext"]},
@@ -70,13 +70,16 @@ function groupesV2(g){if(!g||g.v>=2)return g;const D=GROUPES_DEF();
   g.pente=D.pente;g.v=2;g.niv=nivSains(null,g.liste,g.budget,g.pente);return g;}
 // remet d'aplomb des groupes lus dans le navigateur ou dans la base : bornes, espèces inconnues écartées.
 // L'effectif minimal peut être 0 : l'espèce est alors parfois absente du groupe.
+/* Clé de la Puce : « puce » depuis le 25 novembre 2026. Les réglages enregistrés avant (groupes, bestiaire, dans le navigateur comme
+   dans la base de l'artefact) portent l'ancienne clé : elle est convertie à la lecture, ici et nulle part ailleurs. */
+const ANC_PUCE='insecto'+'ide',clePuce=o=>{if(o&&o[ANC_PUCE]!==undefined){if(o.puce===undefined)o.puce=o[ANC_PUCE];delete o[ANC_PUCE];}return o;};
 function groupesSains(d){const ks=ESPECES().map(e=>e[0]),
   n=(v,mn,mx,df)=>Number.isFinite(+v)&&v!==''&&v!=null?Math.max(mn,Math.min(mx,Math.round(+v))):df;
   if(!d||!Array.isArray(d.liste))return null;
   const liste=d.liste.slice(0,40).map(g=>({n:String(g.n||'Groupe').slice(0,30),lieux:[...new Set(Array.isArray(g.lieux)?g.lieux:[])].filter(v=>LIEUX.some(l=>l[0]===v)),cout:n(g.cout,1,500,1),on:g.on?1:0,f:[0,1,2].includes(+g.f)?+g.f:1,
     // liste vide permise : le style est alors tiré parmi tous
     pats:[...new Set(Array.isArray(g.pats)?g.pats:[g.pat||'errance'])].filter(v=>PATS.some(p=>p[0]===v)),
-    m:(Array.isArray(g.m)?g.m:[]).filter(m=>m&&ks.includes(m.k)).slice(0,6).map(m=>{const a=n(m.min,0,20,1),b=n(m.max,1,20,Math.max(1,a));return {k:m.k,min:Math.min(a,b),max:Math.max(a,b)};})}));
+    m:(Array.isArray(g.m)?g.m:[]).map(m=>m&&m.k===ANC_PUCE?Object.assign({},m,{k:'puce'}):m).filter(m=>m&&ks.includes(m.k)).slice(0,6).map(m=>{const a=n(m.min,0,20,1),b=n(m.max,1,20,Math.max(1,a));return {k:m.k,min:Math.min(a,b),max:Math.max(a,b)};})}));
   const bud=n(d.budget,0,2000,80),pen=n(d.pente,0,200,20),niv=nivSains(d.niv,liste,bud,pen);
   return {budget:niv[1].budget,v:d.v>=2?2:1,pente:pen,niv,liste};}
 let GROUPES=GROUPES_DEF();
@@ -86,7 +89,7 @@ function saveGroupes(){for(const n of GR_NIVS)GROUPES.niv[n].gr=GROUPES.niv[n].g
   GROUPES.budget=GROUPES.niv[1].budget;
   try{localStorage.setItem('np-groupes',JSON.stringify(GROUPES));}catch(e){}touchLocal();}
 // effectifs par espèce : ne servent plus qu'au banc de combat et aux mesures (spawnAnimals, spawnBeasts)
-let LIFE={insectoide:0};BEASTS.forEach(b=>{LIFE[b.key]=0;});
+let LIFE={puce:0};BEASTS.forEach(b=>{LIFE[b.key]=0;});
 
 const grEsc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const grEffectif=g=>{let a=0,b=0;for(const m of g.m){a+=m.min;b+=m.max;}return a===b?''+a:a+' à '+b;};
@@ -95,7 +98,7 @@ const grCompo=g=>{const E=ESPECES();
 /* Fenêtre Groupes (refaite le 19 novembre 2026) : à gauche la fiche du groupe choisi, à droite la liste en colonne.
    Dans la liste, un clic choisit le groupe, la case l'active, et on le déplace à la souris (glisser) ou par ↑ ↓. */
 let GR_SEL=0;
-function buildGroupes(){const E=ESPECES(),ic=k=>ICON[k==='insectoide'?'an0r':'bz'+BEASTS.findIndex(b=>b.key===k)+'r']||'',L=GROUPES.liste;
+function buildGroupes(){const E=ESPECES(),ic=k=>ICON[k==='puce'?'an0r':'bz'+BEASTS.findIndex(b=>b.key===k)+'r']||'',L=GROUPES.liste;
   GR_SEL=Math.max(0,Math.min(L.length-1,GR_SEL));
   $('grList').innerHTML=L.map((g,i)=>`<div class="grl${i===GR_SEL?' sel':''}${g.on?'':' inactif'}" data-g="${i}" draggable="true">
       <span class="grip" aria-hidden="true">⠿</span><input type="checkbox" data-f="on"${g.on?' checked':''} aria-label="Activer le groupe ${grEsc(g.n)}" title="Actif">

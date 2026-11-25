@@ -111,7 +111,7 @@ Les chiffres mesurés sont dans `mesures.md`.
 - **Barres de vie et d'énergie corrigées** : elles comptaient 20 caractères là où la colonne en montrait 14.
 - **Consommables : un battement** (gratuits et instantanés avant).
 - **Éclats de métal** : rendent autant d'énergie que de vie.
-- **Tuiles et stats réglées par l'utilisateur adoptées** comme valeurs du code (l'insectoïde laissé tel quel à sa
+- **Tuiles et stats réglées par l'utilisateur adoptées** comme valeurs du code (la Puce laissée telle quelle à sa
   demande). Décision du même jour : **il règle ses tuiles et ses stats dans l'artefact**, seule version dont la
   session peut relire les réglages.
 
@@ -119,7 +119,7 @@ Les chiffres mesurés sont dans `mesures.md`.
 
 - **Six espèces retirées** : Crachin, Vipérin, Gluar, Siphon, Tapi, Taupar. Restent la Puce et quatre bêtes.
 - **Les créatures deviennent des machines** : Insectoïde → **Puce**, Crabos → **Crabot**, Cafar → **Relais**,
-  Mastok → **Broyeur**, Brochon → **Torpille**. Seuls les noms affichés changent ; les clés internes restent.
+  Mastok → **Broyeur**, Brochon → **Torpille**. Seuls les noms affichés changent ; les clés internes restent (sauf celle de la Puce, devenue `puce` le 25 novembre 2026 : l'ancienne est convertie à la lecture des réglages enregistrés, `clePuce` dans `06b-groupes.js`).
   Les retouches faites sur les anciens dessins sont jetées une fois (`np-robo17`).
 - Les tuiles étant numérotées par rang, le Broyeur passe de `bz8` à `bz2` et la Torpille de `bz9` à `bz3`
   (`migreBz`, marqué par `np-bz17`).
@@ -300,3 +300,21 @@ Ce qui a été remplacé, et pourquoi (demandes de l'utilisateur, « chaque mach
 - **Les murs, les portes et les machines résistaient à l'explosion d'une mine** (règle du 22 novembre 2026 : seule la charge
   sismique en venait à bout). Retiré à la demande : l'explosion d'une mine les détruit désormais, la roche dure exceptée.
   La charge sismique détruit aussi les portes, qu'elle épargnait par oubli.
+
+## 25 novembre 2026 — plus de plan de clé
+- **La clé se fabriquait** (plan de niveau 1, 22 de Matière). Retiré à la demande : il n'existe plus de plan de clé, les clés
+  se trouvent seulement sur la carte.
+
+## 25 novembre 2026 — le coup réel ignorait les +5 % de dégâts par point de POW
+- La règle du 22 novembre 2026 (+5 % de dégâts par point de POW au-dessus du POW requis par l'arme) n'avait été appliquée qu'à
+  l'affichage (`robotDegs`) ; le coup lui-même (`robotDeg`) était resté à +1,5 %, la règle de la précision. Corrigé : le coup
+  applique `degFact`. La précision garde ses +1,5 % par point. Mesures de combat non relancées (demande de l'utilisateur).
+
+## 25 novembre 2026 — réglages du joueur recopiés dans le code
+- Relus dans la base de l'artefact (`reglages/courant`, enregistré le 25 novembre 2026 à 22 h 05) et comparés au code dans le vrai
+  moteur. **Identiques, rien à recopier** : bestiaire, objets (prix, effets, butin), groupes et niveaux, artefacts, discrétion.
+- **Recopié** : 28 tuiles (robots `bz0`…`bz10`, Puce, foreuse, machines `mach0`…`mach9`, terminal, site de forage, sol des ponts,
+  module de puissance ; **Montagne dure et Crête dure**, qui ne suivent donc plus la montagne tendre), les **huit palettes**
+  (Lagon → Lagoon, Désert → Désert sombre, Glacier → Dark forest, Améthyste et Magma retouchées) avec **Améthyste au démarrage**,
+  et la **banque de modules** (10 modules, 2 par niveau 1, 1 en cavernes et en base) devenue la banque de départ (`MODULES_DEF`).
+- Non recopié, comme toujours : la configuration d'essai (génération, taille de planète, état de la foreuse).

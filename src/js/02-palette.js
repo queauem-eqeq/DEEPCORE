@@ -6,20 +6,20 @@
    Le blanc reste fixe. Les palettes d'avant (trois couleurs) sont abandonnées : un réglage enregistré à trois couleurs est ignoré. */
 const LACKING64=['#d6e0f9','#b5c8ea','#94aada','#7c85c5','#7f65bb','#80459e','#9e79b3','#c99acf','#e8bfe2','#ebd2d4','#e0b5bb','#e09f9d','#da827a','#ca614e','#d8180b','#a91d18','#8d1123','#650c25','#380b2a','#1c0b21','#010000','#11103b','#1f088e','#171fa9','#0443be','#116bb5','#2e9adc','#6de6e7','#3ab99d','#1a946c','#0b5d40','#073a31','#041623','#163d4a','#30626d','#4d858d','#75a3a8','#afc8c8','#fffeff','#f7f688','#ebbf4a','#e38d18','#b56303','#833e11','#532918','#331b1a','#140e0e','#966949','#af8568','#c3a389','#d7bea7','#ffe7ad','#efd28b','#dfae65','#be8f44','#947e31','#676920','#395609','#164402','#0a3001','#1d1d1c','#414040','#6f6f6e','#a9a9a9'];
 const PAL_N=5,PAL_CLES=['1','2','3','4','5'];
-const PRESETS=[   // c : accent, bio, monde, danger, bâti
+const PRESETS=[   // c : accent, bio, monde, danger, bâti ; palettes du joueur relues dans l'artefact le 25 novembre 2026
   {n:'Braise',c:['#c99acf','#6de6e7','#ca614e','#d8180b','#7c85c5']},
-  {n:'Lagon',c:['#f7f688','#3ab99d','#116bb5','#d8180b','#75a3a8']},
-  {n:'Désert',c:['#833e11','#ebbf4a','#be8f44','#a91d18','#966949']},
+  {n:'Lagoon',c:['#da827a','#f7f688','#2e9adc','#d8180b','#75a3a8']},
+  {n:'Désert sombre',c:['#1a946c','#ffe7ad','#833e11','#d8180b','#163d4a']},
   {n:'Jungle',c:['#2e9adc','#ebbf4a','#1a946c','#d8180b','#4d858d']},
-  {n:'Améthyste',c:['#6de6e7','#e8bfe2','#7f65bb','#d8180b','#30626d']},
+  {n:'Améthyste',c:['#116bb5','#6de6e7','#7f65bb','#d8180b','#30626d']},
   {n:'Cendre',c:['#e38d18','#3ab99d','#6f6f6e','#d8180b','#af8568']},
-  {n:'Glacier',c:['#ebbf4a','#2e9adc','#073a31','#ca614e','#7c85c5']},
-  {n:'Magma',c:['#f7f688','#e38d18','#833e11','#d8180b','#6f6f6e']}
+  {n:'Dark forest',c:['#4d858d','#f7f688','#164402','#d8180b','#833e11']},
+  {n:'Magma',c:['#f7f688','#e38d18','#8d1123','#d8180b','#6f6f6e']}
 ];
 // Les palettes prédéfinies sont modifiables : la palette sélectionnée suit les sélecteurs de couleur
 const PRESETS_DEF=PRESETS.map(p=>({n:p.n,c:p.c.slice()}));
 const palDe=c=>({'1':c[0],'2':c[1],'3':c[2],'4':c[3],'5':c[4]});
-let PRESET_ACTIVE=2;   // Désert, la palette choisie par le joueur (23 novembre 2026)
+let PRESET_ACTIVE=4;   // Améthyste, la palette choisie par le joueur (25 novembre 2026 ; Désert le 23)
 try{const sv=JSON.parse(localStorage.getItem('np-presets')||'null');
   // une entrée est soit les cinq couleurs (ancien format), soit {n, c} : le nom de la palette est modifiable depuis le 24 novembre 2026
   if(Array.isArray(sv))sv.forEach((e,i)=>{if(!PRESETS[i])return;const c=Array.isArray(e)?e:e&&e.c;

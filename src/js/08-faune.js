@@ -2,17 +2,26 @@
 const animalAt=(x,y)=>G.animals&&G.animals.find(a=>a.x===x&&a.y===y);
 // Eau : depuis le 15 novembre 2026, TOUTES les créatures y entrent (avant : seuls les crabos). Les nageurs (swim) gardent leur avantage :
 // eux seuls ne sont pas ralentis par l'eau (slowOf). L'argument swim encore passé à canWalk et distFrom est sans effet, il est ignoré.
-/* Eau : trois rapports à l'eau selon l'espèce (16 novembre 2026).
+/* Eau : trois rapports à l'eau selon l'espèce (16 novembre 2026 ; complété le 25 novembre 2026, voir eauLibre plus bas).
    - `nage` (crabos, brochon) : elles y vont naturellement, en chasse comme en errance ;
    - `sec` (cafar) : elles n'y mettent jamais une patte, même pour poursuivre ;
-   - les autres (insectoïde, mastok) : elles l'évitent, mais la traversent pour poursuivre la foreuse.
+   - les autres (puce, mastok) : elles l'évitent, mais la traversent pour poursuivre la foreuse.
    Une créature déjà dans l'eau peut toujours en sortir, sinon elle y resterait coincée en cessant la poursuite.
    `swim` reste à part : il ne dit pas qui entre dans l'eau, mais qui n'y est pas ralenti (le crabos seul). */
 const isWater=v=>v===LIQ||v===DEEP,canWalk=(v,mouille)=>!blocks(v)&&(mouille||!isWater(v));
-const mouilleOk=(sp,o)=>!!sp.nage||(!sp.sec&&(o.hunt>0||!!o.aware||!!o.enraged))||isWater(G.t[idx(o.x,o.y)]);
+const mouilleOk=(sp,o)=>!!sp.nage||(!sp.sec&&(o.hunt>0||!!o.aware||!!o.enraged||!!o.gue))||isWater(G.t[idx(o.x,o.y)]);
+/* Trois familles face à l'eau (25 novembre 2026) :
+   - terrestres (ni nage, ni aqua, ni vol) : elles ne naissent pas dans l'eau et n'y ont aucun point de patrouille ; elles y entrent
+     pour poursuivre la foreuse, la franchissent en patrouille seulement quand aucun chemin à sec n'existe (o.gue, patBfs), et, calmes,
+     regagnent la terre la plus proche (sortEau). Dans l'eau, elles subissent le ralentissement et le malus de défense ;
+   - aquatiques (aqua) : elles ne naissent que dans l'eau et n'en sortent pas ; aucun malus d'eau ;
+   - amphibies (nage sans aqua, le crabot) : l'eau et le sol se valent, pour naître comme pour patrouiller ; aucun malus d'eau.
+   eauLibre dit qui échappe aux malus de l'eau (les volants aussi). */
+const eauLibre=sp=>!!(sp.swim||sp.nage||sp.aqua||sp.vol);
+const terrestre=sp=>!sp.nage&&!sp.aqua&&!sp.vol;
 // pas d'attaque à travers un coin
 const canHit=o=>Math.max(Math.abs(o.x-G.px),Math.abs(o.y-G.py))<=1&&diagOk(o.x,o.y,Math.sign(G.px-o.x),Math.sign(G.py-o.y));
-// les insectoïdes n'entrent pas dans le champ d'un laser
+// les puces n'entrent pas dans le champ d'un laser
 const animalOk=(x,y,m)=>{if(x<1||y<1||x>=W-1||y>=H-1)return false;const v=G.t[idx(x,y)];
   return canWalk(v,m)&&!(G.lz&&G.lz[idx(x,y)])&&!(x===G.px&&y===G.py)&&!animalAt(x,y)&&!beastAt(x,y);};
 /* Deux façons de peupler la carte (19 novembre 2026).
@@ -22,7 +31,7 @@ const newPuce=(x,y,gr)=>({sp:0,x,y,hp:pvDe(SPECIES[0]),mp:Math.random(),flee:0,d
 const newBeast=(sp,x,y,pack,gr)=>({sp,x,y,hp:pvDe(BEASTS[sp]),mp:Math.random(),hunt:0,dir:-1,pack,gr});
 const puceSol=(x,y)=>{const v=G.t[idx(x,y)];
   return (v===GROUND||v===GRASS||v===FLAT)&&!animalAt(x,y)&&!beastAt(x,y)&&!(x===G.px&&y===G.py);};
-function spawnAnimals(){G.animals=[];G.fauna=[];G.pool=[0];const n=LIFE.insectoide||0;
+function spawnAnimals(){G.animals=[];G.fauna=[];G.pool=[0];const n=LIFE.puce||0;
   for(let k=0,tries=0;k<n&&tries<n*300+500;tries++){const x=rnd(2,W-3),y=rnd(2,H-3);
     if(!puceSol(x,y)||Math.hypot(x-G.px,y-G.py)<SZ(10,4))continue;G.animals.push(newPuce(x,y,-1));k++;}
 }
@@ -110,7 +119,7 @@ function stepAway(a,fits){const cur=(a.x-G.px)**2+(a.y-G.py)**2;let best=null,bd
     const nd=(nx-G.px)**2+(ny-G.py)**2;if(nd>bd){bd=nd;best=[nx,ny,dx];}}
   if(best){a.x=best[0];a.y=best[1];if(best[2])a.dir=best[2]>0?1:-1;}}
 // Le combat est engagé (15 novembre 2026) : la foreuse vient d'être attaquée ou d'attaquer une créature, que le coup porte ou non.
-// Tous les insectoïdes qui la suivent (ceux qui l'ont repérée, en vue ou sur sa trace) passent à l'attaque, et ne reculeront plus.
+// Toutes les puces qui la suivent (celles qui l'ont repérée, en vue ou sur sa trace) passent à l'attaque, et ne reculeront plus.
 function engage(){for(const a of (G.animals||[]))if(a.aware)a.enraged=true;}
 /* Fumigène : un nuage de cases, et non plus un simple effet (16 novembre 2026).
    À la pose, une galette ovale autour de la foreuse : 7 cases de large et de haut, 5 en diagonale (dx² + dy² ≤ 10, 37 cases).
@@ -152,10 +161,32 @@ function fumTick(){const F=G.fum;if(!F)return;let ks=Object.keys(F);if(!ks.lengt
    son groupe par o.gi. En patrouille on marche : un pas par battement au plus, quelle que soit la vitesse de l'espèce. */
 const PAT_BLOC=8;let PAT_BT=0;
 let PATD={};
-function patBfs(tx,ty,eau){const d=new Int16Array(W*H).fill(-1),q=[idx(tx,ty)];d[q[0]]=0;
+/* Distances de patrouille vers (tx, ty). eau = 1 : groupe aquatique, l'eau seule ; 2 : groupe amphibie, l'eau et le sol se valent ;
+   0 : groupe terrestre — le sol d'abord, et l'eau seulement en dernier recours : chaque case d'eau coûte PAT_EAU pas, si bien qu'un
+   chemin à sec, même très long, passe toujours avant, et qu'aucun point de patrouille ne tombe dans l'eau ni de l'autre côté. */
+const PAT_EAU=1000;
+function patBfs(tx,ty,eau){const d=new Int32Array(W*H).fill(-1),q=[idx(tx,ty)];d[q[0]]=0;const gue=[];
+  const etend=(mouille)=>{for(let k=0;k<q.length;k++){const c=q[k],x=c%W,y=(c/W)|0;for(const[dx,dy]of DIRS){const a=x+dx,b=y+dy;
+    if(a<1||b<1||a>=W-1||b>=H-1)continue;const j=idx(a,b),v=G.t[j];if(d[j]>=0||!diagOk(x,y,dx,dy)||(G.lz&&G.lz[j]))continue;
+    if(eau===1?!isWater(v):!canWalk(v,true))continue;
+    if(!eau&&!mouille&&isWater(v)){gue.push(c);continue;}d[j]=d[c]+(!eau&&isWater(v)?PAT_EAU:1);q.push(j);}}};
+  etend(eau>0);
+  // terrestre : ce que le sol seul n'atteint pas se rejoint par l'eau, des gués les moins coûteux aux plus coûteux
+  if(!eau&&gue.length){const tas=[...new Set(gue)].sort((a,b)=>d[a]-d[b]);
+    while(tas.length){const c=tas.shift(),x=c%W,y=(c/W)|0;for(const[dx,dy]of DIRS){const a=x+dx,b=y+dy;if(a<1||b<1||a>=W-1||b>=H-1)continue;
+      const j=idx(a,b),v=G.t[j];if(d[j]>=0||!diagOk(x,y,dx,dy)||!canWalk(v,true)||(G.lz&&G.lz[j]))continue;
+      d[j]=d[c]+(isWater(v)?PAT_EAU:1);let k=tas.length;while(k>0&&d[tas[k-1]]>d[j])k--;tas.splice(k,0,j);}}}
+  return d;}
+// distance de chaque case d'eau à la terre ferme la plus proche (0 sur le sol), pour qu'un terrestre calme sorte de l'eau
+function distTerre(){if(PATD.terre)return PATD.terre;const d=new Int16Array(W*H).fill(-1),q=[];
+  for(let i=0;i<W*H;i++)if(canWalk(G.t[i],false)){d[i]=0;q.push(i);}
   for(let k=0;k<q.length;k++){const c=q[k],x=c%W,y=(c/W)|0;for(const[dx,dy]of DIRS){const a=x+dx,b=y+dy;if(a<1||b<1||a>=W-1||b>=H-1)continue;
-    const j=idx(a,b),v=G.t[j];if(d[j]>=0||!diagOk(x,y,dx,dy)||(eau?!isWater(v):!canWalk(v,false))||(G.lz&&G.lz[j]))continue;d[j]=d[c]+1;
-      q.push(j);}}return d;}
+    const j=idx(a,b);if(d[j]>=0||!isWater(G.t[j])||!diagOk(x,y,dx,dy))continue;d[j]=d[c]+1;q.push(j);}}
+  return PATD.terre=d;}
+// un terrestre calme resté dans l'eau (poursuite abandonnée) fait un pas vers la terre ; rend true s'il était dans l'eau
+function sortEau(o,sp,fits){if(!terrestre(sp)||!isWater(G.t[idx(o.x,o.y)]))return false;const d=distTerre(),h=d[idx(o.x,o.y)];let best=null,bv=h;
+  for(const[dx,dy]of DIRS){const nx=o.x+dx,ny=o.y+dy,v=d[idx(nx,ny)];if(v<0||v>=bv||!diagOk(o.x,o.y,dx,dy)||!fits(nx,ny))continue;bv=v;best=[nx,ny,dx];}
+  if(best){o.x=best[0];o.y=best[1];if(best[2])o.dir=best[2]>0?1:-1;}o.mp=Math.min(o.mp,.99);return true;}
 const patD=P=>{const k=P.tx+','+P.ty+','+P.eau;return PATD[k]||(PATD[k]=patBfs(P.tx,P.ty,P.eau));};
 // n points accessibles depuis le point de départ, entre a et b cases de lui, écartés les uns des autres, rangés en boucle
 function patPoints(P,n,a,b){const d=patBfs(P.hx,P.hy,P.eau),pts=[];
@@ -175,7 +206,7 @@ function patInteret(hx,hy){const c=[];for(const s of G.sites||[])c.push([s.x,s.y
       if(h>=0&&h<40&&G.t[idx(a,b)]!==DOOR){best=[a,b];bv=dd;break;}}}
   return best||[hx,hy];}
 function patInit(g,id,mb){const o=mb[0],P={pat:g.pat,hx:o.x,hy:o.y,k:0,pause:0,age:0,sp:mb.length<=1?0:mb.length<=4?1:2,
-    eau:mb.every(m=>G.beasts.includes(m)&&BEASTS[m.sp].aqua)?1:0};
+    eau:mb.every(m=>G.beasts.includes(m)&&BEASTS[m.sp].aqua)?1:mb.every(m=>G.beasts.includes(m)&&BEASTS[m.sp].nage)?2:0};
   if(g.pat==='ronde'){P.pts=patPoints(P,rnd(3,4),7,13);if(P.pts.length<2)P.pts=patPoints(P,3,3,7);}
   else if(g.pat==='sentinelle')P.pts=[[P.hx,P.hy],...patPoints(P,rnd(1,2),5,10)];
   else if(g.pat==='territoire')P.pts=patPoints(P,1,2,6);
@@ -224,6 +255,10 @@ function patSwap(o,d){if(o.sw===PAT_BT)return false;let best=null,bv=d[idx(o.x,o
 // le pas de patrouille d'une créature calme ; renvoie false si son groupe n'a pas de point à rejoindre (errance, voyage)
 function patMove(o,fits){const P=G.patr&&G.patr[o.gi];if(!P||!P.pts||P.tx==null)return false;
   const d=patD(P),h=d[idx(o.x,o.y)];if(h<0)return false;
+  // un terrestre ne passe à gué que si son chemin l'exige : il est dans l'eau, ou son point n'est joignable qu'en la traversant
+  o.gue=!P.eau&&h>=PAT_EAU?1:0;
+  try{return patPas(o,fits,P,d,h);}finally{delete o.gue;}}
+function patPas(o,fits,P,d,h){
   if(h>P.sp){const libre=DIRS.some(([dx,dy])=>{const v=d[idx(o.x+dx,o.y+dy)];return v>=0&&v<h&&fits(o.x+dx,o.y+dy)&&diagOk(o.x,o.y,dx,dy);});
     if(libre||!patSwap(o,d))chaseStep(o,d,fits,P.tx,P.ty);}   // un pas libre, sinon l'échange de places, sinon le détour
   else if((P.pat==='territoire'||P.pat==='garde')&&Math.random()<(P.pat==='garde'?.06:.15)){const [dx,dy]=DIRS[rnd(0,7)],
@@ -244,14 +279,14 @@ function animalsAct(){
   if(!G.animals||G.over)return;let fled=null,swarm=null;const distSec=robotDist(false),distEau=robotDist(true),DC={};
   // Puce étourdie par une batterie : comme les autres robots, elle ne fait rien (22 novembre 2026 ; avant, elle n’en tenait pas compte)
   for(const a of G.animals){if(G.over)break;if(a.stun>0){a.stun--;continue;}
-    const sp=SPECIES[a.sp];a.mp=Math.min(2,a.mp+sp.v/5/slowOf(G.t[idx(a.x,a.y)],sp.swim));
+    const sp=SPECIES[a.sp];a.mp=Math.min(2,a.mp+sp.v/5/slowOf(G.t[idx(a.x,a.y)],eauLibre(sp)));
     const mA=mouilleOk(sp,a),okA=(x,y)=>animalOk(x,y,mA),dist=mA?distEau:distSec;
     const d=Math.hypot(a.x-G.px,a.y-G.py),sees=voitForeuse(a,!!a.aware);
     if(sees){if(!a.aware)alerte(a);a.aware=1;spot(a);}
     else if(a.aware&&a.search>0&&--a.search===0){a.aware=0;a.enraged=false;forget(a);}   // fouille terminée : il oublie
     else if(a.aware&&!a.mem)a.aware=0;
     const prev=a.mode,c=cheb(a,G.px,G.py);
-    // l'insectoïde garde ses distances et recule au contact tant que le combat n'est pas engagé (voir engage) ;
+    // la puce garde ses distances et recule au contact tant que le combat n'est pas engagé (voir engage) ;
     // une fois passé à l'attaque (enraged), il ne recule plus jamais, jusqu'à ce qu'il oublie la foreuse
     a.mode=!a.aware?'':!sees?(a.search>0?'search':'seek'):a.enraged?'attack':c<=KEEP_MIN?'flee':c>KEEP_MAX?'follow':'hold';
     if(a.mode==='attack'&&prev!=='attack'&&vis[idx(a.x,a.y)])swarm=swarm||sp;
@@ -263,7 +298,8 @@ function animalsAct(){
       else if(a.mode==='follow')stepToward(a,dist,okA);
       else if(a.mode==='seek'){if(!seekStep(a,okA,DC,mA)){a.mode=a.search>0?'search':'';break;}}
       else if(a.mode==='search')searchStep(a,okA,DC,mA);
-      else if(a.mode===''&&patMove(a,okA))break;                                          // calme : la patrouille de son groupe
+      else if(a.mode===''&&patMove(a,(x,y)=>animalOk(x,y,mouilleOk(sp,a))))break;                                          // calme : la patrouille de son groupe
+      else if(a.mode===''&&sortEau(a,sp,okA))break;
       else if(a.mode===''){errStep(a,okA);break;}                                         // calme, sans point à rejoindre : errance
       else if(Math.random()<(a.mode==='hold'?.15:.3)){const [dx,dy]=DIRS[rnd(0,7)];const nx=a.x+dx,ny=a.y+dy;
         if(okA(nx,ny)&&diagOk(a.x,a.y,dx,dy)&&(a.mode!=='hold'||cheb({x:nx,y:ny},G.px,G.py)>KEEP_MIN)){a.x=nx;a.y=ny;if(dx)a.dir=dx;}}
@@ -306,8 +342,8 @@ function spawnBeasts(){G.beasts=[];G.beastSeen={};G.packs={};let packId=0;
 // aucun style choisi : tous sont possibles
 function poseGroupe(g,gi,id,cases){{const l=g.pats&&g.pats.length?g.pats:g.pat?[g.pat]:PATS.map(p=>p[0]);
   g=Object.assign({},g,{pat:l[rnd(0,l.length-1)]});}   // plusieurs styles cochés : ce groupe-ci en tire un
-  const esp=k=>k==='insectoide'?-1:BEASTS.findIndex(b=>b.key===k);
-  const mb=[];for(const m of g.m){const s=esp(m.k);if(m.k!=='insectoide'&&s<0)continue;
+  const esp=k=>k==='puce'?-1:BEASTS.findIndex(b=>b.key===k);
+  const mb=[];for(const m of g.m){const s=esp(m.k);if(m.k!=='puce'&&s<0)continue;
     for(let n=rnd(Math.min(m.min,m.max),Math.max(m.min,m.max));n>0;n--)mb.push(s);}
   if(!mb.length)return 'vide';   // tous les effectifs tirés valent 0 : rien à poser, ni échec ni dépense
   const lieu=cases&&cases.length?lieuDe(cases[0]):null;
@@ -368,6 +404,8 @@ const nearRobot=b=>canHit(b);
 // Terrain de la cible : eau (peu profonde ou profonde) −20 de défense, herbes hautes +12 (caché).
 const DEF_BASE=.987;
 const terrMod=(x,y)=>{const v=G.t[idx(x,y)];return v===DEEP||v===LIQ?-20:v===GRASS?12:0;};
+// le même pour une créature : aquatiques, amphibies et volants ne subissent pas le malus de l'eau (25 novembre 2026)
+const terrModDe=(sp,x,y)=>eauLibre(sp)&&isWater(G.t[idx(x,y)])?0:terrMod(x,y);
 const hitChance=(pre,def)=>Math.max(5,Math.min(95,Math.round(pre*Math.pow(DEF_BASE,def))));
 /* POW requis (16 novembre 2026) : chaque arme et chaque armure demande un POW (champ req de l'objet).
    POW de base 10 (échelle de la force de Brogue, 16 novembre 2026 au soir ; 1 avant).
@@ -396,7 +434,9 @@ const degFact=(st,d)=>{const e=powEcart(d,st);
   return e<0?Math.pow(POW_MANQUE,-e):Math.pow(1+(typeof ITEM_VAL!=='undefined'?ITEM_VAL.puissance.deg:5)/100,e);};
 const robotDegs=(st,d)=>{st=st||G.st;const a=d===undefined?eqDe('arme'):d,de=armeDe(a),k=degFact(st,a),b=st.degats||0;
   return [Math.max(1,Math.round((de.n+de.p+b)*k)),Math.max(1,Math.round((de.n*de.f+de.p+b)*k))];};
-const robotDeg=()=>{const a=eqDe('arme');return Math.max(1,Math.round((deTire(armeDe(a))+(G.st.degats||0))*armeFact(G.st,a)));};
+// le coup réel suit la même règle que la fourchette affichée (robotDegs) : degFact, soit +5 % par point de POW en trop. Jusqu'au
+// 25 novembre 2026 il appliquait par erreur armeFact (+1,5 %, la règle de la précision) : l'écran annonçait plus que le coup ne faisait.
+const robotDeg=()=>{const a=eqDe('arme');return Math.max(1,Math.round((deTire(armeDe(a))+(G.st.degats||0))*degFact(G.st,a)));};
 const robotDefNu=(st,d)=>{st=st||G.st;return st.def+armureDef(st,d===undefined?eqDe('armure'):d);};
 const robotDef=()=>robotDefNu()+terrMod(G.px,G.py);
 const roll=ch=>Math.random()*100<ch;
@@ -412,7 +452,7 @@ const unNom=sp=>(sp.fem?'une ':'un ')+nomDe(sp);
 const UnNom=sp=>{const a=unNom(sp);return a[0].toUpperCase()+a.slice(1);};
 const LesNoms=sp=>{const n=nomDe(sp);return 'Les '+n+(/s$/.test(n)?'':'s');};
 function hurtRobot(b,sp,o){sp=sp||BEASTS[b.sp];o=o||{};const le=LeNom(sp),nom='',verbe=o.laser?'tire':'attaque';
-  // la foreuse est attaquée, que le coup porte ou non : les insectoïdes qui suivent attaquent
+  // la foreuse est attaquée, que le coup porte ou non : les puces qui suivent attaquent
   const ch=hitChance(sp.pre,robotDef());engage();
   // geste : le bond de l'attaquant, ou le trait du laser — droit sur la foreuse s'il touche, à côté s'il rate
   const geste=rate=>{if(!o.laser){addFx({kind:'lunge',beast:b,dx:Math.sign(G.px-b.x),dy:Math.sign(G.py-b.y),dur:200});return;}
@@ -502,7 +542,7 @@ function beastsAct(){
     if(b.stun>0){b.stun--;continue;}                                                 // étourdi par une batterie : il ne fait rien
     // attiré par une balise posée : il s'acharne sur elle (23 novembre 2026)
     if(b.leurre&&baliseJoue(b,sp,boom))continue;
-    b.mp=Math.min(2,b.mp+sp.v/5/slowOf(G.t[idx(b.x,b.y)],sp.swim));
+    b.mp=Math.min(2,b.mp+sp.v/5/slowOf(G.t[idx(b.x,b.y)],eauLibre(sp)));
     const d=Math.hypot(b.x-G.px,b.y-G.py),sees=voitForeuse(b,b.hunt>0);
     if(sees){if(!b.hunt&&sp.alarm)alarms.push(b);if(!b.hunt&&beastVisible(b))charged=charged||sp;if(!b.hunt)alerte(b);b.hunt=1;spot(b);
       if(G.px!==b.x)b.dir=Math.sign(G.px-b.x);
@@ -541,6 +581,7 @@ function beastsAct(){
       else if(b.hunt>0&&b.search>0)searchStep(b,(x,y)=>beastFits(b,x,y),DC,mouilleOk(sp,b));
       else if(b.hunt>0){if(!seekStep(b,(x,y)=>beastFits(b,x,y),DC,mouilleOk(sp,b)))break;}       // vers la dernière position connue
       else if(patMove(b,(x,y)=>beastFits(b,x,y)))break;                                   // calme : la patrouille de son groupe
+      else if(sortEau(b,sp,(x,y)=>beastFits(b,x,y)))break;                                // terrestre calme dans l'eau : il regagne la terre
       else if(b.pack>=0&&patDe(b)!=='errance'){packMove(b);}
       else{errStep(b,(x,y)=>beastFits(b,x,y));break;}}                                     // errance
   }
@@ -553,7 +594,7 @@ function regen(wait){if(G.over)return;G.st.energie=Math.min(G.st.energieMax,G.st
 // Coup de foreuse : consomme de l'énergie ; refusé si la réserve est insuffisante
 function spend(){if(G.st.energie<G.st.cout){say(`Énergie insuffisante pour frapper (${Math.floor(G.st.energie)}/${G.st.cout}). Attendez qu’elle se recharge.`,'warn');
   SFX.blocked();render();return false;}G.st.energie-=G.st.cout;return true;}
-const TRACK_LIFE=5;
+const TRACK_LIFE=10;   // tours avant que la trace des chenilles ait disparu (5 jusqu'au 25 novembre 2026)
 // Bande : chaque cafar reste à PACK_R cases au plus du centre de son groupe, sinon il y revient.
 // Hors chasse, la bande voyage vers un point accessible tiré au hasard, s'y arrête PACK_PAUSE tours, puis repart.
 const PACK_R=4,PACK_PAUSE=50;

@@ -56,7 +56,7 @@ Partie du document de conception (sommaire et règles à ne pas casser : `concep
 - **Aucune case bâtie ne porte cette texture** (sols, portes, piliers, murs, ponts de bâtiment) : fond uni à
   l'intérieur.
 - **Traces de chenilles** : deux pointillés qui suivent une courbe (64 combinaisons entrée/sortie), effacement
-  pixel par pixel en 5 tours.
+  pixel par pixel en **10 tours** (5 étapes de deux tours ; 5 tours jusqu'au 25 novembre 2026).
 - **Viseur** (curseur souris et inspection) : blanc avec contour noir automatique ; ses pixels blancs passent en
   gris quand la case est inexplorée ou hors d'atteinte.
 
@@ -78,6 +78,7 @@ Partie du document de conception (sommaire et règles à ne pas casser : `concep
   de bord sous la carte (5 lignes visibles, numéro de tour, ×N pour les répétitions). **Il défile** :
 molette ou fine barre pour remonter jusqu'aux 200 derniers messages ; un nouveau message le ramène tout en bas. Un message
   trop long passe à la ligne, aligné après le numéro de tour.
+- **Statistiques de la foreuse** (25 novembre 2026) : sous les boutons EXPLORER et REPOS, dix statistiques de la fenêtre Équipement (`INV_STATS` : VIT, EYE, DEG, PRE, DEF, CRIT, POW, DIS, COUP, DET ; VIE et ÉNER retirées le même jour, les barres les donnent déjà) (`#hstats`), valeurs du moment, terrain compris. **Un encadré par statistique** (« VIE 100 », un espace entre le nom et la valeur), rangés à gauche, **à la ligne quand la place manque**. **Au survol** (ou au clavier) : une infobulle (`#stip`, `statInfo` dans `14-inventaire.js`) donne la **définition** et le **détail des modificateurs en cours** — base, chaque pièce d'équipement portée, bonus permanents, puis POW requis, terrain, action (forage, arrêt, course, parois) — et la valeur du moment.
 - **Barres** (l'ancien Statut) : barres ASCII `█`/`░` — Vie en bio, Énergie en blanc  — suivies de leur valeur chiffrée. Le
   remplissage est un **calque de `█` découpé à la largeur exacte** posé sur un fond de `░`, donc juste à toute
   largeur de colonne et à toute taille de police.

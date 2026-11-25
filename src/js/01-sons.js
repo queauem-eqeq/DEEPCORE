@@ -22,16 +22,23 @@ function noiz(dur,g,freq,ftype,delay,f2){const a=audio();if(!a)return;const t=a.
   v.gain.setValueAtTime(0.0001,t);v.gain.exponentialRampToValueAtTime(g,t+Math.min(.006,dur/4));
     v.gain.exponentialRampToValueAtTime(0.0001,t+dur);
   src.connect(fl);fl.connect(v);v.connect(MASTER);src.start(t,Math.random()*.5);src.stop(t+dur+.02);}
+// Souffle : bruit en bande large, montée et descente lentes et linéaires (aucun transitoire, donc aucun crépitement)
+function souffle(dur,g,f1,f2,att,delay){const a=audio();if(!a)return;const t=a.currentTime+(delay||0);if(!NB)noiz(.01,.0001,1000);
+  const src=a.createBufferSource(),fl=a.createBiquadFilter(),bas=a.createBiquadFilter(),v=a.createGain();src.buffer=NB;
+  fl.type='bandpass';fl.Q.value=.7;fl.frequency.setValueAtTime(f1,t);fl.frequency.linearRampToValueAtTime(f2,t+dur);
+  bas.type='lowpass';bas.frequency.value=5000;
+  v.gain.setValueAtTime(0,t);v.gain.linearRampToValueAtTime(g,t+att);v.gain.linearRampToValueAtTime(0,t+dur);
+  src.connect(fl);fl.connect(bas);bas.connect(v);v.connect(MASTER);src.start(t,Math.random()*.5);src.stop(t+dur+.02);}
 // hasard propre aux variations de sons : il ne consomme pas celui du jeu (une partie rejouée reste identique)
 let SGRAINE=(Date.now()^0x9e3779b9)>>>0;
 function sAlea(){SGRAINE=(SGRAINE*1664525+1013904223)>>>0;return SGRAINE/4294967296;}
 const SFX={
   step(){noiz(.06,.12,700);tone(62,.05,'square',.035);},
   // Herbe : froufrou — trois coups de brosse décalés, filtrés en bande montante, légèrement tirés au hasard
+  // 25 novembre 2026 : les trois coups secs (attaque de 6 ms, passe-haut) crépitaient ; un seul souffle long et fondu à la place (un seul son, demandé le même jour),
+  // montée douce de 50 ms, bande passante large qui glisse vers l'aigu, rien au-dessus de 5 kHz
   grass(){const r=()=>.82+Math.random()*.36;
-    noiz(.14*r(),.05,2600*r(),'bandpass',0,6500);
-    noiz(.1*r(),.042,5000*r(),'highpass',.03);
-    noiz(.08*r(),.028,7200*r(),'highpass',.075);},
+    souffle(.22*r(),.06,1800*r(),4200,.05,0);},
   // Moteur électrique de la course : bourdon court et sifflement d'engrenage, un par pas couru
   motor(){const r=.94+Math.random()*.12;tone(188*r,.1,'sawtooth',.04,214*r);tone(1240*r,.07,'square',.016,1460*r);
     noiz(.05,.02,2800,'bandpass',.01,1800);},

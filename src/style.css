@@ -311,6 +311,22 @@ kbd{font-family:var(--mono);color:var(--fg);border:1px solid var(--line);padding
 .sac .cr button.del{padding:1px 4px;color:var(--dim)}
 .sac .cr button.del:hover{color:var(--life);border-color:var(--life)}
 .sac .inone{margin:0;color:var(--dim);font-size:11px}
+/* statistiques de la foreuse dans la colonne (25 novembre 2026) : un encadré par statistique, nom et valeur séparés d'un espace,
+   rangés à gauche, à la ligne quand la place manque */
+.hstats{display:flex;flex-wrap:wrap;justify-content:flex-start;gap:4px;font-size:11px;font-variant-numeric:tabular-nums}
+.hstats span{white-space:nowrap;padding:1px 5px;border:1px solid var(--line);cursor:help}
+.hstats span:hover,.hstats span:focus-visible{border-color:var(--c1);outline:none}
+.hstats i{font-style:normal;font-size:10px;letter-spacing:.06em;color:var(--dim)}
+.hstats b{font-weight:400}
+/* infobulle d'une statistique : opaque, posée sous l'encadré survolé, sans jamais sortir de l'écran */
+.stip{position:fixed;z-index:60;width:250px;padding:8px 10px;background:var(--black);border:1px solid var(--c1);font-size:11px;line-height:1.45;color:var(--fg);pointer-events:none}
+.stip[hidden]{display:none}
+.stip h4{margin:0 0 4px;font:inherit;letter-spacing:.1em;color:var(--c1)}
+.stip p{margin:0 0 6px;color:var(--dim)}
+.stip ul{margin:0;padding:0;list-style:none}
+.stip li{display:flex;justify-content:space-between;gap:10px}
+.stip li span:last-child{white-space:nowrap}
+.stip li.tot{margin-top:3px;padding-top:3px;border-top:1px solid var(--line);color:var(--c1)}
 .effs{font-size:11px;color:var(--c3);letter-spacing:.06em}
 .effs:empty{display:none}
 .gen .g.niv{grid-template-columns:minmax(0,1fr) 64px 62px}

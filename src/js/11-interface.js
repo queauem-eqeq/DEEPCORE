@@ -1,3 +1,4 @@
+let HSTATS_H='';   // dernier contenu écrit dans les statistiques de la colonne
 /* ---------- Mode carte : la vue défile sans déplacer le robot ---------- */
 let freeCam=false,camCX=0,camCY=0;
 /* Mode carte (M) : la Carte de la colonne s'ouvre en y entrant et se referme en sortant, sauf si elle était déjà ouverte avant
@@ -74,7 +75,7 @@ function seenHTML(){
              ...(G.animals||[]).filter(a=>vis[idx(a.x,a.y)]).map(a=>({o:a,sp:SPECIES[a.sp],ic:'an'+a.sp+'r',hp:a.hp??pvDe(SPECIES[a.sp]),st:{attack:'attaque',flee:'recule',follow:'suit',hold:'observe',seek:'cherche',search:'fouille'}[a.mode]||'',agg:a.mode==='attack'}))]
     .sort((p,q)=>near(p.o,q.o));
   if(ans.length){const max=6;
-    const calc=e=>{const tmA=terrMod(e.o.x,e.o.y),tmR=terrMod(G.px,G.py),me=hitChance(robotPre(),e.sp.def+tmA),
+    const calc=e=>{const tmA=terrModDe(e.sp,e.o.x,e.o.y),tmR=terrMod(G.px,G.py),me=hitChance(robotPre(),e.sp.def+tmA),
       them=e.agg?hitChance(e.sp.pre,robotDef()):null;return {tmA,tmR,me,them};};
     const head='<div class="hd"><span></span><span>Vie</span><span title="Votre chance de le toucher">Toucher</span><span title="Sa chance de vous toucher">Subir</span></div>';
     out.push('<div class="grp">'+head+ans.slice(0,max).map(e=>{const pv=pvDe(e.sp),d=Math.max(Math.abs(e.o.x-G.px),Math.abs(e.o.y-G.py)),c=calc(e);
@@ -105,7 +106,14 @@ function side(){
   {const n=G.niv||1,p=profNiv(n),[am,ab]=G.archM?[G.archM,G.archB]:typeof G.amb==='string'?G.amb.split(' · '):[];
     $('cProf').textContent=`Niveau ${n} · ${p?'−'+p:0} m · ${W}×${H}`;$('cMonde').textContent=am||'Personnalisé';
       $('cBati').textContent=ab||'Personnalisé';}
-  $('matN').textContent=G.st.matiere||0;   // avalée par le commentaire depuis le 16 novembre 2026 : la matière ne s'affichait plus
+  $('matN').textContent=G.st.matiere||0;
+  // statistiques de la foreuse sous EXPLORER et REPOS (25 novembre 2026) : les mêmes valeurs que la fenêtre Équipement, terrain compris
+  if(typeof INV_STATS!=='undefined'&&G.inv){const A=eqDe('arme')||null,B=eqDe('armure')||null;
+    // sans VIE ni ÉNER : les deux barres du haut les donnent déjà (retirées le 25 novembre 2026)
+    const h=INV_STATS.filter(([k])=>k!=='vieMax'&&k!=='energieMax').map(([k,l])=>{const c=statVal(k,G.st,A,B,0);
+      return `<span tabindex="0" data-k="${k}" aria-describedby="stip"><i>${l}</i> <b>${c[1]??c[0]}${k==='crit'?' %':''}</b></span>`;}).join('');
+    // réécrit seulement s'il change : sinon l'encadré survolé serait remplacé à chaque battement et l'infobulle sauterait
+    if(h!==HSTATS_H&&$('hstats')){HSTATS_H=h;$('hstats').innerHTML=h;}if(typeof stipMaj==='function')stipMaj();}   // avalée par le commentaire depuis le 16 novembre 2026 : la matière ne s'affichait plus
   if(!$('inventaire').hidden)invDraw();
   $('msg').innerHTML=seenHTML();
   logDraw();
@@ -188,7 +196,7 @@ let DB=null;
 // À l'ouverture, les réglages enregistrés en base sont rechargés (même d'un autre appareil)
 function applySaved(d){
   const num=v=>typeof v==='number'&&isFinite(v);
-  if(d.bestiaire)BEST_LIST().forEach(e=>{const b=d.bestiaire[e.key];if(b)BFIELDS.forEach(([f])=>{if(num(b[f]))e.o[f]=b[f];});});saveBest();
+  clePuce(d.bestiaire);if(d.bestiaire)BEST_LIST().forEach(e=>{const b=d.bestiaire[e.key];if(b)BFIELDS.forEach(([f])=>{if(num(b[f]))e.o[f]=b[f];});});saveBest();
   if(num(d.discretion))setStealthBase(d.discretion);
   if(d.artefacts){ARTEFACTS=artefactsSains(d.artefacts);saveArtefacts();}
   if(d.items&&typeof itemsApplique==='function'){itemsApplique(d.items);saveItems();}

@@ -293,6 +293,51 @@ function statVal(k,st,arme,armure,dDis){
   if(k==='coup')return [DUR.coup+(st.coup||0)];
   if(k==='crit')return [st.crit??5];
   return [st[k]];}
+/* Infobulle d'une statistique de la colonne (25 novembre 2026) : sa définition, puis ce qui fait sa valeur en ce moment — la base,
+   chaque pièce d'équipement portée, les bonus permanents (modules), puis ce qui tient à la situation (POW requis, terrain, action). */
+// valeurs de la foreuse nue ; la défense de départ (10) vient de la Coque d'usine, portée dès le début
+const ST_BASE={vieMax:100,energieMax:100,vitesse:5,capteur:10,degats:0,pre:100,def:0,crit:5,power:10,dis:0,coup:0,detec:5};
+const ST_DEF={vieMax:['Vie maximale','Ce que la foreuse peut encaisser avant d’être détruite.'],
+  energieMax:['Énergie maximale','La réserve dépensée par la course (5 par pas) ; elle se recharge au repos.'],
+  vitesse:['Vitesse','Les déplacements de la foreuse : à 5, une case par battement ; plus haut, elle va plus vite que les robots lents.'],
+  capteur:['Capteur','La portée de vue, en cases.'],
+  degats:['Dégâts','Ce qu’un coup retire à un robot : le dé de l’arme plus les bonus.'],
+  pre:['Précision','La chance de toucher, avant la défense de la cible (toujours entre 5 et 95 %).'],
+  def:['Défense','Chaque point réduit la chance d’être touché d’environ 1,3 %.'],
+  crit:['Critique','La chance qu’un coup soit critique : dégâts × 3. Un coup par surprise l’est toujours.'],
+  power:['Puissance','Comparée au POW requis par l’arme et par l’armure : chaque point en trop les renforce, chaque point manquant les affaiblit beaucoup.'],
+  dis:['Discrétion','La distance, en cases, à laquelle un robot peut remarquer la foreuse. Plus c’est bas, mieux c’est.'],
+  coup:['Durée du coup','Le temps que prend une attaque : 100 vaut un battement. Plus c’est bas, plus la foreuse frappe vite.'],
+  detec:['Détection','Le rayon, en cases, dans lequel la foreuse peut repérer une porte secrète.']};
+function statInfo(k){const st=G.st,A=eqDe('arme')||null,B=eqDe('armure')||null,L=[],u=k==='crit'?' %':'',pt=n=>Math.abs(n)>1?'s':'';
+  const base=k==='dis'?STEALTH_BASE:k==='coup'?DUR.coup:ST_BASE[k];L.push([k==='dis'?'Base (réglage du jeu)':'Base',base+u]);
+  let eq=0;for(const o of G.inv||[]){const d=ITEMS[o.k];if(!o.eq||!d||!d.mod||!d.mod[k])continue;eq+=d.mod[k];L.push([d.n,signe(d.mod[k])+u]);}
+  const autre=Math.round(((st[k]??ST_BASE[k])-ST_BASE[k]-eq)*100)/100;if(autre)L.push(['Bonus permanents',signe(autre)+u]);
+  if(k==='degats'){const de=armeDe(A),f=degFact(st,A),e=powEcart(A,st);L[0]=['Dé de l’arme ('+(A?A.n:'Foreuse')+')',deTxt(de)];
+    if(e)L.push([`POW : ${Math.abs(e)} point${pt(e)} ${e>0?'en trop':'manquant'+pt(e)}`,fois(f)]);}
+  if(k==='pre'){const e=powEcart(A,st);if(e)L.push([`POW : ${Math.abs(e)} point${pt(e)} ${e>0?'en trop':'manquant'+pt(e)} pour l’arme`,fois(armeFact(st,A))]);}
+  if(k==='def'){const e=powEcart(B,st),t=terrMod(G.px,G.py);if(e)L.push([`POW : ${Math.abs(e)} point${pt(e)} ${e>0?'en trop':'manquant'+pt(e)} pour l’armure`,signe(armureDef(st,B))]);
+    if(t)L.push([t<0?'Dans l’eau':'Dans les herbes hautes',signe(t)]);}
+  if(k==='crit'&&critBonus())L.push(['Surcharge en cours',signe(critBonus())+u]);
+  if(k==='power'){if(A&&A.req)L.push([`Requis par l’arme (${A.n})`,A.req]);if(B&&B.req)L.push([`Requis par l’armure (${B.n})`,B.req]);}
+  if(k==='vitesse'){const v=G.t[idx(G.px,G.py)];if(SLOW[v])L.push([v===DEEP?'En eau profonde : pas plus lents':'Dans l’eau : pas plus lents',fois(SLOW[v])]);
+    if(G.eff&&G.eff.glu>0)L.push(['Engluée : pas plus lents',fois(2)]);}
+  if(k==='dis'){let w=0;for(const [dx,dy] of DIRS){const x=G.px+dx,y=G.py+dy;if(x<0||y<0||x>=W||y>=H)continue;const v=G.t[idx(x,y)];if(v===ROCK||v===MOUNT||bati(v))w++;}
+    if(lastAct==='dig')L.push(['Vient de forer',fois(DIG_MULT)]);if(lastAct==='wait')L.push(['À l’arrêt',fois(.5)]);
+    if(G.t[idx(G.px,G.py)]===FLAT)L.push(['Dans les herbes basses',fois(.5)]);
+    if(w)L.push([`Contre ${w} paroi${w>1?'s':''}`,signe(-Math.min(Math.ceil(w/2),WALL_MAX))]);if(lastRun)L.push(['En courant',signe(SPRINT_NOISE)]);}
+  const c=statVal(k,st,A,B,0);return {t:ST_DEF[k][0],d:ST_DEF[k][1],l:L,tot:(c[1]??c[0])+u};}
+function stipHTML(k){const I=statInfo(k);return `<h4>${I.t}</h4><p>${I.d}</p><ul>${I.l.map(([a,b])=>`<li><span>${a}</span><span>${b}</span></li>`).join('')}`
+  +`<li class="tot"><span>En ce moment</span><span>${I.tot}</span></li></ul>`;}
+// l'infobulle suit l'encadré survolé ou atteint au clavier ; elle se remet à jour à chaque battement tant qu'elle est ouverte
+let STIP=null;
+function stipMaj(){const b=$('stip');if(!b)return;if(!STIP||!G){b.hidden=true;return;}const el=$('hstats').querySelector(`[data-k="${STIP}"]`);if(!el){b.hidden=true;return;}
+  b.innerHTML=stipHTML(STIP);b.hidden=false;const r=el.getBoundingClientRect(),w=b.offsetWidth,h=b.offsetHeight;
+  b.style.left=Math.round(Math.max(4,Math.min(innerWidth-w-4,r.right-w)))+'px';
+  b.style.top=Math.round(r.bottom+4+h>innerHeight-4?Math.max(4,r.top-h-4):r.bottom+4)+'px';}
+if($('hstats')){const hs=$('hstats'),de=e=>{const s=e.target.closest&&e.target.closest('[data-k]');return s&&hs.contains(s)?s.dataset.k:null;};
+  hs.addEventListener('mouseover',e=>{STIP=de(e);stipMaj();});hs.addEventListener('mouseleave',()=>{STIP=null;stipMaj();});
+  hs.addEventListener('focusin',e=>{STIP=de(e);stipMaj();});hs.addEventListener('focusout',()=>{STIP=null;stipMaj();});}
 function statsHTML(o){const H=invHyp(o),A=eqDe('arme')||null,B=eqDe('armure')||null;
   const L=INV_STATS.map(([k,l])=>{const c=statVal(k,G.st,A,B,0),n=statVal(k,H.st,H.arme,H.armure,H.m.dis||0),u=k==='crit'?' %':'';
     return {k,l,u,c,n,ct:c[1]??c[0],nt:n[1]??n[0]};});

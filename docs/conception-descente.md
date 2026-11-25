@@ -14,7 +14,7 @@ Partie du document de conception (sommaire et règles à ne pas casser : `concep
 - **Destruction d'un ennemi** : une **gerbe d'étincelles** (35 à 50) qui filent droit, très vite, avec une courte
   traîne, éteintes en un quart de seconde, et **14 à 22 débris de carcasse** projetés en l'air qui retombent,
   **rebondissent une ou deux fois**, puis **restent au sol** (sauf dans l'eau, un gouffre ou un obstacle). **Une
-  seule couleur : le monde.** Au plus 1 500 débris gardés sur la carte ; ils restent en souvenir
+  seule couleur : le monde.** Une porte fermée cache les débris tombés sur son seuil ; ils reparaissent quand elle s'ouvre (25 novembre 2026). Au plus 1 500 débris gardés sur la carte ; ils restent en souvenir
   (atténués) hors de vue. Pixel art strict, sans opacité.
 - **Foreuse endommagée** : sous **50 PV** elle **fume** (grains gris opaques de 1 ou 2 pixels de tuile, qui montent
   en ondulant et disparaissent d'un coup, et restent sur place quand elle avance, comme une traînée) ; sous **20

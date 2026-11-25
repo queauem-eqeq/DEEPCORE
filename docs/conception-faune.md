@@ -143,11 +143,18 @@ Ajoutées à la fin de `BEASTS` (tuiles `bz6` à `bz10`, dessins de départ). St
 
 ### Comportements communs
 
-- **Eau, trois cas** : **nageurs** (Crabot, Torpille) — ils y vont naturellement, en chasse comme en errance ;
-  **au sec** (Relais) — il n'y met jamais une patte, même pour poursuivre, et contourne le lac ou renonce ; **les
-  autres** — ils évitent l'eau en errance, mais la traversent pour **poursuivre la foreuse**. Une créature déjà
-  dans l'eau peut toujours en sortir. Toutes y subissent −20 de défense ; aucune ne dérive (la dérive est propre à
-  la foreuse) ; seuls les nageurs n'y sont pas ralentis.
+- **Eau, trois familles** (25 novembre 2026 ; `eauLibre`, `terrestre`, `patBfs`, `sortEau` dans `08-faune.js`) :
+  - **terrestres** (Broyeur, Relais, Mine, Sentinelle, Bloqueur, Artilleur, Soudeur, Englueur, Puce) : ils **ne naissent pas
+    dans l'eau** et aucun **point de patrouille** n'y tombe. Ils y entrent pour **poursuivre la foreuse** ; en patrouille, ils ne la
+    franchissent que si **aucun chemin à sec** ne mène à leur point ; calmes, ils **regagnent la terre la plus proche** et n'y
+    restent pas. Dans l'eau ils sont **ralentis** (×1,5) et perdent **20 de défense**. Exception gardée : le **Relais** n'y met
+    jamais une patte, même pour poursuivre (`sec`) ;
+  - **aquatiques** (Torpille) : ils **ne naissent que dans l'eau** et n'en sortent pas ; **aucun malus d'eau** (avant : −20 de
+    défense et ralentie, comme les autres) ;
+  - **amphibies** (Crabot) : l'eau et le sol se valent, pour naître comme pour patrouiller (leurs points peuvent être dans l'eau) ;
+    **aucun malus d'eau** (avant : −20 de défense).
+  Le Drone vole : ni malus ni remous. Aucune créature ne dérive (la dérive est propre à la foreuse).
+  **Remous** : dans l'eau, terrestres et amphibies portent le même remous que la foreuse (`wade`, `wadeDeep`) ; pas la Torpille.
 - **Poursuite** : chaque ennemi qui chasse suit le plus court chemin. Si un autre ennemi bloque le passage, il
   contourne (détour de 10 cases au plus) vers une case libre autour de la foreuse au lieu d'attendre : plusieurs
   ennemis peuvent l'encercler et attaquer en même temps (jusqu'à 8). Un ennemi qui a vu la foreuse disparaître

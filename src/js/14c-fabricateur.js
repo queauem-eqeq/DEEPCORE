@@ -27,7 +27,7 @@ Object.assign(ITEMS,{
     d:'Des plaques épaisses : la foreuse encaisse bien mieux, et se traîne un peu.',
     art:[" ▄▄         ▄▄ ", " █▓█▀▀▀▀▀▀▀█▓█ ", " █▓▒▒▒▐█▌▒▒▒▓█ ", " █▓▒▒▒▒▒▒▒▒▒▓█ ", "  ▀▄▓▓▓▓▓▓▓▄▀  ", "    ▀▀▀▀▀▀▀    "],
     col:[".ww.........ww.", ".w3wwwwwwwww3w.", ".w31113331113w.", ".w31111111113w.", "..ww3333333ww..", "....wwwwwww...."]}});
-const FAB_PRIX={repar:18,batterie:14,fumigene:16,charge:34,cle:22,accu:40,optique:40,servo:45,stabil:45,viseur:50,gyro:50,conden:55,
+const FAB_PRIX={repar:18,batterie:14,fumigene:16,charge:34,accu:40,optique:40,servo:45,stabil:45,viseur:50,gyro:50,conden:55,
   carene:60,vrille:70,trepan:85,blindage:85};
 const FAB_DUREE=300;
 let FAB_CASE=-1,FAB_SEL=0;

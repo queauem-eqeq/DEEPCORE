@@ -257,7 +257,7 @@ function render(){
     const dm=G.dmg&&G.dmg[i];if(dm&&(t===ROCK||t===MOUNT))put(TL.crackH,x,y,.95*k);
   }
   if(G.tracks)for(const k in G.tracks){const tr=G.tracks[k],age=G.turn-tr.t;if(age>=TRACK_LIFE){delete G.tracks[k];continue;}
-    const i=+k;if(tr.i==null||(fog&&!vis[i]))continue;put(TL[`tk${tr.i}${tr.o}${Math.max(0,age)}`],i%W,(i/W)|0,.6);}
+    const i=+k;if(tr.i==null||(fog&&!vis[i]))continue;put(TL[`tk${tr.i}${tr.o}${Math.floor(Math.max(0,age)*5/TRACK_LIFE)}`],i%W,(i/W)|0,.6);}   // cinq étapes d'effacement, étalées sur TRACK_LIFE tours
   if(G.ore)for(const k in G.ore){if(!oreSol(G.ore[k]))continue;const i=+k;if(fog&&!G.seen[i])continue;
     put(oreTile(G.ore[k],true),i%W,(i/W)|0,fog&&!vis[i]?.35:1);}
   // gisements détectés par le sonar, même hors de vue
@@ -278,7 +278,8 @@ function render(){
   if(G.items)for(const k in G.items){const i=+k,l=G.items[k];if(!l||!l.length||fog&&!G.seen[i]||CACHE.has(i))continue;
     put(itemTile(l[l.length-1]),i%W,(i/W)|0,fog&&!vis[i]?.35:1);}
   // débris au sol
-  if(G.splat)for(const [px,py,c,sz] of G.splat){const i=idx(Math.floor(px/S),Math.floor(py/S));if(fog&&!G.seen[i])continue;
+  if(G.splat)for(const [px,py,c,sz] of G.splat){const dx=Math.floor(px/S),dy=Math.floor(py/S),i=idx(dx,dy);if(fog&&!G.seen[i])continue;
+    if(G.t[i]===DOOR&&!porteOuverte(dx,dy))continue;   // une porte fermée cache les débris tombés sur son seuil (25 novembre 2026)
     ctx.globalAlpha=fog&&!vis[i]?.3:1;ctx.fillStyle=c;ctx.fillRect(px-camX*S,py-camY*S,sz,sz);}
   ctx.globalAlpha=1;
   // (les taches de sang ne sont plus dessinées depuis le 19 novembre 2026 : les ennemis laissent des débris)
@@ -300,15 +301,17 @@ function render(){
       ctx.fillRect(px+7*u,py+u,2*u,2*u);}
     const pv=ITEM_VAL.balise.pv;if(q.hp<pv){const w=S-6;ctx.fillStyle='#000';ctx.fillRect(px+3,py-4,w,3);ctx.fillStyle=PAL['4'];
       ctx.fillRect(px+3,py-4,Math.round(w*Math.max(0,q.hp)/pv),3);}}
-  // barre de vie au-dessus d'une créature blessée (insectoïdes compris depuis le 16 novembre 2026 : ils en étaient privés)
+  // barre de vie au-dessus d'une créature blessée (puces comprises depuis le 16 novembre 2026 : elles en étaient privées)
   const barreVie=(px,py,hp,pv)=>{if(hp>=pv)return;const w=S-6;ctx.fillStyle='#000';ctx.fillRect(px+3,py-4,w,3);
     // rouge fixe, jamais la couleur danger de la palette (24 novembre 2026) : la barre se lit pareil avec toutes les palettes
     ctx.fillStyle=ROUGE_FIXE;
     ctx.fillRect(px+3,py-4,Math.round(w*Math.max(0,hp)/pv),3);};
+  // dans l'eau, terrestres et amphibies portent le même remous que la foreuse ; pas les aquatiques ni les volants (25 novembre 2026)
+  const remous=(sp,x,y)=>{if(sp.aqua||sp.vol)return;const v=G.t[idx(x,y)];if(v===LIQ)put(TL.wade,x,y,.95);else if(v===DEEP)put(TL.wadeDeep,x,y,.95);};
   if(G.animals)for(const a of G.animals)if(!fog||vis[idx(a.x,a.y)]){const [lx,ly]=lungeOff(f=>f.kind==='lunge'&&f.beast===a);
     const px=(a.x-camX)*S+lx,py=(a.y-camY)*S+ly;ctx.globalAlpha=1;{const t=TL['an'+a.sp+(a.dir<0?'l':'r')];
       ctx.drawImage(a.stun>0?tuileEtourdie(t):t,px,py,S,S);}
-    const sp=SPECIES[a.sp];barreVie(px,py,a.hp??pvDe(sp),pvDe(sp));}
+    const sp=SPECIES[a.sp];remous(sp,a.x,a.y);barreVie(px,py,a.hp??pvDe(sp),pvDe(sp));}
   if(G.beasts)for(const b of G.beasts){if(!beastVisible(b)||beastCache(b))continue;const [lx,ly]=lungeOff(f=>f.kind==='lunge'&&f.beast===b);
     // mine armée : elle clignote ; étourdie : damier bio / bâti
     const px=(b.x-camX)*S+lx,py=(b.y-camY)*S+ly,img0=b.fuse>0&&Math.floor(performance.now()/130)%2?TL.mineA:TL['bz'+b.sp+(b.dir<0?'l':'r')],
@@ -316,7 +319,7 @@ function render(){
     ctx.globalAlpha=1;ctx.drawImage(img,px,py,S,S);
     const fl=FX.find(f=>f.kind==='flash'&&f.beast===b);if(fl){ctx.globalCompositeOperation='lighter';ctx.globalAlpha=1-fxP(fl);
       ctx.drawImage(img,px,py,S,S);ctx.drawImage(img,px,py,S,S);ctx.globalCompositeOperation='source-over';ctx.globalAlpha=1;}
-    barreVie(px,py,b.hp,pvDe(BEASTS[b.sp]));}
+    remous(BEASTS[b.sp],b.x,b.y);barreVie(px,py,b.hp,pvDe(BEASTS[b.sp]));}
   // objet sous une créature : la créature le cache ; un petit + blanc de 3 × 3 pixels de tuile dans le coin bas droit de la case
   // (23 novembre 2026 ; avant : la tuile de l'objet en petit)
   {for(const i of SOUS){const l=G.items&&G.items[i];if(!(l&&l.length)&&!(G.cles&&G.cles[i]))continue;const q=S/16,px=(i%W-camX)*S+12*q,py=(((i/W)|0)-camY)*S+12*q;
