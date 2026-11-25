@@ -278,7 +278,8 @@ function render(){
   if(G.items)for(const k in G.items){const i=+k,l=G.items[k];if(!l||!l.length||fog&&!G.seen[i]||CACHE.has(i))continue;
     put(itemTile(l[l.length-1]),i%W,(i/W)|0,fog&&!vis[i]?.35:1);}
   // débris au sol
-  if(G.splat)for(const [px,py,c,sz] of G.splat){const i=idx(Math.floor(px/S),Math.floor(py/S));if(fog&&!G.seen[i])continue;
+  if(G.splat)for(const [px,py,c,sz] of G.splat){const dx=Math.floor(px/S),dy=Math.floor(py/S),i=idx(dx,dy);if(fog&&!G.seen[i])continue;
+    if(G.t[i]===DOOR&&!porteOuverte(dx,dy))continue;   // une porte fermée cache les débris tombés sur son seuil (25 novembre 2026)
     ctx.globalAlpha=fog&&!vis[i]?.3:1;ctx.fillStyle=c;ctx.fillRect(px-camX*S,py-camY*S,sz,sz);}
   ctx.globalAlpha=1;
   // (les taches de sang ne sont plus dessinées depuis le 19 novembre 2026 : les ennemis laissent des débris)
