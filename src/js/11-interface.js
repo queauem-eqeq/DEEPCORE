@@ -1,3 +1,4 @@
+let HSTATS_H='';   // dernier contenu écrit dans les statistiques de la colonne
 /* ---------- Mode carte : la vue défile sans déplacer le robot ---------- */
 let freeCam=false,camCX=0,camCY=0;
 /* Mode carte (M) : la Carte de la colonne s'ouvre en y entrant et se referme en sortant, sauf si elle était déjà ouverte avant
@@ -107,8 +108,11 @@ function side(){
       $('cBati').textContent=ab||'Personnalisé';}
   $('matN').textContent=G.st.matiere||0;
   // statistiques de la foreuse sous EXPLORER et REPOS (25 novembre 2026) : les mêmes valeurs que la fenêtre Équipement, terrain compris
-  if(typeof INV_STATS!=='undefined'){const A=eqDe('arme')||null,B=eqDe('armure')||null;
-    $('hstats').innerHTML=INV_STATS.map(([k,l])=>{const c=statVal(k,G.st,A,B,0);return `<span><i>${l}</i><b>${c[1]??c[0]}${k==='crit'?' %':''}</b></span>`;}).join('');}   // avalée par le commentaire depuis le 16 novembre 2026 : la matière ne s'affichait plus
+  if(typeof INV_STATS!=='undefined'&&G.inv){const A=eqDe('arme')||null,B=eqDe('armure')||null;
+    const h=INV_STATS.map(([k,l])=>{const c=statVal(k,G.st,A,B,0);
+      return `<span tabindex="0" data-k="${k}" aria-describedby="stip"><i>${l}</i> <b>${c[1]??c[0]}${k==='crit'?' %':''}</b></span>`;}).join('');
+    // réécrit seulement s'il change : sinon l'encadré survolé serait remplacé à chaque battement et l'infobulle sauterait
+    if(h!==HSTATS_H&&$('hstats')){HSTATS_H=h;$('hstats').innerHTML=h;}if(typeof stipMaj==='function')stipMaj();}   // avalée par le commentaire depuis le 16 novembre 2026 : la matière ne s'affichait plus
   if(!$('inventaire').hidden)invDraw();
   $('msg').innerHTML=seenHTML();
   logDraw();
