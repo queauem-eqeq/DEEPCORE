@@ -132,13 +132,37 @@ Le jeu compte en **unités de temps**, pas en tours.
 - Chaque action de la foreuse a une **durée** (table `DUR` dans `09`) : pas 100, coup de foreuse 100, coup sur la
   roche 100, attendre 100.
 - Durée d'un pas = 100 × 5 ÷ VIT × terrain (eau peu profonde 1,5 ; eau profonde 2) × 0,5 en course.
-- Le monde **bat toutes les 100 unités** : à chaque battement les ennemis agissent, la détection et la perte de
-  trace sont tirées, l'énergie remonte de POW. Une action de 50 laisse passer un battement une fois sur deux ; une
-  action de 200 en laisse passer deux.
+- Le monde **bat toutes les 100 unités**. À chaque battement : la détection et la perte de trace sont tirées,
+  l'énergie remonte de POW, les effets s'épuisent (étourdi, glu, mèche d'une mine), le Soudeur répare, les machines
+  tournent. Une action de 50 laisse passer un battement une fois sur deux ; une action de 200 en laisse passer deux.
 - Conséquence voulue : **la détection se tire au temps, pas à l'action**. Courir fait traverser une zone avec deux
   fois moins de tirages ; une action longue en fait subir davantage.
-- Les ennemis gardent leurs points de mouvement (VIT ÷ 5 par battement), divisés par le ralentissement du terrain.
-- Limite connue : les ennemis agissent par battements entiers, seule la foreuse a des durées fines.
+
+### Chaque créature a son horloge (25 novembre 2026)
+
+Avant, les créatures agissaient par battements entiers, avec des points de mouvement : une seule VIT servait au
+déplacement, un coup prenait toujours un battement, et une bête rapide ne pouvait ni frapper en arrivant au contact,
+ni frapper deux fois. Maintenant elles comptent le temps comme la foreuse.
+
+- Deux durées par espèce, dans les mêmes unités : **`dpas`** (un pas) et **`dcoup`** (un coup). **Plus petit, plus
+  rapide.** Elles s'écrivent sur cinq paliers : **50 très rapide · 75 rapide · 100 normal · 150 lent · 200 très lent**.
+  Elles remplacent la VIT, qui n'existe plus pour les créatures ; le Lab les règle à sa place (Pas, Coup).
+- `o.pret` est l'instant où la créature pourra agir. Elle agit, l'effet est immédiat, puis elle est occupée pendant
+  la durée de son action. Le temps avance jusqu'au plus proche des deux instants suivants : la créature prête la
+  première, ou le prochain battement. **Rien n'est arrondi ni perdu** : le reste de temps se reporte tout seul.
+- Le terrain allonge le pas (eau peu profonde ×1,5, eau profonde ×2, sauf pour les nageurs) et **jamais le coup**.
+- Les tirs sur cadence deviennent des coups : l'intervalle entre deux lasers est `dcoup` (Sentinelle 100, Artilleur
+  150) ; la glu garde son `cadence` comme multiplicateur (Englueur 100 × 3 = 300, inchangé).
+- **Au calme** — patrouille, bande, errance, retour à terre — un pas prend au moins un battement, quelle que soit la
+  vitesse de l'espèce (règle du 20 novembre 2026, conservée).
+- **Égalités** : le battement passe avant une créature prête au même instant, et la foreuse passe avant une créature
+  prête à l'instant même où son action à elle se termine.
+- Ce qui disparaît : la **réserve de points de mouvement** (2 au plus). Une créature immobile ne stocke plus rien,
+  donc plus de bond de deux cases d'un coup — l'approche est régulière, et un peu plus lente qu'avant.
+- Ce qui apparaît : **la charge** (venir au contact et frapper pendant une seule action de la foreuse) et la **double
+  frappe** (`dcoup` 50). Une phase tirée au hasard à la naissance évite que toutes les bêtes d'une espèce agissent au
+  même instant.
+- Reste en VIT : la **foreuse**, dont la vitesse se règle encore par objets (durée d'un pas = 100 × 5 ÷ VIT).
 
 ## 6. Combat
 
@@ -155,7 +179,8 @@ Modèle Brogue :
   défense ; chaque point en trop en ajoute 1. Calculé à la lecture : gagner du POW agit aussitôt.
 - **Critique** : ×3 dégâts. **Coup par surprise** : frapper un ennemi qui ne vous a pas repéré touche toujours et
   est toujours critique.
-- Les animaux attaquent **une fois par battement au contact** ; leur vitesse ne règle que les déplacements.
+- Les créatures attaquent au contact **tous les `dcoup`** : une fois par battement à 100, deux fois à 50, une fois sur
+  deux à 200 (voir l'horloge au 5 bis).
 - **Barre de vie** au-dessus de toute créature blessée. Coup raté : « 0 » en gris. Animation : bond de l'attaquant,
   flash, chiffres flottants, tremblement d'écran quand le robot est touché ou qu'un ennemi meurt.
 

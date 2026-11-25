@@ -1,5 +1,7 @@
 /* Essais des cinq ennemis du 21 novembre 2026, des styles de patrouille « navette » et « garde », et de la répartition par lieu.
-   Tout se joue dans le vrai moteur, sur une carte dégagée (ou une grande base pour la garde et les lieux). Une ligne par essai. */
+   Tout se joue dans le vrai moteur, sur une carte dégagée (ou une grande base pour la garde et les lieux). Une ligne par essai.
+   25 novembre 2026 : les patrouilles passent par pass(100) comme le reste. Depuis l'horloge par créature, beastsAct() ne fait
+   plus que le battement (détection, effets) et ne déplace plus personne : l'appeler seul laissait la bête immobile. */
 (() => {
   const out=[],v=(nom,ok,det)=>out.push((ok?'ok    ':'ÉCHEC ')+nom+(det!=null?' — '+det:'')),sauve=JSON.parse(JSON.stringify(GEN)),E=k=>BEASTS.findIndex(b=>b.key===k);
   const arene=()=>{GEN.taille=3;recRange();recPrend('classique');GEN.structure=0;NIV_GEN=1;newGame();for(let y=1;y<H-1;y++)for(let x=1;x<W-1;x++)G.t[idx(x,y)]=GROUND;G.beasts=[];G.animals=[];G.patr={};G.px=30;G.py=24;G.st.vie=G.st.vieMax=1000;G.eff={};G.over=null;G.las=[];G.lz={};computeFOV();};
@@ -24,10 +26,10 @@
     const sol=[];for(let i=0;i<W*H;i++)if(G.t[i]===FLOOR)sol.push(i);
     let pos,b,P;for(let e=0;e<8;e++){G.beasts=[];G.patr={};pos=sol[rnd(0,sol.length-1)];b=newBeast(E('crabos'),pos%W,(pos/W)|0,-1,0);b.gi=0;G.beasts.push(b);patInit({pat:'navette'},0,[b]);P=G.patr[0];if(P.pts.length===2)break;}   // une pièce close n'offre pas de second point : on en essaie une autre
     const vus=new Set();let loin=0;
-    for(let k=0;k<400;k++){patTick();beastsAct();loin=Math.max(loin,Math.hypot(b.x-pos%W,b.y-((pos/W)|0)));P.pts.forEach((p,n)=>{if(Math.hypot(p[0]-b.x,p[1]-b.y)<=2)vus.add(n);});}
+    for(let k=0;k<400;k++){pass(100);loin=Math.max(loin,Math.hypot(b.x-pos%W,b.y-((pos/W)|0)));P.pts.forEach((p,n)=>{if(Math.hypot(p[0]-b.x,p[1]-b.y)<=2)vus.add(n);});}
     v('navette : va-et-vient entre deux points éloignés',P.pts.length===2&&vus.size===2&&loin>=6,`${P.pts.length} points, ${vus.size} atteints, éloignement ${loin.toFixed(0)} cases`);
     G.beasts=[];G.patr={};const s=G.sites[0],pres=sol.filter(i=>{const d=Math.hypot(i%W-s.x,((i/W)|0)-s.y);return d>4&&d<10;}),p2=pres[rnd(0,pres.length-1)]??sol[0],g=newBeast(E('gardien'),p2%W,(p2/W)|0,-1,0);g.gi=1;G.beasts.push(g);patInit({pat:'garde'},1,[g]);
-    let mx=0;for(let k=0;k<300;k++){patTick();beastsAct();if(k>80)mx=Math.max(mx,Math.hypot(g.x-G.patr[1].hx,g.y-G.patr[1].hy));}
+    let mx=0;for(let k=0;k<300;k++){pass(100);if(k>80)mx=Math.max(mx,Math.hypot(g.x-G.patr[1].hx,g.y-G.patr[1].hy));}
     v('garde : se poste près d’un point à garder et y reste',mx<=5,`poste à ${Math.hypot(G.patr[1].hx-s.x,G.patr[1].hy-s.y).toFixed(0)} cases du site, écart maximal ${mx.toFixed(0)}`);}
   // lieux : sur dix bases, où naissent les membres des groupes réservés au bâti et à l'extérieur
   {let bOk=0,bTot=0,eOk=0,eTot=0;const G0=GROUPES;GROUPES=GROUPES_DEF();

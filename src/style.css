@@ -81,9 +81,11 @@ body{margin:0;background:var(--black);color:var(--fg);font:13px/1.45 var(--mono)
 .seenwrap{font-size:12px;min-width:0}
 .seen{display:grid;gap:7px}
 .seen .grp{display:grid;gap:5px}
-.seen .an,.seen .hd{display:grid;grid-template-columns:20px calc(50% - 30px) 1fr 1fr;gap:0 10px;align-items:center}   /* 20 px pour l'icône : le cadre « en chasse » déborde de 2 px et la colonne défilante le coupait (24 novembre 2026) */
+.seen .an,.seen .hd{display:grid;grid-template-columns:20px 24px calc(50% - 56px) 1fr 1fr;gap:0 10px;align-items:center}   /* 20 px pour l'icône : le cadre « en chasse » déborde de 2 px et la colonne défilante le coupait (24 novembre 2026) ; 24 px pour le repère de cadence (25 novembre 2026) */
 .seen .hd{font-size:10px;letter-spacing:.14em;color:var(--dim);text-transform:uppercase}
-.seen .hd span:nth-child(n+3),.seen .an .n{text-align:right;font-variant-numeric:tabular-nums}
+.seen .hd span:nth-child(n+4),.seen .an .n{text-align:right;font-variant-numeric:tabular-nums}
+.seen .an .cad{font-size:10px;letter-spacing:-.06em;color:var(--dim);white-space:nowrap;overflow:hidden;line-height:1}
+.seen .an .cad.vif{color:var(--c4)}   /* deux actions par action de la foreuse : le repère se voit */
 .seen .an .n{font-size:12px}
 .seen .tgt{border-top:1px solid var(--line);padding-top:7px;display:grid;gap:2px;font-size:12px}
 .seen .tgt .t{display:flex;justify-content:space-between;gap:8px}

@@ -67,19 +67,26 @@ let ICON={};
 const ABAR_CH=48;
 function asciiBar(v,max){const p=max>0?Math.max(0,Math.min(100,v/max*100)):0;
   return `<span class="ae">${'░'.repeat(ABAR_CH)}</span><span class="af" style="width:${p.toFixed(2)}%">${'█'.repeat(ABAR_CH)}</span>`;}
+/* Repère de cadence (25 novembre 2026) : d'un coup d'œil, la vitesse de ce que la créature est en train de faire —
+   son coup si elle est au contact, son pas sinon. Trois chevrons pleins = une action toutes les 50 unités de temps,
+   donc deux pendant une action normale de la foreuse ; le chevron creux = plus lente qu'elle. */
+const CADGL=d=>d<=50?'▸▸▸':d<=75?'▸▸':d<=100?'▸':'▹';
 function seenHTML(){
   const ter=new Map(),out=[];
   for(let i=0;i<W*H;i++)if(vis[i]){const v=G.t[i];ter.set(v,(ter.get(v)||0)+1);}
   const near=(a,b)=>Math.hypot(a.x-G.px,a.y-G.py)-Math.hypot(b.x-G.px,b.y-G.py);
-  const ans=[...(G.beasts||[]).filter(b=>vis[idx(b.x,b.y)]&&!beastCache(b)).map(b=>({o:b,sp:BEASTS[b.sp],ic:'bz'+b.sp+'r',hp:b.hp,st:b.hunt>0?(b.sees?'en chasse':b.search>0?'fouille':'cherche'):'',agg:true})),
-             ...(G.animals||[]).filter(a=>vis[idx(a.x,a.y)]).map(a=>({o:a,sp:SPECIES[a.sp],ic:'an'+a.sp+'r',hp:a.hp??pvDe(SPECIES[a.sp]),st:{attack:'attaque',flee:'recule',follow:'suit',hold:'observe',seek:'cherche',search:'fouille'}[a.mode]||'',agg:a.mode==='attack'}))]
-    .sort((p,q)=>near(p.o,q.o));
+  /* Ordre (25 novembre 2026) : d'abord celles qui sont en jeu, dans l'ordre où elles vont agir (leur horloge, o.pret),
+     puis les autres par distance. Les calmes restent donc en bas sans sauter d'une ligne à l'autre à chaque action. */
+  const ans=[...(G.beasts||[]).filter(b=>vis[idx(b.x,b.y)]&&!beastCache(b)).map(b=>({o:b,sp:BEASTS[b.sp],ic:'bz'+b.sp+'r',hp:b.hp,st:b.hunt>0?(b.sees?'en chasse':b.search>0?'fouille':'cherche'):'',agg:true,ch:b.hunt>0})),
+             ...(G.animals||[]).filter(a=>vis[idx(a.x,a.y)]).map(a=>({o:a,sp:SPECIES[a.sp],ic:'an'+a.sp+'r',hp:a.hp??pvDe(SPECIES[a.sp]),st:{attack:'attaque',flee:'recule',follow:'suit',hold:'observe',seek:'cherche',search:'fouille'}[a.mode]||'',agg:a.mode==='attack',ch:!!a.mode}))]
+    .sort((p,q)=>(p.ch?0:1)-(q.ch?0:1)||(p.ch?(p.o.pret||0)-(q.o.pret||0):near(p.o,q.o)));
   if(ans.length){const max=6;
     const calc=e=>{const tmA=terrModDe(e.sp,e.o.x,e.o.y),tmR=terrMod(G.px,G.py),me=hitChance(robotPre(),e.sp.def+tmA),
       them=e.agg?hitChance(e.sp.pre,robotDef()):null;return {tmA,tmR,me,them};};
-    const head='<div class="hd"><span></span><span>Vie</span><span title="Votre chance de le toucher">Toucher</span><span title="Sa chance de vous toucher">Subir</span></div>';
+    const head='<div class="hd"><span></span><span title="Sa cadence : le nombre d’actions qu’elle fait pendant une action normale de la foreuse"></span><span>Vie</span><span title="Votre chance de le toucher">Toucher</span><span title="Sa chance de vous toucher">Subir</span></div>';
     out.push('<div class="grp">'+head+ans.slice(0,max).map(e=>{const pv=pvDe(e.sp),d=Math.max(Math.abs(e.o.x-G.px),Math.abs(e.o.y-G.py)),c=calc(e);
-      return `<div class="an${e.agg&&e.st?' hunt':''}" title="${e.sp.n}${e.st?' · '+e.st:''} · ${d} case${d>1?'s':''} · ${Math.max(0,e.hp)}/${pv} PV"><img src="${ICON[e.ic]||''}" alt="${e.sp.n}"><span class="hp">${asciiBar(Math.max(0,e.hp),pv)}</span><span class="n" style="color:${chanceCol(c.me)}">${c.me} %</span><span class="n" style="color:${c.them==null?'var(--dim)':chanceCol(100-c.them)}">${c.them==null?'—':c.them+' %'}</span></div>`;}).join('')
+      const dp=Math.round(dpasDe(e.o,e.sp)),dc=dcoupDe(e.o,e.sp),cd=d<=1?dc:dp;
+      return `<div class="an${e.agg&&e.st?' hunt':''}" title="${e.sp.n}${e.st?' · '+e.st:''} · ${d} case${d>1?'s':''} · ${Math.max(0,e.hp)}/${pv} PV · pas ${dp} (${motDuree(dp)}), coup ${dc} (${motDuree(dc)})"><img src="${ICON[e.ic]||''}" alt="${e.sp.n}"><span class="cad${cd<=50?' vif':''}" title="${cd<=100?'Jusqu’à '+cadenceDe(cd).toFixed(cadenceDe(cd)%1?1:0)+' action':'Une action toutes les '+(1/cadenceDe(cd)).toFixed(1)}${cd<=100?'s par action de la foreuse':' actions de la foreuse'}">${CADGL(cd)}</span><span class="hp">${asciiBar(Math.max(0,e.hp),pv)}</span><span class="n" style="color:${chanceCol(c.me)}">${c.me} %</span><span class="n" style="color:${c.them==null?'var(--dim)':chanceCol(100-c.them)}">${c.them==null?'—':c.them+' %'}</span></div>`;}).join('')
     +(ans.length>max?`<div class="none">+ ${ans.length-max} autre${ans.length-max>1?'s':''}</div>`:'')+'</div>');
   }
   const ins=HOV&&!busy()?inspectHTML():'';

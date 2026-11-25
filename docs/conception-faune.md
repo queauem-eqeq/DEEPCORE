@@ -75,7 +75,7 @@ destination).
 
 La patrouille ne joue que tant qu'aucun membre n'a repéré la foreuse. Chasse et fouille finies, le groupe **reprend
 sa patrouille** : il rentre chez lui au lieu de rester là où la chasse l'a mené. En patrouille on marche — un pas
-par battement au plus, quelle que soit la vitesse de l'espèce.
+par battement au plus, quelle que soit la vitesse de l'espèce (un pas au calme dure donc `max(100, dpas)`).
 
 Groupes de départ : puces en errance, crabot en ronde, relais en voyage, torpilles en ronde, broyeur en territoire,
 mines à l'affût, sentinelle en sentinelle. Code : `patInit`, `patTick`, `patMove` dans `08-faune.js`, état dans `G.patr`.
@@ -86,15 +86,23 @@ Les ennemis sont des **machines** : contour noir franc, blindage en couleur mond
 yeux, chenilles ou pattes rigides. Les clés internes gardent les anciens noms (`crabos`, `cafar`, `mastok`,
 `brochon`, `paralyzor`), pour que les archétypes et les réglages enregistrés continuent de marcher.
 
-| Espèce | VIT | PV | DÉG | PRE | DEF | CRIT |
-|---|---|---|---|---|---|---|
-| Puce | 6 | 10 | 2-3 | 80 | 20 | 2 % |
-| Crabot | 5 | 22 | 3-6 | 65 | 0 | 2 % |
-| Relais | 5 | 15 | 3-4 | 50 | 10 | 5 % |
-| Torpille | 7 | 14 | 4-5 | 80 | 20 | 2 % |
-| Broyeur | 4 | 60 | 10-18 | 60 | 0 | 0 % |
-| Mine | 8 | 12 | 20 (explosion) | — | 0 | 0 % |
-| Sentinelle | 7 | 14 | 1-2 (laser, 2 cases) | 75 | 10 | 0 % |
+**Pas** et **Coup** sont des durées, dans les unités de l'horloge (voir `conception-joueur.md`, 5 bis) : plus petit,
+plus rapide. Elles ont remplacé la VIT le 25 novembre 2026 ; les paliers sont 50 · 75 · 100 · 150 · 200.
+
+| Espèce | Pas | Coup | PV | DÉG | PRE | DEF | CRIT |
+|---|---|---|---|---|---|---|---|
+| Puce | 75 | 50 | 10 | 2-3 | 80 | 20 | 2 % |
+| Crabot | 100 | 100 | 22 | 3-6 | 65 | 0 | 2 % |
+| Relais | 100 | 100 | 15 | 3-4 | 50 | 10 | 5 % |
+| Torpille | 75 | 100 | 14 | 4-5 | 80 | 20 | 2 % |
+| Broyeur | 150 | 200 | 60 | 10-18 | 60 | 0 | 0 % |
+| Mine | 50 | 100 | 12 | 20 (explosion) | — | 0 | 0 % |
+| Sentinelle | 75 | 100 | 14 | 1-2 (laser, 2 cases) | 75 | 10 | 0 % |
+| Bloqueur | 50 | 100 | 30 | 2-4 | 100 | 15 | 0 % |
+| Artilleur | 100 | 150 | 14 | 4-7 (laser, 5 cases) | 65 | 5 | 0 % |
+| Drone | 50 | 50 | 6 | 2-3 | 80 | 30 | 0 % |
+| Soudeur | 100 | 100 | 16 | 1-2 | 60 | 10 | 0 % |
+| Englueur | 100 | 100 | 18 | 1-2 (glu, 4 cases) | 75 | 10 | 0 % |
 
 Ce sont les valeurs réglées en jeu par l'utilisateur et recopiées dans le code. Une nouvelle espèce s'ajoute à la fin de la liste (`conception.md`).
 
@@ -133,9 +141,9 @@ Ajoutées à la fin de `BEASTS` (tuiles `bz6` à `bz10`, dessins de départ). St
 
 | Espèce | Rôle | Capacité (`08-faune.js`) |
 |---|---|---|
-| **Bloqueur** (l'ancien Gardien) | Rapide (VIT 8), 30 PV, DEF 15, frappe à 2-4 | `bloque` : au contact il **agrippe la foreuse, qui ne peut plus se déplacer** (ni forer) tant qu'il vit ; trois rayons parallèles couleur bio, espacés d'un pixel, les relient en passant sous eux . Étourdi (batterie), il lâche. La clé reste `gardien` pour les groupes ; ses stats s'enregistrent sous `bloqueur` (`bk`). |
+| **Bloqueur** (l'ancien Gardien) | Pas très rapide (50), coup normal (100), 30 PV, DEF 15, frappe à 2-4 | `bloque` : au contact il **agrippe la foreuse, qui ne peut plus se déplacer** (ni forer) tant qu'il vit ; trois rayons parallèles couleur bio, espacés d'un pixel, les relient en passant sous eux . Étourdi (batterie), il lâche. La clé reste `gardien` pour les groupes ; ses stats s'enregistrent sous `bloqueur` (`bk`). |
 | **Artilleur** | Laser à 5 cases, 4-7 dégâts | `cadence:2` (un tir tous les deux battements), `recul:2` (s'écarte quand la foreuse est à 2 cases) |
-| **Drone** | Rapide, fragile, en essaim | `vol` : gouffres et eau ne l'arrêtent pas ; partage ce qu'il voit avec sa bande |
+| **Drone** | Pas et coup très rapides (50) : il charge et frappe deux fois par battement ; fragile, en essaim | `vol` : gouffres et eau ne l'arrêtent pas ; partage ce qu'il voit avec sa bande |
 | **Soudeur** | Soutien | `soin:5`, `portee:4` : répare l'allié le plus abîmé à portée ; `recul:1` : fuit le contact |
 | **Englueur** | Contrôle | `glu:4` : une **boule de glu** (tuile « glu », plus un trait de laser) tous les 3 battements englue la foreuse 3 battements (pas deux fois plus longs) ; **la foreuse engluée prend la couleur bio** ; garde ses distances |
 

@@ -804,3 +804,46 @@ garnie :
 | 2 | 22 | 11 | 8 |
 | 3 | 22 | 16 | 7 |
 | Total | 63 | 38 (60 %) | 20 (32 %) |
+
+## Horloge par créature : pas et coup séparés (25 novembre 2026)
+
+Les créatures ne comptent plus en points de mouvement mais en unités de temps, avec deux durées par espèce
+(`dpas`, `dcoup`). Voir `conception-joueur.md`, 5 bis. Trois effets se mesurent.
+
+**1. La cadence au contact est exacte.** Robot immobile, bêtes collées, 40 actions, tentatives de coup par bête et
+par action (`hurtRobot` compté) :
+
+| Espèce | Coup | avant | après |
+|---|---|---|---|
+| Crabot | 100 | 1,00 | 1,00 |
+| Broyeur | 200 | 1,00 | 0,50 |
+| Drone | 50 | 1,00 | 2,00 |
+
+**2. L'approche est plus régulière, donc un peu plus lente.** La réserve de deux points de mouvement a disparu :
+une bête bloquée ou immobile ne peut plus repartir de deux cases d'un coup. Les combats durent plus d'actions et
+coûtent moins de vie.
+
+**3. Le jeu est plus facile.** `outils/simul.py combat`, 100 duels, vie restante sur 100 (et nombre d'actions) :
+
+| Combat | avant | après |
+|---|---|---|
+| 1 Crabot | 91 (6) | 91 (6) |
+| 1 Broyeur | 54 (10) | 77 (10) |
+| 1 Bloqueur | 91 (6) | 88 (6) |
+| 1 Drone | 99 (3) | 97 (3) |
+| 2 Crabos | 78 (9) | 84 (11) |
+| 4 Cafars | 66 (13) | 82 (21) |
+| Mastok + 2 Crabos | 28 · **75 % de victoires** (16) | 60 · 100 % (23) |
+| RÉF. (2 Crabos + 1 Vipérin) · foreuse nue | 67 (12) | 78 (17) |
+| Mastok seul | 55 · 99 % (10) | 77 · 100 % (10) |
+
+Lecture. **Le Broyeur est la grosse perte** : son coup à 200 divise ses dégâts par deux, et il portait à lui seul la
+difficulté des groupes qui le contiennent (« Mastok + 2 Crabos » passe de 75 % à 100 % de victoires). Les duels sans
+Broyeur bougent de 6 à 16 points de vie, par l'effet 2. Les espèces accélérées (Drone, Puce, coup 50) ne compensent
+pas : elles meurent en un ou deux coups avant d'avoir frappé deux fois. **À reprendre** : rendre au Broyeur sa
+dangerosité autrement que par la cadence (dégâts, PV, ou un coup à 150), et remesurer.
+
+Artilleur, Soudeur et Englueur sortaient du duel par épuisement du compteur (98, 117 et 135 actions) ; ils se règlent
+maintenant en 5 ou 6 actions, parce que leur tir suit la même horloge que le reste.
+
+`outils/simul.py detection` et `fuite` : inchangés, ces mesures ne dépendent pas de l'horloge des créatures.

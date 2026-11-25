@@ -17,11 +17,11 @@ function computeFOV(){vis=new Uint8Array(W*H);const r=G.st.capteur,px=G.px,py=G.
   for(let y=py-r;y<=py+r;y++)for(let x=px-r;x<=px+r;x++){if(x<0||y<0||x>=W||y>=H)continue;if((x-px)**2+(y-py)**2>r*r+r)continue;
     if(los(px,py,x,y)){vis[idx(x,y)]=1;G.seen[idx(x,y)]=1;}else if(peekBehind(px,py,x,y))G.seen[idx(x,y)]=1;}
   if(G.animals)for(const a of G.animals)if(vis[idx(a.x,a.y)]&&!G.fauna.includes(a.sp)){G.fauna.push(a.sp);const sp=SPECIES[a.sp];
-    sayMore(`Nouvelle espèce observée : ${sp.n} (vitesse ${sp.v}).`,'info');SFX.chirp();}
+    sayMore(`Nouvelle espèce observée : ${sp.n} (pas ${motDuree(sp.dpas)}, coup ${motDuree(sp.dcoup)}).`,'info');SFX.chirp();}
   antVis();   // les antennes allumées tiennent leur zone en vue
   if(G.beasts){if(typeof G.beastSeen!=='object'||!G.beastSeen)G.beastSeen={};
     for(const b of G.beasts){if(G.beastSeen[b.sp]||!vis[idx(b.x,b.y)]||beastCache(b))continue;G.beastSeen[b.sp]=true;const sp=BEASTS[b.sp];
-    sayMore(`Ennemi repéré : ${sp.n} (vitesse ${sp.v}, ${pvDe(sp)} PV).`,'warn');SFX.roar();}}
+    sayMore(`Ennemi repéré : ${sp.n} (pas ${motDuree(sp.dpas)}, coup ${motDuree(sp.dcoup)}, ${pvDe(sp)} PV).`,'warn');SFX.roar();}}
   for(const s of G.sites)if(vis[idx(s.x,s.y)]&&!s.seen){s.seen=true;SFX.spot();say(`Site ${s.id} repéré.`,'info');}
 }
 
@@ -57,14 +57,22 @@ function stealthRange(act){
   return stealthCalc(Math.max(STEALTH_MIN,STEALTH_BASE+(G.st.dis||0)),act,G.t[idx(G.px,G.py)]===FLAT,walls,lastRun);}
 function turnStealth(){G.stealth=stealthRange(lastAct);}
 
-/* ---------- Horloge (13 novembre 2026) ----------
-   Le temps ne se compte plus en tours mais en unités : chaque action de la foreuse a une durée (100 = l'allure de base).
-   Le monde, lui, bat toutes les TICK unités : à chaque battement les ennemis agissent, la détection est tirée et
-   l'énergie remonte. Une action de 50 laisse donc passer un battement une fois sur deux, une action de 200 en laisse
-   passer deux. À VIT 5, sans course et sur sol sec, un pas dure 100 : exactement un battement, comme avant.
-   Durée d'un pas = DUR.pas × 5 ÷ VIT × terrain (SLOW) × 0,5 en course. La VIT ne joue que sur les déplacements. */
+/* ---------- Horloge (13 novembre 2026, horloge par créature le 25 novembre 2026) ----------
+   Le temps ne se compte pas en tours mais en unités : chaque action a une durée (100 = l'allure de base).
+   **Chaque créature a son horloge** : `o.pret` est l'instant où elle pourra agir. Quand elle agit, l'effet est
+   immédiat, puis elle est occupée pendant la durée de son action — un pas (`dpas` de l'espèce, allongé par le
+   terrain) ou un coup (`dcoup`). Le temps avance jusqu'au plus proche des deux prochains instants : la créature
+   prête la première, ou le prochain battement. Rien n'est arrondi ni perdu : le reste de temps d'une action se
+   reporte tout seul sur l'action suivante. Une créature rapide vient donc au contact et frappe pendant une seule
+   action de la foreuse, et un coup de 50 frappe deux fois par battement.
+   Restent calés sur le battement, toutes les TICK unités : la détection et la perte de trace, la recharge
+   d'énergie, la durée des effets (étourdi, glu, mèche d'une mine), les soins du Soudeur et les machines.
+   Égalités : le battement passe avant une créature prête au même instant (la détection avant l'action), et la
+   foreuse passe avant une créature prête à l'instant même où son action à elle se termine.
+   Durée d'un pas de la foreuse = DUR.pas × 5 ÷ VIT × terrain (SLOW) × 0,5 en course. */
 const TICK=100;
 const DUR={pas:100,coup:100,forage:100,attente:100};   // durée de chaque action ; un équipement pourra les modifier
+const PALIERS=[50,75,100,150,200];                     // les durées des créatures s'écrivent sur ces paliers (voir 03-tuiles)
 const SLOW={[LIQ]:1.5,[DEEP]:2};                        // terrains lents : eau peu profonde ×1,5, eau profonde ×2
 const SPRINT_COST=5,SPRINT_MULT=.5;                     // course : énergie par pas, et durée du pas multipliée
 const WAIT_REGEN=2;                                     // attendre sur place : recharge d'énergie multipliée
@@ -77,10 +85,22 @@ function stepDur(v,run){return DUR.pas*5/robotVit()*slowOf(v)*(run?SPRINT_MULT:1
 function portesPrises(){const s=new Set();for(const l of [G.animals,G.beasts])for(const o of l||[]){const i=idx(o.x,o.y);
   if(G.t[i]===DOOR)s.add(i);}return s;}
 function portesBruit(av){for(const i of portesPrises())if(!av.has(i)&&vis[i]){SFX.porte(.6);return;}}
-function pass(d,wait){G.time=(G.time||0)+d;G.debt=(G.debt||0)+d;
-  while(G.debt>=TICK-1e-6&&!G.over){G.debt-=TICK;if(wait)drift(true);const av=portesPrises();animalsAct();beastsAct();machTick();
-    portesBruit(av);effTick();regen(wait);}
+/* Le temps passe : on déroule, dans l'ordre des instants, les actions des créatures et les battements du monde qui
+   tombent pendant la durée d de l'action de la foreuse. G.bat porte l'instant du prochain battement. */
+function pass(d,wait){const fin=(G.time||0)+d;
+  if(G.bat==null)G.bat=(G.time||0)+TICK;
+  let garde=0;
+  while(!G.over&&garde++<4000){
+    const c=prochaineCreature(),tc=c?c.pret:Infinity,
+      batOk=G.bat<=fin+1e-6,                            // le battement qui tombe au bout de l'action compte, lui
+      creOk=tc<fin-1e-6;                                // mais la foreuse joue avant une créature prête au même instant
+    if(!batOk&&!creOk)break;
+    if(creOk&&(!batOk||tc<G.bat)){G.time=tc;creatureJoue(c);}   // une créature agit sur son horloge
+    else{G.time=G.bat;G.bat+=TICK;battement(wait);}}    // le battement du monde (égalité : il passe d'abord)
+  G.time=fin;
   if(!G.over)turnStealth();}                            // une action rapide peut ne faire battre personne : la portée affichée reste juste
+function battement(wait){if(wait)drift(true);const av=portesPrises();animalsAct();beastsAct();machTick();
+  portesBruit(av);effTick();regen(wait);}
 function toggleSprint(){if(!G||G.over)return;
   if(!G.sprint&&G.st.energie<SPRINT_COST){say(`Énergie insuffisante pour courir (${Math.floor(G.st.energie)}/${SPRINT_COST}).`,'warn');
     SFX.blocked();render();return;}

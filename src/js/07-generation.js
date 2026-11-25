@@ -376,7 +376,9 @@ function niveauSuivant(hasard){   // hasard : un archétype monde et un archéty
 const B_PORTE=i=>!!(BATI_DER&&BATI_DER.B.porte[i])||D4.some(([dx,dy])=>{const v=G.t[idx(i%W+dx,((i/W)|0)+dy)];return v===DOOR||v===LOCK;});
 
 /* ---------- Bestiaire : édition des statistiques ---------- */
-const BFIELDS=[['v','Vitesse',1,10],['pv','PV',1,200],['dmin','Dégâts min',0,100],['dmax','Dégâts max',0,100],['pre','Précision',0,250],
+/* Durées à la place de la Vitesse (25 novembre 2026) : « Pas » et « Coup » en unités de temps, sur les paliers
+   50 / 75 / 100 / 150 / 200 — plus petit, plus rapide (voir l'horloge dans 09 et 08-faune). */
+const BFIELDS=[['dpas','Pas',25,400],['dcoup','Coup',25,400],['pv','PV',1,200],['dmin','Dégâts min',0,100],['dmax','Dégâts max',0,100],['pre','Précision',0,250],
   ['def','Défense',0,150],['crit','Crit %',0,100]];
 const BEST_LIST=()=>[{key:'puce',o:SPECIES[0],ic:'an0r',
   role:'Suit à distance et recule ; attaque dès qu’un coup est tenté, par vous ou contre vous'},
@@ -386,9 +388,11 @@ try{const b=clePuce(JSON.parse(localStorage.getItem('np-best')||'null'));
   if(b)BEST_LIST().forEach(e=>{if(b[e.key])BFIELDS.forEach(([f])=>{if(typeof b[e.key][f]==='number')e.o[f]=b[e.key][f];});});}catch(e){}
 function saveBest(){const o={};BEST_LIST().forEach(e=>{o[e.key]={};BFIELDS.forEach(([f])=>o[e.key][f]=e.o[f]);});
   try{localStorage.setItem('np-best',JSON.stringify(o));}catch(e){}touchLocal();}
-try{if(localStorage.getItem('np-mig')!=='eq1'){SPECIES[0].v=6;saveBest();
+/* Les réglages enregistrés d'avant le 25 novembre 2026 portaient une Vitesse, qui n'existe plus : les durées
+   gardent alors les valeurs du code, et le reste (PV, dégâts, précision…) reste celui du joueur. */
+try{if(localStorage.getItem('np-mig')!=='horloge1'){saveBest();
   /* le crabot garde les PV de BEASTS (22, réglage du joueur) : la mise à 25 est retirée le 21 novembre 2026 */
-  localStorage.setItem('np-mig','eq1');}}catch(e){}
+  localStorage.setItem('np-mig','horloge1');}}catch(e){}
 /* Fenêtre Bestiaire (refaite le 19 novembre 2026) : à droite la liste des espèces en colonne ; à gauche, jusqu'à quatre
    espèces choisies, côte à côte dans un tableau — une ligne par statistique — pour les modifier et les comparer.
    Un clic dans la liste ajoute ou retire une espèce ; la cinquième choisie remplace la plus ancienne. */

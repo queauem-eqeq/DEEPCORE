@@ -320,7 +320,7 @@ function machines(){G.las=[];G.lz={};G.circ=[];G.soc={};G.piles={};G.mt=0;G.mach
 function piegeTest(c){const p=(G.pieges||[]).find(p=>p.on&&p.c===c);if(!p)return;p.on=0;
   const s=BEASTS.findIndex(b=>b.key==='cafar');let n=0;const bande=9000+((Math.random()*900)|0);
   p.f.forEach((i,k)=>{const x=i%W,y=(i/W)|0;G.niche[p.n[k]]=2;if(s<0||blocks(G.t[i])||beastAt(x,y)||animalAt(x,y)||(G.px===x&&G.py===y))return;
-    const b=newBeast(s,x,y,bande,-1);b.hunt=1;b.mp=0;b.nd=1;spot(b);G.beasts.push(b);n++;addFx({kind:'alerte',o:b,dur:900});});
+    const b=newBeast(s,x,y,bande,-1);b.hunt=1;b.nd=1;spot(b);G.beasts.push(b);n++;addFx({kind:'alerte',o:b,dur:900});});
   if(!n)return;addFx({kind:'shake',amp:7,dur:300});if(typeof SFX!=='undefined')SFX.explode();
   sayMore(`Piège ! ${n} relais surgissent des murs.`,'warn');}
 
