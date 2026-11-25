@@ -155,7 +155,7 @@ revérifié : le monstre blessé qui a fui revient une fois soigné ; certains �
 | 10 % de hordes hors profondeur | chaque niveau est pile à son budget | à voir : une rencontre trop forte de temps en temps |
 | Mutations | aucune | plus tard : beaucoup de variété pour peu de dessin |
 | Piste d'odeur | dernière position connue, puis fouille | pas nécessaire : notre règle est plus lisible |
-| Fuite quand il est blessé | seul l'insectoïde recule ; le crachin s'écarte | à voir, espèce par espèce |
+| Fuite quand il est blessé | seule la puce recule ; le crachin s'écarte | à voir, espèce par espèce |
 | Poursuite d'un niveau à l'autre | forer termine le niveau, personne ne suit | à voir |
 | Rien à gagner à tuer | rien non plus (les objets ne tombent pas encore) | à décider avec la provenance des objets |
 | Captifs et alliés | aucun | plus tard |

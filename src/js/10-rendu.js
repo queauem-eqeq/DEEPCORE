@@ -301,7 +301,7 @@ function render(){
       ctx.fillRect(px+7*u,py+u,2*u,2*u);}
     const pv=ITEM_VAL.balise.pv;if(q.hp<pv){const w=S-6;ctx.fillStyle='#000';ctx.fillRect(px+3,py-4,w,3);ctx.fillStyle=PAL['4'];
       ctx.fillRect(px+3,py-4,Math.round(w*Math.max(0,q.hp)/pv),3);}}
-  // barre de vie au-dessus d'une créature blessée (insectoïdes compris depuis le 16 novembre 2026 : ils en étaient privés)
+  // barre de vie au-dessus d'une créature blessée (puces comprises depuis le 16 novembre 2026 : elles en étaient privées)
   const barreVie=(px,py,hp,pv)=>{if(hp>=pv)return;const w=S-6;ctx.fillStyle='#000';ctx.fillRect(px+3,py-4,w,3);
     // rouge fixe, jamais la couleur danger de la palette (24 novembre 2026) : la barre se lit pareil avec toutes les palettes
     ctx.fillStyle=ROUGE_FIXE;

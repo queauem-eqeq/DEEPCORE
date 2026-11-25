@@ -144,7 +144,7 @@ Ajoutées à la fin de `BEASTS` (tuiles `bz6` à `bz10`, dessins de départ). St
 ### Comportements communs
 
 - **Eau, trois familles** (25 novembre 2026 ; `eauLibre`, `terrestre`, `patBfs`, `sortEau` dans `08-faune.js`) :
-  - **terrestres** (Broyeur, Relais, Mine, Sentinelle, Bloqueur, Artilleur, Soudeur, Englueur, insectoïde) : ils **ne naissent pas
+  - **terrestres** (Broyeur, Relais, Mine, Sentinelle, Bloqueur, Artilleur, Soudeur, Englueur, Puce) : ils **ne naissent pas
     dans l'eau** et aucun **point de patrouille** n'y tombe. Ils y entrent pour **poursuivre la foreuse** ; en patrouille, ils ne la
     franchissent que si **aucun chemin à sec** ne mène à leur point ; calmes, ils **regagnent la terre la plus proche** et n'y
     restent pas. Dans l'eau ils sont **ralentis** (×1,5) et perdent **20 de défense**. Exception gardée : le **Relais** n'y met

@@ -90,7 +90,7 @@ une partie des « non semée » sont des fouilles encore en cours à la fin de l
 ### Ce que ces chiffres disent
 
 - **De près, à découvert, on ne sème personne.** Le crabos va aussi vite que la foreuse (vitesse 5
-  contre 5) et l'insectoïde plus vite encore : l'écart ne grandit jamais, la bête reste dans le cercle,
+  contre 5) et la puce plus vite encore : l'écart ne grandit jamais, la bête reste dans le cercle,
   et la règle des 3 % ne s'applique pas. Il n'y a pas d'issue sans terrain.
 - **De loin, à découvert, oui.** Avec une douzaine de cases d'avance, la bête est hors du cercle : les
   3 % mordent et elle finit par renoncer. C'est le seul cas où fuir tout droit fonctionne.
@@ -99,7 +99,7 @@ une partie des « non semée » sont des fouilles encore en cours à la fin de l
 - **Les rochers épars ne cachent pas** : ils gênent la foreuse plus qu'ils ne coupent la ligne de vue.
 - **La course change la donne** : de près et à découvert, on sème maintenant un crabos un peu moins
   d'une fois sur deux, au prix de toute l'énergie (donc sans pouvoir frapper ensuite). Avec un abri à
-  portée, la course suffit presque toujours. Contre un insectoïde (vitesse 6), l'avance gagnée est
+  portée, la course suffit presque toujours. Contre une puce (vitesse 6), l'avance gagnée est
   un peu plus faible.
 
 ## Combats (13 novembre 2026)
@@ -205,7 +205,7 @@ vie d'essai très haute : on mesure les **dégâts encaissés**, sans que la mor
 
 | Espèce | Ancien coût (duels) | Coût de base | Pression | Par tête à 6, calmes | Par tête à 6, en alerte |
 |---|---|---|---|---|---|
-| Insectoïde | 4 | 3,3 | 0,15 | 3,5 | 3,9 |
+| Puce | 4 | 3,3 | 0,15 | 3,5 | 3,9 |
 | Cafar | 5 | 2 | 0,3 | 2,4 | 2,8 |
 | Siphon | 3 | 1,1 | 0,31 | 1,7 | 4,1 |
 | Gluar | 12 | 5,7 | 0,67 | 8,7 | 14,3 |
@@ -269,11 +269,11 @@ Lecture : tout nettoyer sans équipement n'est tenable qu'aux niveaux 1 et 2 ; �
 frappent que si l'on passe à leur contact. C'est une carte de taille 1, où tout se rejoint vite : en taille 3 il y a de la place
 pour contourner.
 
-### Après le retour de l'insectoïde fuyant (15 novembre 2026, soir)
+### Après le retour de la puce fuyante (15 novembre 2026, soir)
 
-L'insectoïde recule de nouveau au contact et ne se bat que si la foreuse est engagée ou le frappe. Seul, il ne coûte plus que **1,3** point par
+La puce recule de nouveau au contact et ne se bat que si la foreuse est engagée ou le frappe. Seule, elle ne coûte plus que **1,3** point par
 tête (3,3 avant) ; mêlé à des ennemis qui chassent, rien ne change : le mélange du Plateau donne 43 points (48 avant) et son double 139
-(131 avant), dans le bruit de la mesure. Le coût de menace de 3,3 est donc gardé : il vaut pour l'insectoïde en compagnie, son cas normal.
+(131 avant), dans le bruit de la mesure. Le coût de menace de 3,3 est donc gardé : il vaut pour la puce en compagnie, son cas normal.
 
 ### Limites
 
@@ -304,7 +304,7 @@ Défense multiplicative, dégâts en fourchette, POW requis (voir `conception-jo
 
 | Ennemi | Vie perdue avant | Vie perdue après | Battements avant → après |
 |---|---|---|---|
-| Insectoïde | 1,4 | 2,5 | 20 → 21 |
+| Puce | 1,4 | 2,5 | 20 → 21 |
 | Crabos | 8,8 | 8,5 | 12 → 12 |
 | Crachin | 11,3 | 10,7 | 16 → 16 |
 | Vipérin | 14,2 | 14,2 | 11 → 12 |
@@ -326,7 +326,7 @@ Précision 100 (80 avant), POW 10 (1 avant, seuils et pénalités remis à l'éc
 
 | Ennemi | Vie perdue (modèle Brogue, précision 80) | Vie perdue (précision 100) | Battements |
 |---|---|---|---|
-| Insectoide | 2,5 | 1,7 | 21 → 20 |
+| Puce | 2,5 | 1,7 | 21 → 20 |
 | Crabos | 8,5 | 7,6 | 12 → 12 |
 | Crachin | 10,7 | 9,8 | 16 → 15 |
 | Viperin | 14,2 | 11,1 | 12 → 10 |
@@ -346,7 +346,7 @@ fois sur six). Mêmes duels, 300 essais, foreuse avec son équipement de départ
 
 | Ennemi | Vie perdue (DEG 10, 7-13) | Vie perdue (1d6+5) | Battements |
 |---|---|---|---|
-| Insectoide | 1,7 | 2,8 | 20 → 20 |
+| Puce | 1,7 | 2,8 | 20 → 20 |
 | Crabos | 7,6 | 8 | 12 → 11 |
 | Crachin | 9,8 | 10,7 | 15 → 15 |
 | Viperin | 11,1 | 12,6 | 10 → 11 |

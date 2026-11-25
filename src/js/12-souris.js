@@ -73,7 +73,7 @@ function travelStep(){const T=TRAV;if(!T)return;if(busy()){stopTravel();return;}
    Elle ne fore jamais et n'entre dans l'eau profonde que s'il ne reste rien d'autre. Elle s'arrête au moindre événement (exploreEvent),
    à la moindre touche ou au moindre clic. Quand tout est exploré, elle rejoint le site de forage s'il est connu. */
 let EXPL=null;
-// créatures déjà signalées : chacune n'interrompt l'exploration qu'une fois (sinon un insectoïde qui suit la foreuse l'arrêterait sans cesse)
+// créatures déjà signalées : chacune n'interrompt l'exploration qu'une fois (sinon une puce qui suit la foreuse l'arrêterait sans cesse)
 const EXPL_VUS=new WeakSet();
 function exploreScan(E,deep){const N=W*H,prev=new Int32Array(N).fill(-2),q=[idx(G.px,G.py)];prev[q[0]]=-1;const plein=G.st.vie>=G.st.vieMax;
   const butin=j=>{if(G.cles&&G.cles[j])return 'une clé';

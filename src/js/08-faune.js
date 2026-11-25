@@ -5,7 +5,7 @@ const animalAt=(x,y)=>G.animals&&G.animals.find(a=>a.x===x&&a.y===y);
 /* Eau : trois rapports à l'eau selon l'espèce (16 novembre 2026 ; complété le 25 novembre 2026, voir eauLibre plus bas).
    - `nage` (crabos, brochon) : elles y vont naturellement, en chasse comme en errance ;
    - `sec` (cafar) : elles n'y mettent jamais une patte, même pour poursuivre ;
-   - les autres (insectoïde, mastok) : elles l'évitent, mais la traversent pour poursuivre la foreuse.
+   - les autres (puce, mastok) : elles l'évitent, mais la traversent pour poursuivre la foreuse.
    Une créature déjà dans l'eau peut toujours en sortir, sinon elle y resterait coincée en cessant la poursuite.
    `swim` reste à part : il ne dit pas qui entre dans l'eau, mais qui n'y est pas ralenti (le crabos seul). */
 const isWater=v=>v===LIQ||v===DEEP,canWalk=(v,mouille)=>!blocks(v)&&(mouille||!isWater(v));
@@ -21,7 +21,7 @@ const eauLibre=sp=>!!(sp.swim||sp.nage||sp.aqua||sp.vol);
 const terrestre=sp=>!sp.nage&&!sp.aqua&&!sp.vol;
 // pas d'attaque à travers un coin
 const canHit=o=>Math.max(Math.abs(o.x-G.px),Math.abs(o.y-G.py))<=1&&diagOk(o.x,o.y,Math.sign(G.px-o.x),Math.sign(G.py-o.y));
-// les insectoïdes n'entrent pas dans le champ d'un laser
+// les puces n'entrent pas dans le champ d'un laser
 const animalOk=(x,y,m)=>{if(x<1||y<1||x>=W-1||y>=H-1)return false;const v=G.t[idx(x,y)];
   return canWalk(v,m)&&!(G.lz&&G.lz[idx(x,y)])&&!(x===G.px&&y===G.py)&&!animalAt(x,y)&&!beastAt(x,y);};
 /* Deux façons de peupler la carte (19 novembre 2026).
@@ -119,7 +119,7 @@ function stepAway(a,fits){const cur=(a.x-G.px)**2+(a.y-G.py)**2;let best=null,bd
     const nd=(nx-G.px)**2+(ny-G.py)**2;if(nd>bd){bd=nd;best=[nx,ny,dx];}}
   if(best){a.x=best[0];a.y=best[1];if(best[2])a.dir=best[2]>0?1:-1;}}
 // Le combat est engagé (15 novembre 2026) : la foreuse vient d'être attaquée ou d'attaquer une créature, que le coup porte ou non.
-// Tous les insectoïdes qui la suivent (ceux qui l'ont repérée, en vue ou sur sa trace) passent à l'attaque, et ne reculeront plus.
+// Toutes les puces qui la suivent (celles qui l'ont repérée, en vue ou sur sa trace) passent à l'attaque, et ne reculeront plus.
 function engage(){for(const a of (G.animals||[]))if(a.aware)a.enraged=true;}
 /* Fumigène : un nuage de cases, et non plus un simple effet (16 novembre 2026).
    À la pose, une galette ovale autour de la foreuse : 7 cases de large et de haut, 5 en diagonale (dx² + dy² ≤ 10, 37 cases).
@@ -286,7 +286,7 @@ function animalsAct(){
     else if(a.aware&&a.search>0&&--a.search===0){a.aware=0;a.enraged=false;forget(a);}   // fouille terminée : il oublie
     else if(a.aware&&!a.mem)a.aware=0;
     const prev=a.mode,c=cheb(a,G.px,G.py);
-    // l'insectoïde garde ses distances et recule au contact tant que le combat n'est pas engagé (voir engage) ;
+    // la puce garde ses distances et recule au contact tant que le combat n'est pas engagé (voir engage) ;
     // une fois passé à l'attaque (enraged), il ne recule plus jamais, jusqu'à ce qu'il oublie la foreuse
     a.mode=!a.aware?'':!sees?(a.search>0?'search':'seek'):a.enraged?'attack':c<=KEEP_MIN?'flee':c>KEEP_MAX?'follow':'hold';
     if(a.mode==='attack'&&prev!=='attack'&&vis[idx(a.x,a.y)])swarm=swarm||sp;
@@ -450,7 +450,7 @@ const unNom=sp=>(sp.fem?'une ':'un ')+nomDe(sp);
 const UnNom=sp=>{const a=unNom(sp);return a[0].toUpperCase()+a.slice(1);};
 const LesNoms=sp=>{const n=nomDe(sp);return 'Les '+n+(/s$/.test(n)?'':'s');};
 function hurtRobot(b,sp,o){sp=sp||BEASTS[b.sp];o=o||{};const le=LeNom(sp),nom='',verbe=o.laser?'tire':'attaque';
-  // la foreuse est attaquée, que le coup porte ou non : les insectoïdes qui suivent attaquent
+  // la foreuse est attaquée, que le coup porte ou non : les puces qui suivent attaquent
   const ch=hitChance(sp.pre,robotDef());engage();
   // geste : le bond de l'attaquant, ou le trait du laser — droit sur la foreuse s'il touche, à côté s'il rate
   const geste=rate=>{if(!o.laser){addFx({kind:'lunge',beast:b,dx:Math.sign(G.px-b.x),dy:Math.sign(G.py-b.y),dur:200});return;}

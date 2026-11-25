@@ -111,7 +111,7 @@ Les chiffres mesurés sont dans `mesures.md`.
 - **Barres de vie et d'énergie corrigées** : elles comptaient 20 caractères là où la colonne en montrait 14.
 - **Consommables : un battement** (gratuits et instantanés avant).
 - **Éclats de métal** : rendent autant d'énergie que de vie.
-- **Tuiles et stats réglées par l'utilisateur adoptées** comme valeurs du code (l'insectoïde laissé tel quel à sa
+- **Tuiles et stats réglées par l'utilisateur adoptées** comme valeurs du code (la Puce laissée telle quelle à sa
   demande). Décision du même jour : **il règle ses tuiles et ses stats dans l'artefact**, seule version dont la
   session peut relire les réglages.
 
