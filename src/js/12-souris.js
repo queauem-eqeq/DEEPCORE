@@ -205,7 +205,7 @@ const TDESC={[GROUND]:['Sol rocheux','Praticable. Les points au sol se densifien
   [RUBBLE]:['Gravats','Praticables. Restes d’une roche brisée.'],
   [SHIP]:['Coque du vaisseau','Infranchissable et indestructible, ne bloque pas la vue. Le cargo qui a déposé la foreuse.'],
   [DECK]:['Soute du vaisseau','Praticable. La foreuse peut toujours y revenir ; la porte est à l’arrière.']};
-const BEHAV={insectoide:'Suit la foreuse à 2 ou 3 cases et recule au contact. Dès qu’elle est attaquée ou attaque, même si le coup rate, tous ceux qui la suivent passent à l’attaque et ne reculent plus.',
+const BEHAV={puce:'Suit la foreuse à 2 ou 3 cases et recule au contact. Dès qu’elle est attaquée ou attaque, même si le coup rate, tous ceux qui la suivent passent à l’attaque et ne reculent plus.',
   crabos:'Chasse la foreuse dès qu’il la voit et l’attaque au contact. Abandonne environ 8 tours après l’avoir perdue de vue.',
   cafar:'Va en groupe : ce qu’un relais voit, tout le groupe le sait.',
   mastok:'Machine lente et massive : beaucoup de points de vie, des coups très lourds. Mieux vaut l’éviter ou la fuir.'};
@@ -219,7 +219,7 @@ function inspectHTML(){const {x,y}=HOV;if(x<0||y<0||x>=W||y>=H)return '';
   const occ=see?occupant(x,y):null;
   if(d===0){const st=G.st;out.push(head(ICON.robot_r,'Foreuse U-7',dt),
     `<div class="kv"><span>Vie <b>${Math.ceil(st.vie)}/${st.vieMax}</b></span><span>Énergie <b>${Math.floor(st.energie)}/${st.energieMax}</b></span><span>DEF <b>${robotDef()}</b></span></div>`);}
-  else if(occ){const isB=(G.beasts||[]).includes(occ),sp=isB?BEASTS[occ.sp]:SPECIES[occ.sp],key=isB?sp.key:'insectoide',
+  else if(occ){const isB=(G.beasts||[]).includes(occ),sp=isB?BEASTS[occ.sp]:SPECIES[occ.sp],key=isB?sp.key:'puce',
     hp=Math.max(0,occ.hp??pvDe(sp));
     const P=isB&&sp.pack&&G.packs?G.packs[occ.pack]:null;
     const state=isB?(occ.hunt>0?(occ.sees?'en chasse':occ.search>0?'fouille les environs':'se dirige vers votre dernière position connue'):P?(P.pause>0?'au repos':'en route'):'erre'):({attack:'attaque',flee:'recule',follow:'suit',hold:'observe',seek:'se dirige vers votre dernière position connue',search:'fouille les environs'}[occ.mode]||'ne vous a pas repéré');

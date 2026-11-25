@@ -31,7 +31,7 @@ const newPuce=(x,y,gr)=>({sp:0,x,y,hp:pvDe(SPECIES[0]),mp:Math.random(),flee:0,d
 const newBeast=(sp,x,y,pack,gr)=>({sp,x,y,hp:pvDe(BEASTS[sp]),mp:Math.random(),hunt:0,dir:-1,pack,gr});
 const puceSol=(x,y)=>{const v=G.t[idx(x,y)];
   return (v===GROUND||v===GRASS||v===FLAT)&&!animalAt(x,y)&&!beastAt(x,y)&&!(x===G.px&&y===G.py);};
-function spawnAnimals(){G.animals=[];G.fauna=[];G.pool=[0];const n=LIFE.insectoide||0;
+function spawnAnimals(){G.animals=[];G.fauna=[];G.pool=[0];const n=LIFE.puce||0;
   for(let k=0,tries=0;k<n&&tries<n*300+500;tries++){const x=rnd(2,W-3),y=rnd(2,H-3);
     if(!puceSol(x,y)||Math.hypot(x-G.px,y-G.py)<SZ(10,4))continue;G.animals.push(newPuce(x,y,-1));k++;}
 }
@@ -342,8 +342,8 @@ function spawnBeasts(){G.beasts=[];G.beastSeen={};G.packs={};let packId=0;
 // aucun style choisi : tous sont possibles
 function poseGroupe(g,gi,id,cases){{const l=g.pats&&g.pats.length?g.pats:g.pat?[g.pat]:PATS.map(p=>p[0]);
   g=Object.assign({},g,{pat:l[rnd(0,l.length-1)]});}   // plusieurs styles cochés : ce groupe-ci en tire un
-  const esp=k=>k==='insectoide'?-1:BEASTS.findIndex(b=>b.key===k);
-  const mb=[];for(const m of g.m){const s=esp(m.k);if(m.k!=='insectoide'&&s<0)continue;
+  const esp=k=>k==='puce'?-1:BEASTS.findIndex(b=>b.key===k);
+  const mb=[];for(const m of g.m){const s=esp(m.k);if(m.k!=='puce'&&s<0)continue;
     for(let n=rnd(Math.min(m.min,m.max),Math.max(m.min,m.max));n>0;n--)mb.push(s);}
   if(!mb.length)return 'vide';   // tous les effectifs tirés valent 0 : rien à poser, ni échec ni dépense
   const lieu=cases&&cases.length?lieuDe(cases[0]):null;

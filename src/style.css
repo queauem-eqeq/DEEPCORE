@@ -311,6 +311,11 @@ kbd{font-family:var(--mono);color:var(--fg);border:1px solid var(--line);padding
 .sac .cr button.del{padding:1px 4px;color:var(--dim)}
 .sac .cr button.del:hover{color:var(--life);border-color:var(--life)}
 .sac .inone{margin:0;color:var(--dim);font-size:11px}
+/* statistiques de la foreuse dans la colonne : trois lignes de quatre (25 novembre 2026) */
+.hstats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:3px 8px;font-size:11px;font-variant-numeric:tabular-nums}
+.hstats span{display:flex;justify-content:space-between;gap:3px;white-space:nowrap;min-width:0}
+.hstats i{font-style:normal;font-size:10px;letter-spacing:.06em;color:var(--dim)}
+.hstats b{font-weight:400}
 .effs{font-size:11px;color:var(--c3);letter-spacing:.06em}
 .effs:empty{display:none}
 .gen .g.niv{grid-template-columns:minmax(0,1fr) 64px 62px}

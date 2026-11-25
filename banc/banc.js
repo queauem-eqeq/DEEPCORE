@@ -8,7 +8,7 @@ const $b=id=>document.getElementById(id),esc=s=>String(s).replace(/&/g,'&amp;').
 const vrai={render,addFx,say,sayMore};
 dead=()=>{if(G.over)G.over.boom=true;};                        // pas d'explosion ni d'écran de fin sur le banc
 function muet(on){if(on){render=()=>{};addFx=()=>{};say=(m,c)=>{G.msg={m,c:c||''};};sayMore=say;}else{render=vrai.render;addFx=vrai.addFx;say=vrai.say;sayMore=vrai.sayMore;}}
-const ESP=()=>[{key:'insectoide',n:SPECIES[0].n,ic:'an0r'},...BEASTS.map((b,i)=>({key:b.key,n:b.n,ic:'bz'+i+'r'}))];
+const ESP=()=>[{key:'puce',n:SPECIES[0].n,ic:'an0r'},...BEASTS.map((b,i)=>({key:b.key,n:b.n,ic:'bz'+i+'r'}))];
 /* Reliefs d'essai du banc : les six reliefs des anciens biomes du jeu, gardés ici le 16 novembre 2026 quand la descente a été
    retirée, pour que les mesures déjà archivées restent comparables. Ce sont des terrains de mesure, pas du contenu de jeu. */
 const RELIEFS={
@@ -28,7 +28,7 @@ function carte(cfg){const g0=GEN,gen=cfg.carte==='arene'?{eau:0,montagne:0,gouff
   GEN=Object.assign({},g0,gen,{taille:1});SANS_VAISSEAU=true;try{genPlanet();}finally{GEN=g0;SANS_VAISSEAU=false;}
   if(cfg.carte==='arene')for(let y=1;y<H-1;y++)for(let x=1;x<W-1;x++)G.t[idx(x,y)]=GROUND;
   Object.assign(G,{w:W,h:H,eff:{},ore:{},items:{},tracks:{},lastDir:null,beasts:[],amb:[],blood:{},fv:2,inv:invTest(),log:[],sonar:2,over:null,time:0,debt:0,sprint:false});
-  G.st.matiere=0;for(const k in LIFE)LIFE[k]=Math.max(0,Math.round(+(cfg.ennemis||{})[k]||0));
+  G.st.matiere=0;clePuce(cfg.ennemis);for(const k in LIFE)LIFE[k]=Math.max(0,Math.round(+(cfg.ennemis||{})[k]||0));
   spawnAnimals();spawnBeasts();
   itemsApplique(JSON.parse(JSON.stringify(ITEMS_DEF)));if(cfg.items)itemsApplique(cfg.items);   // variantes d'objets à l'essai (mêmes champs que Lab → Items)
   if(cfg.pow>0)G.st.power=Math.round(cfg.pow);   // POW d'essai (modules de puissance), avant d'équiper

@@ -119,7 +119,7 @@ Les chiffres mesurés sont dans `mesures.md`.
 
 - **Six espèces retirées** : Crachin, Vipérin, Gluar, Siphon, Tapi, Taupar. Restent la Puce et quatre bêtes.
 - **Les créatures deviennent des machines** : Insectoïde → **Puce**, Crabos → **Crabot**, Cafar → **Relais**,
-  Mastok → **Broyeur**, Brochon → **Torpille**. Seuls les noms affichés changent ; les clés internes restent.
+  Mastok → **Broyeur**, Brochon → **Torpille**. Seuls les noms affichés changent ; les clés internes restent (sauf celle de la Puce, devenue `puce` le 25 novembre 2026 : l'ancienne est convertie à la lecture des réglages enregistrés, `clePuce` dans `06b-groupes.js`).
   Les retouches faites sur les anciens dessins sont jetées une fois (`np-robo17`).
 - Les tuiles étant numérotées par rang, le Broyeur passe de `bz8` à `bz2` et la Torpille de `bz9` à `bz3`
   (`migreBz`, marqué par `np-bz17`).

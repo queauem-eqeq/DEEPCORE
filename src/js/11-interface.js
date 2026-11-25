@@ -105,7 +105,10 @@ function side(){
   {const n=G.niv||1,p=profNiv(n),[am,ab]=G.archM?[G.archM,G.archB]:typeof G.amb==='string'?G.amb.split(' · '):[];
     $('cProf').textContent=`Niveau ${n} · ${p?'−'+p:0} m · ${W}×${H}`;$('cMonde').textContent=am||'Personnalisé';
       $('cBati').textContent=ab||'Personnalisé';}
-  $('matN').textContent=G.st.matiere||0;   // avalée par le commentaire depuis le 16 novembre 2026 : la matière ne s'affichait plus
+  $('matN').textContent=G.st.matiere||0;
+  // statistiques de la foreuse sous EXPLORER et REPOS (25 novembre 2026) : les mêmes valeurs que la fenêtre Équipement, terrain compris
+  if(typeof INV_STATS!=='undefined'){const A=eqDe('arme')||null,B=eqDe('armure')||null;
+    $('hstats').innerHTML=INV_STATS.map(([k,l])=>{const c=statVal(k,G.st,A,B,0);return `<span><i>${l}</i><b>${c[1]??c[0]}${k==='crit'?' %':''}</b></span>`;}).join('');}   // avalée par le commentaire depuis le 16 novembre 2026 : la matière ne s'affichait plus
   if(!$('inventaire').hidden)invDraw();
   $('msg').innerHTML=seenHTML();
   logDraw();
@@ -188,7 +191,7 @@ let DB=null;
 // À l'ouverture, les réglages enregistrés en base sont rechargés (même d'un autre appareil)
 function applySaved(d){
   const num=v=>typeof v==='number'&&isFinite(v);
-  if(d.bestiaire)BEST_LIST().forEach(e=>{const b=d.bestiaire[e.key];if(b)BFIELDS.forEach(([f])=>{if(num(b[f]))e.o[f]=b[f];});});saveBest();
+  clePuce(d.bestiaire);if(d.bestiaire)BEST_LIST().forEach(e=>{const b=d.bestiaire[e.key];if(b)BFIELDS.forEach(([f])=>{if(num(b[f]))e.o[f]=b[f];});});saveBest();
   if(num(d.discretion))setStealthBase(d.discretion);
   if(d.artefacts){ARTEFACTS=artefactsSains(d.artefacts);saveArtefacts();}
   if(d.items&&typeof itemsApplique==='function'){itemsApplique(d.items);saveItems();}
