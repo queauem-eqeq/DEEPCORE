@@ -304,3 +304,8 @@ Ce qui a été remplacé, et pourquoi (demandes de l'utilisateur, « chaque mach
 ## 25 novembre 2026 — plus de plan de clé
 - **La clé se fabriquait** (plan de niveau 1, 22 de Matière). Retiré à la demande : il n'existe plus de plan de clé, les clés
   se trouvent seulement sur la carte.
+
+## 25 novembre 2026 — le coup réel ignorait les +5 % de dégâts par point de POW
+- La règle du 22 novembre 2026 (+5 % de dégâts par point de POW au-dessus du POW requis par l'arme) n'avait été appliquée qu'à
+  l'affichage (`robotDegs`) ; le coup lui-même (`robotDeg`) était resté à +1,5 %, la règle de la précision. Corrigé : le coup
+  applique `degFact`. La précision garde ses +1,5 % par point. Mesures de combat non relancées (demande de l'utilisateur).

@@ -434,7 +434,9 @@ const degFact=(st,d)=>{const e=powEcart(d,st);
   return e<0?Math.pow(POW_MANQUE,-e):Math.pow(1+(typeof ITEM_VAL!=='undefined'?ITEM_VAL.puissance.deg:5)/100,e);};
 const robotDegs=(st,d)=>{st=st||G.st;const a=d===undefined?eqDe('arme'):d,de=armeDe(a),k=degFact(st,a),b=st.degats||0;
   return [Math.max(1,Math.round((de.n+de.p+b)*k)),Math.max(1,Math.round((de.n*de.f+de.p+b)*k))];};
-const robotDeg=()=>{const a=eqDe('arme');return Math.max(1,Math.round((deTire(armeDe(a))+(G.st.degats||0))*armeFact(G.st,a)));};
+// le coup réel suit la même règle que la fourchette affichée (robotDegs) : degFact, soit +5 % par point de POW en trop. Jusqu'au
+// 25 novembre 2026 il appliquait par erreur armeFact (+1,5 %, la règle de la précision) : l'écran annonçait plus que le coup ne faisait.
+const robotDeg=()=>{const a=eqDe('arme');return Math.max(1,Math.round((deTire(armeDe(a))+(G.st.degats||0))*degFact(G.st,a)));};
 const robotDefNu=(st,d)=>{st=st||G.st;return st.def+armureDef(st,d===undefined?eqDe('armure'):d);};
 const robotDef=()=>robotDefNu()+terrMod(G.px,G.py);
 const roll=ch=>Math.random()*100<ch;
