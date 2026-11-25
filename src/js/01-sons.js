@@ -35,11 +35,10 @@ function sAlea(){SGRAINE=(SGRAINE*1664525+1013904223)>>>0;return SGRAINE/4294967
 const SFX={
   step(){noiz(.06,.12,700);tone(62,.05,'square',.035);},
   // Herbe : froufrou — trois coups de brosse décalés, filtrés en bande montante, légèrement tirés au hasard
-  // 25 novembre 2026 : les trois coups secs (attaque de 6 ms, passe-haut) crépitaient ; deux souffles longs et fondus à la place,
-  // montée douce de 40 à 50 ms, bande passante large qui glisse vers l'aigu, rien au-dessus de 5 kHz
+  // 25 novembre 2026 : les trois coups secs (attaque de 6 ms, passe-haut) crépitaient ; un seul souffle long et fondu à la place (un seul son, demandé le même jour),
+  // montée douce de 50 ms, bande passante large qui glisse vers l'aigu, rien au-dessus de 5 kHz
   grass(){const r=()=>.82+Math.random()*.36;
-    souffle(.24*r(),.05,1500*r(),3600,.05,0);
-    souffle(.18*r(),.03,2400*r(),4800,.04,.05);},
+    souffle(.22*r(),.06,1800*r(),4200,.05,0);},
   // Moteur électrique de la course : bourdon court et sifflement d'engrenage, un par pas couru
   motor(){const r=.94+Math.random()*.12;tone(188*r,.1,'sawtooth',.04,214*r);tone(1240*r,.07,'square',.016,1460*r);
     noiz(.05,.02,2800,'bandpass',.01,1800);},
