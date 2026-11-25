@@ -309,7 +309,7 @@ function baliseJoue(e,sp,boom){const q=baliseDe(e);if(!q){e.leurre=0;return fals
   else if((sp.laser||sp.glu)&&d<=(sp.laser||sp.glu)&&d>1&&los(e.x,e.y,q.x,q.y)){if(sp.cadence){if((e.cd=(e.cd||0)-1)>0)return true;
     e.cd=sp.cadence;}baliseFrappe(e,sp,q,true);return true;}
   else if(d<=1){baliseFrappe(e,sp,q,false);return true;}
-  e.mp=Math.min(2,e.mp+sp.v/5/slowOf(G.t[idx(e.x,e.y)],sp.swim));const m=mouilleOk(sp,e),kD=q.id+':'+(m?1:0);let D=BAL_D.get(kD);
+  e.mp=Math.min(2,e.mp+sp.v/5/slowOf(G.t[idx(e.x,e.y)],eauLibre(sp)));const m=mouilleOk(sp,e),kD=q.id+':'+(m?1:0);let D=BAL_D.get(kD);
     if(!D){D=distFrom(q.x,q.y,m);BAL_D.set(kD,D);}
   while(e.mp>=1&&!G.over){e.mp-=1;if(cheb(e,q.x,q.y)<=1){e.mp=Math.min(e.mp,.99);break;
     }if(!chaseStep(e,D,(x,y)=>beastFits(e,x,y),q.x,q.y))break;}

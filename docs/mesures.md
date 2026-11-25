@@ -753,6 +753,11 @@ Ce que les chiffres disent, et ce qui a été réglé en conséquence :
 Relancé après les changements : valeurs inchangées (perd la trace à 13 cases : 100 % en 36 tours ; terrain dégagé, 12 cases
 d'avance : 50 % semée ; herbes hautes en zigzag : 100 %).
 
+Relancé le 25 novembre 2026 après les trois familles face à l'eau (terrestres, aquatiques, amphibies) : ces mesures se font
+à sec et ne bougent pas (combat : 1 Crabot vie restante 93, 1 Broyeur 54, 1 Torpille 91, Mastok + 2 Crabos 74 % de victoires ;
+fuite en courant, 12 cases d'avance : 100 % semée). **Non mesuré : les combats dans l'eau**, où le Crabot et la Torpille ne
+perdent plus 20 de défense et où la Torpille n'est plus ralentie.
+
 ### Réseau de cavernes (21 novembre 2026)
 
 25 cartes par réglage (`outils/scripts/mesure-cavernes.js`), taille 4 sauf mention : part de cavernes obtenue à moins de

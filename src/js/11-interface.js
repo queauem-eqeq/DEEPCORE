@@ -74,7 +74,7 @@ function seenHTML(){
              ...(G.animals||[]).filter(a=>vis[idx(a.x,a.y)]).map(a=>({o:a,sp:SPECIES[a.sp],ic:'an'+a.sp+'r',hp:a.hp??pvDe(SPECIES[a.sp]),st:{attack:'attaque',flee:'recule',follow:'suit',hold:'observe',seek:'cherche',search:'fouille'}[a.mode]||'',agg:a.mode==='attack'}))]
     .sort((p,q)=>near(p.o,q.o));
   if(ans.length){const max=6;
-    const calc=e=>{const tmA=terrMod(e.o.x,e.o.y),tmR=terrMod(G.px,G.py),me=hitChance(robotPre(),e.sp.def+tmA),
+    const calc=e=>{const tmA=terrModDe(e.sp,e.o.x,e.o.y),tmR=terrMod(G.px,G.py),me=hitChance(robotPre(),e.sp.def+tmA),
       them=e.agg?hitChance(e.sp.pre,robotDef()):null;return {tmA,tmR,me,them};};
     const head='<div class="hd"><span></span><span>Vie</span><span title="Votre chance de le toucher">Toucher</span><span title="Sa chance de vous toucher">Subir</span></div>';
     out.push('<div class="grp">'+head+ans.slice(0,max).map(e=>{const pv=pvDe(e.sp),d=Math.max(Math.abs(e.o.x-G.px),Math.abs(e.o.y-G.py)),c=calc(e);

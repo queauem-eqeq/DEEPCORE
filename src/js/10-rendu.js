@@ -306,10 +306,12 @@ function render(){
     // rouge fixe, jamais la couleur danger de la palette (24 novembre 2026) : la barre se lit pareil avec toutes les palettes
     ctx.fillStyle=ROUGE_FIXE;
     ctx.fillRect(px+3,py-4,Math.round(w*Math.max(0,hp)/pv),3);};
+  // dans l'eau, terrestres et amphibies portent le même remous que la foreuse ; pas les aquatiques ni les volants (25 novembre 2026)
+  const remous=(sp,x,y)=>{if(sp.aqua||sp.vol)return;const v=G.t[idx(x,y)];if(v===LIQ)put(TL.wade,x,y,.95);else if(v===DEEP)put(TL.wadeDeep,x,y,.95);};
   if(G.animals)for(const a of G.animals)if(!fog||vis[idx(a.x,a.y)]){const [lx,ly]=lungeOff(f=>f.kind==='lunge'&&f.beast===a);
     const px=(a.x-camX)*S+lx,py=(a.y-camY)*S+ly;ctx.globalAlpha=1;{const t=TL['an'+a.sp+(a.dir<0?'l':'r')];
       ctx.drawImage(a.stun>0?tuileEtourdie(t):t,px,py,S,S);}
-    const sp=SPECIES[a.sp];barreVie(px,py,a.hp??pvDe(sp),pvDe(sp));}
+    const sp=SPECIES[a.sp];remous(sp,a.x,a.y);barreVie(px,py,a.hp??pvDe(sp),pvDe(sp));}
   if(G.beasts)for(const b of G.beasts){if(!beastVisible(b)||beastCache(b))continue;const [lx,ly]=lungeOff(f=>f.kind==='lunge'&&f.beast===b);
     // mine armée : elle clignote ; étourdie : damier bio / bâti
     const px=(b.x-camX)*S+lx,py=(b.y-camY)*S+ly,img0=b.fuse>0&&Math.floor(performance.now()/130)%2?TL.mineA:TL['bz'+b.sp+(b.dir<0?'l':'r')],
@@ -317,7 +319,7 @@ function render(){
     ctx.globalAlpha=1;ctx.drawImage(img,px,py,S,S);
     const fl=FX.find(f=>f.kind==='flash'&&f.beast===b);if(fl){ctx.globalCompositeOperation='lighter';ctx.globalAlpha=1-fxP(fl);
       ctx.drawImage(img,px,py,S,S);ctx.drawImage(img,px,py,S,S);ctx.globalCompositeOperation='source-over';ctx.globalAlpha=1;}
-    barreVie(px,py,b.hp,pvDe(BEASTS[b.sp]));}
+    remous(BEASTS[b.sp],b.x,b.y);barreVie(px,py,b.hp,pvDe(BEASTS[b.sp]));}
   // objet sous une créature : la créature le cache ; un petit + blanc de 3 × 3 pixels de tuile dans le coin bas droit de la case
   // (23 novembre 2026 ; avant : la tuile de l'objet en petit)
   {for(const i of SOUS){const l=G.items&&G.items[i];if(!(l&&l.length)&&!(G.cles&&G.cles[i]))continue;const q=S/16,px=(i%W-camX)*S+12*q,py=(((i/W)|0)-camY)*S+12*q;
