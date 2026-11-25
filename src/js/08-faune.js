@@ -594,7 +594,7 @@ function regen(wait){if(G.over)return;G.st.energie=Math.min(G.st.energieMax,G.st
 // Coup de foreuse : consomme de l'énergie ; refusé si la réserve est insuffisante
 function spend(){if(G.st.energie<G.st.cout){say(`Énergie insuffisante pour frapper (${Math.floor(G.st.energie)}/${G.st.cout}). Attendez qu’elle se recharge.`,'warn');
   SFX.blocked();render();return false;}G.st.energie-=G.st.cout;return true;}
-const TRACK_LIFE=5;
+const TRACK_LIFE=10;   // tours avant que la trace des chenilles ait disparu (5 jusqu'au 25 novembre 2026)
 // Bande : chaque cafar reste à PACK_R cases au plus du centre de son groupe, sinon il y revient.
 // Hors chasse, la bande voyage vers un point accessible tiré au hasard, s'y arrête PACK_PAUSE tours, puis repart.
 const PACK_R=4,PACK_PAUSE=50;

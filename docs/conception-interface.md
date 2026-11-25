@@ -56,7 +56,7 @@ Partie du document de conception (sommaire et règles à ne pas casser : `concep
 - **Aucune case bâtie ne porte cette texture** (sols, portes, piliers, murs, ponts de bâtiment) : fond uni à
   l'intérieur.
 - **Traces de chenilles** : deux pointillés qui suivent une courbe (64 combinaisons entrée/sortie), effacement
-  pixel par pixel en 5 tours.
+  pixel par pixel en **10 tours** (5 étapes de deux tours ; 5 tours jusqu'au 25 novembre 2026).
 - **Viseur** (curseur souris et inspection) : blanc avec contour noir automatique ; ses pixels blancs passent en
   gris quand la case est inexplorée ou hors d'atteinte.
 
