@@ -107,7 +107,7 @@ CRIT +5, POW 9), **Trépan lourd** (2d6+6 ; coup +25, POW 12), **Carène légèr
 | PRE | 100 | précision |
 | DEF | 10 | défense : fait rater les coups reçus, sans réduire les dégâts. Modifiée par le terrain et l'armure (10 viennent de la Coque d'usine) |
 | CRIT | 5 % | coup critique (×3) ; coup par surprise toujours critique |
-| DET | 5 | portée de découverte des portes dérobées |
+| DET | 3 | portée de découverte des portes dérobées : 15 % par battement en agissant, 35 % en attendant sur place (voir `conception-carte.md`) |
 | POW | 10 | seuil d'équipement (POW requis) et recharge d'énergie : POW/10 par battement |
 
 - **Aperçu derrière les obstacles** (foreuse seulement) : dans le rayon EYE, la case juste derrière un obstacle à la

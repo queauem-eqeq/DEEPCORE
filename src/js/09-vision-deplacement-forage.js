@@ -103,7 +103,7 @@ function pass(d,wait){const fin=(G.time||0)+d;
   G.time=fin;
   if(!G.over)turnStealth();}                            // une action rapide peut ne faire battre personne : la portée affichée reste juste
 function battement(wait){if(wait)drift(true);const av=portesPrises();animalsAct();beastsAct();machTick();
-  portesBruit(av);effTick();regen(wait);}
+  portesBruit(av);effTick();regen(wait);chercheSecrets(wait);}   // la foreuse cherche les portes dérobées à chaque battement (07b)
 function toggleSprint(){if(!G||G.over)return;
   if(!G.sprint&&G.st.energie<SPRINT_COST){say(`Énergie insuffisante pour courir (${Math.floor(G.st.energie)}/${SPRINT_COST}).`,'warn');
     SFX.blocked();render();return;}
@@ -231,7 +231,7 @@ function tryMove(dx,dy){
 function waitTurn(){
   if(G.over||drilling||!$('overlay').hidden)return;lastAct='wait';lastRun=false;G.turn++;G.msg=null;
     if(!REST)say(`Le robot attend : recharge ${WAIT_REGEN} fois plus vite (${+(G.st.power/POW_BASE*WAIT_REGEN).toFixed(1)}/t).`);
-  pass(DUR.attente,true);chercheSecrets();computeFOV();render();if(G.over&&G.over.dead)dead();
+  pass(DUR.attente,true);computeFOV();render();if(G.over&&G.over.dead)dead();
 }
 function askDrill(){
   if(G.over||drilling||!$('overlay').hidden)return;const s=siteAt(G.px,G.py);if(!s)return;

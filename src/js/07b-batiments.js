@@ -437,11 +437,17 @@ function secrets(B,strs){const n=GEN.sSecrets||0,t=G.t,out=[];G.secrets=0;if(n<=
     if(!ok)continue;const sol=[];for(let y=y0;y<y0+h;y++)for(let x=x0;x<x0+w;x++){t[idx(x,y)]=FLOOR;sol.push(idx(x,y));}
     t[idx(cx,cy)]=SECRET;out.push(sol);}
   G.secrets=out.length;return out;}
-// Se reposer fait chercher : chaque porte dérobée à DET cases ou moins (5 de base, un objet peut le changer) a 25 % de chance
-// par battement d'être découverte.
-const SECRET_P=.25;
-function chercheSecrets(){const r=G.st.detec||5;let n=0;
+/* Chercher les portes dérobées (26 novembre 2026). La foreuse cherche à **chaque battement**, et plus attentivement
+   quand elle ne fait qu'attendre : chaque porte dérobée à DET cases ou moins (3 de base, un objet peut le changer) a
+   SECRET_P.bouge de chance d'être découverte à un battement ordinaire, SECRET_P.arret à un battement passé sur place
+   (touche Attendre comme Repos, qui n'est qu'une suite d'attentes). La chance est la même partout dans le rayon.
+   Avant, la foreuse ne cherchait qu'en attendant, à 25 % par battement, et sur un rayon de 5 : en marchant, elle
+   pouvait longer une porte dérobée sans aucune chance de la voir. */
+const SECRET_P={bouge:.15,arret:.35};
+function chercheSecrets(arret){const r=G.st.detec||3,p=arret?SECRET_P.arret:SECRET_P.bouge;let n=0;
   for(let y=Math.max(0,G.py-r);y<=Math.min(H-1,G.py+r);y++)for(let x=Math.max(0,G.px-r);x<=Math.min(W-1,G.px+r);x++){const i=idx(x,y);
-    if(G.t[i]!==SECRET||Math.hypot(x-G.px,y-G.py)>r||Math.random()>=SECRET_P)continue;G.t[i]=DOOR;G.seen[i]=1;n++;
+    if(G.t[i]!==SECRET||Math.hypot(x-G.px,y-G.py)>r||Math.random()>=p)continue;G.t[i]=DOOR;G.seen[i]=1;n++;
       addFx({kind:'num',x,y,txt:'!',col:'#ffffff',dur:900});}
-  if(n){SFX.spot();sayMore(n>1?'Des portes dérobées apparaissent dans le mur !':'Une porte dérobée apparaît dans le mur !','good');if(typeof stopRest==='function'&&REST)stopRest('Repos interrompu : une porte dérobée.');}}
+  if(n){SFX.spot();sayMore(n>1?'Des portes dérobées apparaissent dans le mur !':'Une porte dérobée apparaît dans le mur !','good');
+    if(typeof stopRest==='function'&&REST)stopRest('Repos interrompu : une porte dérobée.');
+    if(typeof stopTravel==='function'&&TRAV)stopTravel('Trajet interrompu : une porte dérobée.');}}

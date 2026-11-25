@@ -305,7 +305,7 @@ function statVal(k,st,arme,armure,dDis){
 /* Infobulle d'une statistique de la colonne (25 novembre 2026) : sa définition, puis ce qui fait sa valeur en ce moment — la base,
    chaque pièce d'équipement portée, les bonus permanents (modules), puis ce qui tient à la situation (POW requis, terrain, action). */
 // valeurs de la foreuse nue ; la défense de départ (10) vient de la Coque d'usine, portée dès le début
-const ST_BASE={vieMax:100,energieMax:100,pas:0,capteur:10,degats:0,pre:100,def:0,crit:5,power:10,dis:0,coup:0,detec:5};
+const ST_BASE={vieMax:100,energieMax:100,pas:0,capteur:10,degats:0,pre:100,def:0,crit:5,power:10,dis:0,coup:0,detec:3};
 const ST_DEF={vieMax:['Vie maximale','Ce que la foreuse peut encaisser avant d’être détruite.'],
   energieMax:['Énergie maximale','La réserve dépensée par la course (5 par pas) ; elle se recharge au repos.'],
   pas:['Durée du pas','Le temps que prend un déplacement : 100 vaut un battement, comme pour les robots. Plus c’est bas, plus la foreuse marche vite.'],
@@ -317,7 +317,7 @@ const ST_DEF={vieMax:['Vie maximale','Ce que la foreuse peut encaisser avant d�
   power:['Puissance','Comparée au POW requis par l’arme et par l’armure : chaque point en trop les renforce, chaque point manquant les affaiblit beaucoup.'],
   dis:['Discrétion','La distance, en cases, à laquelle un robot peut remarquer la foreuse. Plus c’est bas, mieux c’est.'],
   coup:['Durée du coup','Le temps que prend une attaque : 100 vaut un battement. Plus c’est bas, plus la foreuse frappe vite.'],
-  detec:['Détection','Le rayon, en cases, dans lequel la foreuse peut repérer une porte secrète.']};
+  detec:['Détection','Le rayon, en cases, dans lequel la foreuse peut repérer une porte dérobée. Elle cherche à chaque battement : 15 % de chance par porte, 35 % si elle attend sur place ou se repose.']};
 function statInfo(k){const st=G.st,A=eqDe('arme')||null,B=eqDe('armure')||null,L=[],u=k==='crit'?' %':'',pt=n=>Math.abs(n)>1?'s':'';
   const base=k==='dis'?STEALTH_BASE:k==='coup'?DUR.coup:k==='pas'?DUR.pas:ST_BASE[k];L.push([k==='dis'?'Base (réglage du jeu)':'Base',base+u]);
   let eq=0;for(const o of G.inv||[]){const d=ITEMS[o.k];if(!o.eq||!d||!d.mod||!d.mod[k])continue;eq+=d.mod[k];L.push([d.n,signe(d.mod[k])+u]);}

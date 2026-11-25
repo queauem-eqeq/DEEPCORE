@@ -475,9 +475,13 @@ pièce ils deviennent du sol, sous un mur du mur) ; seuls le vaisseau et le bord
   a en tout point l'air d'un mur (dessin, fiche de survol, mini-carte) et se comporte comme tel. Jamais la pièce du
   site, jamais une entrée. S'il manque de culs-de-sac, une pièce de 3 × 3 à 5 × 4 est **creusée dans un massif de
   mur plein** ; s'il n'y a pas de massif non plus, la carte en a moins que demandé. **Aucune clé** dedans.
-  **Découverte en se reposant** : chaque porte dérobée à **DET cases ou moins** a **25 % de chance par battement**
-  d'apparaître ; elle devient une porte ordinaire, un « ! » la signale et le repos s'interrompt. Une charge
-  sismique ouvre aussi le mur.
+  **Découverte** (revue le 26 novembre 2026) : la foreuse cherche à **chaque battement**, et mieux quand elle ne
+  fait rien d'autre. Chaque porte dérobée à **DET cases ou moins** (3 de base) a **15 % de chance par battement**
+  d'apparaître, et **35 % à un battement passé sur place** — touche Attendre comme Repos, qui n'est qu'une suite
+  d'attentes. La chance est la même partout dans le rayon. Elle devient une porte ordinaire, un « ! » la signale,
+  et le repos ou le trajet en cours s'interrompt. Une charge sismique ouvre aussi le mur.
+  Avant : rayon 5, **25 % par battement mais seulement en attendant** — en marchant, la foreuse pouvait longer une
+  porte dérobée sans aucune chance de la voir.
 - **Les murs ne se percent pas à la foreuse** : seule la **charge sismique** les ouvre. Entrer dans une salle
   murée coûte donc un consommable rare.
 - **Pas de gouffre à l'intérieur des pièces** pour l'instant : le code existe, désactivé par le drapeau

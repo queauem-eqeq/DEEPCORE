@@ -847,3 +847,23 @@ Artilleur, Soudeur et Englueur sortaient du duel par épuisement du compteur (98
 maintenant en 5 ou 6 actions, parce que leur tir suit la même horloge que le reste.
 
 `outils/simul.py detection` et `fuite` : inchangés, ces mesures ne dépendent pas de l'horloge des créatures.
+
+## Portes dérobées : on cherche en marchant (26 novembre 2026)
+
+La foreuse ne cherchait qu'en attendant (25 % par battement, rayon DET 5) : en marchant, elle pouvait longer une
+porte dérobée sans aucune chance de la voir. Elle cherche maintenant à chaque battement, rayon DET 3, 15 % par
+battement en agissant et 35 % à un battement passé sur place. Mesuré dans le moteur, 3 000 essais par ligne.
+
+| Situation | avant | après |
+|---|---|---|
+| Porte à 1 ou 3 cases, battement en agissant | 0 % | 15 % |
+| Porte à 1 ou 3 cases, battement sur place | 25 % | 35 % |
+| Porte à 4 cases | 25 % (DET 5) | 0 % (hors du rayon) |
+| Battements pour trouver une porte à 2 cases, à l'arrêt | 4,0 | 2,9 |
+| Battements pour trouver une porte à 2 cases, en agissant | jamais | 6,7 |
+| Longer un mur, 13 pas, porte au milieu | 0 % | **58 %** |
+
+Lecture. Le rayon se resserre (5 → 3) et l'attente devient plus efficace (25 → 35 %), mais le vrai changement est
+la dernière ligne : **passer devant une porte dérobée suffit maintenant à la trouver plus d'une fois sur deux**,
+alors qu'avant il fallait s'arrêter au bon endroit sans savoir qu'il y avait quelque chose. Se reposer reste la
+façon de fouiller un endroit précis : deux fois moins de battements qu'en marchant sur place.

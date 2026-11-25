@@ -274,7 +274,7 @@ function genPlanet(){
       if(sites.some(s=>Math.abs(s.x-x)+Math.abs(s.y-y)<(last?4:gap)))continue;sites.push({x,y});}
     if(sites.length<NSITES&&!last)continue;
     G={t,recette:ZONE?GEN.recette:'classique',seen:new Array(N).fill(0),px:sx,py:sy,turn:0,dist:0,over:null,msg:null,ship,face:'d',
-      st:{detec:5,vie:100,vieMax:100,energie:100,energieMax:100,repar:0,power:10,pas:0,degats:0,capteur:10,cout:10,pre:100,def:10,crit:5},
+      st:{detec:3,vie:100,vieMax:100,energie:100,energieMax:100,repar:0,power:10,pas:0,degats:0,capteur:10,cout:10,pre:100,def:10,crit:5},
       sites:sites.map((s,i)=>({x:s.x,y:s.y,depth:10,id:LETTERS[i],seen:false,known:false}))};
     return;
   }
