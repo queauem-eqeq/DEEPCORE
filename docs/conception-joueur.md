@@ -71,7 +71,7 @@ Posé à la fin de la génération, sur toutes les recettes. **Ordre de priorit�
 
 ### Fabricateur (`14c-fabricateur.js`)
 
-Premier usage de la **Matière**. Avancer sur un fabricateur ouvre une liste : **seulement les objets dont la foreuse a trouvé le plan** (sans aucun plan, il le dit et ne propose rien). Les plans se trouvent au sol, dans les dépôts, les salles piégées, les vitrines et sur les robots abattus : objets simples au niveau 1 (réparobots, batterie, fumigène, clé), consommables avancés et accessoires au niveau 2, armes et armures au niveau 3 (un cran d'avance possible). Un plan déjà connu se recycle en 10 de Matière. Le Module de puissance ne se fabrique pas. Une fabrication prend 3 battements ; l'objet est ramassé s'il y a de la place, sinon posé sous la foreuse.
+Premier usage de la **Matière**. Avancer sur un fabricateur ouvre une liste : **seulement les objets dont la foreuse a trouvé le plan** (sans aucun plan, il le dit et ne propose rien). Les plans se trouvent au sol, dans les dépôts, les salles piégées, les vitrines et sur les robots abattus : objets simples au niveau 1 (réparobots, batterie, fumigène), consommables avancés et accessoires au niveau 2, armes et armures au niveau 3 (un cran d'avance possible). Un plan déjà connu se recycle en 10 de Matière. Le Module de puissance ne se fabrique pas, la clé non plus (25 novembre 2026 : plus de plan de clé, les clés se trouvent). Une fabrication prend 3 battements ; l'objet est ramassé s'il y a de la place, sinon posé sous la foreuse.
 
 - **Commandes** : flèches (ou Z/S) et Entrée, ou clic ; Échap ferme. Pavé numérique : 8 et 2 montent et descendent, 5 fabrique ; les chiffres 1 à 9 du haut du clavier choisissent l'objet de ce numéro, affiché devant son nom.
 - **Fenêtre de taille fixe** : liste et panneau de droite gardent leur hauteur d'un objet à l'autre. Nom coloré par famille : consommables en bio, accessoires en monde, armes et armures en accent (grisé si la Matière manque).
@@ -83,7 +83,7 @@ Premier usage de la **Matière**. Avancer sur un fabricateur ouvre une liste : *
 | Fumigène | 16 | Viseur laser, Gyroscope | 50 |
 | Réparobots | 18 | Condensateur | 55 |
 | Surrégime | 20 | Carène légère (armure) | 60 |
-| Clé | 22 | Vrille rapide (arme) | 70 |
+| — | | Vrille rapide (arme) | 70 |
 | Camouflage optique | 24 | Trépan lourd (arme), Blindage composite (armure) | 85 |
 | Charge sismique | **34** (le consommable qui épargne le plus de vie, voir mesures) | Accumulateur, Téléobjectif | 40 |
 

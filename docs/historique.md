@@ -300,3 +300,7 @@ Ce qui a été remplacé, et pourquoi (demandes de l'utilisateur, « chaque mach
 - **Les murs, les portes et les machines résistaient à l'explosion d'une mine** (règle du 22 novembre 2026 : seule la charge
   sismique en venait à bout). Retiré à la demande : l'explosion d'une mine les détruit désormais, la roche dure exceptée.
   La charge sismique détruit aussi les portes, qu'elle épargnait par oubli.
+
+## 25 novembre 2026 — plus de plan de clé
+- **La clé se fabriquait** (plan de niveau 1, 22 de Matière). Retiré à la demande : il n'existe plus de plan de clé, les clés
+  se trouvent seulement sur la carte.

@@ -97,7 +97,7 @@ const tenuPar=()=>(G.beasts||[]).find(b=>b.tient&&!(b.stun>0)&&Math.max(Math.abs
 
 /* ----- Butin ----- */
 // objets simples d'abord, les meilleurs plus bas
-const PLAN_RANG=k=>{const d=ITEMS[k];return ['repar','batterie','fumigene','cle','balise'].includes(k)?1:d.conso||d.slot==='acc'?2:3;};
+const PLAN_RANG=k=>{const d=ITEMS[k];return ['repar','batterie','fumigene','balise'].includes(k)?1:d.conso||d.slot==='acc'?2:3;};
 const nivCarte=()=>nivBorne((typeof G!=='undefined'&&G&&G.niv)||(typeof NIV_GEN==='number'?NIV_GEN:1));
 let PLANS_POSES={};   // plans déjà posés sur la carte en cours de génération : pas deux fois le même
 function planTire(){const s=savoir(),niv=nivCarte(),lib=Object.keys(FAB_PRIX).filter(k=>ITEMS[k]&&!s.plans[k]&&!PLANS_POSES[k]);
@@ -193,6 +193,8 @@ function butinExplo(){const N=W*H,t=G.t,dep=idx(G.px,G.py),s0=G.sites&&G.sites[0
 /* ----- Ramassage : la Matière rejoint la réserve, un plan s'apprend, le reste va au sac ----- */
 function butinPrend(c,more){const l=G.items&&G.items[c];if(!l)return;const dire=more?sayMore:invSay,reste=[];
   for(const k of l){const d=ITEMS[k];
+    // la clé ne se fabrique plus (25 novembre 2026) : un plan de clé resté au sol d'une ancienne partie se recycle en Matière
+    if(k==='plan_cle'){G.st.matiere=(G.st.matiere||0)+PLAN_DOUBLON;dire(`Plan périmé, recyclé en Matière {µ} (+${PLAN_DOUBLON}).`,'info');continue;}
     if(d&&d.mat){const m=ITEM_VAL.matiere.mat;G.st.matiere=(G.st.matiere||0)+m;
       addFx({kind:'num',x:G.px,y:G.py,txt:'+'+m,col:PAL['1'],dur:750});
       dire(`Matière {µ} ramassée : +${m} (réserve ${G.st.matiere}).`,'good');SFX.spot();}
