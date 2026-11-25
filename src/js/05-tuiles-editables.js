@@ -46,6 +46,10 @@ for(const k of ['an0',...BEASTS.map((_,i)=>'bz'+i)])PAT[k+'l']=(x,y)=>TF(k+'r')(
 // Roche dure (21 novembre 2026) : mêmes dessins que la montagne tendre (retouches comprises), en encre foncée 'd'
 PAT.hardBody=(x,y)=>{const c=TF('mtBody')(x,y);return c==='3'?'d':c;};PAT.hardTop=(x,y)=>{const c=TF('mtTop')(x,y);return c==='3'?'d':c;};
 // retouchables comme les autres (24 novembre 2026) : sans retouche, elles suivent la montagne tendre ; avec, elles vivent leur vie
+// Montagne dure et Crête dure : dessins du joueur adoptés (base de l'artefact, 25 novembre 2026 à 22 h 05) ; ils ne suivent donc plus
+// la Montagne et la Crête tendres.
+PAT.hardBody=[".ddd.ddd.ddd.d.d", "d.d.d.d.d.d.ddd.", "dd.ddd.ddd.ddd.d", "d.d.d.d.d.d.d.dd", ".ddd.ddd.d.d.ddd", "d.d.d.d.d.d.d.d.", "dd.d.d.ddd.ddd.d", "d.ddd.ddd.d.d.d.", ".ddd.ddd.ddd.ddd", "d.d.d.d.d.d.ddd.", "dd.ddd.ddd.ddd.d", "d.d.d.d.d.d.d.d.", ".ddd.ddd.d.d.ddd", "ddd.d.d.d.d.ddd.", "dd.ddd.ddd.ddd.d", "d.ddd.d.d.d.d.d."];
+PAT.hardTop=["................", "................", "................", "....d...........", "...d.d..........", "..d.d.d.........", ".d.ddd.d...d....", "d.d.d.d.d.ddd...", ".ddd.ddd.ddd.d..", "d.d.ddd.d.d.d.d.", "dd.ddd.ddd.ddd.d", "d.d.d.d.d.d.d.d.", ".ddd.ddd.ddd.ddd", "d.d.d.d.ddd.d.d.", "dd.ddd.d.d.ddd.d", "d.ddd.d.d.ddd.d."];
 for(const k of ['hardBody','hardTop']){PAT_ORIG[k]=PAT[k];PAT[k]=(x,y)=>TF(k)(x,y);}
 // Fonds des crêtes : seule la partie AU-DESSUS de la ligne de crête est un fond, le reste garde ses trous (sinon la crête sombre paraît plus claire)
 const crestY=(f,x)=>{for(let y=0;y<16;y++)if(f(x,y)!=='.')return y;return 16;};

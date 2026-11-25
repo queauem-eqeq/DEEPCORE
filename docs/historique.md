@@ -309,3 +309,12 @@ Ce qui a été remplacé, et pourquoi (demandes de l'utilisateur, « chaque mach
 - La règle du 22 novembre 2026 (+5 % de dégâts par point de POW au-dessus du POW requis par l'arme) n'avait été appliquée qu'à
   l'affichage (`robotDegs`) ; le coup lui-même (`robotDeg`) était resté à +1,5 %, la règle de la précision. Corrigé : le coup
   applique `degFact`. La précision garde ses +1,5 % par point. Mesures de combat non relancées (demande de l'utilisateur).
+
+## 25 novembre 2026 — réglages du joueur recopiés dans le code
+- Relus dans la base de l'artefact (`reglages/courant`, enregistré le 25 novembre 2026 à 22 h 05) et comparés au code dans le vrai
+  moteur. **Identiques, rien à recopier** : bestiaire, objets (prix, effets, butin), groupes et niveaux, artefacts, discrétion.
+- **Recopié** : 28 tuiles (robots `bz0`…`bz10`, Puce, foreuse, machines `mach0`…`mach9`, terminal, site de forage, sol des ponts,
+  module de puissance ; **Montagne dure et Crête dure**, qui ne suivent donc plus la montagne tendre), les **huit palettes**
+  (Lagon → Lagoon, Désert → Désert sombre, Glacier → Dark forest, Améthyste et Magma retouchées) avec **Améthyste au démarrage**,
+  et la **banque de modules** (10 modules, 2 par niveau 1, 1 en cavernes et en base) devenue la banque de départ (`MODULES_DEF`).
+- Non recopié, comme toujours : la configuration d'essai (génération, taille de planète, état de la foreuse).
