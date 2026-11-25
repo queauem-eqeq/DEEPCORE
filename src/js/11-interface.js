@@ -109,7 +109,8 @@ function side(){
   $('matN').textContent=G.st.matiere||0;
   // statistiques de la foreuse sous EXPLORER et REPOS (25 novembre 2026) : les mêmes valeurs que la fenêtre Équipement, terrain compris
   if(typeof INV_STATS!=='undefined'&&G.inv){const A=eqDe('arme')||null,B=eqDe('armure')||null;
-    const h=INV_STATS.map(([k,l])=>{const c=statVal(k,G.st,A,B,0);
+    // sans VIE ni ÉNER : les deux barres du haut les donnent déjà (retirées le 25 novembre 2026)
+    const h=INV_STATS.filter(([k])=>k!=='vieMax'&&k!=='energieMax').map(([k,l])=>{const c=statVal(k,G.st,A,B,0);
       return `<span tabindex="0" data-k="${k}" aria-describedby="stip"><i>${l}</i> <b>${c[1]??c[0]}${k==='crit'?' %':''}</b></span>`;}).join('');
     // réécrit seulement s'il change : sinon l'encadré survolé serait remplacé à chaque battement et l'infobulle sauterait
     if(h!==HSTATS_H&&$('hstats')){HSTATS_H=h;$('hstats').innerHTML=h;}if(typeof stipMaj==='function')stipMaj();}   // avalée par le commentaire depuis le 16 novembre 2026 : la matière ne s'affichait plus
