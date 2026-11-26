@@ -137,10 +137,20 @@ function side(){
 /* Journal du bas (22 novembre 2026) : il défile (molette, barre) pour relire les messages plus anciens. Il n'est refait que
    quand il change ; un nouveau message le ramène tout en bas, sinon on reste là où on lisait. */
 let LOG_SIG='';
+const LOG_PAS=.13,LOG_SOMBRE=.4;   // un tour s'assombrit de LOG_PAS par tour d'âge, sans descendre sous LOG_SOMBRE
 function logDraw(){const lg=G.log||[],L=lg[lg.length-1],nouveau=`${lg.length}|${L?L.m+L.n+L.t:''}`,sig=nouveau+'|'+G.turn;
   if(sig===LOG_SIG)return;
   const el=$('log'),bas=!LOG_SIG||LOG_SIG.slice(0,LOG_SIG.lastIndexOf('|'))!==nouveau,top=el.scrollTop;LOG_SIG=sig;
-  el.innerHTML=lg.map(e=>`<li class="${e.c||''}${e.t===G.turn&&!e.c?' new':''}"><span class="t">T${String(e.t).padStart(3,'0')}</span>${e.m}${e.n>1?`<span class="x">×${e.n}</span>`:''}</li>`).join('');
+  /* Un bloc par tour (26 novembre 2026) : le numéro de tour écrit **une seule fois**, à gauche, et tous les
+     événements de ce tour à sa droite, dans l'ordre où ils sont arrivés. Les tours passés s'assombrissent avec
+     l'âge jusqu'à un plancher : le tour en cours reste franc, les anciens s'effacent sans disparaître. */
+  const blocs=[];
+  for(const e of lg){const b=blocs[blocs.length-1];if(b&&b.t===e.t)b.ev.push(e);else blocs.push({t:e.t,ev:[e]});}
+  el.innerHTML=blocs.map((b,i)=>{const op=Math.max(LOG_SOMBRE,1-(blocs.length-1-i)*LOG_PAS);
+    return `<li class="tour${b.t===G.turn?' new':''}" style="opacity:${op.toFixed(2)}">`+
+      `<span class="t">T${String(b.t).padStart(3,'0')}</span><span class="evs">`+
+      b.ev.map(e=>`<span class="ev ${e.c||''}">${e.m}${e.n>1?`<span class="x">×${e.n}</span>`:''}</span>`).join('')+
+      '</span></li>';}).join('');
   el.scrollTop=bas?el.scrollHeight:top;}
 
 
