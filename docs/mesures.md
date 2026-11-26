@@ -970,3 +970,23 @@ gain plus faible (environ un tiers). Le premier rendu d'un niveau reste cher (60
 gouffres et toutes les cases), une fois, pendant la descente. Écran identique au pixel près (`test-decor-cache.js` sur
 quatre recettes et trois écrans, `empreinte-image.js`, `test-fx-surface.js`).
 
+
+### Intro et descentes : audit (26 novembre 2026)
+
+Outil : `python3 outils/perf_scenes.py [intro|niv1|niv2] [--profil] [--densite D]`. Chromium sans carte graphique, 1280 × 800.
+
+| Scène | Images/s | Calcul par image dessinée (moy · p95) | CPU |
+|---|---|---|---|
+| Arrivée (intro) | 20 | 15 ms · 31 à 36 ms | 29 à 30 % |
+| Première descente | 20 | 22 ms · 32 à 35 ms | 43 à 45 % |
+| Seconde descente (mines) | 20 | 24 à 26 ms · 34 à 39 ms | 48 à 51 % |
+
+- Ces scènes sont des grilles de caractères plein écran : 146 × 55 cases dans les descentes, environ 160 × 50 pour
+  l'arrivée. **Chaque case est redessinée à chaque image** (fond noir, puis le caractère) : 8 000 à 15 000 opérations de
+  dessin par image. C'est le nombre d'opérations qui coûte, pas le nombre de pixels : en densité 2, le coût ne change
+  presque pas.
+- Descentes : la roche est une fonction fixe de la position. Elle défile d'environ 0,8 rangée par image, et presque pas
+  sur le côté. La foreuse, les mines, la Matière, la fumée et les débris se dessinent par-dessus.
+- Arrivée : la grille est reconstruite à chaque image (étoiles, planète, nuages, vaisseau, flammes), puis dessinée en
+  entier, décalée d'un bloc quand ça tremble.
+- Les bruits de la roche (`fgH`, `fgNz`) prennent 4 à 5 %.
