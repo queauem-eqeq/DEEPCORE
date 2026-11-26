@@ -214,7 +214,7 @@ addEventListener('keydown',ev=>{
   if(KEYS[k]){ev.preventDefault();tryMove(...KEYS[k]);}else if(k==='f'){ev.preventDefault();askDrill();
     }else if(k==='b'){ev.preventDefault();toggleFog();}else if(k==='r'){ev.preventDefault();toggleSprint();
     }else if(k==='p'){ev.preventDefault();startRest();}else if(k==='t'){ev.preventDefault();invToggle();
-    }else if(k==='i'){ev.preventDefault();sacNav(true);}else if(k==='o'){ev.preventDefault();startExplore();
+    }else if(k==='i'){ev.preventDefault();if(ev.shiftKey)sacFerme();else sacNav(true);}else if(k==='o'){ev.preventDefault();startExplore();
     }else if(k===' '||k==='5'||k==='.'||ev.code==='Numpad5'){ev.preventDefault();waitTurn();}
 });
 $('pad').addEventListener('click',ev=>{const b=ev.target.closest('button[data-d]');if(!b||!$('overlay').hidden)return;const [dx,dy]=b.dataset.d.split(',').map(Number);if(freeCam)panCam(dx*2,dy*2);else tryMove(dx,dy);});

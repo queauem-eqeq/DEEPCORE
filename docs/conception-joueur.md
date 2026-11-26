@@ -248,8 +248,10 @@ inconnue sur soi peut coûter cher, la lancer sur un ennemi peut le servir. Fabr
   ailleurs. Jamais non plus sous une créature vivante, sauf quand une créature vient se poser sur un objet déjà au sol. Les lots posés à la génération (appât d'une salle piégée, dépôts, vitrines) restent
   groupés sur leur case.
   La **clé** est un consommable comme les autres (voir § portes verrouillées) : elle s'empile, se jette, se ramasse.
-- **Touche I** : ouvre le sous-menu et choisit le premier consommable ; **↑ ↓** parcourir, **Entrée** utiliser,
-  **X**, **Suppr** ou **J** jeter un exemplaire au sol, **Échap** ou **I** sortir.
+- **Touche I** : ouvre le sous-menu et choisit le **premier consommable**, prêt à l'emploi ; appuyer de nouveau sur
+  **I** revient au premier. **↑ ↓** parcourir, **Entrée** utiliser, **X**, **Suppr** ou **J** jeter un exemplaire au
+  sol, **Maj+I** referme le sous-menu, **Échap** sort de la navigation en le laissant ouvert (26 novembre 2026 :
+  avant, **I** servait aussi à ressortir, ce qui empêchait de revenir au premier objet d'une touche).
 - **Touche T** : la fenêtre Équipement, plein écran. Liste à gauche (`/` arme, `[` armure, `=` accessoire ; un
   objet équipé y reste, en couleur monde, mention « équipé ») ; fiche à droite (dessin ASCII coloré, description,
   effets, **Équiper / Retirer**, **Jeter**). Clavier : ↑ ↓, **Entrée** équiper, **J** jeter, **G** ramasser.

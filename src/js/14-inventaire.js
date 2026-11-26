@@ -395,18 +395,22 @@ function sacJeter(i){const o=G.inv[i];if(!o||G.over||!ITEMS[o.k].conso)return;co
   invTake(i);const c=caseJet();G.items=G.items||{};(G.items[c]=G.items[c]||[]).push(o.k);
   say(`${d.n} jeté${accord(d)} au sol${n>1?` (il en reste ${n-1})`:''} : inventaire ${sacPlaces()}/${SAC_MAX}.`);SFX.thud();
   sacFix();SAC_H='';invChanged();}
-/* Navigation au clavier (touche I) : ouvre le sous-menu s'il est replié et choisit le premier consommable.
-   Ensuite ↑ ↓ pour parcourir, Entrée pour utiliser, X, Suppr ou J pour jeter un exemplaire au sol, Échap ou I pour sortir. */
+/* Navigation au clavier (touche I) : ouvre le sous-menu s'il est replié et choisit le **premier consommable**, prêt à
+   l'emploi. Ensuite ↑ ↓ pour parcourir, Entrée pour utiliser, X, Suppr ou J pour jeter un exemplaire au sol.
+   **Maj+I referme le sous-menu** (26 novembre 2026 ; avant, I servait aussi à ressortir) ; Échap sort sans le replier. */
 function sacFix(){const l=invConsos();if(!l.length){SAC_SEL=-1;SAC_NAV=false;return;}if(!l.includes(SAC_SEL))SAC_SEL=l[0];}
-function sacNav(on){const f=$('fd-sac');
-  if(on&&SAC_NAV){SAC_NAV=false;SAC_H='';sacDraw();render();return;}                       // I une seconde fois : on ressort
-  if(on){if(!invConsos().length){say('Aucun consommable dans l’inventaire.');render();return;}
-    if(!f.open)f.open=true;SAC_NAV=true;sacFix();}
+function sacNav(on){const f=$('fd-sac'),l=invConsos();
+  if(on){if(!l.length){say('Aucun consommable dans l’inventaire.');render();return;}
+    if(!f.open)f.open=true;SAC_NAV=true;SAC_SEL=l[0];}                                     // I : toujours le premier de la liste
   else SAC_NAV=false;
   SAC_H='';sacDraw();render();}
+// Maj+I : on sort de la navigation et on replie le sous-menu
+function sacFerme(){SAC_NAV=false;$('fd-sac').open=false;SAC_H='';sacDraw();render();}
 function sacKey(ev){const k=ev.key.toLowerCase(),l=invConsos(),d=KEYS[k];
   if(!l.length){SAC_NAV=false;return false;}
-  if(k==='escape'||k==='i'){ev.preventDefault();sacNav(false);return true;}
+  if(k==='i'&&ev.shiftKey){ev.preventDefault();sacFerme();return true;}
+  if(k==='escape'){ev.preventDefault();sacNav(false);return true;}
+  if(k==='i'){ev.preventDefault();sacNav(true);return true;}                  // I de nouveau : on revient au premier
   if(d&&d[0]===0){ev.preventDefault();const p=l.indexOf(SAC_SEL);SAC_SEL=l[((p<0?0:p)+d[1]+l.length)%l.length];SAC_H='';
     sacDraw();return true;}
   if(k==='enter'||k===' '){ev.preventDefault();invEquip(SAC_SEL);sacFix();SAC_H='';render();return true;}
