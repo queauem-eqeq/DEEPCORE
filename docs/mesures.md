@@ -990,3 +990,17 @@ Outil : `python3 outils/perf_scenes.py [intro|niv1|niv2] [--profil] [--densite D
 - Arrivée : la grille est reconstruite à chaque image (étoiles, planète, nuages, vaisseau, flammes), puis dessinée en
   entier, décalée d'un bloc quand ça tremble.
 - Les bruits de la roche (`fgH`, `fgNz`) prennent 4 à 5 %.
+
+**Après la mise en cache (même jour)** :
+
+| Scène | Calcul par image (moy · p95 · pire), avant → après | CPU, avant → après |
+|---|---|---|
+| Arrivée (intro) | 15 · 31 à 36 · 47 à 53 ms → **9,4 · 27 · 35 ms** | 30 % → **19 %** |
+| Première descente | 22 · 32 à 35 ms → **8,5 · 15 ms** | 43 à 45 % → **17 %** |
+| Seconde descente (mines) | 24 à 26 · 34 à 39 ms → **9,1 · 16 ms** | 48 à 51 % → **19 %** |
+
+La première image d'une descente coûte 50 à 110 ms au lieu d'environ 45 (création du cache, pendant l'entrée encore noire).
+Images identiques au pixel près, contrôlées sur trois écrans (`test-forage-cache.js`) et pendant toute l'intro
+(`arrivee_cache.py`). Ce qui reste dans l'intro : le calcul de la grille (planète, nuages, flammes) et les moments où
+presque toutes les cases changent (descente vers la planète).
+

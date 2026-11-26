@@ -561,13 +561,45 @@ function fgDrill(F,t){const th=F.th*Math.PI/180,co=Math.cos(th),si=Math.sin(th),
     if(tab&&tab[ch])ch=tab[ch];
     {const X=Math.round((F.nx+i+jx-F.camX)*F.cw+F.w/2),Y=Math.round((F.ny+j-F.camY)*F.chh);F.x.fillStyle='#000';
       F.x.fillRect(X,Y,F.cw,F.chh);F.x.drawImage(fgGlyph(F,ch,col),X,Y);}}}   /* case opaque */
+/* Roche des descentes en cache (26 novembre 2026) : la grille de roche (146 × 55 cases environ) était redessinée en entier à
+   chaque image, soit 8 000 caractères. Elle est gardée dans un canevas à part, aux dimensions de la grille : chaque case est
+   recalculée à chaque image (fgCell, sans dessin) et n'est repeinte que si son caractère ou sa couleur a changé ; quand la
+   caméra passe d'une rangée ou d'une colonne à la suivante, l'image est décalée d'autant. Le canevas est ensuite posé d'un
+   bloc, à la place exacte des cases (largeur et hauteur de case entières : même position au pixel près). Le scintillement
+   des filons, le tunnel creusé et le plancher passent par fgCell : ils sont suivis sans les énumérer.
+   FG_ROCHE_OFF = true : dessin direct, case par case (contrôle : outils/scripts/test-forage-cache.js). */
+let FG_ROCHE_OFF=false;
+// le caractère sur fond noir, d'une pièce : même image que « fond noir puis caractère », en un seul dessin
+function fgGlyphNoir(F,ch,col){const A=F.atlN||(F.atlN={}),k=ch+'\u0001'+col;let g=A[k];
+  if(!g){g=document.createElement('canvas');g.width=F.cw;g.height=F.chh;const x=g.getContext('2d');x.fillStyle='#000';
+    x.fillRect(0,0,F.cw,F.chh);x.drawImage(fgGlyph(F,ch,col),0,0);A[k]=g;}return g;}
+function fgRoche(F){const x=F.x,{w,cw,chh}=F,r0=Math.floor(F.camY),c0=Math.floor(F.camX)-((F.C/2)|0);
+  if(FG_ROCHE_OFF){for(let r=-1;r<=F.R;r++){const y=r0+r,py=Math.round((y-F.camY)*chh);
+    for(let c=0;c<F.C;c++){const xw=c0+c;if(fgCell(F,xw,y))x.drawImage(fgGlyph(F,F.oc,F.ok),Math.round((xw-F.camX)*cw+w/2),py);}}return;}
+  const NC=F.C,NR=F.R+2;let K=F.roc;
+  if(!K||K.nc!==NC||K.nr!==NR||K.cw!==cw||K.chh!==chh){
+    K=F.roc={cv:document.createElement('canvas'),cv2:document.createElement('canvas'),nc:NC,nr:NR,cw,chh,sig:new Array(NC*NR).fill(''),r0:null,c0:null};   // un canevas neuf est noir : toutes les cases sont « vides »
+    for(const c of [K.cv,K.cv2]){c.width=NC*cw;c.height=NR*chh;const g=c.getContext('2d');g.fillStyle='#000';g.fillRect(0,0,c.width,c.height);}}
+  // la caméra a changé de rangée ou de colonne : décaler l'image et les signatures, les cases nouvelles restent à peindre
+  if(K.r0!==null&&(K.r0!==r0||K.c0!==c0)){const dr=r0-K.r0,dc=c0-K.c0,g2=K.cv2.getContext('2d');
+    g2.fillStyle='#000';g2.fillRect(0,0,K.cv2.width,K.cv2.height);
+    if(Math.abs(dr)<NR&&Math.abs(dc)<NC)g2.drawImage(K.cv,-dc*cw,-dr*chh);
+    const t=K.cv;K.cv=K.cv2;K.cv2=t;const s2=new Array(NC*NR).fill('');   // les cases nouvelles sont noires
+    for(let j=0;j<NR;j++){const jj=j+dr;if(jj<0||jj>=NR)continue;
+      for(let i=0;i<NC;i++){const ii=i+dc;if(ii>=0&&ii<NC)s2[j*NC+i]=K.sig[jj*NC+ii];}}
+    K.sig=s2;}
+  K.r0=r0;K.c0=c0;
+  const g=K.cv.getContext('2d');g.globalAlpha=1;
+  for(let r=-1;r<=F.R;r++){const y=r0+r,j=r+1;
+    for(let c=0;c<NC;c++){const s=fgCell(F,c0+c,y)?F.oc+'\u0001'+F.ok:'',q=j*NC+c;const av=K.sig[q];if(av===s)continue;K.sig[q]=s;
+      // un seul geste : le caractère déjà posé sur son fond noir ; une case qui se vide repasse au noir
+      if(s)g.drawImage(fgGlyphNoir(F,F.oc,F.ok),c*cw,j*chh);else{g.fillStyle='#000';g.fillRect(c*cw,j*chh,cw,chh);}}}
+  x.drawImage(K.cv,Math.round((c0-F.camX)*cw+w/2),Math.round((r0-1-F.camY)*chh));}
 function fgDraw(F,t){const x=F.x,{w,h,cw,chh,dpr}=F;
   x.setTransform(1,0,0,1,0,0);x.fillStyle='#000';x.fillRect(0,0,w,h);
   const amp=(F.ph===0?1.4*Math.min(1,t/FG_T0):F.ph===1?1.4+F.hs*4.2:F.ph===2?2.2:.6)*dpr+F.imp*16*dpr;
   x.save();x.translate(Math.round((Math.random()-.5)*2*amp),Math.round((Math.random()-.5)*2*amp));
-  const r0=Math.floor(F.camY),c0=Math.floor(F.camX)-((F.C/2)|0);
-  for(let r=-1;r<=F.R;r++){const y=r0+r,py=Math.round((y-F.camY)*chh);
-    for(let c=0;c<F.C;c++){const xw=c0+c;if(fgCell(F,xw,y))x.drawImage(fgGlyph(F,F.oc,F.ok),Math.round((xw-F.camX)*cw+w/2),py);}}
+  fgRoche(F);
   fgDecor(F,F.decD,0,0);if(F.ox!=null)fgDecor(F,F.decA,F.fl,F.ox);   /* le plancher du départ et celui de l'arrivée */
   fgExCases(F,t);   /* roche qui fond sous le cône, cratères des mines (et de la foreuse) */
   // mine : un pavé plein de 7 × 3 caractères, rouge et blanc en alternance, bien plus gros que les filons de la roche

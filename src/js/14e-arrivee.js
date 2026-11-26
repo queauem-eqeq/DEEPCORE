@@ -126,6 +126,33 @@ const S_TUILE=32;
 const lisse5=v=>{v=cl(v);return v*v*v*(v*(v*6-15)+10);};   /* S, la taille d'une tuile du jeu en pixels (00-base.js) */
 // position des étoiles : l'intégrale de leur vitesse, qui retombe en douceur à la sortie d'hyperespace (jamais de recul)
 const trajet=t=>t<T_HYP?t+20*T_HYP*(1-Math.pow(1-t/T_HYP,3)):t+20*T_HYP;
+/* Grille de l'arrivée en cache (26 novembre 2026) : les 8 000 cases étaient toutes redessinées à chaque image. Elles sont
+   gardées dans un canevas à part (TAMPON), et seules les cases dont le caractère ou la couleur a changé depuis l'image
+   précédente sont repeintes (fond noir, puis le caractère). Le tremblement décale le tampon d'un bloc au moment de le poser,
+   comme il décalait chaque case. Si une case ne tombe pas sur des pixels entiers, ou si la taille change, on redessine tout,
+   comme avant. TAMPON_OFF = true : dessin direct (contrôle : outils/scripts/test-arrivee-cache.js). */
+let TAMPON=null,TAMPON_OFF=false;
+const TAMPON_M=64;   // marge autour de la grille, plus large que le plus fort tremblement
+// le caractère sur fond noir, d'une pièce : même image que « fond noir puis caractère », en un seul dessin
+let ATLN={},ATLN_DIM='';
+function glyphNoir(ch,co){if(ATLN_DIM!==DIM){ATLN={};ATLN_DIM=DIM;}const k=ch+co;let g=ATLN[k];
+  if(!g){g=document.createElement('canvas');g.width=cw;g.height=chh;const c=g.getContext('2d');c.fillStyle='#000';c.fillRect(0,0,cw,chh);
+    c.drawImage(glyph(ch,co),0,0);ATLN[k]=g;}return g;}
+function grilleDessine(x,GX0,GY0,ox,oy){
+  const entier=v=>Math.abs(v-Math.round(v))<1e-6;
+  if(TAMPON_OFF||!entier(cw)||!entier(chh)||!entier(GX0)||!entier(GY0)){if(!TAMPON_OFF)TAMPON=null;x.fillStyle='#000';x.fillRect(0,0,w,h);
+    for(let j=0;j<R;j++)for(let i=0;i<C;i++){const ch=CH[j*C+i];if(ch!==' ')x.drawImage(glyph(ch,CO[j*C+i]),i*cw+GX0+ox,j*chh+GY0+oy);}
+    return;}
+  const M=TAMPON_M,cle=`${DIM}|${C}|${R}|${cw}|${chh}`;
+  if(!TAMPON||TAMPON.cle!==cle){const c=document.createElement('canvas');c.width=C*cw+2*M;c.height=R*chh+2*M;
+    const g=c.getContext('2d');g.fillStyle='#000';g.fillRect(0,0,c.width,c.height);
+    TAMPON={cle,cv:c,g,ch:new Array(C*R).fill(' '),co:new Array(C*R).fill('')};}
+  const T=TAMPON,g=T.g;g.globalAlpha=1;
+  for(let q=0;q<C*R;q++){const ch=CH[q],co=ch===' '?'':CO[q];if(T.ch[q]===ch&&T.co[q]===co)continue;
+    const X=(q%C)*cw+M,Y=((q/C)|0)*chh+M;
+    // un seul geste : le caractère déjà posé sur son fond noir (glyphNoir) ; une case qui se vide repasse au noir
+    if(ch!==' ')g.drawImage(glyphNoir(ch,co),X,Y);else{g.fillStyle='#000';g.fillRect(X,Y,cw,chh);}T.ch[q]=ch;T.co[q]=co;}
+  x.fillStyle='#000';x.fillRect(0,0,w,h);x.drawImage(T.cv,GX0+ox-M,GY0+oy-M);}
 function frame(now){if(!S||INTRO!==S)return;setup();const t=(now-S.t0)/1000+S.saut,ev=k=>{if(S.ev[k])return false;
   S.ev[k]=true;return true;};
   sons(t,ev);x.setTransform(1,0,0,1,0,0);x.globalAlpha=1;
@@ -196,8 +223,7 @@ function frame(now){if(!S||INTRO!==S)return;setup();const t=(now-S.t0)/1000+S.sa
   const choc=hc*hc*7+(t>T_POSE&&t<T_POSE+.5?(1-(t-T_POSE)/.5)*6:0),ox=Math.round((Math.random()-.5)*2*choc*dpr),
     oy=Math.round((Math.random()-.5)*2*choc*dpr);
   const fini=(i,j)=>t-(T_NOIR+hsh(i,j,33)*.6);   /* extinction : depuis combien de temps la case s'éteint */
-  if(t<=T_NOIR){x.fillStyle='#000';x.fillRect(0,0,w,h);for(let j=0;j<R;j++)for(let i=0;i<C;i++){const ch=CH[j*C+i];
-    if(ch!==' ')x.drawImage(glyph(ch,CO[j*C+i]),i*cw+GX0+ox,j*chh+GY0+oy);}}
+  if(t<=T_NOIR)grilleDessine(x,GX0,GY0,ox,oy);
   else{x.clearRect(0,0,w,h);x.fillStyle='#000';for(let j=0;j<R;j++)for(let i=0;i<C;i++){if(fini(i,j)>=0)continue;
     const ch=CH[j*C+i],X=i*cw+GX0,Y=j*chh+GY0;x.fillRect(X,Y,cw,chh);if(ch!==' ')x.drawImage(glyph(ch,CO[j*C+i]),X,Y);}}
   /* plus de tableau de bord à l'arrivée (retiré le 23 novembre 2026, à la demande) ; hud() reste pour mémoire */
@@ -269,6 +295,8 @@ window.arriveeStart=()=>{nouvelle();INTRO=S;introCv.hidden=false;introCv.style.o
   /* le jeu en pixels, dessous, apparaît case par case à la fin */
   $('introSkip').hidden=false;raf20(frame);};
 // passer : on saute à l'extinction (les sons d'ici là ne sont plus joués)
+// pour les contrôles (test-arrivee-cache.js) : dessiner une image à un instant donné, avec ou sans le tampon
+window.arriveeControle={set off(v){TAMPON_OFF=v;},image:now=>frame(now),get S(){return S;},T_NOIR};
 window.arriveeSkip=()=>{if(!S)return;const t=(performance.now()-S.t0)/1000+S.saut;if(t<T_NOIR){S.saut+=T_NOIR-t;
   for(const k of ['hyper','hum','appr','reen','thr','touch'])S.ev[k]=true;for(const e of S.eclairs)e.son=1;}};
 })();

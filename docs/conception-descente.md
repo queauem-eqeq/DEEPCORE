@@ -192,3 +192,11 @@ La descente compte `NIV_MAX = 3` niveaux (table `NIVEAUX`, `00-base.js`).
 - **F9** ne lance plus la cinématique : il garantit **au moins un exemplaire de chaque consommable** dans l'inventaire (capsules identifiées et clé) : une sorte déjà présente n'est pas ajoutée ; s'il manque des places, il **retire des doublons** (un exemplaire à la fois, sur la plus grosse pile) jusqu'à ce que toutes les sortes tiennent. Touche d'essai, absente du sous-menu Contrôles.
 - La taille de la carte ne change pas d'un niveau à l'autre (elle s'applique au lancement).
 
+## Dessin en cache (26 novembre 2026)
+La grille de roche des descentes est gardée dans un canevas à part (`fgRoche`, `14b-forage.js`) : chaque case est
+recalculée à chaque image, mais n'est repeinte que si son caractère ou sa couleur a changé, et l'image est décalée quand la
+caméra passe d'une rangée à l'autre. L'arrivée (`14e-arrivee.js`) garde de même sa grille dans un tampon (`grilleDessine`) ;
+le tremblement décale le tampon d'un bloc. Les caractères sont posés d'une pièce sur leur fond noir (`fgGlyphNoir`,
+`glyphNoir`). Rien ne change à l'écran : cases opaques, pas de transparence. Contrôles : `outils/scripts/test-forage-cache.js`
+et `python3 outils/arrivee_cache.py` (cache contre dessin direct, au pixel près).
+

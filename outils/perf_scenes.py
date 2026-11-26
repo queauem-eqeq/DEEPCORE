@@ -47,9 +47,11 @@ async def scene(nav, nom, profil):
     if not T:
         print(f'{nom} : aucune image dessinée'); return
     d = sorted(x[1] for x in T)
+    pires = sorted(range(len(T)), key=lambda i: -T[i][1])[:3]
     iv = sorted(T[i][0] - T[i - 1][0] for i in range(1, len(T)))
     print(f'{nom:5} : {len(T) / dur:4.1f} images/s · calcul par image moy {sum(d) / len(d):5.1f} ms, p95 {d[int(len(d) * .95)]:5.1f}, '
           f'pire {d[-1]:5.1f} · CPU {100 * cpu / 1000 / dur:4.1f} % · écart entre images p95 {iv[int(len(iv) * .95)]:.0f} ms'
+          + f' · pires images n° {[(i, round(T[i][1])) for i in pires]} sur {len(T)}'
           + (f' · ERREURS {err}' if err else ''))
     if prof:
         noeuds = {x['id']: x for x in prof['nodes']}; pas = collections.Counter(prof['samples']); tot = sum(pas.values())
