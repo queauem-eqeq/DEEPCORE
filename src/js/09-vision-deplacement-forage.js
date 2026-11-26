@@ -13,9 +13,18 @@ function peekBehind(x0,y0,x1,y1){const p=line(x0,y0,x1,y1),n=p.length;if(n<3)ret
   for(let i=1;i<n-2;i++)if(opaque(p[i][0],p[i][1]))return false;
   const o=G.t[idx(p[n-2][0],p[n-2][1])];if(bati(o)||o===DOOR)return false;   // le capteur ne devine rien derrière un mur bâti ou une porte
   return opaque(p[n-2][0],p[n-2][1]);}
-function computeFOV(){vis=new Uint8Array(W*H);const r=G.st.capteur,px=G.px,py=G.py;
+/* Les murs qui bordent une case en vue sont vus eux aussi (26 novembre 2026). Une seule ligne de visée ne les atteint
+   pas : celle qui va du capteur au mur longeant un couloir passe par d'autres murs, si bien qu'on remontait un couloir
+   entre deux parois noires. Dès qu'on voit le sol d'une case, on voit ce qui la borde. */
+function computeFOV(){vis=new Uint8Array(W*H);const r=G.st.capteur,px=G.px,py=G.py,clairs=[];
   for(let y=py-r;y<=py+r;y++)for(let x=px-r;x<=px+r;x++){if(x<0||y<0||x>=W||y>=H)continue;if((x-px)**2+(y-py)**2>r*r+r)continue;
-    if(los(px,py,x,y)){vis[idx(x,y)]=1;G.seen[idx(x,y)]=1;}else if(peekBehind(px,py,x,y))G.seen[idx(x,y)]=1;}
+    if(los(px,py,x,y)){vis[idx(x,y)]=1;G.seen[idx(x,y)]=1;if(!opaque(x,y))clairs.push(x,y);}
+    else if(peekBehind(px,py,x,y))G.seen[idx(x,y)]=1;}
+  for(let k=0;k<clairs.length;k+=2){const x=clairs[k],y=clairs[k+1];
+    for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){const nx=x+dx,ny=y+dy;
+      if((!dx&&!dy)||nx<0||ny<0||nx>=W||ny>=H)continue;
+      const j=idx(nx,ny);if(vis[j]||!opaque(nx,ny)||(G.fum&&G.fum[j]))continue;   // la fumée n'est pas un mur
+      vis[j]=1;G.seen[j]=1;}}
   if(G.animals)for(const a of G.animals)if(vis[idx(a.x,a.y)]&&!G.fauna.includes(a.sp)){G.fauna.push(a.sp);const sp=SPECIES[a.sp];
     sayMore(`Nouvelle espèce observée : ${sp.n} (pas ${motDuree(sp.dpas)}, coup ${motDuree(sp.dcoup)}).`,'info');SFX.chirp();}
   antVis();   // les antennes allumées tiennent leur zone en vue

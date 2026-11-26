@@ -517,6 +517,10 @@ pièce ils deviennent du sol, sous un mur du mur) ; seuls le vaisseau et le bord
     déjà en chasse).
 - **Les niches des salles piégées sont cachées elles aussi** depuis le 26 novembre 2026 : `G.niche` vaut **3**
   (cachée), **1** (repérée, fermée) ou **2** (ouverte). Avant, elles se voyaient d'emblée.
+- **Les murs qui bordent une case en vue sont vus** (26 novembre 2026) : après le calcul du champ de vision, les
+  huit voisines opaques de chaque case en vue passent en vue elles aussi (`computeFOV`, `09-vision-deplacement-forage.js`).
+  Une ligne de visée seule ne les atteignait pas — celle qui va du capteur au mur longeant un couloir passe par d'autres
+  murs —, et on remontait un couloir entre deux parois noires. La fumée ne compte pas comme un mur.
 - **Le brouillard assombrit, il ne rend pas transparent** (26 novembre 2026). Une case mémorisée mais hors de vue
   est dessinée **en entier, à pleine opacité**, puis couverte d'un voile de la couleur du fond (`FOND`), à
   `1 − FOG_K` (0,72). Avant, on multipliait l'opacité de **chaque couche** par `FOG_K` : tout ce qui est posé sur
