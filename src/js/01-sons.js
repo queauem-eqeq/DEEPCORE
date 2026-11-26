@@ -121,6 +121,8 @@ const SFX={
   // toutes les portes font le bruit de celle du vaisseau (19 novembre 2026) ; k : volume (0,6 pour une créature)
   porte(k=1){SFX.door(k);},
   // serrure : la clé tourne (deux crans), le pêne recule, puis la porte s'ouvre
+  // une planche de pont qui se verrouille en place (26 novembre 2026) : le déploiement en joue une par case
+  pont(n){const r=1+(n%4)*.04;tone(420*r,.05,'square',.035,300);noiz(.05,.07,1500,'bandpass',0,900);},
   serrure(){tone(1500,.03,'square',.04,1100);tone(1300,.03,'square',.04,950,.09);noiz(.04,.12,900,'bandpass',.2);
     tone(110,.07,'square',.07,70,.22);},
   /* Porte automatique, forte et métallique : souffle pneumatique, servo, grincement de rail (deux partiels aigus non

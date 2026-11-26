@@ -507,7 +507,11 @@ pièce ils deviennent du sol, sous un mur du mur) ; seuls le vaisseau et le bord
   - **Invisibles** : le mur se dessine comme un mur. Ils se repèrent comme les portes dérobées (même rayon DET,
     mêmes 15 % / 35 % par battement), **chacun pour lui-même** : repérer un mur n'en révèle aucun autre.
   - **Ils partent au passage** : dès que la foreuse arrive sur une case voisine du mur, repérés ou non. Les repérer
-    sert à les **contourner**, pas à les désamorcer. Une fois partis, la niche reste ouverte et le piège est mort.
+    sert à les **contourner**, pas à les désamorcer. Une fois partis, la plaque reste dans le mur, la fente éteinte
+    (`piegeVide`).
+  - **Le dedans de la plaque laisse voir le mur** (26 novembre 2026) : ces trois tuiles (`piegeLaser`, `piegeMine`,
+    `piegeVide`) n'ont que leur cadre et leur marque ; le reste est transparent, donc la brique du mur se voit au
+    travers. Avec un dedans noir, la plaque faisait **un trou dans le mur** et on croyait voir de l'autre côté.
   - Deux sortes pour l'instant, en alternance, **d'autres viendront** (`PIEGE_SORTES` dans `07b-batiments.js`) :
     **laser encastré** (un tir depuis le mur, PRE 85, 6-10 dégâts) et **mine embusquée** (une Mine sort du mur,
     déjà en chasse).

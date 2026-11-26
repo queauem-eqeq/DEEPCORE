@@ -219,6 +219,8 @@ function sonarR(){if(!G||G.sonar===1)return -1;const f=FX.find(f=>f.kind==='sona
 const sonarVu=(i,sr)=>Math.hypot(i%W-(G.sonX??G.px),((i/W)|0)-(G.sonY??G.py))<=sr;
 const FOND='#020605',FOG_K=.28;   // couleur de fond, et ce qui reste d'une case dans le brouillard (26 novembre 2026)
 function render(){
+  // planches de pont dont l'instant est venu : elles cessent d'être cachées
+  if(PONT_AN.size){const now=performance.now();for(const [i,q] of PONT_AN)if(q<=now)PONT_AN.delete(i);}
   if(!fxRaf&&animVif())fxRaf=requestAnimationFrame(fxLoop);
   if(G&&G.sonar===1&&G.turn>=(G.sonarAt||0)&&started&&!INTRO&&!BOOM&&!G.over&&$('overlay').hidden&&$('introCv').hidden)sonarStart();
   if(!G||!TL.robot)return;ensureChasmOv();ensureSolOv();
@@ -235,7 +237,8 @@ function render(){
        ce qui est posé sur autre chose — une niche dans un mur, une tourelle, une machine, un laser — devenait
        translucide et laissait voir le dessous. Une case d'une seule couche rend exactement pareil qu'avant
        (couleur × FOG_K sur le fond, des deux façons) ; une case à plusieurs couches ne transparaît plus. */
-    const i=idx(x,y),v=fog?vis[i]:1;if(!v&&!G.seen[i])continue;const t=G.t[i],h=hash(x,y),k=1;
+    // pont en cours de déploiement : la planche pas encore posée se dessine comme le gouffre (26 novembre 2026)
+    const i=idx(x,y),v=fog?vis[i]:1;if(!v&&!G.seen[i])continue;const t=PONT_AN.has(i)?CHASM:G.t[i],h=hash(x,y),k=1;
     const pb=t===BRIDGE&&G.pb&&G.pb[i];   // pont d'un bâtiment : couleur unie et tuile du sol bâti (19 novembre 2026)
     if(t!==CHASM)voile(x,y,(x-camX)*S,(y-camY)*S,k,null,pb||t>=WALL);   // rien de bâti ne porte la texture du sol naturel
     if(pb)put(TL.solPont,x,y,.5*k);

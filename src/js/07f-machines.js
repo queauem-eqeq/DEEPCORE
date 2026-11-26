@@ -75,11 +75,21 @@ function machTuileRendu(t,x,y,put){const i=idx(x,y),a=G.art&&G.art[i];
   else if(t===FABRIC)put(TL.fabric,1);}
 
 /* ----- Circuits : leviers, socles, ponts, grilles ----- */
+/* Le pont se déploie **planche par planche** (26 novembre 2026). Le modèle, lui, est posé d'un coup : on ne doit pas
+   pouvoir marcher sur une planche qui n'existe pas encore, ni voir une bête tomber dans un trou déjà comblé. Seul le
+   dessin est retardé : tant que l'instant d'une case n'est pas venu, elle se dessine comme le gouffre. */
+const PONT_AN=new Map(),PONT_PAS=70;
+function pontAnime(cells,dep){if(reduced||!cells||cells.length<2)return;
+  const ec=(i,j)=>Math.max(Math.abs(i%W-j%W),Math.abs(((i/W)|0)-((j/W)|0)));
+  const l=(dep!=null&&ec(cells[cells.length-1],dep)<ec(cells[0],dep))?cells.slice().reverse():cells.slice();
+  const t0=performance.now();
+  l.forEach((i,n)=>{PONT_AN.set(i,t0+(n+1)*PONT_PAS);setTimeout(()=>SFX.pont(n),n*PONT_PAS);});}
 function circApplique(c,muet){const t=G.t;
   for(const k of c.cib){
     if(k.t==='pont'){for(const j of k.c){if(c.on){t[j]=BRIDGE;G.pb=G.pb||{};G.pb[j]=1;}
-        else{t[j]=CHASM;if(G.pb)delete G.pb[j];const b=beastAt(j%W,(j/W)|0);if(b){G.beasts.splice(G.beasts.indexOf(b),1);
+        else{t[j]=CHASM;PONT_AN.delete(j);if(G.pb)delete G.pb[j];const b=beastAt(j%W,(j/W)|0);if(b){G.beasts.splice(G.beasts.indexOf(b),1);
           if(!muet)sayMore(`${LeNom(BEASTS[b.sp])} tombe dans le gouffre.`,'good');}}}
+      if(c.on&&!muet)pontAnime(k.c,c.c);
       CHASM_OV=null;}
     else if(k.t==='grille')k.c.forEach((j,n)=>{if(c.on){if(t[j]===GRILLE)t[j]=k.sous[n];}else if(t[j]===k.sous[n]&&!(G.px===j%W&&G.py===((j/W)|0))&&!beastAt(j%W,(j/W)|0)&&!animalAt(j%W,(j/W)|0))t[j]=GRILLE;});
     else if(k.t==='lasers'){for(const l of G.las||[])if(l.g===k.g)l.cut=c.on?1:0;machZone();}}}
@@ -233,14 +243,34 @@ function machines(){G.las=[];G.lz={};G.circ=[];G.soc={};G.piles={};G.mt=0;G.mach
         if(fosse.length<6||fosse.some(i=>t[i]!==FLOOR||pres(i)||i===site||i===dep||G.lz[i]||G.cles[i]||(G.items[i]&&G.items[i].length)||G.soc[i]!=null))continue;
         // le gouffre va d'un mur à l'autre : sur ses côtés, hors de la pièce, il n'y a que des obstacles
         if(fosse.some(i=>{const x=i%W,y=(i/W)|0;return (vert?[[0,1],[0,-1]]:[[1,0],[-1,0]]).some(([dx,dy])=>{const j=idx(x+dx,y+dy);return !P.has(j)&&!blocks(t[j]);});}))continue;
-        const large=a1-a0-2*m+1,bout=(lg,c)=>p.c.find(i=>li(i)===lg&&co(i)===c);
-        const lignes=mel([...new Set(fosse.map(li))]).filter(lg=>fosse.filter(i=>li(i)===lg).length===large&&bout(lg,a0+m-1)!=null&&bout(lg,a1-m+1)!=null&&t[bout(lg,a0+m-1)]===FLOOR&&t[bout(lg,a1-m+1)]===FLOOR);
-        if(!lignes.length)continue;const lg=lignes[0],pt=fosse.filter(i=>li(i)===lg).sort((a,b)=>co(a)-co(b));
+        const bout=(lg,c)=>p.c.find(i=>li(i)===lg&&co(i)===c);
+        /* Le pont n'est plus forcément droit (26 novembre 2026) : il avance d'une colonne à la suivante et peut se
+           décaler d'une ligne en chemin, en posant le coude pour rester d'un seul tenant. Il lui faut seulement
+           partir d'une rive et atteindre l'autre. */
+        const M=new Map();for(const i of fosse)M.set(li(i)+'|'+co(i),i);
+        const cel=(l,c)=>M.get(l+'|'+c),cA=a0+m,cB=a1-m;
+        const rive=(l,c)=>{const b=bout(l,c);return b!=null&&t[b]===FLOOR?b:null;};
+        const toutes=[...new Set(fosse.map(li))];
+        const dep0=mel(toutes.filter(l=>rive(l,cA-1)&&cel(l,cA)!=null)),arr0=toutes.filter(l=>rive(l,cB+1)&&cel(l,cB)!=null);
+        if(!dep0.length||!arr0.length)continue;
+        const chemin=(lA,lB)=>{let l=lA;const q=[cel(lA,cA)];
+          for(let c=cA+1;c<=cB;c++){const reste=cB-c;let cib=l;
+            if(Math.abs(lB-l)>reste)cib=l+Math.sign(lB-l);                                  // il faut se rapprocher de l'arrivée
+            else if(Math.random()<.3&&reste>Math.abs(lB-l))cib=l+(Math.random()<.5?1:-1);   // un virage, tant qu'il reste de la place
+            if(cib!==l){const cd=cel(cib,c-1);if(cd==null)cib=l;else q.push(cd);}           // le coude
+            const n=cel(cib,c);if(n==null)return null;l=cib;q.push(n);}
+          return l===lB?q:null;};
+        let pt=null,lgA=null,lgB=null;
+        for(const lA of dep0){for(const lB of mel(arr0.filter(l=>Math.abs(l-lA)<=cB-cA))){
+            for(let e=0;e<6&&!pt;e++)pt=chemin(lA,lB);
+            if(pt){lgA=lA;lgB=lB;break;}}
+          if(pt)break;}
+        if(!pt)continue;
         const sv=fosse.map(i=>t[i]),defait=()=>fosse.forEach((i,n)=>t[i]=sv[n]);for(const i of fosse)t[i]=CHASM;
         const d=dist(),pres1=p.c.filter(i=>t[i]===FLOOR&&d[i]>=0),loin=p.c.filter(i=>t[i]===FLOOR&&d[i]<0);
         // les deux rives se rejoignent par ailleurs : ni passage obligé, ni cul-de-sac
         if(!pres1.length||!loin.length){defait();continue;}
-        const pied=[bout(lg,a0+m-1),bout(lg,a1-m+1)].find(i=>d[i]>=0);if(pied==null){defait();continue;}
+        const pied=[bout(lgA,cA-1),bout(lgB,cB+1)].find(i=>d[i]>=0);if(pied==null){defait();continue;}
         const cand=pres1.filter(i=>i!==pied&&libre(i)&&!pres(i)&&artLibre(B,i,site)).sort((a,b)=>pas(a,pied)-pas(b,pied));
         if(!cand.length||pas(cand[0],pied)>3){defait();continue;}const mec=cand[0];
         let fait=false;

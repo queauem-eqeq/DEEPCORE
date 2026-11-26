@@ -12,7 +12,7 @@ function batiTuile(t,x,y,put){
        dans le brouillard — chaque couche y est dessinée à l'opacité du brouillard — et la niche se lisait au travers. */
     const i=idx(x,y),nc=G.niche&&G.niche[i],mp=G.murp&&G.murp[i];
     let sur=null;
-    if(mp&&mp.vu)sur=mp.on?(mp.k==='laser'?'piegeLaser':'piegeMine'):'nicheOuverte';
+    if(mp&&mp.vu)sur=mp.on?(mp.k==='laser'?'piegeLaser':'piegeMine'):'piegeVide';   // parti : la plaque reste, éteinte
     else if(nc===1)sur='niche';else if(nc===2)sur='nicheOuverte';
     put(sur?TL[base+'_'+sur]:TL[base],.95);return;}
   put(TL.floor,.5);
