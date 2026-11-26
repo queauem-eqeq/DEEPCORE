@@ -356,8 +356,17 @@ Code : `07c-artefacts.js`, appelé à la fin de la génération des bâtiments.
 
 ### Deux règles de génération
 
-- **Un gisement de métal ou de Matière ne touche jamais plus de 3 roches dures** (parmi ses 8 voisines) : `hideOre`
-  ne retient que ces cases. Faute de place, sur une carte qui n'en offre pas assez, il reprend toute la roche tendre.
+- **Un gisement de métal ou de Matière se dégage en 6 forages au plus** (26 novembre 2026). `coutForage` mesure le
+  vrai coût depuis la zone où la foreuse arrive : entrer dans une case praticable ne coûte rien, percer une roche ou
+  une montagne coûte 1 ; la roche dure, les murs, les piliers, les vitres, les gouffres et les machines ne se
+  percent pas. Un gisement qui demande plus de **ORE_DIGS = 6** cases à percer, ou qu'on ne peut pas atteindre du
+  tout, est posé ailleurs.
+  Avant, on ne regardait que ses 8 voisines (« pas plus de 3 roches dures ») : un gisement pouvait être enfermé un
+  peu plus loin par la roche dure. Ce test reste en second filtre, il écarte ceux qui sont pénibles à dégager.
+  Mesuré, gisements demandant plus de 6 forages — avant → après : atterrissage **7 → 0** (pire cas 17 → 6),
+  cavernes **19 → 0** (30 → 6), grande base **41 sur 108 → 0** (34 → 6). Aucun inatteignable dans les deux cas.
+  Faute de place, sur une carte qui n'offre pas assez de roche tendre, `hideOre` reprend toute la roche tendre
+  atteignable.
 - **La zone dégagée autour du vaisseau est un ovale** (`SHIP_OVALE`), centré sur lui, avec une case de marge au moins
   autour de la coque. 
 

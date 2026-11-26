@@ -458,10 +458,39 @@ function durcir(){const t=G.t,d=new Int16Array(W*H).fill(-1),q=[];
       if(d[j]<0){d[j]=d[c]+1;q.push(j);}}}
   for(let i=0;i<W*H;i++){const x=i%W,y=(i/W)|0;if(x<1||y<1||x>=W-1||y>=H-1){t[i]=HARD;continue;}
     if(t[i]!==MOUNT)continue;if(Math.random()<DURCIR[Math.min(d[i],DURCIR.length-1)])t[i]=HARD;}}
+/* Coût en forages pour atteindre chaque case (26 novembre 2026), depuis la zone où la foreuse arrive : entrer dans
+   une case praticable ne coûte rien, percer une roche ou une montagne coûte 1. La roche dure, les murs, les piliers,
+   les vitres, les gouffres et les machines ne se percent pas. Les cases laissées à −1 demandent plus de max forages,
+   ou sont inatteignables. Sert à ne pas enfermer un gisement (voir hideOre). */
+function coutForage(max){const N=W*H,d=new Int32Array(N).fill(-1),
+    dur=v=>v===ROCK||v===MOUNT,
+    libre=v=>!(dur(v)||v===HARD||v===WALL||v===PILLAR||v===VITRE||v===CHASM||v>=MACHINE);
+  let dep=-1;
+  if(G.px!=null&&G.py!=null&&G.px>=0&&G.py>=0){const i=idx(G.px,G.py);if(libre(G.t[i])||dur(G.t[i]))dep=i;}
+  if(dep<0)for(let i=0;i<N&&dep<0;i++)if(libre(G.t[i]))dep=i;
+  if(dep<0)return d;
+  d[dep]=0;let front=[dep];
+  for(let k=0;k<=max&&front.length;k++){
+    const q=front.slice();                                   // à coût k : on s'étend librement sur le praticable
+    for(let p=0;p<q.length;p++){const c=q[p],x=c%W,y=(c/W)|0;
+      for(const [dx,dy] of D4){const nx=x+dx,ny=y+dy;if(nx<0||ny<0||nx>=W||ny>=H)continue;
+        const j=idx(nx,ny);if(d[j]>=0)continue;if(!libre(G.t[j]))continue;d[j]=k;q.push(j);}}
+    const suiv=[];                                            // puis on perce une couche : coût k+1
+    if(k<max)for(const c of q)for(const [dx,dy] of D4){const nx=c%W+dx,ny=((c/W)|0)+dy;
+      if(nx<0||ny<0||nx>=W||ny>=H)continue;const j=idx(nx,ny);
+      if(d[j]>=0||!dur(G.t[j]))continue;d[j]=k+1;suiv.push(j);}
+    front=suiv;}
+  return d;}
+const ORE_DIGS=6;   // un gisement ne doit jamais demander plus de six cases à percer pour être atteint
 function hideOre(nMetal=3,nMat=1){G.ore={};const lib=[];
-  // un gisement ne touche jamais plus de 3 roches dures (ses 8 voisines) : on doit pouvoir l'atteindre sans charge (21 novembre 2026)
+  /* Un gisement doit rester atteignable : pas plus de ORE_DIGS cases à percer depuis la zone de départ (26 novembre
+     2026, demande de l'utilisateur). Avant, on ne regardait que ses 8 voisines (« pas plus de 3 roches dures »), ce
+     qui laissait passer des gisements enfermés un peu plus loin par la roche dure. L'ancien test reste en second
+     filtre : il écarte en plus les gisements collés à la roche dure, pénibles à dégager. */
+  const cout=coutForage(ORE_DIGS);
   const dures=i=>{let n=0;for(const [dx,dy] of DIRS)if(G.t[idx(i%W+dx,((i/W)|0)+dy)]===HARD)n++;return n;},tous=[];
-  for(let i=0;i<W*H;i++){const x=i%W,y=(i/W)|0;if(G.t[i]===MOUNT&&x>0&&y>0&&x<W-1&&y<H-1){tous.push(i);if(dures(i)<=3)lib.push(i);}}
+  for(let i=0;i<W*H;i++){const x=i%W,y=(i/W)|0;
+    if(G.t[i]===MOUNT&&x>0&&y>0&&x<W-1&&y<H-1&&cout[i]>=0){tous.push(i);if(dures(i)<=3)lib.push(i);}}
   if(lib.length<nMetal+nMat)lib.splice(0,lib.length,...tous);   // carte sans roche tendre assez dégagée : on reprend tout, faute de mieux
   for(let i=lib.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[lib[i],lib[j]]=[lib[j],lib[i]];}
   lib.slice(0,nMetal+nMat).forEach((i,k)=>{const r=Math.random();G.ore[i]=(k<nMetal?'':'m')+'roche'+(r<ORE_MIX[1]?1:r<ORE_MIX[1]+ORE_MIX[2]?2:3);});}
