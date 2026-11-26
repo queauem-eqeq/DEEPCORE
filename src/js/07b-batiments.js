@@ -348,7 +348,8 @@ function batiments(){BATI_DER=null;
    Machine : une machine de décor (comme celles des artefacts), posée tout de suite. Butin et ennemis : en fin de génération
    (mdlRemplit, appelé par niveau() après le butin et la faune ordinaires). Un emplacement déjà pris est laissé tel quel. */
 function mdlMachines(strs){const t=G.t,site=G.sites&&G.sites[0]?idx(G.sites[0].x,G.sites[0].y):-1;
-  for(const S of strs)for(const p of S.pieces){if(!p.mod)continue;G.mods.push({nom:p.mod.nom,marq:p.mod.marq});
+  // salle : les cases de la pièce où le module est posé. Les ennemis qu'il place n'en sortent pas (26 novembre 2026).
+  for(const S of strs)for(const p of S.pieces){if(!p.mod)continue;G.mods.push({nom:p.mod.nom,marq:p.mod.marq,salle:p.c.slice()});
     for(const [i,k] of p.mod.marq)if(k==='m'&&i!==site&&!blocks(t[i])&&t[i]!==DOOR&&G.art[i]==null&&!G.cles[i]){t[i]=MACHINE;
       G.art[i]=rnd(0,9);}}}
 function mdlRemplit(){if(!G.mods||!G.mods.length)return;const t=G.t,site=G.sites&&G.sites[0]?idx(G.sites[0].x,G.sites[0].y):-1;
@@ -358,6 +359,10 @@ function mdlRemplit(){if(!G.mods||!G.mods.length)return;const t=G.t,site=G.sites
   for(const M of G.mods)for(const [i,k] of M.marq){const x=i%W,y=(i/W)|0;if(i===site||blocks(t[i])||(x===G.px&&y===G.py))continue;
     if(k==='b'&&!(G.items[i]&&G.items[i].length)&&!(G.cles&&G.cles[i]))(G.items[i]=G.items[i]||[]).push(Math.random()<.6?consoTire():'matiere');
     else if(k==='e'&&esp.length&&!beastAt(x,y)&&!animalAt(x,y)){const b=newBeast(esp[rnd(0,esp.length-1)],x,y,-1,-1);
+      /* Il garde sa salle et n'en sort pas (26 novembre 2026, demande de l'utilisateur) : b.salle est l'indice de
+         son module dans G.mods, dont le champ salle liste les cases de la pièce. Le contrôle est dans beastFits
+         (08-faune), donc toutes les façons de bouger le respectent : chasse, fouille, errance, bande. */
+      if(M.salle&&M.salle.length)b.salle=G.mods.indexOf(M);
       if(beastFits(b,x,y))G.beasts.push(b);}}}
 // Tout ce qu'un couloir percé depuis le départ ne pourra jamais atteindre (terrain enfermé entre des murs) devient du mur plein.
 // Renvoie les cases atteignables par le dehors : une porte d'entrée doit donner sur l'une d'elles.

@@ -451,6 +451,12 @@ pièce ils deviennent du sol, sous un mur du mur) ; seuls le vaisseau et le bord
   - **Emplacements** : **Machine** = une machine de décor ; **Butin** = un consommable (6 fois sur 10) ou de la
     Matière ; **Ennemi** = une espèce tirée parmi les groupes du niveau, seule et sans patrouille. Un emplacement
     déjà occupé (clé, artefact, créature) est laissé tel quel.
+  - **Un ennemi de module garde sa salle** (26 novembre 2026) : il ne sort jamais de la pièce où le module est
+    posé, même en chasse. Il y va et vient, et frappe la foreuse qui entre ou qui passe à sa portée, mais il ne la
+    poursuit pas dehors. `b.salle` donne son module dans `G.mods`, dont le champ `salle` liste les cases de la
+    pièce ; le contrôle est dans `beastFits` (`08-faune.js`), donc **toutes** les façons de bouger le respectent —
+    chasse, fouille, retour au dernier point connu, bande, errance. Mesuré : 13 ennemis de module lancés en chasse
+    pendant 120 battements, **aucun sorti**, 12 sur 13 se sont déplacés dans leur salle.
   - Mesuré le 24 novembre sur les trois modules du joueur (15 cartes chacun) : posé 15 fois sur 15, site toujours
     atteignable. Code : `mdlTirage`, `mdlPrepare`, `accretion`, `mdlMachines`, `mdlRemplit` (`07b-batiments.js`) ;
     `G.mods` garde les modules posés.

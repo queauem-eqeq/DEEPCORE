@@ -352,9 +352,19 @@ function animalJoue(a){const sp=SPECIES[a.sp];
 const FOOT=[[0,0]];
 const beastAt=(x,y)=>G.beasts&&G.beasts.find(b=>b.x===x&&b.y===y);
 // une balise posée barre le passage
+/* Un ennemi posé par un module garde sa salle (26 novembre 2026) : b.salle donne son module dans G.mods, dont le
+   champ salle liste les cases de la pièce. On met la liste en Set une fois, dans une WeakMap calée sur le tableau
+   lui-même : une nouvelle carte remplace les tableaux, donc le cache se renouvelle tout seul. */
+const SALLE_SET=new WeakMap();
+function salleOk(b,x,y){if(b.salle==null)return true;
+  const m=G.mods&&G.mods[b.salle],a=m&&m.salle;if(!a||!a.length)return true;
+  let S=SALLE_SET.get(a);if(!S){S=new Set(a);SALLE_SET.set(a,S);}
+  return S.has(idx(x,y));}
 function beastFits(b,x,y){const spB=BEASTS[b.sp],mB=mouilleOk(spB,b);
   if(G.balises&&G.balises.length&&FOOT.some(([dx,dy])=>baliseAt(x+dx,y+dy)))return false;
-  for(const[dx,dy]of FOOT){const cx=x+dx,cy=y+dy;if(cx<1||cy<1||cx>=W-1||cy>=H-1)return false;const v=G.t[idx(cx,cy)];
+  for(const[dx,dy]of FOOT){const cx=x+dx,cy=y+dy;if(cx<1||cy<1||cx>=W-1||cy>=H-1)return false;
+  if(!salleOk(b,cx,cy))return false;                                     // ennemi de module : il ne sort pas de sa salle
+  const v=G.t[idx(cx,cy)];
   if(spB.aqua&&!isWater(v))return false;   // le brochon ne quitte jamais l'eau
   // calme, il n'entre pas dans le champ d'un laser ; en chasse, il fonce (21 novembre 2026)
   if(!(b.hunt>0)&&G.lz&&G.lz[idx(cx,cy)])return false;
