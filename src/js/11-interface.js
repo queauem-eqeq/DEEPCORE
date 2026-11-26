@@ -27,16 +27,25 @@ const miniEnd=()=>{if(!miniDrag)return;miniDrag=null;mv.style.cursor='';};
 mv.addEventListener('pointerup',miniEnd);mv.addEventListener('pointercancel',miniEnd);
 function mini(){
   // la mini-carte occupe toute la largeur de la colonne ; chaque case est calée sur des pixels entiers
+  const VITRE_FIN=.45;
   const dpr=devicePixelRatio||1,cw=Math.max(60,mv.clientWidth||mv.parentElement.clientWidth),pw=Math.round(cw*dpr),ph=Math.round(pw*H/W);
   if(mv.width!==pw||mv.height!==ph){mv.width=pw;mv.height=ph;mv.style.height=Math.round(cw*H/W)+'px';}
   const k=pw/W,X=x=>Math.floor(x*k),Y=y=>Math.floor(y*k),cell=(x,y,w,h)=>mctx.fillRect(X(x),Y(y),X(x+(w||1))-X(x),Y(y+(h||1))-Y(y));
   mctx.setTransform(1,0,0,1,0,0);mctx.globalAlpha=1;mctx.fillStyle='#020605';mctx.fillRect(0,0,pw,ph);
   // 13 = roche dure : la plus marquée de la mini-carte ; 14 à 17 = mur, sol bâti, porte, pilier
+  // part de la case occupée par un mur vitré sur la mini-carte (26 novembre 2026)
   const C=[[PAL['3'],.14],[PAL['3'],.55],[PAL['3'],.85],[PAL['2'],.6],[PAL['1'],.55],[PAL['1'],.22],[PAL['2'],.22],['#000',1],[PAL['3'],.3],
     [PAL['3'],.3],[PAL['1'],.35],[PAL['1'],.9],[PAL['2'],.35],[PAL['3'],1],[PAL['5'],.95],[PAL['5'],.05],[PAL['1'],1],[PAL['5'],.7],
     ['#ffffff',1],[PAL['5'],.95]];
-  for(let y=0;y<H;y++)for(let x=0;x<W;x++){const i=idx(x,y);if(fog&&!G.seen[i])continue;const [c,a]=C[G.t[i]]||C[0];mctx.globalAlpha=a;
-    mctx.fillStyle=c;cell(x,y);}
+  /* Mur vitré (26 novembre 2026) : sa valeur (31) est hors de la table C, il retombait donc sur la teinte la plus
+     pâle et ne se lisait pas comme un mur. Il prend la couleur du mur, mais un **trait plus fin** — centré dans la
+     case, VITRE_FIN de sa largeur, un pixel au moins : la ligne se voit, et on voit que c'est une vitre. */
+  const cellFin=(x,y)=>{const x0=X(x),y0=Y(y),w=X(x+1)-x0,h=Y(y+1)-y0,
+    iw=Math.max(1,Math.round(w*VITRE_FIN)),ih=Math.max(1,Math.round(h*VITRE_FIN));
+    mctx.fillRect(x0+((w-iw)>>1),y0+((h-ih)>>1),iw,ih);};
+  for(let y=0;y<H;y++)for(let x=0;x<W;x++){const i=idx(x,y);if(fog&&!G.seen[i])continue;const v=G.t[i];
+    if(v===VITRE){const [c,a]=C[WALL];mctx.globalAlpha=a;mctx.fillStyle=c;cellFin(x,y);continue;}
+    const [c,a]=C[v]||C[0];mctx.globalAlpha=a;mctx.fillStyle=c;cell(x,y);}
   mctx.globalAlpha=1;
   for(const s of G.sites){if(fog&&!s.seen)continue;mctx.fillStyle=s.known?PAL['3']:PAL['2'];cell(s.x-1,s.y-1,3,3);}
   {const sr=sonarR();if(sr>0&&G.ore){const d=Math.max(3,Math.round(k*1.4));for(const o in G.ore){const i=+o;if(!sonarVu(i,sr))continue;
