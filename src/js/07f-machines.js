@@ -287,9 +287,11 @@ function machines(){G.las=[];G.lz={};G.circ=[];G.soc={};G.piles={};G.mt=0;G.mach
     p.mach='piege';return true;};
   /* -- vitrines (22 novembre 2026, d'après les coffres de Brogue) : une petite pièce en cul-de-sac, trois vitrines, un lot dans chacune.
      On n'en emporte qu'un : les autres se verrouillent. Rien à combattre : le choix est le jeu. */
-  const vitrines=p=>{const P=new Set(p.c),ent=[];if(p.c.length<9||p.c.length>48)return false;
+  const vitrines=p=>{const P=new Set(p.c),ent=[];if(p.c.length<9||p.c.length>120)return false;
     for(const i of p.c)for(const j of v4(i))if(!P.has(j)&&!blocks(t[j])&&!ent.includes(j))ent.push(j);
-    if(ent.length!==1||G.lz[ent[0]])return false;
+    /* 26 novembre 2026 : jusqu'à deux entrées, et des pièces jusqu'à 120 cases. Le cul-de-sac strict ne servait plus
+       à rien depuis que les lots sont enfermés derrière leurs portes, et il écartait neuf pièces sur dix. */
+    if(!ent.length||ent.length>2||ent.some(i=>G.lz[i]))return false;
     /* Trois niches côte à côte, creusées dans un mur, chacune derrière sa porte (26 novembre 2026, d'après le
        module « Vitrine REF » du joueur). En partant du sol de la pièce et en s'enfonçant dans le mur :
            rangée 0 (la pièce)   .  .  .  .  .     on se tient là
@@ -309,25 +311,26 @@ function machines(){G.las=[];G.lz={};G.circ=[];G.soc={};G.piles={};G.mt=0;G.mach
       return t[m]===WALL&&!(G.niche&&G.niche[m])&&!(G.murp&&G.murp[m]);};
     const sol=(x,y)=>{if(x<1||y<1||x>=W-1||y>=H-1)return 0;const f=idx(x,y);
       return P.has(f)&&t[f]===FLOOR&&!G.lz[f]&&libre(f)&&!pres(f)&&artLibre(B,f,site)?f:0;};
-    /* Deux tailles. **Longue (7)** : on bâtit aussi les deux bouts, il faut sept cases de large.
-       **Courte (5)** : les bouts sont déjà des murs de la pièce — un renfoncement juste à la bonne taille.
-       On essaie la longue d'abord, la courte s'il n'y a pas la place. */
-    for(const L of [7,5])for(const [dx,dy,ox,oy] of [[1,0,0,1],[1,0,0,-1],[0,1,1,0],[0,1,-1,0]])for(const i0 of p.c){
-      const x0=i0%W,y0=(i0/W)|0,niches=[],portes=[];let ok=true;
+    /* Chacun des deux bouts est soit **bâti** (on prend une case de sol de plus de ce côté), soit un **mur de la pièce
+       déjà là** : le renfoncement juste à la bonne taille (cinq de large), le coin (six), ou le banc posé au milieu
+       d'un mur (sept). Les quatre combinaisons sont essayées, dans les quatre orientations ; on garde le plus serré,
+       puis le plus loin de l'entrée. N'en essayer que deux ne donnait une vitrine que sur quatre cartes sur quarante. */
+    for(const b0 of [0,1])for(const b1 of [0,1])
+      for(const [dx,dy,ox,oy] of [[1,0,0,1],[1,0,0,-1],[0,1,1,0],[0,1,-1,0]])for(const i0 of p.c){
+      const x0=i0%W,y0=(i0/W)|0,L=5+b0+b1,d0=b0,niches=[],portes=[];let ok=true;
       for(let k=0;k<L&&ok;k++){const nx=x0+dx*k,ny=y0+dy*k;         // rangée des niches, adossée au mur du fond
         const n=sol(nx,ny),pd=sol(nx+ox,ny+oy);                      // rangée des portes, devant
         if(!n||!pd||!mur(nx-ox,ny-oy)){ok=false;break;}
         niches.push(n);portes.push(pd);}
-      if(ok&&L===5)for(const k of [-1,L]){const bx=x0+dx*k,by=y0+dy*k;   // les bouts : des murs déjà là
+      if(ok)for(const k of (b0?[]:[-1]).concat(b1?[]:[L])){const bx=x0+dx*k,by=y0+dy*k;   // bout non bâti : le mur doit déjà y être
         if(!mur(bx,by)||!mur(bx+ox,by+oy)){ok=false;break;}}
-      const d0=L===7?1:0;   // la première niche : au rang 1 si on bâtit les bouts, au rang 0 sinon
       if(ok)for(const k of [d0,d0+2,d0+4]){const cx=x0+dx*k+ox*2,cy=y0+dy*k+oy*2;   // du sol devant chaque porte
         if(!sol(cx,cy)){ok=false;break;}}
-      if(ok)bancs.push({niches,portes,L,d0,d:pas(niches[d0+2],ent[0])});}
+      if(ok)bancs.push({niches,portes,L,d0,b0,b1,d:pas(niches[d0+2],ent[0])});}
     if(!bancs.length)return false;
-    bancs.sort((a,b)=>b.L-a.L||b.d-a.d);
+    bancs.sort((a,b)=>a.L-b.L||b.d-a.d);
     const banc=bancs[0],d0=banc.d0,sel=[banc.niches[d0],banc.niches[d0+2],banc.niches[d0+4]];
-    if(banc.L===7)for(const k of [0,6]){t[banc.niches[k]]=WALL;t[banc.portes[k]]=WALL;}   // les deux bouts, bâtis
+    for(const k of (banc.b0?[0]:[]).concat(banc.b1?[banc.L-1]:[])){t[banc.niches[k]]=WALL;t[banc.portes[k]]=WALL;}   // les bouts bâtis
     for(const k of [d0+1,d0+3]){t[banc.niches[k]]=VITRE;t[banc.portes[k]]=VITRE;}         // cloisons, deux cases de fond
     for(const k of [d0,d0+2,d0+4])t[banc.portes[k]]=DOOR;                                  // une porte devant chaque niche
     const bc=typeof butinCoffre==='function';
