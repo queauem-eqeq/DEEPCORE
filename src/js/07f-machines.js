@@ -121,7 +121,7 @@ function machBump(nx,ny,dx,dy){const i=idx(nx,ny),v=G.t[i],fin=d=>{G.turn++;G.ms
     addFx({kind:'num',x:G.px,y:G.py,txt:'+'+dv,col:PAL['2'],dur:900});addFx({kind:'soin',x:G.px,y:G.py,dur:900,gr:fxGrains(9)});SFX.analyse();
     let n=0;for(const b of G.beasts||[])if(!b.hunt&&Math.hypot(b.x-G.px,b.y-G.py)<=12&&!BEASTS[b.sp].mine){b.hunt=1;spot(b);n++;}
     say(`Station de réparation : +${dv} vie, +${de} énergie. Le vacarme s’entend de loin${n?` : ${n} ennemi${n>1?'s':''} vien${n>1?'nent':'t'} voir`:''}.`,'good');return fin(200);}
-  if(v===FABRIC){if(typeof fabOpen==='function')fabOpen(i);else{say('Fabricateur.');render();}return 'stop';}
+  if(v===FABRIC){if(typeof fabOpen==='function')fabOpen(i);else{say('FABLAB.');render();}return 'stop';}
   if(v===GRILLE){say('Grille d’énergie : fermée. Son socle, tout près, attend une pile.');SFX.blocked();render();return 'stop';}
   if(v===TURRET||v===PYLON){say((v===TURRET?'Tourelle laser':'Croix laser')+' : la foreuse ne l’entame pas. Une charge sismique la détruit.');
     SFX.blocked();render();return 'stop';}

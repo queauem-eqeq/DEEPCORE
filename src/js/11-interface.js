@@ -16,6 +16,8 @@ const miniCell=ev=>{const r=mv.getBoundingClientRect();return [(ev.clientX-r.lef
 function miniMove(ev){const [x,y]=miniCell(ev);camCX=Math.max(0,Math.min(W-1,Math.round(x-miniDrag.ox)));
   camCY=Math.max(0,Math.min(H-1,Math.round(y-miniDrag.oy)));render();}
 mv.addEventListener('pointerdown',ev=>{if(!G||!$('overlay').hidden||ev.button>0)return;ev.preventDefault();
+  // visée longue du phaseur (26 novembre 2026) : la mini-carte sert à viser loin d'un seul geste, sans toucher au mode carte
+  if(PHASE){const [x,y]=miniCell(ev);phaseVers(Math.round(x),Math.round(y));return;}
   if(TRAV)stopTravel('Trajet interrompu.');if(REST)stopRest('Repos interrompu.');if(EXPL)stopExplore('Exploration interrompue.');
     if(INSPECT){INSPECT=false;$('inspTag').hidden=true;}
   if(!freeCam)setFreeCam(true);
@@ -188,6 +190,13 @@ addEventListener('keydown',ev=>{
   if(!$('bestiary').hidden){if(ev.key==='Escape'){ev.preventDefault();closeBest();}return;}
   if(!$('viseurs').hidden){if(ev.key==='Escape'){ev.preventDefault();closeCur();}return;}
   if(!$('overlay').hidden||ev.ctrlKey||ev.metaKey||ev.altKey||ev.target.tagName==='INPUT')return;const k=ev.key.toLowerCase();
+  /* Visée longue du phaseur (26 novembre 2026) : la foreuse est démontée, le viseur traverse toute la carte et la vue le suit.
+     Shift accélère de cinq cases, comme le mode carte. Rien d'autre ne répond tant qu'elle n'est pas reformée. */
+  if(PHASE){ev.preventDefault();
+    if(KEYS[k]){const st=ev.shiftKey?5:1;phaseVers(PHASE.x+KEYS[k][0]*st,PHASE.y+KEYS[k][1]*st);}
+    else if(k==='enter'||k===' ')phaseOk();
+    else if(k==='escape')phaseRetour();
+    return;}
   if(VISEE){ev.preventDefault();                                  // visée d'une charge sismique : rien d'autre ne répond
     if(KEYS[k])viseeVers(VISEE.x+KEYS[k][0],VISEE.y+KEYS[k][1]);
     else if(k==='enter'||k===' ')viseeOk();

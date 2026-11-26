@@ -14,6 +14,28 @@ Partie du document de conception (sommaire et règles à ne pas casser : `concep
   portes et piliers des bâtiments, pour que l'intérieur ne se confonde plus avec la montagne). Le blanc reste fixe. Dans le
   code les clés sont `3` monde, `2` bio, `1` accent, `4` danger, `5` bâti ; les encres `r` et `L` des tuiles se lisent en
   couleur danger, et l'encre `3` se lit en couleur bâti sur les tuiles de `BATI_TUILES` (`02-palette.js`).
+- **Un visuel et un son propres à chaque objet** (26 novembre 2026, demande de l'utilisateur). Avant, le Module de puissance
+  empruntait les flèches et le bruit d'analyse d'un autre objet, le Surrégime le bruit des coups critiques, le Camouflage celui
+  du fumigène et le Court-circuit celui des lasers ; Surrégime et Camouflage n'avaient aucune animation. Désormais, chaque
+  consommable a son animation **et** son bruit, et aucun n'est partagé avec un autre (`10-rendu.js`, `01-sons.js`) :
+
+  | Objet | Animation | Son |
+  |---|---|---|
+  | Réparobots | petites croix qui montent (`soin`) | `repair` |
+  | Batterie | flèches bio qui montent (`ener`) ; sur un ennemi, éclat (`flash`) | `battery` |
+  | Fumigène | tuiles de nuage | `smoke` |
+  | Charge sismique | explosion sur toute la zone (`boom`) + secousse | `explode` |
+  | **Module de puissance** | **`boost`** : des grains d'accent tombent d'un anneau vers la case, puis son cadre s'allume | **`boost`** |
+  | **Surrégime** | **`fury`** : huit dards en couleur danger battent autour de la case | **`fury`** |
+  | **Camouflage optique** | **`veil`** : un rideau tramé en couleur monde descend sur la case | **`veil`** |
+  | Balise | la tuile vole jusqu'à la case (`jet`) + secousse | `alarme` |
+  | **Court-circuit** | **`zap`** : un éclair blanc brisé, quatre tronçons, coudes renouvelés douze fois par seconde ; sur la foreuse, deux éclairs croisent sa case | **`zap`** |
+  | **Phaseur** | **`phase`** : la tuile se démonte (ou se reforme) pixel par pixel, dans un ordre fixe ; **`onde`** : deux anneaux bio s'ouvrent au départ et à l'arrivée | **`phase`** |
+
+  Tout cela reste du pixel art strict : calé sur la grille des pixels de tuile, opaque, sans dégradé ni transparence.
+  L'ordre de dissolution du phaseur est tiré **sans `Math.random`** (générateur à graine fixe, `PHASE_ORD`) : l'empreinte des
+  cartes ne bouge pas. Contrôle : poser les effets avec une durée très longue et un `t0` reculé les fige à mi-course le temps
+  d'une capture.
 - **Réglages du joueur adoptés le 23 novembre 2026** : les dessins retouchés dans l'artefact (`reglages/courant`) sont recopiés dans
   `TUILES_JOUEUR` (`03-tuiles.js`) et `TUILES_JOUEUR_B` (`03b-tuiles-machines.js`) — bz6r, bz7r, mach5, robot_u, siteUnknown, niche,
   stationOff, chargeur, o_capsule, o_plan — et la palette **Désert** retouchée dans `PRESETS` ; **Désert** devient la palette de départ

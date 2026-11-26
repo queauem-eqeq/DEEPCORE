@@ -10,8 +10,9 @@
    Ce que la foreuse sait (plans, capsules identifiées, noms de code) vit dans G.st.savoir : G.st suit la foreuse d'un niveau
    à l'autre. Valeurs réglables : Lab → Items (np-items). */
 const ITEM_VAL_DEF={repar:{soin:50},batterie:{energie:50,choc:12,etourdi:6},charge:{degats:30},puissance:{pow:1,deg:5},
-  berserk:{crit:50,duree:10},camo:{duree:10},balise:{rayon:20,duree:25,pv:40},court:{etourdi:10},matiere:{mat:15}};
-const ITEM_VAL_LIB={soin:'Vie rendue',energie:'Énergie rendue',choc:'Dégâts de la décharge',etourdi:'Étourdissement (battements)',degats:'Dégâts',pow:'POW gagné',deg:'Dégâts par point de POW en trop (%)',crit:'CRIT en plus (points)',duree:'Durée (battements)',rayon:'Rayon de l’appel (cases)',pv:'PV de la balise posée',mat:'Matière {µ} rendue'};
+  berserk:{crit:50,duree:10},camo:{duree:10},balise:{rayon:20,duree:25,pv:40},court:{etourdi:10},matiere:{mat:15},
+  phaseur:{loin:14}};
+const ITEM_VAL_LIB={soin:'Vie rendue',energie:'Énergie rendue',choc:'Dégâts de la décharge',etourdi:'Étourdissement (battements)',degats:'Dégâts',pow:'POW gagné',deg:'Dégâts par point de POW en trop (%)',crit:'CRIT en plus (points)',duree:'Durée (battements)',rayon:'Rayon de l’appel (cases)',pv:'PV de la balise posée',mat:'Matière {µ} rendue',loin:'Distance mini où l’ennemi reparaît (cases)'};
 let ITEM_VAL=JSON.parse(JSON.stringify(ITEM_VAL_DEF));
 // chance qu'un robot abattu lâche un objet, par espèce (clé du Bestiaire)
 const DROPS_DEF={crabos:8,cafar:6,mastok:90,brochon:10,mine:0,paralyzor:25,gardien:60,artilleur:35,drone:5,soudeur:45,englueur:35};
@@ -19,17 +20,17 @@ let DROPS=Object.assign({},DROPS_DEF);
 const PLAN_DOUBLON=10;   // un plan déjà connu se recycle en Matière
 
 Object.assign(ITEMS,{
-  puissance:{n:'Module de puissance',conso:1,son:'analyse',eff:'POW +1, pour toujours',
+  puissance:{n:'Module de puissance',conso:1,son:'boost',eff:'POW +1, pour toujours',
     d:'Un étage d’alimentation de plus : POW +1 définitivement. Les coups portent plus fort et un équipement plus lourd devient utilisable.',
     plein:st=>false,non:'',use:st=>'',
     art:["    ┌─────┐    ", "   ─┤  ▲  ├─   ", "   ─┤ ▲▲▲ ├─   ", "   ─┤  █  ├─   ", "    └─────┘    "],
     col:["....wwwwwww....", "...ww..1..ww...", "...ww.111.ww...", "...ww..1..ww...", "....wwwwwww...."]},
-  berserk:{n:'Surrégime',conso:1,son:'crit',eff:'CRIT +50 pendant 8 battements',
+  berserk:{n:'Surrégime',conso:1,son:'fury',eff:'CRIT +50 pendant 8 battements',
     d:'Débride le moteur quelques battements : presque tous les coups sont critiques. Injecté à un ennemi, c’est lui qui frappe en critique.',
     plein:st=>false,non:'',use:st=>'',
     art:["          ▄▄   ", "        ▄▀▒▀   ", "      ▄▀▒▄▀    ", "    ▄▀▒▄▀      ", "  ▄█▄▄▀        ", "  ▀▀           "],
     col:["..........ww...", "........wwrw...", "......wwrww....", "....wwrww......", "..wwwww........", "..ww..........."]},
-  camo:{n:'Camouflage optique',conso:1,son:'smoke',eff:'Invisible 10 battements',
+  camo:{n:'Camouflage optique',conso:1,son:'veil',eff:'Invisible 10 battements',
     d:'La coque renvoie ce qui l’entoure : les ennemis ne voient plus la foreuse, sauf au contact. Un coup ou un forage rompt l’effet.',
     plein:st=>false,non:'',use:st=>'',
     art:["   ·  ·  ·  ·  ", "  ·  ▄▄▄▄▄  ·  ", "  · █░▒█▒░█ ·  ", "  ·  ▀▀▀▀▀  ·  ", "   ·  ·  ·  ·  "],
@@ -40,21 +41,29 @@ Object.assign(ITEMS,{
     plein:st=>false,non:'',use:st=>'',
     art:["      ) ) )    ", "     ▄▄█▄▄     ", "     █ ● █     ", "     ▀▀█▀▀     ", "    ▄▄▄█▄▄▄    "],
     col:["......r.r.r....", ".....wwwww.....", ".....w.r.w.....", ".....wwwww.....", "....wwwwwww...."]},
-  court:{n:'Court-circuit',conso:1,son:'laser',eff:'Énergie à zéro, ou ennemi hors service',
+  court:{n:'Court-circuit',conso:1,son:'zap',eff:'Énergie à zéro, ou ennemi hors service',
     d:'Une surtension brutale. Sur la foreuse : l’énergie tombe à zéro. Lancé sur un ennemi : il reste hors service 10 battements, sans dégât.',
     plein:st=>false,non:'',use:st=>'',
     art:["     ▄▄▄▄▄     ", "    █  ▄▀ █    ", "    █ ▀▄  █    ", "    █  ▄▀ █    ", "     ▀▀▀▀▀     "],
     col:[".....wwwww.....", "....w..11.w....", "....w.11..w....", "....w..11.w....", ".....wwwww....."]},
+  /* Phaseur (26 novembre 2026, demande de l'utilisateur). Sur la foreuse : elle se démonte et un grand viseur s'ouvre ;
+     elle se reforme n'importe où sur le terrain DÉJÀ DÉCOUVERT (G.seen), pourvu qu'elle y tienne. Sur un ennemi : il se
+     disperse et reparaît au hasard sur le niveau, à `loin` cases au moins, et perd la trace de la foreuse. */
+  phaseur:{n:'Phaseur',conso:1,son:'phase',eff:'Téléportation sur le terrain connu',
+    d:'Un champ de phase à usage unique. Sur la foreuse : elle se démonte et se reforme où l’on veut, pourvu que le terrain ait déjà été découvert. Lancé sur un ennemi : il se disperse et reparaît ailleurs sur le niveau, sans plus savoir où la foreuse se trouve.',
+    plein:st=>false,non:'',use:st=>'',
+    art:["     ▄▄▄▄▄     ", "    █ ▐▌  █    ", "    █ ▐▌░ █    ", "    █ ▐▌  █    ", "     ▀▀▀▀▀     "],
+    col:[".....wwwww.....", "....w.11..w....", "....w.112.w....", "....w.11..w....", ".....wwwww....."]},
   matiere:{n:'Matière {µ}',mat:1,eff:'Matière {µ} +15',d:'Un bloc de Matière {µ} brute : il rejoint la réserve dès qu’on le ramasse.',
     art:["     ▄▄        ", "   ▄████▄  ▄▄  ", "  ████████████ ", "   ▀████████▀  ", "      ▀▀▀▀     "],
     col:[".....11........", "...11w111..11..", "..111111111w11.", "...1111111111..", "......1111....."]}});
-Object.assign(FAB_PRIX,{berserk:20,camo:24,balise:12,court:16});
+Object.assign(FAB_PRIX,{berserk:20,camo:24,balise:12,court:16,phaseur:45});
 
 /* ----- Ce que la foreuse sait ----- */
 // zone d'effet d'un consommable : r = 0 une case, 1 l'explosion (3 × 3 et 5 cases autour), 'f' le disque du fumigène ; la visée, elle,
 // ne montre toujours qu'une case. soi : la visée s'ouvre sur la foreuse (de même pour toute capsule non identifiée)
 const CONSO={repar:{r:0,soi:1},batterie:{r:0,soi:1},fumigene:{r:'f',soi:1},charge:{r:1,soi:0},puissance:{r:0,soi:1},berserk:{r:0,soi:1},
-  camo:{r:0,soi:1},balise:{r:0,soi:1},court:{r:0,soi:1}};
+  camo:{r:0,soi:1},balise:{r:0,soi:1},court:{r:0,soi:1},phaseur:{r:0,soi:1}};
 let SAV_GARDE=null;   // pendant la génération du niveau suivant, G.st est neuf : on garde la main sur le savoir de la foreuse
 const codeTire=()=>{const L='BDFGHJKLMNPQRSTVWXZ',H='0123456789ABCDEF',l=()=>L[rnd(0,L.length-1)],h=()=>H[rnd(0,15)];
   return `//${l()}${l()}${rnd(2,9)}-${h()}${h()}${l()}`;};
@@ -83,17 +92,69 @@ function itemTxt(){const V=ITEM_VAL,v=k=>ITEMS[k].vrai;
   v('berserk').eff=`CRIT +${V.berserk.crit} pendant ${V.berserk.duree} battements`;
   v('camo').eff=`Invisible ${V.camo.duree} battements`;
   v('balise').eff=`Appelle les ennemis à ${V.balise.rayon} cases`;v('court').eff=`Énergie à zéro, ou ennemi hors service ${V.court.etourdi} battements`;
+  v('phaseur').eff='Téléportation sur le terrain connu';
   ITEMS.matiere.eff=`Matière {µ} +${V.matiere.mat}`;}
 // plans de fabrication : un objet « plan_<clé> » par objet fabricable ; jamais dans le sac, il s'apprend en le ramassant
 const ART_PLAN={art:["  ┌─────────┐  ", "  │ ┌──┐ ── │  ", "  │ │  │ ── │  ", "  │ └──┘ ── │  ", "  └─────────┘  "],col:["..wwwwwwwwwww..", "..w.2222.22.w..", "..w.2..2.22.w..", "..w.2222.22.w..", "..wwwwwwwwwww.."]};
 function plansInit(){for(const k in FAB_PRIX)if(ITEMS[k]&&!ITEMS['plan_'+k]){const o={plan:k,art:ART_PLAN.art,col:ART_PLAN.col,
-  d:'Un plan de fabrication : une fois ramassé, le fabricateur sait produire cet objet.',eff:'Plan de fabrication'};
+  d:'Un plan de fabrication : une fois ramassé, le FABLAB sait produire cet objet.',eff:'Plan de fabrication'};
   Object.defineProperty(o,'n',{get:()=>'Plan : '+((ITEMS[k].vrai||ITEMS[k]).n),enumerable:true});ITEMS['plan_'+k]=o;}}
 plansInit();
 const critBonus=()=>G&&G.eff&&G.eff.berserk>0?ITEM_VAL.berserk.crit:0;
 function camoCasse(){if(G&&G.eff&&G.eff.camo>0){G.eff.camo=0;sayMore('Le camouflage optique se rompt.','warn');}}
 // la foreuse est-elle tenue par un Bloqueur ? (un Bloqueur étourdi lâche prise)
 const tenuPar=()=>(G.beasts||[]).find(b=>b.tient&&!(b.stun>0)&&Math.max(Math.abs(b.x-G.px),Math.abs(b.y-G.py))<=1);
+
+/* ----- Phaseur (26 novembre 2026) -----
+   Deux temps quand il sert la foreuse, un seul quand il sert contre un ennemi.
+   1. La capsule est dépensée, la foreuse se démonte (animation « phase », pixel par pixel) et PHASE s'ouvre : un viseur libre,
+      que la vue suit (10-rendu). Il part de la foreuse.
+   2. On valide une case : la foreuse s'y reforme. La case doit avoir été DÉCOUVERTE (G.seen) et pouvoir la porter —
+      ni obstacle, ni créature, ni balise ; l'eau, elle, est permise, la foreuse patauge.
+   Échap, ou une case impossible validée trois fois, ramène la foreuse où elle était : la capsule est perdue, mais on ne
+   reste jamais bloqué hors du monde. Le battement ne passe qu'à l'arrivée, et la téléportation rompt le camouflage. */
+const PHASE_DUR=420;
+// tuile d'une créature, pour l'animation (la même que celle du rendu)
+const creatureTuile=c=>{const b=(G.beasts||[]).includes(c);return TL[(b?'bz':'an')+c.sp+(c.dir<0?'l':'r')];};
+const phaseFx=(x,y,tl,out)=>{if(tl)addFx({kind:'phase',x,y,tl,out,dur:PHASE_DUR});
+  addFx({kind:'onde',x,y,r:4.5,dur:PHASE_DUR});};
+// la foreuse tient-elle sur cette case ? (destination du phaseur)
+function phaseTient(x,y){if(x<1||y<1||x>=W-1||y>=H-1)return false;const i=idx(x,y);
+  return !blocks(G.t[i])&&!beastAt(x,y)&&!animalAt(x,y)&&!baliseAt(x,y);}
+const phaseConnu=(x,y)=>!!(G.seen&&G.seen[idx(x,y)]);
+// une case au hasard pour une créature téléportée : à `loin` cases au moins, et où elle tient (eau, salle de module, lasers compris)
+function phaseCase(c,loin){const b=(G.beasts||[]).includes(c);
+  // beastFits connaît tout des ennemis (eau, salle d'un module, lasers, balises) ; pour la faune, terrOk suffit
+  const ok=(x,y)=>b?beastFits(c,x,y):terrOk(c,x,y)&&!(x===G.px&&y===G.py)&&!beastAt(x,y)&&!animalAt(x,y)&&!baliseAt(x,y);
+  // on desserre la distance plutôt que de ne rien faire : une petite carte, ou un aquatique dans une flaque, n'offre pas toujours 14 cases
+  for(const d of [loin,Math.round(loin/2),3,1]){const l=[];
+    for(let y=1;y<H-1;y++)for(let x=1;x<W-1;x++){if(cheb(c,x,y)<d||!ok(x,y))continue;l.push([x,y]);}
+    if(l.length)return l[rnd(0,l.length-1)];}
+  return null;}
+// la foreuse se démonte : le viseur s'ouvre
+function phaseOuvre(neuf){const nom=ITEMS.phaseur.vrai.n;
+  PHASE={x:G.px,y:G.py,x0:G.px,y0:G.py,rate:0};
+  phaseFx(G.px,G.py,null,1);addFx({kind:'phase',x:G.px,y:G.py,robot:1,out:1,dur:PHASE_DUR});
+  SFX.phase();camoCasse();
+  say(`${neuf?`Capsule ${savoir().codes.phaseur} : c’était un ${nom}. `:''}${nom} : la foreuse se démonte. Choisissez où elle se reforme — déplacement ou souris, Entrée ou clic pour valider, Échap pour revenir sur place.`,'warn');
+  render();}
+function phaseVers(x,y){if(!PHASE)return;const cx=Math.max(1,Math.min(W-2,x)),cy=Math.max(1,Math.min(H-2,y));
+  if(cx!==PHASE.x||cy!==PHASE.y){PHASE.x=cx;PHASE.y=cy;render();}}
+// la foreuse se reforme sur la case visée
+function phaseOk(){if(!PHASE||G.over)return;const {x,y}=PHASE;
+  if(!phaseConnu(x,y)||!phaseTient(x,y)){PHASE.rate++;SFX.blocked();
+    say(phaseConnu(x,y)?'Le champ de phase refuse cette case : la foreuse n’y tiendrait pas.':'Terrain jamais découvert : le champ de phase n’a pas de point d’ancrage.','warn');
+    if(PHASE.rate>=3)phaseRetour('Trop d’essais : la foreuse se reforme sur place.');else render();return;}
+  const loin=Math.round(Math.hypot(x-PHASE.x0,y-PHASE.y0));PHASE=null;
+  G.px=x;G.py=y;G.tracks=null;   // la trace s'arrête net : rien ne relie les deux points
+  phaseArrive(`La foreuse se reforme ${loin} case${loin>1?'s':''} plus loin.`);}
+// Échap, ou trois refus : retour sur place
+function phaseRetour(m){if(!PHASE)return;G.px=PHASE.x0;G.py=PHASE.y0;PHASE=null;phaseArrive(m||'Le champ de phase se referme : la foreuse se reforme sur place.');}
+function phaseArrive(m){addFx({kind:'phase',x:G.px,y:G.py,robot:1,dur:PHASE_DUR});
+  addFx({kind:'onde',x:G.px,y:G.py,r:4.5,dur:PHASE_DUR});SFX.phase();
+  say(m,'good');computeFOV();invChanged();
+  if(consoTemps())return;
+  render();}
 
 /* ----- Butin ----- */
 // objets simples d'abord, les meilleurs plus bas
@@ -103,7 +164,8 @@ let PLANS_POSES={};   // plans déjà posés sur la carte en cours de générati
 function planTire(){const s=savoir(),niv=nivCarte(),lib=Object.keys(FAB_PRIX).filter(k=>ITEMS[k]&&!s.plans[k]&&!PLANS_POSES[k]);
   let l=lib.filter(k=>PLAN_RANG(k)<=niv);if(!l.length)l=lib.filter(k=>PLAN_RANG(k)<=niv+1);if(!l.length)return 'matiere';
   const k=l[rnd(0,l.length-1)];PLANS_POSES[k]=1;return 'plan_'+k;}
-const CONSO_POIDS=[['repar',5],['batterie',4],['fumigene',3],['charge',3],['berserk',2],['camo',2],['balise',2],['court',2]];
+const CONSO_POIDS=[['repar',5],['batterie',4],['fumigene',3],['charge',3],['berserk',2],['camo',2],['balise',2],['court',2],
+  ['phaseur',2]];
 function consoTire(){let t=CONSO_POIDS.reduce((a,c)=>a+c[1],0),r=Math.random()*t;
   for(const [k,p] of CONSO_POIDS){if((r-=p)<0)return k;}return 'repar';}
 function equipTire(){const l=Object.keys(ITEMS).filter(k=>ITEMS[k].slot&&!ITEMS[k].base&&k!=='usine'&&PLAN_RANG(k)<=nivCarte()+1);
@@ -201,7 +263,7 @@ function butinPrend(c,more){const l=G.items&&G.items[c];if(!l)return;const dire=
       dire(`Matière {µ} ramassée : +${m} (réserve ${G.st.matiere}).`,'good');SFX.spot();}
     else if(d&&d.plan){const s=savoir();if(s.plans[d.plan]){G.st.matiere=(G.st.matiere||0)+PLAN_DOUBLON;
       dire(`${d.n} : déjà connu, recyclé en Matière {µ} (+${PLAN_DOUBLON}).`,'info');}
-      else{s.plans[d.plan]=1;identifier(d.plan);dire(`${d.n} appris : le fabricateur sait maintenant le produire.`,'good');}SFX.analyse();}
+      else{s.plans[d.plan]=1;identifier(d.plan);dire(`${d.n} appris : le FABLAB sait maintenant le produire.`,'good');}SFX.analyse();}
     else reste.push(k);}
   if(reste.length)G.items[c]=reste;else delete G.items[c];}
 
@@ -215,7 +277,11 @@ function consoCible(i,x,y){const o=G.inv[i];if(!o)return;const k=o.k,d=ITEMS[k],
   // objet connu, inutile sur la foreuse : refusé, rien n'est dépensé
   if(connu&&moi&&((k==='repar'&&st.vie>=st.vieMax)||(k==='batterie'&&st.energie>=st.energieMax))){say(k==='repar'?'Vie déjà au maximum : réparobots inutiles.':'Énergie déjà au maximum : batterie inutile.','warn');
     SFX.blocked();render();return;}
-  VISEE=null;let txt='',ton='good',son=d.son;const num=(t,col)=>addFx({kind:'num',x,y,txt:t,col,dur:900});
+  VISEE=null;
+  // Phaseur sur la foreuse : la capsule part tout de suite, la foreuse se démonte, et le grand viseur s'ouvre pour choisir
+  // où elle se reforme. Le battement ne passe qu'à l'arrivée (phaseArrive), pas ici.
+  if(k==='phaseur'&&moi){const neuf=identifier(k);invTake(i);sacFix();SAC_H='';phaseOuvre(neuf);return;}
+  let txt='',ton='good',son=d.son;const num=(t,col)=>addFx({kind:'num',x,y,txt:t,col,dur:900});
   if(k==='repar'){if(moi){const a=st.vie;st.vie=Math.min(st.vieMax,st.vie+V.soin);txt=`+${Math.round(st.vie-a)} PV`;
     addFx({kind:'soin',x,y,dur:1000,gr:fxGrains(12)});}
     else if(c){const m=pvDe(sp),a=c.hp??m;c.hp=Math.min(m,a+V.soin);txt=`${leNom(sp)} est réparé (+${c.hp-a} PV)`;ton='warn';
@@ -232,17 +298,21 @@ addFx({kind:'ener',x,y,dur:1000,gr:fxGrains(12)});}
     else{txt='la décharge se perd dans le sol';ton='warn';}}
   else if(k==='fumigene'){fumPose(x,y);txt=fumDedans()?'le nuage se répand, les ennemis perdent votre trace':'le nuage se répand là-bas';}
   else if(k==='puissance'){if(moi){st.power=(st.power||0)+V.pow;txt=`POW +${V.pow} (POW ${st.power})`;
-    addFx({kind:'ener',x,y,dur:1000,gr:fxGrains(12)});}
-    else if(b){b.pow=(b.pow||0)+1;txt=`${leNom(sp)} gagne en puissance : ses coups portent plus fort`;ton='warn';num('POW+',PAL['3']);}
+    addFx({kind:'boost',x,y,dur:900,gr:fxGrains(14)});}
+    else if(b){b.pow=(b.pow||0)+1;txt=`${leNom(sp)} gagne en puissance : ses coups portent plus fort`;ton='warn';num('POW+',PAL['3']);
+      addFx({kind:'boost',x,y,dur:900,gr:fxGrains(14)});}
     else{txt='le module grille sans rien alimenter';ton='warn';}}
-  else if(k==='berserk'){if(moi){G.eff.berserk=V.duree;txt=`surrégime : CRIT +${V.crit} pendant ${V.duree} battements`;}
+  else if(k==='berserk'){if(moi){G.eff.berserk=V.duree;txt=`surrégime : CRIT +${V.crit} pendant ${V.duree} battements`;
+    addFx({kind:'fury',x,y,dur:800});}
     else if(b){b.bers=V.duree;b.hunt=1;spot(b);
-      txt=`${leNom(sp)} passe en surrégime : ses coups sont critiques pendant ${V.duree} battements`;ton='warn';num('!!',PAL['3']);}
+      txt=`${leNom(sp)} passe en surrégime : ses coups sont critiques pendant ${V.duree} battements`;ton='warn';num('!!',PAL['3']);
+      addFx({kind:'fury',x,y,dur:800});}
     else{txt='la dose se perd';ton='warn';}}
   else if(k==='camo'){if(moi){G.eff.camo=V.duree;
     for(const e of G.beasts||[])if(e.hunt&&Math.max(Math.abs(e.x-G.px),Math.abs(e.y-G.py))>1){e.hunt=0;forget(e);
-    }txt=`la foreuse disparaît pendant ${V.duree} battements`;}
-    else if(b){b.camo=V.duree;txt=`${leNom(sp)} disparaît pendant ${V.duree} battements`;ton='warn';}
+    }txt=`la foreuse disparaît pendant ${V.duree} battements`;addFx({kind:'veil',x,y,dur:750});}
+    else if(b){b.camo=V.duree;txt=`${leNom(sp)} disparaît pendant ${V.duree} battements`;ton='warn';
+      addFx({kind:'veil',x,y,dur:750});}
     else{txt='le voile se dissipe sans rien couvrir';ton='warn';}}
   else if(k==='balise'){
     if(moi){const camo=G.eff&&G.eff.camo>0;if(camo)G.eff.camo=0;let n=0;
@@ -251,9 +321,19 @@ addFx({kind:'ener',x,y,dur:1000,gr:fxGrains(12)});}
       addFx({kind:'shake',amp:4,dur:250});txt=`la balise hurle sur la foreuse : ${n} ennemi${n>1?'s':''} alentour ${n>1?'savent':'sait'} où elle est`+(camo?' ; le camouflage optique se rompt':'');ton='warn';}
     else{const q=balisePose(x,y);
       txt=`la balise tombe au sol et hurle : ${q} ennemi${q>1?'s':''} l’${q>1?'oublient':'oublie'} pour elle, pendant ${V.duree} battements`;}}
-  else if(k==='court'){if(moi){st.energie=0;txt='surtension : l’énergie tombe à zéro';ton='warn';addFx({kind:'shake',amp:5,dur:250});}
+  // Phaseur sur une créature : elle se disperse et reparaît au hasard, à `loin` cases au moins, et perd la trace de la foreuse
+  else if(k==='phaseur'){if(c){const p=phaseCase(c,V.loin||14);
+    if(!p){txt=`le champ se referme : nulle part où envoyer ${leNom(sp)}`;ton='warn';}
+    else{phaseFx(c.x,c.y,creatureTuile(c),1);
+      c.x=p[0];c.y=p[1];c.tient=0;c.leurre=0;
+      if(b){b.hunt=0;b.fuse=0;}else an.aware=0;
+      forget(c);phaseFx(c.x,c.y,null,0);
+      txt=`${leNom(sp)} se disperse et se reforme ailleurs sur le niveau`;}}
+    else{txt='le champ de phase se referme sur le vide';ton='warn';}}
+  else if(k==='court'){if(moi){st.energie=0;txt='surtension : l’énergie tombe à zéro';ton='warn';addFx({kind:'shake',amp:5,dur:250});
+    addFx({kind:'zap',ax:x-.5,ay:y-.5,bx:x+.5,by:y+.5,dur:320});addFx({kind:'zap',ax:x+.5,ay:y-.5,bx:x-.5,by:y+.5,dur:320});}
     else if(b){b.stun=V.etourdi;b.tient=0;txt=`${leNom(sp)} est hors service pendant ${V.etourdi} battements`;num('HS',PAL['3']);
-      addFx({kind:'flash',beast:b,dur:220});}
+      addFx({kind:'zap',ax:G.px,ay:G.py,bx:x,by:y,dur:320});addFx({kind:'flash',beast:b,dur:220});}
     else{txt='la surtension se perd dans le sol';ton='warn';}}
   const neuf=identifier(k);invTake(i);sacFix();SAC_H='';
   say(`${neuf?`Capsule ${savoir().codes[k]} : c’était ${nom}. `:''}${nom} : ${txt}.`,ton);(son&&SFX[son]?SFX[son]:SFX.spot)();

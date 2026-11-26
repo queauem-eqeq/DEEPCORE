@@ -69,12 +69,16 @@ Posé à la fin de la génération, sur toutes les recettes. **Ordre de priorit�
   5,4 en cul-de-sac, aucun en « autres salles » (les culs-de-sac suffisent). Sur les 63 cartes qui avaient une pièce
   fermée garnie, le Module de puissance y était **38 fois (60 %)** et le plan 20 fois (32 %). Mesures : `docs/mesures.md`.
 
-### Fabricateur (`14c-fabricateur.js`)
+### FABLAB (`14c-fabricateur.js`)
 
-Premier usage de la **Matière**. Avancer sur un fabricateur ouvre une liste : **seulement les objets dont la foreuse a trouvé le plan** (sans aucun plan, il le dit et ne propose rien). Les plans se trouvent au sol, dans les dépôts, les salles piégées, les vitrines et sur les robots abattus : objets simples au niveau 1 (réparobots, batterie, fumigène), consommables avancés et accessoires au niveau 2, armes et armures au niveau 3 (un cran d'avance possible). Un plan déjà connu se recycle en 10 de Matière. Le Module de puissance ne se fabrique pas, la clé non plus (25 novembre 2026 : plus de plan de clé, les clés se trouvent). Une fabrication prend 3 battements ; l'objet est ramassé s'il y a de la place, sinon posé sous la foreuse.
+Appelé **Fabricateur** jusqu'au 26 novembre 2026. Les clés internes (`FABRIC`, tuile `fabric`, `fab*`) n'ont pas changé.
 
-- **Commandes** : flèches (ou Z/S) et Entrée, ou clic ; Échap ferme. Pavé numérique : 8 et 2 montent et descendent, 5 fabrique ; les chiffres 1 à 9 du haut du clavier choisissent l'objet de ce numéro, affiché devant son nom.
-- **Fenêtre de taille fixe** : liste et panneau de droite gardent leur hauteur d'un objet à l'autre. Nom coloré par famille : consommables en bio, accessoires en monde, armes et armures en accent (grisé si la Matière manque).
+Premier usage de la **Matière**. Avancer sur un FABLAB ouvre une liste : **seulement les objets dont la foreuse a trouvé le plan** (sans aucun plan, il le dit et ne propose rien). Les plans se trouvent au sol, dans les dépôts, les salles piégées, les vitrines et sur les robots abattus : objets simples au niveau 1 (réparobots, batterie, fumigène), consommables avancés et accessoires au niveau 2, armes et armures au niveau 3 (un cran d'avance possible). Un plan déjà connu se recycle en 10 de Matière. Le Module de puissance ne se fabrique pas, la clé non plus (25 novembre 2026 : plus de plan de clé, les clés se trouvent). Une fabrication prend 3 battements ; l'objet est ramassé s'il y a de la place, sinon posé sous la foreuse.
+
+- **Boutons en ligne (26 novembre 2026).** Un bouton ne porte plus que **le numéro entre crochets, le nom et le prix** — deux fois moins large qu'avant, où l'effet occupait la moitié de la place. Les boutons **se suivent sur la même ligne** et **reviennent à la ligne** quand la place manque. L'effet et la description complète restent sous l'illustration ASCII, à droite ; la fiche **défile** plutôt que de couper un texte long.
+- **En-tête (26 novembre 2026)** : la Matière en réserve, puis **« Inventaire x/20 »** et les **vingt places en quatre rangées de cinq carrés**. Un carré vide est un contour blanc d'un pixel sur fond noir ; rempli, il prend la couleur du type de l'objet qui l'occupe — **bio** pour un consommable, **monde** pour un accessoire, **bâti** pour une arme ou une armure. Les carrés sont **classés par type**, dans cet ordre. Ce qui est **porté** ne prend pas de place et ne figure donc pas dans la grille.
+- **Commandes** : flèches (ou Z/S, Q/D) et Entrée, ou clic ; Échap ferme. Les boutons se suivant en ligne, **droite et gauche avancent comme bas et haut**. Pavé numérique : 8, 2, 4 et 6 parcourent, 5 fabrique ; les chiffres 1 à 9 du haut du clavier choisissent l'objet de ce numéro, affiché devant son nom.
+- **Fenêtre de taille fixe** : liste et panneau de droite gardent leur hauteur d'un objet à l'autre. Nom coloré par famille : consommables en bio, accessoires en monde, armes et armures en **bâti** (accent jusqu'au 26 novembre 2026 ; grisé si la Matière manque).
 - **À droite de la liste** : l'illustration ASCII de l'objet sélectionné (celle de l'inventaire, `artHTML`), son nom, son effet et sa description ; elle suit les flèches, le survol et le focus. Elle reprend la tuile de l'objet posé au sol (même silhouette, mêmes couleurs) ; la tuile fait foi : quand on redessine une tuile `o_…`, l'illustration est à reprendre à la main. Les quatre objets du fabricateur ont leur tuile (`o_vrille`, `o_trepan`, `o_carene`, `o_blindage`). Contrôle : `outils/scripts/planche-objets.js`.
 
 | Objet | Prix | Objet | Prix |
@@ -85,6 +89,7 @@ Premier usage de la **Matière**. Avancer sur un fabricateur ouvre une liste : *
 | Surrégime | 20 | Carène légère (armure) | 60 |
 | — | | Vrille rapide (arme) | 70 |
 | Camouflage optique | 24 | Trépan lourd (arme), Blindage composite (armure) | 85 |
+| **Phaseur** | **45** | | |
 | Charge sismique | **34** (le consommable qui épargne le plus de vie, voir mesures) | Accumulateur, Téléobjectif | 40 |
 
 Tous les prix se règlent dans **Lab → Items**.
@@ -192,6 +197,8 @@ Modèle Brogue :
 
 **Rien n'est donné au départ**, sauf la foreuse et la Coque d'usine : tout le reste se trouve ou se fabrique.
 
+**Vingt places, équipement compris (26 novembre 2026).** L'inventaire tient **20 places** : **chaque exemplaire transporté en prend une, l'équipement aussi** — seul ce qui est **porté** est gratuit. S'équiper libère donc une place, se déséquiper en reprend une (refusé quand le sac est plein : il faut d'abord jeter quelque chose). Sac plein, un objet ramassé **reste au sol**, équipement compris. Jusqu'au 26 novembre 2026, seuls les consommables comptaient et l'équipement transporté était gratuit.
+
 ### Capsules, visée, plans (`14d-objets.js`)
 
 - **Consommables non identifiés.** Chaque sorte porte un **nom de code** tiré à chaque partie (« Capsule //KZ7-3FQ ») et la même
@@ -217,9 +224,12 @@ Modèle Brogue :
 | **Camouflage optique** | invisible 10 battements : vue seulement au contact, les poursuivants à distance lâchent ; **rompu par un coup ou un forage** ; « Camouflé N » sous les barres, comme « Englué N » | il disparaît 10 battements (visible au contact) |
 | **Balise** (néfaste sur soi) | une **sirène à deux tons** retentit ; tous les ennemis à 20 cases savent où est la foreuse ; **elle rompt son camouflage optique** | **lancée ailleurs, c'est un leurre posé au sol** (ci-dessous) |
 | **Court-circuit** (néfaste) | énergie à zéro | hors service 10 battements, sans dégât ; un Bloqueur lâche |
+| **Phaseur** | **elle se démonte et se reforme où l'on veut**, sur le terrain déjà découvert (ci-dessous) | **il se disperse et reparaît ailleurs sur le niveau**, à 14 cases au moins, et **perd la trace de la foreuse** ; un Bloqueur lâche |
 | **Matière** (butin au sol) | +15 en réserve, dès qu'on marche dessus ; au sol, elle a le dessin des **éclats moyens** en couleur Matière  | – |
 
 **Balise posée.** Lancée ailleurs que sur la foreuse, la balise **vole jusqu'à la case visée** et s'y pose (case libre la plus proche si elle est occupée). Elle **hurle 25 battements** (« Balise N » sous les barres, point rouge clignotant). Tant qu'elle hurle, **tout ennemi à 20 cases d'elle, ou qui chasse la foreuse, la délaisse pour s'acharner sur elle** : il l'attaque au contact, les tireurs (Sentinelle, Artilleur, Englueur) lui tirent dessus à portée, les mines s'arment à côté. **Chaque coup la touche** (critique possible) ; un seul bruit d'attaque par battement. Elle a **40 PV**, barre le passage comme une créature et, **détruite, explose sur sa seule case**, sans dégâts alentour ; mines et charges sismiques l'abîment aussi. Les ennemis attirés **restent en chasse** (pas de coup par surprise sur eux) et gardent le souvenir de la foreuse ; balise éteinte ou détruite, ils reprennent la chasse (sur la foreuse s'ils la voient, sinon là où ils l'ont vue). Un ennemi frappé par la foreuse délaisse la balise. La balise posée ne rompt pas le camouflage. Valeurs réglables dans Lab → Items (rayon, durée, PV). 
+
+**Phaseur (26 novembre 2026).** Sur la foreuse, il se joue **en deux temps**. La visée courte ordinaire choisit d'abord la cible : la foreuse elle-même, ou un ennemi à 4 cases. Sur la foreuse, la capsule part aussitôt, **la foreuse se démonte pixel par pixel** et un **grand viseur** s'ouvre : il n'est plus borné à 4 cases, **la vue le suit** à travers toute la carte (Maj : cinq cases d'un coup ; un clic sur la mini-carte y porte le viseur d'un geste). Le cadre du viseur dit tout de suite si la case convient : **bio** quand la foreuse peut s'y reformer, **danger** sinon. Il faut que la case ait été **découverte** (`G.seen`) et qu'elle **porte la foreuse** — ni obstacle, ni créature, ni balise ; l'eau, elle, est permise, la foreuse patauge. Échap, ou trois cases impossibles validées de suite, **la reforme sur place** : la capsule est perdue, mais on ne reste jamais bloqué hors du monde. **La trace au sol s'arrête net** (rien ne relie les deux points), le camouflage se rompt, et **le battement ne passe qu'à l'arrivée**. Distance minimale de réapparition d'un ennemi : réglable dans Lab → Items.
 
 **Créature étourdie** (batterie, Court-circuit) : elle ne fait plus rien, Puces comprises. Toute sa silhouette devient un **damier d'un pixel sur deux, couleur bio et couleur bâti en quinconce**, les deux couleurs **s'échangeant à chaque battement**. **La foreuse prend le même damier quand elle est immobilisée** (tenue par un Bloqueur) ; il prime sur ses autres allures (engluée, camouflée, en surrégime).
 

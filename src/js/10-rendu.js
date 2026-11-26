@@ -73,6 +73,18 @@ function tuileEtourdie(base){if(!base)return base;const ph=(G.turn||0)&1,a=PAL['
       p[q+2]=k[2];p[q+3]=255;}
     x.putImageData(im,0,0);}catch(e){}
   return m[cle]=c;}
+/* Dissolution d'une tuile au pixel (phaseur, 26 novembre 2026). Les 256 pixels s'effacent dans un ordre tiré une fois pour
+   toutes, le même à chaque partie : aucun appel à Math.random, l'empreinte des cartes reste intacte. Pixel art strict — un
+   pixel est là ou il n'y est pas, jamais à moitié transparent. reste va de 0 (rien) à 1 (la tuile entière).
+   Les tuiles produites sont mises en cache par tuile d'origine et par seizième : dix-sept au plus par tuile. */
+const PHASE_ORD=(()=>{const a=[...Array(256).keys()];let g=0x5eed;
+  for(let i=255;i>0;i--){g=(g*1103515245+12345)&0x7fffffff;const j=g%(i+1),t=a[i];a[i]=a[j];a[j]=t;}return a;})();
+const PHASE_VAR=new WeakMap();
+function tuilePhase(base,reste){if(!base)return base;const n=Math.max(0,Math.min(16,Math.round(reste*16)));if(n>=16)return base;
+  let m=PHASE_VAR.get(base);if(!m){m={};PHASE_VAR.set(base,m);}if(m[n])return m[n];
+  const c=document.createElement('canvas');c.width=c.height=16;const x=c.getContext('2d');
+  if(n>0){x.drawImage(base,0,0,16,16);for(let k=n*16;k<256;k++){const q=PHASE_ORD[k];x.clearRect(q&15,q>>4,1,1);}}
+  return m[n]=c;}
 /* Trait de laser au pixel de tuile (u = 1/16 de case) de (ax, ay) à (bx, by), en pixels de tuile : couleur col (danger par
    défaut), avec etinc étincelles blanches ou accent qui sautent le long du trait. */
 function traitLaser(u,ax,ay,bx,by,graine,etinc,col){let x0=Math.round(ax),y0=Math.round(ay);const x1=Math.round(bx),y1=Math.round(by);
@@ -225,7 +237,8 @@ function render(){
   if(G&&G.sonar===1&&G.turn>=(G.sonarAt||0)&&started&&!INTRO&&!BOOM&&!G.over&&$('overlay').hidden&&$('introCv').hidden)sonarStart();
   if(!G||!TL.robot)return;ensureChasmOv();ensureSolOv();
   const vc=vw/S,vr=vh/S;
-  const fx0=freeCam?camCX:G.px,fy0=freeCam?camCY:G.py;
+  // la vue suit le viseur du phaseur (26 novembre 2026), comme elle suit le cadre du mode carte
+  const fx0=PHASE?PHASE.x:freeCam?camCX:G.px,fy0=PHASE?PHASE.y:freeCam?camCY:G.py;
   camX=Math.max(0,Math.min(W-Math.floor(vc),fx0-Math.floor(vc/2)));camY=Math.max(0,Math.min(H-Math.floor(vr),fy0-Math.floor(vr/2)));
   ox=0;oy=0;
   ctx.globalAlpha=1;ctx.imageSmoothingEnabled=false;ctx.fillStyle=FOND;ctx.fillRect(0,0,vw,vh);
@@ -345,9 +358,20 @@ function render(){
   if(VISEE){const t=viseeTuile();ctx.globalAlpha=1;
     for(const [zx,zy] of viseeCases()){
       if(zx<0||zy<0||zx>=W||zy>=H)continue;ctx.drawImage(t,(zx-camX)*S,(zy-camY)*S,S,S);}}
-  const wreck=BOOM||(G.over&&G.over.dead);   // foreuse détruite : plus dessinée
+  /* Viseur du phaseur (26 novembre 2026) : un cadre d'un pixel de tuile et une croix au centre. Il dit tout de suite si la
+     case convient — bio quand la foreuse peut s'y reformer, danger quand le terrain est inconnu ou ne la porterait pas. */
+  if(PHASE){const u=S/16,ok=phaseConnu(PHASE.x,PHASE.y)&&phaseTient(PHASE.x,PHASE.y),px=(PHASE.x-camX)*S,py=(PHASE.y-camY)*S;
+    ctx.globalAlpha=1;ctx.fillStyle=ok?PAL['2']:PAL['4'];
+    for(let k=0;k<16;k++)if(k<5||k>10){ctx.fillRect(px+k*u,py,u,u);ctx.fillRect(px+k*u,py+15*u,u,u);
+      ctx.fillRect(px,py+k*u,u,u);ctx.fillRect(px+15*u,py+k*u,u,u);}
+    for(let k=6;k<10;k++){ctx.fillRect(px+k*u,py+7*u,u,u);ctx.fillRect(px+7*u,py+k*u,u,u);}}
+  /* Phaseur : la foreuse se démonte pixel par pixel (out), ou se reforme (arrivée). Entre les deux, pendant la visée longue,
+     elle n'est plus dessinée du tout — elle n'est nulle part. */
+  const fph=FX.find(f=>f.kind==='phase'&&f.robot);
+  const wreck=BOOM||(G.over&&G.over.dead)||(PHASE&&!fph);   // foreuse détruite, ou hors phase : plus dessinée
   if(!wreck){const [lx,ly]=lungeOff(f=>f.kind==='lunge'&&f.robot);ctx.globalAlpha=1;
-    ctx.drawImage(robotTuile(),(G.px-camX)*S+lx,(G.py-camY)*S+ly,S,S);}
+    const rt=fph?tuilePhase(robotTuile(),fph.out?1-fxP(fph):fxP(fph)):robotTuile();
+    ctx.drawImage(rt,(G.px-camX)*S+lx,(G.py-camY)*S+ly,S,S);}
   const ht=G.t[idx(G.px,G.py)];if(wreck){}else if(ht===LIQ)put(TL.wade,G.px,G.py,.95);else if(ht===DEEP)put(TL.wadeDeep,G.px,G.py,.95);
   for(const f of FX){if(f.kind!=='num')continue;const p=fxP(f),rise=reduced?0:p*14;
     ctx.globalAlpha=p<.6?1:1-(p-.6)/.4;ctx.font='bold 14px "JetBrains Mono", ui-monospace, monospace';ctx.textAlign='center';
@@ -395,7 +419,47 @@ function render(){
      w=Math.ceil(vw/u),h=Math.ceil(vh/u),q=R*Math.SQRT1_2;
      const dot=(px,py)=>{if(px>=0&&py>=0&&px<w&&py<h)ctx.fillRect(px*u,py*u,u,u);};
      for(let d=-Math.ceil(q);d<=Math.ceil(q);d++){const e=Math.round(Math.sqrt(Math.max(0,R*R-d*d)));dot(cx+d,cy-e);dot(cx+d,cy+e);
-       dot(cx-e,cy+d);dot(cx+e,cy+d);}}}
+       dot(cx-e,cy+d);dot(cx+e,cy+d);}}
+   /* Un visuel propre à chaque consommable (26 novembre 2026, demande de l'utilisateur). Avant, le module de puissance
+      empruntait les flèches de la batterie, et le surrégime comme le camouflage n'avaient rien du tout.
+      Pixel art strict partout : tout est calé sur la grille des pixels de tuile, opaque, sans dégradé ni transparence.
+      – phase : la tuile d'une créature qui se démonte pixel par pixel (phaseur) ;
+      – onde  : deux anneaux de pixels qui s'ouvrent, couleur bio (phaseur, départ et arrivée) ;
+      – boost : des grains qui convergent vers la case, puis un cadre qui s'allume, couleur accent (module de puissance) ;
+      – fury  : huit dards qui battent autour de la case, couleur danger (surrégime) ;
+      – veil  : un rideau tramé qui descend sur la case, couleur monde (camouflage optique) ;
+      – zap   : un éclair brisé de la foreuse à la cible, couleur accent, coudes renouvelés douze fois par seconde (court-circuit). */
+   for(const f of FX)if(f.kind==='phase'&&f.tl){const p=fxP(f);ctx.globalAlpha=1;
+     ctx.drawImage(tuilePhase(f.tl,f.out?1-p:p),(f.x-camX)*S,(f.y-camY)*S,S,S);}
+   for(const f of FX)if(f.kind==='onde'){const p=fxP(f),cx=Math.round((f.x+.5-camX)*16),cy=Math.round((f.y+.5-camY)*16);
+     ctx.fillStyle=PAL['2'];
+     for(const d0 of [0,.3]){if(p<d0)continue;const R=(p-d0)/(1-d0)*f.r*16,q=R*Math.SQRT1_2;
+       for(let d=-Math.ceil(q);d<=Math.ceil(q);d++){const e=Math.round(Math.sqrt(Math.max(0,R*R-d*d)));
+         ctx.fillRect((cx+d)*u,(cy-e)*u,u,u);ctx.fillRect((cx+d)*u,(cy+e)*u,u,u);
+         ctx.fillRect((cx-e)*u,(cy+d)*u,u,u);ctx.fillRect((cx+e)*u,(cy+d)*u,u,u);}}}
+   for(const f of FX)if(f.kind==='boost'){const p=fxP(f),bx=(f.x-camX)*16,by=(f.y-camY)*16,px=(f.x-camX)*S,py=(f.y-camY)*S;
+     ctx.fillStyle=PAL['1'];
+     for(let n=0;n<f.gr.length;n++){const g=f.gr[n],q=(p-g.d)*2.2;if(q<0||q>1)continue;
+       // chaque grain part d'un anneau hors de la case et tombe vers le centre : on voit l'énergie entrer
+       const a=n/f.gr.length*Math.PI*2+g.d*3,R=14*(1-q);
+       ctx.fillRect(Math.round(bx+7+Math.cos(a)*R)*u,Math.round(by+7+Math.sin(a)*R)*u,2*u,2*u);}
+     if(p>.72)for(let k=0;k<16;k++){ctx.fillRect(px+k*u,py,u,u);ctx.fillRect(px+k*u,py+15*u,u,u);
+       ctx.fillRect(px,py+k*u,u,u);ctx.fillRect(px+15*u,py+k*u,u,u);}}
+   for(const f of FX)if(f.kind==='fury'){const p=fxP(f),bat=reduced?0:Math.floor(p*9)&1,
+     L=2+Math.round(Math.sin(p*Math.PI)*5)+bat,bx=(f.x-camX)*16,by=(f.y-camY)*16;ctx.fillStyle=PAL['4'];
+     for(const [dx,dy] of DIRS)for(let k=5;k<5+L;k++)ctx.fillRect(Math.round(bx+7.5+dx*k)*u,Math.round(by+7.5+dy*k)*u,u,u);}
+   for(const f of FX)if(f.kind==='veil'){const p=fxP(f),px=(f.x-camX)*S,py=(f.y-camY)*S,haut=Math.round(p*22)-6;
+     ctx.fillStyle=PAL['3'];
+     for(let j=0;j<16;j++){const r=j-haut;if(r<0||r>5)continue;
+       for(let i=0;i<16;i++)if((i+j)&1)ctx.fillRect(px+i*u,py+j*u,u,u);}}
+   for(const f of FX)if(f.kind==='zap'&&fxP(f)<.85){const p=fxP(f),ax=(f.ax+.5-camX)*16,ay=(f.ay+.5-camY)*16,
+     bx=(f.bx+.5-camX)*16,by=(f.by+.5-camY)*16,dx=bx-ax,dy=by-ay,L=Math.hypot(dx,dy)||1,nx=-dy/L,ny=dx/L,
+     ph=reduced?0:Math.floor(p*12),pt=[[ax,ay]];
+     // quatre tronçons, coudes renouvelés douze fois par seconde : le trait crépite au lieu de rester droit
+     for(let k=1;k<4;k++){const t=k/4,o=((ph*(3+k)+k*5)%11-5)*(1-Math.abs(t*2-1))*1.6;
+       pt.push([ax+dx*t+nx*o,ay+dy*t+ny*o]);}
+     pt.push([bx,by]);
+     for(let k=0;k<4;k++)traitLaser(u,pt[k][0],pt[k][1],pt[k+1][0],pt[k+1][1],f.t0+k+ph,k===3?4:2,'#ffffff');}}
   if(BOOM)drawBoom();
   ctx.restore();
   smokeKick();

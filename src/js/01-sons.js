@@ -112,6 +112,25 @@ const SFX={
     noiz(1.7,.17,2600,'bandpass',.05,700);
     noiz(1.9,.07,900,'lowpass',.06,260);
     tone(430,1.3,'sine',.018,120,.07);},
+  /* Consommables, suite (26 novembre 2026) : chaque objet a maintenant son bruit, aucun n'est partagé avec un autre.
+     Avant, le module de puissance empruntait celui de l'analyse, le surrégime celui des coups critiques, le camouflage
+     celui du fumigène et le court-circuit celui des lasers : on ne les distinguait pas à l'oreille. */
+  // Module de puissance : trois paliers qui montent et se verrouillent, puis une basse qui s'installe
+  boost(){[392,523,659].forEach((f,i)=>tone(f,.12,'square',.05,null,i*.1));
+    tone(1046,.3,'triangle',.05,1318,.3);tone(98,.5,'sawtooth',.05,65,.3);},
+  // Surrégime : un rugissement bref et un cliquetis rapide qui s'emballe
+  fury(){tone(120,.35,'sawtooth',.1,210);noiz(.3,.1,420,'lowpass',0,1500);
+    for(let i=0;i<7;i++)tone(2200+i*160,.04,'square',.03,null,.1+i*.045);},
+  // Camouflage optique : un balayage qui descend et s'efface, sans attaque — le contraire du fumigène, qui claque
+  veil(){souffle(.9,.09,3800,260,.25);tone(880,.7,'sine',.035,110);tone(1320,.5,'sine',.018,180,.12);},
+  // Court-circuit : l'arc électrique, quatre craquements secs et une plainte qui tombe
+  zap(){for(let i=0;i<4;i++)noiz(.05,.16,5600,'highpass',i*.06);
+    tone(1900,.18,'square',.05,140);tone(640,.3,'sawtooth',.04,70,.1);},
+  /* Phaseur (26 novembre 2026) : deux temps dans un seul bruit — la foreuse qui se démonte (plainte qui monte, souffle qui
+     s'ouvre) puis la reprise de forme à l'arrivée (claquement sourd et harmonique qui se referme). */
+  phase(){tone(220,.4,'sine',.055,1760);souffle(.45,.1,400,4200,.2);
+    tone(1760,.12,'square',.03,2640,.3);
+    noiz(.1,.14,2400,'bandpass',.5,600);tone(1320,.3,'triangle',.05,330,.52);tone(110,.4,'square',.06,74,.52);},
   squish(){noiz(.18,.25,900,'lowpass',0,250);tone(160,.12,'square',.07,60);},
   screech(){tone(2600,.09,'sawtooth',.06,3800);tone(3400,.12,'square',.04,2200,.08);noiz(.15,.08,5000,'highpass',.02);},
   // alarme de la balise (22 novembre 2026) : sirène à deux tons, six alternances en un peu moins d'une seconde et demie
