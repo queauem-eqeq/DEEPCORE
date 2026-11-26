@@ -99,6 +99,11 @@ Pour le passage au niveau suivant. Vue **de côté**, tout en **caractères ASCI
   abandonnée. Maximum 60 par descente ; mesuré : 6 sans piloter, 54 en visant (`test-forage.js`).
   
 - **Annonce en gros** : alignée à gauche, juste sous le tableau de bord, dans un cadre plein à fond noir avec deux bandes de chantier. Tout en **police DOS** (Modern DOS 8x16, CP437, domaine public : `02b-police-dos.js`, `dosCar`, `dosTexte`), un pixel de police calé sur des pixels d'écran, d'après les références de l'utilisateur (`F:\WORK\IAZONE\DEEPCORE\REF`). **Apparition** (2 s), de gauche à droite avec du désordre : chaque case monte en densité « . → i → 0 », puis montre des caractères au hasard sur des pavés de couleur (couleur de l'alerte ou gris, en inverse vidéo) avant de se figer ; le rebord et les bandes montent en « ░ ▒ ▓ █ ». Le message reste 4 s. **Disparition** (1 s), colonne par colonne de gauche à droite, à rebours : pavés, « 0 → i → . », plus rien ; la roche reparaît derrière. Première descente : « MATIÈRE {µ} DÉTECTÉE / COLLECTE POSSIBLE » (couleur accent) ; seconde : « EXPLOSIFS DÉTECTÉS / ATTENTION SOUS-SOL PIÉGÉ ! » (rouge). Le cadre a **la même taille aux deux descentes et à l'arrivée** (30 cases de large, règle `fgAnnP`, 30 % de la largeur de l'écran) ; deux lignes sont réservées sous le tableau de bord pour ses alertes qui clignotent, que l'annonce ne cache pas.
+  **Taille fixe** (26 novembre 2026) : elle ne suit plus la largeur de la fenêtre. Le cadre se calculait sur
+  30 % de la largeur réelle, donc l'annonce grossissait dès qu'on agrandissait la fenêtre ; le même calcul se fait
+  maintenant sur une **largeur de référence** (`FG_ANN_REF`, 1280 pixels CSS), donc la taille est celle qu'elle
+  avait dans une fenêtre de 1280 et n'en bouge plus. Le dpr reste pris en compte, pour la même taille apparente sur
+  un écran fin. Vaut aussi pour l'arrivée en ASCII (`14e`), qui appelle le même `fgAnnP`.
 
 **Foreuse détruite pendant une descente** . Tout se joue
 **sur la grille de la descente** (elle ne change pas), **chaque case dessinée opaque** (aucune transparence). Un coup très
