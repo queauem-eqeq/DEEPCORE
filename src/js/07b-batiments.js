@@ -5,14 +5,16 @@
 // dessin d'une case bâtie ; put(tuile, opacité) vient du rendu de la partie ou de celui de l'intro
 function batiTuile(t,x,y,put){
   if(t===LOCK){put(TL.floor,.5);put(TL.lock,1);return;}
-  if(t===WALL||t===SECRET){const b=y<H-1?G.t[idx(x,y+1)]:WALL;put(b===WALL||b===SECRET?TL.wall:TL.wallFace,.95);
-    /* Ce qui se cache dans le mur se dessine à **l'opacité du mur** (26 novembre 2026) et jamais au-dessus : à 1, la
-       niche ressortait plus claire que le mur dans le brouillard et se lisait en transparence. Caché (niche 3, mur
-       piégé pas encore repéré), on ne dessine rien du tout : le mur est un mur. */
+  if(t===WALL||t===SECRET){const b=y<H-1?G.t[idx(x,y+1)]:WALL,base=(b===WALL||b===SECRET)?'wall':'wallFace';
+    /* Ce qui se cache dans le mur (26 novembre 2026) : **jamais d'alpha**. Soit on ne le voit pas, parce qu'il n'est
+       pas repéré, et le mur est un mur ; soit on le voit, et c'est une tuile **composée dans le mur** (murComposites,
+       05-tuiles-editables), dessinée en une seule fois. Superposer deux tuiles les rendait toutes deux translucides
+       dans le brouillard — chaque couche y est dessinée à l'opacité du brouillard — et la niche se lisait au travers. */
     const i=idx(x,y),nc=G.niche&&G.niche[i],mp=G.murp&&G.murp[i];
-    if(nc===1||nc===2)put(nc===2?TL.nicheOuverte:TL.niche,.95);
-    if(mp&&mp.vu)put(mp.on?(mp.k==='laser'?TL.piegeLaser:TL.piegeMine):TL.nicheOuverte,.95);
-    return;}
+    let sur=null;
+    if(mp&&mp.vu)sur=mp.on?(mp.k==='laser'?'piegeLaser':'piegeMine'):'nicheOuverte';
+    else if(nc===1)sur='niche';else if(nc===2)sur='nicheOuverte';
+    put(sur?TL[base+'_'+sur]:TL[base],.95);return;}
   put(TL.floor,.5);
   if(t===PILLAR)put(TL.pillar,.95);
   else if(t===VITRE)put(TL.vitre,.95);

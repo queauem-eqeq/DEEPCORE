@@ -494,9 +494,15 @@ pièce ils deviennent du sol, sous un mur du mur) ; seuls le vaisseau et le bord
     **laser encastré** (un tir depuis le mur, PRE 85, 6-10 dégâts) et **mine embusquée** (une Mine sort du mur,
     déjà en chasse).
 - **Les niches des salles piégées sont cachées elles aussi** depuis le 26 novembre 2026 : `G.niche` vaut **3**
-  (cachée), **1** (repérée, fermée) ou **2** (ouverte). Avant, elles se voyaient d'emblée. Ce qui se cache dans un
-  mur se dessine à **l'opacité du mur** et jamais au-dessus : à 1, la niche ressortait plus claire que le mur dans
-  le brouillard et se lisait en transparence.
+  (cachée), **1** (repérée, fermée) ou **2** (ouverte). Avant, elles se voyaient d'emblée.
+- **Jamais d'alpha sur ce qui se cache dans un mur.** Deux états, pas trois : on ne le voit pas parce qu'il n'est
+  pas repéré, et le mur est un mur ; ou on le voit, repéré ou déclenché. Une niche, un laser encastré ou une mine
+  embusquée ne sont donc **pas dessinés par-dessus le mur** : la tuile est **composée dans celle du mur** à la
+  construction des tuiles (`murComposites`, `05-tuiles-editables.js`) et dessinée en une seule fois.
+  Pourquoi : la tuile de mur a des **pixels transparents entre ses briques**, et chaque couche du rendu est
+  dessinée à l'opacité du brouillard. Superposer deux tuiles laissait donc voir les briques au travers du fond
+  noir de la niche. Composées, les 56 pixels de la niche sont opaques, et le tout s'assombrit d'un bloc comme
+  n'importe quel mur. La règle vaut pour toute tuile à venir posée dans un mur.
 - **Les murs ne se percent pas à la foreuse** : seule la **charge sismique** les ouvre. Entrer dans une salle
   murée coûte donc un consommable rare.
 - **Pas de gouffre à l'intérieur des pièces** pour l'instant : le code existe, désactivé par le drapeau

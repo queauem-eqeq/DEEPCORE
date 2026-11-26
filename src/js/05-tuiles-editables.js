@@ -78,15 +78,25 @@ const batiSrc=k=>{const f=PAT[k];return typeof f==='function'?(x,y)=>{const c=f(
 const tuileSrc=k=>EAU_TUILES.includes(k)?eauSrc(k):BATI_TUILES.includes(k)?batiSrc(k):PAT[k];
 // tuiles d'eau : encre bio -> couleur eau
 function eauSrc(k){const f=PAT[k];return typeof f==='function'?(x,y)=>{const c=f(x,y);return c==='2'?'e':c;}:f.map(r=>r.replace(/2/g,'e'));}
+/* Une tuile posée DANS une autre (26 novembre 2026) : le caractère du dessus s'il n'est pas transparent, sinon celui
+   du dessous. Sert aux niches et aux murs piégés, composés une fois pour toutes dans la tuile du mur. Les superposer
+   au moment du rendu les rendait toutes deux translucides dans le brouillard (chaque couche est dessinée à l'opacité
+   du brouillard), et la niche se lisait en transparence : ici le mur disparaît vraiment sous la niche. */
+const tuileDans=(bas,haut)=>{const b=tuileSrc(bas),h=tuileSrc(haut);
+  return (x,y)=>{const c=typeof h==='function'?h(x,y):h[y][x];
+    return c&&c!=='.'?c:(typeof b==='function'?b(x,y):b[y][x]);};};
+const MUR_DANS=['niche','nicheOuverte','piegeLaser','piegeMine'];
+function murComposites(){for(const bas of ['wall','wallFace'])for(const haut of MUR_DANS)
+  TL[bas+'_'+haut]=tileCanvas(tuileDans(bas,haut));}
 function rebuildTile(k){for(const d of TILE_DEPS[k]||[k]){if(d==='ship')TL.ship=tileCanvas(TF('ship'),SGW*16,SGH*16);
   else if(PAT[d])TL[d]=tileCanvas(tuileSrc(d));if(/^(an|bz)\d+r$|^robot_r$/.test(d)){try{ICON[d]=TL[d].toDataURL();
-  }catch(e){}}}buildCursor();if(k==='robot_u')robotTiles();}
+  }catch(e){}}}murComposites();buildCursor();if(k==='robot_u')robotTiles();}
 function buildTiles(){
   TL={};for(const k in PAT)TL[k]=tileCanvas(tuileSrc(k));
   // la Matière reprend les dessins des éclats de métal (retouches comprises), en couleur accent au lieu de bio
   for(const k of ['ore','ore1','ore2','oreSol','oreSol1','oreSol2']){const f=TF(k);
     TL[k.replace('ore','mat')]=tileCanvas((x,y)=>{const c=f(x,y);return c==='2'?'1':c;});
-    }TL.ship=tileCanvas(TF('ship'),SGW*16,SGH*16);buildCursor();
+    }TL.ship=tileCanvas(TF('ship'),SGW*16,SGH*16);murComposites();buildCursor();
   ICON={};for(const k in TL)if(/^(an|bz)\d+r$|^robot_r$/.test(k)){try{ICON[k]=TL[k].toDataURL();}catch(e){}}
   robotTiles();
   ANIMG=SPECIES.map((_,i)=>{try{return TL['an'+i+'r'].toDataURL();}catch(e){return '';}});
