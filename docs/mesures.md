@@ -882,9 +882,28 @@ Mesuré avec `python3 outils/jeu.py DOSSIER outils/scripts/mesure-perf.js`, sur 
 | Tour complet (`tryMove`) | 5,8 ms | 36 ms | 159 ms |
 | Au repos, rappels d'image sur 3 s | 3,0 ms | 7,4 ms | 10,4 ms |
 
-Mémoire JS : 19,6 Mo. Au repos : environ 26 rappels d'image par seconde, soit **près de 8 % de CPU** alors que rien ne bouge.
+Mémoire JS : 19,6 Mo. *Correction du même jour : les « 8 % de CPU au repos » venaient des effets laissés par les pas d'essai.
+Une fois ces effets finis, la boucle d'animation s'arrête bien ; au repos, seul le battement des liquides (`setInterval`, toutes
+les 650 ms) redessine l'écran.*
 
 Lecture :
 - Le moteur (vue, ennemis) est léger. Le coût vient du **dessin** : `render` redessine toute la fenêtre à chaque appel.
 - Les pics de 30 à 80 ms **ne sont pas un effet de démarrage** : ils reviennent tout au long de la mesure (ramasse-miettes probable, à confirmer au profileur).
-- Pistes, **non vérifiées** : arrêter la boucle d'animation quand rien n'anime (`animVif` existe déjà) ; ne redessiner que les cases changées ; réduire les objets créés à chaque tour. Après chaque piste : `outils/verifier.py` doit laisser l'empreinte identique.
+### Allègement du rendu (26 novembre 2026, même jour)
+
+Profil (`python3 outils/profil.py`, 200 rendus + 200 pas) avant : `drawImage` 49 %, `fillRect` 10 %, journal (`logDraw`) 9 %,
+mini-carte 6 %, patrouilles (`etend`) 5 %. Deux changements, **sans rien changer à l'écran** (contrôlé au pixel près par
+`outils/scripts/empreinte-image.js`, vue + mini-carte + journal) ni au jeu (`outils/verifier.py` : empreinte identique) :
+- **Mini-carte** : son fond est gardé dans un canevas à part ; on ne repeint que les cases dont le terrain ou l'état « vu »
+  a changé (avant : 6 144 cases à chaque rendu, y compris chaque image d'effet et chaque battement des liquides).
+- **Journal** : seuls les tours qui ont changé sont refaits (avant : les 200 messages reconstruits à chaque tour).
+
+Résultat, trois passes de chaque côté : **environ 15 % de CPU en moins** sur le même scénario (17 300 → 14 700
+échantillons de profil). Les temps moyens de `render` et du tour bougent peu (≈ 6 ms et ≈ 11 ms) : le bruit de Chromium
+sans carte graphique est du même ordre.
+
+Ce qui reste : **60 % du temps est le dessin des tuiles de la vue principale** (`drawImage`, plusieurs couches par case).
+Le gros gain serait un cache du terrain de la vue (ne repeindre que les cases changées, décaler l'image quand la caméra
+bouge, liquides à part). C'est une refonte de `render` (voisins des murs, ponts, gisements, brouillard) : à faire avec Opus,
+contrôlée par `empreinte-image.js`, et **après une mesure sur un vrai navigateur** : avec une carte graphique, `drawImage`
+coûte bien moins cher et le gain pourrait ne pas valoir le risque.

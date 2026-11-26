@@ -28,6 +28,7 @@ mv.addEventListener('pointerdown',ev=>{if(!G||!$('overlay').hidden||ev.button>0)
 mv.addEventListener('pointermove',ev=>{if(miniDrag)miniMove(ev);});
 const miniEnd=()=>{if(!miniDrag)return;miniDrag=null;mv.style.cursor='';};
 mv.addEventListener('pointerup',miniEnd);mv.addEventListener('pointercancel',miniEnd);
+const MINI_FOND={cv:document.createElement('canvas'),sig:'',G:null,t:null,vu:null};
 function mini(){
   // la mini-carte occupe toute la largeur de la colonne ; chaque case est calée sur des pixels entiers
   const VITRE_FIN=.45;
@@ -43,13 +44,24 @@ function mini(){
   /* Mur vitré (26 novembre 2026) : sa valeur (31) est hors de la table C, il retombait donc sur la teinte la plus
      pâle et ne se lisait pas comme un mur. Il prend la couleur du mur, mais un **trait plus fin** — centré dans la
      case, VITRE_FIN de sa largeur, un pixel au moins : la ligne se voit, et on voit que c'est une vitre. */
-  const cellFin=(x,y)=>{const x0=X(x),y0=Y(y),w=X(x+1)-x0,h=Y(y+1)-y0,
-    iw=Math.max(1,Math.round(w*VITRE_FIN)),ih=Math.max(1,Math.round(h*VITRE_FIN));
-    mctx.fillRect(x0+((w-iw)>>1),y0+((h-ih)>>1),iw,ih);};
-  for(let y=0;y<H;y++)for(let x=0;x<W;x++){const i=idx(x,y);if(fog&&!G.seen[i])continue;const v=G.t[i];
-    if(v===VITRE){const [c,a]=C[WALL];mctx.globalAlpha=a;mctx.fillStyle=c;cellFin(x,y);continue;}
-    const [c,a]=C[v]||C[0];mctx.globalAlpha=a;mctx.fillStyle=c;cell(x,y);}
-  mctx.globalAlpha=1;
+  /* Fond de la mini-carte en cache (26 novembre 2026) : les 6 144 cases étaient redessinées à chaque rendu (chaque image
+     d'effet, chaque battement des liquides) pour retrouver presque la même image. On garde le fond dans un canevas à part
+     et on ne repeint que les cases dont le terrain ou l'état « vu » a changé ; tout est refait si la taille, le brouillard,
+     les couleurs ou la carte changent. Les cases ne se chevauchent pas : repeindre une case seule donne la même image. */
+  const sig=`${pw}|${ph}|${fog?1:0}|${C.map(c=>c[0]).join()}`,t=G.t,vu=G.seen,F=MINI_FOND;
+  const tout=F.sig!==sig||F.G!==G||!F.t||F.t.length!==t.length;
+  if(tout){F.sig=sig;F.G=G;F.cv.width=pw;F.cv.height=ph;F.t=new Int32Array(t.length).fill(-1);F.vu=new Uint8Array(t.length);}
+  const g=F.cv.getContext('2d');
+  if(tout){g.globalAlpha=1;g.fillStyle='#020605';g.fillRect(0,0,pw,ph);}
+  for(let y=0;y<H;y++)for(let x=0;x<W;x++){const i=idx(x,y),v=t[i],s=vu[i]?1:0;
+    if(!tout&&F.t[i]===v&&F.vu[i]===s)continue;
+    const x0=X(x),y0=Y(y),w=X(x+1)-x0,h=Y(y+1)-y0;
+    if(!tout){g.globalAlpha=1;g.fillStyle='#020605';g.fillRect(x0,y0,w,h);}
+    F.t[i]=v;F.vu[i]=s;if(fog&&!s)continue;
+    if(v===VITRE){const [c,a]=C[WALL],iw=Math.max(1,Math.round(w*VITRE_FIN)),ih=Math.max(1,Math.round(h*VITRE_FIN));
+      g.globalAlpha=a;g.fillStyle=c;g.fillRect(x0+((w-iw)>>1),y0+((h-ih)>>1),iw,ih);continue;}
+    const [c,a]=C[v]||C[0];g.globalAlpha=a;g.fillStyle=c;g.fillRect(x0,y0,w,h);}
+  mctx.globalAlpha=1;mctx.drawImage(MINI_FOND.cv,0,0);
   for(const s of G.sites){if(fog&&!s.seen)continue;mctx.fillStyle=s.known?PAL['3']:PAL['2'];cell(s.x-1,s.y-1,3,3);}
   {const sr=sonarR();if(sr>0&&G.ore){const d=Math.max(3,Math.round(k*1.4));for(const o in G.ore){const i=+o;if(!sonarVu(i,sr))continue;
     mctx.fillStyle=oreMat(G.ore[o])?PAL['1']:PAL['2'];mctx.fillRect(Math.round((i%W+.5)*k-d/2),Math.round((((i/W)|0)+.5)*k-d/2),d,d);}}
@@ -141,7 +153,7 @@ function side(){
 }
 /* Journal du bas (22 novembre 2026) : il défile (molette, barre) pour relire les messages plus anciens. Il n'est refait que
    quand il change ; un nouveau message le ramène tout en bas, sinon on reste là où on lisait. */
-let LOG_SIG='';
+let LOG_SIG='',LOG_LI=[];
 const LOG_PAS=.13,LOG_SOMBRE=.4;   // un tour s'assombrit de LOG_PAS par tour d'âge, sans descendre sous LOG_SOMBRE
 function logDraw(){const lg=G.log||[],L=lg[lg.length-1],nouveau=`${lg.length}|${L?L.m+L.n+L.t:''}`,sig=nouveau+'|'+G.turn;
   if(sig===LOG_SIG)return;
@@ -151,7 +163,7 @@ function logDraw(){const lg=G.log||[],L=lg[lg.length-1],nouveau=`${lg.length}|${
      l'âge jusqu'à un plancher : le tour en cours reste franc, les anciens s'effacent sans disparaître. */
   const blocs=[];
   for(const e of lg){const b=blocs[blocs.length-1];if(b&&b.t===e.t)b.ev.push(e);else blocs.push({t:e.t,ev:[e]});}
-  el.innerHTML=blocs.map((b,i)=>{const op=Math.max(LOG_SOMBRE,1-(blocs.length-1-i)*LOG_PAS);
+  const S=blocs.map((b,i)=>{const op=Math.max(LOG_SOMBRE,1-(blocs.length-1-i)*LOG_PAS);
     return `<li class="tour${b.t===G.turn?' new':''}" style="opacity:${op.toFixed(2)}">`+
       `<span class="t">T${String(b.t).padStart(3,'0')}</span><span class="evs">`+
       /* Les messages d'un tour se suivent sur la MÊME ligne, séparés par ║ (26 novembre 2026). Chaque message est
@@ -160,7 +172,15 @@ function logDraw(){const lg=G.log||[],L=lg[lg.length-1],nouveau=`${lg.length}|${
          qu'il suit, pour ne jamais se retrouver seul en début de ligne. */
       b.ev.map((e,k)=>`<span class="ev ${e.c||''}">${e.m}${e.n>1?`<span class="x">×${e.n}</span>`:''}`+
         (k<b.ev.length-1?'<span class="sep">║</span>':'')+'</span>').join('')+
-      '</span></li>';}).join('');
+      '</span></li>';});
+  /* Seuls les tours qui ont changé sont refaits (26 novembre 2026) : avant, les 200 messages étaient reconstruits à
+     chaque tour, alors que seuls les derniers changent (nouveaux messages, assombrissement). Même texte, même page. */
+  const O=LOG_LI,li=el.children;
+  if(li.length!==O.length)el.innerHTML=S.join('');
+  else{const n=Math.min(O.length,S.length);for(let i=0;i<n;i++)if(O[i]!==S[i])li[i].outerHTML=S[i];
+    for(let i=O.length-1;i>=S.length;i--)li[i].remove();
+    if(S.length>n)el.insertAdjacentHTML('beforeend',S.slice(n).join(''));}
+  LOG_LI=S;
   el.scrollTop=bas?el.scrollHeight:top;}
 
 

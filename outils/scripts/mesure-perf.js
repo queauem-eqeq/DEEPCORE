@@ -2,9 +2,12 @@
 // Renvoie, pour chaque étape, la médiane, le 95e centile et le pire cas en millisecondes.
 (async () => {
   const st = a => { const s = [...a].sort((x, y) => x - y), q = p => s[Math.min(s.length - 1, Math.floor(p * s.length))];
-    return `méd ${q(.5).toFixed(2)} · p95 ${q(.95).toFixed(2)} · max ${s[s.length - 1].toFixed(2)} ms (n=${s.length})`; };
+    return `moy ${(a.reduce((x,y)=>x+y,0)/a.length).toFixed(2)} · méd ${q(.5).toFixed(2)} · p95 ${q(.95).toFixed(2)} · max ${s[s.length - 1].toFixed(2)} ms (n=${s.length})`; };
   const chrono = (n, f) => { const t = []; for (let i = 0; i < n; i++) { const a = performance.now(); try { f(i); } catch (e) { t.push(-1); continue; } t.push(performance.now() - a); } return t; };
   const out = {};
+  // hasard fixé : la même carte et les mêmes pas à chaque mesure, pour comparer deux versions du code
+  const vrai = Math.random; let gr = 7; Math.random = () => { gr = (gr + 0x6D2B79F5) | 0; let t = Math.imul(gr ^ (gr >>> 15), 1 | gr);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
   // 1. Génération complète d'un niveau (carte, bâtiments, faune)
   out['génération newGame'] = st(chrono(6, () => newGame()));
   // 2. Pièces du tour, isolées
@@ -15,7 +18,9 @@
   // 3. Un tour complet vu du joueur : un pas dans une direction au hasard (déplacement + IA + vue + rendu)
   const D = [[1, 0], [-1, 0], [0, 1], [0, -1]];
   out['tour (tryMove)'] = st(chrono(300, i => { const d = D[(i * 7 + (i >> 2)) % 4]; tryMove(d[0], d[1]); }));
+  Math.random = vrai;
   // 4. Charge au repos : temps passé dans les rappels d'image pendant 3 s sans rien faire
+  FX.length = 0; render(); await new Promise(r => setTimeout(r, 1500));   // laisser finir les effets des pas
   const T = [], raf = window.requestAnimationFrame.bind(window);
   window.requestAnimationFrame = cb => raf(ts => { const a = performance.now(); cb(ts); T.push(performance.now() - a); });
   await new Promise(r => setTimeout(r, 3000));

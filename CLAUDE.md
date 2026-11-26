@@ -31,7 +31,7 @@ Le jeu est une page web en plusieurs fichiers (`src/`), **sans étape d'assembla
 - `python3 outils/jeu.py DOSSIER [script.js]` : image de la partie, intro passée ; le script prépare la
   scène dans la page et renvoie ce qu'on veut lire.
 - `python3 outils/simul.py [detection|fuite|tout]` : rejoue des situations dans le moteur et mesure.
-- `python3 outils/perf.py` : fluidité de l’intro. `python3 outils/jeu.py DOSSIER outils/scripts/mesure-perf.js` : temps de calcul en partie (génération, vue, ennemis, tour, rendu, CPU au repos), à comparer avec `docs/mesures.md`.
+- `python3 outils/perf.py` : fluidité de l’intro. `python3 outils/jeu.py DOSSIER outils/scripts/mesure-perf.js` : temps de calcul en partie (génération, vue, ennemis, tour, rendu, CPU au repos), à comparer avec `docs/mesures.md`. `python3 outils/profil.py [N]` : les fonctions qui coûtent le plus. `SANS_ANIM=1 python3 outils/jeu.py DOSSIER outils/scripts/empreinte-image.js` : empreinte de l'écran (vue, mini-carte, journal), à comparer avant/après une optimisation du rendu qui ne doit rien changer à l'image.
 - `python3 outils/animation_cavernes.py SORTIE.gif [essais] [réglages]` : GIF animé de la génération d'un niveau « cavernes » (roche, cavernes, boyaux, bâtiments, portes), tiré du vrai moteur sans toucher à `src/`.
 - `python3 outils/animation_niveau.py atterrissage|classique SORTIE.gif [essais]` : même chose pour le niveau 1 et la recette classique (relief, vaisseau, site, bâtiments, tunnels).
 - `python3 outils/planche_cartes.py SORTIE.png amb:RECETTE [taille]` : douze cartes côte à côte avec leurs mesures, une par
