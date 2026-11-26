@@ -922,3 +922,26 @@ résolution coûte même plus cher. Le gain vient de dessiner moins de pixels et
 obtenue est identique au pixel près à la pleine résolution (comparée). Sur ordinateur, l'écran reste identique
 (`empreinte-image.js`).
 
+
+### Ce qui ralentit un tour (26 novembre 2026)
+
+Outils : `outils/scripts/acoups.js` (chaque étape d'un pas chronométrée, 300 pas, hasard fixé) et
+`outils/scripts/mesure-logique.js` (le calcul de jeu seul, sans dessin, 1000 pas par recette).
+
+- **Le calcul de jeu est léger.** Sans le dessin, un pas coûte en moyenne 1 à 2 ms ; 99 % des pas restent sous 7 ms ;
+  le pire vu, 16 ms (cavernes, 33 ennemis). Rien à corriger d'urgence.
+- **Les pics de 30 à 50 ms d'un tour sont tous dans le dessin**, et **pas dans le jeu** : la même scène, redessinée
+  100 fois de suite sans jouer, dépasse 15 ms une fois sur trois. C'est Chromium sans carte graphique qui exécute le
+  dessin par paquets ; sur une vraie machine, ce comportement est probablement différent. À confirmer sur le PC du joueur.
+- Une seule exception réelle dans le dessin : le **premier rendu d'un niveau** calcule le voile du sol et les bords des
+  gouffres (environ 30 ms, une fois par niveau ; pendant la descente, invisible).
+- Ce qui coûte dans les pas les plus lents du calcul de jeu :
+  - **`patBfs` (chemins de patrouille de la faune)** : 1 à 1,5 ms par appel, jusqu'à 6 appels dans un même battement ;
+  - **poursuites** (`chaseStep`, `robotDistAvoid`, `distFrom`) : jusqu'à 6 ou 7 ms quand plusieurs ennemis chassent ;
+  - **champ de vision** dans les cavernes : jusqu'à 8 ms (près de 400 lignes de vue tirées).
+- Pendant les effets (coups, projectiles, sonar), la boucle d'animation redessine **tout l'écran à chaque image** (60 fois
+  par seconde). C'est là que le dessin pèse vraiment en combat, sur n'importe quelle machine.
+
+Pistes, par gain attendu : (1) pendant un effet, ne redessiner que la couche des effets (`fxv`) quand le décor ne bouge
+pas ; (2) garder en mémoire les chemins de patrouille de la faune, recalculés seulement si la carte change ; (3) le cache
+du terrain de la vue (voir plus haut).
