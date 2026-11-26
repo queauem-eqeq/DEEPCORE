@@ -169,6 +169,11 @@ coupait) sont peintes. Créatures, objets, traces, effets et curseur se dessinen
 pas sur un nombre entier de pixels, le dessin se fait directement, sans cache. `DECOR_OFF = true` revient au dessin direct.
 Contrôle : `outils/scripts/test-decor-cache.js` (quatre recettes, cache contre dessin direct, au pixel près).
 
+### Plein écran (26 novembre 2026)
+Bouton **PLEIN ÉCRAN** sous Niv1 · Niv2 · Niv3 : met toute la page en plein écran (Échap ou le même bouton, devenu
+« QUITTER LE PLEIN ÉCRAN », pour en sortir) ; le jeu se redimensionne seul. Dans l'artefact claude.ai, le jeu est dans un
+cadre : si le site hôte refuse, le journal propose d'ouvrir le jeu dans un onglet à part ou d'appuyer sur F11.
+
 ### Souris et inspection
 
 - Le curseur système est masqué sur la carte ; le **viseur** est dessiné sur la case survolée. Dès qu'on appuie sur

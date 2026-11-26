@@ -341,3 +341,16 @@ $('fd-carte').addEventListener('toggle',()=>{if(G)render();});   // la mini-cart
   d.addEventListener('toggle',()=>{try{localStorage.setItem('np-'+id,d.open?'open':'closed');}catch(e){}});});
 $('restart').onclick=e=>{e.preventDefault();e.stopPropagation();unlock();SFX.start();newGame();started=true;
   $('overlay').hidden=true;render();};
+/* Plein écran (26 novembre 2026) : le bouton met toute la page en plein écran, ou en sort. Dans l'artefact claude.ai, la page
+   est dans un cadre : si le site hôte ne l'autorise pas, le navigateur refuse, et le journal le dit (ouvrir alors l'artefact
+   dans un onglet à part, ou passer le navigateur en plein écran avec F11). Le jeu se redimensionne seul (resize). */
+{const pb=$('pleinBtn'),dedans=()=>!!(document.fullscreenElement||document.webkitFullscreenElement);
+  const maj=()=>{pb.textContent=dedans()?'QUITTER LE PLEIN ÉCRAN':'PLEIN ÉCRAN';};
+  pb.addEventListener('click',e=>{e.currentTarget.blur();const d=document,el=d.documentElement;
+    if(dedans()){(d.exitFullscreen||d.webkitExitFullscreen).call(d);return;}
+    const f=el.requestFullscreen||el.webkitRequestFullscreen;
+    const refus=()=>{if(G)say('Plein écran refusé par la page qui contient le jeu : ouvrez-le dans un onglet à part, ou appuyez sur F11.','info');};
+    if(!f||!(d.fullscreenEnabled||d.webkitFullscreenEnabled)){refus();return;}
+    try{const p=f.call(el);if(p&&p.catch)p.catch(refus);}catch(er){refus();}});
+  for(const ev of ['fullscreenchange','webkitfullscreenchange'])document.addEventListener(ev,()=>{maj();setTimeout(()=>{resize();},60);});}
+
