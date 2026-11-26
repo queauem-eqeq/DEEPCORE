@@ -1,8 +1,24 @@
 /* ---------- Rendu ---------- */
 const cv=$('view'),ctx=cv.getContext('2d'),fcv=$('fxv'),fctx=fcv.getContext('2d');let cols=20,rows=15,camX=0,camY=0,vw=0,vh=0;
-function resize(){const r=$('mapwrap').getBoundingClientRect();vw=Math.max(1,Math.floor(r.width));vh=Math.max(1,Math.floor(r.height));
-  const dpr=devicePixelRatio||1;cv.width=vw*dpr;cv.height=vh*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);fcv.width=vw*dpr;fcv.height=vh*dpr;
-    fctx.setTransform(dpr,0,0,dpr,0,0);
+/* Tablette (26 novembre 2026) : sur un écran tactile, la vue montre au plus VUE_MAX × VUE_MAX cases. 21 = la portée de vue de
+   la foreuse (capteur 10) de part et d'autre : tout ce qu'elle voit tient à l'écran. Le canevas est dessiné à la résolution
+   de l'ordinateur (un point = un pixel), puis agrandi par le navigateur d'un facteur entier (VZ × densité de l'écran) :
+   l'image est exactement celle de l'ordinateur, en plus gros et nette, et il y a 9 fois moins de pixels à dessiner qu'à
+   pleine résolution (mesuré : environ 4 ms par image au lieu de 12 à 16 ; docs/mesures.md). Sur ordinateur, rien ne
+   change (VZ = 1). Le Téléobjectif (capteur 13) voit au-delà de 21 cases : à régler plus tard. */
+const VUE_MAX=21;let VZ=1;
+let vueTablette=()=>matchMedia('(pointer:coarse)').matches&&!matchMedia('(any-pointer:fine)').matches;
+function resize(){const r=$('mapwrap').getBoundingClientRect(),lw=Math.max(1,Math.floor(r.width)),lh=Math.max(1,Math.floor(r.height));
+  const dpr=devicePixelRatio||1;
+  if(vueTablette()){
+    // f : pixels d'écran par point de la vue, entier ; le plus petit qui ne montre pas plus de VUE_MAX cases
+    const f=Math.max(1,Math.ceil(Math.max(lw,lh)*dpr/(VUE_MAX*S)));VZ=f/dpr;
+    vw=Math.ceil(lw/VZ);vh=Math.ceil(lh/VZ);cv.width=fcv.width=vw;cv.height=fcv.height=vh;
+    for(const c of [cv,fcv]){c.style.width=vw*VZ+'px';c.style.height=vh*VZ+'px';}   // déborde d'un rien, rogné par .view
+    ctx.setTransform(1,0,0,1,0,0);fctx.setTransform(1,0,0,1,0,0);}
+  else{VZ=1;vw=lw;vh=lh;for(const c of [cv,fcv])c.style.width=c.style.height='';
+    cv.width=vw*dpr;cv.height=vh*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);fcv.width=vw*dpr;fcv.height=vh*dpr;
+    fctx.setTransform(dpr,0,0,dpr,0,0);}
   cols=Math.ceil(vw/S);rows=Math.ceil(vh/S);render();}
 const hash=(x,y)=>((x*73856093)^(y*19349663))>>>0;
 let ox=0,oy=0;

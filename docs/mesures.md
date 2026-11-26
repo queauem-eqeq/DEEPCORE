@@ -907,3 +907,18 @@ Le gros gain serait un cache du terrain de la vue (ne repeindre que les cases ch
 bouge, liquides à part). C'est une refonte de `render` (voisins des murs, ponts, gisements, brouillard) : à faire avec Opus,
 contrôlée par `empreinte-image.js`, et **après une mesure sur un vrai navigateur** : avec une carte graphique, `drawImage`
 coûte bien moins cher et le gain pourrait ne pas valoir le risque.
+
+### Tablette : vue plafonnée à 21 cases (26 novembre 2026)
+
+Rendu moyen (`render`, 100 appels), écran d'iPad simulé (densité 2), même Chromium sans carte graphique :
+
+| | Pleine résolution, sans plafond | Plafond 21 cases, zoom entier, pleine résolution | Plafond 21 cases, canevas à la résolution de l'ordinateur (retenu) |
+|---|---|---|---|
+| Paysage 1180 × 820 | 11 à 14 ms (29 × 22 cases) | 15 à 17 ms (19 × 15 cases) | **3,7 à 4,0 ms** |
+| Portrait 820 × 1180 | 10 à 15 ms (23 × 41 cases) | 19 à 23 ms (11 × 20 cases) | **3,8 à 4,4 ms** |
+
+Leçon : ici, le coût suit le **nombre de pixels à remplir**, pas le nombre de cases. Moins de cases agrandies à pleine
+résolution coûte même plus cher. Le gain vient de dessiner moins de pixels et de laisser le navigateur agrandir ; l'image
+obtenue est identique au pixel près à la pleine résolution (comparée). Sur ordinateur, l'écran reste identique
+(`empreinte-image.js`).
+

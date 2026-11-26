@@ -117,11 +117,11 @@ function chaleur(t){const u=(t-T_D0)/(T_D1-T_D0);return u<.08?0:u<S.pic?s3((u-.0
 
 /* cadrage final : celui du jeu (foreuse au centre, caméra bornée), pour finir à l'échelle et à la place exactes des pixels */
 function cadreJeu(){const el=$('mapwrap'),mr=el?el.getBoundingClientRect():{left:0,top:0,width:innerWidth,height:innerHeight},
-  vc=Math.floor(mr.width)/S_TUILE,vr=Math.floor(mr.height)/S_TUILE;
+  Z=S_TUILE*VZ,vc=Math.floor(mr.width)/Z,vr=Math.floor(mr.height)/Z;   // VZ : zoom de la vue sur tablette (10-rendu.js)
   const camX=Math.max(0,Math.min(W-Math.floor(vc),G.px-Math.floor(vc/2))),camY=Math.max(0,Math.min(H-Math.floor(vr),G.py-Math.floor(vr/2)));
     /* comme le jeu : caméra bornée au bord de la carte */
   return {gx:(((mr.left*dpr)%cw)+cw)%cw-cw,gy:(((mr.top*dpr)%chh)+chh)%chh-chh,
-    px:(mr.left+(G.ship.x+SGW/2-camX)*S_TUILE)*dpr,py:(mr.top+(G.ship.y+SGH/2-camY)*S_TUILE)*dpr};}
+    px:(mr.left+(G.ship.x+SGW/2-camX)*Z)*dpr,py:(mr.top+(G.ship.y+SGH/2-camY)*Z)*dpr};}
 const S_TUILE=32;
 const lisse5=v=>{v=cl(v);return v*v*v*(v*(v*6-15)+10);};   /* S, la taille d'une tuile du jeu en pixels (00-base.js) */
 // position des étoiles : l'intégrale de leur vitesse, qui retombe en douceur à la sortie d'hyperespace (jamais de recul)

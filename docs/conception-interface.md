@@ -143,6 +143,14 @@ molette ou fine barre pour remonter jusqu'aux 200 derniers messages ; un nouveau
 - Sous **REGEN · MONDE · LIFE**, une rangée **NIV1 · NIV2 · NIV3** .
 - Sous-menus repliables : **Inventaire**, **Carte**, **Lab** (Bestiaire, Groupes, Artefacts, Items, Discrétion, Tile editor, **Combat** : un lien qui ouvre le banc dans un autre onglet), **Palette**, **Contrôles** (l'aide des touches, une commande par ligne : la touche, puis ce qu'elle fait ; trois groupes : Se déplacer, Objets, Voir).
 
+### Tablette : vue plafonnée à 21 cases (26 novembre 2026)
+Sur un écran tactile sans souris, la vue montre **au plus 21 cases** sur son plus grand côté (21 = la portée de vue de la
+foreuse, capteur 10, de part et d'autre) ; le petit côté en montre moins selon la forme de l'écran (iPad en paysage :
+environ 19 × 15 ; en portrait : 11 × 20). Les cases sont agrandies d'un facteur entier, pour rester nettes au pixel près.
+Le canevas est dessiné à la résolution de l'ordinateur puis agrandi par le navigateur : même image, trois fois moins de
+calcul qu'à pleine résolution. Sur ordinateur, rien ne change (autant de cases que la fenêtre en permet). **À régler plus
+tard** : le Téléobjectif (capteur 13) voit au-delà de ce qui est affiché.
+
 ### Souris et inspection
 
 - Le curseur système est masqué sur la carte ; le **viseur** est dessiné sur la case survolée. Dès qu'on appuie sur
