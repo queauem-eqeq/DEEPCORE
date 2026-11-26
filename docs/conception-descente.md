@@ -204,6 +204,13 @@ et `python3 outils/arrivee_cache.py` (cache contre dessin direct, au pixel près
 - **Descentes : 40 rangées** à l'écran (`size = h / 40`, `14b-forage.js` ; 52 avant). Caractères plus gros, plus lisibles
   sur tablette, environ 25 % de calcul en moins. La foreuse voit donc moins loin devant elle en nombre de rangées : à surveiller
   pour la difficulté du mini-jeu des mines.
+- **Foreuse réduite** (26 novembre 2026, même jour) : 9 × 11 cases au lieu de 11 × 15 (sans ses nacelles latérales), tunnel
+  plus étroit (`FG_R` 6 → 5 : une mine touche si elle est à moins de 4 cases de l'axe, 5 avant), hauteur couchée 2,6.
+  **Mini-jeu des mines** : descente ralentie de 15 % (`FG_JEU_VIT`), foreuse plus vive (`FG_JEU_ACC` 52 → 64,
+  `FG_JEU_VMAX` 24 → 28, commande prise en compte plus tôt).
+- **Arrivée en grosses cases jusqu'au bout** (`GROS_BASCULE = false`, à l'essai) : plus de passage aux cases fines ;
+  l'extinction finale se fait couche par couche (`grosEteint`). Avec `GROS_BASCULE = true`, bascule de 8,7 à 9,2 s, comme
+  décrit ci-dessous.
 - **Arrivée : grosses cases au début.** Jusqu'à 8,7 s, le fond (étoiles, planète, nuages, ombre, éclairs) est tracé en cases
   1,5 fois plus grandes (`GROS_F`, 12 × 24 en densité 1) ; le vaisseau, ses flammes et le plasma restent en cases fines par-dessus,
   et les nuages que traverse le vaisseau se posent en grosses cases au-dessus de lui. De 8,7 à 9,2 s (`T_GROS0`, `T_GROS1`),

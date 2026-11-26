@@ -30,25 +30,24 @@ function fgAmasForme(x,y,n){const c=[{x,y,ok:1}],vu=new Set([x+','+y]);let g=0;
     X=b.x+dx,Y=b.y+dy,k=X+','+Y;
     if(vu.has(k)||Math.abs(Y-y)>3)continue;vu.add(k);c.push({x:X,y:Y,ok:1});}
   return c;}
+/* La foreuse (26 novembre 2026 : réduite de 11 × 15 à 9 × 11 cases, sans ses deux nacelles latérales, quand les descentes
+   sont passées à 40 rangées : elle aurait pris près de 40 % de la hauteur). FG_AC : colonne de l'axe ; FG_AB : rangée du nez. */
 const FG_ART=[
-  "   ▄▄▄▄▄   ",
-  "  ▐█▀▀▀█▌  ",
-  " ╔╧═════╧╗ ",
-  " ║ ◉ ▒▒▒ ║ ",
-  "╔╣═══════╠╗",
-  "║║░░░░░░░║║",
-  "╚╣▒▒▒▒▒▒▒╠╝",
-  " ╚╗▓▓▓▓▓╔╝ ",
-  "  ╲▓▓▓▓▓╱  ",
-  "  ╲▓▓▓▓▓╱  ",
-  "   ╲▓▓▓╱   ",
-  "   ╲▓▓▓╱   ",
-  "    ╲▓╱    ",
-  "    ╲▓╱    ",
-  "     ▼     "];
+  "  ▄▄▄▄▄  ",
+  " ▐█▀▀▀█▌ ",
+  "╔╧═════╧╗",
+  "║ ◉ ▒▒▒ ║",
+  "╠═══════╣",
+  "║░░░░░░░║",
+  "╚╗▓▓▓▓▓╔╝",
+  " ╲▓▓▓▓▓╱ ",
+  "  ╲▓▓▓╱  ",
+  "   ╲▓╱   ",
+  "    ▼    "];
 const FG_MSK=[   // d gris sombre · g gris · w blanc · a accent (couleur 1) · b couleur 2 · o ambre
-  "ddddddddddd","ggggggggggg","ggggggggggg","gggogaaaggg","ggggggggggg","ggaaaaaaagg","ggaaaaaaagg",
-  "gggwwwwwggg","gggwwwwwggg","gggwwwwwggg","ggggwwwgggg","ggggwwwgggg","gggggwggggg","gggggwggggg","ooooooooooo"];
+  "ddddddddd","ggggggggg","ggggggggg","ggogaaagg","ggggggggg","gaaaaaaag","ggwwwwwgg",
+  "ggwwwwwgg","gggwwwggg","ggggwgggg","ooooooooo"];
+const FG_AC=(FG_ART[0].length-1)/2,FG_AB=FG_ART.length-1,FG_AOEIL=FG_ART.findIndex(l=>l.includes('◉'));
 // un quart de tour du caractère lui-même : FG_RG quand le nez part à droite, FG_RD quand il part à gauche
 const FG_RG={'▄':'▐','▐':'▀','▀':'▌','▌':'▄','═':'║','║':'═','╔':'╚','╚':'╝','╝':'╗','╗':'╔','╠':'╩','╣':'╦','╧':'╣','╲':'╱','╱':'╲','▼':'►'};
 const FG_RD={'▄':'▌','▌':'▀','▀':'▐','▐':'▄','═':'║','║':'═','╔':'╗','╗':'╝','╝':'╚','╚':'╔','╠':'╦','╣':'╩','╧':'╠','╲':'╱','╱':'╲','▼':'◄'};
@@ -70,8 +69,11 @@ const FG_NIV=[
   {D0:150,b:[[0,0],[.05,1],[.17,2]],dur:3,seuil:p=>.665-.05*p,des:.15,mel:(m,n)=>m===2&&n>.70?1:m===1&&n<.30?2:m},
   {D0:390,b:[[0,2],[.22,4],[.5,2]],dur:5,seuil:p=>.6-.05*p,des:.05,mel:(m,n)=>m===2&&n>.68?4:m},
   {D0:190,b:[[0,5],[.3,6],[.62,5],[.84,7]],dur:7,seuil:p=>.6-.07*p,des:.05,mel:(m,n)=>m===5&&n>.72?6:m}];
-const FG_ENT=.8,FG_ANN_T0=1,FG_ANN_T1=3,FG_ANNONCE=8,FG_T0=2.5,FG_PLG=1.3,FG_CAV=34,FG_R=6,FG_POSE=3.2,
+const FG_ENT=.8,FG_ANN_T0=1,FG_ANN_T1=3,FG_ANNONCE=8,FG_T0=2.5,FG_PLG=1.3,FG_CAV=34,FG_R=5,FG_POSE=2.6,
   FG_FONT='"JetBrains Mono", ui-monospace, Menlo, Consolas, monospace';
+/* Mini-jeu des mines (26 novembre 2026, avec le passage à 40 rangées) : descente ralentie de 15 %, la foreuse réagit plus
+   vite (accélération 52 → 64, vitesse de côté 24 → 28, commande prise en compte plus tôt). */
+const FG_JEU_VIT=.85,FG_JEU_ACC=64,FG_JEU_VMAX=28;
 const FG_SMOKE=['#c4cdd0','#9aa5a9','#737f84','#4d585d','#2e373b'];
 let FORAGE=null,FG_CB=null;
 /* Profondeur du haut de chaque niveau, en mètres (22 novembre 2026) : 0 au niveau 1, puis la fin de chaque descente (le
@@ -376,13 +378,13 @@ function forageFrame(now){const F=FORAGE;if(!F)return;
     if(t>=FG_T0){F.ph=1;F.tD=t;F.th=0;F.ny=0;}}
   if(F.ph===1){F.te=t-F.tD;
     const dur=fgDur(F,F.cx,F.d+1),pousse=1+Math.max(0,F.te-6)*.14,mont=Math.min(1,F.te/.7);
-    F.vy=20*pousse*mont/Math.max(.5,dur*.85)*(F.stun>0?.35:1);F.d+=F.vy*dt;
+    F.vy=20*pousse*mont/Math.max(.5,dur*.85)*(F.stun>0?.35:1)*(F.jeu?FG_JEU_VIT:1);F.d+=F.vy*dt;
     // pivoter : sonder devant, à gauche et à droite, et glisser vers le plus tendre ; le joueur appuie dans le même sens ou contre
     const look=11,dc=fgSonde(F,F.cx,F.d+look),dl=fgSonde(F,F.cx-10,F.d+look),dr=fgSonde(F,F.cx+10,F.d+look);
     F.evit=dc;
     if(dc>1.5)F.vx+=(dl<dr?-1:1)*Math.min(3,dc-1.5)*24*dt;
-    F.man+=((F.kr-F.kl)-F.man)*Math.min(1,dt*8);F.vx+=F.man*(F.jeu?52:28)*dt;   // mini-jeu : la foreuse répond plus vite
-    F.vx*=Math.exp(-dt*2.4);F.vx=Math.max(F.jeu?-24:-16,Math.min(F.jeu?24:16,F.vx));F.cx+=F.vx*dt;
+    F.man+=((F.kr-F.kl)-F.man)*Math.min(1,dt*(F.jeu?11:8));F.vx+=F.man*(F.jeu?FG_JEU_ACC:28)*dt;   // mini-jeu : la foreuse répond plus vite
+    F.vx*=Math.exp(-dt*2.4);F.vx=Math.max(F.jeu?-FG_JEU_VMAX:-16,Math.min(F.jeu?FG_JEU_VMAX:16,F.vx));F.cx+=F.vx*dt;
     if(F.jeu)fgMines(F,dt);else fgAmas(F);
     for(let y=Math.floor(dPrev);y<=Math.floor(F.d);y++)fgCreuse(F,y);
     F.nx=F.cx;F.ny=F.d;
@@ -477,7 +479,7 @@ function fgExplose(F,cx,cy,o){const E=fgExE(F),t=F.t,r0=o.r,ch=o.choc;cx=Math.ro
     E.p.push({x:e.x,y:e.y,vx:Math.cos(a)*v/.6,vy:Math.sin(a)*v,ch:e.ch,col:e.col,e:fgRnd(.6,1.25)*(o.e||1),gx:Math.round(e.x),gy:Math.round(e.y),t0:t});}}
 function fgExploseForeuse(F){const ec=[];
   for(let r=0;r<FG_ART.length;r++)for(let c=0;c<FG_ART[r].length;c++){const ch=FG_ART[r][c];
-    if(ch!==' ')ec.push({x:F.nx+c-5,y:F.ny+r-14,ch,col:F.pal[FG_MSK[r][c]]||'#fff'});}
+    if(ch!==' ')ec.push({x:F.nx+c-FG_AC,y:F.ny+r-FG_AB,ch,col:F.pal[FG_MSK[r][c]]||'#fff'});}
   fgExplose(F,F.nx,F.ny-3,{r:6,choc:24,v:[30,95],eclats:ec});}
 function fgExploseMine(F,m){const ec=[];   /* la mine : son pavé rouge et blanc part en éclats */
   for(let j=-1;j<=1;j++)for(let i=-3;i<=3;i++)ec.push({x:m.x+i,y:m.y+j,ch:i===0&&j===0?'●':Math.abs(i)===1&&!j?'▓':'█',col:(i+j)&1?'#ff3b30':'#ffffff'});
@@ -549,16 +551,17 @@ function fgDrill(F,t){const th=F.th*Math.PI/180,co=Math.cos(th),si=Math.sin(th),
     fr=Math.floor(t*(F.ph===0?10+Math.min(1,t/FG_T0)*14:F.ph===1?26:F.ph===2?14:3)),
     jx=F.hs>.5?(fgH(F,Math.floor(t*14),7,0)-.5)*2*(F.hs-.3)*1.2:0;
   let x0=1e9,x1=-1e9,y0=1e9,y1=-1e9;
-  for(const q of [[-3.3,-14.6],[3.3,-14.6],[-3.3,.6],[3.3,.6]]){const ex=q[0]*co+q[1]*si,ey=-q[0]*si+q[1]*co;
+  const hx=(FG_AC+.5)*.6,hy=FG_AB+.6;
+  for(const q of [[-hx,-hy],[hx,-hy],[-hx,.6],[hx,.6]]){const ex=q[0]*co+q[1]*si,ey=-q[0]*si+q[1]*co;
     x0=Math.min(x0,ex);x1=Math.max(x1,ex);y0=Math.min(y0,ey);y1=Math.max(y1,ey);}
   for(let j=Math.floor(y0)-1;j<=Math.ceil(y1)+1;j++)for(let i=Math.floor(x0/.6)-1;i<=Math.ceil(x1/.6)+1;i++){
-    const ex=i*.6,lx=ex*co-j*si,ly=ex*si+j*co,c=Math.round(lx/.6+5),r=Math.round(ly+14);
-    if(r<0||r>14||c<0||c>10)continue;
+    const ex=i*.6,lx=ex*co-j*si,ly=ex*si+j*co,c=Math.round(lx/.6+FG_AC),r=Math.round(ly+FG_AB);
+    if(r<0||r>FG_AB||c<0||c>2*FG_AC)continue;
     let ch=FG_ART[r][c];if(ch===' ')continue;
     let col=F.pal[FG_MSK[r][c]];
-    if(r>=7&&r<=13&&ch==='▓'){const ph=(c+r*2+fr)&3;ch=ph<2?'▓':'▒';col=ph<2?F.pal.w:F.pal.g;}
-    else if(r===3&&ch==='◉')col=(Math.floor(t*3)&1)||F.ph>=2?F.pal.o:F.pal.b;
-    else if(r===14&&F.ph===1)col=(Math.floor(t*20)&1)?'#fff':F.pal.o;
+    if(r>FG_AOEIL&&r<FG_AB&&ch==='▓'){const ph=(c+r*2+fr)&3;ch=ph<2?'▓':'▒';col=ph<2?F.pal.w:F.pal.g;}
+    else if(r===FG_AOEIL&&ch==='◉')col=(Math.floor(t*3)&1)||F.ph>=2?F.pal.o:F.pal.b;
+    else if(r===FG_AB&&F.ph===1)col=(Math.floor(t*20)&1)?'#fff':F.pal.o;
     if(tab&&tab[ch])ch=tab[ch];
     {const X=Math.round((F.nx+i+jx-F.camX)*F.cw+F.w/2),Y=Math.round((F.ny+j-F.camY)*F.chh);F.x.fillStyle='#000';
       F.x.fillRect(X,Y,F.cw,F.chh);F.x.drawImage(fgGlyph(F,ch,col),X,Y);}}}   /* case opaque */

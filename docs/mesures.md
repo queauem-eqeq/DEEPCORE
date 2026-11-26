@@ -1015,3 +1015,9 @@ presque toutes les cases changent (descente vers la planète).
 En plein écran 1920 × 1080, l'arrivée passe de 34 % de CPU (p95 65 ms, 63 ms en moyenne vers 7 s) à 24-28 % (p95 35-44 ms,
 27 ms au plus fort). Le plus lourd reste le calcul des nuages vers 6 à 8 s, pas le dessin.
 
+**Arrivée en grosses cases jusqu'au bout, nuages (même jour)** : 1280 × 800 : 14 % de CPU (moy 7 ms, p95 19 ms) ;
+1920 × 1080 : 22 % (moy 10,5 ms, p95 31 à 34 ms), contre 34 % (p95 65 ms) au départ. Le bruit des nuages saute ses deux
+étages fins quand le premier suffit à rester sous le seuil (`fbmSous`, image identique) : il pèse désormais moins de 1 %. Ce
+qui reste en plein écran, c'est la pose des grandes images par le navigateur (« program » au profil, 29 %), bien moins chère
+avec une carte graphique.
+

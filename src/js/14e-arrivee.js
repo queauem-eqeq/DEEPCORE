@@ -27,6 +27,10 @@ function vn(x,y,p,q,s){const xi=Math.floor(x),yi=Math.floor(y),fx=x-xi,fy=y-yi,u
   m=(a,b)=>hsh(((a%p)+p)%p,((b%q)+q)%q,s);
   return (m(xi,yi)*(1-u)+m(xi+1,yi)*u)*(1-v)+(m(xi,yi+1)*(1-u)+m(xi+1,yi+1)*u)*v;}
 const fbm=(x,y,s)=>.55*vn(x*NX/W,y*NY/H,NX,NY,s)+.3*vn(x*2*NX/W,y*2*NY/H,2*NX,2*NY,s+1)+.15*vn(x*4*NX/W,y*4*NY/H,4*NX,4*NY,s+2);
+/* fbm comparé à un seuil (26 novembre 2026) : les deux derniers étages valent au plus 0,45 ; si le premier étage, plus 0,45,
+   reste sous le seuil, le nuage n'existe pas ici et on s'épargne les deux autres. Même résultat que fbm(x, y, s) - thr. */
+const fbmSous=(x,y,s,thr)=>{const a=.55*vn(x*NX/W,y*NY/H,NX,NY,s);if(a+.45<thr-1e-9)return -1;
+  return a+.3*vn(x*2*NX/W,y*2*NY/H,2*NX,2*NY,s+1)+.15*vn(x*4*NX/W,y*4*NY/H,4*NX,4*NY,s+2)-thr;};
 function carteAscii(){MAP=new Array(W*H);FICT.clear();NX=Math.max(2,Math.round(W/16));NY=Math.max(2,Math.round(H/16));
   for(let y=0;y<H;y++)for(let xx=0;xx<W;xx++){const i=y*W+xx,v=G.t[i],h=hsh(xx,y,9),up=y?G.t[i-W]:-1;let e;
     const autour=(f)=>[-1,1,-W,W].some(o=>{const j=i+o;return j>=0&&j<W*H&&!f(G.t[j]);}),bord=xx<2||y<2||xx>=W-2||y>=H-2;
@@ -97,7 +101,8 @@ let w,h,dpr,cw,chh,C,R,FONT,ATL={},CH=[],CO=[],DIM='';
    grosse case bascule à son tour (au hasard) vers les cases fines, d'un coup, sans transparence ; à partir de T_GROS1, tout
    est en 8 × 16, la taille qui fait un quart de tuile du jeu et qui permet de finir à l'échelle exacte des pixels.
    GROS_ON = false : tout en cases fines, comme avant. */
-let GROS_ON=true;const GROS_F=1.5,T_GROS0=8.7,T_GROS1=9.2;
+let GROS_ON=true;const GROS_F=1.5,GROS_BASCULE=false,   // false (26 novembre 2026, à l'essai) : grosses cases jusqu'au bout
+  T_GROS0=GROS_BASCULE?8.7:Infinity,T_GROS1=GROS_BASCULE?9.2:Infinity;
 let cw0,chh0,C0,R0,CH0,CO0,cwB,chhB,CB,RB,CHB=[],COB=[],CHT=[],COT=[],CHF=[],COF=[];
 function setup(){dpr=Math.min(devicePixelRatio||1,2);w=Math.round(innerWidth*dpr);h=Math.round(innerHeight*dpr);
   if(DIM===w+'x'+h)return;DIM=w+'x'+h;
@@ -182,6 +187,15 @@ function grosDessine(x,t,GX0,GY0,ox,oy,passage){x.fillStyle='#000';x.fillRect(0,
     if(ch===' '){x.fillStyle='#000';x.fillRect(X,Y,cw0,chh0);}else x.drawImage(glyphNoir(ch,b?CO0[q]:COF[q],cw0,chh0),X,Y);}
   for(let q=0;q<CB*RB;q++){if(CHT[q]===' '||(passage&&bas[q]))continue;
     x.drawImage(glyphNoir(CHT[q],COT[q],cwB,chhB),(q%CB)*cwB+X0,((q/CB)|0)*chhB+Y0);}}
+/* Extinction en grosses cases (26 novembre 2026, quand l'arrivée ne repasse plus aux cases fines) : la même que celle de la
+   grille fine, couche par couche. Le fond en grosses cases s'éteint case par case (« ▒ ░ · », puis le jeu apparaît) ; le
+   vaisseau en cases fines et les nuages du dessus s'éteignent par-dessus, chacun à son tour, sans jamais percer le fond. */
+function grosEteint(x,t,GX0,GY0){x.clearRect(0,0,w,h);
+  const fini=(i,j)=>t-(T_NOIR+hsh(i,j,33)*.6);
+  const couche=(A,B,Cn,Rn,gw,gh,fond)=>{for(let j=0;j<Rn;j++)for(let i=0;i<Cn;i++){const q=j*Cn+i,ch=A[q],X=i*gw+GX0,Y=j*gh+GY0,f=fini(i,j);
+    if(f<0){if(ch!==' ')x.drawImage(glyphNoir(ch,B[q],gw,gh),X,Y);else if(fond){x.fillStyle='#000';x.fillRect(X,Y,gw,gh);}continue;}
+    const st=Math.floor(f/.1);if(st<3&&ch!==' ')x.drawImage(glyphNoir('▒░·'[st],B[q],gw,gh),X,Y);}};
+  couche(CHB,COB,CB,RB,cwB,chhB,true);couche(CHF,COF,C0,R0,cw0,chh0,false);couche(CHT,COT,CB,RB,cwB,chhB,false);}
 function frame(now){if(!S||INTRO!==S)return;setup();const t=(now-S.t0)/1000+S.saut,ev=k=>{if(S.ev[k])return false;
   S.ev[k]=true;return true;};
   sons(t,ev);x.setTransform(1,0,0,1,0,0);x.globalAlpha=1;
@@ -225,7 +239,7 @@ function frame(now){if(!S||INTRO!==S)return;setup();const t=(now-S.t0)/1000+S.sa
     /* vus de l'espace, clairsemés ; ils s'épaississent en douceur */
     const dessus=pres<.35;for(let j=0;j<R;j++)for(let i=0;i<C;i++){const dx=(cx0(i)-PX)/chh0,dy=(cy0(j)-PY)/chh0;
       if(Rs<70&&Math.hypot(dx,dy)>Rs)continue;
-      const n0=fbm(LX+dx*kl+t*.15*k,LY+dy*kl,L.s)-thr;if(n0<0)continue;const gr=hsh(i,j,L.s+((t*3)|0)),n=n0+(gr-.5)*.07;if(n<.005)continue;
+      const n0=fbmSous(LX+dx*kl+t*.15*k,LY+dy*kl,L.s,thr);if(n0<0)continue;const gr=hsh(i,j,L.s+((t*3)|0)),n=n0+(gr-.5)*.07;if(n<.005)continue;
         /* du grain dans la matière, qui bouge lentement */
       const q=Math.min(NU_CH.length-1,Math.floor(n/.032)),ch=NU_CH[q][Math.floor(hsh(i,j,L.s+7)*NU_CH[q].length)],
         c=NU_GRIS[Math.min(4,Math.max(0,Math.floor(n/.04)+(gr<.2?-1:gr>.85?1:0)))];   /* nuages légers : jamais de pavé plein */
@@ -266,12 +280,13 @@ function frame(now){if(!S||INTRO!==S)return;setup();const t=(now-S.t0)/1000+S.sa
     oy=Math.round((Math.random()-.5)*2*choc*dpr);
   const fini=(i,j)=>t-(T_NOIR+hsh(i,j,33)*.6);   /* extinction : depuis combien de temps la case s'éteint */
   if(t<=T_NOIR){if(gros)grosDessine(x,t,GX0,GY0,ox,oy,petit);else grilleDessine(x,GX0,GY0,ox,oy);}
+  else if(gros)grosEteint(x,t,GX0,GY0);
   else{x.clearRect(0,0,w,h);x.fillStyle='#000';for(let j=0;j<R;j++)for(let i=0;i<C;i++){if(fini(i,j)>=0)continue;
     const ch=CH[j*C+i],X=i*cw+GX0,Y=j*chh+GY0;x.fillRect(X,Y,cw,chh);if(ch!==' ')x.drawImage(glyph(ch,CO[j*C+i]),X,Y);}}
   /* plus de tableau de bord à l'arrivée (retiré le 23 novembre 2026, à la demande) ; hud() reste pour mémoire */
   // extinction : chaque case, à son tour, passe par « ▒ ░ · » dans sa couleur, puis s'efface et laisse voir le jeu en pixels,
   // à la même échelle et à la même place (le tableau de bord s'efface avec les cases qu'il couvre)
-  if(t>T_NOIR)for(let j=0;j<R;j++)for(let i=0;i<C;i++){const f=fini(i,j);if(f<0)continue;
+  if(t>T_NOIR&&!gros)for(let j=0;j<R;j++)for(let i=0;i<C;i++){const f=fini(i,j);if(f<0)continue;
     const st=Math.floor(f/.1),q=j*C+i,X=i*cw+GX0,Y=j*chh+GY0;
     x.clearRect(X,Y,cw,chh);if(st<3&&CH[q]!==' '){x.fillStyle='#000';x.fillRect(X,Y,cw,chh);x.drawImage(glyph('▒░·'[st],CO[q]),X,Y);}}
   if(t>=T_FIN){S=null;introCv.style.background='';endIntro();return;}
