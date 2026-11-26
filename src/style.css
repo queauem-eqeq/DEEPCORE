@@ -16,8 +16,9 @@ body{margin:0;background:var(--black);color:var(--fg);font:13px/1.45 var(--mono)
 .log ul{list-style:none;margin:0;padding:0 6px 0 0;display:flex;flex-direction:column;height:100%;overflow-y:auto}
 .log li:first-child{margin-top:auto}   /* peu de messages : collés en bas, comme avant */
 .log li{flex:none;color:var(--dim);white-space:normal;overflow-wrap:anywhere;display:grid;grid-template-columns:calc(4ch + 10px) minmax(0,1fr)}   /* un bloc par tour : le numéro à gauche, ses événements à droite (26 novembre 2026) */
-.log .evs{display:flex;flex-direction:column;min-width:0}
-.log .ev{display:block}
+.log .evs{display:block;min-width:0}
+.log .ev{display:inline-block;vertical-align:top;max-width:100%}   /* chaque message entier : il descend d'un bloc plutôt que d'être coupé */
+.log .sep{color:var(--dim);margin:0 .6ch}
 .log li.new{color:var(--fg)}
 .log .ev.warn{color:var(--c3)}.log .ev.info{color:var(--c2)}.log .ev.good{color:var(--c1)}
 .log .t{color:var(--dim);font-variant-numeric:tabular-nums}

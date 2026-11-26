@@ -149,7 +149,12 @@ function logDraw(){const lg=G.log||[],L=lg[lg.length-1],nouveau=`${lg.length}|${
   el.innerHTML=blocs.map((b,i)=>{const op=Math.max(LOG_SOMBRE,1-(blocs.length-1-i)*LOG_PAS);
     return `<li class="tour${b.t===G.turn?' new':''}" style="opacity:${op.toFixed(2)}">`+
       `<span class="t">T${String(b.t).padStart(3,'0')}</span><span class="evs">`+
-      b.ev.map(e=>`<span class="ev ${e.c||''}">${e.m}${e.n>1?`<span class="x">×${e.n}</span>`:''}</span>`).join('')+
+      /* Les messages d'un tour se suivent sur la MÊME ligne, séparés par ║ (26 novembre 2026). Chaque message est
+         une boîte en ligne : il passe à la ligne suivante **en entier** s'il ne tient pas au bout de celle-ci, et il
+         n'est coupé que s'il est à lui seul plus large que la colonne. Le séparateur est collé à la fin du message
+         qu'il suit, pour ne jamais se retrouver seul en début de ligne. */
+      b.ev.map((e,k)=>`<span class="ev ${e.c||''}">${e.m}${e.n>1?`<span class="x">×${e.n}</span>`:''}`+
+        (k<b.ev.length-1?'<span class="sep">║</span>':'')+'</span>').join('')+
       '</span></li>';}).join('');
   el.scrollTop=bas?el.scrollHeight:top;}
 

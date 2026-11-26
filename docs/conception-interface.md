@@ -79,7 +79,10 @@ Partie du document de conception (sommaire et règles à ne pas casser : `concep
 molette ou fine barre pour remonter jusqu'aux 200 derniers messages ; un nouveau message le ramène tout en bas. Un message
   trop long passe à la ligne, aligné après le numéro de tour.
   **Un bloc par tour** (26 novembre 2026) : le numéro de tour est écrit **une seule fois**, à gauche, et tous les
-  événements de ce tour sont rangés à sa droite, dans l'ordre où ils sont arrivés. **Les tours passés
+  événements de ce tour sont rangés à sa droite, dans l'ordre où ils sont arrivés, **sur la même ligne, séparés
+  par ║**. Chaque message est une boîte en ligne : s'il ne tient pas au bout de la ligne il descend **en entier**
+  sur la suivante, et il n'est coupé que s'il est à lui seul plus large que la colonne. Le séparateur est collé à
+  la fin du message qu'il suit, pour ne jamais se retrouver seul en début de ligne. **Les tours passés
   s'assombrissent** avec l'âge — l'opacité perd `LOG_PAS` (0,13) par tour d'âge et ne descend pas sous `LOG_SOMBRE`
   (0,40) : le tour en cours reste franc, les anciens s'effacent sans disparaître. Chaque événement garde sa couleur
   (avertissement, information, bonne nouvelle). Mesuré sur cinq tours : 1 · 0,87 · 0,74 · 0,61 · 0,48.
