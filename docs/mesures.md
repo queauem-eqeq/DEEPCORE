@@ -945,3 +945,6 @@ Outils : `outils/scripts/acoups.js` (chaque étape d'un pas chronométrée, 300 
 Pistes, par gain attendu : (1) pendant un effet, ne redessiner que la couche des effets (`fxv`) quand le décor ne bouge
 pas ; (2) garder en mémoire les chemins de patrouille de la faune, recalculés seulement si la carte change ; (3) le cache
 du terrain de la vue (voir plus haut).
+
+**Effets à 30 images par seconde (même jour)** : pendant un effet de 2 s, 61 → 31 rendus par seconde, et le dessin
+passe de 20 % à 8,5 % de CPU (Chromium sans carte graphique). Écran identique hors animation (`empreinte-image.js`).

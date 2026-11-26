@@ -151,6 +151,11 @@ Le canevas est dessiné à la résolution de l'ordinateur puis agrandi par le na
 calcul qu'à pleine résolution. Sur ordinateur, rien ne change (autant de cases que la fenêtre en permet). **À régler plus
 tard** : le Téléobjectif (capteur 13) voit au-delà de ce qui est affiché.
 
+### Rythme des effets (26 novembre 2026)
+Les effets (coups, projectiles, sonar, consommables) sont animés à **30 images par seconde** (`FX_FPS`, `10-rendu.js`),
+au lieu du rythme du navigateur (60, ou plus sur un écran rapide) : chaque image redessine tout l'écran, et le pixel art
+n'y perd presque rien. Les effets durent le même temps. Les explosions gardent leur propre rythme.
+
 ### Souris et inspection
 
 - Le curseur système est masqué sur la carte ; le **viseur** est dessiné sur la case survolée. Dès qu'on appuie sur

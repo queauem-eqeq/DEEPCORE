@@ -157,8 +157,13 @@ function addFx(f){f.t0=performance.now();if(f.kind==='num')f.stack=FX.filter(o=>
   FX.push(f);if(!fxRaf)fxRaf=requestAnimationFrame(fxLoop);}
 // grains d'un effet de consommable : position dans la case et instant d'apparition, tirés une fois pour toutes
 const fxGrains=n=>Array.from({length:n},()=>({x:rnd(0,13),y:rnd(3,14),d:Math.random()*.55}));
+/* Effets à 30 images par seconde (26 novembre 2026) : la boucle redessine tout l'écran ; le navigateur la rappelle 60 fois
+   par seconde (plus sur un écran rapide), on saute une image sur deux. Les effets durent le même temps (ils suivent
+   l'horloge, pas le nombre d'images). FX_FPS règle le rythme ; les explosions (drawBoom) gardent le leur. */
+const FX_FPS=30;let fxDernier=0;
 // une mine armée ou un paralyzor accroché gardent le rendu en marche
-function fxLoop(){const now=performance.now();FX=FX.filter(f=>now-f.t0<f.dur);if(antAnime())antVis();render();
+function fxLoop(){const now=performance.now();
+  if(now-fxDernier<1000/FX_FPS-4){fxRaf=requestAnimationFrame(fxLoop);return;}fxDernier=now;FX=FX.filter(f=>now-f.t0<f.dur);if(antAnime())antVis();render();
   fxRaf=(FX.length||animVif())?requestAnimationFrame(fxLoop):0;}
 const fxP=f=>Math.min(1,(performance.now()-f.t0)/f.dur);
 function lungeOff(match){if(reduced)return [0,0];const f=FX.find(match);if(!f)return [0,0];const k=Math.sin(Math.PI*fxP(f))*.4*S;
