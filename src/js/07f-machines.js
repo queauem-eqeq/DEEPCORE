@@ -290,9 +290,27 @@ function machines(){G.las=[];G.lz={};G.circ=[];G.soc={};G.piles={};G.mt=0;G.mach
   const vitrines=p=>{const P=new Set(p.c),ent=[];if(p.c.length<9||p.c.length>48)return false;
     for(const i of p.c)for(const j of v4(i))if(!P.has(j)&&!blocks(t[j])&&!ent.includes(j))ent.push(j);
     if(ent.length!==1||G.lz[ent[0]])return false;
-    const c=p.c.filter(i=>libre(i)&&!pres(i)&&artLibre(B,i,site)).sort((a,b)=>pas(b,ent[0])-pas(a,ent[0])),sel=[];
-    for(const i of c){if(sel.length>=3)break;if(sel.every(j=>pas(i,j)>=2))sel.push(i);}
-    if(sel.length<3)return false;const bc=typeof butinCoffre==='function';
+    /* Trois niches creusées côte à côte dans un même mur, séparées par des murs vitrés (26 novembre 2026, d'après
+       le module « Vitrine REF » du joueur) : [niche][vitre][niche][vitre][niche]. La disposition dit la règle —
+       trois lots alignés derrière une vitrine se lisent comme trois choix, là où les trois socles éparpillés dans
+       la pièce (22 novembre) ne se lisaient pas du tout, sans une seule vitre nulle part.
+       On cherche cinq murs d'affilée bordés par le sol de la pièce du même côté, et pleins de l'autre : la niche
+       reste un cul-de-sac d'une case. On garde le banc le plus loin de l'entrée, pour qu'on le découvre en entrant. */
+    const bancs=[];
+    for(const [dx,dy,ox,oy] of [[1,0,0,-1],[1,0,0,1],[0,1,-1,0],[0,1,1,0]])for(const i0 of p.c){
+      const x0=i0%W,y0=(i0/W)|0,murs=[],devant=[];let ok=true;
+      for(let k=0;k<5&&ok;k++){const fx=x0+dx*k,fy=y0+dy*k,mx=fx+ox,my=fy+oy,bx=mx+ox,by=my+oy;
+        if(mx<1||my<1||mx>=W-1||my>=H-1||bx<0||by<0||bx>=W||by>=H){ok=false;break;}
+        const f=idx(fx,fy),m=idx(mx,my);
+        if(!P.has(f)||t[f]!==FLOOR||t[m]!==WALL||!blocks(t[idx(bx,by)])
+          ||(B.fixe&&B.fixe[m])||(B.porte&&B.porte[m])||G.lz[f]||(G.niche&&G.niche[m])){ok=false;break;}
+        murs.push(m);devant.push(f);}
+      if(ok)bancs.push({murs,devant,d:pas(devant[2],ent[0])});}
+    if(!bancs.length)return false;
+    bancs.sort((a,b)=>b.d-a.d);const banc=bancs[0],sel=[banc.murs[0],banc.murs[2],banc.murs[4]];
+    for(const m of [banc.murs[1],banc.murs[3]])t[m]=VITRE;   // les deux cloisons vitrées entre les niches
+    for(const m of sel)t[m]=FLOOR;                            // les trois niches, creusées dans le mur
+    const bc=typeof butinCoffre==='function';
     const lots=bc?[[planTire()],[equipTire()],[consoTire(),consoTire()]]:[['matiere'],['matiere'],['matiere']];
     sel.forEach((i,n)=>{G.items[i]=lots[n].slice();G.vit[i]=1;});G.choix.push({c:sel,on:1});p.mach='vitrines';return true;};
   // récompense d'une salle à lasers : un butin au fond, là où mène la traversée

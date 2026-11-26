@@ -75,6 +75,8 @@ function travelStep(){const T=TRAV;if(!T)return;if(busy()){stopTravel();return;}
 let EXPL=null;
 // créatures déjà signalées : chacune n'interrompt l'exploration qu'une fois (sinon une puce qui suit la foreuse l'arrêterait sans cesse)
 const EXPL_VUS=new WeakSet();
+// vitrines déjà signalées : chacune n'arrête l'exploration qu'une fois (26 novembre 2026)
+const EXPL_VIT=new WeakSet();
 function exploreScan(E,deep){const N=W*H,prev=new Int32Array(N).fill(-2),q=[idx(G.px,G.py)];prev[q[0]]=-1;const plein=G.st.vie>=G.st.vieMax;
   const butin=j=>{if(G.cles&&G.cles[j])return 'une clé';
     if(G.items&&G.items[j]&&G.items[j].length&&!(G.pieges||[]).some(p=>p.on&&p.c===j)&&!(G.vit&&G.vit[j]))return 'un objet';
@@ -87,6 +89,9 @@ function exploreScan(E,deep){const N=W*H,prev=new Int32Array(N).fill(-2),q=[idx(
     for(const[dx,dy]of DIRS){const a=x+dx,b=y+dy;if(a<1||b<1||a>=W-1||b>=H-1)continue;const j=idx(a,b);
       if(prev[j]!==-2||!G.seen[j])continue;const v=G.t[j];
       if(blocks(v)||(v===DEEP&&!deep)||!diagOk(x,y,dx,dy)||occupant(a,b))continue;
+      /* Une vitrine encore fermée ne se traverse pas (26 novembre 2026) : y poser la foreuse ramasserait le lot et
+         condamnerait les deux autres. L'exploration la contourne, et s'arrête dès qu'elle en voit une. */
+      if(G.vit&&G.vit[j]===1)continue;
       const o=G.ore&&G.ore[j];if(plein&&o&&oreSol(o)&&!oreMat(o))continue;
       prev[j]=c;q.push(j);}}
   return null;}
@@ -95,6 +100,9 @@ function exploreEvent(E){
   let nv=null;for(const e of [...(G.beasts||[]),...(G.animals||[])])if(vis[idx(e.x,e.y)]&&!EXPL_VUS.has(e)){EXPL_VUS.add(e);nv=nv||e;}
   if(nv)return `${(G.beasts.includes(nv)?BEASTS:SPECIES)[nv.sp].n.toLowerCase()} en vue`;
   if((G.beasts||[]).some(b=>b.hunt>0&&vis[idx(b.x,b.y)]))return 'un ennemi vous chasse';
+  // des vitrines en vue : on s'arrête, le choix revient au joueur
+  if(G.choix)for(const g of G.choix)if(g.on&&!EXPL_VIT.has(g)&&g.c.some(i=>vis[i])){EXPL_VIT.add(g);
+    return 'vitrines en vue : à vous de choisir le lot';}
   if(G.sites.filter(s=>s.seen).length>E.sites)return 'site de forage repéré';
   const ef=G.eff||{};if(ef.poison>0||ef.glu>0)return 'la foreuse subit un effet';
   if(G.msg&&G.msg.c==='warn')return 'alerte';
@@ -107,6 +115,7 @@ function startExplore(){
   if((G.beasts||[]).some(b=>b.hunt>0&&vis[idx(b.x,b.y)])){say('Un ennemi vous chasse : pas d’exploration automatique.','warn');
     SFX.blocked();render();return;}
   for(const e of [...(G.beasts||[]),...(G.animals||[])])if(vis[idx(e.x,e.y)])EXPL_VUS.add(e);
+  for(const g of G.choix||[])if(g.c.some(i=>vis[i]))EXPL_VIT.add(g);   // vitrines déjà en vue : elles n'arrêtent pas aussitôt
   EXPL={vie:G.st.vie,sites:G.sites.filter(s=>s.seen).length,vu:new Set(),n:0,tm:0};$('explBtn').classList.add('on');
   say('Exploration automatique. Une touche ou un clic pour l’arrêter.','info');exploreStep();}
 function exploreStep(){const E=EXPL;if(!E)return;if(busy()){stopExplore();return;}
