@@ -90,14 +90,27 @@ const NU_CH=['··:','·:░','░░:','░▒░','▒░▒','▒▒▓','▒
 /* ---------- la scène, sur le canvas de l'intro ---------- */
 let x=null;   /* le contexte du canvas de l'intro (déclaré par 15-intro.js, chargé après) */
 let w,h,dpr,cw,chh,C,R,FONT,ATL={},CH=[],CO=[],DIM='';
+/* Grosses cases au début de l'arrivée (26 novembre 2026) : pendant l'hyperespace et l'approche, le fond (étoiles, planète,
+   nuages, ombre, éclairs) est tracé en cases GROS_F fois plus grandes (12 × 24 au lieu de 8 × 16 en densité 1) : 2,25 fois
+   moins de cases à calculer et à dessiner. Le vaisseau, ses flammes et le plasma restent en cases fines par-dessus, et la
+   couche de nuages que le vaisseau traverse se pose en grosses cases au-dessus de lui. Entre T_GROS0 et T_GROS1, chaque
+   grosse case bascule à son tour (au hasard) vers les cases fines, d'un coup, sans transparence ; à partir de T_GROS1, tout
+   est en 8 × 16, la taille qui fait un quart de tuile du jeu et qui permet de finir à l'échelle exacte des pixels.
+   GROS_ON = false : tout en cases fines, comme avant. */
+let GROS_ON=true;const GROS_F=1.5,T_GROS0=8.7,T_GROS1=9.2;
+let cw0,chh0,C0,R0,CH0,CO0,cwB,chhB,CB,RB,CHB=[],COB=[],CHT=[],COT=[],CHF=[],COF=[];
 function setup(){dpr=Math.min(devicePixelRatio||1,2);w=Math.round(innerWidth*dpr);h=Math.round(innerHeight*dpr);
   if(DIM===w+'x'+h)return;DIM=w+'x'+h;
   introCv.width=w;introCv.height=h;cw=8*dpr;chh=16*dpr;C=Math.ceil(w/cw)+2;R=Math.ceil(h/chh)+2;
     /* case de 8 × 16 px : 4 × 2 cases par tuile du jeu */
-  FONT=`${Math.round(cw/.6)}px ${FG_FONT}`;ATL={};CH=new Array(C*R);CO=new Array(C*R);}
-function glyph(ch,co){const k=ch+co;let g=ATL[k];if(!g){g=document.createElement('canvas');g.width=cw;g.height=chh;
+  FONT=`${Math.round(cw/.6)}px ${FG_FONT}`;ATL={};CH=new Array(C*R);CO=new Array(C*R);
+  cw0=cw;chh0=chh;C0=C;R0=R;CH0=CH;CO0=CO;CHF=new Array(C*R);COF=new Array(C*R);
+  cwB=Math.round(cw*GROS_F);chhB=Math.round(chh*GROS_F);CB=Math.ceil(w/cwB)+2;RB=Math.ceil(h/chhB)+2;
+  CHB=new Array(CB*RB);COB=new Array(CB*RB);CHT=new Array(CB*RB);COT=new Array(CB*RB);}
+function glyph(ch,co,gw=cw,gh=chh){const k=ch+co+'|'+gw;let g=ATL[k];if(!g){g=document.createElement('canvas');g.width=gw;g.height=gh;
   const c=g.getContext('2d');
-  c.font=FONT;c.textAlign='center';c.textBaseline='middle';c.fillStyle=co;c.fillText(ch,cw/2,chh/2);ATL[k]=g;}return g;}
+  c.font=gw===cw0?FONT:`${Math.round(gw/.6)}px ${FG_FONT}`;c.textAlign='center';c.textBaseline='middle';c.fillStyle=co;
+  c.fillText(ch,gw/2,gh/2);ATL[k]=g;}return g;}
 const put=(i,j,ch,co)=>{if(i<0||j<0||i>=C||j>=R)return;CH[j*C+i]=ch;CO[j*C+i]=co;};   // la dernière écriture gagne : pas de superposition
 
 const T_HYP=1.3,T_P0=.85,T_P1=2.2,T_D0=2.2,T_D1=10.6,T_POSE=11.4,T_NOIR=12.7,T_FIN=13.8;   // secondes
@@ -126,43 +139,65 @@ const S_TUILE=32;
 const lisse5=v=>{v=cl(v);return v*v*v*(v*(v*6-15)+10);};   /* S, la taille d'une tuile du jeu en pixels (00-base.js) */
 // position des étoiles : l'intégrale de leur vitesse, qui retombe en douceur à la sortie d'hyperespace (jamais de recul)
 const trajet=t=>t<T_HYP?t+20*T_HYP*(1-Math.pow(1-t/T_HYP,3)):t+20*T_HYP;
-/* Grille de l'arrivée en cache (26 novembre 2026) : les 8 000 cases étaient toutes redessinées à chaque image. Elles sont
-   gardées dans un canevas à part (TAMPON), et seules les cases dont le caractère ou la couleur a changé depuis l'image
-   précédente sont repeintes (fond noir, puis le caractère). Le tremblement décale le tampon d'un bloc au moment de le poser,
-   comme il décalait chaque case. Si une case ne tombe pas sur des pixels entiers, ou si la taille change, on redessine tout,
-   comme avant. TAMPON_OFF = true : dessin direct (contrôle : outils/scripts/test-arrivee-cache.js). */
-let TAMPON=null,TAMPON_OFF=false;
+/* Grille de l'arrivée en cache (26 novembre 2026) : les 8 000 cases étaient toutes redessinées à chaque image. Chaque grille
+   (cases fines, grosses cases du fond) est gardée dans un canevas à part (TAMPONS), et seules les cases dont le caractère
+   ou la couleur a changé depuis l'image précédente sont repeintes, d'un seul geste (glyphNoir : le caractère déjà posé sur
+   son fond noir). Le tremblement décale le canevas d'un bloc au moment de le poser, comme il décalait chaque case. Si une
+   case ne tombe pas sur des pixels entiers, on dessine directement, comme avant. TAMPON_OFF = true : dessin direct
+   (contrôle : outils/arrivee_cache.py). */
+let TAMPONS={},TAMPON_OFF=false;
 const TAMPON_M=64;   // marge autour de la grille, plus large que le plus fort tremblement
 // le caractère sur fond noir, d'une pièce : même image que « fond noir puis caractère », en un seul dessin
 let ATLN={},ATLN_DIM='';
-function glyphNoir(ch,co){if(ATLN_DIM!==DIM){ATLN={};ATLN_DIM=DIM;}const k=ch+co;let g=ATLN[k];
-  if(!g){g=document.createElement('canvas');g.width=cw;g.height=chh;const c=g.getContext('2d');c.fillStyle='#000';c.fillRect(0,0,cw,chh);
-    c.drawImage(glyph(ch,co),0,0);ATLN[k]=g;}return g;}
-function grilleDessine(x,GX0,GY0,ox,oy){
-  const entier=v=>Math.abs(v-Math.round(v))<1e-6;
-  if(TAMPON_OFF||!entier(cw)||!entier(chh)||!entier(GX0)||!entier(GY0)){if(!TAMPON_OFF)TAMPON=null;x.fillStyle='#000';x.fillRect(0,0,w,h);
-    for(let j=0;j<R;j++)for(let i=0;i<C;i++){const ch=CH[j*C+i];if(ch!==' ')x.drawImage(glyph(ch,CO[j*C+i]),i*cw+GX0+ox,j*chh+GY0+oy);}
-    return;}
-  const M=TAMPON_M,cle=`${DIM}|${C}|${R}|${cw}|${chh}`;
-  if(!TAMPON||TAMPON.cle!==cle){const c=document.createElement('canvas');c.width=C*cw+2*M;c.height=R*chh+2*M;
+function glyphNoir(ch,co,gw=cw,gh=chh){if(ATLN_DIM!==DIM){ATLN={};ATLN_DIM=DIM;}const k=ch+co+'|'+gw;let g=ATLN[k];
+  if(!g){g=document.createElement('canvas');g.width=gw;g.height=gh;const c=g.getContext('2d');c.fillStyle='#000';c.fillRect(0,0,gw,gh);
+    c.drawImage(glyph(ch,co,gw,gh),0,0);ATLN[k]=g;}return g;}
+const entier=v=>Math.abs(v-Math.round(v))<1e-6;
+// met à jour le canevas d'une grille (cases changées seulement) et le renvoie ; la case (0, 0) est en (M, M)
+function tamponMaj(nom,A,B,Cn,Rn,gw,gh){const M=TAMPON_M,cle=`${DIM}|${Cn}|${Rn}|${gw}|${gh}`;let T=TAMPONS[nom];
+  if(!T||T.cle!==cle){const c=document.createElement('canvas');c.width=Cn*gw+2*M;c.height=Rn*gh+2*M;
     const g=c.getContext('2d');g.fillStyle='#000';g.fillRect(0,0,c.width,c.height);
-    TAMPON={cle,cv:c,g,ch:new Array(C*R).fill(' '),co:new Array(C*R).fill('')};}
-  const T=TAMPON,g=T.g;g.globalAlpha=1;
-  for(let q=0;q<C*R;q++){const ch=CH[q],co=ch===' '?'':CO[q];if(T.ch[q]===ch&&T.co[q]===co)continue;
-    const X=(q%C)*cw+M,Y=((q/C)|0)*chh+M;
-    // un seul geste : le caractère déjà posé sur son fond noir (glyphNoir) ; une case qui se vide repasse au noir
-    if(ch!==' ')g.drawImage(glyphNoir(ch,co),X,Y);else{g.fillStyle='#000';g.fillRect(X,Y,cw,chh);}T.ch[q]=ch;T.co[q]=co;}
-  x.fillStyle='#000';x.fillRect(0,0,w,h);x.drawImage(T.cv,GX0+ox-M,GY0+oy-M);}
+    T=TAMPONS[nom]={cle,cv:c,g,ch:new Array(Cn*Rn).fill(' '),co:new Array(Cn*Rn).fill('')};}
+  const g=T.g;g.globalAlpha=1;
+  for(let q=0;q<Cn*Rn;q++){const ch=A[q],co=ch===' '?'':B[q];if(T.ch[q]===ch&&T.co[q]===co)continue;
+    const X=(q%Cn)*gw+M,Y=((q/Cn)|0)*gh+M;
+    // un seul geste : le caractère sur son fond noir ; une case qui se vide repasse au noir
+    if(ch!==' ')g.drawImage(glyphNoir(ch,co,gw,gh),X,Y);else{g.fillStyle='#000';g.fillRect(X,Y,gw,gh);}T.ch[q]=ch;T.co[q]=co;}
+  return T.cv;}
+// une grille entière, posée sur le noir à partir de (X0, Y0) : par son tampon, ou case par case (dessin direct)
+function grillePose(x,nom,A,B,Cn,Rn,gw,gh,X0,Y0){
+  if(TAMPON_OFF||!entier(gw)||!entier(gh)||!entier(X0)||!entier(Y0)){
+    for(let j=0;j<Rn;j++)for(let i=0;i<Cn;i++){const ch=A[j*Cn+i];if(ch!==' ')x.drawImage(glyph(ch,B[j*Cn+i],gw,gh),i*gw+X0,j*gh+Y0);}return;}
+  x.drawImage(tamponMaj(nom,A,B,Cn,Rn,gw,gh),X0-TAMPON_M,Y0-TAMPON_M);}
+function grilleDessine(x,GX0,GY0,ox,oy){x.fillStyle='#000';x.fillRect(0,0,w,h);grillePose(x,'fin',CH0,CO0,C0,R0,cw0,chh0,GX0+ox,GY0+oy);}
+// grosses cases : le fond, puis le vaisseau en cases fines, puis les nuages du dessus ; pendant le passage, les grosses cases
+// déjà basculées montrent la grille fine complète
+function grosDessine(x,t,GX0,GY0,ox,oy,passage){x.fillStyle='#000';x.fillRect(0,0,w,h);
+  const X0=GX0+ox,Y0=GY0+oy,bas=passage?new Uint8Array(CB*RB):null;
+  if(passage)for(let q=0;q<CB*RB;q++)bas[q]=t>=T_GROS0+hsh(q%CB,(q/CB)|0,41)*(T_GROS1-T_GROS0-.05)?1:0;
+  grillePose(x,'gros',CHB,COB,CB,RB,cwB,chhB,X0,Y0);
+  const sous=i=>{const I=Math.floor((i%C0+.5)*cw0/cwB),J=Math.floor((((i/C0)|0)+.5)*chh0/chhB);return J*CB+I;};
+  for(let q=0;q<C0*R0;q++){const b=passage&&bas[sous(q)],ch=b?CH0[q]:CHF[q];if(!b&&ch===' ')continue;
+    const X=(q%C0)*cw0+X0,Y=((q/C0)|0)*chh0+Y0;
+    if(ch===' '){x.fillStyle='#000';x.fillRect(X,Y,cw0,chh0);}else x.drawImage(glyphNoir(ch,b?CO0[q]:COF[q],cw0,chh0),X,Y);}
+  for(let q=0;q<CB*RB;q++){if(CHT[q]===' '||(passage&&bas[q]))continue;
+    x.drawImage(glyphNoir(CHT[q],COT[q],cwB,chhB),(q%CB)*cwB+X0,((q/CB)|0)*chhB+Y0);}}
 function frame(now){if(!S||INTRO!==S)return;setup();const t=(now-S.t0)/1000+S.saut,ev=k=>{if(S.ev[k])return false;
   S.ev[k]=true;return true;};
   sons(t,ev);x.setTransform(1,0,0,1,0,0);x.globalAlpha=1;
-  CH.fill(' ');CO.fill('#000');
-  const J=cadreJeu(),GX0=J.gx,GY0=J.gy,cx0=i=>i*cw+GX0+cw/2,cy0=j=>j*chh+GY0+chh/2;
+  const J=cadreJeu(),GX0=J.gx,GY0=J.gy;let gxc=GX0,gyc=GY0;const cx0=i=>i*cw+gxc+cw/2,cy0=j=>j*chh+gyc+chh/2;
   // le point d'atterrissage : au centre de l'écran pendant la descente, puis il glisse jusqu'à la place du vaisseau dans le jeu
   const {k,Z,Rs}=zoom(t),hc=chaleur(t),ent=s3((t-T_P0)/(T_P1-T_P0)),cal=lisse5((t-T_D0)/(T_POSE-.2-T_D0)),
     PX=w/2+(J.px-w/2)*cal,PY0=h*.45+(J.py-h*.45)*cal,PY=-Rs*chh*1.2+(PY0+Rs*chh*1.2)*ent,
     // le vaisseau se pose à sa place sur la carte ; la planète tourne un peu en entrant
     LX=G.ship.x+SGW/2+14*(1-s3(t/4.5)),LY=G.ship.y+SGH/2;
+  // grosses cases au début ; les deux grilles pendant le passage (voir GROS_ON)
+  const gros=GROS_ON&&t<T_GROS1&&entier(cwB)&&entier(chhB),petit=!gros||t>=T_GROS0;
+  // la grille où écrivent put() et les boucles : cases fines (complète, ou le vaisseau seul), grosses (fond, nuages du dessus)
+  const grille=m=>{if(m==='fond'||m==='dessus'){C=CB;R=RB;cw=cwB;chh=chhB;CH=m==='fond'?CHB:CHT;CO=m==='fond'?COB:COT;}
+    else{C=C0;R=R0;cw=cw0;chh=chh0;CH=m==='devant'?CHF:CH0;CO=m==='devant'?COF:CO0;}};
+  const construire=G_=>{
+  grille(G_?'fond':'petit');
   // étoiles : traînées d'hyperespace qui raccourcissent pendant un ralenti amorti, puis points qui défilent lentement
   const hy=cl(1-t/T_HYP),tr=trajet(t);
   for(const s of S.stars){const v=.08+.05*s.l,y=((s.y+tr*v)%1)*R,i=Math.floor(s.x*C),L=Math.round(1+hy*hy*(10+6*s.l));
@@ -170,24 +205,25 @@ function frame(now){if(!S||INTRO!==S)return;setup();const t=(now-S.t0)/1000+S.sa
       put(i,j,q===0?(hy>.05?'│':s.l===2?'*':s.l?'+':'·'):q<L/2?'│':'¦',q===0?(s.l?P.W:P.K):q<L/2?P.G:P.K);}}
   // la planète : un disque, courbé sur les bords (projection en arc sinus), avec son anneau d'atmosphère ; de près, à plat
   ENROULE=Rs<90;
-  if(t>T_P0){for(let j=0;j<R;j++)for(let i=0;i<C;i++){const dx=(cx0(i)-PX)/chh,dy=(cy0(j)-PY)/chh,d=Math.hypot(dx,dy),r=d/Rs;
+  if(t>T_P0){for(let j=0;j<R;j++)for(let i=0;i<C;i++){const dx=(cx0(i)-PX)/chh0,dy=(cy0(j)-PY)/chh0,d=Math.hypot(dx,dy),r=d/Rs;
       if(r>=1){if(r<1+1.3/Rs&&Rs<70)put(i,j,hsh(i,j,(t*8)|0)<.5?'░':'▒',col('B',.7));continue;}
       const md=!ENROULE||!d?k:k*Rs*Math.asin(Math.min(1,r))/d,e=cellMap(LX+dx*md,LY+dy*md);let ch=e[0],c=col(e[1],e[2]);
       if(r>.9&&Rs<70){if(ch!==' ')ch=r>.96?'░':'▒';c=col(e[1]==='K'?'M':e[1],.45);}   // le bord du disque, plus clair
       put(i,j,ch,c);}}   /* le disque cache les étoiles, même là où le sol est nu */
   // le vaisseau est centré sur le point d'atterrissage ; il tangue, puis se stabilise
-  const mont=1-Math.pow(1-cl(t/T_D0),4),SYv=(h+NH*chh*.6)+(PY0-(h+NH*chh*.6))*mont;
+  const mont=1-Math.pow(1-cl(t/T_D0),4),SYv=(h+NH*chh0*.6)+(PY0-(h+NH*chh0*.6))*mont;
     /* le vaisseau entre par le bas et rejoint le milieu de la planète quand la descente commence */
-  const sw=t<T_POSE?Math.round(Math.sin(t*1.1)*1.6*cl((T_POSE-t)/1.5)):0,sc=Math.round((PX-GX0)/cw)-NW/2+sw,sr=Math.round((SYv-GY0)/chh)-NH/2;
+  const sw=t<T_POSE?Math.round(Math.sin(t*1.1)*1.6*cl((T_POSE-t)/1.5)):0,sc=Math.round((PX-GX0)/cw0)-NW/2+sw,sr=Math.round((SYv-GY0)/chh0)-NH/2;
   // ombre du vaisseau sur le sol, qui le rejoint en se posant
   if(k<.85){const a=cl((T_POSE-t)/1.6),ox=Math.round(a*9),oy=Math.round(a*5);
-    NEF.forEach((l,r)=>{for(let c=0;c<l.length;c++)if(l[c]!==' '){const i=sc+c+ox,j=sr+r+oy;if(i<0||j<0||i>=C||j>=R)continue;const q=j*C+i;CO[q]=col('M',.22);if(CH[q]===' ')CH[q]='░';}});}
+    NEF.forEach((l,r)=>{for(let c=0;c<l.length;c++)if(l[c]!==' '){let i=sc+c+ox,j=sr+r+oy;if(G_){i=Math.floor((i+.5)*cw0/cwB);j=Math.floor((j+.5)*chh0/chhB);}   // en grosses cases : la case qui contient
+      if(i<0||j<0||i>=C||j>=R)continue;const q=j*C+i;CO[q]=col('M',.22);if(CH[q]===' ')CH[q]='░';}});}
   // nuages : chaque couche, à son altitude, grossit à son rythme et s'effiloche en passant le vaisseau ; ils apparaissent peu à peu
   const lame=[],monte=1-cl((Rs-12)/32);
   for(const L of S.nuages){if(Z<=L.a||Rs<12)continue;
     const kl=k*(Z-L.a)/Z,pres=cl((Z-L.a)/(L.a*1.6)),thr=L.thr+.3*(1-pres)*(1-pres)+.1*cl((Z-6)/60)+.45*monte;
     /* vus de l'espace, clairsemés ; ils s'épaississent en douceur */
-    const dessus=pres<.35;for(let j=0;j<R;j++)for(let i=0;i<C;i++){const dx=(cx0(i)-PX)/chh,dy=(cy0(j)-PY)/chh;
+    const dessus=pres<.35;for(let j=0;j<R;j++)for(let i=0;i<C;i++){const dx=(cx0(i)-PX)/chh0,dy=(cy0(j)-PY)/chh0;
       if(Rs<70&&Math.hypot(dx,dy)>Rs)continue;
       const n0=fbm(LX+dx*kl+t*.15*k,LY+dy*kl,L.s)-thr;if(n0<0)continue;const gr=hsh(i,j,L.s+((t*3)|0)),n=n0+(gr-.5)*.07;if(n<.005)continue;
         /* du grain dans la matière, qui bouge lentement */
@@ -200,6 +236,7 @@ function frame(now){if(!S||INTRO!==S)return;setup();const t=(now-S.t0)/1000+S.sa
     }if(((a*30)|0)%2&&a>.07)continue;let i=Math.floor(e.x*C);const fin=Math.floor(R*(.55+.4*hsh(e.s,0,1)));
     for(let j=0;j<fin;j++){const r=hsh(e.s,j,2),di=r<.33?-1:r<.66?0:1;put(i,j,di<0?'╱':di>0?'╲':'│',j%3?P.W:'#fff3a0');
       for(let q=-6;q<=6;q++){const o=j*C+i+q;if(q&&o>=0&&o<CH.length&&'░▒▓█'.includes(CH[o]))CO[o]=P.W;}i+=di;}}
+  grille(G_?'devant':'petit');
   // le vaisseau et ses réacteurs
   const flam=t<T_POSE?(t<T_HYP?7:2+Math.round(hsh(1,(t*14)|0,3)*2)):0;
   for(const ec of REACT)for(let q=1;q<=flam;q++)put(sc+ec,sr+NH-1+q,q===1?'▼':q<flam?'║':'¦',feu(.95-q*.12));
@@ -218,12 +255,17 @@ function frame(now){if(!S||INTRO!==S)return;setup();const t=(now-S.t0)/1000+S.sa
   if(t>T_POSE){const a=t-T_POSE,rr=4+a*16,ci=sc+NW/2,cj=sr+NH/2;
     for(let j=Math.floor(cj-rr-2);j<=cj+rr+2;j++)for(let i=Math.floor(ci-(rr+2)*chh/cw);i<=ci+(rr+2)*chh/cw;i++){const d=Math.hypot((i-ci)*cw/chh,j-cj);
       if(Math.abs(d-rr)>1.1)continue;const n=(1-a/1.3)*hsh(i,j,7);if(n<.25)continue;put(i,j,n>.6?'▒':n>.42?'░':'·',col('M',1.25));}}
+  grille(G_?'dessus':'petit');
   for(const l of lame)put(...l);   // la couche que le vaisseau traverse passe par-dessus
+  };
+  try{if(gros){for(const A of [CHB,CHT,CHF])A.fill(' ');for(const A of [COB,COT,COF])A.fill('#000');construire(true);}
+    if(petit){CH0.fill(' ');CO0.fill('#000');construire(false);}}
+  finally{grille('petit');}
   // dessin : chaque case opaque (fond noir plein, puis le caractère), décalée d'un bloc quand ça tremble
   const choc=hc*hc*7+(t>T_POSE&&t<T_POSE+.5?(1-(t-T_POSE)/.5)*6:0),ox=Math.round((Math.random()-.5)*2*choc*dpr),
     oy=Math.round((Math.random()-.5)*2*choc*dpr);
   const fini=(i,j)=>t-(T_NOIR+hsh(i,j,33)*.6);   /* extinction : depuis combien de temps la case s'éteint */
-  if(t<=T_NOIR)grilleDessine(x,GX0,GY0,ox,oy);
+  if(t<=T_NOIR){if(gros)grosDessine(x,t,GX0,GY0,ox,oy,petit);else grilleDessine(x,GX0,GY0,ox,oy);}
   else{x.clearRect(0,0,w,h);x.fillStyle='#000';for(let j=0;j<R;j++)for(let i=0;i<C;i++){if(fini(i,j)>=0)continue;
     const ch=CH[j*C+i],X=i*cw+GX0,Y=j*chh+GY0;x.fillRect(X,Y,cw,chh);if(ch!==' ')x.drawImage(glyph(ch,CO[j*C+i]),X,Y);}}
   /* plus de tableau de bord à l'arrivée (retiré le 23 novembre 2026, à la demande) ; hud() reste pour mémoire */
@@ -296,7 +338,7 @@ window.arriveeStart=()=>{nouvelle();INTRO=S;introCv.hidden=false;introCv.style.o
   $('introSkip').hidden=false;raf20(frame);};
 // passer : on saute à l'extinction (les sons d'ici là ne sont plus joués)
 // pour les contrôles (test-arrivee-cache.js) : dessiner une image à un instant donné, avec ou sans le tampon
-window.arriveeControle={set off(v){TAMPON_OFF=v;},image:now=>frame(now),get S(){return S;},T_NOIR};
+window.arriveeControle={set off(v){TAMPON_OFF=v;},set gros(v){GROS_ON=v;},image:now=>frame(now),get S(){return S;},T_NOIR};
 window.arriveeSkip=()=>{if(!S)return;const t=(performance.now()-S.t0)/1000+S.saut;if(t<T_NOIR){S.saut+=T_NOIR-t;
   for(const k of ['hyper','hum','appr','reen','thr','touch'])S.ev[k]=true;for(const e of S.eclairs)e.son=1;}};
 })();

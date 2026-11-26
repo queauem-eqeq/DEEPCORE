@@ -200,3 +200,16 @@ le tremblement décale le tampon d'un bloc. Les caractères sont posés d'une pi
 `glyphNoir`). Rien ne change à l'écran : cases opaques, pas de transparence. Contrôles : `outils/scripts/test-forage-cache.js`
 et `python3 outils/arrivee_cache.py` (cache contre dessin direct, au pixel près).
 
+## Taille des cases (26 novembre 2026)
+- **Descentes : 40 rangées** à l'écran (`size = h / 40`, `14b-forage.js` ; 52 avant). Caractères plus gros, plus lisibles
+  sur tablette, environ 25 % de calcul en moins. La foreuse voit donc moins loin devant elle en nombre de rangées : à surveiller
+  pour la difficulté du mini-jeu des mines.
+- **Arrivée : grosses cases au début.** Jusqu'à 8,7 s, le fond (étoiles, planète, nuages, ombre, éclairs) est tracé en cases
+  1,5 fois plus grandes (`GROS_F`, 12 × 24 en densité 1) ; le vaisseau, ses flammes et le plasma restent en cases fines par-dessus,
+  et les nuages que traverse le vaisseau se posent en grosses cases au-dessus de lui. De 8,7 à 9,2 s (`T_GROS0`, `T_GROS1`),
+  chaque grosse case bascule à son tour, au hasard et d'un coup, vers les cases fines ; ensuite tout est en 8 × 16, le quart de
+  tuile du jeu qui permet de finir à l'échelle exacte des pixels. `GROS_ON = false` : tout en cases fines, comme avant (image
+  identique, contrôlée).
+- La grille de roche est posée à partir d'une seule origine arrondie : plus de rangée qui saute d'un pixel quand la caméra tombe
+  pile sur un demi-pixel.
+

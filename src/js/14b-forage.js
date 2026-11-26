@@ -261,9 +261,10 @@ function fgDecor(F,D,gy,ox){if(!D)return;fgDecorCv(F,D);if(!D.img)return;
 function playForage(suite,niv,opt){
   if(reduced||FORAGE){suite&&suite();return;}
   unlock();if(typeof TRAV!=='undefined'&&TRAV)stopTravel();
-  // même échelle aux deux descentes (22 novembre 2026 ; la première était plus zoomée, h ÷ 36)
+  // même échelle aux deux descentes (22 novembre 2026 ; la première était plus zoomée, h ÷ 36) ; 40 rangées depuis le
+  // 26 novembre 2026 (52 avant) : caractères plus gros, environ 20 % de calcul en moins par image (docs/mesures.md)
   const jeu=(niv||1)>=2,dpr=Math.min(devicePixelRatio||1,2),w=Math.round(innerWidth*dpr),h=Math.round(innerHeight*dpr),
-    size=Math.max(9,Math.round(h/52)),chh=size,cw=Math.round(size*.6);
+    size=Math.max(9,Math.round(h/40)),chh=size,cw=Math.round(size*.6);
   fgCv.width=w;fgCv.height=h;
   FORAGE={x:fgx,w,h,dpr,cw,chh,font:`${size}px ${FG_FONT}`,R:Math.ceil(h/chh)+1,C:Math.ceil(w/cw)+3,
     P:FG_NIV[Math.max(0,Math.min(FG_NIV.length-1,(niv||1)-1))],niv:niv||1,
@@ -574,8 +575,12 @@ function fgGlyphNoir(F,ch,col){const A=F.atlN||(F.atlN={}),k=ch+'\u0001'+col;let
   if(!g){g=document.createElement('canvas');g.width=F.cw;g.height=F.chh;const x=g.getContext('2d');x.fillStyle='#000';
     x.fillRect(0,0,F.cw,F.chh);x.drawImage(fgGlyph(F,ch,col),0,0);A[k]=g;}return g;}
 function fgRoche(F){const x=F.x,{w,cw,chh}=F,r0=Math.floor(F.camY),c0=Math.floor(F.camX)-((F.C/2)|0);
-  if(FG_ROCHE_OFF){for(let r=-1;r<=F.R;r++){const y=r0+r,py=Math.round((y-F.camY)*chh);
-    for(let c=0;c<F.C;c++){const xw=c0+c;if(fgCell(F,xw,y))x.drawImage(fgGlyph(F,F.oc,F.ok),Math.round((xw-F.camX)*cw+w/2),py);}}return;}
+  /* position de la grille : une seule origine arrondie, puis des pas entiers. Avant, chaque rangée arrondissait sa propre
+     position : quand la caméra tombait pile sur un demi-pixel, l'imprécision des calculs en arrondissait certaines vers le
+     haut, d'autres vers le bas, et des rangées sautaient d'un pixel le temps d'une image (vu à 125 %, 26 novembre 2026). */
+  const bx=Math.round((c0-F.camX)*cw+w/2),by=Math.round((r0-F.camY)*chh);
+  if(FG_ROCHE_OFF){for(let r=-1;r<=F.R;r++){const y=r0+r,py=by+r*chh;
+    for(let c=0;c<F.C;c++){const xw=c0+c;if(fgCell(F,xw,y))x.drawImage(fgGlyph(F,F.oc,F.ok),bx+c*cw,py);}}return;}
   const NC=F.C,NR=F.R+2;let K=F.roc;
   if(!K||K.nc!==NC||K.nr!==NR||K.cw!==cw||K.chh!==chh){
     K=F.roc={cv:document.createElement('canvas'),cv2:document.createElement('canvas'),nc:NC,nr:NR,cw,chh,sig:new Array(NC*NR).fill(''),r0:null,c0:null};   // un canevas neuf est noir : toutes les cases sont « vides »
@@ -594,7 +599,7 @@ function fgRoche(F){const x=F.x,{w,cw,chh}=F,r0=Math.floor(F.camY),c0=Math.floor
     for(let c=0;c<NC;c++){const s=fgCell(F,c0+c,y)?F.oc+'\u0001'+F.ok:'',q=j*NC+c;const av=K.sig[q];if(av===s)continue;K.sig[q]=s;
       // un seul geste : le caractère déjà posé sur son fond noir ; une case qui se vide repasse au noir
       if(s)g.drawImage(fgGlyphNoir(F,F.oc,F.ok),c*cw,j*chh);else{g.fillStyle='#000';g.fillRect(c*cw,j*chh,cw,chh);}}}
-  x.drawImage(K.cv,Math.round((c0-F.camX)*cw+w/2),Math.round((r0-1-F.camY)*chh));}
+  x.drawImage(K.cv,bx,by-chh);}
 function fgDraw(F,t){const x=F.x,{w,h,cw,chh,dpr}=F;
   x.setTransform(1,0,0,1,0,0);x.fillStyle='#000';x.fillRect(0,0,w,h);
   const amp=(F.ph===0?1.4*Math.min(1,t/FG_T0):F.ph===1?1.4+F.hs*4.2:F.ph===2?2.2:.6)*dpr+F.imp*16*dpr;

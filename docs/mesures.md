@@ -1004,3 +1004,14 @@ Images identiques au pixel près, contrôlées sur trois écrans (`test-forage-c
 (`arrivee_cache.py`). Ce qui reste dans l'intro : le calcul de la grille (planète, nuages, flammes) et les moments où
 presque toutes les cases changent (descente vers la planète).
 
+**Taille des cases (même jour)** : descentes à 40 rangées, arrivée en grosses cases jusqu'à 8,7 s.
+
+| Scène, 1280 × 800 | Calcul par image (moy · p95) | CPU |
+|---|---|---|
+| Arrivée | 9,4 · 27 ms → **8,1 · 21 ms** | 19 % → **15 à 17 %** |
+| Première descente | 8,5 · 15 ms → **6,9 · 12 ms** | 17 % → **14 %** |
+| Seconde descente | 9,1 · 16 ms → **7,2 · 12 ms** | 19 % → **15 %** |
+
+En plein écran 1920 × 1080, l'arrivée passe de 34 % de CPU (p95 65 ms, 63 ms en moyenne vers 7 s) à 24-28 % (p95 35-44 ms,
+27 ms au plus fort). Le plus lourd reste le calcul des nuages vers 6 à 8 s, pas le dessin.
+
