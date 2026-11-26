@@ -253,16 +253,18 @@ function machines(){G.las=[];G.lz={};G.circ=[];G.soc={};G.piles={};G.mt=0;G.mach
         const toutes=[...new Set(fosse.map(li))];
         const dep0=mel(toutes.filter(l=>rive(l,cA-1)&&cel(l,cA)!=null)),arr0=toutes.filter(l=>rive(l,cB+1)&&cel(l,cB)!=null);
         if(!dep0.length||!arr0.length)continue;
-        const chemin=(lA,lB)=>{let l=lA;const q=[cel(lA,cA)];
+        const chemin=(lA,lB,vir)=>{let l=lA;const q=[cel(lA,cA)];
           for(let c=cA+1;c<=cB;c++){const reste=cB-c;let cib=l;
             if(Math.abs(lB-l)>reste)cib=l+Math.sign(lB-l);                                  // il faut se rapprocher de l'arrivée
-            else if(Math.random()<.3&&reste>Math.abs(lB-l))cib=l+(Math.random()<.5?1:-1);   // un virage, tant qu'il reste de la place
+            else if(Math.random()<vir&&reste>Math.abs(lB-l))cib=l+(Math.random()<.5?1:-1);  // un virage, tant qu'il reste de la place
             if(cib!==l){const cd=cel(cib,c-1);if(cd==null)cib=l;else q.push(cd);}           // le coude
             const n=cel(cib,c);if(n==null)return null;l=cib;q.push(n);}
           return l===lB?q:null;};
-        let pt=null,lgA=null,lgB=null;
-        for(const lA of dep0){for(const lB of mel(arr0.filter(l=>Math.abs(l-lA)<=cB-cA))){
-            for(let e=0;e<6&&!pt;e++)pt=chemin(lA,lB);
+        let pt=null,lgA=null,lgB=null;const droit=Math.random()<.45;   // un pont sur deux reste droit
+        for(const lA of dep0){const bs=mel(arr0.filter(l=>Math.abs(l-lA)<=cB-cA));
+          if(droit)bs.sort((a,b)=>Math.abs(a-lA)-Math.abs(b-lA));      // le plus court chemin d'abord : tout droit
+          for(const lB of bs){
+            for(let e=0;e<6&&!pt;e++)pt=chemin(lA,lB,droit?0:.3);
             if(pt){lgA=lA;lgB=lB;break;}}
           if(pt)break;}
         if(!pt)continue;
