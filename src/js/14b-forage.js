@@ -607,15 +607,21 @@ function fgDraw(F,t){const x=F.x,{w,h,cw,chh,dpr}=F;
 const FG_ANN_GL='#%&$@/\\<>=+*?!;:-_|[]{}()0123456789ABCDEFGHJKLMNPQRSTUVWXYZ£¥§¶«»±÷≈∙√ⁿ²■ΣΩδ∞φε∩≡';
 const FG_ANN_FIN=1;   // durée de la disparition (23 novembre 2026 : doublée, 0,5 s avant)
 const FG_ANN_COLS=30;
-/* taille d'un pixel de police des alertes (entier), la même partout (arrivée et descentes) : le cadre tient dans 30 % de la largeur (41 % jusqu'au 23 novembre 2026, jugé trop gros) */
+/* Taille d'un pixel de police des alertes (entier), la même partout (arrivée et descentes).
+   26 novembre 2026 : elle ne suit **plus** la largeur de la fenêtre. Elle se calculait sur la largeur réelle (30 %
+   de la largeur, 41 % jusqu'au 23 novembre, jugé trop gros), si bien que les alertes grossissaient à chaque fois
+   qu'on agrandissait la fenêtre. Le calcul est le même, mais sur une **largeur de référence** : la taille est donc
+   fixe, celle qu'elles avaient dans une fenêtre de FG_ANN_REF pixels CSS de large. Le dpr reste pris en compte,
+   pour la même taille apparente sur un écran fin. Un seul nombre à changer pour les agrandir : FG_ANN_REF. */
+const FG_ANN_REF=1280;
 // largeur du cadre, en cases, la même aux deux descentes : le plus long message (26) + 4
-const fgAnnP=w=>Math.max(1,Math.floor(w*.30/((FG_ANN_COLS+2)*8)));
+const fgAnnP=(w,dpr)=>Math.max(1,Math.floor(FG_ANN_REF*(dpr||1)*.30/((FG_ANN_COLS+2)*8)));
 const FG_ANN_RAMPE='.i0',FG_ANN_BLOC='░▒▓';
 function fgAnnonce(F,t){const x=F.x,{w,h}=F,[l1,l2]=F.jeu?['EXPLOSIFS DÉTECTÉS','ATTENTION SOUS-SOL PIÉGÉ !']:['MATIÈRE {µ} DÉTECTÉE',
   'COLLECTE POSSIBLE'],col=F.jeu?'#ff3b30':F.pal.a,blanc=F.pal.w,gris=F.cRock2;
   const cols=FG_ANN_COLS,rows=9;   // même cadre, même taille de caractères aux deux descentes (23 novembre 2026)
   // alignée à gauche sous le tableau de bord ; un pixel de police = p pixels d'écran (entier), le cadre tenant dans 41 % de la largeur
-  const p=fgAnnP(w),cw=8*p,chh=16*p,x0=(F.hudG??Math.round(w*.02))+cw,y0=(F.hudB??Math.round(h*.3))+chh+Math.round(6*(F.dpr||1));
+  const p=fgAnnP(w,F.dpr),cw=8*p,chh=16*p,x0=(F.hudG??Math.round(w*.02))+cw,y0=(F.hudB??Math.round(h*.3))+chh+Math.round(6*(F.dpr||1));
     /* sa bordure noire (une case autour) commence sous le tableau */
   const pa=Math.max(0,Math.min(1,(t-FG_ANN_T0)/(FG_ANN_T1-FG_ANN_T0))),q=Math.max(0,Math.min(1,(t-(FG_ANNONCE-FG_ANN_FIN))/FG_ANN_FIN)),
     tic=Math.floor(t*20);

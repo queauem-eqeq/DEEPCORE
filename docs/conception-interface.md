@@ -78,7 +78,15 @@ Partie du document de conception (sommaire et règles à ne pas casser : `concep
   de bord sous la carte (5 lignes visibles, numéro de tour, ×N pour les répétitions). **Il défile** :
 molette ou fine barre pour remonter jusqu'aux 200 derniers messages ; un nouveau message le ramène tout en bas. Un message
   trop long passe à la ligne, aligné après le numéro de tour.
-- **Statistiques de la foreuse** (25 novembre 2026) : sous les boutons EXPLORER et REPOS, dix statistiques de la fenêtre Équipement (`INV_STATS` : VIT, EYE, DEG, PRE, DEF, CRIT, POW, DIS, COUP, DET ; VIE et ÉNER retirées le même jour, les barres les donnent déjà) (`#hstats`), valeurs du moment, terrain compris. **Un encadré par statistique** (« VIE 100 », un espace entre le nom et la valeur), rangés à gauche, **à la ligne quand la place manque**. **Au survol** (ou au clavier) : une infobulle (`#stip`, `statInfo` dans `14-inventaire.js`) donne la **définition** et le **détail des modificateurs en cours** — base, chaque pièce d'équipement portée, bonus permanents, puis POW requis, terrain, action (forage, arrêt, course, parois) — et la valeur du moment.
+  **Un bloc par tour** (26 novembre 2026) : le numéro de tour est écrit **une seule fois**, à gauche, et tous les
+  événements de ce tour sont rangés à sa droite, dans l'ordre où ils sont arrivés, **sur la même ligne, séparés
+  par ║**. Chaque message est une boîte en ligne : s'il ne tient pas au bout de la ligne il descend **en entier**
+  sur la suivante, et il n'est coupé que s'il est à lui seul plus large que la colonne. Le séparateur est collé à
+  la fin du message qu'il suit, pour ne jamais se retrouver seul en début de ligne. **Les tours passés
+  s'assombrissent** avec l'âge — l'opacité perd `LOG_PAS` (0,13) par tour d'âge et ne descend pas sous `LOG_SOMBRE`
+  (0,40) : le tour en cours reste franc, les anciens s'effacent sans disparaître. Chaque événement garde sa couleur
+  (avertissement, information, bonne nouvelle). Mesuré sur cinq tours : 1 · 0,87 · 0,74 · 0,61 · 0,48.
+- **Statistiques de la foreuse** (25 novembre 2026, rangées dans un sous-menu le 26) : sous les boutons EXPLORER et REPOS, le repli **STATS** (`#fd-stats`, ouvert la première fois, son état est retenu comme les autres replis ; **5 px** sous le bloc des boutons, comme Inventaire, Carte, Palette et Contrôles sous ce qui les précède) contient dix statistiques (`#hstats`), valeurs du moment, terrain compris, dans l'ordre **POW, EYE, DEG, PRE, DEF, CRIT, PAS, COUP, DIS, DET** (`HSTATS_ORDRE` dans `11-interface.js`, indépendant de l'ordre de la fenêtre Équipement ; VIE et ÉNER retirées le 25 novembre, les barres les donnent déjà). **Un encadré par statistique** (« VIE 100 », un espace entre le nom et la valeur), rangés à gauche, **à la ligne quand la place manque**. **Au survol** (ou au clavier) : une infobulle (`#stip`, `statInfo` dans `14-inventaire.js`) donne la **définition** et le **détail des modificateurs en cours** — base, chaque pièce d'équipement portée, bonus permanents, puis POW requis, terrain, action (forage, arrêt, course, parois) — et la valeur du moment.
 - **Barres** (l'ancien Statut) : barres ASCII `█`/`░` — Vie en bio, Énergie en blanc  — suivies de leur valeur chiffrée. Le
   remplissage est un **calque de `█` découpé à la largeur exacte** posé sur un fond de `░`, donc juste à toute
   largeur de colonne et à toute taille de police.
@@ -118,7 +126,7 @@ molette ou fine barre pour remonter jusqu'aux 200 derniers messages ; un nouveau
 - Le curseur système est masqué sur la carte ; le **viseur** est dessiné sur la case survolée. Dès qu'on appuie sur
   une touche, viseur, fiche et trajet disparaissent jusqu'au prochain mouvement de souris.
 - **Survol** : fiche complète dans « En vue » — terrain et ses effets, distance, créature (état, PV, DÉG, PRE, DEF
-  modifiée, VIT, chances Toucher / Subir, comportement), site, roche fissurée, bord indestructible, objets posés,
+  modifiée, durées du pas et du coup, chances Toucher / Subir, comportement), site, roche fissurée, bord indestructible, objets posés,
   « souvenir » si la case est hors de vue, et l'action du clic (« y aller · N tours », « frapper », « forer »).
 - **Trajet** : le plus court chemin (Dijkstra, 8 directions, cases connues seulement, eau profonde évitée,
   créatures visibles contournées), montré par un petit rond blanc (4 × 4 pixels de tuile, opacité 70 %) au centre

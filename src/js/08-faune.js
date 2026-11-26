@@ -19,6 +19,40 @@ const mouilleOk=(sp,o)=>!!sp.nage||(!sp.sec&&(o.hunt>0||!!o.aware||!!o.enraged||
    eauLibre dit qui échappe aux malus de l'eau (les volants aussi). */
 const eauLibre=sp=>!!(sp.swim||sp.nage||sp.aqua||sp.vol);
 const terrestre=sp=>!sp.nage&&!sp.aqua&&!sp.vol;
+/* ---------- Horloge des créatures (25 novembre 2026) ----------
+   Deux durées par espèce, en unités de temps comme pour la foreuse (100 = l'allure de base, voir l'horloge dans 09) :
+   `dpas` pour un pas, `dcoup` pour un coup. **Plus petit, plus rapide.** Le terrain allonge le pas (eau peu profonde
+   ×1,5, eau profonde ×2) et jamais le coup ; les nageurs n'en souffrent pas. Avant, une seule VIT servait aux deux et
+   un coup prenait toujours un battement : une créature rapide ne pouvait ni frapper en arrivant, ni frapper deux fois.
+   Les tirs sur cadence (laser, glu) deviennent des coups : l'intervalle est dcoup, multiplié par sp.cadence pour la glu. */
+const ficheDe=o=>(G.beasts&&G.beasts.includes(o))?BEASTS[o.sp]:SPECIES[o.sp];
+const dpasDe=(o,sp)=>{sp=sp||ficheDe(o);
+  return Math.max(10,(sp.dpas||100)*slowOf(G.t[idx(o.x,o.y)],eauLibre(sp)));};
+const dcoupDe=(o,sp)=>Math.max(10,((sp||ficheDe(o)).dcoup||100));
+// Le mot qui dit une durée, pour les fiches et le journal (plus petit, plus rapide), et la cadence : combien de
+// gestes la créature fait pendant une action normale de la foreuse (100 unités).
+const motDuree=d=>d<=50?'très rapide':d<=75?'rapide':d<=100?'normal':d<=150?'lent':'très lent';
+const cadenceDe=d=>100/Math.max(10,d||100);
+/* Les cartes de distance vers la foreuse, partagées par toutes les créatures qui agissent entre deux battements :
+   la foreuse ne bougeant pas pendant son action, elles restent justes. Refaites quand elle a bougé, et à chaque
+   battement (une explosion peut avoir changé le terrain). DC mémorise les cartes vers les derniers points connus. */
+let DIST=null,DC={};
+function distReset(){DIST=null;DC={};}
+function distCarte(eau,vol){if(!DIST||DIST.px!==G.px||DIST.py!==G.py)DIST={px:G.px,py:G.py};
+  const k=vol?'vol':eau?'eau':'sec';
+  if(!DIST[k])DIST[k]=vol?distFromVol(G.px,G.py):robotDist(!!eau);
+  return DIST[k];}
+/* La créature prête le plus tôt. Son horloge est mise en route au besoin : une créature qui vient d'apparaître
+   attend d'abord la durée d'un pas, pour qu'elle n'agisse pas gratuitement à l'instant même où elle naît (c'est
+   aussi ce qui convertit une partie d'avant cette version, qui comptait en points de mouvement). */
+function prochaineCreature(){if(!G||G.over)return null;let best=null;
+  for(const l of [G.animals,G.beasts])for(const o of l||[]){
+    if(o.pret==null)o.pret=(G.time||0)+dpasDe(o)*(.5+.5*(o.ph!=null?o.ph:Math.random()));
+    if(!best||o.pret<best.pret)best=o;}
+  return best;}
+// Une créature agit, puis son horloge repart de la durée de ce qu'elle vient de faire.
+function creatureJoue(o){const dur=(G.beasts&&G.beasts.includes(o))?beastJoue(o):animalJoue(o);
+  o.pret=(G.time||0)+Math.max(10,dur||dpasDe(o));}
 // pas d'attaque à travers un coin
 const canHit=o=>Math.max(Math.abs(o.x-G.px),Math.abs(o.y-G.py))<=1&&diagOk(o.x,o.y,Math.sign(G.px-o.x),Math.sign(G.py-o.y));
 // les puces n'entrent pas dans le champ d'un laser
@@ -27,8 +61,10 @@ const animalOk=(x,y,m)=>{if(x<1||y<1||x>=W-1||y>=H-1)return false;const v=G.t[id
 /* Deux façons de peupler la carte (19 novembre 2026).
    - spawnGroupes : le jeu. Un budget de menace achète des groupes réglés dans Lab → Groupes (voir 06b-groupes).
    - spawnAnimals / spawnBeasts : effectifs par espèce lus dans LIFE. Ne sert plus qu'au banc de combat et aux mesures. */
-const newPuce=(x,y,gr)=>({sp:0,x,y,hp:pvDe(SPECIES[0]),mp:Math.random(),flee:0,dir:Math.random()<.5?1:-1,gr});
-const newBeast=(sp,x,y,pack,gr)=>({sp,x,y,hp:pvDe(BEASTS[sp]),mp:Math.random(),hunt:0,dir:-1,pack,gr});
+/* ph : la phase de l'horloge de la créature, tirée au hasard, pour que des bêtes de la même espèce n'agissent pas
+   toutes au même instant (prochaineCreature la convertit en o.pret au premier réveil). */
+const newPuce=(x,y,gr)=>({sp:0,x,y,hp:pvDe(SPECIES[0]),ph:Math.random(),flee:0,dir:Math.random()<.5?1:-1,gr});
+const newBeast=(sp,x,y,pack,gr)=>({sp,x,y,hp:pvDe(BEASTS[sp]),ph:Math.random(),hunt:0,dir:-1,pack,gr});
 const puceSol=(x,y)=>{const v=G.t[idx(x,y)];
   return (v===GROUND||v===GRASS||v===FLAT)&&!animalAt(x,y)&&!beastAt(x,y)&&!(x===G.px&&y===G.py);};
 function spawnAnimals(){G.animals=[];G.fauna=[];G.pool=[0];const n=LIFE.puce||0;
@@ -186,7 +222,7 @@ function distTerre(){if(PATD.terre)return PATD.terre;const d=new Int16Array(W*H)
 // un terrestre calme resté dans l'eau (poursuite abandonnée) fait un pas vers la terre ; rend true s'il était dans l'eau
 function sortEau(o,sp,fits){if(!terrestre(sp)||!isWater(G.t[idx(o.x,o.y)]))return false;const d=distTerre(),h=d[idx(o.x,o.y)];let best=null,bv=h;
   for(const[dx,dy]of DIRS){const nx=o.x+dx,ny=o.y+dy,v=d[idx(nx,ny)];if(v<0||v>=bv||!diagOk(o.x,o.y,dx,dy)||!fits(nx,ny))continue;bv=v;best=[nx,ny,dx];}
-  if(best){o.x=best[0];o.y=best[1];if(best[2])o.dir=best[2]>0?1:-1;}o.mp=Math.min(o.mp,.99);return true;}
+  if(best){o.x=best[0];o.y=best[1];if(best[2])o.dir=best[2]>0?1:-1;}return true;}
 const patD=P=>{const k=P.tx+','+P.ty+','+P.eau;return PATD[k]||(PATD[k]=patBfs(P.tx,P.ty,P.eau));};
 // n points accessibles depuis le point de départ, entre a et b cases de lui, écartés les uns des autres, rangés en boucle
 function patPoints(P,n,a,b){const d=patBfs(P.hx,P.hy,P.eau),pts=[];
@@ -263,59 +299,75 @@ function patPas(o,fits,P,d,h){
     if(libre||!patSwap(o,d))chaseStep(o,d,fits,P.tx,P.ty);}   // un pas libre, sinon l'échange de places, sinon le détour
   else if((P.pat==='territoire'||P.pat==='garde')&&Math.random()<(P.pat==='garde'?.06:.15)){const [dx,dy]=DIRS[rnd(0,7)],
     v=d[idx(o.x+dx,o.y+dy)];if(v>=0&&v<=P.sp+1&&fits(o.x+dx,o.y+dy)&&diagOk(o.x,o.y,dx,dy)){o.x+=dx;o.y+=dy;if(dx)o.dir=dx;}}
-  o.mp=Math.min(o.mp,.99);return true;}
-/* Errance (règle du 20 novembre 2026) : un pas tous les battements ou tous les deux (une fois sur deux, la créature marque
-   un temps après son pas). Elle ne repart jamais d'où elle vient, ni par les deux diagonales voisines : il lui reste tout
-   droit, les deux diagonales de devant et les deux virages à 90°. Dans un cul-de-sac seulement, elle fait demi-tour.
-   o.lx, o.ly : son dernier pas ; o.ew : battements d'attente avant le prochain. */
-function errStep(o,fits){o.mp=Math.min(o.mp,.99);if(o.ew>0){o.ew--;return;}
+  return true;}
+/* Errance (règle du 20 novembre 2026) : un pas à chaque fois qu'elle peut agir, ou un sur deux (une fois sur deux, la
+   créature marque un temps après son pas). Elle ne repart jamais d'où elle vient, ni par les deux diagonales voisines :
+   il lui reste tout droit, les deux diagonales de devant et les deux virages à 90°. Dans un cul-de-sac seulement, elle
+   fait demi-tour. o.lx, o.ly : son dernier pas ; o.ew : actions d'attente avant le prochain. */
+function errStep(o,fits){if(o.ew>0){o.ew--;return;}
   const lx=o.lx||0,ly=o.ly||0,libres=DIRS.filter(([dx,dy])=>fits(o.x+dx,o.y+dy)&&diagOk(o.x,o.y,dx,dy));if(!libres.length)return;
   const devant=libres.filter(([dx,dy])=>dx*lx+dy*ly>=0),c=devant.length?devant:libres,[dx,dy]=c[rnd(0,c.length-1)];
   o.x+=dx;o.y+=dy;o.lx=dx;o.ly=dy;if(dx)o.dir=dx;o.ew=rnd(0,1);}
 const patDe=o=>{const P=G.patr&&G.patr[o.gi];return P?P.pat:null;};
+/* Le battement, côté animaux : détection, humeur (a.mode) et effets. Les pas et les coups, eux, se jouent sur
+   l'horloge de chaque bête, dans animalJoue. L'humeur décidée ici sert jusqu'au battement suivant. */
 function animalsAct(){
-  turnStealth();
+  turnStealth();distReset();
   if(G&&!G.over)patTick();
-  if(!G.animals||G.over)return;let fled=null,swarm=null;const distSec=robotDist(false),distEau=robotDist(true),DC={};
+  if(!G.animals||G.over)return;let fled=null,swarm=null;
   // Puce étourdie par une batterie : comme les autres robots, elle ne fait rien (22 novembre 2026 ; avant, elle n’en tenait pas compte)
   for(const a of G.animals){if(G.over)break;if(a.stun>0){a.stun--;continue;}
-    const sp=SPECIES[a.sp];a.mp=Math.min(2,a.mp+sp.v/5/slowOf(G.t[idx(a.x,a.y)],eauLibre(sp)));
-    const mA=mouilleOk(sp,a),okA=(x,y)=>animalOk(x,y,mA),dist=mA?distEau:distSec;
-    const d=Math.hypot(a.x-G.px,a.y-G.py),sees=voitForeuse(a,!!a.aware);
+    const sp=SPECIES[a.sp],sees=voitForeuse(a,!!a.aware);
     if(sees){if(!a.aware)alerte(a);a.aware=1;spot(a);}
     else if(a.aware&&a.search>0&&--a.search===0){a.aware=0;a.enraged=false;forget(a);}   // fouille terminée : il oublie
     else if(a.aware&&!a.mem)a.aware=0;
+    a.sees=sees;
     const prev=a.mode,c=cheb(a,G.px,G.py);
     // la puce garde ses distances et recule au contact tant que le combat n'est pas engagé (voir engage) ;
     // une fois passé à l'attaque (enraged), il ne recule plus jamais, jusqu'à ce qu'il oublie la foreuse
     a.mode=!a.aware?'':!sees?(a.search>0?'search':'seek'):a.enraged?'attack':c<=KEEP_MIN?'flee':c>KEEP_MAX?'follow':'hold';
     if(a.mode==='attack'&&prev!=='attack'&&vis[idx(a.x,a.y)])swarm=swarm||sp;
     if(a.mode==='flee'&&prev!=='flee'&&vis[idx(a.x,a.y)])fled=fled||sp;
-    if(a.mode==='attack'&&canHit(a)){hurtRobot(a,sp);continue;}
-    while(a.mp>=1&&!G.over){a.mp-=1;
-      if(a.mode==='attack'){if(canHit(a)){a.mp=Math.min(a.mp,.99);break;}stepToward(a,dist,okA);}
-      else if(a.mode==='flee')stepAway(a,okA);
-      else if(a.mode==='follow')stepToward(a,dist,okA);
-      else if(a.mode==='seek'){if(!seekStep(a,okA,DC,mA)){a.mode=a.search>0?'search':'';break;}}
-      else if(a.mode==='search')searchStep(a,okA,DC,mA);
-      else if(a.mode===''&&patMove(a,(x,y)=>animalOk(x,y,mouilleOk(sp,a))))break;                                          // calme : la patrouille de son groupe
-      else if(a.mode===''&&sortEau(a,sp,okA))break;
-      else if(a.mode===''){errStep(a,okA);break;}                                         // calme, sans point à rejoindre : errance
-      else if(Math.random()<(a.mode==='hold'?.15:.3)){const [dx,dy]=DIRS[rnd(0,7)];const nx=a.x+dx,ny=a.y+dy;
-        if(okA(nx,ny)&&diagOk(a.x,a.y,dx,dy)&&(a.mode!=='hold'||cheb({x:nx,y:ny},G.px,G.py)>KEEP_MIN)){a.x=nx;a.y=ny;if(dx)a.dir=dx;}}
-      else a.mp=Math.min(a.mp,.99);}
   }
   if(swarm){sayMore(`${LesNoms(swarm)} passent à l’attaque !`,'warn');SFX.chirp();}
   else if(fled){sayMore(`${UnNom(fled)} recule.`);SFX.chirp();}
 }
+// Une action d'animal, sur son horloge : un coup (dcoup) ou un pas (dpas). Rend la durée de ce qu'il a fait.
+function animalJoue(a){const sp=SPECIES[a.sp];
+  if(a.stun>0)return dpasDe(a,sp);                                   // étourdi : son temps passe sans qu'il agisse
+  const mA=mouilleOk(sp,a),okA=(x,y)=>animalOk(x,y,mA),dist=distCarte(mA,false);
+  if(a.mode==='attack'&&canHit(a)){hurtRobot(a,sp);return dcoupDe(a,sp);}
+  if(a.mode==='attack'||a.mode==='follow')stepToward(a,dist,okA);
+  else if(a.mode==='flee')stepAway(a,okA);
+  else if(a.mode==='seek'){if(!a.mem||!seekStep(a,okA,DC,mA))a.mode=a.search>0?'search':'';}
+  else if(a.mode==='search')searchStep(a,okA,DC,mA);
+  // au calme : patrouille, retour à terre ou errance — un pas par battement au plus, quelle que soit sa vitesse
+  else if(a.mode===''){if(!patMove(a,okA)&&!sortEau(a,sp,okA))errStep(a,okA);return Math.max(TICK,dpasDe(a,sp));}
+  // hold : il reste à distance et ne bouge que de temps en temps
+  else if(Math.random()<(a.mode==='hold'?.15:.3)){const [dx,dy]=DIRS[rnd(0,7)],nx=a.x+dx,ny=a.y+dy;
+    if(okA(nx,ny)&&diagOk(a.x,a.y,dx,dy)&&(a.mode!=='hold'||cheb({x:nx,y:ny},G.px,G.py)>KEEP_MIN)){a.x=nx;a.y=ny;if(dx)a.dir=dx;}}
+  return dpasDe(a,sp);}
 
 /* ---------- Prédateurs ---------- */
 const FOOT=[[0,0]];
 const beastAt=(x,y)=>G.beasts&&G.beasts.find(b=>b.x===x&&b.y===y);
 // une balise posée barre le passage
+/* Un ennemi posé par un module garde sa salle (26 novembre 2026) : b.salle donne son module dans G.mods, dont le
+   champ salle liste les cases de la pièce. Il n'en sort pas **tant qu'il n'a pas été alerté** ; une fois qu'il a
+   repéré la foreuse ou qu'un cri l'a prévenu (b.libre, posé au battement), il poursuit dehors comme les autres et
+   ne se referme plus dedans — sinon, ayant oublié la foreuse au loin, il resterait planté sans pouvoir bouger.
+   On met la liste en Set une fois, dans une WeakMap calée sur le tableau lui-même : une nouvelle carte remplace
+   les tableaux, donc le cache se renouvelle tout seul. */
+const SALLE_SET=new WeakMap();
+function salleOk(b,x,y){if(b.salle==null||b.libre)return true;
+  const m=G.mods&&G.mods[b.salle],a=m&&m.salle;if(!a||!a.length)return true;
+  let S=SALLE_SET.get(a);if(!S){S=new Set(a);SALLE_SET.set(a,S);}
+  return S.has(idx(x,y));}
 function beastFits(b,x,y){const spB=BEASTS[b.sp],mB=mouilleOk(spB,b);
   if(G.balises&&G.balises.length&&FOOT.some(([dx,dy])=>baliseAt(x+dx,y+dy)))return false;
-  for(const[dx,dy]of FOOT){const cx=x+dx,cy=y+dy;if(cx<1||cy<1||cx>=W-1||cy>=H-1)return false;const v=G.t[idx(cx,cy)];
+  for(const[dx,dy]of FOOT){const cx=x+dx,cy=y+dy;if(cx<1||cy<1||cx>=W-1||cy>=H-1)return false;
+  if(!salleOk(b,cx,cy))return false;                                     // ennemi de module : il ne sort pas de sa salle
+  const v=G.t[idx(cx,cy)];
   if(spB.aqua&&!isWater(v))return false;   // le brochon ne quitte jamais l'eau
   // calme, il n'entre pas dans le champ d'un laser ; en chasse, il fonce (21 novembre 2026)
   if(!(b.hunt>0)&&G.lz&&G.lz[idx(cx,cy)])return false;
@@ -532,18 +584,18 @@ function explose(b){const sp=BEASTS[b.sp],k=G.beasts.indexOf(b);if(k>=0)G.beasts
    pour toucher ordinaire, et le trait rouge se voit toujours — droit sur la foreuse s'il touche, à côté s'il rate.
    La clé interne de l'espèce reste `paralyzor`, pour que les groupes déjà réglés continuent de marcher. */
 // une mine armée clignote : le rendu doit tourner
-const animVif=()=>!!(G&&((G.beasts&&G.beasts.some(b=>b.fuse>0))||(G.balises&&G.balises.length)));
+const animVif=()=>!!(G&&((G.beasts&&G.beasts.some(b=>b.fuse>0))||(G.balises&&G.balises.length)||(typeof PONT_AN!=='undefined'&&PONT_AN.size)));
+/* Le battement, côté ennemis : détection, alarmes, mémoire, effets qui s'épuisent, mèche des mines, soins du
+   Soudeur. Les pas et les coups se jouent sur l'horloge de chaque créature, dans beastJoue. Ce qui est décidé ici
+   (b.sees, b.hunt) sert jusqu'au battement suivant. */
 function beastsAct(){
-  turnStealth();
-  if(!G.beasts||!G.beasts.length||G.over)return;baliseTick();const distSec=robotDist(false),distEau=robotDist(true),DC={};
-    let charged=null,distVol=null;const alarms=[],boom=[];packTick();
-  for(const b of G.beasts){if(G.over)break;if(b.skip){b.skip=0;continue;}const sp=BEASTS[b.sp];
+  turnStealth();distReset();
+  if(!G.beasts||!G.beasts.length||G.over)return;baliseTick();
+    let charged=null;const alarms=[],boom=[];packTick();
+  for(const b of G.beasts){if(G.over)break;const sp=BEASTS[b.sp];
     if(b.bers>0)b.bers--;if(b.camo>0)b.camo--;if(b.tient&&!nearRobot(b))b.tient=0;
     if(b.stun>0){b.stun--;continue;}                                                 // étourdi par une batterie : il ne fait rien
-    // attiré par une balise posée : il s'acharne sur elle (23 novembre 2026)
-    if(b.leurre&&baliseJoue(b,sp,boom))continue;
-    b.mp=Math.min(2,b.mp+sp.v/5/slowOf(G.t[idx(b.x,b.y)],eauLibre(sp)));
-    const d=Math.hypot(b.x-G.px,b.y-G.py),sees=voitForeuse(b,b.hunt>0);
+    const sees=voitForeuse(b,b.hunt>0);
     if(sees){if(!b.hunt&&sp.alarm)alarms.push(b);if(!b.hunt&&beastVisible(b))charged=charged||sp;if(!b.hunt)alerte(b);b.hunt=1;spot(b);
       if(G.px!==b.x)b.dir=Math.sign(G.px-b.x);
       // seuls les relais partagent ce qu'un des leurs voit — pas les autres espèces de leur groupe (20 novembre 2026)
@@ -551,43 +603,51 @@ function beastsAct(){
     else if(b.hunt&&b.search>0&&--b.search===0){b.hunt=0;forget(b);}                // fouille terminée : il oublie
     else if(b.hunt&&!b.mem)b.hunt=0;
     b.sees=sees;
+    if(b.salle!=null&&b.hunt>0)b.libre=1;   // ennemi de module alerté : il peut désormais sortir de sa salle
     if(alarms.length&&alarms[alarms.length-1]===b)raiseAlarm(b);
-    // mine : armée, elle attend l'explosion ; sinon elle s'arme à une case de la foreuse
-    if(sp.mine){
-      if(b.fuse>0){if(--b.fuse<=0)boom.push(b);continue;}
-      if(b.hunt>0&&cheb(b,G.px,G.py)<=1){b.fuse=rnd(2,3);if(beastVisible(b)){sayMore('La mine s’arme !','warn');SFX.spot();}continue;}}
+    // mine armée : la mèche brûle en battements, comme avant (2 à 3)
+    if(sp.mine&&b.fuse>0&&--b.fuse<=0)boom.push(b);
     // soudeur : répare l'allié le plus abîmé à portée
-    if(sp.soin){let c=null,m=0;for(const o of G.beasts){if(o===b||cheb(o,b.x,b.y)>(sp.portee||3))continue;
+    if(sp.soin&&!b.stun){let c=null,m=0;for(const o of G.beasts){if(o===b||cheb(o,b.x,b.y)>(sp.portee||3))continue;
       const q=pvDe(BEASTS[o.sp])-o.hp;if(q>m){m=q;c=o;}}
       if(c){const h=Math.min(sp.soin,m);c.hp+=h;if(beastVisible(c)){addFx({kind:'num',x:c.x,y:c.y,txt:'+'+h,col:PAL['2'],dur:750});
         addFx({kind:'laser',o:b,x:c.x,y:c.y,ox:0,oy:0,dur:260});}}}
-    // il s'écarte ; acculé, il se bat
-    if(sp.recul&&b.hunt>0&&sees&&cheb(b,G.px,G.py)<=sp.recul){const x0=b.x,y0=b.y;stepAway(b,(x,y)=>beastFits(b,x,y));
-      if(b.x!==x0||b.y!==y0){b.mp=Math.min(b.mp,.99);if(b.cd>0)b.cd--;continue;}}
-    // entre deux jets, il tient sa distance
-    if(sp.glu&&b.hunt>0&&sees&&cheb(b,G.px,G.py)<=sp.glu&&cheb(b,G.px,G.py)>1&&los(b.x,b.y,G.px,G.py)){if((b.cd=(b.cd||0)-1)<=0){b.cd=sp.cadence||3;
-      glue(b,sp);}continue;}
-    // sentinelle : elle tire dès qu'elle est à portée
-    if(sp.laser&&b.hunt>0&&sees&&cheb(b,G.px,G.py)<=sp.laser&&los(b.x,b.y,G.px,G.py)){if(sp.cadence){if((b.cd=(b.cd||0)-1)>0)continue;
-      b.cd=sp.cadence;}hurtRobot(b,sp,{laser:1});continue;}
-    if(b.hunt>0&&nearRobot(b)){if(sp.bloque&&!b.tient){b.tient=1;
-      if(beastVisible(b)){sayMore(`${LeNom(sp)} agrippe la foreuse : elle ne peut plus se déplacer tant qu’il tient.`,'warn');SFX.blocked();
-      }}hurtRobot(b);continue;}
-    while(b.mp>=1&&!G.over){b.mp-=1;
-      if(b.hunt>0&&sees){
-        if(nearRobot(b)){b.mp=Math.min(b.mp,.99);break;}
-        chaseStep(b,sp.vol?(distVol=distVol||distFromVol(G.px,G.py)):mouilleOk(sp,b)?distEau:distSec,(x,y)=>beastFits(b,x,y));}
-      // fouille autour du dernier point connu
-      else if(b.hunt>0&&b.search>0)searchStep(b,(x,y)=>beastFits(b,x,y),DC,mouilleOk(sp,b));
-      else if(b.hunt>0){if(!seekStep(b,(x,y)=>beastFits(b,x,y),DC,mouilleOk(sp,b)))break;}       // vers la dernière position connue
-      else if(patMove(b,(x,y)=>beastFits(b,x,y)))break;                                   // calme : la patrouille de son groupe
-      else if(sortEau(b,sp,(x,y)=>beastFits(b,x,y)))break;                                // terrestre calme dans l'eau : il regagne la terre
-      else if(b.pack>=0&&patDe(b)!=='errance'){packMove(b);}
-      else{errStep(b,(x,y)=>beastFits(b,x,y));break;}}                                     // errance
   }
   for(const b of boom)if(G.beasts.includes(b)&&!G.over)explose(b);
   if(charged){sayMore(`${LeNom(charged)} vous a repéré et charge !`,'warn');SFX.roar();}
 }
+/* Une action d'ennemi, sur son horloge. Rend la durée de ce qu'il vient de faire : un coup (dcoup, multiplié par
+   sp.cadence pour la glu) ou un pas (dpas, allongé par le terrain). Dans l'ordre : étourdi, balise qui l'attire,
+   mine (armée elle ne bouge plus, sinon elle s'arme au contact), recul, glu, laser, corps à corps, déplacement. */
+function beastJoue(b){const sp=BEASTS[b.sp],fits=(x,y)=>beastFits(b,x,y),mouille=mouilleOk(sp,b);
+  if(b.stun>0)return dpasDe(b,sp);                                   // étourdi : son temps passe sans qu'il agisse
+  // attiré par une balise posée : il s'acharne sur elle (23 novembre 2026)
+  if(b.leurre){const d=baliseJoue(b,sp);if(d)return d;}
+  if(sp.mine){
+    if(b.fuse>0)return dcoupDe(b,sp);                                // armée : elle attend l'explosion, sans plus bouger
+    if(b.hunt>0&&cheb(b,G.px,G.py)<=1){b.fuse=rnd(2,3);
+      if(beastVisible(b)){sayMore('La mine s’arme !','warn');SFX.spot();}return dcoupDe(b,sp);}}
+  // il s'écarte ; acculé, il se bat
+  if(sp.recul&&b.hunt>0&&b.sees&&cheb(b,G.px,G.py)<=sp.recul){const x0=b.x,y0=b.y;stepAway(b,fits);
+    if(b.x!==x0||b.y!==y0)return dpasDe(b,sp);}
+  // entre deux jets, il tient sa distance
+  if(sp.glu&&b.hunt>0&&b.sees&&cheb(b,G.px,G.py)<=sp.glu&&cheb(b,G.px,G.py)>1&&los(b.x,b.y,G.px,G.py)){
+    glue(b,sp);return dcoupDe(b,sp)*(sp.cadence||3);}
+  // sentinelle et artilleur : ils tirent dès qu'ils sont à portée, et le temps du tir tient lieu de cadence
+  if(sp.laser&&b.hunt>0&&b.sees&&cheb(b,G.px,G.py)<=sp.laser&&los(b.x,b.y,G.px,G.py)){
+    hurtRobot(b,sp,{laser:1});return dcoupDe(b,sp);}
+  if(b.hunt>0&&nearRobot(b)){if(sp.bloque&&!b.tient){b.tient=1;
+    if(beastVisible(b)){sayMore(`${LeNom(sp)} agrippe la foreuse : elle ne peut plus se déplacer tant qu’il tient.`,'warn');SFX.blocked();
+    }}hurtRobot(b);return dcoupDe(b,sp);}
+  if(b.hunt>0&&b.sees)chaseStep(b,distCarte(mouille,sp.vol),fits);
+  else if(b.hunt>0&&b.search>0)searchStep(b,fits,DC,mouille);        // fouille autour du dernier point connu
+  // vers la dernière position connue ; sans position connue il n'a plus rien à suivre (le battement lui ôtera la chasse)
+  else if(b.hunt>0&&b.mem)seekStep(b,fits,DC,mouille);
+  else{   // au calme : patrouille, retour à terre d'un terrestre, bande ou errance — un pas par battement au plus,
+          // quelle que soit la vitesse de l'espèce (règle du 20 novembre 2026, conservée telle quelle)
+    if(!patMove(b,fits)&&!sortEau(b,sp,fits)){if(b.pack>=0&&patDe(b)!=='errance')packMove(b);else errStep(b,fits);}
+    return Math.max(TICK,dpasDe(b,sp));}
+  return dpasDe(b,sp);}
 // Plus de réparation automatique : seule l'énergie se recharge à chaque battement.
 // Attendre sur place la recharge WAIT_REGEN fois plus vite (13 novembre 2026) : 2/t au lieu de 1/t à POW 1.
 function regen(wait){if(G.over)return;G.st.energie=Math.min(G.st.energieMax,G.st.energie+G.st.power/POW_BASE*(wait?WAIT_REGEN:1));}
@@ -628,7 +688,7 @@ function packMove(b){const P=G.packs&&G.packs[b.pack];
   // pause : il piétine sur place
   if(Math.random()<.25){const[dx,dy]=DIRS[rnd(0,7)];if(beastFits(b,b.x+dx,b.y+dy)&&diagOk(b.x,b.y,dx,dy)&&packOk(b,b.x+dx,b.y+dy)){b.x+=dx;
     b.y+=dy;if(dx)b.dir=dx;}}
-  else b.mp=Math.min(b.mp,.99);}
+}
 const mates=b=>G.beasts.filter(o=>o!==b&&o.pack===b.pack&&o.pack>=0);
 const packCenter=m=>[m.reduce((s,o)=>s+o.x,0)/m.length,m.reduce((s,o)=>s+o.y,0)/m.length];
 function packOk(b,x,y){const m=mates(b);if(!m.length)return true;const [cx,cy]=packCenter(m);

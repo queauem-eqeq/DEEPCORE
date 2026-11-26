@@ -75,11 +75,21 @@ function machTuileRendu(t,x,y,put){const i=idx(x,y),a=G.art&&G.art[i];
   else if(t===FABRIC)put(TL.fabric,1);}
 
 /* ----- Circuits : leviers, socles, ponts, grilles ----- */
+/* Le pont se déploie **planche par planche** (26 novembre 2026). Le modèle, lui, est posé d'un coup : on ne doit pas
+   pouvoir marcher sur une planche qui n'existe pas encore, ni voir une bête tomber dans un trou déjà comblé. Seul le
+   dessin est retardé : tant que l'instant d'une case n'est pas venu, elle se dessine comme le gouffre. */
+const PONT_AN=new Map(),PONT_PAS=70;
+function pontAnime(cells,dep){if(reduced||!cells||cells.length<2)return;
+  const ec=(i,j)=>Math.max(Math.abs(i%W-j%W),Math.abs(((i/W)|0)-((j/W)|0)));
+  const l=(dep!=null&&ec(cells[cells.length-1],dep)<ec(cells[0],dep))?cells.slice().reverse():cells.slice();
+  const t0=performance.now();
+  l.forEach((i,n)=>{PONT_AN.set(i,t0+(n+1)*PONT_PAS);setTimeout(()=>SFX.pont(n),n*PONT_PAS);});}
 function circApplique(c,muet){const t=G.t;
   for(const k of c.cib){
     if(k.t==='pont'){for(const j of k.c){if(c.on){t[j]=BRIDGE;G.pb=G.pb||{};G.pb[j]=1;}
-        else{t[j]=CHASM;if(G.pb)delete G.pb[j];const b=beastAt(j%W,(j/W)|0);if(b){G.beasts.splice(G.beasts.indexOf(b),1);
+        else{t[j]=CHASM;PONT_AN.delete(j);if(G.pb)delete G.pb[j];const b=beastAt(j%W,(j/W)|0);if(b){G.beasts.splice(G.beasts.indexOf(b),1);
           if(!muet)sayMore(`${LeNom(BEASTS[b.sp])} tombe dans le gouffre.`,'good');}}}
+      if(c.on&&!muet)pontAnime(k.c,c.c);
       CHASM_OV=null;}
     else if(k.t==='grille')k.c.forEach((j,n)=>{if(c.on){if(t[j]===GRILLE)t[j]=k.sous[n];}else if(t[j]===k.sous[n]&&!(G.px===j%W&&G.py===((j/W)|0))&&!beastAt(j%W,(j/W)|0)&&!animalAt(j%W,(j/W)|0))t[j]=GRILLE;});
     else if(k.t==='lasers'){for(const l of G.las||[])if(l.g===k.g)l.cut=c.on?1:0;machZone();}}}
@@ -233,14 +243,36 @@ function machines(){G.las=[];G.lz={};G.circ=[];G.soc={};G.piles={};G.mt=0;G.mach
         if(fosse.length<6||fosse.some(i=>t[i]!==FLOOR||pres(i)||i===site||i===dep||G.lz[i]||G.cles[i]||(G.items[i]&&G.items[i].length)||G.soc[i]!=null))continue;
         // le gouffre va d'un mur à l'autre : sur ses côtés, hors de la pièce, il n'y a que des obstacles
         if(fosse.some(i=>{const x=i%W,y=(i/W)|0;return (vert?[[0,1],[0,-1]]:[[1,0],[-1,0]]).some(([dx,dy])=>{const j=idx(x+dx,y+dy);return !P.has(j)&&!blocks(t[j]);});}))continue;
-        const large=a1-a0-2*m+1,bout=(lg,c)=>p.c.find(i=>li(i)===lg&&co(i)===c);
-        const lignes=mel([...new Set(fosse.map(li))]).filter(lg=>fosse.filter(i=>li(i)===lg).length===large&&bout(lg,a0+m-1)!=null&&bout(lg,a1-m+1)!=null&&t[bout(lg,a0+m-1)]===FLOOR&&t[bout(lg,a1-m+1)]===FLOOR);
-        if(!lignes.length)continue;const lg=lignes[0],pt=fosse.filter(i=>li(i)===lg).sort((a,b)=>co(a)-co(b));
+        const bout=(lg,c)=>p.c.find(i=>li(i)===lg&&co(i)===c);
+        /* Le pont n'est plus forcément droit (26 novembre 2026) : il avance d'une colonne à la suivante et peut se
+           décaler d'une ligne en chemin, en posant le coude pour rester d'un seul tenant. Il lui faut seulement
+           partir d'une rive et atteindre l'autre. */
+        const M=new Map();for(const i of fosse)M.set(li(i)+'|'+co(i),i);
+        const cel=(l,c)=>M.get(l+'|'+c),cA=a0+m,cB=a1-m;
+        const rive=(l,c)=>{const b=bout(l,c);return b!=null&&t[b]===FLOOR?b:null;};
+        const toutes=[...new Set(fosse.map(li))];
+        const dep0=mel(toutes.filter(l=>rive(l,cA-1)&&cel(l,cA)!=null)),arr0=toutes.filter(l=>rive(l,cB+1)&&cel(l,cB)!=null);
+        if(!dep0.length||!arr0.length)continue;
+        const chemin=(lA,lB,vir)=>{let l=lA;const q=[cel(lA,cA)];
+          for(let c=cA+1;c<=cB;c++){const reste=cB-c;let cib=l;
+            if(Math.abs(lB-l)>reste)cib=l+Math.sign(lB-l);                                  // il faut se rapprocher de l'arrivée
+            else if(Math.random()<vir&&reste>Math.abs(lB-l))cib=l+(Math.random()<.5?1:-1);  // un virage, tant qu'il reste de la place
+            if(cib!==l){const cd=cel(cib,c-1);if(cd==null)cib=l;else q.push(cd);}           // le coude
+            const n=cel(cib,c);if(n==null)return null;l=cib;q.push(n);}
+          return l===lB?q:null;};
+        let pt=null,lgA=null,lgB=null;const droit=Math.random()<.45;   // un pont sur deux reste droit
+        for(const lA of dep0){const bs=mel(arr0.filter(l=>Math.abs(l-lA)<=cB-cA));
+          if(droit)bs.sort((a,b)=>Math.abs(a-lA)-Math.abs(b-lA));      // le plus court chemin d'abord : tout droit
+          for(const lB of bs){
+            for(let e=0;e<6&&!pt;e++)pt=chemin(lA,lB,droit?0:.3);
+            if(pt){lgA=lA;lgB=lB;break;}}
+          if(pt)break;}
+        if(!pt)continue;
         const sv=fosse.map(i=>t[i]),defait=()=>fosse.forEach((i,n)=>t[i]=sv[n]);for(const i of fosse)t[i]=CHASM;
         const d=dist(),pres1=p.c.filter(i=>t[i]===FLOOR&&d[i]>=0),loin=p.c.filter(i=>t[i]===FLOOR&&d[i]<0);
         // les deux rives se rejoignent par ailleurs : ni passage obligé, ni cul-de-sac
         if(!pres1.length||!loin.length){defait();continue;}
-        const pied=[bout(lg,a0+m-1),bout(lg,a1-m+1)].find(i=>d[i]>=0);if(pied==null){defait();continue;}
+        const pied=[bout(lgA,cA-1),bout(lgB,cB+1)].find(i=>d[i]>=0);if(pied==null){defait();continue;}
         const cand=pres1.filter(i=>i!==pied&&libre(i)&&!pres(i)&&artLibre(B,i,site)).sort((a,b)=>pas(a,pied)-pas(b,pied));
         if(!cand.length||pas(cand[0],pied)>3){defait();continue;}const mec=cand[0];
         let fait=false;
@@ -267,8 +299,10 @@ function machines(){G.las=[];G.lz={};G.circ=[];G.soc={};G.piles={};G.mt=0;G.mach
     const but=BUTIN_DEPOT(),cs=mel(p.c.filter(i=>t[i]===FLOOR));
       but.forEach((o,n)=>{if(cs[n]!=null)(G.items[cs[n]]=G.items[cs[n]]||[]).push(o);});
     p.mach='depot';return true;};
-  /* -- salle piégée (22 novembre 2026) : un butin au milieu de la pièce, des relais cachés dans les murs. Les niches se voient
-     (tuile « niche ») : un joueur attentif lit le piège avant de prendre l'appât. Ramasser l'appât fait surgir la bande. */
+  /* -- salle piégée (22 novembre 2026) : un butin au milieu de la pièce, des relais cachés dans les murs. Les niches
+     étaient visibles jusqu'au 26 novembre 2026 ; elles sont maintenant cachées et se repèrent comme les portes
+     dérobées, alors seulement le joueur attentif lit le piège avant de prendre l'appât. Ramasser l'appât fait surgir
+     la bande, repérée ou non. */
   const piege=p=>{if(p.c.length<20||p.c.length>140)return false;const P=new Set(p.c),niches=[],vuM=new Set(),vuS=new Set();
     const cx=p.c.reduce((a,i)=>a+i%W,0)/p.c.length,cy=p.c.reduce((a,i)=>a+((i/W)|0),0)/p.c.length;
     const app=p.c.filter(i=>libre(i)&&!pres(i)).sort((a,b)=>Math.hypot(a%W-cx,((a/W)|0)-cy)-Math.hypot(b%W-cx,((b/W)|0)-cy))[0];
@@ -277,18 +311,61 @@ function machines(){G.las=[];G.lz={};G.circ=[];G.soc={};G.piles={};G.mt=0;G.mach
       const j=v4(i).find(j=>t[j]===WALL&&!P.has(j)&&!vuM.has(j)&&!pres(j));if(j==null)continue;vuM.add(j);vuS.add(i);niches.push([j,i]);}
     // deux fois plus de relais (22 novembre 2026, choix de l'utilisateur) : 8 à 16, autant que les murs le permettent
     const n=Math.max(8,Math.min(16,Math.round(p.c.length/4.5)));if(niches.length<6)return false;const sel=niches.slice(0,n);
-    G.pieges.push({c:app,n:sel.map(a=>a[0]),f:sel.map(a=>a[1]),on:1});for(const [j] of sel)G.niche[j]=1;
+    // 26 novembre 2026 : les niches naissent CACHÉES (3). Elles se repèrent comme les portes dérobées (07b,
+    // chercheSecrets) et deviennent alors visibles et fermées (1) ; 2 veut toujours dire ouverte.
+    G.pieges.push({c:app,n:sel.map(a=>a[0]),f:sel.map(a=>a[1]),on:1});for(const [j] of sel)G.niche[j]=3;
     const but=typeof butinCoffre==='function'?butinCoffre('piege'):['matiere','matiere'];
       for(const o of but)(G.items[app]=G.items[app]||[]).push(o);
     p.mach='piege';return true;};
   /* -- vitrines (22 novembre 2026, d'après les coffres de Brogue) : une petite pièce en cul-de-sac, trois vitrines, un lot dans chacune.
      On n'en emporte qu'un : les autres se verrouillent. Rien à combattre : le choix est le jeu. */
-  const vitrines=p=>{const P=new Set(p.c),ent=[];if(p.c.length<9||p.c.length>48)return false;
+  const vitrines=p=>{const P=new Set(p.c),ent=[];if(p.c.length<9||p.c.length>120)return false;
     for(const i of p.c)for(const j of v4(i))if(!P.has(j)&&!blocks(t[j])&&!ent.includes(j))ent.push(j);
-    if(ent.length!==1||G.lz[ent[0]])return false;
-    const c=p.c.filter(i=>libre(i)&&!pres(i)&&artLibre(B,i,site)).sort((a,b)=>pas(b,ent[0])-pas(a,ent[0])),sel=[];
-    for(const i of c){if(sel.length>=3)break;if(sel.every(j=>pas(i,j)>=2))sel.push(i);}
-    if(sel.length<3)return false;const bc=typeof butinCoffre==='function';
+    /* 26 novembre 2026 : jusqu'à deux entrées, et des pièces jusqu'à 120 cases. Le cul-de-sac strict ne servait plus
+       à rien depuis que les lots sont enfermés derrière leurs portes, et il écartait neuf pièces sur dix. */
+    if(!ent.length||ent.length>2||ent.some(i=>G.lz[i]))return false;
+    /* Trois niches côte à côte, creusées dans un mur, chacune derrière sa porte (26 novembre 2026, d'après le
+       module « Vitrine REF » du joueur). En partant du sol de la pièce et en s'enfonçant dans le mur :
+           rangée 0 (la pièce)   .  .  .  .  .     on se tient là
+           rangée 1              D  V  D  V  D     une porte devant chaque niche, vitré entre les deux
+           rangée 2              S  V  S  V  S     les trois niches, le lot dedans, vitré entre les deux
+           rangée 3              X  X  X  X  X     le mur du fond, laissé intact
+       Les cloisons vitrées font donc **deux cases de profondeur** : on voit les trois lots d'un coup, de n'importe
+       quelle niche comme du couloir. La disposition dit la règle, là où les trois socles éparpillés dans la pièce
+       (22 novembre) ne se lisaient pas du tout, sans une seule vitre nulle part.
+       **Tout le pourtour doit être du mur** — le fond et les deux bouts : la roche se perce en deux coups, et on
+       entrerait par derrière sans jamais choisir. On garde le banc le plus loin de l'entrée. */
+    /* On la **bâtit dans la pièce**, adossée à un mur : les murs d'un bâtiment font une case d'épaisseur, il n'y a
+       pas de masse où creuser. Il faut sept cases de large sur deux rangées de sol libre, le mur de la pièce
+       derrière, et du sol devant les trois portes pour s'y tenir. */
+    const bancs=[];
+    const mur=(x,y)=>{if(x<1||y<1||x>=W-1||y>=H-1)return false;const m=idx(x,y);
+      return t[m]===WALL&&!(G.niche&&G.niche[m]);};
+    const sol=(x,y)=>{if(x<1||y<1||x>=W-1||y>=H-1)return 0;const f=idx(x,y);
+      return P.has(f)&&t[f]===FLOOR&&!G.lz[f]&&libre(f)&&!pres(f)&&artLibre(B,f,site)?f:0;};
+    /* Chacun des deux bouts est soit **bâti** (on prend une case de sol de plus de ce côté), soit un **mur de la pièce
+       déjà là** : le renfoncement juste à la bonne taille (cinq de large), le coin (six), ou le banc posé au milieu
+       d'un mur (sept). Les quatre combinaisons sont essayées, dans les quatre orientations ; on garde le plus serré,
+       puis le plus loin de l'entrée. N'en essayer que deux ne donnait une vitrine que sur quatre cartes sur quarante. */
+    for(const b0 of [0,1])for(const b1 of [0,1])
+      for(const [dx,dy,ox,oy] of [[1,0,0,1],[1,0,0,-1],[0,1,1,0],[0,1,-1,0]])for(const i0 of p.c){
+      const x0=i0%W,y0=(i0/W)|0,L=5+b0+b1,d0=b0,niches=[],portes=[];let ok=true;
+      for(let k=0;k<L&&ok;k++){const nx=x0+dx*k,ny=y0+dy*k;         // rangée des niches, adossée au mur du fond
+        const n=sol(nx,ny),pd=sol(nx+ox,ny+oy);                      // rangée des portes, devant
+        if(!n||!pd||!mur(nx-ox,ny-oy)){ok=false;break;}
+        niches.push(n);portes.push(pd);}
+      if(ok)for(const k of (b0?[]:[-1]).concat(b1?[]:[L])){const bx=x0+dx*k,by=y0+dy*k;   // bout non bâti : le mur doit déjà y être
+        if(!mur(bx,by)||!mur(bx+ox,by+oy)){ok=false;break;}}
+      if(ok)for(const k of [d0,d0+2,d0+4]){const cx=x0+dx*k+ox*2,cy=y0+dy*k+oy*2;   // du sol devant chaque porte
+        if(!sol(cx,cy)){ok=false;break;}}
+      if(ok)bancs.push({niches,portes,L,d0,b0,b1,d:pas(niches[d0+2],ent[0])});}
+    if(!bancs.length)return false;
+    bancs.sort((a,b)=>a.L-b.L||b.d-a.d);
+    const banc=bancs[0],d0=banc.d0,sel=[banc.niches[d0],banc.niches[d0+2],banc.niches[d0+4]];
+    for(const k of (banc.b0?[0]:[]).concat(banc.b1?[banc.L-1]:[])){t[banc.niches[k]]=WALL;t[banc.portes[k]]=WALL;}   // les bouts bâtis
+    for(const k of [d0+1,d0+3]){t[banc.niches[k]]=VITRE;t[banc.portes[k]]=VITRE;}         // cloisons, deux cases de fond
+    for(const k of [d0,d0+2,d0+4])t[banc.portes[k]]=DOOR;                                  // une porte devant chaque niche
+    const bc=typeof butinCoffre==='function';
     const lots=bc?[[planTire()],[equipTire()],[consoTire(),consoTire()]]:[['matiere'],['matiere'],['matiere']];
     sel.forEach((i,n)=>{G.items[i]=lots[n].slice();G.vit[i]=1;});G.choix.push({c:sel,on:1});p.mach='vitrines';return true;};
   // récompense d'une salle à lasers : un butin au fond, là où mène la traversée
@@ -320,7 +397,7 @@ function machines(){G.las=[];G.lz={};G.circ=[];G.soc={};G.piles={};G.mt=0;G.mach
 function piegeTest(c){const p=(G.pieges||[]).find(p=>p.on&&p.c===c);if(!p)return;p.on=0;
   const s=BEASTS.findIndex(b=>b.key==='cafar');let n=0;const bande=9000+((Math.random()*900)|0);
   p.f.forEach((i,k)=>{const x=i%W,y=(i/W)|0;G.niche[p.n[k]]=2;if(s<0||blocks(G.t[i])||beastAt(x,y)||animalAt(x,y)||(G.px===x&&G.py===y))return;
-    const b=newBeast(s,x,y,bande,-1);b.hunt=1;b.mp=0;b.nd=1;spot(b);G.beasts.push(b);n++;addFx({kind:'alerte',o:b,dur:900});});
+    const b=newBeast(s,x,y,bande,-1);b.hunt=1;b.nd=1;spot(b);G.beasts.push(b);n++;addFx({kind:'alerte',o:b,dur:900});});
   if(!n)return;addFx({kind:'shake',amp:7,dur:300});if(typeof SFX!=='undefined')SFX.explode();
   sayMore(`Piège ! ${n} relais surgissent des murs.`,'warn');}
 

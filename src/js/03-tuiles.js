@@ -116,9 +116,9 @@ PAT.crackH=(x,y)=>{const c=(a,b)=>PAT.crack2[b]&&PAT.crack2[b][a]==='0';
   if(x>=11&&y<=4&&x-y>=10)return '0';if(x<=4&&y>=11&&y-x>=10)return '0';
   if((x-6)**2+(y-10)**2<=2||(x-11)**2+(y-8)**2<=1)return '0';return '.';};
 PAT.rubble=["................","..33.......3....","..3.....33......","........3...33..","....3.......3...",".33......3......","..........33....","...3..3.........","..33.......3....","........33......",".3...3......33..","...........3....","....33..........","..........3..3..",".3..3...........","................"];
-// Petits animaux : v = vitesse (5 = celle du robot), d = portée de détection en cases
+// Petits animaux : dpas et dcoup = durées d'un pas et d'un coup (100 = l'allure de base), d = portée de détection en cases
 const SPECIES=[
-  {n:'Puce',fem:true,v:6,pv:10,dmin:2,dmax:3,pre:80,def:20,crit:2,b:'2',a:'3',rx:4,ry:2,hr:1.6,legs:3,ears:'antennes',tail:'',pat:'rayures',
+  {n:'Puce',fem:true,dpas:75,dcoup:50,pv:10,dmin:2,dmax:3,pre:80,def:20,crit:2,b:'2',a:'3',rx:4,ry:2,hr:1.6,legs:3,ears:'antennes',tail:'',pat:'rayures',
    // dessin robotique adopté comme norme le 17 novembre 2026
    rows:["................",
      "................",
@@ -153,9 +153,9 @@ function critter(p){const cx=7,cy=9,hx=cx+p.rx+1,hy=cy-p.ry+1,top=hy-Math.ceil(p
     if(p.tail==='pompon'&&x===tx-1&&(y===cy-1||y===cy))return p.b;
     if(p.tail==='boucle'&&((x===tx-1&&y===cy)||(x===tx-2&&y===cy-1)||(x===tx-2&&y===cy-2)||(x===tx-1&&y===cy-3)))return p.b;
     return '.';};}
-// Animal agressif (1 case) : v = vitesse, d = détection, pv = points de vie
+// Animal agressif (1 case) : dpas et dcoup = durées d'un pas et d'un coup, d = détection, pv = points de vie
 const BEASTS=[
-  {n:'Crabot',key:'crabos',nb:15,role:'Chasse le robot',v:5,pv:22,dmin:3,dmax:6,pre:65,def:0,crit:2,swim:true,nage:true,
+  {n:'Crabot',key:'crabos',nb:15,role:'Chasse le robot',dpas:100,dcoup:100,pv:22,dmin:3,dmax:6,pre:65,def:0,crit:2,swim:true,nage:true,
     rows:["................",
      "................",
      "................",
@@ -172,7 +172,7 @@ const BEASTS=[
      "...1.1....1.1...",
      "................",
      "................"]},
-  {n:'Relais',key:'cafar',nb:12,role:'En bande de 2 à 4 ; ce qu’un membre voit, la bande le sait',v:5,pv:15,dmin:3,dmax:4,pre:50,def:10,
+  {n:'Relais',key:'cafar',nb:12,role:'En bande de 2 à 4 ; ce qu’un membre voit, la bande le sait',dpas:100,dcoup:100,pv:15,dmin:3,dmax:4,pre:50,def:10,
     crit:5,pack:true,alarm:false,
    // dessin robotique adopté comme norme le 17 novembre 2026
    sec:true,rows:["................",
@@ -191,7 +191,7 @@ const BEASTS=[
      "....11.....11...",
      "................",
      "................"]},
-  {n:'Broyeur',key:'mastok',nb:1,role:'Colosse lent : très résistant, frappe très fort',v:4,pv:60,dmin:10,dmax:18,pre:60,def:0,crit:0,
+  {n:'Broyeur',key:'mastok',nb:1,role:'Colosse lent : très résistant, frappe très fort',dpas:150,dcoup:200,pv:60,dmin:10,dmax:18,pre:60,def:0,crit:0,
    rows:["................",
      "......2222......",
      "....22211222....",
@@ -209,7 +209,7 @@ const BEASTS=[
      "....22....22....",
      "...2222..2222..."]},
   // Brochon (16 novembre 2026) : le poisson. Il ne quitte jamais l'eau (aqua) et disparaît dès qu'il plonge en eau profonde (cache).
-  {n:'Torpille',fem:true,key:'brochon',nb:5,role:'Ne quitte jamais l’eau ; invisible dès qu’il plonge en eau profonde',v:7,pv:14,dmin:4,
+  {n:'Torpille',fem:true,key:'brochon',nb:5,role:'Ne quitte jamais l’eau ; invisible dès qu’il plonge en eau profonde',dpas:75,dcoup:100,pv:14,dmin:4,
     dmax:5,pre:80,def:20,crit:2,nage:true,aqua:true,cache:true,
    rows:["................",
      "................",
@@ -227,7 +227,7 @@ const BEASTS=[
      "....1...........",
      "................",
      "................"]},
-  {n:'Mine',fem:true,key:'mine',nb:4,role:'Fonce sur la foreuse, s’arme à une case, puis explose 2 à 3 battements plus tard sur un carré de 3 × 3 et 5 cases autour',v:8,pv:12,dmin:20,dmax:20,pre:100,def:0,crit:0,mine:true,rows:["................",
+  {n:'Mine',fem:true,key:'mine',nb:4,role:'Fonce sur la foreuse, s’arme à une case, puis explose 2 à 3 battements plus tard sur un carré de 3 × 3 et 5 cases autour',dpas:50,dcoup:100,pv:12,dmin:20,dmax:20,pre:100,def:0,crit:0,mine:true,rows:["................",
      "................",
      "................",
      ".......11.......",
@@ -243,7 +243,7 @@ const BEASTS=[
      "...1...11...1...",
      ".......11.......",
      "................"]},
-  {n:'Sentinelle',fem:true,key:'paralyzor',nb:3,role:'Tire un laser jusqu’à 2 cases, en ligne de vue',v:7,pv:18,dmin:2,dmax:2,pre:70,def:10,
+  {n:'Sentinelle',fem:true,key:'paralyzor',nb:3,role:'Tire un laser jusqu’à 2 cases, en ligne de vue',dpas:75,dcoup:100,pv:18,dmin:2,dmax:2,pre:70,def:10,
     crit:0,laser:2,rows:["................",
      "................",
      "......1111......",
@@ -265,11 +265,11 @@ const BEASTS=[
      distance), soin + portee (répare un allié blessé), glu (portée du jet de glu). Dessins de départ, à retoucher dans le Tile editor. */
   // l'ancien Gardien (22 novembre 2026) ; la clé reste « gardien » pour les groupes déjà réglés, ses stats sont enregistrées sous « bloqueur »
   {n:'Bloqueur',key:'gardien',bk:'bloqueur',bloque:true,nb:2,
-    role:'Rapide : il agrippe la foreuse, qui ne peut plus se déplacer tant qu’il vit. Frappe peu fort',v:8,pv:30,dmin:2,dmax:4,
+    role:'Rapide : il agrippe la foreuse, qui ne peut plus se déplacer tant qu’il vit. Frappe peu fort',dpas:50,dcoup:100,pv:30,dmin:2,dmax:4,
     pre:100,def:15,crit:0,
   
    rows:["................", "................", ".....1....1.....", ".....1....1.....", "...1111111111...", "..112222222211..", ".31123322332113.", ".33122222222133.", "..312223322213..", "..312233332213..", "...1122222211...", "...1111111111...", "...11......11...", "..111......111..", "................", "................"]},
-  {n:'Artilleur',key:'artilleur',nb:2,role:'Tire un laser jusqu’à 5 cases, un battement sur deux, et recule quand on l’approche',v:5,pv:14,
+  {n:'Artilleur',key:'artilleur',nb:2,role:'Tire un laser jusqu’à 5 cases, un battement sur deux, et recule quand on l’approche',dpas:100,dcoup:150,pv:14,
     dmin:4,dmax:7,pre:65,def:5,crit:0,laser:5,cadence:2,recul:2,
    rows:["................",
      "................",
@@ -287,7 +287,7 @@ const BEASTS=[
      "..11....11......",
      "................",
      "................"]},
-  {n:'Drone',key:'drone',nb:4,role:'Vole : ni gouffre ni eau ne l’arrêtent. Fragile, rapide, en essaim',v:9,pv:6,dmin:2,dmax:3,pre:80,
+  {n:'Drone',key:'drone',nb:4,role:'Vole : ni gouffre ni eau ne l’arrêtent. Fragile, rapide, en essaim',dpas:50,dcoup:50,pv:6,dmin:2,dmax:3,pre:80,
     def:30,crit:0,vol:true,swim:true,nage:true,pack:true,
    rows:["................",
      "................",
@@ -305,7 +305,7 @@ const BEASTS=[
      "................",
      "................",
      "................"]},
-  {n:'Soudeur',key:'soudeur',nb:1,role:'Répare ses alliés à 4 cases, 5 PV par battement, et fuit le contact',v:5,pv:16,dmin:1,dmax:2,pre:60,
+  {n:'Soudeur',key:'soudeur',nb:1,role:'Répare ses alliés à 4 cases, 5 PV par battement, et fuit le contact',dpas:100,dcoup:100,pv:16,dmin:1,dmax:2,pre:60,
     def:10,crit:0,soin:5,portee:4,recul:1,
    rows:["................",
      "................",
@@ -323,7 +323,7 @@ const BEASTS=[
      "..11........11..",
      "................",
      "................"]},
-  {n:'Englueur',key:'englueur',nb:2,role:'Crache de la glu jusqu’à 4 cases et garde ses distances : la foreuse avance deux fois moins vite pendant 3 battements',v:5,pv:18,dmin:1,dmax:2,pre:75,def:10,crit:0,glu:4,cadence:3,recul:2,
+  {n:'Englueur',key:'englueur',nb:2,role:'Crache de la glu jusqu’à 4 cases et garde ses distances : la foreuse avance deux fois moins vite pendant 3 battements',dpas:100,dcoup:100,pv:18,dmin:1,dmax:2,pre:75,def:10,crit:0,glu:4,cadence:3,recul:2,
    rows:["................",
      "................",
      "................",

@@ -304,17 +304,18 @@ function baliseFrappe(e,sp,q,laser){const vu=beastVisible(e)||vis[idx(q.x,q.y)],
 function baliseBoom(q,vu){addFx({kind:'boom',x:q.x,y:q.y,cases:[[q.x,q.y]],dur:420});
   if(vu||cheb(q,G.px,G.py)<=10){addFx({kind:'shake',amp:5,dur:250});SFX.explode();}
   if(vu)sayMore('La balise est détruite : elle explose.','warn');else if(cheb(q,G.px,G.py)<=10)sayMore('Une explosion, tout près.','warn');}
-/* Un ennemi qui suit une balise : il y court et l'attaque, au lieu de la foreuse. Rend true s'il a joué. */
-function baliseJoue(e,sp,boom){const q=baliseDe(e);if(!q){e.leurre=0;return false;}const d=cheb(e,q.x,q.y);
-  if(sp.mine){if(e.fuse>0){if(--e.fuse<=0)boom.push(e);return true;}if(d<=1){e.fuse=rnd(2,3);return true;}}
-  else if((sp.laser||sp.glu)&&d<=(sp.laser||sp.glu)&&d>1&&los(e.x,e.y,q.x,q.y)){if(sp.cadence){if((e.cd=(e.cd||0)-1)>0)return true;
-    e.cd=sp.cadence;}baliseFrappe(e,sp,q,true);return true;}
-  else if(d<=1){baliseFrappe(e,sp,q,false);return true;}
-  e.mp=Math.min(2,e.mp+sp.v/5/slowOf(G.t[idx(e.x,e.y)],eauLibre(sp)));const m=mouilleOk(sp,e),kD=q.id+':'+(m?1:0);let D=BAL_D.get(kD);
+/* Un ennemi qui suit une balise : il y court et l'attaque, au lieu de la foreuse. Rend la durée de ce qu'il a fait
+   (son horloge, voir 08-faune), ou 0 s'il n'a rien à suivre. La mèche d'une mine armée brûle au battement. */
+function baliseJoue(e,sp){const q=baliseDe(e);if(!q){e.leurre=0;return 0;}const d=cheb(e,q.x,q.y);
+  if(sp.mine){if(e.fuse>0)return dcoupDe(e,sp);
+    if(d<=1){e.fuse=rnd(2,3);return dcoupDe(e,sp);}}
+  else if((sp.laser||sp.glu)&&d<=(sp.laser||sp.glu)&&d>1&&los(e.x,e.y,q.x,q.y)){
+    baliseFrappe(e,sp,q,true);return dcoupDe(e,sp)*(sp.glu?(sp.cadence||3):1);}
+  else if(d<=1){baliseFrappe(e,sp,q,false);return dcoupDe(e,sp);}
+  const m=mouilleOk(sp,e),kD=q.id+':'+(m?1:0);let D=BAL_D.get(kD);
     if(!D){D=distFrom(q.x,q.y,m);BAL_D.set(kD,D);}
-  while(e.mp>=1&&!G.over){e.mp-=1;if(cheb(e,q.x,q.y)<=1){e.mp=Math.min(e.mp,.99);break;
-    }if(!chaseStep(e,D,(x,y)=>beastFits(e,x,y),q.x,q.y))break;}
-  return true;}
+  chaseStep(e,D,(x,y)=>beastFits(e,x,y),q.x,q.y);
+  return dpasDe(e,sp);}
 /* F9 (23 novembre 2026, pour les essais) : au moins un exemplaire de chaque consommable existant (capsules et clé) dans le sac,
    identifié. Une sorte déjà présente n'est pas ajoutée. S'il manque des places, F9 retire des doublons — un exemplaire à la
    fois, toujours sur la plus grosse pile — jusqu'à ce que toutes les sortes tiennent. */

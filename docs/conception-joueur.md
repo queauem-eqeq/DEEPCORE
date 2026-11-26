@@ -14,13 +14,13 @@ retouchables dans le Tile editor (groupe « Machines »).
 | **Tourelle laser** | Encastrée dans un mur, elle tire un rayon droit à travers la pièce jusqu'au premier obstacle. Deux tourelles voisines tirent ensemble : le « laser large », deux cases. Une salle porte 1 à 4 bandes, séparées par deux cases sûres. Période 4 à 7 battements, allumée 1. |
 | **Croix laser** | Un pylône qui éclaire ses quatre cases voisines ; les diagonales sont sûres. Quadrillage d'un pylône sur trois. Période 3 à 7, allumée 1 ou 2. |
 | **Levier** | La foreuse l'actionne en avançant dessus. Il déploie un pont (une fois pour toutes) ou coupe les lasers de sa salle (il se rebascule). **Toujours dans la salle de ce qu'il commande.** |
-| **Pont à levier** | Le **gouffre prend presque toute la salle**, d'un mur à l'autre ; il ne reste qu'une bande de sol (une ou deux cases) à chaque bout. Le levier est **au pied du pont**, du côté d'où l'on vient. Deux cas seulement : le pont est le **seul chemin** vers le site, ou l'autre rive est un **cul-de-sac avec un butin** (Matière). Si les deux rives se rejoignent par ailleurs, la salle n'est pas retenue. Une fois sur trois, un socle remplace le levier. |
+| **Pont à levier** | Le **gouffre prend presque toute la salle**, d'un mur à l'autre ; il ne reste qu'une bande de sol (une ou deux cases) à chaque bout. Le levier est **au pied du pont**, du côté d'où l'on vient. Deux cas seulement : le pont est le **seul chemin** vers le site, ou l'autre rive est un **cul-de-sac avec un butin** (Matière). Si les deux rives se rejoignent par ailleurs, la salle n'est pas retenue. Une fois sur trois, un socle remplace le levier. **Le pont n'est pas forcément droit** (26 novembre 2026) : il avance d'une colonne à la suivante et peut se décaler d'une ligne en chemin, le coude posé pour qu'il reste d'un seul tenant ; il lui faut seulement partir d'une rive et atteindre l'autre. Mesure sur 30 cartes de niveau 3 : 37 ponts, 20 avec virage, 17 droits, 5,3 cases en moyenne. **Il se déploie planche par planche**, depuis la rive du levier, une case toutes les 70 ms, avec un claquement par planche : seul le dessin est retardé, le pont est franchissable dès l'instant où le levier est actionné. |
 | **Pile énergétique** | La foreuse la pousse en avançant dessus, jamais en diagonale, sur sol libre ; **elle passe les portes**. Posée sur son **socle**, elle alimente ce qui y est relié ; retirée, tout se referme. Elle arrête les lasers. |
 | **Distributeur de pile** (l'ancien chargeur) | **La pile attend à côté de lui.** Avancer dessus la rappelle à cette place : une pile coincée ne bloque rien pour de bon. |
 | **Socle** | Posé **près de ce qu'il alimente** : devant la grille (2 à 4 pas), ou au pied du pont. La pile et son distributeur sont à 6-18 pas, dans une pièce voisine quand il y en a une. |
 | **Grille d'énergie** | Ferme l'unique entrée d'un **dépôt** (un plan, deux capsules ou une capsule et un équipement, de la Matière). Elle ne garde jamais le chemin du site. |
 | **Salle piégée** | Un butin au milieu de la pièce (plan ou équipement, capsule, Matière) ; 8 à 16 **relais cachés dans des niches** (moins si les murs manquent de place) des murs (tuile « niche », visible : le piège se lit). Ramasser l'appât les fait surgir, déjà en chasse. Ils ne lâchent rien. L'exploration automatique ne touche pas à l'appât. |
-| **Vitrines** | Une petite pièce en cul-de-sac, trois lots sous vitrine (un plan, un équipement, deux capsules) : **on n'en emporte qu'un**, les deux autres se verrouillent. Idée des coffres de Brogue. |
+| **Vitrines** | Un banc **bâti contre un mur de la pièce**, **trois niches côte à côte séparées par des murs vitrés** — `[niche][vitre][niche][vitre][niche]` — un lot dans chacune (un plan, un équipement, deux capsules) : **on n'en emporte qu'un**, les deux autres se verrouillent. Idée des coffres de Brogue. Refaites le 26 novembre 2026 d'après le module « Vitrine REF » du joueur : avant, c'étaient trois socles éparpillés dans la pièce, sans une seule vitre, et rien ne disait que c'était un choix. Le banc fait **deux rangées** : les niches contre le mur du fond, puis **une porte devant chacune**, les cloisons vitrées traversant les deux rangées. Ses deux bouts sont soit bâtis, soit des murs de la pièce déjà là (renfoncement de cinq, coin de six, banc de sept) ; la pièce peut avoir **jusqu'à deux entrées** et compter jusqu'à 120 cases. Ces quatre combinaisons, essayées le 26 novembre, font passer la vitrine de **1 carte sur 10 à 1 sur 3** ; n'essayer que le renfoncement et le banc complet la rendait introuvable. **L'exploration automatique ne les traverse pas et s'arrête dès qu'elle en voit une** : marcher sur une niche prendrait le lot et condamnerait les deux autres, le choix revient au joueur. |
 | **Station de réparation** | Une fois : vie et énergie au maximum. Le bruit met en chasse les ennemis à 12 cases. |
 | **Fabricateur** | Voir « Fabricateur ». Un par niveau, garanti. |
 
@@ -92,8 +92,8 @@ Tous les prix se règlent dans **Lab → Items**.
 Repère : une carte de taille 3 porte deux gisements de Matière de 30 à 50, soit 70 à 80 par niveau, plus le butin au sol
 (2 à 4 blocs de 15) et ce que lâchent les robots : 120 à 150 par niveau en explorant tout.
 Quatre pièces nouvelles (choix de l'utilisateur, « consommables + équipement ») : **Vrille rapide** (1d4+4, coup −30,
-CRIT +5, POW 9), **Trépan lourd** (2d6+6 ; coup +25, POW 12), **Carène légère** (DEF +5, VIT +1, DIS −1, POW 9),
-**Blindage composite** (DEF +25 ; VIT −1, POW 12). Leurs tuiles au sol sont la tuile générique, à dessiner.
+CRIT +5, POW 9), **Trépan lourd** (2d6+6 ; coup +25, POW 12), **Carène légère** (DEF +5, pas −10, DIS −1, POW 9),
+**Blindage composite** (DEF +25 ; pas +25, POW 12). Leurs tuiles au sol sont la tuile générique, à dessiner.
 
 ## 5. Foreuse
 
@@ -101,13 +101,13 @@ CRIT +5, POW 9), **Trépan lourd** (2d6+6 ; coup +25, POW 12), **Carène légèr
 |---|---|---|
 | Vie | 100 | **pas de réparation automatique** |
 | Énergie | 100 | se recharge de POW par battement, **× 2 en attendant sur place** ; se déplacer ne coûte rien, un coup sur la roche 10, frapper un animal rien |
-| VIT | 5 | **vitesse de déplacement** : un pas dure 100 × 5 ÷ VIT. À 5, un pas = un battement. Ne joue ni sur les coups ni sur le forage |
+| PAS | 100 | **durée d'un déplacement**, en unités de temps comme pour les créatures : 100 = un battement. Plus c'est bas, plus la foreuse marche vite. Ne joue ni sur les coups ni sur le forage |
 | EYE | 10 | rayon de vision |
 | DEG | 0 | **bonus fixe** ajouté au jet de dés de l'arme |
 | PRE | 100 | précision |
 | DEF | 10 | défense : fait rater les coups reçus, sans réduire les dégâts. Modifiée par le terrain et l'armure (10 viennent de la Coque d'usine) |
 | CRIT | 5 % | coup critique (×3) ; coup par surprise toujours critique |
-| DET | 5 | portée de découverte des portes dérobées |
+| DET | 3 | portée de découverte des portes dérobées : 15 % par battement en agissant, 35 % en attendant sur place (voir `conception-carte.md`) |
 | POW | 10 | seuil d'équipement (POW requis) et recharge d'énergie : POW/10 par battement |
 
 - **Aperçu derrière les obstacles** (foreuse seulement) : dans le rayon EYE, la case juste derrière un obstacle à la
@@ -131,14 +131,42 @@ Le jeu compte en **unités de temps**, pas en tours.
 
 - Chaque action de la foreuse a une **durée** (table `DUR` dans `09`) : pas 100, coup de foreuse 100, coup sur la
   roche 100, attendre 100.
-- Durée d'un pas = 100 × 5 ÷ VIT × terrain (eau peu profonde 1,5 ; eau profonde 2) × 0,5 en course.
-- Le monde **bat toutes les 100 unités** : à chaque battement les ennemis agissent, la détection et la perte de
-  trace sont tirées, l'énergie remonte de POW. Une action de 50 laisse passer un battement une fois sur deux ; une
-  action de 200 en laisse passer deux.
+- Durée d'un pas = PAS × terrain (eau peu profonde 1,5 ; eau profonde 2) × 0,5 en course × 2 si la foreuse est engluée.
+- Le monde **bat toutes les 100 unités**. À chaque battement : la détection et la perte de trace sont tirées,
+  l'énergie remonte de POW, les effets s'épuisent (étourdi, glu, mèche d'une mine), le Soudeur répare, les machines
+  tournent. Une action de 50 laisse passer un battement une fois sur deux ; une action de 200 en laisse passer deux.
 - Conséquence voulue : **la détection se tire au temps, pas à l'action**. Courir fait traverser une zone avec deux
   fois moins de tirages ; une action longue en fait subir davantage.
-- Les ennemis gardent leurs points de mouvement (VIT ÷ 5 par battement), divisés par le ralentissement du terrain.
-- Limite connue : les ennemis agissent par battements entiers, seule la foreuse a des durées fines.
+
+### Chaque créature a son horloge (25 novembre 2026)
+
+Avant, les créatures agissaient par battements entiers, avec des points de mouvement : une seule VIT servait au
+déplacement, un coup prenait toujours un battement, et une bête rapide ne pouvait ni frapper en arrivant au contact,
+ni frapper deux fois. Maintenant elles comptent le temps comme la foreuse.
+
+- Deux durées par espèce, dans les mêmes unités : **`dpas`** (un pas) et **`dcoup`** (un coup). **Plus petit, plus
+  rapide.** Elles s'écrivent sur cinq paliers : **50 très rapide · 75 rapide · 100 normal · 150 lent · 200 très lent**.
+  Elles remplacent la VIT, qui n'existe plus pour les créatures ; le Lab les règle à sa place (Pas, Coup).
+- `o.pret` est l'instant où la créature pourra agir. Elle agit, l'effet est immédiat, puis elle est occupée pendant
+  la durée de son action. Le temps avance jusqu'au plus proche des deux instants suivants : la créature prête la
+  première, ou le prochain battement. **Rien n'est arrondi ni perdu** : le reste de temps se reporte tout seul.
+- Le terrain allonge le pas (eau peu profonde ×1,5, eau profonde ×2, sauf pour les nageurs) et **jamais le coup**.
+- Les tirs sur cadence deviennent des coups : l'intervalle entre deux lasers est `dcoup` (Sentinelle 100, Artilleur
+  150) ; la glu garde son `cadence` comme multiplicateur (Englueur 100 × 3 = 300, inchangé).
+- **Au calme** — patrouille, bande, errance, retour à terre — un pas prend au moins un battement, quelle que soit la
+  vitesse de l'espèce (règle du 20 novembre 2026, conservée).
+- **Égalités** : le battement passe avant une créature prête au même instant, et la foreuse passe avant une créature
+  prête à l'instant même où son action à elle se termine.
+- Ce qui disparaît : la **réserve de points de mouvement** (2 au plus). Une créature immobile ne stocke plus rien,
+  donc plus de bond de deux cases d'un coup — l'approche est régulière, et un peu plus lente qu'avant.
+- Ce qui apparaît : **la charge** (venir au contact et frapper pendant une seule action de la foreuse) et la **double
+  frappe** (`dcoup` 50). Une phase tirée au hasard à la naissance évite que toutes les bêtes d'une espèce agissent au
+  même instant.
+- **La foreuse compte pareil** (26 novembre 2026) : sa VIT en base 5 a disparu, remplacée par **PAS**, en base 100 comme
+  COUP et comme les créatures. `G.st.pas` et `G.st.coup` sont des modificateurs que l'équipement ajoute ou retire,
+  **négatif = plus rapide** ; la colonne affiche la durée obtenue. Objets adaptés : Servomoteur **pas −25**, Carène
+  légère **pas −10**, Blindage composite **pas +25**. Une partie d'avant est convertie une fois, en recalculant le
+  modificateur depuis l'équipement porté (pas depuis le total, qui dériverait au premier objet retiré).
 
 ## 6. Combat
 
@@ -155,7 +183,8 @@ Modèle Brogue :
   défense ; chaque point en trop en ajoute 1. Calculé à la lecture : gagner du POW agit aussitôt.
 - **Critique** : ×3 dégâts. **Coup par surprise** : frapper un ennemi qui ne vous a pas repéré touche toujours et
   est toujours critique.
-- Les animaux attaquent **une fois par battement au contact** ; leur vitesse ne règle que les déplacements.
+- Les créatures attaquent au contact **tous les `dcoup`** : une fois par battement à 100, deux fois à 50, une fois sur
+  deux à 200 (voir l'horloge au 5 bis).
 - **Barre de vie** au-dessus de toute créature blessée. Coup raté : « 0 » en gris. Animation : bond de l'attaquant,
   flash, chiffres flottants, tremblement d'écran quand le robot est touché ou qu'un ennemi meurt.
 
@@ -219,8 +248,9 @@ inconnue sur soi peut coûter cher, la lancer sur un ennemi peut le servir. Fabr
   ailleurs. Jamais non plus sous une créature vivante, sauf quand une créature vient se poser sur un objet déjà au sol. Les lots posés à la génération (appât d'une salle piégée, dépôts, vitrines) restent
   groupés sur leur case.
   La **clé** est un consommable comme les autres (voir § portes verrouillées) : elle s'empile, se jette, se ramasse.
-- **Touche I** : ouvre le sous-menu et choisit le premier consommable ; **↑ ↓** parcourir, **Entrée** utiliser,
-  **X**, **Suppr** ou **J** jeter un exemplaire au sol, **Échap** ou **I** sortir.
+- **Touche I** : ouvre le sous-menu et choisit le **premier consommable**, prêt à l'emploi ; **I** de nouveau
+  **referme le sous-menu**. **↑ ↓** parcourir, **Entrée** utiliser, **X**, **Suppr** ou **J** jeter un exemplaire au
+  sol, **Échap** sort de la navigation en laissant le sous-menu ouvert.
 - **Touche T** : la fenêtre Équipement, plein écran. Liste à gauche (`/` arme, `[` armure, `=` accessoire ; un
   objet équipé y reste, en couleur monde, mention « équipé ») ; fiche à droite (dessin ASCII coloré, description,
   effets, **Équiper / Retirer**, **Jeter**). Clavier : ↑ ↓, **Entrée** équiper, **J** jeter, **G** ramasser.
@@ -238,7 +268,7 @@ inconnue sur soi peut coûter cher, la lancer sur un ennemi peut le servir. Fabr
 |---|---|---|---|
 | Foreuse | arme | 10 | **seule arme** : dégâts **1d6+5** (6 à 11), coup 100 |
 | Coque d'usine | armure | 10 | **seule armure** : DEF +10 (déjà compris dans les stats de départ) |
-| Servomoteur | accessoire | – | VIT +2 |
+| Servomoteur | accessoire | – | Pas −25 (la foreuse marche plus vite) |
 | Téléobjectif | accessoire | – | EYE +3 |
 | Viseur laser | accessoire | – | CRIT +10 % |
 | Condensateur | accessoire | – | POW +1 |

@@ -356,8 +356,17 @@ Code : `07c-artefacts.js`, appelé à la fin de la génération des bâtiments.
 
 ### Deux règles de génération
 
-- **Un gisement de métal ou de Matière ne touche jamais plus de 3 roches dures** (parmi ses 8 voisines) : `hideOre`
-  ne retient que ces cases. Faute de place, sur une carte qui n'en offre pas assez, il reprend toute la roche tendre.
+- **Un gisement de métal ou de Matière se dégage en 6 forages au plus** (26 novembre 2026). `coutForage` mesure le
+  vrai coût depuis la zone où la foreuse arrive : entrer dans une case praticable ne coûte rien, percer une roche ou
+  une montagne coûte 1 ; la roche dure, les murs, les piliers, les vitres, les gouffres et les machines ne se
+  percent pas. Un gisement qui demande plus de **ORE_DIGS = 6** cases à percer, ou qu'on ne peut pas atteindre du
+  tout, est posé ailleurs.
+  Avant, on ne regardait que ses 8 voisines (« pas plus de 3 roches dures ») : un gisement pouvait être enfermé un
+  peu plus loin par la roche dure. Ce test reste en second filtre, il écarte ceux qui sont pénibles à dégager.
+  Mesuré, gisements demandant plus de 6 forages — avant → après : atterrissage **7 → 0** (pire cas 17 → 6),
+  cavernes **19 → 0** (30 → 6), grande base **41 sur 108 → 0** (34 → 6). Aucun inatteignable dans les deux cas.
+  Faute de place, sur une carte qui n'offre pas assez de roche tendre, `hideOre` reprend toute la roche tendre
+  atteignable.
 - **La zone dégagée autour du vaisseau est un ovale** (`SHIP_OVALE`), centré sur lui, avec une case de marge au moins
   autour de la coque. 
 
@@ -451,6 +460,15 @@ pièce ils deviennent du sol, sous un mur du mur) ; seuls le vaisseau et le bord
   - **Emplacements** : **Machine** = une machine de décor ; **Butin** = un consommable (6 fois sur 10) ou de la
     Matière ; **Ennemi** = une espèce tirée parmi les groupes du niveau, seule et sans patrouille. Un emplacement
     déjà occupé (clé, artefact, créature) est laissé tel quel.
+  - **Un ennemi de module garde sa salle tant qu'il n'a pas été alerté** (26 novembre 2026) : au calme il ne sort
+    pas de la pièce où le module est posé — il y va et vient, il la garde. **Une fois alerté** (il a repéré la
+    foreuse, ou un cri l'a prévenu), il poursuit dehors comme n'importe quel ennemi, et il ne se referme plus
+    dedans : sans cela, ayant oublié la foreuse au loin, il resterait planté sans pouvoir bouger.
+    `b.salle` donne son module dans `G.mods`, dont le champ `salle` liste les cases de la pièce ; `b.libre` est
+    posé au battement dès que la chasse commence. Le contrôle est dans `beastFits` (`08-faune.js`), donc **toutes**
+    les façons de bouger le respectent — chasse, fouille, retour au dernier point connu, bande, errance.
+    Mesuré sur 10 ennemis de module, 150 battements chacun : **au calme, 0 sorti** et 9 sur 10 se sont déplacés
+    dans leur salle ; **alertés, 10 sur 10 sont sortis** poursuivre.
   - Mesuré le 24 novembre sur les trois modules du joueur (15 cartes chacun) : posé 15 fois sur 15, site toujours
     atteignable. Code : `mdlTirage`, `mdlPrepare`, `accretion`, `mdlMachines`, `mdlRemplit` (`07b-batiments.js`) ;
     `G.mods` garde les modules posés.
@@ -475,9 +493,36 @@ pièce ils deviennent du sol, sous un mur du mur) ; seuls le vaisseau et le bord
   a en tout point l'air d'un mur (dessin, fiche de survol, mini-carte) et se comporte comme tel. Jamais la pièce du
   site, jamais une entrée. S'il manque de culs-de-sac, une pièce de 3 × 3 à 5 × 4 est **creusée dans un massif de
   mur plein** ; s'il n'y a pas de massif non plus, la carte en a moins que demandé. **Aucune clé** dedans.
-  **Découverte en se reposant** : chaque porte dérobée à **DET cases ou moins** a **25 % de chance par battement**
-  d'apparaître ; elle devient une porte ordinaire, un « ! » la signale et le repos s'interrompt. Une charge
-  sismique ouvre aussi le mur.
+  **Découverte** (revue le 26 novembre 2026) : la foreuse cherche à **chaque battement**, et mieux quand elle ne
+  fait rien d'autre. Chaque porte dérobée à **DET cases ou moins** (3 de base) a **15 % de chance par battement**
+  d'apparaître, et **35 % à un battement passé sur place** — touche Attendre comme Repos, qui n'est qu'une suite
+  d'attentes. La chance est la même partout dans le rayon. Elle devient une porte ordinaire, un « ! » la signale,
+  et le repos ou le trajet en cours s'interrompt. Une charge sismique ouvre aussi le mur.
+  Avant : rayon 5, **25 % par battement mais seulement en attendant** — en marchant, la foreuse pouvait longer une
+  porte dérobée sans aucune chance de la voir.
+- **Les niches des salles piégées sont cachées elles aussi** depuis le 26 novembre 2026 : `G.niche` vaut **3**
+  (cachée), **1** (repérée, fermée) ou **2** (ouverte). Avant, elles se voyaient d'emblée.
+- **Les murs qui bordent une case en vue sont vus** (26 novembre 2026) : après le calcul du champ de vision, les
+  huit voisines opaques de chaque case en vue passent en vue elles aussi (`computeFOV`, `09-vision-deplacement-forage.js`).
+  Une ligne de visée seule ne les atteignait pas — celle qui va du capteur au mur longeant un couloir passe par d'autres
+  murs —, et on remontait un couloir entre deux parois noires. La fumée ne compte pas comme un mur.
+- **Le brouillard assombrit, il ne rend pas transparent** (26 novembre 2026). Une case mémorisée mais hors de vue
+  est dessinée **en entier, à pleine opacité**, puis couverte d'un voile de la couleur du fond (`FOND`), à
+  `1 − FOG_K` (0,72). Avant, on multipliait l'opacité de **chaque couche** par `FOG_K` : tout ce qui est posé sur
+  autre chose — une niche dans un mur, une tourelle, une machine, un terminal, une grille, un laser — devenait
+  translucide et laissait voir le dessous. Une tourelle en était le cas le plus net : son corps noir mesuré à
+  `[2,6,5]` en vue remontait à `[31,24,17]` dans le brouillard, **plus clair de loin que de près**, parce que le
+  mur transparaissait au travers. Elle passe maintenant à `[1,5,5]`.
+  Une case d'une seule couche rend exactement comme avant — couleur × `FOG_K` sur le fond, des deux façons — donc
+  l'apparence générale du brouillard ne change pas. La règle vaut pour toute tuile future posée sur une autre.
+- **Jamais d'alpha sur ce qui se cache dans un mur.** Deux états, pas trois : on ne le voit pas parce qu'il n'est
+  pas repéré, et le mur est un mur ; ou on le voit, repéré ou déclenché. Une niche, un laser encastré ou une mine
+  embusquée ne sont donc **pas dessinés par-dessus le mur** : la tuile est **composée dans celle du mur** à la
+  construction des tuiles (`murComposites`, `05-tuiles-editables.js`) et dessinée en une seule fois.
+  Pourquoi : la tuile de mur a des **pixels transparents entre ses briques**, et chaque couche du rendu est
+  dessinée à l'opacité du brouillard. Superposer deux tuiles laissait donc voir les briques au travers du fond
+  noir de la niche. Composées, les 56 pixels de la niche sont opaques, et le tout s'assombrit d'un bloc comme
+  n'importe quel mur. La règle vaut pour toute tuile à venir posée dans un mur.
 - **Les murs ne se percent pas à la foreuse** : seule la **charge sismique** les ouvre. Entrer dans une salle
   murée coûte donc un consommable rare.
 - **Pas de gouffre à l'intérieur des pièces** pour l'instant : le code existe, désactivé par le drapeau

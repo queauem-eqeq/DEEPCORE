@@ -5,8 +5,14 @@
 // dessin d'une case bâtie ; put(tuile, opacité) vient du rendu de la partie ou de celui de l'intro
 function batiTuile(t,x,y,put){
   if(t===LOCK){put(TL.floor,.5);put(TL.lock,1);return;}
-  if(t===WALL||t===SECRET){const b=y<H-1?G.t[idx(x,y+1)]:WALL;put(b===WALL||b===SECRET?TL.wall:TL.wallFace,.95);
-    {const nc=G.niche&&G.niche[idx(x,y)];if(nc)put(nc===2?TL.nicheOuverte:TL.niche,1);}return;}
+  if(t===WALL||t===SECRET){const b=y<H-1?G.t[idx(x,y+1)]:WALL,base=(b===WALL||b===SECRET)?'wall':'wallFace';
+    /* Ce qui se cache dans le mur (26 novembre 2026) : **jamais d'alpha**. Soit on ne le voit pas, parce qu'il n'est
+       pas repéré, et le mur est un mur ; soit on le voit, et c'est une tuile **composée dans le mur** (murComposites,
+       05-tuiles-editables), dessinée en une seule fois. Superposer deux tuiles les rendait toutes deux translucides
+       dans le brouillard — chaque couche y est dessinée à l'opacité du brouillard — et la niche se lisait au travers. */
+    const i=idx(x,y),nc=G.niche&&G.niche[i];
+    const sur=nc===1?'niche':nc===2?'nicheOuverte':null;
+    put(sur?TL[base+'_'+sur]:TL[base],.95);return;}
   put(TL.floor,.5);
   if(t===PILLAR)put(TL.pillar,.95);
   else if(t===VITRE)put(TL.vitre,.95);
@@ -340,7 +346,8 @@ function batiments(){BATI_DER=null;
    Machine : une machine de décor (comme celles des artefacts), posée tout de suite. Butin et ennemis : en fin de génération
    (mdlRemplit, appelé par niveau() après le butin et la faune ordinaires). Un emplacement déjà pris est laissé tel quel. */
 function mdlMachines(strs){const t=G.t,site=G.sites&&G.sites[0]?idx(G.sites[0].x,G.sites[0].y):-1;
-  for(const S of strs)for(const p of S.pieces){if(!p.mod)continue;G.mods.push({nom:p.mod.nom,marq:p.mod.marq});
+  // salle : les cases de la pièce où le module est posé. Les ennemis qu'il place n'en sortent pas (26 novembre 2026).
+  for(const S of strs)for(const p of S.pieces){if(!p.mod)continue;G.mods.push({nom:p.mod.nom,marq:p.mod.marq,salle:p.c.slice()});
     for(const [i,k] of p.mod.marq)if(k==='m'&&i!==site&&!blocks(t[i])&&t[i]!==DOOR&&G.art[i]==null&&!G.cles[i]){t[i]=MACHINE;
       G.art[i]=rnd(0,9);}}}
 function mdlRemplit(){if(!G.mods||!G.mods.length)return;const t=G.t,site=G.sites&&G.sites[0]?idx(G.sites[0].x,G.sites[0].y):-1;
@@ -350,6 +357,10 @@ function mdlRemplit(){if(!G.mods||!G.mods.length)return;const t=G.t,site=G.sites
   for(const M of G.mods)for(const [i,k] of M.marq){const x=i%W,y=(i/W)|0;if(i===site||blocks(t[i])||(x===G.px&&y===G.py))continue;
     if(k==='b'&&!(G.items[i]&&G.items[i].length)&&!(G.cles&&G.cles[i]))(G.items[i]=G.items[i]||[]).push(Math.random()<.6?consoTire():'matiere');
     else if(k==='e'&&esp.length&&!beastAt(x,y)&&!animalAt(x,y)){const b=newBeast(esp[rnd(0,esp.length-1)],x,y,-1,-1);
+      /* Il garde sa salle et n'en sort pas (26 novembre 2026, demande de l'utilisateur) : b.salle est l'indice de
+         son module dans G.mods, dont le champ salle liste les cases de la pièce. Le contrôle est dans beastFits
+         (08-faune), donc toutes les façons de bouger le respectent : chasse, fouille, errance, bande. */
+      if(M.salle&&M.salle.length)b.salle=G.mods.indexOf(M);
       if(beastFits(b,x,y))G.beasts.push(b);}}}
 // Tout ce qu'un couloir percé depuis le départ ne pourra jamais atteindre (terrain enfermé entre des murs) devient du mur plein.
 // Renvoie les cases atteignables par le dehors : une porte d'entrée doit donner sur l'une d'elles.
@@ -437,11 +448,28 @@ function secrets(B,strs){const n=GEN.sSecrets||0,t=G.t,out=[];G.secrets=0;if(n<=
     if(!ok)continue;const sol=[];for(let y=y0;y<y0+h;y++)for(let x=x0;x<x0+w;x++){t[idx(x,y)]=FLOOR;sol.push(idx(x,y));}
     t[idx(cx,cy)]=SECRET;out.push(sol);}
   G.secrets=out.length;return out;}
-// Se reposer fait chercher : chaque porte dérobée à DET cases ou moins (5 de base, un objet peut le changer) a 25 % de chance
-// par battement d'être découverte.
-const SECRET_P=.25;
-function chercheSecrets(){const r=G.st.detec||5;let n=0;
-  for(let y=Math.max(0,G.py-r);y<=Math.min(H-1,G.py+r);y++)for(let x=Math.max(0,G.px-r);x<=Math.min(W-1,G.px+r);x++){const i=idx(x,y);
-    if(G.t[i]!==SECRET||Math.hypot(x-G.px,y-G.py)>r||Math.random()>=SECRET_P)continue;G.t[i]=DOOR;G.seen[i]=1;n++;
-      addFx({kind:'num',x,y,txt:'!',col:'#ffffff',dur:900});}
-  if(n){SFX.spot();sayMore(n>1?'Des portes dérobées apparaissent dans le mur !':'Une porte dérobée apparaît dans le mur !','good');if(typeof stopRest==='function'&&REST)stopRest('Repos interrompu : une porte dérobée.');}}
+/* Chercher les portes dérobées (26 novembre 2026). La foreuse cherche à **chaque battement**, et plus attentivement
+   quand elle ne fait qu'attendre : chaque porte dérobée à DET cases ou moins (3 de base, un objet peut le changer) a
+   SECRET_P.bouge de chance d'être découverte à un battement ordinaire, SECRET_P.arret à un battement passé sur place
+   (touche Attendre comme Repos, qui n'est qu'une suite d'attentes). La chance est la même partout dans le rayon.
+   Avant, la foreuse ne cherchait qu'en attendant, à 25 % par battement, et sur un rayon de 5 : en marchant, elle
+   pouvait longer une porte dérobée sans aucune chance de la voir. */
+const SECRET_P={bouge:.15,arret:.35};
+function chercheSecrets(arret){const r=G.st.detec||3,p=arret?SECRET_P.arret:SECRET_P.bouge;let np=0,nq=0;
+  const marque=(x,y,i)=>{G.seen[i]=1;addFx({kind:'num',x,y,txt:'!',col:'#ffffff',dur:900});};
+  for(let y=Math.max(0,G.py-r);y<=Math.min(H-1,G.py+r);y++)for(let x=Math.max(0,G.px-r);x<=Math.min(W-1,G.px+r);x++){
+    const i=idx(x,y);if(Math.hypot(x-G.px,y-G.py)>r)continue;
+    // une porte dérobée
+    if(G.t[i]===SECRET){if(Math.random()>=p)continue;G.t[i]=DOOR;marque(x,y,i);np++;continue;}
+    if(G.t[i]!==WALL)continue;
+    // une niche de salle piégée, encore cachée (3) : elle devient visible et fermée (1)
+    if(G.niche&&G.niche[i]===3){if(Math.random()>=p)continue;G.niche[i]=1;marque(x,y,i);nq++;continue;}
+    }
+  if(!np&&!nq)return;
+  SFX.spot();
+  if(np)sayMore(np>1?'Des portes dérobées apparaissent dans le mur !':'Une porte dérobée apparaît dans le mur !','good');
+  if(nq)sayMore(nq>1?`${nq} niches repérées dans les murs.`:'Une niche repérée dans le mur.','warn');
+  const quoi=np?'une porte dérobée':'un piège';
+  if(typeof stopRest==='function'&&REST)stopRest('Repos interrompu : '+quoi+'.');
+  if(typeof stopTravel==='function'&&TRAV)stopTravel('Trajet interrompu : '+quoi+'.');}
+

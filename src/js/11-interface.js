@@ -1,3 +1,4 @@
+const HSTATS_ORDRE=['power','capteur','degats','pre','def','crit','pas','coup','dis','detec'];
 let HSTATS_H='';   // dernier contenu écrit dans les statistiques de la colonne
 /* ---------- Mode carte : la vue défile sans déplacer le robot ---------- */
 let freeCam=false,camCX=0,camCY=0;
@@ -27,16 +28,25 @@ const miniEnd=()=>{if(!miniDrag)return;miniDrag=null;mv.style.cursor='';};
 mv.addEventListener('pointerup',miniEnd);mv.addEventListener('pointercancel',miniEnd);
 function mini(){
   // la mini-carte occupe toute la largeur de la colonne ; chaque case est calée sur des pixels entiers
+  const VITRE_FIN=.45;
   const dpr=devicePixelRatio||1,cw=Math.max(60,mv.clientWidth||mv.parentElement.clientWidth),pw=Math.round(cw*dpr),ph=Math.round(pw*H/W);
   if(mv.width!==pw||mv.height!==ph){mv.width=pw;mv.height=ph;mv.style.height=Math.round(cw*H/W)+'px';}
   const k=pw/W,X=x=>Math.floor(x*k),Y=y=>Math.floor(y*k),cell=(x,y,w,h)=>mctx.fillRect(X(x),Y(y),X(x+(w||1))-X(x),Y(y+(h||1))-Y(y));
   mctx.setTransform(1,0,0,1,0,0);mctx.globalAlpha=1;mctx.fillStyle='#020605';mctx.fillRect(0,0,pw,ph);
   // 13 = roche dure : la plus marquée de la mini-carte ; 14 à 17 = mur, sol bâti, porte, pilier
+  // part de la case occupée par un mur vitré sur la mini-carte (26 novembre 2026)
   const C=[[PAL['3'],.14],[PAL['3'],.55],[PAL['3'],.85],[PAL['2'],.6],[PAL['1'],.55],[PAL['1'],.22],[PAL['2'],.22],['#000',1],[PAL['3'],.3],
     [PAL['3'],.3],[PAL['1'],.35],[PAL['1'],.9],[PAL['2'],.35],[PAL['3'],1],[PAL['5'],.95],[PAL['5'],.05],[PAL['1'],1],[PAL['5'],.7],
     ['#ffffff',1],[PAL['5'],.95]];
-  for(let y=0;y<H;y++)for(let x=0;x<W;x++){const i=idx(x,y);if(fog&&!G.seen[i])continue;const [c,a]=C[G.t[i]]||C[0];mctx.globalAlpha=a;
-    mctx.fillStyle=c;cell(x,y);}
+  /* Mur vitré (26 novembre 2026) : sa valeur (31) est hors de la table C, il retombait donc sur la teinte la plus
+     pâle et ne se lisait pas comme un mur. Il prend la couleur du mur, mais un **trait plus fin** — centré dans la
+     case, VITRE_FIN de sa largeur, un pixel au moins : la ligne se voit, et on voit que c'est une vitre. */
+  const cellFin=(x,y)=>{const x0=X(x),y0=Y(y),w=X(x+1)-x0,h=Y(y+1)-y0,
+    iw=Math.max(1,Math.round(w*VITRE_FIN)),ih=Math.max(1,Math.round(h*VITRE_FIN));
+    mctx.fillRect(x0+((w-iw)>>1),y0+((h-ih)>>1),iw,ih);};
+  for(let y=0;y<H;y++)for(let x=0;x<W;x++){const i=idx(x,y);if(fog&&!G.seen[i])continue;const v=G.t[i];
+    if(v===VITRE){const [c,a]=C[WALL];mctx.globalAlpha=a;mctx.fillStyle=c;cellFin(x,y);continue;}
+    const [c,a]=C[v]||C[0];mctx.globalAlpha=a;mctx.fillStyle=c;cell(x,y);}
   mctx.globalAlpha=1;
   for(const s of G.sites){if(fog&&!s.seen)continue;mctx.fillStyle=s.known?PAL['3']:PAL['2'];cell(s.x-1,s.y-1,3,3);}
   {const sr=sonarR();if(sr>0&&G.ore){const d=Math.max(3,Math.round(k*1.4));for(const o in G.ore){const i=+o;if(!sonarVu(i,sr))continue;
@@ -67,19 +77,26 @@ let ICON={};
 const ABAR_CH=48;
 function asciiBar(v,max){const p=max>0?Math.max(0,Math.min(100,v/max*100)):0;
   return `<span class="ae">${'░'.repeat(ABAR_CH)}</span><span class="af" style="width:${p.toFixed(2)}%">${'█'.repeat(ABAR_CH)}</span>`;}
+/* Repère de cadence (25 novembre 2026) : d'un coup d'œil, la vitesse de ce que la créature est en train de faire —
+   son coup si elle est au contact, son pas sinon. Trois chevrons pleins = une action toutes les 50 unités de temps,
+   donc deux pendant une action normale de la foreuse ; le chevron creux = plus lente qu'elle. */
+const CADGL=d=>d<=50?'▸▸▸':d<=75?'▸▸':d<=100?'▸':'▹';
 function seenHTML(){
   const ter=new Map(),out=[];
   for(let i=0;i<W*H;i++)if(vis[i]){const v=G.t[i];ter.set(v,(ter.get(v)||0)+1);}
   const near=(a,b)=>Math.hypot(a.x-G.px,a.y-G.py)-Math.hypot(b.x-G.px,b.y-G.py);
-  const ans=[...(G.beasts||[]).filter(b=>vis[idx(b.x,b.y)]&&!beastCache(b)).map(b=>({o:b,sp:BEASTS[b.sp],ic:'bz'+b.sp+'r',hp:b.hp,st:b.hunt>0?(b.sees?'en chasse':b.search>0?'fouille':'cherche'):'',agg:true})),
-             ...(G.animals||[]).filter(a=>vis[idx(a.x,a.y)]).map(a=>({o:a,sp:SPECIES[a.sp],ic:'an'+a.sp+'r',hp:a.hp??pvDe(SPECIES[a.sp]),st:{attack:'attaque',flee:'recule',follow:'suit',hold:'observe',seek:'cherche',search:'fouille'}[a.mode]||'',agg:a.mode==='attack'}))]
-    .sort((p,q)=>near(p.o,q.o));
+  /* Ordre (25 novembre 2026) : d'abord celles qui sont en jeu, dans l'ordre où elles vont agir (leur horloge, o.pret),
+     puis les autres par distance. Les calmes restent donc en bas sans sauter d'une ligne à l'autre à chaque action. */
+  const ans=[...(G.beasts||[]).filter(b=>vis[idx(b.x,b.y)]&&!beastCache(b)).map(b=>({o:b,sp:BEASTS[b.sp],ic:'bz'+b.sp+'r',hp:b.hp,st:b.hunt>0?(b.sees?'en chasse':b.search>0?'fouille':'cherche'):'',agg:true,ch:b.hunt>0})),
+             ...(G.animals||[]).filter(a=>vis[idx(a.x,a.y)]).map(a=>({o:a,sp:SPECIES[a.sp],ic:'an'+a.sp+'r',hp:a.hp??pvDe(SPECIES[a.sp]),st:{attack:'attaque',flee:'recule',follow:'suit',hold:'observe',seek:'cherche',search:'fouille'}[a.mode]||'',agg:a.mode==='attack',ch:!!a.mode}))]
+    .sort((p,q)=>(p.ch?0:1)-(q.ch?0:1)||(p.ch?(p.o.pret||0)-(q.o.pret||0):near(p.o,q.o)));
   if(ans.length){const max=6;
     const calc=e=>{const tmA=terrModDe(e.sp,e.o.x,e.o.y),tmR=terrMod(G.px,G.py),me=hitChance(robotPre(),e.sp.def+tmA),
       them=e.agg?hitChance(e.sp.pre,robotDef()):null;return {tmA,tmR,me,them};};
-    const head='<div class="hd"><span></span><span>Vie</span><span title="Votre chance de le toucher">Toucher</span><span title="Sa chance de vous toucher">Subir</span></div>';
+    const head='<div class="hd"><span></span><span title="Sa cadence : le nombre d’actions qu’elle fait pendant une action normale de la foreuse"></span><span>Vie</span><span title="Votre chance de le toucher">Toucher</span><span title="Sa chance de vous toucher">Subir</span></div>';
     out.push('<div class="grp">'+head+ans.slice(0,max).map(e=>{const pv=pvDe(e.sp),d=Math.max(Math.abs(e.o.x-G.px),Math.abs(e.o.y-G.py)),c=calc(e);
-      return `<div class="an${e.agg&&e.st?' hunt':''}" title="${e.sp.n}${e.st?' · '+e.st:''} · ${d} case${d>1?'s':''} · ${Math.max(0,e.hp)}/${pv} PV"><img src="${ICON[e.ic]||''}" alt="${e.sp.n}"><span class="hp">${asciiBar(Math.max(0,e.hp),pv)}</span><span class="n" style="color:${chanceCol(c.me)}">${c.me} %</span><span class="n" style="color:${c.them==null?'var(--dim)':chanceCol(100-c.them)}">${c.them==null?'—':c.them+' %'}</span></div>`;}).join('')
+      const dp=Math.round(dpasDe(e.o,e.sp)),dc=dcoupDe(e.o,e.sp),cd=d<=1?dc:dp;
+      return `<div class="an${e.agg&&e.st?' hunt':''}" title="${e.sp.n}${e.st?' · '+e.st:''} · ${d} case${d>1?'s':''} · ${Math.max(0,e.hp)}/${pv} PV · pas ${dp} (${motDuree(dp)}), coup ${dc} (${motDuree(dc)})"><img src="${ICON[e.ic]||''}" alt="${e.sp.n}"><span class="cad${cd<=50?' vif':''}" title="${cd<=100?'Jusqu’à '+cadenceDe(cd).toFixed(cadenceDe(cd)%1?1:0)+' action':'Une action toutes les '+(1/cadenceDe(cd)).toFixed(1)}${cd<=100?'s par action de la foreuse':' actions de la foreuse'}">${CADGL(cd)}</span><span class="hp">${asciiBar(Math.max(0,e.hp),pv)}</span><span class="n" style="color:${chanceCol(c.me)}">${c.me} %</span><span class="n" style="color:${c.them==null?'var(--dim)':chanceCol(100-c.them)}">${c.them==null?'—':c.them+' %'}</span></div>`;}).join('')
     +(ans.length>max?`<div class="none">+ ${ans.length-max} autre${ans.length-max>1?'s':''}</div>`:'')+'</div>');
   }
   const ins=HOV&&!busy()?inspectHTML():'';
@@ -107,10 +124,12 @@ function side(){
     $('cProf').textContent=`Niveau ${n} · ${p?'−'+p:0} m · ${W}×${H}`;$('cMonde').textContent=am||'Personnalisé';
       $('cBati').textContent=ab||'Personnalisé';}
   $('matN').textContent=G.st.matiere||0;
-  // statistiques de la foreuse sous EXPLORER et REPOS (25 novembre 2026) : les mêmes valeurs que la fenêtre Équipement, terrain compris
+  // statistiques de la foreuse dans le sous-menu « Stats » (25 novembre 2026) : les mêmes valeurs que la fenêtre Équipement, terrain compris
   if(typeof INV_STATS!=='undefined'&&G.inv){const A=eqDe('arme')||null,B=eqDe('armure')||null;
     // sans VIE ni ÉNER : les deux barres du haut les donnent déjà (retirées le 25 novembre 2026)
-    const h=INV_STATS.filter(([k])=>k!=='vieMax'&&k!=='energieMax').map(([k,l])=>{const c=statVal(k,G.st,A,B,0);
+    // ordre demandé le 26 novembre 2026, indépendant de celui de la fenêtre Équipement
+    const lib=Object.fromEntries(INV_STATS);
+    const h=HSTATS_ORDRE.filter(k=>lib[k]).map(k=>{const l=lib[k],c=statVal(k,G.st,A,B,0);
       return `<span tabindex="0" data-k="${k}" aria-describedby="stip"><i>${l}</i> <b>${c[1]??c[0]}${k==='crit'?' %':''}</b></span>`;}).join('');
     // réécrit seulement s'il change : sinon l'encadré survolé serait remplacé à chaque battement et l'infobulle sauterait
     if(h!==HSTATS_H&&$('hstats')){HSTATS_H=h;$('hstats').innerHTML=h;}if(typeof stipMaj==='function')stipMaj();}   // avalée par le commentaire depuis le 16 novembre 2026 : la matière ne s'affichait plus
@@ -121,10 +140,25 @@ function side(){
 /* Journal du bas (22 novembre 2026) : il défile (molette, barre) pour relire les messages plus anciens. Il n'est refait que
    quand il change ; un nouveau message le ramène tout en bas, sinon on reste là où on lisait. */
 let LOG_SIG='';
+const LOG_PAS=.13,LOG_SOMBRE=.4;   // un tour s'assombrit de LOG_PAS par tour d'âge, sans descendre sous LOG_SOMBRE
 function logDraw(){const lg=G.log||[],L=lg[lg.length-1],nouveau=`${lg.length}|${L?L.m+L.n+L.t:''}`,sig=nouveau+'|'+G.turn;
   if(sig===LOG_SIG)return;
   const el=$('log'),bas=!LOG_SIG||LOG_SIG.slice(0,LOG_SIG.lastIndexOf('|'))!==nouveau,top=el.scrollTop;LOG_SIG=sig;
-  el.innerHTML=lg.map(e=>`<li class="${e.c||''}${e.t===G.turn&&!e.c?' new':''}"><span class="t">T${String(e.t).padStart(3,'0')}</span>${e.m}${e.n>1?`<span class="x">×${e.n}</span>`:''}</li>`).join('');
+  /* Un bloc par tour (26 novembre 2026) : le numéro de tour écrit **une seule fois**, à gauche, et tous les
+     événements de ce tour à sa droite, dans l'ordre où ils sont arrivés. Les tours passés s'assombrissent avec
+     l'âge jusqu'à un plancher : le tour en cours reste franc, les anciens s'effacent sans disparaître. */
+  const blocs=[];
+  for(const e of lg){const b=blocs[blocs.length-1];if(b&&b.t===e.t)b.ev.push(e);else blocs.push({t:e.t,ev:[e]});}
+  el.innerHTML=blocs.map((b,i)=>{const op=Math.max(LOG_SOMBRE,1-(blocs.length-1-i)*LOG_PAS);
+    return `<li class="tour${b.t===G.turn?' new':''}" style="opacity:${op.toFixed(2)}">`+
+      `<span class="t">T${String(b.t).padStart(3,'0')}</span><span class="evs">`+
+      /* Les messages d'un tour se suivent sur la MÊME ligne, séparés par ║ (26 novembre 2026). Chaque message est
+         une boîte en ligne : il passe à la ligne suivante **en entier** s'il ne tient pas au bout de celle-ci, et il
+         n'est coupé que s'il est à lui seul plus large que la colonne. Le séparateur est collé à la fin du message
+         qu'il suit, pour ne jamais se retrouver seul en début de ligne. */
+      b.ev.map((e,k)=>`<span class="ev ${e.c||''}">${e.m}${e.n>1?`<span class="x">×${e.n}</span>`:''}`+
+        (k<b.ev.length-1?'<span class="sep">║</span>':'')+'</span>').join('')+
+      '</span></li>';}).join('');
   el.scrollTop=bas?el.scrollHeight:top;}
 
 
@@ -272,7 +306,9 @@ function toggleVision(){SHOWVIS=!SHOWVIS;say(SHOWVIS?'Portée de discrétion aff
 function toggleFog(){fog=!fog;try{localStorage.setItem('np-fog',fog?'on':'off');
   }catch(e){}say(fog?'Brouillard de guerre activé.':'Brouillard de guerre désactivé.','info');render();}
 $('fd-carte').addEventListener('toggle',()=>{if(G)render();});   // la mini-carte se dessine à l'ouverture
-['fd-sac','fd-carte','fd-pal','fd-lab','fd-ctrl'].forEach(id=>{const d=$(id);try{d.open=localStorage.getItem('np-'+id)==='open';}catch(e){}
+// « Stats » (26 novembre 2026) s'ouvre de lui-même la première fois : ces valeurs étaient visibles sans repli avant
+['fd-sac','fd-carte','fd-stats','fd-pal','fd-lab','fd-ctrl'].forEach(id=>{const d=$(id);
+  try{const v=localStorage.getItem('np-'+id);d.open=v?v==='open':id==='fd-stats';}catch(e){}
   d.addEventListener('toggle',()=>{try{localStorage.setItem('np-'+id,d.open?'open':'closed');}catch(e){}});});
 $('restart').onclick=e=>{e.preventDefault();e.stopPropagation();unlock();SFX.start();newGame();started=true;
   $('overlay').hidden=true;render();};

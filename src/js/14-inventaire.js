@@ -4,15 +4,16 @@
    Équiper un objet AJOUTE ses modificateurs (mod) aux stats de G.st, le retirer les ENLÈVE : le reste du jeu lit G.st
    sans rien savoir de l'équipement, et les autres sources de bonus s'additionnent sans conflit.
    de : dés de dégâts d'une arme, {n:dés, f:faces, p:bonus} (voir 08-faune) ; mod.degats est un bonus ajouté au jet.
-   Champs de mod : degats, pre, crit, def, vitesse, capteur, power, vieMax,
+   Champs de mod : degats, pre, crit, def, pas, capteur, power, vieMax,
    req : POW requis par une arme ou une armure (voir 08-faune : armeFact, armureDef).
-                   dis (portée de discrétion, en cases), coup (durée d'un coup de foreuse, en unités de temps).
+                   dis (portée de discrétion, en cases), pas et coup (durées d'un pas et d'un coup de la foreuse, en
+                   unités de temps, base 100 : un modificateur négatif la rend plus rapide).
    Consommables (conso) : usage unique, empilés (n exemplaires sur une ligne).
    Dessins : art = lignes de caractères ; col = même grille, une couleur par caractère
              (w blanc · 1 accent · 2 bio · 3 monde · e énergie · r rouge · d gris · . couleur du texte). */
 const SLOTS={arme:{n:1,nom:'Arme',g:'/'},armure:{n:1,nom:'Armure',g:'['},acc:{n:3,nom:'Accessoire',g:'='}};
 // libellé, sens favorable (+1 : plus c'est haut mieux c'est ; −1 : l'inverse), unité
-const MODS={degats:['DEG',1,''],pre:['PRE',1,''],crit:['CRIT',1,' %'],def:['DEF',1,''],vitesse:['VIT',1,''],capteur:['EYE',1,''],
+const MODS={degats:['DEG',1,''],pre:['PRE',1,''],crit:['CRIT',1,' %'],def:['DEF',1,''],pas:['Pas',-1,''],capteur:['EYE',1,''],
   power:['POW',1,''],vieMax:['Vie max',1,''],energieMax:['Énergie max',1,''],dis:['DIS',-1,''],detec:['DET',1,''],coup:['Coup',-1,'']};
 const ITEMS={
   foreuse:{n:'Foreuse',f:1,slot:'arme',req:10,de:{n:1,f:6,p:5},mod:{},base:1,
@@ -23,7 +24,7 @@ const ITEMS={
     d:'La coque de série, montée au départ. Sans elle, la foreuse n’a aucune défense.',
     art:["  ▄▄       ▄▄  ", "  █▓▀▀▀▀▀▀▀▓█  ", "  █▓▓▓▐█▌▓▓▓█  ", "   ▀▄▓▓▓▓▓▄▀   ", "     ▀▀▀▀▀     "],
     col:["..33.......33..", "..31333333313..", "..31113331113..", "...331111133...", ".....33333....."]},
-  servo:{n:'Servomoteur',slot:'acc',mod:{vitesse:2},
+  servo:{n:'Servomoteur',slot:'acc',mod:{pas:-25},
     d:'Entraînement plus nerveux : la foreuse se déplace plus vite.',
     art:["       │       ", "    ·┌─┴─┐·    ", "  ───┤▓+▓├───  ", "    ·└─┬─┘·    ", "       │       "],
     col:[".......3.......", "....3333333....", "..33331d13333..", "....3333333....", ".......3......."]},
@@ -104,6 +105,13 @@ function invMigre(){if(G.st&&G.st.cles>0){const o=G.inv.find(o=>o.k==='cle');if(
   if(!G.inv.some(o=>o.eq&&ITEMS[o.k].slot==='arme'))G.inv.find(o=>o.k==='foreuse').eq=1;
   // la Coque d'usine est portée d'origine : son DEF +10 est déjà compris dans les stats de départ, donc on la marque équipée sans appliquer son effet
   if(!G.inv.some(o=>o.eq&&ITEMS[o.k].slot==='armure'))G.inv.find(o=>o.k==='usine').eq=1;
+  /* Partie d'avant le 26 novembre 2026 : la VIT en base 5 devient une durée de pas en base 100. On ne convertit pas
+     le total (il dériverait au premier objet retiré) : on recalcule le modificateur à partir de l'équipement porté,
+     ce qui donne exactement ce que la nouvelle règle aurait produit. La clé est effacée, donc cela ne se rejoue pas. */
+  if(G.st&&G.st.vitesse!=null){let p=0;
+    for(const o of G.inv||[]){const d=ITEMS[o.k];if(o.eq&&d&&d.mod&&d.mod.pas)p+=d.mod.pas;}
+    G.st.pas=p;delete G.st.vitesse;}
+  if(G.st&&G.st.pas==null)G.st.pas=0;
   G.st.vie=Math.min(G.st.vieMax,G.st.vie);G.st.energie=Math.min(G.st.energieMax,G.st.energie);}
 const ACOL={w:'#fff','1':'var(--c1)','2':'var(--c2)','3':'var(--c3)',e:'var(--energy)',r:'var(--life)',d:'var(--dim)'};
 const escH=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
@@ -262,7 +270,7 @@ function invPickup(more){const c=idx(G.px,G.py);if(G.items&&G.items[c]&&G.items[
   return true;}
 
 // Stats dans la fenêtre : valeur actuelle, puis « → nouvelle valeur » en couleur si Entrée sur l'objet choisi la changeait
-const INV_STATS=[['vieMax','VIE'],['energieMax','ÉNER'],['vitesse','VIT'],['capteur','EYE'],['degats','DEG'],['pre','PRE'],['def','DEF'],['crit','CRIT'],['power','POW'],['dis','DIS'],['coup','COUP'],['detec','DET']];
+const INV_STATS=[['vieMax','VIE'],['energieMax','ÉNER'],['pas','PAS'],['capteur','EYE'],['degats','DEG'],['pre','PRE'],['def','DEF'],['crit','CRIT'],['power','POW'],['dis','DIS'],['coup','COUP'],['detec','DET']];
 function invDelta(o){const d=ITEMS[o.k],m={};if(d.conso)return m;const add=(mm,sg)=>{for(const k in mm||{})m[k]=(m[k]||0)+sg*mm[k];};
   if(o.eq){if(d.slot!=='arme')add(d.mod,-1);return m;}
   const sl=SLOTS[d.slot];if(invCount(d.slot)>=sl.n){if(sl.n>1)return m;add(ITEMS[G.inv.find(p=>p.eq&&ITEMS[p.k].slot===d.slot).k].mod,-1);}
@@ -290,16 +298,17 @@ function statVal(k,st,arme,armure,dDis){
   if(k==='def')return [robotDefNu(st,armure)+terrMod(G.px,G.py)];
   if(k==='pre')return [robotPre(st,arme)];
   if(k==='degats'){const [a,b]=robotDegs(st,arme);return [(a+b)/2,a===b?''+a:a+'-'+b];}
+  if(k==='pas')return [DUR.pas+(st.pas||0)];
   if(k==='coup')return [DUR.coup+(st.coup||0)];
   if(k==='crit')return [st.crit??5];
   return [st[k]];}
 /* Infobulle d'une statistique de la colonne (25 novembre 2026) : sa définition, puis ce qui fait sa valeur en ce moment — la base,
    chaque pièce d'équipement portée, les bonus permanents (modules), puis ce qui tient à la situation (POW requis, terrain, action). */
 // valeurs de la foreuse nue ; la défense de départ (10) vient de la Coque d'usine, portée dès le début
-const ST_BASE={vieMax:100,energieMax:100,vitesse:5,capteur:10,degats:0,pre:100,def:0,crit:5,power:10,dis:0,coup:0,detec:5};
+const ST_BASE={vieMax:100,energieMax:100,pas:0,capteur:10,degats:0,pre:100,def:0,crit:5,power:10,dis:0,coup:0,detec:3};
 const ST_DEF={vieMax:['Vie maximale','Ce que la foreuse peut encaisser avant d’être détruite.'],
   energieMax:['Énergie maximale','La réserve dépensée par la course (5 par pas) ; elle se recharge au repos.'],
-  vitesse:['Vitesse','Les déplacements de la foreuse : à 5, une case par battement ; plus haut, elle va plus vite que les robots lents.'],
+  pas:['Durée du pas','Le temps que prend un déplacement : 100 vaut un battement, comme pour les robots. Plus c’est bas, plus la foreuse marche vite.'],
   capteur:['Capteur','La portée de vue, en cases.'],
   degats:['Dégâts','Ce qu’un coup retire à un robot : le dé de l’arme plus les bonus.'],
   pre:['Précision','La chance de toucher, avant la défense de la cible (toujours entre 5 et 95 %).'],
@@ -308,9 +317,9 @@ const ST_DEF={vieMax:['Vie maximale','Ce que la foreuse peut encaisser avant d�
   power:['Puissance','Comparée au POW requis par l’arme et par l’armure : chaque point en trop les renforce, chaque point manquant les affaiblit beaucoup.'],
   dis:['Discrétion','La distance, en cases, à laquelle un robot peut remarquer la foreuse. Plus c’est bas, mieux c’est.'],
   coup:['Durée du coup','Le temps que prend une attaque : 100 vaut un battement. Plus c’est bas, plus la foreuse frappe vite.'],
-  detec:['Détection','Le rayon, en cases, dans lequel la foreuse peut repérer une porte secrète.']};
+  detec:['Détection','Le rayon, en cases, dans lequel la foreuse peut repérer une porte dérobée. Elle cherche à chaque battement : 15 % de chance par porte, 35 % si elle attend sur place ou se repose.']};
 function statInfo(k){const st=G.st,A=eqDe('arme')||null,B=eqDe('armure')||null,L=[],u=k==='crit'?' %':'',pt=n=>Math.abs(n)>1?'s':'';
-  const base=k==='dis'?STEALTH_BASE:k==='coup'?DUR.coup:ST_BASE[k];L.push([k==='dis'?'Base (réglage du jeu)':'Base',base+u]);
+  const base=k==='dis'?STEALTH_BASE:k==='coup'?DUR.coup:k==='pas'?DUR.pas:ST_BASE[k];L.push([k==='dis'?'Base (réglage du jeu)':'Base',base+u]);
   let eq=0;for(const o of G.inv||[]){const d=ITEMS[o.k];if(!o.eq||!d||!d.mod||!d.mod[k])continue;eq+=d.mod[k];L.push([d.n,signe(d.mod[k])+u]);}
   const autre=Math.round(((st[k]??ST_BASE[k])-ST_BASE[k]-eq)*100)/100;if(autre)L.push(['Bonus permanents',signe(autre)+u]);
   if(k==='degats'){const de=armeDe(A),f=degFact(st,A),e=powEcart(A,st);L[0]=['Dé de l’arme ('+(A?A.n:'Foreuse')+')',deTxt(de)];
@@ -320,7 +329,7 @@ function statInfo(k){const st=G.st,A=eqDe('arme')||null,B=eqDe('armure')||null,L
     if(t)L.push([t<0?'Dans l’eau':'Dans les herbes hautes',signe(t)]);}
   if(k==='crit'&&critBonus())L.push(['Surcharge en cours',signe(critBonus())+u]);
   if(k==='power'){if(A&&A.req)L.push([`Requis par l’arme (${A.n})`,A.req]);if(B&&B.req)L.push([`Requis par l’armure (${B.n})`,B.req]);}
-  if(k==='vitesse'){const v=G.t[idx(G.px,G.py)];if(SLOW[v])L.push([v===DEEP?'En eau profonde : pas plus lents':'Dans l’eau : pas plus lents',fois(SLOW[v])]);
+  if(k==='pas'){const v=G.t[idx(G.px,G.py)];if(G.sprint)L.push(['En courant',fois(SPRINT_MULT)]);if(SLOW[v])L.push([v===DEEP?'En eau profonde : pas plus lents':'Dans l’eau : pas plus lents',fois(SLOW[v])]);
     if(G.eff&&G.eff.glu>0)L.push(['Engluée : pas plus lents',fois(2)]);}
   if(k==='dis'){let w=0;for(const [dx,dy] of DIRS){const x=G.px+dx,y=G.py+dy;if(x<0||y<0||x>=W||y>=H)continue;const v=G.t[idx(x,y)];if(v===ROCK||v===MOUNT||bati(v))w++;}
     if(lastAct==='dig')L.push(['Vient de forer',fois(DIG_MULT)]);if(lastAct==='wait')L.push(['À l’arrêt',fois(.5)]);
@@ -386,18 +395,21 @@ function sacJeter(i){const o=G.inv[i];if(!o||G.over||!ITEMS[o.k].conso)return;co
   invTake(i);const c=caseJet();G.items=G.items||{};(G.items[c]=G.items[c]||[]).push(o.k);
   say(`${d.n} jeté${accord(d)} au sol${n>1?` (il en reste ${n-1})`:''} : inventaire ${sacPlaces()}/${SAC_MAX}.`);SFX.thud();
   sacFix();SAC_H='';invChanged();}
-/* Navigation au clavier (touche I) : ouvre le sous-menu s'il est replié et choisit le premier consommable.
-   Ensuite ↑ ↓ pour parcourir, Entrée pour utiliser, X, Suppr ou J pour jeter un exemplaire au sol, Échap ou I pour sortir. */
+/* Navigation au clavier (touche I) : ouvre le sous-menu s'il est replié et choisit le **premier consommable**, prêt à
+   l'emploi. Ensuite ↑ ↓ pour parcourir, Entrée pour utiliser, X, Suppr ou J pour jeter un exemplaire au sol.
+   **I referme le sous-menu** ; **Échap** sort de la navigation en le laissant ouvert. */
 function sacFix(){const l=invConsos();if(!l.length){SAC_SEL=-1;SAC_NAV=false;return;}if(!l.includes(SAC_SEL))SAC_SEL=l[0];}
-function sacNav(on){const f=$('fd-sac');
-  if(on&&SAC_NAV){SAC_NAV=false;SAC_H='';sacDraw();render();return;}                       // I une seconde fois : on ressort
-  if(on){if(!invConsos().length){say('Aucun consommable dans l’inventaire.');render();return;}
-    if(!f.open)f.open=true;SAC_NAV=true;sacFix();}
+function sacNav(on){const f=$('fd-sac'),l=invConsos();
+  if(on){if(!l.length){say('Aucun consommable dans l’inventaire.');render();return;}
+    if(!f.open)f.open=true;SAC_NAV=true;SAC_SEL=l[0];}                                     // I : le premier de la liste
   else SAC_NAV=false;
   SAC_H='';sacDraw();render();}
+// I une seconde fois : on sort de la navigation et on replie le sous-menu
+function sacFerme(){SAC_NAV=false;$('fd-sac').open=false;SAC_H='';sacDraw();render();}
 function sacKey(ev){const k=ev.key.toLowerCase(),l=invConsos(),d=KEYS[k];
   if(!l.length){SAC_NAV=false;return false;}
-  if(k==='escape'||k==='i'){ev.preventDefault();sacNav(false);return true;}
+  if(k==='i'){ev.preventDefault();sacFerme();return true;}
+  if(k==='escape'){ev.preventDefault();sacNav(false);return true;}
   if(d&&d[0]===0){ev.preventDefault();const p=l.indexOf(SAC_SEL);SAC_SEL=l[((p<0?0:p)+d[1]+l.length)%l.length];SAC_H='';
     sacDraw();return true;}
   if(k==='enter'||k===' '){ev.preventDefault();invEquip(SAC_SEL);sacFix();SAC_H='';render();return true;}

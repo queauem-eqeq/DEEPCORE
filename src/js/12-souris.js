@@ -75,6 +75,8 @@ function travelStep(){const T=TRAV;if(!T)return;if(busy()){stopTravel();return;}
 let EXPL=null;
 // créatures déjà signalées : chacune n'interrompt l'exploration qu'une fois (sinon une puce qui suit la foreuse l'arrêterait sans cesse)
 const EXPL_VUS=new WeakSet();
+// vitrines déjà signalées : chacune n'arrête l'exploration qu'une fois (26 novembre 2026)
+const EXPL_VIT=new WeakSet();
 function exploreScan(E,deep){const N=W*H,prev=new Int32Array(N).fill(-2),q=[idx(G.px,G.py)];prev[q[0]]=-1;const plein=G.st.vie>=G.st.vieMax;
   const butin=j=>{if(G.cles&&G.cles[j])return 'une clé';
     if(G.items&&G.items[j]&&G.items[j].length&&!(G.pieges||[]).some(p=>p.on&&p.c===j)&&!(G.vit&&G.vit[j]))return 'un objet';
@@ -87,6 +89,9 @@ function exploreScan(E,deep){const N=W*H,prev=new Int32Array(N).fill(-2),q=[idx(
     for(const[dx,dy]of DIRS){const a=x+dx,b=y+dy;if(a<1||b<1||a>=W-1||b>=H-1)continue;const j=idx(a,b);
       if(prev[j]!==-2||!G.seen[j])continue;const v=G.t[j];
       if(blocks(v)||(v===DEEP&&!deep)||!diagOk(x,y,dx,dy)||occupant(a,b))continue;
+      /* Une vitrine encore fermée ne se traverse pas (26 novembre 2026) : y poser la foreuse ramasserait le lot et
+         condamnerait les deux autres. L'exploration la contourne, et s'arrête dès qu'elle en voit une. */
+      if(G.vit&&G.vit[j]===1)continue;
       const o=G.ore&&G.ore[j];if(plein&&o&&oreSol(o)&&!oreMat(o))continue;
       prev[j]=c;q.push(j);}}
   return null;}
@@ -95,6 +100,9 @@ function exploreEvent(E){
   let nv=null;for(const e of [...(G.beasts||[]),...(G.animals||[])])if(vis[idx(e.x,e.y)]&&!EXPL_VUS.has(e)){EXPL_VUS.add(e);nv=nv||e;}
   if(nv)return `${(G.beasts.includes(nv)?BEASTS:SPECIES)[nv.sp].n.toLowerCase()} en vue`;
   if((G.beasts||[]).some(b=>b.hunt>0&&vis[idx(b.x,b.y)]))return 'un ennemi vous chasse';
+  // des vitrines en vue : on s'arrête, le choix revient au joueur
+  if(G.choix)for(const g of G.choix)if(g.on&&!EXPL_VIT.has(g)&&g.c.some(i=>vis[i])){EXPL_VIT.add(g);
+    return 'vitrines en vue : à vous de choisir le lot';}
   if(G.sites.filter(s=>s.seen).length>E.sites)return 'site de forage repéré';
   const ef=G.eff||{};if(ef.poison>0||ef.glu>0)return 'la foreuse subit un effet';
   if(G.msg&&G.msg.c==='warn')return 'alerte';
@@ -107,6 +115,7 @@ function startExplore(){
   if((G.beasts||[]).some(b=>b.hunt>0&&vis[idx(b.x,b.y)])){say('Un ennemi vous chasse : pas d’exploration automatique.','warn');
     SFX.blocked();render();return;}
   for(const e of [...(G.beasts||[]),...(G.animals||[])])if(vis[idx(e.x,e.y)])EXPL_VUS.add(e);
+  for(const g of G.choix||[])if(g.c.some(i=>vis[i]))EXPL_VIT.add(g);   // vitrines déjà en vue : elles n'arrêtent pas aussitôt
   EXPL={vie:G.st.vie,sites:G.sites.filter(s=>s.seen).length,vu:new Set(),n:0,tm:0};$('explBtn').classList.add('on');
   say('Exploration automatique. Une touche ou un clic pour l’arrêter.','info');exploreStep();}
 function exploreStep(){const E=EXPL;if(!E)return;if(busy()){stopExplore();return;}
@@ -215,7 +224,11 @@ function inspectHTML(){const {x,y}=HOV;if(x<0||y<0||x>=W||y>=H)return '';
   if(!seen&&G.ore&&G.ore[i]&&sonarVu(i,sonarR())){const o=G.ore[i];
     return `<div class="insp">${head('','Gisement détecté',dt)}<p><b>${oreMat(o)?'Matière {µ}':'Éclats de métal'}</b> · repéré par le sonar : ${oreMat(o)?`+${ORE_PV[oreLv(o)]} en réserve`:`+${ORE_PV[oreLv(o)]} PV`}. ${oreSol(o)?'Au sol.':'Pris dans la roche : il faudra forer.'}</p></div>`;}
   if(!seen)return `<div class="insp">${head('','Zone inexplorée',dt)}<p>Aucune donnée : la foreuse n’est jamais passée à portée de ce secteur.</p></div>`;
-  const out=[],t=G.t[i],[tn,td]=TDESC[t]||['Terrain',''],border=x===0||y===0||x===W-1||y===H-1;
+  const out=[],t=G.t[i];let [tn,td]=TDESC[t]||['Terrain',''];const border=x===0||y===0||x===W-1||y===H-1;
+  // Une niche de salle piégée repérée se nomme par ce qu'elle cache ; cachée, c'est un mur ordinaire.
+  {const nc=G.niche&&G.niche[i];
+    if(nc===1)[tn,td]=['Niche fermée','Un relais s’y tient caché. Il surgira quand on ramassera l’appât de la salle.'];
+    else if(nc===2)[tn,td]=['Niche ouverte','Le relais qui s’y tenait en est sorti.'];}
   const occ=see?occupant(x,y):null;
   if(d===0){const st=G.st;out.push(head(ICON.robot_r,'Foreuse U-7',dt),
     `<div class="kv"><span>Vie <b>${Math.ceil(st.vie)}/${st.vieMax}</b></span><span>Énergie <b>${Math.floor(st.energie)}/${st.energieMax}</b></span><span>DEF <b>${robotDef()}</b></span></div>`);}
@@ -225,7 +238,7 @@ function inspectHTML(){const {x,y}=HOV;if(x<0||y<0||x>=W||y>=H)return '';
     const state=isB?(occ.hunt>0?(occ.sees?'en chasse':occ.search>0?'fouille les environs':'se dirige vers votre dernière position connue'):P?(P.pause>0?'au repos':'en route'):'erre'):({attack:'attaque',flee:'recule',follow:'suit',hold:'observe',seek:'se dirige vers votre dernière position connue',search:'fouille les environs'}[occ.mode]||'ne vous a pas repéré');
     const me=hitChance(robotPre(),sp.def+terrModDe(sp,x,y)),them=isB||occ.mode==='attack'?hitChance(sp.pre,robotDef()):null;
     out.push(head(ICON[isB?'bz'+occ.sp+'r':'an'+occ.sp+'r'],sp.n,`${state} · ${dt}`),
-      `<div class="kv"><span>PV <b>${hp}/${pvDe(sp)}</b></span><span>DÉG <b>${dmgTxt(sp)}</b></span><span>PRE <b>${sp.pre}</b></span><span>DEF <b>${sp.def+terrModDe(sp,x,y)}</b></span><span>VIT <b>${sp.v}</b></span></div>`,
+      `<div class="kv"><span>PV <b>${hp}/${pvDe(sp)}</b></span><span>DÉG <b>${dmgTxt(sp)}</b></span><span>PRE <b>${sp.pre}</b></span><span>DEF <b>${sp.def+terrModDe(sp,x,y)}</b></span><span title="Durée d’un pas sur cette case : plus petit, plus rapide">PAS <b>${Math.round(dpasDe(occ,sp))}</b></span><span title="Durée d’un coup : 50 frappe deux fois par battement, 200 une fois sur deux">COUP <b>${dcoupDe(occ,sp)}</b></span></div>`,
       ((isB?!(occ.hunt>0):!occ.mode)?`<p class="eye" title="Chance qu’il vous repère à chaque tour">${EYE_SVG} <b>${detectChance(occ)} %</b></p>`:''),
       `<p>Toucher <b style="color:${chanceCol(me)}">${me} %</b> · Subir <b style="color:${them==null?'var(--dim)':chanceCol(100-them)}">${them==null?'—':them+' %'}</b></p>`,
       `<p>${BEHAV[key]}</p>`);}
