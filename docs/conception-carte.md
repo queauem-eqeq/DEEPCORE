@@ -513,6 +513,15 @@ pièce ils deviennent du sol, sous un mur du mur) ; seuls le vaisseau et le bord
     déjà en chasse).
 - **Les niches des salles piégées sont cachées elles aussi** depuis le 26 novembre 2026 : `G.niche` vaut **3**
   (cachée), **1** (repérée, fermée) ou **2** (ouverte). Avant, elles se voyaient d'emblée.
+- **Le brouillard assombrit, il ne rend pas transparent** (26 novembre 2026). Une case mémorisée mais hors de vue
+  est dessinée **en entier, à pleine opacité**, puis couverte d'un voile de la couleur du fond (`FOND`), à
+  `1 − FOG_K` (0,72). Avant, on multipliait l'opacité de **chaque couche** par `FOG_K` : tout ce qui est posé sur
+  autre chose — une niche dans un mur, une tourelle, une machine, un terminal, une grille, un laser — devenait
+  translucide et laissait voir le dessous. Une tourelle en était le cas le plus net : son corps noir mesuré à
+  `[2,6,5]` en vue remontait à `[31,24,17]` dans le brouillard, **plus clair de loin que de près**, parce que le
+  mur transparaissait au travers. Elle passe maintenant à `[1,5,5]`.
+  Une case d'une seule couche rend exactement comme avant — couleur × `FOG_K` sur le fond, des deux façons — donc
+  l'apparence générale du brouillard ne change pas. La règle vaut pour toute tuile future posée sur une autre.
 - **Jamais d'alpha sur ce qui se cache dans un mur.** Deux états, pas trois : on ne le voit pas parce qu'il n'est
   pas repéré, et le mur est un mur ; ou on le voit, repéré ou déclenché. Une niche, un laser encastré ou une mine
   embusquée ne sont donc **pas dessinés par-dessus le mur** : la tuile est **composée dans celle du mur** à la

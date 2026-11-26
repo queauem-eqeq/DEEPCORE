@@ -217,6 +217,7 @@ function sonarStart(){G.sonar=2;G.sonX=G.px;G.sonY=G.py;
 // f.ant : le cercle d'une antenne ne détecte pas les gisements
 function sonarR(){if(!G||G.sonar===1)return -1;const f=FX.find(f=>f.kind==='sonar'&&!f.ant);return f?fxP(f)*f.r:Infinity;}
 const sonarVu=(i,sr)=>Math.hypot(i%W-(G.sonX??G.px),((i/W)|0)-(G.sonY??G.py))<=sr;
+const FOND='#020605',FOG_K=.28;   // couleur de fond, et ce qui reste d'une case dans le brouillard (26 novembre 2026)
 function render(){
   if(!fxRaf&&animVif())fxRaf=requestAnimationFrame(fxLoop);
   if(G&&G.sonar===1&&G.turn>=(G.sonarAt||0)&&started&&!INTRO&&!BOOM&&!G.over&&$('overlay').hidden&&$('introCv').hidden)sonarStart();
@@ -225,11 +226,16 @@ function render(){
   const fx0=freeCam?camCX:G.px,fy0=freeCam?camCY:G.py;
   camX=Math.max(0,Math.min(W-Math.floor(vc),fx0-Math.floor(vc/2)));camY=Math.max(0,Math.min(H-Math.floor(vr),fy0-Math.floor(vr/2)));
   ox=0;oy=0;
-  ctx.globalAlpha=1;ctx.imageSmoothingEnabled=false;ctx.fillStyle='#020605';ctx.fillRect(0,0,vw,vh);
+  ctx.globalAlpha=1;ctx.imageSmoothingEnabled=false;ctx.fillStyle=FOND;ctx.fillRect(0,0,vw,vh);
   const sh=reduced?null:FX.find(f=>f.kind==='shake');ctx.save();
   if(sh){const a=(1-fxP(sh))*sh.amp;ctx.translate(Math.round((Math.random()*2-1)*a),Math.round((Math.random()*2-1)*a));}
   for(let y=camY;y<Math.min(H,camY+rows+1);y++)for(let x=camX;x<Math.min(W,camX+cols+1);x++){
-    const i=idx(x,y),v=fog?vis[i]:1;if(!v&&!G.seen[i])continue;const t=G.t[i],h=hash(x,y),k=v?1:.28;
+    /* Brouillard (26 novembre 2026) : la case est dessinée **en entier, à pleine opacité**, puis assombrie d'un
+       coup par un voile de la couleur du fond. Avant, on multipliait l'opacité de chaque couche par FOG_K : tout
+       ce qui est posé sur autre chose — une niche dans un mur, une tourelle, une machine, un laser — devenait
+       translucide et laissait voir le dessous. Une case d'une seule couche rend exactement pareil qu'avant
+       (couleur × FOG_K sur le fond, des deux façons) ; une case à plusieurs couches ne transparaît plus. */
+    const i=idx(x,y),v=fog?vis[i]:1;if(!v&&!G.seen[i])continue;const t=G.t[i],h=hash(x,y),k=1;
     const pb=t===BRIDGE&&G.pb&&G.pb[i];   // pont d'un bâtiment : couleur unie et tuile du sol bâti (19 novembre 2026)
     if(t!==CHASM)voile(x,y,(x-camX)*S,(y-camY)*S,k,null,pb||t>=WALL);   // rien de bâti ne porte la texture du sol naturel
     if(pb)put(TL.solPont,x,y,.5*k);
@@ -255,6 +261,7 @@ function render(){
     else if(t===GRASS)put(TL.grass0,x,y,.45*k);
     else if(t===FLAT)put(TL.flat0,x,y,.38*k);
     const dm=G.dmg&&G.dmg[i];if(dm&&(t===ROCK||t===MOUNT))put(TL.crackH,x,y,.95*k);
+    if(!v){ctx.globalAlpha=1-FOG_K;ctx.fillStyle=FOND;ctx.fillRect((x-camX)*S,(y-camY)*S,S,S);}   // le voile du brouillard, une seule fois sur la case finie
   }
   if(G.tracks)for(const k in G.tracks){const tr=G.tracks[k],age=G.turn-tr.t;if(age>=TRACK_LIFE){delete G.tracks[k];continue;}
     const i=+k;if(tr.i==null||(fog&&!vis[i]))continue;put(TL[`tk${tr.i}${tr.o}${Math.floor(Math.max(0,age)*5/TRACK_LIFE)}`],i%W,(i/W)|0,.6);}   // cinq étapes d'effacement, étalées sur TRACK_LIFE tours
