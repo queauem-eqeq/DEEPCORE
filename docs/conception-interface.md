@@ -161,6 +161,14 @@ tard** : le Téléobjectif (capteur 13) voit au-delà de ce qui est affiché.
   rayons du Bloqueur, explosion), tout est redessiné comme avant. Contrôle : `outils/scripts/test-fx-surface.js` (chaque
   effet, image identique au pixel près entre les deux chemins).
 
+### Décor de la vue en cache (26 novembre 2026)
+Le décor (sol, roches, montagnes, murs, machines, eau, gouffres, brouillard) est gardé dans un canevas de la taille de la vue
+(`decorVue`, `caseDecor`, `10-rendu.js`). À chaque rendu, chaque case enregistre ce qu'elle dessinerait ; elle n'est repeinte
+que si cette liste a changé. Quand la caméra bouge, l'image est décalée et seules les cases nouvelles (et celles que le bord
+coupait) sont peintes. Créatures, objets, traces, effets et curseur se dessinent par-dessus, comme avant. Si une case ne tombe
+pas sur un nombre entier de pixels, le dessin se fait directement, sans cache. `DECOR_OFF = true` revient au dessin direct.
+Contrôle : `outils/scripts/test-decor-cache.js` (quatre recettes, cache contre dessin direct, au pixel près).
+
 ### Souris et inspection
 
 - Le curseur système est masqué sur la carte ; le **viseur** est dessiné sur la case survolée. Dès qu'on appuie sur

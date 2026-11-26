@@ -953,3 +953,20 @@ passe de 20 % à 8,5 % de CPU (Chromium sans carte graphique). Écran identique 
 (8 ms) et 40 images rapides (**0,17 ms**) ; le dessin passe de **20 % de CPU (60 images/s) à environ 2 %**. Un effet
 qui touche le décor (secousse…) : 22 rendus complets par seconde au lieu de 61, soit environ 6 % au lieu de 20 %.
 
+### Décor en cache (26 novembre 2026, même jour)
+
+Recette classique, hasard fixé, 300 pas puis la même scène redessinée 100 fois (`render`, en ms ; moyenne · p95) :
+
+| Écran | Sans cache, en jouant | Avec cache, en jouant | Sans cache, même scène | Avec cache, même scène |
+|---|---|---|---|---|
+| Ordinateur 1280 × 800 | 8,2 à 8,7 · 23 à 26 | 5,7 à 6,3 · 15 à 17 | 6,6 à 7,3 · 18 à 22 | **1,0** · 1,3 |
+| Ordinateur, densité 2 | 18 · 58 | 11,6 · 31 | 15 · 46 | **1,6** · 2,7 |
+| Ordinateur, zoom 125 % | 10,3 · 30 | 7,0 · 19 | 9,0 · 30 | **1,0** · 1,3 |
+| Tablette (iPad simulé) | 6,3 · 22 | 4,3 · 9 | 5,2 · 23 | **0,9** · 1,4 |
+
+Une scène qui ne bouge pas (battement de l'eau sans eau visible, survol, effets qui touchent le décor) coûte 5 à 9 fois
+moins. En jouant, la caméra suit la foreuse à chaque pas : il faut décaler l'image et peindre une rangée de cases, d'où un
+gain plus faible (environ un tiers). Le premier rendu d'un niveau reste cher (60 à 80 ms : voile du sol, bords des
+gouffres et toutes les cases), une fois, pendant la descente. Écran identique au pixel près (`test-decor-cache.js` sur
+quatre recettes et trois écrans, `empreinte-image.js`, `test-fx-surface.js`).
+
