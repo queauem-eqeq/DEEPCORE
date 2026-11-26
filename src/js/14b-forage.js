@@ -281,7 +281,7 @@ function playForage(suite,niv,opt){
   FORAGE.camY=-FORAGE.R*.62;
   fgCv.hidden=false;$('forageSkip').hidden=false;$('forageSkip').textContent=jeu?`Échap : passer (−${FG_PASSE_DM} vie)`:'Échap : passer';
     fgBoom(FORAGE,'start');
-  requestAnimationFrame(forageFrame);}
+  raf20(forageFrame);}
 /* Descente complète (23 novembre 2026) : le décor du départ est lu sur la carte actuelle, le niveau d'arrivée est généré (palette tirée) AVANT la
    scène pour qu'on en voie le décor sur le plancher d'arrivée, puis la scène se joue par-dessus la partie déjà changée. prep : Lab (niveau forcé). */
 function descendre(niv,hasard,prep){
@@ -436,7 +436,7 @@ function forageFrame(now){const F=FORAGE;if(!F)return;
   if(F.ox==null&&F.decA){fgDecorCv(F,F.decA);if(F.decA.img&&F.fl-F.decA.h1<F.camY+F.R+3)F.ox=Math.round(F.cx);}
   if(!F.sansRendu)fgDraw(F,t);   // sansRendu : pour rejouer la scène en accéléré dans les essais (outils/scripts/test-forage.js)
   if(F.ph===4&&t>=F.tFade+F.fadeLen){endForage();return;}
-  requestAnimationFrame(forageFrame);}
+  raf20(forageFrame);}
 const fgGlyph=(F,ch,col)=>{let A=F.atl[col];if(!A)A=F.atl[col]={};let g=A[ch];
   if(!g){g=document.createElement('canvas');g.width=F.cw;g.height=F.chh;const x=g.getContext('2d');x.font=F.font;x.textAlign='center';
     x.textBaseline='middle';x.fillStyle=col;x.fillText(ch,F.cw/2,F.chh/2);A[ch]=g;}

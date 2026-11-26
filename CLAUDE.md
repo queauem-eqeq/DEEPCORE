@@ -40,7 +40,7 @@ Le jeu est une page web en plusieurs fichiers (`src/`), **sans étape d'assembla
 - `python3 outils/forage.py DOSSIER niv2 t1 t2 …` : images de la seconde descente (le mini-jeu des mines).
 - **Essais automatiques**, à passer à `jeu.py` et à relancer après tout changement de ces systèmes : `test-machines.js`
   (machines), `test-ennemis.js` (espèces, patrouilles, lieux), `test-forage.js` (mini-jeu), `test-descente.js` (la descente
-  entière, trois niveaux) ; mesures : `mesure-ambiances.js`, `mesure-faune.js`. Chacun renvoie une ligne par essai.
+  entière, trois niveaux), `test-fx-surface.js` (effets dessinés sur le décor figé : image identique) ; mesures : `mesure-ambiances.js`, `mesure-faune.js`. Chacun renvoie une ligne par essai.
 - `node outils/redecouper.js [--ecrire] [LIMITE]` (acorn requis : `npm i acorn` dans un dossier temporaire, puis `NODE_PATH`) : redécoupe les
   lignes de `src/js` trop longues (140 caractères par défaut) sans changer le programme : l'arbre syntaxique est comparé avant
   d'écrire. Exclus : `02b` (données) et `07e` (`animation_cavernes.py` y cherche du texte exact). Utile aussi pour aligner une

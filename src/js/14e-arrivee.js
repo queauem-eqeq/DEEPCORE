@@ -207,7 +207,7 @@ function frame(now){if(!S||INTRO!==S)return;setup();const t=(now-S.t0)/1000+S.sa
     const st=Math.floor(f/.1),q=j*C+i,X=i*cw+GX0,Y=j*chh+GY0;
     x.clearRect(X,Y,cw,chh);if(st<3&&CH[q]!==' '){x.fillStyle='#000';x.fillRect(X,Y,cw,chh);x.drawImage(glyph('▒░·'[st],CO[q]),X,Y);}}
   if(t>=T_FIN){S=null;introCv.style.background='';endIntro();return;}
-  requestAnimationFrame(frame);}
+  raf20(frame);}
 
 /* ---------- tableau de bord (repris des descentes) ---------- */
 let HUDG=0,HUDB=0;
@@ -267,7 +267,7 @@ function sons(t,ev){const D=T_D1-T_D0;
   if(t>=T_POSE&&ev('touch'))SFX.touchdown();}
 window.arriveeStart=()=>{nouvelle();INTRO=S;introCv.hidden=false;introCv.style.opacity=1;introCv.style.background='transparent';
   /* le jeu en pixels, dessous, apparaît case par case à la fin */
-  $('introSkip').hidden=false;requestAnimationFrame(frame);};
+  $('introSkip').hidden=false;raf20(frame);};
 // passer : on saute à l'extinction (les sons d'ici là ne sont plus joués)
 window.arriveeSkip=()=>{if(!S)return;const t=(performance.now()-S.t0)/1000+S.saut;if(t<T_NOIR){S.saut+=T_NOIR-t;
   for(const k of ['hyper','hum','appr','reen','thr','touch'])S.ev[k]=true;for(const e of S.eclairs)e.son=1;}};

@@ -50,7 +50,7 @@ function gore(x,y){const cx=(x+.5)*S,cy=(y+.5)*S,deb=[PAL['3']],ETINC_COLS=[PAL[
       c:deb[(Math.random()*deb.length)|0],blood:true,reb:1+((Math.random()*2)|0)});}
   smokeKick();}
 function smokeOn(){return G&&!G.over&&G.st&&G.st.vie<50&&$('introCv').hidden;}
-function smokeKick(){if(!SMOKE.raf&&(smokeOn()||SMOKE.p.length)){SMOKE.last=performance.now();SMOKE.raf=requestAnimationFrame(smokeStep);}}
+function smokeKick(){if(!SMOKE.raf&&(smokeOn()||SMOKE.p.length)){SMOKE.last=performance.now();SMOKE.raf=raf20(smokeStep);}}
 function smokeStep(now){const dt=Math.min(.05,(now-SMOKE.last)/1000);SMOKE.last=now;const on=smokeOn(),fire=on&&G.st.vie<20;
   if(on){const cx=(G.px+.5)*S,cy=(G.py+.5)*S;
     SMOKE.acc+=dt*(fire?24:12);while(SMOKE.acc>=1){SMOKE.acc--;const g=85+((Math.random()*60)|0);
@@ -75,7 +75,7 @@ function smokeStep(now){const dt=Math.min(.05,(now-SMOKE.last)/1000);SMOKE.last=
     SMOKE.p[n++]=q;   // pixel art strict : taille fixe, opaque, calé sur la grille des pixels de tuile (2 px), disparaît d'un coup
     fctx.fillStyle=q.c;fctx.fillRect(Math.round((q.x-camX*S)/2)*2,Math.round((q.y-camY*S)/2)*2,q.sz,q.sz);}
   SMOKE.p.length=n;fctx.globalAlpha=1;if(landed)render();
-  SMOKE.raf=(on||n)?requestAnimationFrame(smokeStep):0;if(!SMOKE.raf)fctx.clearRect(0,0,vw,vh);}
+  SMOKE.raf=(on||n)?raf20(smokeStep):0;if(!SMOKE.raf)fctx.clearRect(0,0,vw,vh);}
 /* Créature étourdie (batterie, court-circuit ; 22 novembre 2026) : toute sa silhouette devient un damier d'un pixel sur deux,
    couleur bio et couleur bâti en quinconce ; les deux couleurs s'échangent à chaque battement, pour qu'on voie qu'elle ne
    bouge plus. Les variantes sont gardées par tuile, couleurs et parité du battement. */
@@ -116,8 +116,9 @@ function traitLaser(u,ax,ay,bx,by,graine,etinc,col){let x0=Math.round(ax),y0=Mat
 // Rayons du Bloqueur qui tient la foreuse : trois traits parallèles couleur bio, espacés d'un pixel (22 novembre 2026 ; d'abord un
 // trait rouge). Décalés en travers du rayon : en hauteur s'il est plutôt horizontal, en largeur sinon. Dessinés avant les créatures
 // et la foreuse, pour passer sous elles.
-function rayonsBloqueur(){const u=S/16,cx=o=>(o.x+.5-camX)*16,cy=o=>(o.y+.5-camY)*16;
-  for(const b of G.beasts||[])if(b.tient&&!(b.stun>0)&&beastVisible(b)){const ax=cx(b),ay=cy(b),bx=cx({x:G.px,y:G.py}),
+let RAYONS_VUS=false;   // un Bloqueur tient la foreuse à l'écran : ses rayons crépitent, le décor s'anime seul
+function rayonsBloqueur(){const u=S/16,cx=o=>(o.x+.5-camX)*16,cy=o=>(o.y+.5-camY)*16;RAYONS_VUS=false;
+  for(const b of G.beasts||[])if(b.tient&&!(b.stun>0)&&beastVisible(b)){RAYONS_VUS=true;const ax=cx(b),ay=cy(b),bx=cx({x:G.px,y:G.py}),
     by=cy({x:G.px,y:G.py}),hz=Math.abs(bx-ax)>=Math.abs(by-ay);
     for(const d of [-2,0,2]){const ox=hz?0:d,oy=hz?d:0;traitLaser(u,ax+ox,ay+oy,bx+ox,by+oy,b.x*7+b.y+d,d?0:2,PAL['2']);}}}
 /* ---------- Explosion de la foreuse (mort) ----------
@@ -145,8 +146,8 @@ function explode(done){
         if(q.vz<-1.2){q.vz=-q.vz*.45;q.vx*=.75;q.vy*=.75;}else q.vz=0;}}
       BOOM.p[n++]=q;}
     BOOM.p.length=n;render();
-    if(n)requestAnimationFrame(step);else{const d=BOOM.done;BOOM=null;render();setTimeout(d,250);}};
-  requestAnimationFrame(step);}
+    if(n)raf20(step);else{const d=BOOM.done;BOOM=null;render();setTimeout(d,250);}};
+  raf20(step);}
 function drawBoom(){const fl=1-(performance.now()-BOOM.t0)/180;
   // éclair de l'explosion
   if(fl>0){ctx.globalAlpha=fl*.8;ctx.fillStyle='#ffffff';ctx.beginPath();
@@ -154,17 +155,13 @@ function drawBoom(){const fl=1-(performance.now()-BOOM.t0)/180;
   ctx.globalAlpha=1;for(const q of BOOM.p){ctx.fillStyle=q.c;
     ctx.fillRect(Math.round((q.x-camX)*S/2)*2,Math.round((q.y-q.z-camY)*S/2)*2,q.sz,q.sz);}}
 function addFx(f){f.t0=performance.now();if(f.kind==='num')f.stack=FX.filter(o=>o.kind==='num'&&o.x===f.x&&o.y===f.y&&fxP(o)<.5).length;
-  FX.push(f);if(!fxRaf)fxRaf=requestAnimationFrame(fxLoop);}
+  FX.push(f);if(!fxRaf)fxRaf=raf20(fxLoop);}
 // grains d'un effet de consommable : position dans la case et instant d'apparition, tirés une fois pour toutes
 const fxGrains=n=>Array.from({length:n},()=>({x:rnd(0,13),y:rnd(3,14),d:Math.random()*.55}));
-/* Effets à 30 images par seconde (26 novembre 2026) : la boucle redessine tout l'écran ; le navigateur la rappelle 60 fois
-   par seconde (plus sur un écran rapide), on saute une image sur deux. Les effets durent le même temps (ils suivent
-   l'horloge, pas le nombre d'images). FX_FPS règle le rythme ; les explosions (drawBoom) gardent le leur. */
-const FX_FPS=30;let fxDernier=0;
 // une mine armée ou un paralyzor accroché gardent le rendu en marche
-function fxLoop(){const now=performance.now();
-  if(now-fxDernier<1000/FX_FPS-4){fxRaf=requestAnimationFrame(fxLoop);return;}fxDernier=now;FX=FX.filter(f=>now-f.t0<f.dur);if(antAnime())antVis();render();
-  fxRaf=(FX.length||animVif())?requestAnimationFrame(fxLoop):0;}
+function fxLoop(){const now=performance.now();FX=FX.filter(f=>now-f.t0<f.dur);if(antAnime())antVis();
+  if(fxSurface())fxRapide();else render();
+  fxRaf=(FX.length||animVif())?raf20(fxLoop):0;}
 const fxP=f=>Math.min(1,(performance.now()-f.t0)/f.dur);
 function lungeOff(match){if(reduced)return [0,0];const f=FX.find(match);if(!f)return [0,0];const k=Math.sin(Math.PI*fxP(f))*.4*S;
   return [f.dx*k,f.dy*k];}
@@ -254,7 +251,7 @@ const FOND='#020605',FOG_K=.28;   // couleur de fond, et ce qui reste d'une case
 function render(){
   // planches de pont dont l'instant est venu : elles cessent d'être cachées
   if(PONT_AN.size){const now=performance.now();for(const [i,q] of PONT_AN)if(q<=now)PONT_AN.delete(i);}
-  if(!fxRaf&&animVif())fxRaf=requestAnimationFrame(fxLoop);
+  if(!fxRaf&&animVif())fxRaf=raf20(fxLoop);
   if(G&&G.sonar===1&&G.turn>=(G.sonarAt||0)&&started&&!INTRO&&!BOOM&&!G.over&&$('overlay').hidden&&$('introCv').hidden)sonarStart();
   if(!G||!TL.robot)return;ensureChasmOv();ensureSolOv();
   const vc=vw/S,vr=vh/S;
@@ -394,6 +391,36 @@ function render(){
     const rt=fph?tuilePhase(robotTuile(),fph.out?1-fxP(fph):fxP(fph)):robotTuile();
     ctx.drawImage(rt,(G.px-camX)*S+lx,(G.py-camY)*S+ly,S,S);}
   const ht=G.t[idx(G.px,G.py)];if(wreck){}else if(ht===LIQ)put(TL.wade,G.px,G.py,.95);else if(ht===DEEP)put(TL.wadeDeep,G.px,G.py,.95);
+  if(FX.length)fxInstantane();   // le décor sans les effets de surface, pour les images suivantes (fxRapide)
+  fxCouche();
+  ctx.restore();
+  smokeKick();
+  curseurCase();
+  ctx.globalAlpha=1;side();mini();
+}
+/* ---------- Effets de surface sur le décor figé (26 novembre 2026) ----------
+   Pendant un effet, la boucle redessinait tout l'écran à chaque image. La plupart des effets (chiffres de dégâts, soins,
+   lasers, braises, alertes, ondes, éclairs…) se posent **par-dessus** le décor sans le changer : render() garde une copie
+   du décor juste avant de les dessiner (fxInstantane), et tant que rien d'autre ne bouge, fxRapide() recolle cette copie
+   et ne redessine que ces effets. Quand un effet touche le décor lui-même (secousse, élan d'une créature, éclair sur une
+   bête, phaseur, sonar, balise en vol), ou quand le décor s'anime seul (mine armée, balise, pont, antenne, rayons du
+   Bloqueur, explosion), ou quand le tour, la caméra ou la vue ont changé, on redessine tout comme avant. */
+const FX_DECOR=new Set(['shake','lunge','flash','phase','sonar','jet']);
+const FX_SNAP={cv:document.createElement('canvas'),cle:''};
+const fxCle=()=>G?`${G.turn}|${camX}|${camY}|${G.px}|${G.py}|${fog}|${vw}|${vh}|${cv.width}|${cv.height}|${PHASE?1:0}`:'';
+function fxInstantane(){const c=FX_SNAP.cv;if(c.width!==cv.width||c.height!==cv.height){c.width=cv.width;c.height=cv.height;}
+  const g=c.getContext('2d');g.globalCompositeOperation='copy';g.drawImage(cv,0,0);g.globalCompositeOperation='source-over';
+  FX_SNAP.cle=fxCle();}
+function fxSurface(){return !!G&&FX_SNAP.cle===fxCle()&&!BOOM&&!INTRO&&!animVif()&&!antAnime()&&!RAYONS_VUS&&
+  FX.every(f=>!FX_DECOR.has(f.kind));}
+function fxRapide(){ctx.save();ctx.setTransform(1,0,0,1,0,0);ctx.globalAlpha=1;ctx.globalCompositeOperation='copy';
+  ctx.drawImage(FX_SNAP.cv,0,0);ctx.restore();ctx.save();fxCouche();ctx.restore();smokeKick();curseurCase();ctx.globalAlpha=1;}
+function curseurCase(){
+  if(HOV&&CURT&&!busy()){const ok=(x,y)=>{const i=idx(x,y);
+    return (!fog||G.seen[i])&&(getPath()||Math.max(Math.abs(x-G.px),Math.abs(y-G.py))<=1);};
+    ctx.globalAlpha=1;ctx.drawImage(ok(HOV.x,HOV.y)?CURT:CURT_DIM,(HOV.x-camX)*S,(HOV.y-camY)*S,S,S);}
+}
+function fxCouche(){
   for(const f of FX){if(f.kind!=='num')continue;const p=fxP(f),rise=reduced?0:p*14;
     ctx.globalAlpha=p<.6?1:1-(p-.6)/.4;ctx.font='bold 14px "JetBrains Mono", ui-monospace, monospace';ctx.textAlign='center';
       ctx.textBaseline='bottom';
@@ -482,11 +509,5 @@ function render(){
      pt.push([bx,by]);
      for(let k=0;k<4;k++)traitLaser(u,pt[k][0],pt[k][1],pt[k+1][0],pt[k+1][1],f.t0+k+ph,k===3?4:2,'#ffffff');}}
   if(BOOM)drawBoom();
-  ctx.restore();
-  smokeKick();
-  if(HOV&&CURT&&!busy()){const ok=(x,y)=>{const i=idx(x,y);
-    return (!fog||G.seen[i])&&(getPath()||Math.max(Math.abs(x-G.px),Math.abs(y-G.py))<=1);};
-    ctx.globalAlpha=1;ctx.drawImage(ok(HOV.x,HOV.y)?CURT:CURT_DIM,(HOV.x-camX)*S,(HOV.y-camY)*S,S,S);}
-  ctx.globalAlpha=1;side();mini();
 }
 const mv=$('mini'),mctx=mv.getContext('2d');

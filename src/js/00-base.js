@@ -44,4 +44,11 @@ const idx=(x,y)=>y*W+x;
 const DIRS=[[1,0],[-1,0],[0,1],[0,-1],[1,1],[1,-1],[-1,1],[-1,-1]];
 const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const LETTERS='ABCDE';
+/* Cadence des animations (26 novembre 2026) : 20 images par seconde partout (effets, fumée, explosions, cinématiques), au
+   lieu du rythme du navigateur (60, plus sur un écran rapide). Chaque image redessine beaucoup : trois fois moins
+   d'images, trois fois moins de dessin. Les animations suivent l'horloge, pas le nombre d'images : leur durée ne change
+   pas. raf20(f) remplace requestAnimationFrame(f) : il laisse passer les images trop rapprochées. */
+const FPS=20;
+function raf20(cb){return requestAnimationFrame(function attend(now){
+  if(now-(cb._img||0)<1000/FPS-4){requestAnimationFrame(attend);return;}cb._img=now;cb(now);});}
 

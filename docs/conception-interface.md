@@ -151,10 +151,15 @@ Le canevas est dessiné à la résolution de l'ordinateur puis agrandi par le na
 calcul qu'à pleine résolution. Sur ordinateur, rien ne change (autant de cases que la fenêtre en permet). **À régler plus
 tard** : le Téléobjectif (capteur 13) voit au-delà de ce qui est affiché.
 
-### Rythme des effets (26 novembre 2026)
-Les effets (coups, projectiles, sonar, consommables) sont animés à **30 images par seconde** (`FX_FPS`, `10-rendu.js`),
-au lieu du rythme du navigateur (60, ou plus sur un écran rapide) : chaque image redessine tout l'écran, et le pixel art
-n'y perd presque rien. Les effets durent le même temps. Les explosions gardent leur propre rythme.
+### Rythme des animations et effets de surface (26 novembre 2026)
+- **20 images par seconde partout** (effets, fumée, explosion, intro, descentes) : `FPS` et `raf20()` dans `00-base.js`,
+  au lieu du rythme du navigateur (60 ou plus). Les animations suivent l'horloge : leur durée ne change pas.
+- **Effets de surface** : la plupart des effets (dégâts, soins, énergie, lasers, glu, braises, alertes, ondes, boost,
+  fureur, voile, éclairs) se posent par-dessus le décor. Pendant qu'ils jouent, le décor n'est plus redessiné : une copie
+  est recollée et seuls les effets sont repeints (`fxRapide`, `10-rendu.js`). Dès qu'un effet touche le décor (secousse,
+  élan, éclair sur une bête, phaseur, sonar, balise en vol) ou que le décor s'anime seul (mine armée, balise, pont, antenne,
+  rayons du Bloqueur, explosion), tout est redessiné comme avant. Contrôle : `outils/scripts/test-fx-surface.js` (chaque
+  effet, image identique au pixel près entre les deux chemins).
 
 ### Souris et inspection
 

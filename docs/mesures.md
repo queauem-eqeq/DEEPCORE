@@ -948,3 +948,8 @@ du terrain de la vue (voir plus haut).
 
 **Effets à 30 images par seconde (même jour)** : pendant un effet de 2 s, 61 → 31 rendus par seconde, et le dessin
 passe de 20 % à 8,5 % de CPU (Chromium sans carte graphique). Écran identique hors animation (`empreinte-image.js`).
+
+**20 images par seconde et effets de surface (même jour)** : pendant un effet de surface de 2 s, 4 rendus complets
+(8 ms) et 40 images rapides (**0,17 ms**) ; le dessin passe de **20 % de CPU (60 images/s) à environ 2 %**. Un effet
+qui touche le décor (secousse…) : 22 rendus complets par seconde au lieu de 61, soit environ 6 % au lieu de 20 %.
+
