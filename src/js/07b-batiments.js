@@ -6,7 +6,13 @@
 function batiTuile(t,x,y,put){
   if(t===LOCK){put(TL.floor,.5);put(TL.lock,1);return;}
   if(t===WALL||t===SECRET){const b=y<H-1?G.t[idx(x,y+1)]:WALL;put(b===WALL||b===SECRET?TL.wall:TL.wallFace,.95);
-    {const nc=G.niche&&G.niche[idx(x,y)];if(nc)put(nc===2?TL.nicheOuverte:TL.niche,1);}return;}
+    /* Ce qui se cache dans le mur se dessine à **l'opacité du mur** (26 novembre 2026) et jamais au-dessus : à 1, la
+       niche ressortait plus claire que le mur dans le brouillard et se lisait en transparence. Caché (niche 3, mur
+       piégé pas encore repéré), on ne dessine rien du tout : le mur est un mur. */
+    const i=idx(x,y),nc=G.niche&&G.niche[i],mp=G.murp&&G.murp[i];
+    if(nc===1||nc===2)put(nc===2?TL.nicheOuverte:TL.niche,.95);
+    if(mp&&mp.vu)put(mp.on?(mp.k==='laser'?TL.piegeLaser:TL.piegeMine):TL.nicheOuverte,.95);
+    return;}
   put(TL.floor,.5);
   if(t===PILLAR)put(TL.pillar,.95);
   else if(t===VITRE)put(TL.vitre,.95);
@@ -330,7 +336,7 @@ function batiments(){BATI_DER=null;
                 if(dedans.has(j)&&(v===BRIDGE||v===CHASM)){if(!vu.has(j)){vu.add(j);zone.push(j);}}
                 else if(B.fixe[j]||(dedans.has(j)&&(v===FLOOR||v===DOOR||v===PILLAR||v===LOCK)))batiVu=true;}}
             if(!batiVu)for(const c of zone)delete G.pb[c];}}
-        siteAuFond(B,strs);petites(B,strs);const sec=secrets(B,strs);verrous(B,strs,sec);artefacts(B,strs);mdlMachines(strs);
+        siteAuFond(B,strs);petites(B,strs);const sec=secrets(B,strs);verrous(B,strs,sec);artefacts(B,strs);mursPieges(B,strs);mdlMachines(strs);
           BATI_DER={B,strs};return;}
     }
     for(let i=0;i<N;i++)G.t[i]=t0[i];
@@ -444,10 +450,64 @@ function secrets(B,strs){const n=GEN.sSecrets||0,t=G.t,out=[];G.secrets=0;if(n<=
    Avant, la foreuse ne cherchait qu'en attendant, à 25 % par battement, et sur un rayon de 5 : en marchant, elle
    pouvait longer une porte dérobée sans aucune chance de la voir. */
 const SECRET_P={bouge:.15,arret:.35};
-function chercheSecrets(arret){const r=G.st.detec||3,p=arret?SECRET_P.arret:SECRET_P.bouge;let n=0;
-  for(let y=Math.max(0,G.py-r);y<=Math.min(H-1,G.py+r);y++)for(let x=Math.max(0,G.px-r);x<=Math.min(W-1,G.px+r);x++){const i=idx(x,y);
-    if(G.t[i]!==SECRET||Math.hypot(x-G.px,y-G.py)>r||Math.random()>=p)continue;G.t[i]=DOOR;G.seen[i]=1;n++;
-      addFx({kind:'num',x,y,txt:'!',col:'#ffffff',dur:900});}
-  if(n){SFX.spot();sayMore(n>1?'Des portes dérobées apparaissent dans le mur !':'Une porte dérobée apparaît dans le mur !','good');
-    if(typeof stopRest==='function'&&REST)stopRest('Repos interrompu : une porte dérobée.');
-    if(typeof stopTravel==='function'&&TRAV)stopTravel('Trajet interrompu : une porte dérobée.');}}
+function chercheSecrets(arret){const r=G.st.detec||3,p=arret?SECRET_P.arret:SECRET_P.bouge;let np=0,nq=0;
+  const marque=(x,y,i)=>{G.seen[i]=1;addFx({kind:'num',x,y,txt:'!',col:'#ffffff',dur:900});};
+  for(let y=Math.max(0,G.py-r);y<=Math.min(H-1,G.py+r);y++)for(let x=Math.max(0,G.px-r);x<=Math.min(W-1,G.px+r);x++){
+    const i=idx(x,y);if(Math.hypot(x-G.px,y-G.py)>r)continue;
+    // une porte dérobée
+    if(G.t[i]===SECRET){if(Math.random()>=p)continue;G.t[i]=DOOR;marque(x,y,i);np++;continue;}
+    if(G.t[i]!==WALL)continue;
+    // une niche de salle piégée, encore cachée (3) : elle devient visible et fermée (1)
+    if(G.niche&&G.niche[i]===3){if(Math.random()>=p)continue;G.niche[i]=1;marque(x,y,i);nq++;continue;}
+    // un mur piégé isolé, pas encore repéré ; chaque mur se repère pour lui-même
+    const m=G.murp&&G.murp[i];
+    if(m&&m.on&&!m.vu){if(Math.random()>=p)continue;m.vu=1;marque(x,y,i);nq++;}}
+  if(!np&&!nq)return;
+  SFX.spot();
+  if(np)sayMore(np>1?'Des portes dérobées apparaissent dans le mur !':'Une porte dérobée apparaît dans le mur !','good');
+  if(nq)sayMore(nq>1?`${nq} pièges repérés dans les murs.`:'Un piège repéré dans le mur.','warn');
+  const quoi=np?'une porte dérobée':'un piège';
+  if(typeof stopRest==='function'&&REST)stopRest('Repos interrompu : '+quoi+'.');
+  if(typeof stopTravel==='function'&&TRAV)stopTravel('Trajet interrompu : '+quoi+'.');}
+
+/* ---------- Murs piégés (26 novembre 2026) ----------
+   Des pièges isolés encastrés dans les murs du bâti, indépendants des salles piégées (qui gardent leur appât et
+   leurs relais). Ils sont **invisibles** tant que la foreuse ne les a pas repérés — même recherche que les portes
+   dérobées — et ils partent **au passage**, dès qu'elle arrive sur une case voisine du mur, repérés ou non : les
+   repérer sert à les contourner. Deux sortes pour l'instant, d'autres viendront.
+   G.murp {case du mur : {k:'laser'|'mine', f:case de sol devant, vu:0|1 repéré, on:1|0 encore armé}}.
+   Réglage : GEN.sPieges, le nombre visé par carte (menu MONDE et recettes). */
+const PIEGE_SORTES=['laser','mine'];
+const PIEGE_SP={n:'laser encastré',fem:false,pre:85,crit:0,dmin:6,dmax:10};
+function mursPieges(B,strs){G.murp={};const n=GEN.sPieges||0;if(n<=0||!strs)return 0;
+  const t=G.t,site=G.sites&&G.sites[0]?idx(G.sites[0].x,G.sites[0].y):-1,cand=[],vus=new Set();
+  for(const S of strs)for(const p of S.pieces){if(p.c.includes(site))continue;
+    for(const i of p.c){if(t[i]!==FLOOR)continue;
+      for(const [dx,dy] of D4){const x=i%W+dx,y=((i/W)|0)+dy;if(x<2||y<2||x>=W-2||y>=H-2)continue;
+        const j=idx(x,y);
+        if(t[j]!==WALL||vus.has(j)||(B.fixe&&B.fixe[j])||(B.porte&&B.porte[j])||(G.niche&&G.niche[j]))continue;
+        vus.add(j);cand.push([j,i]);}}}
+  cand.sort(()=>Math.random()-.5);
+  // jamais deux pièges à moins de 4 cases l'un de l'autre : on ne tombe pas dans une rafale
+  const pris=[];let k=0;
+  for(const [j,f] of cand){if(pris.length>=n)break;
+    const x=j%W,y=(j/W)|0;if(pris.some(([px,py])=>Math.hypot(px-x,py-y)<4))continue;
+    G.murp[j]={k:PIEGE_SORTES[(k++)%PIEGE_SORTES.length],f,vu:0,on:1};pris.push([x,y]);}
+  return pris.length;}
+/* Un mur piégé part quand la foreuse arrive à côté. Appelé à la fin de chaque pas. */
+function murpTest(){const M=G.murp;if(!M||G.over)return;
+  for(const [dx,dy] of D4){const x=G.px+dx,y=G.py+dy;if(x<0||y<0||x>=W||y>=H)continue;
+    const j=idx(x,y),m=M[j];if(!m||!m.on)continue;
+    m.on=0;m.vu=1;G.seen[j]=1;
+    if(m.k==='laser'){
+      sayMore('Piège ! Un laser s’allume dans le mur.','warn');
+      hurtRobot({x,y,dir:Math.sign(G.px-x)||1,bers:0,pow:0},PIEGE_SP,{laser:1});}
+    else{
+      const sp=BEASTS.findIndex(b=>b.key==='mine'),f=m.f,fx=f%W,fy=(f/W)|0;
+      if(sp<0||blocks(G.t[f])||beastAt(fx,fy)||animalAt(fx,fy)||(G.px===fx&&G.py===fy)){
+        sayMore('Piège ! Une trappe s’ouvre dans le mur, mais rien n’en sort.','warn');}
+      else{const b=newBeast(sp,fx,fy,-1,-1);b.hunt=1;b.nd=1;spot(b);G.beasts.push(b);
+        addFx({kind:'alerte',o:b,dur:900});addFx({kind:'shake',amp:5,dur:250});
+        if(typeof SFX!=='undefined')SFX.spot();
+        sayMore('Piège ! Une mine embusquée sort du mur.','warn');}}
+    if(G.over&&G.over.dead)return;}}

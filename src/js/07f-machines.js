@@ -267,8 +267,10 @@ function machines(){G.las=[];G.lz={};G.circ=[];G.soc={};G.piles={};G.mt=0;G.mach
     const but=BUTIN_DEPOT(),cs=mel(p.c.filter(i=>t[i]===FLOOR));
       but.forEach((o,n)=>{if(cs[n]!=null)(G.items[cs[n]]=G.items[cs[n]]||[]).push(o);});
     p.mach='depot';return true;};
-  /* -- salle piégée (22 novembre 2026) : un butin au milieu de la pièce, des relais cachés dans les murs. Les niches se voient
-     (tuile « niche ») : un joueur attentif lit le piège avant de prendre l'appât. Ramasser l'appât fait surgir la bande. */
+  /* -- salle piégée (22 novembre 2026) : un butin au milieu de la pièce, des relais cachés dans les murs. Les niches
+     étaient visibles jusqu'au 26 novembre 2026 ; elles sont maintenant cachées et se repèrent comme les portes
+     dérobées, alors seulement le joueur attentif lit le piège avant de prendre l'appât. Ramasser l'appât fait surgir
+     la bande, repérée ou non. */
   const piege=p=>{if(p.c.length<20||p.c.length>140)return false;const P=new Set(p.c),niches=[],vuM=new Set(),vuS=new Set();
     const cx=p.c.reduce((a,i)=>a+i%W,0)/p.c.length,cy=p.c.reduce((a,i)=>a+((i/W)|0),0)/p.c.length;
     const app=p.c.filter(i=>libre(i)&&!pres(i)).sort((a,b)=>Math.hypot(a%W-cx,((a/W)|0)-cy)-Math.hypot(b%W-cx,((b/W)|0)-cy))[0];
@@ -277,7 +279,9 @@ function machines(){G.las=[];G.lz={};G.circ=[];G.soc={};G.piles={};G.mt=0;G.mach
       const j=v4(i).find(j=>t[j]===WALL&&!P.has(j)&&!vuM.has(j)&&!pres(j));if(j==null)continue;vuM.add(j);vuS.add(i);niches.push([j,i]);}
     // deux fois plus de relais (22 novembre 2026, choix de l'utilisateur) : 8 à 16, autant que les murs le permettent
     const n=Math.max(8,Math.min(16,Math.round(p.c.length/4.5)));if(niches.length<6)return false;const sel=niches.slice(0,n);
-    G.pieges.push({c:app,n:sel.map(a=>a[0]),f:sel.map(a=>a[1]),on:1});for(const [j] of sel)G.niche[j]=1;
+    // 26 novembre 2026 : les niches naissent CACHÉES (3). Elles se repèrent comme les portes dérobées (07b,
+    // chercheSecrets) et deviennent alors visibles et fermées (1) ; 2 veut toujours dire ouverte.
+    G.pieges.push({c:app,n:sel.map(a=>a[0]),f:sel.map(a=>a[1]),on:1});for(const [j] of sel)G.niche[j]=3;
     const but=typeof butinCoffre==='function'?butinCoffre('piege'):['matiere','matiere'];
       for(const o of but)(G.items[app]=G.items[app]||[]).push(o);
     p.mach='piege';return true;};

@@ -215,7 +215,16 @@ function inspectHTML(){const {x,y}=HOV;if(x<0||y<0||x>=W||y>=H)return '';
   if(!seen&&G.ore&&G.ore[i]&&sonarVu(i,sonarR())){const o=G.ore[i];
     return `<div class="insp">${head('','Gisement détecté',dt)}<p><b>${oreMat(o)?'Matière {µ}':'Éclats de métal'}</b> · repéré par le sonar : ${oreMat(o)?`+${ORE_PV[oreLv(o)]} en réserve`:`+${ORE_PV[oreLv(o)]} PV`}. ${oreSol(o)?'Au sol.':'Pris dans la roche : il faudra forer.'}</p></div>`;}
   if(!seen)return `<div class="insp">${head('','Zone inexplorée',dt)}<p>Aucune donnée : la foreuse n’est jamais passée à portée de ce secteur.</p></div>`;
-  const out=[],t=G.t[i],[tn,td]=TDESC[t]||['Terrain',''],border=x===0||y===0||x===W-1||y===H-1;
+  const out=[],t=G.t[i];let [tn,td]=TDESC[t]||['Terrain',''];const border=x===0||y===0||x===W-1||y===H-1;
+  /* Un mur piégé repéré se nomme par ce qu'il cache (26 novembre 2026) ; tant qu'il n'est pas repéré, c'est un mur
+     ordinaire et la fiche n'en dit rien. Une niche de salle piégée repérée se nomme aussi. */
+  {const mp=G.murp&&G.murp[i];
+    if(mp&&mp.vu){if(!mp.on)[tn,td]=['Piège déclenché','La niche est ouverte : ce piège-là ne repartira pas.'];
+      else if(mp.k==='laser')[tn,td]=['Mur piégé : laser encastré','Il tire dès que la foreuse arrive sur une case voisine. Repéré, il se contourne.'];
+      else [tn,td]=['Mur piégé : mine embusquée','Une mine en sort dès que la foreuse arrive sur une case voisine. Repérée, elle se contourne.'];}
+    else{const nc=G.niche&&G.niche[i];
+      if(nc===1)[tn,td]=['Niche fermée','Un relais s’y tient caché. Il surgira quand on ramassera l’appât de la salle.'];
+      else if(nc===2)[tn,td]=['Niche ouverte','Le relais qui s’y tenait en est sorti.'];}}
   const occ=see?occupant(x,y):null;
   if(d===0){const st=G.st;out.push(head(ICON.robot_r,'Foreuse U-7',dt),
     `<div class="kv"><span>Vie <b>${Math.ceil(st.vie)}/${st.vieMax}</b></span><span>Énergie <b>${Math.floor(st.energie)}/${st.energieMax}</b></span><span>DEF <b>${robotDef()}</b></span></div>`);}
