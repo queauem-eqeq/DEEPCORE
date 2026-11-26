@@ -353,10 +353,13 @@ const FOOT=[[0,0]];
 const beastAt=(x,y)=>G.beasts&&G.beasts.find(b=>b.x===x&&b.y===y);
 // une balise posée barre le passage
 /* Un ennemi posé par un module garde sa salle (26 novembre 2026) : b.salle donne son module dans G.mods, dont le
-   champ salle liste les cases de la pièce. On met la liste en Set une fois, dans une WeakMap calée sur le tableau
-   lui-même : une nouvelle carte remplace les tableaux, donc le cache se renouvelle tout seul. */
+   champ salle liste les cases de la pièce. Il n'en sort pas **tant qu'il n'a pas été alerté** ; une fois qu'il a
+   repéré la foreuse ou qu'un cri l'a prévenu (b.libre, posé au battement), il poursuit dehors comme les autres et
+   ne se referme plus dedans — sinon, ayant oublié la foreuse au loin, il resterait planté sans pouvoir bouger.
+   On met la liste en Set une fois, dans une WeakMap calée sur le tableau lui-même : une nouvelle carte remplace
+   les tableaux, donc le cache se renouvelle tout seul. */
 const SALLE_SET=new WeakMap();
-function salleOk(b,x,y){if(b.salle==null)return true;
+function salleOk(b,x,y){if(b.salle==null||b.libre)return true;
   const m=G.mods&&G.mods[b.salle],a=m&&m.salle;if(!a||!a.length)return true;
   let S=SALLE_SET.get(a);if(!S){S=new Set(a);SALLE_SET.set(a,S);}
   return S.has(idx(x,y));}
@@ -600,6 +603,7 @@ function beastsAct(){
     else if(b.hunt&&b.search>0&&--b.search===0){b.hunt=0;forget(b);}                // fouille terminée : il oublie
     else if(b.hunt&&!b.mem)b.hunt=0;
     b.sees=sees;
+    if(b.salle!=null&&b.hunt>0)b.libre=1;   // ennemi de module alerté : il peut désormais sortir de sa salle
     if(alarms.length&&alarms[alarms.length-1]===b)raiseAlarm(b);
     // mine armée : la mèche brûle en battements, comme avant (2 à 3)
     if(sp.mine&&b.fuse>0&&--b.fuse<=0)boom.push(b);
