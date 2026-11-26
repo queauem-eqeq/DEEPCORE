@@ -37,7 +37,7 @@ body{margin:0;background:var(--black);color:var(--fg);font:13px/1.45 var(--mono)
 .colfixe{flex:none}
 .coldefil{flex:1 1 auto;min-height:0;overflow-y:auto;scrollbar-width:none}
 .coldefil::-webkit-scrollbar{display:none}
-#fd-pal,#fd-ctrl,.nivrow{margin-top:-15px}   /* Palette sous Lab, Contrôles sous Palette : à 5 px, comme Carte sous Inventaire (22 novembre 2026) */
+#fd-stats,#fd-sac,#fd-pal,#fd-ctrl,.nivrow{margin-top:-15px}   /* Stats, Inventaire, Palette, Contrôles : 5 px sous le bloc précédent, comme Carte sous Inventaire (22 novembre 2026) */
 /* Contrôles : une commande par ligne, touches à gauche, effet à droite */
 .ctrl{display:grid;gap:10px;font-size:11px;line-height:1.5}
 .ctrl h3{margin:0;font-size:10px;font-weight:500;letter-spacing:.18em;text-transform:uppercase;color:var(--c3)}

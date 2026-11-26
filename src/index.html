@@ -176,16 +176,16 @@
         <div class="bar2"><span>Matière {µ}</span><span></span><span class="bnum mat" id="matN" title="Réserve de Matière {µ} : servira à construire de l’équipement">0</span></div>
         <div class="btnrow"><button id="sprintBtn" class="pace" aria-pressed="false" title="Courir ou marcher (R) : la course double la vitesse et coûte 5 d’énergie par pas">MARCHE</button><button id="invBtn" class="pace" aria-haspopup="dialog" title="Ouvrir l’équipement (T) : armes, armures, accessoires">ÉQUIPEMENT</button></div>
         <div class="btnrow"><button id="explBtn" class="pace" title="Exploration automatique (O) : la foreuse explore seule et s’arrête au moindre événement">EXPLORER</button><button id="restBtn" class="pace" title="Repos (P) : attendre jusqu’à l’énergie pleine">REPOS</button></div>
-        <!-- 26 novembre 2026 : les statistiques de la foreuse (sans VIE ni ÉNER) dans un sous-menu « Stats » : un encadré par statistique,
-             à la ligne quand il le faut ; au survol, définition et modificateurs en cours -->
-        <details class="fold" id="fd-stats">
-          <summary><h2>Stats</h2></summary>
-          <div class="hstats" id="hstats" role="group" aria-label="Statistiques de la foreuse"></div>
-        </details>
         <div class="stip" id="stip" role="tooltip" hidden></div>
         <div class="effs" id="effs" role="status" aria-label="Effets en cours"></div>
       </div>
     </div>
+    <!-- 26 novembre 2026 : les statistiques de la foreuse (sans VIE ni ÉNER) dans un sous-menu « Stats » : un encadré par statistique,
+         à la ligne quand il le faut ; au survol, définition et modificateurs en cours. Au même écart que Lab/Palette/Contrôles. -->
+    <details class="fold" id="fd-stats">
+      <summary><h2>Stats</h2></summary>
+      <div class="hstats" id="hstats" role="group" aria-label="Statistiques de la foreuse"></div>
+    </details>
     <details class="fold" id="fd-sac">
       <summary><h2>Inventaire</h2><span class="cnt" id="sacN" title="Places occupées sur 20 : chaque exemplaire prend une place"></span></summary>
       <div class="sac" id="sac"></div>
