@@ -867,3 +867,24 @@ Lecture. Le rayon se resserre (5 → 3) et l'attente devient plus efficace (25 �
 la dernière ligne : **passer devant une porte dérobée suffit maintenant à la trouver plus d'une fois sur deux**,
 alors qu'avant il fallait s'arrêter au bon endroit sans savoir qu'il y avait quelque chose. Se reposer reste la
 façon de fouiller un endroit précis : deux fois moins de battements qu'en marchant sur place.
+
+## Fluidité et temps de calcul (26 novembre 2026)
+
+Mesuré avec `python3 outils/jeu.py DOSSIER outils/scripts/mesure-perf.js`, sur la branche de la PR #55 (carte 96×64, Chromium sans carte graphique : **les chiffres sont pessimistes** par rapport à un vrai ordinateur, à refaire sur la machine du joueur avant de conclure). Objectifs : image sous 16 ms, tour sous 50 ms.
+
+| Étape | Médiane | p95 | Pire |
+|---|---|---|---|
+| Génération d'un niveau (`newGame`) | 386 ms | 475 ms | 475 ms |
+| `computeFOV` | 0,1 ms | 0,4 ms | 2,9 ms |
+| `render` | 1,7 ms | 29 ms | 79 ms |
+| `beastsAct` | 0,1 ms | 3,3 ms | 8,4 ms |
+| `animalsAct` | 1,7 ms | 2,7 ms | 12,9 ms |
+| Tour complet (`tryMove`) | 5,8 ms | 36 ms | 159 ms |
+| Au repos, rappels d'image sur 3 s | 3,0 ms | 7,4 ms | 10,4 ms |
+
+Mémoire JS : 19,6 Mo. Au repos : environ 26 rappels d'image par seconde, soit **près de 8 % de CPU** alors que rien ne bouge.
+
+Lecture :
+- Le moteur (vue, ennemis) est léger. Le coût vient du **dessin** : `render` redessine toute la fenêtre à chaque appel.
+- Les pics de 30 à 80 ms **ne sont pas un effet de démarrage** : ils reviennent tout au long de la mesure (ramasse-miettes probable, à confirmer au profileur).
+- Pistes, **non vérifiées** : arrêter la boucle d'animation quand rien n'anime (`animVif` existe déjà) ; ne redessiner que les cases changées ; réduire les objets créés à chaque tour. Après chaque piste : `outils/verifier.py` doit laisser l'empreinte identique.
