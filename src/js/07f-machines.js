@@ -290,26 +290,46 @@ function machines(){G.las=[];G.lz={};G.circ=[];G.soc={};G.piles={};G.mt=0;G.mach
   const vitrines=p=>{const P=new Set(p.c),ent=[];if(p.c.length<9||p.c.length>48)return false;
     for(const i of p.c)for(const j of v4(i))if(!P.has(j)&&!blocks(t[j])&&!ent.includes(j))ent.push(j);
     if(ent.length!==1||G.lz[ent[0]])return false;
-    /* Trois niches creusées côte à côte dans un même mur, séparées par des murs vitrés (26 novembre 2026, d'après
-       le module « Vitrine REF » du joueur) : [niche][vitre][niche][vitre][niche]. La disposition dit la règle —
-       trois lots alignés derrière une vitrine se lisent comme trois choix, là où les trois socles éparpillés dans
-       la pièce (22 novembre) ne se lisaient pas du tout, sans une seule vitre nulle part.
-       On cherche cinq murs d'affilée bordés par le sol de la pièce du même côté, et pleins de l'autre : la niche
-       reste un cul-de-sac d'une case. On garde le banc le plus loin de l'entrée, pour qu'on le découvre en entrant. */
+    /* Trois niches côte à côte, creusées dans un mur, chacune derrière sa porte (26 novembre 2026, d'après le
+       module « Vitrine REF » du joueur). En partant du sol de la pièce et en s'enfonçant dans le mur :
+           rangée 0 (la pièce)   .  .  .  .  .     on se tient là
+           rangée 1              D  V  D  V  D     une porte devant chaque niche, vitré entre les deux
+           rangée 2              S  V  S  V  S     les trois niches, le lot dedans, vitré entre les deux
+           rangée 3              X  X  X  X  X     le mur du fond, laissé intact
+       Les cloisons vitrées font donc **deux cases de profondeur** : on voit les trois lots d'un coup, de n'importe
+       quelle niche comme du couloir. La disposition dit la règle, là où les trois socles éparpillés dans la pièce
+       (22 novembre) ne se lisaient pas du tout, sans une seule vitre nulle part.
+       **Tout le pourtour doit être du mur** — le fond et les deux bouts : la roche se perce en deux coups, et on
+       entrerait par derrière sans jamais choisir. On garde le banc le plus loin de l'entrée. */
+    /* On la **bâtit dans la pièce**, adossée à un mur : les murs d'un bâtiment font une case d'épaisseur, il n'y a
+       pas de masse où creuser. Il faut sept cases de large sur deux rangées de sol libre, le mur de la pièce
+       derrière, et du sol devant les trois portes pour s'y tenir. */
     const bancs=[];
-    for(const [dx,dy,ox,oy] of [[1,0,0,-1],[1,0,0,1],[0,1,-1,0],[0,1,1,0]])for(const i0 of p.c){
-      const x0=i0%W,y0=(i0/W)|0,murs=[],devant=[];let ok=true;
-      for(let k=0;k<5&&ok;k++){const fx=x0+dx*k,fy=y0+dy*k,mx=fx+ox,my=fy+oy,bx=mx+ox,by=my+oy;
-        if(mx<1||my<1||mx>=W-1||my>=H-1||bx<0||by<0||bx>=W||by>=H){ok=false;break;}
-        const f=idx(fx,fy),m=idx(mx,my);
-        if(!P.has(f)||t[f]!==FLOOR||t[m]!==WALL||!blocks(t[idx(bx,by)])
-          ||(B.fixe&&B.fixe[m])||(B.porte&&B.porte[m])||G.lz[f]||(G.niche&&G.niche[m])){ok=false;break;}
-        murs.push(m);devant.push(f);}
-      if(ok)bancs.push({murs,devant,d:pas(devant[2],ent[0])});}
+    const mur=(x,y)=>{if(x<1||y<1||x>=W-1||y>=H-1)return false;const m=idx(x,y);
+      return t[m]===WALL&&!(G.niche&&G.niche[m])&&!(G.murp&&G.murp[m]);};
+    const sol=(x,y)=>{if(x<1||y<1||x>=W-1||y>=H-1)return 0;const f=idx(x,y);
+      return P.has(f)&&t[f]===FLOOR&&!G.lz[f]&&libre(f)&&!pres(f)&&artLibre(B,f,site)?f:0;};
+    /* Deux tailles. **Longue (7)** : on bâtit aussi les deux bouts, il faut sept cases de large.
+       **Courte (5)** : les bouts sont déjà des murs de la pièce — un renfoncement juste à la bonne taille.
+       On essaie la longue d'abord, la courte s'il n'y a pas la place. */
+    for(const L of [7,5])for(const [dx,dy,ox,oy] of [[1,0,0,1],[1,0,0,-1],[0,1,1,0],[0,1,-1,0]])for(const i0 of p.c){
+      const x0=i0%W,y0=(i0/W)|0,niches=[],portes=[];let ok=true;
+      for(let k=0;k<L&&ok;k++){const nx=x0+dx*k,ny=y0+dy*k;         // rangée des niches, adossée au mur du fond
+        const n=sol(nx,ny),pd=sol(nx+ox,ny+oy);                      // rangée des portes, devant
+        if(!n||!pd||!mur(nx-ox,ny-oy)){ok=false;break;}
+        niches.push(n);portes.push(pd);}
+      if(ok&&L===5)for(const k of [-1,L]){const bx=x0+dx*k,by=y0+dy*k;   // les bouts : des murs déjà là
+        if(!mur(bx,by)||!mur(bx+ox,by+oy)){ok=false;break;}}
+      const d0=L===7?1:0;   // la première niche : au rang 1 si on bâtit les bouts, au rang 0 sinon
+      if(ok)for(const k of [d0,d0+2,d0+4]){const cx=x0+dx*k+ox*2,cy=y0+dy*k+oy*2;   // du sol devant chaque porte
+        if(!sol(cx,cy)){ok=false;break;}}
+      if(ok)bancs.push({niches,portes,L,d0,d:pas(niches[d0+2],ent[0])});}
     if(!bancs.length)return false;
-    bancs.sort((a,b)=>b.d-a.d);const banc=bancs[0],sel=[banc.murs[0],banc.murs[2],banc.murs[4]];
-    for(const m of [banc.murs[1],banc.murs[3]])t[m]=VITRE;   // les deux cloisons vitrées entre les niches
-    for(const m of sel)t[m]=FLOOR;                            // les trois niches, creusées dans le mur
+    bancs.sort((a,b)=>b.L-a.L||b.d-a.d);
+    const banc=bancs[0],d0=banc.d0,sel=[banc.niches[d0],banc.niches[d0+2],banc.niches[d0+4]];
+    if(banc.L===7)for(const k of [0,6]){t[banc.niches[k]]=WALL;t[banc.portes[k]]=WALL;}   // les deux bouts, bâtis
+    for(const k of [d0+1,d0+3]){t[banc.niches[k]]=VITRE;t[banc.portes[k]]=VITRE;}         // cloisons, deux cases de fond
+    for(const k of [d0,d0+2,d0+4])t[banc.portes[k]]=DOOR;                                  // une porte devant chaque niche
     const bc=typeof butinCoffre==='function';
     const lots=bc?[[planTire()],[equipTire()],[consoTire(),consoTire()]]:[['matiere'],['matiere'],['matiere']];
     sel.forEach((i,n)=>{G.items[i]=lots[n].slice();G.vit[i]=1;});G.choix.push({c:sel,on:1});p.mach='vitrines';return true;};

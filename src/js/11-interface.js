@@ -1,3 +1,4 @@
+const HSTATS_ORDRE=['power','capteur','degats','pre','def','crit','pas','coup','dis','detec'];
 let HSTATS_H='';   // dernier contenu écrit dans les statistiques de la colonne
 /* ---------- Mode carte : la vue défile sans déplacer le robot ---------- */
 let freeCam=false,camCX=0,camCY=0;
@@ -123,10 +124,12 @@ function side(){
     $('cProf').textContent=`Niveau ${n} · ${p?'−'+p:0} m · ${W}×${H}`;$('cMonde').textContent=am||'Personnalisé';
       $('cBati').textContent=ab||'Personnalisé';}
   $('matN').textContent=G.st.matiere||0;
-  // statistiques de la foreuse sous EXPLORER et REPOS (25 novembre 2026) : les mêmes valeurs que la fenêtre Équipement, terrain compris
+  // statistiques de la foreuse dans le sous-menu « Stats » (25 novembre 2026) : les mêmes valeurs que la fenêtre Équipement, terrain compris
   if(typeof INV_STATS!=='undefined'&&G.inv){const A=eqDe('arme')||null,B=eqDe('armure')||null;
     // sans VIE ni ÉNER : les deux barres du haut les donnent déjà (retirées le 25 novembre 2026)
-    const h=INV_STATS.filter(([k])=>k!=='vieMax'&&k!=='energieMax').map(([k,l])=>{const c=statVal(k,G.st,A,B,0);
+    // ordre demandé le 26 novembre 2026, indépendant de celui de la fenêtre Équipement
+    const lib=Object.fromEntries(INV_STATS);
+    const h=HSTATS_ORDRE.filter(k=>lib[k]).map(k=>{const l=lib[k],c=statVal(k,G.st,A,B,0);
       return `<span tabindex="0" data-k="${k}" aria-describedby="stip"><i>${l}</i> <b>${c[1]??c[0]}${k==='crit'?' %':''}</b></span>`;}).join('');
     // réécrit seulement s'il change : sinon l'encadré survolé serait remplacé à chaque battement et l'infobulle sauterait
     if(h!==HSTATS_H&&$('hstats')){HSTATS_H=h;$('hstats').innerHTML=h;}if(typeof stipMaj==='function')stipMaj();}   // avalée par le commentaire depuis le 16 novembre 2026 : la matière ne s'affichait plus
@@ -303,7 +306,9 @@ function toggleVision(){SHOWVIS=!SHOWVIS;say(SHOWVIS?'Portée de discrétion aff
 function toggleFog(){fog=!fog;try{localStorage.setItem('np-fog',fog?'on':'off');
   }catch(e){}say(fog?'Brouillard de guerre activé.':'Brouillard de guerre désactivé.','info');render();}
 $('fd-carte').addEventListener('toggle',()=>{if(G)render();});   // la mini-carte se dessine à l'ouverture
-['fd-sac','fd-carte','fd-pal','fd-lab','fd-ctrl'].forEach(id=>{const d=$(id);try{d.open=localStorage.getItem('np-'+id)==='open';}catch(e){}
+// « Stats » (26 novembre 2026) s'ouvre de lui-même la première fois : ces valeurs étaient visibles sans repli avant
+['fd-sac','fd-carte','fd-stats','fd-pal','fd-lab','fd-ctrl'].forEach(id=>{const d=$(id);
+  try{const v=localStorage.getItem('np-'+id);d.open=v?v==='open':id==='fd-stats';}catch(e){}
   d.addEventListener('toggle',()=>{try{localStorage.setItem('np-'+id,d.open?'open':'closed');}catch(e){}});});
 $('restart').onclick=e=>{e.preventDefault();e.stopPropagation();unlock();SFX.start();newGame();started=true;
   $('overlay').hidden=true;render();};
