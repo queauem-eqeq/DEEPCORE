@@ -85,7 +85,7 @@ function eauSrc(k){const f=PAT[k];return typeof f==='function'?(x,y)=>{const c=f
 const tuileDans=(bas,haut)=>{const b=tuileSrc(bas),h=tuileSrc(haut);
   return (x,y)=>{const c=typeof h==='function'?h(x,y):h[y][x];
     return c&&c!=='.'?c:(typeof b==='function'?b(x,y):b[y][x]);};};
-const MUR_DANS=['niche','nicheOuverte','piegeLaser','piegeMine','piegeVide'];
+const MUR_DANS=['niche','nicheOuverte'];
 function murComposites(){for(const bas of ['wall','wallFace'])for(const haut of MUR_DANS)
   TL[bas+'_'+haut]=tileCanvas(tuileDans(bas,haut));}
 function rebuildTile(k){for(const d of TILE_DEPS[k]||[k]){if(d==='ship')TL.ship=tileCanvas(TF('ship'),SGW*16,SGH*16);

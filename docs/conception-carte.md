@@ -500,21 +500,6 @@ pièce ils deviennent du sol, sous un mur du mur) ; seuls le vaisseau et le bord
   et le repos ou le trajet en cours s'interrompt. Une charge sismique ouvre aussi le mur.
   Avant : rayon 5, **25 % par battement mais seulement en attendant** — en marchant, la foreuse pouvait longer une
   porte dérobée sans aucune chance de la voir.
-- **Murs piégés** (26 novembre 2026) — réglage **« Murs piégés »** dans MONDE et dans chaque recette
-  (`GEN.sPieges`, 0 à 20, 4 par défaut) : des pièges **isolés** encastrés dans les murs du bâti, indépendants des
-  salles piégées. Jamais à moins de 4 cases l'un de l'autre, jamais sur une porte, un mur fixe, une niche de salle
-  piégée ni dans la pièce du site.
-  - **Invisibles** : le mur se dessine comme un mur. Ils se repèrent comme les portes dérobées (même rayon DET,
-    mêmes 15 % / 35 % par battement), **chacun pour lui-même** : repérer un mur n'en révèle aucun autre.
-  - **Ils partent au passage** : dès que la foreuse arrive sur une case voisine du mur, repérés ou non. Les repérer
-    sert à les **contourner**, pas à les désamorcer. Une fois partis, la plaque reste dans le mur, la fente éteinte
-    (`piegeVide`).
-  - **Le dedans de la plaque laisse voir le mur** (26 novembre 2026) : ces trois tuiles (`piegeLaser`, `piegeMine`,
-    `piegeVide`) n'ont que leur cadre et leur marque ; le reste est transparent, donc la brique du mur se voit au
-    travers. Avec un dedans noir, la plaque faisait **un trou dans le mur** et on croyait voir de l'autre côté.
-  - Deux sortes pour l'instant, en alternance, **d'autres viendront** (`PIEGE_SORTES` dans `07b-batiments.js`) :
-    **laser encastré** (un tir depuis le mur, PRE 85, 6-10 dégâts) et **mine embusquée** (une Mine sort du mur,
-    déjà en chasse).
 - **Les niches des salles piégées sont cachées elles aussi** depuis le 26 novembre 2026 : `G.niche` vaut **3**
   (cachée), **1** (repérée, fermée) ou **2** (ouverte). Avant, elles se voyaient d'emblée.
 - **Les murs qui bordent une case en vue sont vus** (26 novembre 2026) : après le calcul du champ de vision, les

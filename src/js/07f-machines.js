@@ -340,7 +340,7 @@ function machines(){G.las=[];G.lz={};G.circ=[];G.soc={};G.piles={};G.mt=0;G.mach
        derrière, et du sol devant les trois portes pour s'y tenir. */
     const bancs=[];
     const mur=(x,y)=>{if(x<1||y<1||x>=W-1||y>=H-1)return false;const m=idx(x,y);
-      return t[m]===WALL&&!(G.niche&&G.niche[m])&&!(G.murp&&G.murp[m]);};
+      return t[m]===WALL&&!(G.niche&&G.niche[m]);};
     const sol=(x,y)=>{if(x<1||y<1||x>=W-1||y>=H-1)return 0;const f=idx(x,y);
       return P.has(f)&&t[f]===FLOOR&&!G.lz[f]&&libre(f)&&!pres(f)&&artLibre(B,f,site)?f:0;};
     /* Chacun des deux bouts est soit **bâti** (on prend une case de sol de plus de ce côté), soit un **mur de la pièce

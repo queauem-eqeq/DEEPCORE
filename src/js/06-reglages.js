@@ -15,7 +15,7 @@ const GEN_LBL=[['eau','Eau',60],['montagne','Montagne',70],['gouffre','Gouffre',
 const METHODS=[['automate','Automate cellulaire'],['bruit','Bruit (chaînes)'],['mixte','Mixte']];
 // structure : part de la carte occupée par les bâtiments (19 novembre 2026)
 let GEN={taille:4,eau:10,montagne:12,gouffre:4,herbe:15,methode:'automate',remplissage:55,iterations:5,structure:10,sNb:0,sStyle:'',
-  sPieces:0,sEntrees:0,sOuvert:25,sVerrous:1,sSecrets:1,sPieges:4,recette:'atterrissage',grain:65,regroupe:45,cvMont:4,cvGouf:3,cvRoc:2,ambM:''};
+  sPieces:0,sEntrees:0,sOuvert:25,sVerrous:1,sSecrets:1,recette:'atterrissage',grain:65,regroupe:45,cvMont:4,cvGouf:3,cvRoc:2,ambM:''};
 try{const g=JSON.parse(localStorage.getItem('np-gen')||'null');if(g&&typeof g.eau==='number')GEN=Object.assign(GEN,g);}catch(e){}
 if(!(GEN.taille>=1&&GEN.taille<=5))GEN.taille=4;
 if(!(GEN.structure>=0&&GEN.structure<=30))GEN.structure=10;
@@ -33,9 +33,7 @@ const R_STYLE=['sel','sStyle','Archétype de structure',[['','Au hasard']].conca
   // sans fourchette de hasard : 0 veut dire « pas de limite », et un tirage bas ferait un complexe de trois pièces
   R_PIECES=['num','sPieces','Pièces par structure',0,40,0],
   R_OUVERT=['num','sOuvert','Ouvertures sans porte (%)',0,100,25,[0,60]],R_VERROUS=['num','sVerrous','Portes verrouillées',0,3,1,[0,3]],
-    R_SECRETS=['num','sSecrets','Pièces secrètes',0,3,1,[0,3]],
-    // murs piégés isolés posés dans le bâti (26 novembre 2026, 07b mursPieges) : laser encastré, mine embusquée
-    R_PIEGES=['num','sPieges','Murs piégés',0,20,4,[0,10]];
+    R_SECRETS=['num','sSecrets','Pièces secrètes',0,3,1,[0,3]];
 const R_AIDE='Avant-poste : petites pièces, peu de boucles. Hangar : grandes salles à piliers. Complexe de forage : couloirs et gouffres. Ruine : cavernes effondrées.';
 /* Ambiances (21 novembre 2026 ; séparées en deux listes le 22 novembre 2026, demande de l'utilisateur).
    Deux préréglages indépendants, choisis sous la recette, en haut du menu Monde :
@@ -152,7 +150,7 @@ const RECETTES={atterrissage:{n:'Niveau 1 : extérieur, montagne, complexe enfou
       ['num','zExt','Part d’extérieur (%)',35,80,60,[40,75]],['num','zComplexe','Taille du complexe (% du massif)',10,70,45,[25,65]],
       ['sub','Tunnels'],['num','zTunnels','Taille du réseau (cases)',100,400,245,[140,380]],['num','zSalles','Salles de tunnel',0,8,4,[1,7]],
       ['num','zSorties','Sorties du réseau',1,3,2,[1,3]],['num','zPorte','Éloignement de la porte (cases)',10,45,30,[15,42]],
-      ['sub','Complexe'],R_STYLE,R_PIECES,R_OUVERT,R_VERROUS,R_SECRETS,R_PIEGES]},
+      ['sub','Complexe'],R_STYLE,R_PIECES,R_OUVERT,R_VERROUS,R_SECRETS]},
   cavernes:{n:'Niveau 2 : réseau de cavernes, bâtiments enchâssés',zones:true,enfoui:true,cavernes:true,sansVaisseau:true,
     titre:'Cavernes, boyaux, bâtiments',
     aide:'Tout est sous roche : la foreuse arrive par un puits. Chaque curseur donne un centre : la carte varie autour à chaque tirage. Le sol des cavernes (eau, herbe, montagne, gouffre, rochers) se règle dans la colonne Monde. '+R_AIDE,
@@ -165,7 +163,7 @@ const RECETTES={atterrissage:{n:'Niveau 1 : extérieur, montagne, complexe enfou
       ['num','cvBoyaux','Boucles entre cavernes',0,6,2,[0,4]],['num','cvCuls','Culs-de-sac',0,6,2,[0,4]],
       ['sub','Bâtiments'],['num','cvBati','Nombre de bâtiments',1,6,2,[1,4]],['num','cvSurf','Surface bâtie (% de la carte)',5,40,14,[8,24]],
       ['num','cvPieces','Pièces par bâtiment (0 : automatique)',0,25,0],['num','cvPortes','Portes par bâtiment',1,3,1,[1,2]],
-      R_STYLE,R_OUVERT,R_VERROUS,R_SECRETS,R_PIEGES]},
+      R_STYLE,R_OUVERT,R_VERROUS,R_SECRETS]},
   base:{n:'Niveau 3 : grande base, poches extérieures, tunnels',zones:true,enfoui:true,cavernes:true,base:true,sansVaisseau:true,
     titre:'Base, poches, tunnels',
     aide:'La foreuse débouche dans une aile de la base. Les ailes sont reliées par un réseau de tunnels ; une ou deux poches de terrain naturel servent d’extérieur. Les salles-machines (lasers, ponts, piles, dépôts) se règlent ici et dans Lab → Artefacts. Chaque curseur donne un centre. '+R_AIDE,
@@ -175,11 +173,11 @@ const RECETTES={atterrissage:{n:'Niveau 1 : extérieur, montagne, complexe enfou
       ['sub','Poches extérieures'],['num','cvPart','Part de la carte (%)',8,22,9,[8,13]],['num','cvTaille','Taille d’une poche (cases)',120,600,320,[240,420]],['num','cvForme','Forme (0 : ronde · 100 : déchiquetée)',0,100,50,[20,80]],
       ['sub','Tunnels'],['num','bsTunnels','Galeries en plus (cases)',0,300,110,[60,200]],['num','bsSalles','Salles de tunnel',0,5,2,[1,4]],
       ['num','cvBoyaux','Boucles entre poches',0,6,1,[0,2]],['num','cvCuls','Culs-de-sac des poches',0,6,2,[0,3]],['num','cvSinu','Sinuosité',0,100,50,[20,80]],
-      R_STYLE,R_OUVERT,R_VERROUS,R_SECRETS,R_PIEGES]},
+      R_STYLE,R_OUVERT,R_VERROUS,R_SECRETS]},
   classique:{n:'Classique : terrain partout, bâtiments posés dessus',titre:'Structures',aide:R_AIDE,
     regl:[R_AMB('classique'),R_STYLE,['sel','sNb','Nombre de structures',[[0,'Une ou deux'],[1,'Une'],[2,'Deux']],0,[0,1,2]],['num',
       'structure','Surface bâtie (%)',0,70,10,[6,22]],
-      R_PIECES,['num','sEntrees','Portes d’entrée',0,4,0],R_OUVERT,R_VERROUS,R_SECRETS,R_PIEGES]}};
+      R_PIECES,['num','sEntrees','Portes d’entrée',0,4,0],R_OUVERT,R_VERROUS,R_SECRETS]}};
 if(!RECETTES[GEN.recette])GEN.recette='atterrissage';
 const ENFOUI=()=>!!(RECETTES[GEN.recette]||{}).enfoui;
 const recLignes=r=>RECETTES[r].regl.filter(l=>l[0]!=='sub');
