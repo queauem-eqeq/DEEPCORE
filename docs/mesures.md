@@ -1021,3 +1021,25 @@ En plein écran 1920 × 1080, l'arrivée passe de 34 % de CPU (p95 65 ms, 63 ms 
 qui reste en plein écran, c'est la pose des grandes images par le navigateur (« program » au profil, 29 %), bien moins chère
 avec une carte graphique.
 
+
+### Bilan (27 novembre 2026)
+
+Version de la PR #56 (branche `claude/2026-11-26_Mesures_fluidite-cpu`), Chromium sans carte graphique.
+
+| | Au départ (26 novembre) | Aujourd'hui |
+|---|---|---|
+| Rendu, même scène | 6,6 à 7,3 ms | **1,1 ms** |
+| Rendu en jouant (moy · p95) | 8,2 à 8,7 · 23 à 26 ms | **5,8 · 15 ms** |
+| Pas complet (moy · p95) | 7,8 à 11 · 36 ms | **7,8 · 17 à 20 ms** |
+| Calcul de jeu seul (moy · p99) | 1 à 2 · 7 ms | 0,6 à 1,4 · 3 à 7 ms (inchangé) |
+| Effet de surface, 2 s | 20 % de CPU | **1,2 %** |
+| Effet qui touche le décor, 2 s | 20 % | **6 %** |
+| Au repos (eau) | 0,4 % | 0,4 % |
+| Tablette, un rendu | 10 à 15 ms | **1 à 1,6 ms** |
+| Intro 1280 × 800 · 1920 × 1080 | 30 % · 34 % (p95 65 ms) | **14 % · 22 %** (p95 20 · 35 ms) |
+| Descentes 1280 × 800 · 1920 × 1080 | 45 à 51 % | **16 % · 17 %** |
+| Génération d'un niveau | 0,4 s | 0,3 à 0,4 s (inchangé) |
+
+Pics restants, ponctuels : première image d'une descente (60 à 110 ms, écran encore noir), premier rendu d'un niveau
+(environ 100 à 190 ms : voile du sol, bords des gouffres, toutes les cases du décor), un pas isolé de 80 ms au niveau 1 non
+reproduit (ramasse-miettes probable). Mémoire JS : 28 Mo (20 Mo avant ; les canevas des caches).
