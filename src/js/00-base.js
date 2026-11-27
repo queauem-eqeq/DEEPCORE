@@ -30,6 +30,9 @@ const RECETTE_NIV=n=>NIVEAUX[nivBorne(n)].recette,   // la recette de chaque niv
 const DIRN=['est','ouest','sud','nord','sud-est','nord-est','sud-ouest','nord-ouest'];
 // (la table STATS de la colonne a disparu avec le sous-menu Statistiques, le 15 novembre 2026)
 let VISEE=null;   // visée d'une charge sismique en cours : {i, x, y} — voir 14-inventaire.js
+/* Visée longue du phaseur (26 novembre 2026) : {x, y} — la foreuse est démontée, on choisit où elle se reforme, n'importe où
+   sur le terrain déjà découvert. La vue suit le viseur (10-rendu), qui n'est donc plus borné à VISEE_R cases. Voir 14d-objets.js. */
+let PHASE=null;
 const CRIT_X=3;   // dégâts d'un coup critique
 const $=id=>document.getElementById(id);
 // Horodatage de la dernière retouche faite dans ce navigateur (palettes, tuiles, génération, faune, bestiaire) :
@@ -41,4 +44,11 @@ const idx=(x,y)=>y*W+x;
 const DIRS=[[1,0],[-1,0],[0,1],[0,-1],[1,1],[1,-1],[-1,1],[-1,-1]];
 const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const LETTERS='ABCDE';
+/* Cadence des animations (26 novembre 2026) : 20 images par seconde partout (effets, fumée, explosions, cinématiques), au
+   lieu du rythme du navigateur (60, plus sur un écran rapide). Chaque image redessine beaucoup : trois fois moins
+   d'images, trois fois moins de dessin. Les animations suivent l'horloge, pas le nombre d'images : leur durée ne change
+   pas. raf20(f) remplace requestAnimationFrame(f) : il laisse passer les images trop rapprochées. */
+const FPS=20;
+function raf20(cb){return requestAnimationFrame(function attend(now){
+  if(now-(cb._img||0)<1000/FPS-4){requestAnimationFrame(attend);return;}cb._img=now;cb(now);});}
 

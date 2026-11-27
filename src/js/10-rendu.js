@@ -1,8 +1,24 @@
 /* ---------- Rendu ---------- */
 const cv=$('view'),ctx=cv.getContext('2d'),fcv=$('fxv'),fctx=fcv.getContext('2d');let cols=20,rows=15,camX=0,camY=0,vw=0,vh=0;
-function resize(){const r=$('mapwrap').getBoundingClientRect();vw=Math.max(1,Math.floor(r.width));vh=Math.max(1,Math.floor(r.height));
-  const dpr=devicePixelRatio||1;cv.width=vw*dpr;cv.height=vh*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);fcv.width=vw*dpr;fcv.height=vh*dpr;
-    fctx.setTransform(dpr,0,0,dpr,0,0);
+/* Tablette (26 novembre 2026) : sur un écran tactile, la vue montre au plus VUE_MAX × VUE_MAX cases. 21 = la portée de vue de
+   la foreuse (capteur 10) de part et d'autre : tout ce qu'elle voit tient à l'écran. Le canevas est dessiné à la résolution
+   de l'ordinateur (un point = un pixel), puis agrandi par le navigateur d'un facteur entier (VZ × densité de l'écran) :
+   l'image est exactement celle de l'ordinateur, en plus gros et nette, et il y a 9 fois moins de pixels à dessiner qu'à
+   pleine résolution (mesuré : environ 4 ms par image au lieu de 12 à 16 ; docs/mesures.md). Sur ordinateur, rien ne
+   change (VZ = 1). Le Téléobjectif (capteur 13) voit au-delà de 21 cases : à régler plus tard. */
+const VUE_MAX=21;let VZ=1;
+let vueTablette=()=>matchMedia('(pointer:coarse)').matches&&!matchMedia('(any-pointer:fine)').matches;
+function resize(){const r=$('mapwrap').getBoundingClientRect(),lw=Math.max(1,Math.floor(r.width)),lh=Math.max(1,Math.floor(r.height));
+  const dpr=devicePixelRatio||1;
+  if(vueTablette()){
+    // f : pixels d'écran par point de la vue, entier ; le plus petit qui ne montre pas plus de VUE_MAX cases
+    const f=Math.max(1,Math.ceil(Math.max(lw,lh)*dpr/(VUE_MAX*S)));VZ=f/dpr;
+    vw=Math.ceil(lw/VZ);vh=Math.ceil(lh/VZ);cv.width=fcv.width=vw;cv.height=fcv.height=vh;
+    for(const c of [cv,fcv]){c.style.width=vw*VZ+'px';c.style.height=vh*VZ+'px';}   // déborde d'un rien, rogné par .view
+    ctx.setTransform(1,0,0,1,0,0);fctx.setTransform(1,0,0,1,0,0);}
+  else{VZ=1;vw=lw;vh=lh;for(const c of [cv,fcv])c.style.width=c.style.height='';
+    cv.width=vw*dpr;cv.height=vh*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);fcv.width=vw*dpr;fcv.height=vh*dpr;
+    fctx.setTransform(dpr,0,0,dpr,0,0);}
   cols=Math.ceil(vw/S);rows=Math.ceil(vh/S);render();}
 const hash=(x,y)=>((x*73856093)^(y*19349663))>>>0;
 let ox=0,oy=0;
@@ -34,7 +50,7 @@ function gore(x,y){const cx=(x+.5)*S,cy=(y+.5)*S,deb=[PAL['3']],ETINC_COLS=[PAL[
       c:deb[(Math.random()*deb.length)|0],blood:true,reb:1+((Math.random()*2)|0)});}
   smokeKick();}
 function smokeOn(){return G&&!G.over&&G.st&&G.st.vie<50&&$('introCv').hidden;}
-function smokeKick(){if(!SMOKE.raf&&(smokeOn()||SMOKE.p.length)){SMOKE.last=performance.now();SMOKE.raf=requestAnimationFrame(smokeStep);}}
+function smokeKick(){if(!SMOKE.raf&&(smokeOn()||SMOKE.p.length)){SMOKE.last=performance.now();SMOKE.raf=raf20(smokeStep);}}
 function smokeStep(now){const dt=Math.min(.05,(now-SMOKE.last)/1000);SMOKE.last=now;const on=smokeOn(),fire=on&&G.st.vie<20;
   if(on){const cx=(G.px+.5)*S,cy=(G.py+.5)*S;
     SMOKE.acc+=dt*(fire?24:12);while(SMOKE.acc>=1){SMOKE.acc--;const g=85+((Math.random()*60)|0);
@@ -59,7 +75,7 @@ function smokeStep(now){const dt=Math.min(.05,(now-SMOKE.last)/1000);SMOKE.last=
     SMOKE.p[n++]=q;   // pixel art strict : taille fixe, opaque, calé sur la grille des pixels de tuile (2 px), disparaît d'un coup
     fctx.fillStyle=q.c;fctx.fillRect(Math.round((q.x-camX*S)/2)*2,Math.round((q.y-camY*S)/2)*2,q.sz,q.sz);}
   SMOKE.p.length=n;fctx.globalAlpha=1;if(landed)render();
-  SMOKE.raf=(on||n)?requestAnimationFrame(smokeStep):0;if(!SMOKE.raf)fctx.clearRect(0,0,vw,vh);}
+  SMOKE.raf=(on||n)?raf20(smokeStep):0;if(!SMOKE.raf)fctx.clearRect(0,0,vw,vh);}
 /* Créature étourdie (batterie, court-circuit ; 22 novembre 2026) : toute sa silhouette devient un damier d'un pixel sur deux,
    couleur bio et couleur bâti en quinconce ; les deux couleurs s'échangent à chaque battement, pour qu'on voie qu'elle ne
    bouge plus. Les variantes sont gardées par tuile, couleurs et parité du battement. */
@@ -73,6 +89,18 @@ function tuileEtourdie(base){if(!base)return base;const ph=(G.turn||0)&1,a=PAL['
       p[q+2]=k[2];p[q+3]=255;}
     x.putImageData(im,0,0);}catch(e){}
   return m[cle]=c;}
+/* Dissolution d'une tuile au pixel (phaseur, 26 novembre 2026). Les 256 pixels s'effacent dans un ordre tiré une fois pour
+   toutes, le même à chaque partie : aucun appel à Math.random, l'empreinte des cartes reste intacte. Pixel art strict — un
+   pixel est là ou il n'y est pas, jamais à moitié transparent. reste va de 0 (rien) à 1 (la tuile entière).
+   Les tuiles produites sont mises en cache par tuile d'origine et par seizième : dix-sept au plus par tuile. */
+const PHASE_ORD=(()=>{const a=[...Array(256).keys()];let g=0x5eed;
+  for(let i=255;i>0;i--){g=(g*1103515245+12345)&0x7fffffff;const j=g%(i+1),t=a[i];a[i]=a[j];a[j]=t;}return a;})();
+const PHASE_VAR=new WeakMap();
+function tuilePhase(base,reste){if(!base)return base;const n=Math.max(0,Math.min(16,Math.round(reste*16)));if(n>=16)return base;
+  let m=PHASE_VAR.get(base);if(!m){m={};PHASE_VAR.set(base,m);}if(m[n])return m[n];
+  const c=document.createElement('canvas');c.width=c.height=16;const x=c.getContext('2d');
+  if(n>0){x.drawImage(base,0,0,16,16);for(let k=n*16;k<256;k++){const q=PHASE_ORD[k];x.clearRect(q&15,q>>4,1,1);}}
+  return m[n]=c;}
 /* Trait de laser au pixel de tuile (u = 1/16 de case) de (ax, ay) à (bx, by), en pixels de tuile : couleur col (danger par
    défaut), avec etinc étincelles blanches ou accent qui sautent le long du trait. */
 function traitLaser(u,ax,ay,bx,by,graine,etinc,col){let x0=Math.round(ax),y0=Math.round(ay);const x1=Math.round(bx),y1=Math.round(by);
@@ -88,8 +116,9 @@ function traitLaser(u,ax,ay,bx,by,graine,etinc,col){let x0=Math.round(ax),y0=Mat
 // Rayons du Bloqueur qui tient la foreuse : trois traits parallèles couleur bio, espacés d'un pixel (22 novembre 2026 ; d'abord un
 // trait rouge). Décalés en travers du rayon : en hauteur s'il est plutôt horizontal, en largeur sinon. Dessinés avant les créatures
 // et la foreuse, pour passer sous elles.
-function rayonsBloqueur(){const u=S/16,cx=o=>(o.x+.5-camX)*16,cy=o=>(o.y+.5-camY)*16;
-  for(const b of G.beasts||[])if(b.tient&&!(b.stun>0)&&beastVisible(b)){const ax=cx(b),ay=cy(b),bx=cx({x:G.px,y:G.py}),
+let RAYONS_VUS=false;   // un Bloqueur tient la foreuse à l'écran : ses rayons crépitent, le décor s'anime seul
+function rayonsBloqueur(){const u=S/16,cx=o=>(o.x+.5-camX)*16,cy=o=>(o.y+.5-camY)*16;RAYONS_VUS=false;
+  for(const b of G.beasts||[])if(b.tient&&!(b.stun>0)&&beastVisible(b)){RAYONS_VUS=true;const ax=cx(b),ay=cy(b),bx=cx({x:G.px,y:G.py}),
     by=cy({x:G.px,y:G.py}),hz=Math.abs(bx-ax)>=Math.abs(by-ay);
     for(const d of [-2,0,2]){const ox=hz?0:d,oy=hz?d:0;traitLaser(u,ax+ox,ay+oy,bx+ox,by+oy,b.x*7+b.y+d,d?0:2,PAL['2']);}}}
 /* ---------- Explosion de la foreuse (mort) ----------
@@ -117,8 +146,8 @@ function explode(done){
         if(q.vz<-1.2){q.vz=-q.vz*.45;q.vx*=.75;q.vy*=.75;}else q.vz=0;}}
       BOOM.p[n++]=q;}
     BOOM.p.length=n;render();
-    if(n)requestAnimationFrame(step);else{const d=BOOM.done;BOOM=null;render();setTimeout(d,250);}};
-  requestAnimationFrame(step);}
+    if(n)raf20(step);else{const d=BOOM.done;BOOM=null;render();setTimeout(d,250);}};
+  raf20(step);}
 function drawBoom(){const fl=1-(performance.now()-BOOM.t0)/180;
   // éclair de l'explosion
   if(fl>0){ctx.globalAlpha=fl*.8;ctx.fillStyle='#ffffff';ctx.beginPath();
@@ -126,12 +155,13 @@ function drawBoom(){const fl=1-(performance.now()-BOOM.t0)/180;
   ctx.globalAlpha=1;for(const q of BOOM.p){ctx.fillStyle=q.c;
     ctx.fillRect(Math.round((q.x-camX)*S/2)*2,Math.round((q.y-q.z-camY)*S/2)*2,q.sz,q.sz);}}
 function addFx(f){f.t0=performance.now();if(f.kind==='num')f.stack=FX.filter(o=>o.kind==='num'&&o.x===f.x&&o.y===f.y&&fxP(o)<.5).length;
-  FX.push(f);if(!fxRaf)fxRaf=requestAnimationFrame(fxLoop);}
+  FX.push(f);if(!fxRaf)fxRaf=raf20(fxLoop);}
 // grains d'un effet de consommable : position dans la case et instant d'apparition, tirés une fois pour toutes
 const fxGrains=n=>Array.from({length:n},()=>({x:rnd(0,13),y:rnd(3,14),d:Math.random()*.55}));
 // une mine armée ou un paralyzor accroché gardent le rendu en marche
-function fxLoop(){const now=performance.now();FX=FX.filter(f=>now-f.t0<f.dur);if(antAnime())antVis();render();
-  fxRaf=(FX.length||animVif())?requestAnimationFrame(fxLoop):0;}
+function fxLoop(){const now=performance.now();FX=FX.filter(f=>now-f.t0<f.dur);if(antAnime())antVis();
+  if(fxSurface())fxRapide();else render();
+  fxRaf=(FX.length||animVif())?raf20(fxLoop):0;}
 const fxP=f=>Math.min(1,(performance.now()-f.t0)/f.dur);
 function lungeOff(match){if(reduced)return [0,0];const f=FX.find(match);if(!f)return [0,0];const k=Math.sin(Math.PI*fxP(f))*.4*S;
   return [f.dx*k,f.dy*k];}
@@ -218,54 +248,105 @@ function sonarStart(){G.sonar=2;G.sonX=G.px;G.sonY=G.py;
 function sonarR(){if(!G||G.sonar===1)return -1;const f=FX.find(f=>f.kind==='sonar'&&!f.ant);return f?fxP(f)*f.r:Infinity;}
 const sonarVu=(i,sr)=>Math.hypot(i%W-(G.sonX??G.px),((i/W)|0)-(G.sonY??G.py))<=sr;
 const FOND='#020605',FOG_K=.28;   // couleur de fond, et ce qui reste d'une case dans le brouillard (26 novembre 2026)
+/* ---------- Décor de la vue en cache (26 novembre 2026) ----------
+   Le décor (sol, roches, montagnes, murs, machines, eau, gouffres, brouillard) était redessiné case par case à chaque rendu,
+   quatre à six tuiles par case : 60 % du temps de calcul. Il est maintenant gardé dans un canevas de la taille de la vue.
+   À chaque rendu, chaque case **enregistre** d'abord ce qu'elle dessinerait (quelles tuiles, quelles couleurs, quelle
+   opacité : caseDecor avec un « enregistreur ») ; elle n'est repeinte que si cette liste a changé. Toutes les dépendances
+   (voisins, niches, machines, portes, gisements, battement de l'eau, brouillard, palette, tuiles retouchées) sont ainsi
+   suivies sans les énumérer. Quand la caméra bouge, l'image est décalée d'autant et seules les cases nouvelles sont
+   peintes. Les cases ne débordent jamais de leur carré : en repeindre une seule donne la même image qu'avant.
+   Si une case ne tombe pas sur un nombre entier de pixels (zoom d'écran fractionnaire), on dessine comme avant, sans cache.
+   Contrôles : empreinte-image.js et test-decor-cache.js (cache contre dessin direct, au pixel près). */
+const DECOR={cv:document.createElement('canvas'),cv2:document.createElement('canvas'),sig:[],cam:null,k:0,ids:new WeakMap(),n:0};
+const decorId=o=>{if(!o)return 'u';let v=DECOR.ids.get(o);if(v==null){v=++DECOR.n;DECOR.ids.set(o,v);}return v;};
+let DECOR_OFF=false;   // true : dessin direct, sans cache (pour les contrôles)
+// ce que dessine une case du décor, par trois gestes : une tuile entière, un morceau 16×16 d'une grande image, une couleur
+function caseDecor(x,y,P){
+  /* Brouillard (26 novembre 2026) : la case est dessinée **en entier, à pleine opacité**, puis assombrie d'un
+     coup par un voile de la couleur du fond. Avant, on multipliait l'opacité de chaque couche par FOG_K : tout
+     ce qui est posé sur autre chose — une niche dans un mur, une tourelle, une machine, un laser — devenait
+     translucide et laissait voir le dessous. Une case d'une seule couche rend exactement pareil qu'avant
+     (couleur × FOG_K sur le fond, des deux façons) ; une case à plusieurs couches ne transparaît plus. */
+  // pont en cours de déploiement : la planche pas encore posée se dessine comme le gouffre (26 novembre 2026)
+  const i=idx(x,y),v=fog?vis[i]:1;if(!v&&!G.seen[i])return;const t=PONT_AN.has(i)?CHASM:G.t[i],h=hash(x,y),k=1;
+  const pb=t===BRIDGE&&G.pb&&G.pb[i];   // pont d'un bâtiment : couleur unie et tuile du sol bâti (19 novembre 2026)
+  // le voile de couleur monde (voir voile()) ; rien de bâti ne porte la texture du sol naturel
+  if(t!==CHASM){if(!(pb||t>=WALL)&&SOL_OV&&SOL_OV._g===G)P.sub(SOL_OV,x*16,y*16,k);else P.rect(PAL['3'],.08*k);}
+  if(pb)P.img(TL.solPont,.5*k);
+  if(t>=WALL)batiTuile(t,x,y,(tl,a)=>P.img(tl,a*k));else
+  if(!pb)P.img(TL.ground0,.6*k);   // sol uniforme : plus de variations près des sites (13 novembre 2026)
+  if(t===ROCK)P.img(h%3===0?TL.rock2:h%3===1?TL.rock:TL.rock3,.95*k);   // trois rochers, à parts égales (24 novembre 2026)
+  // sous de la roche dure, la crête se pose sur un fond de roche dure
+  // au bord haut de la carte, la case est traitée comme prolongée vers le haut : pas de crête sur la première rangée (24 novembre 2026)
+  else if(t===MOUNT){const up=y>0?G.t[idx(x,y-1)]:t;if(up===MOUNT)P.img(TL.mtBody,.9*k);else{if(up===HARD)P.img(TL.softTopBg,.9*k);
+    P.img(TL.mtTop,.9*k);}}
+  else if(t===HARD){const up=y>0?G.t[idx(x,y-1)]:t;   // comme la montagne : crête irrégulière en haut, posée sur de la roche tendre
+    if(up!==HARD){if(up===MOUNT||up===ROCK)P.img(TL.hardTopBg,.9*k);P.img(TL.hardTop,.9*k);}else P.img(TL.hardBody,.9*k);}
+  else if((t===SHIP||t===DECK)&&G.ship){const sk=TL['ship_'+(x-G.ship.x)+'_'+(y-G.ship.y)];if(sk)P.img(sk,k);}
+  if(t===MOUNT&&G.ore&&G.ore[i]&&!oreSol(G.ore[i]))P.img(oreTile(G.ore[i],false),k);
+  else if(t===LIQ){P.rect(PAL['e'],.24*k);P.img((liqFrame+(h%2))%2?TL.liq1:TL.liq0,.9*k);}
+  else if(t===DEEP){P.rect('#01060c',k);P.rect(PAL['e'],.08*k);P.img((liqFrame+(h%2))%2?TL.deep1:TL.deep0,.4*k);}
+  else if(t===CHASM){P.rect('#000',1);if(CHASM_OV)P.sub(CHASM_OV,x*16,y*16,k);}
+  else if(t===RUBBLE)P.img(TL.rubble,.65*k);
+  // herbes assombries de moitié le 15 novembre 2026 (elles ressortaient trop) : même teinte, luminosité divisée par deux
+  else if(t===GRASS)P.img(TL.grass0,.45*k);
+  else if(t===FLAT)P.img(TL.flat0,.38*k);
+  const dm=G.dmg&&G.dmg[i];if(dm&&(t===ROCK||t===MOUNT))P.img(TL.crackH,.95*k);
+  if(!v)P.rect(FOND,1-FOG_K);   // le voile du brouillard, une seule fois sur la case finie
+}
+// les trois gestes, appliqués à un contexte de dessin, pour la case dont le coin est en (px, py)
+function peintre(c){const P={px:0,py:0,
+  img:(tl,a)=>{c.globalAlpha=a;c.drawImage(tl,P.px,P.py,S,S);},
+  sub:(im,sx,sy,a)=>{c.globalAlpha=a;c.drawImage(im,sx,sy,16,16,P.px,P.py,S,S);},
+  rect:(col,a)=>{c.globalAlpha=a;c.fillStyle=col;c.fillRect(P.px,P.py,S,S);}};return P;}
+// l'enregistreur : la liste de ce que la case dessinerait, en texte
+const ENR={l:[],img:(tl,a)=>ENR.l.push(decorId(tl),a),sub:(im,sx,sy,a)=>ENR.l.push('s',decorId(im),sx,sy,a),
+  rect:(col,a)=>ENR.l.push('r',col,a)};
+function decorVue(){
+  const x1=Math.min(W,camX+cols+1),y1=Math.min(H,camY+rows+1),k=ctx.getTransform().a,pas=S*k;
+  // sans cache : le dessin d'avant, case par case, directement dans la vue
+  if(DECOR_OFF||Math.abs(pas-Math.round(pas))>1e-6){const P=peintre(ctx);
+    for(let y=camY;y<y1;y++)for(let x=camX;x<x1;x++){P.px=(x-camX)*S;P.py=(y-camY)*S;caseDecor(x,y,P);}DECOR.cam=null;return;}
+  const D=DECOR;let c=D.cv,g=c.getContext('2d');
+  // vue, densité ou carte changées : tout repeindre
+  if(c.width!==cv.width||c.height!==cv.height||D.k!==k||!D.cam||D.cam.G!==G){c.width=cv.width;c.height=cv.height;D.k=k;
+    g.setTransform(k,0,0,k,0,0);g.imageSmoothingEnabled=false;D.sig=new Array(W*H);D.cam=null;}
+  // la caméra a bougé : décaler l'image, oublier les cases sorties de la vue
+  if(D.cam&&(D.cam.x!==camX||D.cam.y!==camY)){const o=D.cam,dx=(o.x-camX)*S,dy=(o.y-camY)*S;
+    // par un second canevas : recopier un canevas sur lui-même, décalé, ne donne pas une image sûre
+    const c2=D.cv2,g2=c2.getContext('2d');if(c2.width!==c.width||c2.height!==c.height){c2.width=c.width;c2.height=c.height;}
+    g2.setTransform(1,0,0,1,0,0);g2.globalAlpha=1;g2.globalCompositeOperation='source-over';g2.fillStyle=FOND;
+    g2.fillRect(0,0,c2.width,c2.height);g2.drawImage(c,Math.round(dx*k),Math.round(dy*k));
+    D.cv=c2;D.cv2=c;c=D.cv;g=g2;g.setTransform(k,0,0,k,0,0);g.imageSmoothingEnabled=false;
+    for(let y=o.y;y<o.y1;y++)for(let x=o.x;x<o.x1;x++)if(x<camX||x>=x1||y<camY||y>=y1)D.sig[idx(x,y)]=undefined;
+    // les cases entrées dans la vue, et celles que le bord bas ou droit coupait (leur partie cachée n'avait pas été peinte)
+    const fx=o.x+Math.floor(vw/S),fy=o.y+Math.floor(vh/S);
+    for(let y=camY;y<y1;y++)for(let x=camX;x<x1;x++)if(x<o.x||x>=o.x1||y<o.y||y>=o.y1||x>=fx||y>=fy)D.sig[idx(x,y)]=undefined;}
+  D.cam={x:camX,y:camY,x1,y1,G};
+  const P=peintre(g);
+  for(let y=camY;y<y1;y++)for(let x=camX;x<x1;x++){const i=idx(x,y);
+    ENR.l.length=0;caseDecor(x,y,ENR);const sig=ENR.l.join(',')+'|'+FOND;
+    if(D.sig[i]===sig)continue;D.sig[i]=sig;P.px=(x-camX)*S;P.py=(y-camY)*S;
+    g.globalAlpha=1;g.fillStyle=FOND;g.fillRect(P.px,P.py,S,S);caseDecor(x,y,P);}
+  g.globalAlpha=1;
+  // la vue reçoit le décor tel quel, pixel pour pixel (la secousse décale seulement l'ensemble)
+  const m=ctx.getTransform();ctx.save();ctx.setTransform(1,0,0,1,m.e,m.f);ctx.globalAlpha=1;ctx.drawImage(c,0,0);ctx.restore();}
 function render(){
   // planches de pont dont l'instant est venu : elles cessent d'être cachées
   if(PONT_AN.size){const now=performance.now();for(const [i,q] of PONT_AN)if(q<=now)PONT_AN.delete(i);}
-  if(!fxRaf&&animVif())fxRaf=requestAnimationFrame(fxLoop);
+  if(!fxRaf&&animVif())fxRaf=raf20(fxLoop);
   if(G&&G.sonar===1&&G.turn>=(G.sonarAt||0)&&started&&!INTRO&&!BOOM&&!G.over&&$('overlay').hidden&&$('introCv').hidden)sonarStart();
   if(!G||!TL.robot)return;ensureChasmOv();ensureSolOv();
   const vc=vw/S,vr=vh/S;
-  const fx0=freeCam?camCX:G.px,fy0=freeCam?camCY:G.py;
+  // la vue suit le viseur du phaseur (26 novembre 2026), comme elle suit le cadre du mode carte
+  const fx0=PHASE?PHASE.x:freeCam?camCX:G.px,fy0=PHASE?PHASE.y:freeCam?camCY:G.py;
   camX=Math.max(0,Math.min(W-Math.floor(vc),fx0-Math.floor(vc/2)));camY=Math.max(0,Math.min(H-Math.floor(vr),fy0-Math.floor(vr/2)));
   ox=0;oy=0;
   ctx.globalAlpha=1;ctx.imageSmoothingEnabled=false;ctx.fillStyle=FOND;ctx.fillRect(0,0,vw,vh);
   const sh=reduced?null:FX.find(f=>f.kind==='shake');ctx.save();
   if(sh){const a=(1-fxP(sh))*sh.amp;ctx.translate(Math.round((Math.random()*2-1)*a),Math.round((Math.random()*2-1)*a));}
-  for(let y=camY;y<Math.min(H,camY+rows+1);y++)for(let x=camX;x<Math.min(W,camX+cols+1);x++){
-    /* Brouillard (26 novembre 2026) : la case est dessinée **en entier, à pleine opacité**, puis assombrie d'un
-       coup par un voile de la couleur du fond. Avant, on multipliait l'opacité de chaque couche par FOG_K : tout
-       ce qui est posé sur autre chose — une niche dans un mur, une tourelle, une machine, un laser — devenait
-       translucide et laissait voir le dessous. Une case d'une seule couche rend exactement pareil qu'avant
-       (couleur × FOG_K sur le fond, des deux façons) ; une case à plusieurs couches ne transparaît plus. */
-    // pont en cours de déploiement : la planche pas encore posée se dessine comme le gouffre (26 novembre 2026)
-    const i=idx(x,y),v=fog?vis[i]:1;if(!v&&!G.seen[i])continue;const t=PONT_AN.has(i)?CHASM:G.t[i],h=hash(x,y),k=1;
-    const pb=t===BRIDGE&&G.pb&&G.pb[i];   // pont d'un bâtiment : couleur unie et tuile du sol bâti (19 novembre 2026)
-    if(t!==CHASM)voile(x,y,(x-camX)*S,(y-camY)*S,k,null,pb||t>=WALL);   // rien de bâti ne porte la texture du sol naturel
-    if(pb)put(TL.solPont,x,y,.5*k);
-    if(t>=WALL)batiTuile(t,x,y,(tl,a)=>put(tl,x,y,a*k));else
-    if(!pb)put(TL.ground0,x,y,.6*k);   // sol uniforme : plus de variations près des sites (13 novembre 2026)
-    if(t===ROCK)put(h%3===0?TL.rock2:h%3===1?TL.rock:TL.rock3,x,y,.95*k);   // trois rochers, à parts égales (24 novembre 2026)
-    // sous de la roche dure, la crête se pose sur un fond de roche dure
-    // au bord haut de la carte, la case est traitée comme prolongée vers le haut : pas de crête sur la première rangée (24 novembre 2026)
-    else if(t===MOUNT){const up=y>0?G.t[idx(x,y-1)]:t;if(up===MOUNT)put(TL.mtBody,x,y,.9*k);else{if(up===HARD)put(TL.softTopBg,x,y,.9*k);
-      put(TL.mtTop,x,y,.9*k);}}
-    else if(t===HARD){const up=y>0?G.t[idx(x,y-1)]:t;   // comme la montagne : crête irrégulière en haut, posée sur de la roche tendre
-      if(up!==HARD){if(up===MOUNT||up===ROCK)put(TL.hardTopBg,x,y,.9*k);put(TL.hardTop,x,y,.9*k);}else put(TL.hardBody,x,y,.9*k);}
-    else if((t===SHIP||t===DECK)&&G.ship){const sk=TL['ship_'+(x-G.ship.x)+'_'+(y-G.ship.y)];if(sk)put(sk,x,y,k);}
-    if(t===MOUNT&&G.ore&&G.ore[i]&&!oreSol(G.ore[i]))put(oreTile(G.ore[i],false),x,y,k);
-    else if(t===LIQ){ctx.globalAlpha=.24*k;ctx.fillStyle=PAL['e'];ctx.fillRect((x-camX)*S,(y-camY)*S,S,S);
-      put((liqFrame+(h%2))%2?TL.liq1:TL.liq0,x,y,.9*k);}
-    else if(t===DEEP){ctx.globalAlpha=k;ctx.fillStyle='#01060c';ctx.fillRect((x-camX)*S,(y-camY)*S,S,S);ctx.globalAlpha=.08*k;
-      ctx.fillStyle=PAL['e'];ctx.fillRect((x-camX)*S,(y-camY)*S,S,S);put((liqFrame+(h%2))%2?TL.deep1:TL.deep0,x,y,.4*k);}
-    else if(t===CHASM){ctx.globalAlpha=1;ctx.fillStyle='#000';ctx.fillRect((x-camX)*S,(y-camY)*S,S,S);if(CHASM_OV){ctx.globalAlpha=k;
-      ctx.drawImage(CHASM_OV,x*16,y*16,16,16,(x-camX)*S,(y-camY)*S,S,S);}}
-    else if(t===RUBBLE)put(TL.rubble,x,y,.65*k);
-    // herbes assombries de moitié le 15 novembre 2026 (elles ressortaient trop) : même teinte, luminosité divisée par deux
-    else if(t===GRASS)put(TL.grass0,x,y,.45*k);
-    else if(t===FLAT)put(TL.flat0,x,y,.38*k);
-    const dm=G.dmg&&G.dmg[i];if(dm&&(t===ROCK||t===MOUNT))put(TL.crackH,x,y,.95*k);
-    if(!v){ctx.globalAlpha=1-FOG_K;ctx.fillStyle=FOND;ctx.fillRect((x-camX)*S,(y-camY)*S,S,S);}   // le voile du brouillard, une seule fois sur la case finie
-  }
+  decorVue();
   if(G.tracks)for(const k in G.tracks){const tr=G.tracks[k],age=G.turn-tr.t;if(age>=TRACK_LIFE){delete G.tracks[k];continue;}
     const i=+k;if(tr.i==null||(fog&&!vis[i]))continue;put(TL[`tk${tr.i}${tr.o}${Math.floor(Math.max(0,age)*5/TRACK_LIFE)}`],i%W,(i/W)|0,.6);}   // cinq étapes d'effacement, étalées sur TRACK_LIFE tours
   if(G.ore)for(const k in G.ore){if(!oreSol(G.ore[k]))continue;const i=+k;if(fog&&!G.seen[i])continue;
@@ -345,10 +426,51 @@ function render(){
   if(VISEE){const t=viseeTuile();ctx.globalAlpha=1;
     for(const [zx,zy] of viseeCases()){
       if(zx<0||zy<0||zx>=W||zy>=H)continue;ctx.drawImage(t,(zx-camX)*S,(zy-camY)*S,S,S);}}
-  const wreck=BOOM||(G.over&&G.over.dead);   // foreuse détruite : plus dessinée
+  /* Viseur du phaseur (26 novembre 2026) : un cadre d'un pixel de tuile et une croix au centre. Il dit tout de suite si la
+     case convient — bio quand la foreuse peut s'y reformer, danger quand le terrain est inconnu ou ne la porterait pas. */
+  if(PHASE){const u=S/16,ok=phaseConnu(PHASE.x,PHASE.y)&&phaseTient(PHASE.x,PHASE.y),px=(PHASE.x-camX)*S,py=(PHASE.y-camY)*S;
+    ctx.globalAlpha=1;ctx.fillStyle=ok?PAL['2']:PAL['4'];
+    for(let k=0;k<16;k++)if(k<5||k>10){ctx.fillRect(px+k*u,py,u,u);ctx.fillRect(px+k*u,py+15*u,u,u);
+      ctx.fillRect(px,py+k*u,u,u);ctx.fillRect(px+15*u,py+k*u,u,u);}
+    for(let k=6;k<10;k++){ctx.fillRect(px+k*u,py+7*u,u,u);ctx.fillRect(px+7*u,py+k*u,u,u);}}
+  /* Phaseur : la foreuse se démonte pixel par pixel (out), ou se reforme (arrivée). Entre les deux, pendant la visée longue,
+     elle n'est plus dessinée du tout — elle n'est nulle part. */
+  const fph=FX.find(f=>f.kind==='phase'&&f.robot);
+  const wreck=BOOM||(G.over&&G.over.dead)||(PHASE&&!fph);   // foreuse détruite, ou hors phase : plus dessinée
   if(!wreck){const [lx,ly]=lungeOff(f=>f.kind==='lunge'&&f.robot);ctx.globalAlpha=1;
-    ctx.drawImage(robotTuile(),(G.px-camX)*S+lx,(G.py-camY)*S+ly,S,S);}
+    const rt=fph?tuilePhase(robotTuile(),fph.out?1-fxP(fph):fxP(fph)):robotTuile();
+    ctx.drawImage(rt,(G.px-camX)*S+lx,(G.py-camY)*S+ly,S,S);}
   const ht=G.t[idx(G.px,G.py)];if(wreck){}else if(ht===LIQ)put(TL.wade,G.px,G.py,.95);else if(ht===DEEP)put(TL.wadeDeep,G.px,G.py,.95);
+  if(FX.length)fxInstantane();   // le décor sans les effets de surface, pour les images suivantes (fxRapide)
+  fxCouche();
+  ctx.restore();
+  smokeKick();
+  curseurCase();
+  ctx.globalAlpha=1;side();mini();
+}
+/* ---------- Effets de surface sur le décor figé (26 novembre 2026) ----------
+   Pendant un effet, la boucle redessinait tout l'écran à chaque image. La plupart des effets (chiffres de dégâts, soins,
+   lasers, braises, alertes, ondes, éclairs…) se posent **par-dessus** le décor sans le changer : render() garde une copie
+   du décor juste avant de les dessiner (fxInstantane), et tant que rien d'autre ne bouge, fxRapide() recolle cette copie
+   et ne redessine que ces effets. Quand un effet touche le décor lui-même (secousse, élan d'une créature, éclair sur une
+   bête, phaseur, sonar, balise en vol), ou quand le décor s'anime seul (mine armée, balise, pont, antenne, rayons du
+   Bloqueur, explosion), ou quand le tour, la caméra ou la vue ont changé, on redessine tout comme avant. */
+const FX_DECOR=new Set(['shake','lunge','flash','phase','sonar','jet']);
+const FX_SNAP={cv:document.createElement('canvas'),cle:''};
+const fxCle=()=>G?`${G.turn}|${camX}|${camY}|${G.px}|${G.py}|${fog}|${vw}|${vh}|${cv.width}|${cv.height}|${PHASE?1:0}`:'';
+function fxInstantane(){const c=FX_SNAP.cv;if(c.width!==cv.width||c.height!==cv.height){c.width=cv.width;c.height=cv.height;}
+  const g=c.getContext('2d');g.globalCompositeOperation='copy';g.drawImage(cv,0,0);g.globalCompositeOperation='source-over';
+  FX_SNAP.cle=fxCle();}
+function fxSurface(){return !!G&&FX_SNAP.cle===fxCle()&&!BOOM&&!INTRO&&!animVif()&&!antAnime()&&!RAYONS_VUS&&
+  FX.every(f=>!FX_DECOR.has(f.kind));}
+function fxRapide(){ctx.save();ctx.setTransform(1,0,0,1,0,0);ctx.globalAlpha=1;ctx.globalCompositeOperation='copy';
+  ctx.drawImage(FX_SNAP.cv,0,0);ctx.restore();ctx.save();fxCouche();ctx.restore();smokeKick();curseurCase();ctx.globalAlpha=1;}
+function curseurCase(){
+  if(HOV&&CURT&&!busy()){const ok=(x,y)=>{const i=idx(x,y);
+    return (!fog||G.seen[i])&&(getPath()||Math.max(Math.abs(x-G.px),Math.abs(y-G.py))<=1);};
+    ctx.globalAlpha=1;ctx.drawImage(ok(HOV.x,HOV.y)?CURT:CURT_DIM,(HOV.x-camX)*S,(HOV.y-camY)*S,S,S);}
+}
+function fxCouche(){
   for(const f of FX){if(f.kind!=='num')continue;const p=fxP(f),rise=reduced?0:p*14;
     ctx.globalAlpha=p<.6?1:1-(p-.6)/.4;ctx.font='bold 14px "JetBrains Mono", ui-monospace, monospace';ctx.textAlign='center';
       ctx.textBaseline='bottom';
@@ -395,13 +517,47 @@ function render(){
      w=Math.ceil(vw/u),h=Math.ceil(vh/u),q=R*Math.SQRT1_2;
      const dot=(px,py)=>{if(px>=0&&py>=0&&px<w&&py<h)ctx.fillRect(px*u,py*u,u,u);};
      for(let d=-Math.ceil(q);d<=Math.ceil(q);d++){const e=Math.round(Math.sqrt(Math.max(0,R*R-d*d)));dot(cx+d,cy-e);dot(cx+d,cy+e);
-       dot(cx-e,cy+d);dot(cx+e,cy+d);}}}
+       dot(cx-e,cy+d);dot(cx+e,cy+d);}}
+   /* Un visuel propre à chaque consommable (26 novembre 2026, demande de l'utilisateur). Avant, le module de puissance
+      empruntait les flèches de la batterie, et le surrégime comme le camouflage n'avaient rien du tout.
+      Pixel art strict partout : tout est calé sur la grille des pixels de tuile, opaque, sans dégradé ni transparence.
+      – phase : la tuile d'une créature qui se démonte pixel par pixel (phaseur) ;
+      – onde  : deux anneaux de pixels qui s'ouvrent, couleur bio (phaseur, départ et arrivée) ;
+      – boost : des grains qui convergent vers la case, puis un cadre qui s'allume, couleur accent (module de puissance) ;
+      – fury  : huit dards qui battent autour de la case, couleur danger (surrégime) ;
+      – veil  : un rideau tramé qui descend sur la case, couleur monde (camouflage optique) ;
+      – zap   : un éclair brisé de la foreuse à la cible, couleur accent, coudes renouvelés douze fois par seconde (court-circuit). */
+   for(const f of FX)if(f.kind==='phase'&&f.tl){const p=fxP(f);ctx.globalAlpha=1;
+     ctx.drawImage(tuilePhase(f.tl,f.out?1-p:p),(f.x-camX)*S,(f.y-camY)*S,S,S);}
+   for(const f of FX)if(f.kind==='onde'){const p=fxP(f),cx=Math.round((f.x+.5-camX)*16),cy=Math.round((f.y+.5-camY)*16);
+     ctx.fillStyle=PAL['2'];
+     for(const d0 of [0,.3]){if(p<d0)continue;const R=(p-d0)/(1-d0)*f.r*16,q=R*Math.SQRT1_2;
+       for(let d=-Math.ceil(q);d<=Math.ceil(q);d++){const e=Math.round(Math.sqrt(Math.max(0,R*R-d*d)));
+         ctx.fillRect((cx+d)*u,(cy-e)*u,u,u);ctx.fillRect((cx+d)*u,(cy+e)*u,u,u);
+         ctx.fillRect((cx-e)*u,(cy+d)*u,u,u);ctx.fillRect((cx+e)*u,(cy+d)*u,u,u);}}}
+   for(const f of FX)if(f.kind==='boost'){const p=fxP(f),bx=(f.x-camX)*16,by=(f.y-camY)*16,px=(f.x-camX)*S,py=(f.y-camY)*S;
+     ctx.fillStyle=PAL['1'];
+     for(let n=0;n<f.gr.length;n++){const g=f.gr[n],q=(p-g.d)*2.2;if(q<0||q>1)continue;
+       // chaque grain part d'un anneau hors de la case et tombe vers le centre : on voit l'énergie entrer
+       const a=n/f.gr.length*Math.PI*2+g.d*3,R=14*(1-q);
+       ctx.fillRect(Math.round(bx+7+Math.cos(a)*R)*u,Math.round(by+7+Math.sin(a)*R)*u,2*u,2*u);}
+     if(p>.72)for(let k=0;k<16;k++){ctx.fillRect(px+k*u,py,u,u);ctx.fillRect(px+k*u,py+15*u,u,u);
+       ctx.fillRect(px,py+k*u,u,u);ctx.fillRect(px+15*u,py+k*u,u,u);}}
+   for(const f of FX)if(f.kind==='fury'){const p=fxP(f),bat=reduced?0:Math.floor(p*9)&1,
+     L=2+Math.round(Math.sin(p*Math.PI)*5)+bat,bx=(f.x-camX)*16,by=(f.y-camY)*16;ctx.fillStyle=PAL['4'];
+     for(const [dx,dy] of DIRS)for(let k=5;k<5+L;k++)ctx.fillRect(Math.round(bx+7.5+dx*k)*u,Math.round(by+7.5+dy*k)*u,u,u);}
+   for(const f of FX)if(f.kind==='veil'){const p=fxP(f),px=(f.x-camX)*S,py=(f.y-camY)*S,haut=Math.round(p*22)-6;
+     ctx.fillStyle=PAL['3'];
+     for(let j=0;j<16;j++){const r=j-haut;if(r<0||r>5)continue;
+       for(let i=0;i<16;i++)if((i+j)&1)ctx.fillRect(px+i*u,py+j*u,u,u);}}
+   for(const f of FX)if(f.kind==='zap'&&fxP(f)<.85){const p=fxP(f),ax=(f.ax+.5-camX)*16,ay=(f.ay+.5-camY)*16,
+     bx=(f.bx+.5-camX)*16,by=(f.by+.5-camY)*16,dx=bx-ax,dy=by-ay,L=Math.hypot(dx,dy)||1,nx=-dy/L,ny=dx/L,
+     ph=reduced?0:Math.floor(p*12),pt=[[ax,ay]];
+     // quatre tronçons, coudes renouvelés douze fois par seconde : le trait crépite au lieu de rester droit
+     for(let k=1;k<4;k++){const t=k/4,o=((ph*(3+k)+k*5)%11-5)*(1-Math.abs(t*2-1))*1.6;
+       pt.push([ax+dx*t+nx*o,ay+dy*t+ny*o]);}
+     pt.push([bx,by]);
+     for(let k=0;k<4;k++)traitLaser(u,pt[k][0],pt[k][1],pt[k+1][0],pt[k+1][1],f.t0+k+ph,k===3?4:2,'#ffffff');}}
   if(BOOM)drawBoom();
-  ctx.restore();
-  smokeKick();
-  if(HOV&&CURT&&!busy()){const ok=(x,y)=>{const i=idx(x,y);
-    return (!fog||G.seen[i])&&(getPath()||Math.max(Math.abs(x-G.px),Math.abs(y-G.py))<=1);};
-    ctx.globalAlpha=1;ctx.drawImage(ok(HOV.x,HOV.y)?CURT:CURT_DIM,(HOV.x-camX)*S,(HOV.y-camY)*S,S,S);}
-  ctx.globalAlpha=1;side();mini();
 }
 const mv=$('mini'),mctx=mv.getContext('2d');

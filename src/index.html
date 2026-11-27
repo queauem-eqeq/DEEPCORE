@@ -108,11 +108,12 @@
     <p class="termtxt" id="termTxt"></p>
   </div>
 </div>
-<!-- Fabricateur (21 novembre 2026) : des objets contre de la Matière. Voir 14c-fabricateur. -->
+<!-- FABLAB (21 novembre 2026, renommé le 26) : des objets contre de la Matière. Voir 14c-fabricateur. -->
 <div class="modal" id="fabric" role="dialog" aria-modal="true" aria-labelledby="fabTitre" hidden>
   <div class="mcard" tabindex="-1">
-    <div class="mhead"><h2 id="fabTitre">Fabricateur</h2><button id="fabClose" aria-label="Fermer le fabricateur">Fermer</button></div>
-    <div class="sum" id="fabMat"></div>
+    <div class="mhead"><h2 id="fabTitre">FABLAB</h2><button id="fabClose" aria-label="Fermer le FABLAB">Fermer</button></div>
+    <!-- en-tête : la Matière en réserve, puis les vingt places de l'inventaire en quatre rangées de cinq (26 novembre 2026) -->
+    <div class="sum fabtete"><span id="fabMat"></span><span id="fabSacN"></span><div id="fabGrille" aria-hidden="true"></div></div>
     <div class="fabwrap"><div id="fabList" role="list"></div><div id="fabVue" aria-live="polite"></div></div>
     <div class="sum" id="fabMsg" aria-live="polite"></div>
   </div>
@@ -209,6 +210,8 @@
     <div class="btnrow"><button class="go" id="restart" title="Relancer une carte avec les réglages en cours du menu Monde">REGEN</button><button id="mondeBtn" aria-haspopup="dialog" title="Relief, taille et archétypes de monde">MONDE</button><button id="lifeBtn" aria-haspopup="dialog" title="Faune : budget de menace et groupes d’ennemis">LIFE</button></div>
     <!-- Niv1, Niv2, Niv3 : sortis du Lab le 22 novembre 2026, sous REGEN · MONDE · LIFE -->
     <div class="btnrow nivrow"><button id="niv1Btn" title="Rejouer la cinématique d’arrivée, puis un niveau 1 aux réglages tirés au hasard">Niv1</button><button id="niv2Btn" title="Jouer la cinématique de forage, puis un niveau 2 aux réglages tirés au hasard">Niv2</button><button id="niv3Btn" title="Jouer la seconde descente (le mini-jeu des mines), puis un niveau 3 aux réglages tirés au hasard">Niv3</button></div>
+    <!-- plein écran (26 novembre 2026) -->
+    <div class="btnrow nivrow"><button id="pleinBtn" title="Plein écran : le jeu occupe tout l’écran (Échap pour en sortir)">PLEIN ÉCRAN</button></div>
     <details class="fold" id="fd-lab">
       <summary><h2>Lab</h2></summary>
       <div class="foldwrap">

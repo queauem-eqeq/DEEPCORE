@@ -14,6 +14,28 @@ Partie du document de conception (sommaire et règles à ne pas casser : `concep
   portes et piliers des bâtiments, pour que l'intérieur ne se confonde plus avec la montagne). Le blanc reste fixe. Dans le
   code les clés sont `3` monde, `2` bio, `1` accent, `4` danger, `5` bâti ; les encres `r` et `L` des tuiles se lisent en
   couleur danger, et l'encre `3` se lit en couleur bâti sur les tuiles de `BATI_TUILES` (`02-palette.js`).
+- **Un visuel et un son propres à chaque objet** (26 novembre 2026, demande de l'utilisateur). Avant, le Module de puissance
+  empruntait les flèches et le bruit d'analyse d'un autre objet, le Surrégime le bruit des coups critiques, le Camouflage celui
+  du fumigène et le Court-circuit celui des lasers ; Surrégime et Camouflage n'avaient aucune animation. Désormais, chaque
+  consommable a son animation **et** son bruit, et aucun n'est partagé avec un autre (`10-rendu.js`, `01-sons.js`) :
+
+  | Objet | Animation | Son |
+  |---|---|---|
+  | Réparobots | petites croix qui montent (`soin`) | `repair` |
+  | Batterie | flèches bio qui montent (`ener`) ; sur un ennemi, éclat (`flash`) | `battery` |
+  | Fumigène | tuiles de nuage | `smoke` |
+  | Charge sismique | explosion sur toute la zone (`boom`) + secousse | `explode` |
+  | **Module de puissance** | **`boost`** : des grains d'accent tombent d'un anneau vers la case, puis son cadre s'allume | **`boost`** |
+  | **Surrégime** | **`fury`** : huit dards en couleur danger battent autour de la case | **`fury`** |
+  | **Camouflage optique** | **`veil`** : un rideau tramé en couleur monde descend sur la case | **`veil`** |
+  | Balise | la tuile vole jusqu'à la case (`jet`) + secousse | `alarme` |
+  | **Court-circuit** | **`zap`** : un éclair blanc brisé, quatre tronçons, coudes renouvelés douze fois par seconde ; sur la foreuse, deux éclairs croisent sa case | **`zap`** |
+  | **Phaseur** | **`phase`** : la tuile se démonte (ou se reforme) pixel par pixel, dans un ordre fixe ; **`onde`** : deux anneaux bio s'ouvrent au départ et à l'arrivée | **`phase`** |
+
+  Tout cela reste du pixel art strict : calé sur la grille des pixels de tuile, opaque, sans dégradé ni transparence.
+  L'ordre de dissolution du phaseur est tiré **sans `Math.random`** (générateur à graine fixe, `PHASE_ORD`) : l'empreinte des
+  cartes ne bouge pas. Contrôle : poser les effets avec une durée très longue et un `t0` reculé les fige à mi-course le temps
+  d'une capture.
 - **Réglages du joueur adoptés le 23 novembre 2026** : les dessins retouchés dans l'artefact (`reglages/courant`) sont recopiés dans
   `TUILES_JOUEUR` (`03-tuiles.js`) et `TUILES_JOUEUR_B` (`03b-tuiles-machines.js`) — bz6r, bz7r, mach5, robot_u, siteUnknown, niche,
   stationOff, chargeur, o_capsule, o_plan — et la palette **Désert** retouchée dans `PRESETS` ; **Désert** devient la palette de départ
@@ -120,6 +142,37 @@ molette ou fine barre pour remonter jusqu'aux 200 derniers messages ; un nouveau
   colonne ; le journal et les champs de saisie restent sélectionnables). 
 - Sous **REGEN · MONDE · LIFE**, une rangée **NIV1 · NIV2 · NIV3** .
 - Sous-menus repliables : **Inventaire**, **Carte**, **Lab** (Bestiaire, Groupes, Artefacts, Items, Discrétion, Tile editor, **Combat** : un lien qui ouvre le banc dans un autre onglet), **Palette**, **Contrôles** (l'aide des touches, une commande par ligne : la touche, puis ce qu'elle fait ; trois groupes : Se déplacer, Objets, Voir).
+
+### Tablette : vue plafonnée à 21 cases (26 novembre 2026)
+Sur un écran tactile sans souris, la vue montre **au plus 21 cases** sur son plus grand côté (21 = la portée de vue de la
+foreuse, capteur 10, de part et d'autre) ; le petit côté en montre moins selon la forme de l'écran (iPad en paysage :
+environ 19 × 15 ; en portrait : 11 × 20). Les cases sont agrandies d'un facteur entier, pour rester nettes au pixel près.
+Le canevas est dessiné à la résolution de l'ordinateur puis agrandi par le navigateur : même image, trois fois moins de
+calcul qu'à pleine résolution. Sur ordinateur, rien ne change (autant de cases que la fenêtre en permet). **À régler plus
+tard** : le Téléobjectif (capteur 13) voit au-delà de ce qui est affiché.
+
+### Rythme des animations et effets de surface (26 novembre 2026)
+- **20 images par seconde partout** (effets, fumée, explosion, intro, descentes) : `FPS` et `raf20()` dans `00-base.js`,
+  au lieu du rythme du navigateur (60 ou plus). Les animations suivent l'horloge : leur durée ne change pas.
+- **Effets de surface** : la plupart des effets (dégâts, soins, énergie, lasers, glu, braises, alertes, ondes, boost,
+  fureur, voile, éclairs) se posent par-dessus le décor. Pendant qu'ils jouent, le décor n'est plus redessiné : une copie
+  est recollée et seuls les effets sont repeints (`fxRapide`, `10-rendu.js`). Dès qu'un effet touche le décor (secousse,
+  élan, éclair sur une bête, phaseur, sonar, balise en vol) ou que le décor s'anime seul (mine armée, balise, pont, antenne,
+  rayons du Bloqueur, explosion), tout est redessiné comme avant. Contrôle : `outils/scripts/test-fx-surface.js` (chaque
+  effet, image identique au pixel près entre les deux chemins).
+
+### Décor de la vue en cache (26 novembre 2026)
+Le décor (sol, roches, montagnes, murs, machines, eau, gouffres, brouillard) est gardé dans un canevas de la taille de la vue
+(`decorVue`, `caseDecor`, `10-rendu.js`). À chaque rendu, chaque case enregistre ce qu'elle dessinerait ; elle n'est repeinte
+que si cette liste a changé. Quand la caméra bouge, l'image est décalée et seules les cases nouvelles (et celles que le bord
+coupait) sont peintes. Créatures, objets, traces, effets et curseur se dessinent par-dessus, comme avant. Si une case ne tombe
+pas sur un nombre entier de pixels, le dessin se fait directement, sans cache. `DECOR_OFF = true` revient au dessin direct.
+Contrôle : `outils/scripts/test-decor-cache.js` (quatre recettes, cache contre dessin direct, au pixel près).
+
+### Plein écran (26 novembre 2026)
+Bouton **PLEIN ÉCRAN** sous Niv1 · Niv2 · Niv3 : met toute la page en plein écran (Échap ou le même bouton, devenu
+« QUITTER LE PLEIN ÉCRAN », pour en sortir) ; le jeu se redimensionne seul. Dans l'artefact claude.ai, le jeu est dans un
+cadre : si le site hôte refuse, le journal propose d'ouvrir le jeu dans un onglet à part ou d'appuyer sur F11.
 
 ### Souris et inspection
 

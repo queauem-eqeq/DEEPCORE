@@ -2,7 +2,8 @@
 const EYE_SVG='<svg class="eyeic" viewBox="0 0 11 7" width="22" height="14" shape-rendering="crispEdges" aria-hidden="true"><path fill="currentColor" d="M3 0h5v1H3zM1 1h2v1H1zM8 1h2v1H8zM0 2h1v3H0zM10 2h1v3h-1zM1 5h2v1H1zM8 5h2v1H8zM3 6h5v1H3zM4 2h3v3H4z"/></svg>';
 /* ---------- Souris, inspection et déplacement automatique (inspirés de Brogue) ---------- */
 let HOV=null,INSPECT=false,TRAV=null,lastPT='mouse',PC={k:'',p:null};
-const busy=()=>!G||!!G.over||drilling||!$('overlay').hidden;
+// pendant la visée longue du phaseur la foreuse est démontée : aucune action ne doit partir (26 novembre 2026)
+const busy=()=>!G||!!G.over||drilling||!!PHASE||!$('overlay').hidden;
 // créature visible sur une case (les animaux cachés par le brouillard ne bloquent pas le tracé)
 function occupant(x,y){const seenHere=!fog||vis[idx(x,y)];if(!seenHere)return null;const b=beastAt(x,y);
   return (b&&!beastCache(b)?b:null)||animalAt(x,y)||null;}
@@ -169,13 +170,15 @@ function setInspect(on){INSPECT=on;$('inspTag').hidden=!on;if(on){if(freeCam)set
 function moveInspect(dx,dy){const vc=Math.floor(vw/S),vr=Math.floor(vh/S);
   HOV={x:Math.max(camX,Math.min(Math.min(W,camX+vc)-1,HOV.x+dx)),y:Math.max(camY,Math.min(Math.min(H,camY+vr)-1,HOV.y+dy))};render();}
 const cellAt=ev=>{const r=cv.getBoundingClientRect();
-  return {x:Math.floor((ev.clientX-r.left)/S)+camX,y:Math.floor((ev.clientY-r.top)/S)+camY};};
+  return {x:Math.floor((ev.clientX-r.left)/(S*VZ))+camX,y:Math.floor((ev.clientY-r.top)/(S*VZ))+camY};};   // VZ : zoom de la vue sur tablette
 cv.addEventListener('pointerdown',ev=>{lastPT=ev.pointerType||'mouse';});
 cv.addEventListener('pointermove',ev=>{if(ev.pointerType==='touch'||!G)return;const c=cellAt(ev);if(c.x<0||c.y<0||c.x>=W||c.y>=H)return;
+  if(PHASE){phaseVers(c.x,c.y);return;}   // visée longue du phaseur (26 novembre 2026)
   if(VISEE){viseeVers(c.x,c.y);return;}
   if(!HOV||HOV.x!==c.x||HOV.y!==c.y){HOV=c;render();}});
 cv.addEventListener('pointerleave',()=>{if(INSPECT||lastPT==='touch')return;if(HOV){HOV=null;render();}});
-cv.addEventListener('click',ev=>{if(VISEE){const c=cellAt(ev);viseeVers(c.x,c.y);viseeOk();return;}
+cv.addEventListener('click',ev=>{if(PHASE){const c=cellAt(ev);phaseVers(c.x,c.y);phaseOk();return;}
+  if(VISEE){const c=cellAt(ev);viseeVers(c.x,c.y);viseeOk();return;}
   if(busy())return;if(EXPL){stopExplore('Exploration interrompue.');return;}if(REST){stopRest('Repos interrompu.');return;
     }if(TRAV){stopTravel('Trajet interrompu.');return;}
   const c=cellAt(ev);if(c.x<0||c.y<0||c.x>=W||c.y>=H)return;
@@ -203,7 +206,7 @@ const TDESC={[GROUND]:['Sol rocheux','Praticable. Les points au sol se densifien
   [GRILLE]:['Grille d’énergie','Infranchissable tant que son socle n’est pas alimenté par une pile. On voit au travers. Une charge sismique la détruit.'],
   [STATION]:['Station de réparation','Avancer dessus remet la vie et l’énergie au maximum, une seule fois. Le bruit attire les ennemis à 12 cases.'],
   [CHARGEUR]:['Distributeur de pile','Sa pile attend à côté de lui. Avancer dessus la rappelle : utile si elle est coincée.'],
-  [FABRIC]:['Fabricateur','Avancer dessus ouvre la liste de fabrication : des objets contre de la Matière {µ}.'],
+  [FABRIC]:['FABLAB','Avancer dessus ouvre la liste de fabrication : des objets contre de la Matière {µ}.'],
   [VITRE]:['Mur vitré','Infranchissable, mais on voit au travers, dans les deux sens : les créatures aussi. La foreuse ne l’entame pas : seule une charge sismique l’ouvre.'],
   [PILLAR]:['Pilier','Infranchissable et opaque : il coupe la ligne de vue. Compte comme une paroi pour la discrétion.'],
   [LIQ]:['Eau peu profonde','Praticable par tous. Défense −20 pour qui s’y trouve ; pas deux fois plus lent, sauf pour les crabos qui nagent.'],

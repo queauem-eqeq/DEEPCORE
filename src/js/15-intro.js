@@ -99,7 +99,7 @@ function playIntro(){
     bolts:BOLTS.map(dd=>({t:TZ0+dd*(TZ1-TZ0),x:.15+R()*.7,pts:null})),
     dust:null,shadow:shipShadow(),mapImg:introMapImg()};
   introCv.hidden=false;introCv.style.opacity=1;$('introSkip').hidden=false;
-  requestAnimationFrame(introFrame);}
+  raf20(introFrame);}
 function skipIntro(){if(!INTRO)return;if(INTRO.ascii){arriveeSkip();return;}const now=performance.now();
   if((now-INTRO.t0)/1000<T5)INTRO.t0=now-T5*1000;INTRO.ev.touch=true;INTRO.ev.reen=true;}
 function endIntro(){INTRO=null;introCv.hidden=true;$('introSkip').hidden=true;introCv.style.opacity=1;markIntro();render();}
@@ -259,7 +259,7 @@ function introFrame(now){const I=INTRO;if(!I)return;ensureChasmOv();ensureSolOv(
   if(I.flash>0){x.globalAlpha=I.flash*.55;x.fillStyle='#ffffff';x.fillRect(0,0,w,h);x.globalAlpha=1;I.flash=Math.max(0,I.flash-dt*5);}
   introCv.style.opacity=t>T5?String(1-clamp01((t-T5)/(TEND-T5))):'1';
   if(t>=TEND){endIntro();return;}
-  requestAnimationFrame(introFrame);}
+  raf20(introFrame);}
 /* Lab → Niv1 et Niv2 (21 novembre 2026 ; avant, un seul bouton « Intro » qui rejouait l'arrivée sur la carte du menu Monde).
    Niv1 : la cinématique d'arrivée, puis un niveau 1 (recette « atterrissage ») aux réglages tirés au hasard.
    Niv2 : la cinématique de forage, puis un niveau 2 (recette « cavernes ») aux réglages tirés au hasard ; la foreuse garde

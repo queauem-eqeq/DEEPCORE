@@ -192,3 +192,31 @@ La descente compte `NIV_MAX = 3` niveaux (table `NIVEAUX`, `00-base.js`).
 - **F9** ne lance plus la cinématique : il garantit **au moins un exemplaire de chaque consommable** dans l'inventaire (capsules identifiées et clé) : une sorte déjà présente n'est pas ajoutée ; s'il manque des places, il **retire des doublons** (un exemplaire à la fois, sur la plus grosse pile) jusqu'à ce que toutes les sortes tiennent. Touche d'essai, absente du sous-menu Contrôles.
 - La taille de la carte ne change pas d'un niveau à l'autre (elle s'applique au lancement).
 
+## Dessin en cache (26 novembre 2026)
+La grille de roche des descentes est gardée dans un canevas à part (`fgRoche`, `14b-forage.js`) : chaque case est
+recalculée à chaque image, mais n'est repeinte que si son caractère ou sa couleur a changé, et l'image est décalée quand la
+caméra passe d'une rangée à l'autre. L'arrivée (`14e-arrivee.js`) garde de même sa grille dans un tampon (`grilleDessine`) ;
+le tremblement décale le tampon d'un bloc. Les caractères sont posés d'une pièce sur leur fond noir (`fgGlyphNoir`,
+`glyphNoir`). Rien ne change à l'écran : cases opaques, pas de transparence. Contrôles : `outils/scripts/test-forage-cache.js`
+et `python3 outils/arrivee_cache.py` (cache contre dessin direct, au pixel près).
+
+## Taille des cases (26 novembre 2026)
+- **Descentes : 40 rangées** à l'écran (`size = h / 40`, `14b-forage.js` ; 52 avant). Caractères plus gros, plus lisibles
+  sur tablette, environ 25 % de calcul en moins. La foreuse voit donc moins loin devant elle en nombre de rangées : à surveiller
+  pour la difficulté du mini-jeu des mines.
+- **Foreuse réduite** (26 novembre 2026, même jour) : 9 × 11 cases au lieu de 11 × 15 (sans ses nacelles latérales), tunnel
+  plus étroit (`FG_R` 6 → 5 : une mine touche si elle est à moins de 4 cases de l'axe, 5 avant), hauteur couchée 2,6.
+  **Mini-jeu des mines** : descente ralentie de 15 % (`FG_JEU_VIT`), foreuse plus vive (`FG_JEU_ACC` 52 → 64,
+  `FG_JEU_VMAX` 24 → 28, commande prise en compte plus tôt).
+- **Arrivée en grosses cases jusqu'au bout** (`GROS_BASCULE = false`, à l'essai) : plus de passage aux cases fines ;
+  l'extinction finale se fait couche par couche (`grosEteint`). Avec `GROS_BASCULE = true`, bascule de 8,7 à 9,2 s, comme
+  décrit ci-dessous.
+- **Arrivée : grosses cases au début.** Jusqu'à 8,7 s, le fond (étoiles, planète, nuages, ombre, éclairs) est tracé en cases
+  1,5 fois plus grandes (`GROS_F`, 12 × 24 en densité 1) ; le vaisseau, ses flammes et le plasma restent en cases fines par-dessus,
+  et les nuages que traverse le vaisseau se posent en grosses cases au-dessus de lui. De 8,7 à 9,2 s (`T_GROS0`, `T_GROS1`),
+  chaque grosse case bascule à son tour, au hasard et d'un coup, vers les cases fines ; ensuite tout est en 8 × 16, le quart de
+  tuile du jeu qui permet de finir à l'échelle exacte des pixels. `GROS_ON = false` : tout en cases fines, comme avant (image
+  identique, contrôlée).
+- La grille de roche est posée à partir d'une seule origine arrondie : plus de rangée qui saute d'un pixel quand la caméra tombe
+  pile sur un demi-pixel.
+

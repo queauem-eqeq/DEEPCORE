@@ -138,9 +138,12 @@ function invApply(o,sg){const m=ITEMS[o.k].mod||{},st=G.st,v0=st.vieMax,e0=st.en
 const invCount=s=>G.inv.filter(o=>o.eq&&ITEMS[o.k].slot===s).length;
 /* Deux endroits depuis le 15 novembre 2026 : la fenêtre Équipement (armes, armures, accessoires) et le sous-menu « Inventaire »
    de la colonne (consommables). Un seul sac derrière, G.inv ; INV_SEL est l'indice RÉEL dans G.inv de l'objet choisi dans la fenêtre. */
-// places du sous-menu Inventaire (22 novembre 2026 ; avant 10) : les exemplaires s'empilent à l'affichage, mais CHACUN prend une place
+/* Places de l'inventaire (22 novembre 2026 ; avant 10) : les exemplaires s'empilent à l'affichage, mais CHACUN prend une place.
+   26 novembre 2026, demande de l'utilisateur : **tout ce qui est transporté** prend une place, l'équipement compris — seul ce
+   qui est PORTÉ (o.eq) est gratuit. S'équiper libère donc une place, se déséquiper en reprend une (refusé si le sac est plein).
+   La grille du FABLAB (4 rangées de 5 carrés) montre ces vingt places, classées par type. */
 const SAC_MAX=20;
-const sacPlaces=()=>G.inv.reduce((t,o)=>t+(ITEMS[o.k]&&ITEMS[o.k].conso?(o.n||1):0),0);   // places occupées : un par exemplaire
+const sacPlaces=()=>G.inv.reduce((t,o)=>t+(o.eq?0:(o.n||1)),0);   // places occupées : un par exemplaire transporté
 const invEquipables=()=>G.inv.map((o,i)=>i).filter(i=>!ITEMS[G.inv[i].k].conso);
 const invConsos=()=>G.inv.map((o,i)=>i).filter(i=>ITEMS[G.inv[i].k].conso);
 function invFix(){const l=invEquipables();if(!l.length){INV_SEL=-1;return;}if(!l.includes(INV_SEL))INV_SEL=l[0];}
@@ -222,6 +225,9 @@ function invEquip(i){const o=G.inv[i];if(!o||G.over)return;const d=ITEMS[o.k],e=
     if(d.fx)addFx({kind:d.fx,x:G.px,y:G.py,dur:1000,gr:fxGrains(12)});
     consoTemps();invChanged();return;}   // un consommable coûte un battement (16 novembre 2026)
   if(o.eq){if(d.slot==='arme'){invSay(ARME_FIXE,'warn');SFX.blocked();render();return;}
+    // retiré, l'objet est transporté : il prend une place (26 novembre 2026)
+    if(sacPlaces()>=SAC_MAX){invSay(`Inventaire plein (${SAC_MAX}/${SAC_MAX}) : ${d.n} retiré${e} n’aurait plus sa place. Jetez quelque chose d’abord.`,'warn');
+      SFX.blocked();render();return;}
     invApply(o,-1);o.eq=0;invSay(`${d.n} retiré${e}.`);SFX.door();invChanged();return;}
   const sl=SLOTS[d.slot];let rem='';
   if(invCount(d.slot)>=sl.n){
@@ -258,7 +264,7 @@ function invDrop(i){const o=G.inv[i];if(!o||G.over)return;const d=ITEMS[o.k];
 function invPickup(more){const c=idx(G.px,G.py);if(G.items&&G.items[c]&&G.items[c].length){choixTest(c);piegeTest(c);butinPrend(c,more);}
   const l=G.items&&G.items[c];if(!l||!l.length)return false;
   const pris=[],laisses=[];
-  for(const k of l){if(ITEMS[k].conso&&sacPlaces()>=SAC_MAX){laisses.push(k);continue;}   // inventaire plein : l'objet reste au sol
+  for(const k of l){if(sacPlaces()>=SAC_MAX){laisses.push(k);continue;}   // inventaire plein : l'objet reste au sol, équipement compris
     const pile=ITEMS[k].conso&&G.inv.find(o=>o.k===k);
     if(pile){pile.n=(pile.n||1)+1;pris.push(k);continue;}
     G.inv.push(ITEMS[k].conso?{k,eq:0,n:1}:{k,eq:0});pris.push(k);}

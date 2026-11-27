@@ -31,7 +31,7 @@ Le jeu est une page web en plusieurs fichiers (`src/`), **sans étape d'assembla
 - `python3 outils/jeu.py DOSSIER [script.js]` : image de la partie, intro passée ; le script prépare la
   scène dans la page et renvoie ce qu'on veut lire.
 - `python3 outils/simul.py [detection|fuite|tout]` : rejoue des situations dans le moteur et mesure.
-- `python3 outils/perf.py` : fluidité.
+- `python3 outils/perf.py` : fluidité de l’intro. `python3 outils/jeu.py DOSSIER outils/scripts/mesure-perf.js` : temps de calcul en partie (génération, vue, ennemis, tour, rendu, CPU au repos), à comparer avec `docs/mesures.md`. `python3 outils/profil.py [N]` : les fonctions qui coûtent le plus. `outils/scripts/acoups.js` et `outils/scripts/mesure-logique.js` : ce qui coûte dans un pas, avec et sans dessin. `SANS_ANIM=1 python3 outils/jeu.py DOSSIER outils/scripts/empreinte-image.js` : empreinte de l'écran (vue, mini-carte, journal), à comparer avant/après une optimisation du rendu qui ne doit rien changer à l'image.
 - `python3 outils/animation_cavernes.py SORTIE.gif [essais] [réglages]` : GIF animé de la génération d'un niveau « cavernes » (roche, cavernes, boyaux, bâtiments, portes), tiré du vrai moteur sans toucher à `src/`.
 - `python3 outils/animation_niveau.py atterrissage|classique SORTIE.gif [essais]` : même chose pour le niveau 1 et la recette classique (relief, vaisseau, site, bâtiments, tunnels).
 - `python3 outils/planche_cartes.py SORTIE.png amb:RECETTE [taille]` : douze cartes côte à côte avec leurs mesures, une par
@@ -40,7 +40,7 @@ Le jeu est une page web en plusieurs fichiers (`src/`), **sans étape d'assembla
 - `python3 outils/forage.py DOSSIER niv2 t1 t2 …` : images de la seconde descente (le mini-jeu des mines).
 - **Essais automatiques**, à passer à `jeu.py` et à relancer après tout changement de ces systèmes : `test-machines.js`
   (machines), `test-ennemis.js` (espèces, patrouilles, lieux), `test-forage.js` (mini-jeu), `test-descente.js` (la descente
-  entière, trois niveaux) ; mesures : `mesure-ambiances.js`, `mesure-faune.js`. Chacun renvoie une ligne par essai.
+  entière, trois niveaux), `test-fx-surface.js` (effets dessinés sur le décor figé : image identique), `test-decor-cache.js` (décor en cache contre dessin direct), `test-forage-cache.js` (roche des descentes en cache contre dessin direct) ; `python3 outils/arrivee_cache.py` (même contrôle pour l'intro) ; `python3 outils/perf_scenes.py` (fluidité de l'intro et des descentes) ; mesures : `mesure-ambiances.js`, `mesure-faune.js`. Chacun renvoie une ligne par essai.
 - `node outils/redecouper.js [--ecrire] [LIMITE]` (acorn requis : `npm i acorn` dans un dossier temporaire, puis `NODE_PATH`) : redécoupe les
   lignes de `src/js` trop longues (140 caractères par défaut) sans changer le programme : l'arbre syntaxique est comparé avant
   d'écrire. Exclus : `02b` (données) et `07e` (`animation_cavernes.py` y cherche du texte exact). Utile aussi pour aligner une

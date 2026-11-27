@@ -131,7 +131,7 @@ function drift(wait){if(!wait)return;
   SFX.drift();sayMore(`Eau profonde : le courant entraîne le robot vers ${['l’est','l’ouest','le sud','le nord','le sud-est','le nord-est','le sud-ouest','le nord-ouest'][k]}.`,'warn');
 }
 const DEEP_MISS=.5;   // eau profonde : chance qu'un pas parte dans une autre direction, tirée au hasard
-function tryMove(dx,dy){
+function tryMove(dx,dy){if(PHASE)return;   // foreuse démontée : elle ne marche pas tant qu'elle n'est pas reformée
   if(G.over||drilling)return;lastAct='move';lastRun=false;let nx=G.px+dx,ny=G.py+dy;if(nx<0||ny<0||nx>=W||ny>=H)return;
   let v=G.t[idx(nx,ny)];
   G.face=dx>0?'r':dx<0?'l':dy>0?'d':'u';
@@ -237,7 +237,7 @@ function tryMove(dx,dy){
 }
 
 /* ---------- Forage ---------- */
-function waitTurn(){
+function waitTurn(){if(PHASE)return;
   if(G.over||drilling||!$('overlay').hidden)return;lastAct='wait';lastRun=false;G.turn++;G.msg=null;
     if(!REST)say(`Le robot attend : recharge ${WAIT_REGEN} fois plus vite (${+(G.st.power/POW_BASE*WAIT_REGEN).toFixed(1)}/t).`);
   pass(DUR.attente,true);computeFOV();render();if(G.over&&G.over.dead)dead();
