@@ -121,7 +121,7 @@ s au pluriel sur un nom qui en porte déjà un : « la puce », « la torpille �
   groupe ne sont pas alertées, et aucune autre espèce ne partage.
 - **Torpille** : ne quitte jamais l'eau ; invisible dès qu'elle plonge en eau profonde.
 - **Mine** : elle fonce dès qu'elle a repéré la foreuse. Arrivée **à une case**, elle **s'arme** : elle ne bouge
-  plus et **clignote**, puis **explose 2 à 3 battements plus tard**  — **20 dégâts** dans un **carré de 3 × 3, plus 5 cases tirées
+  plus et **clignote**, puis **explose 2 à 3 battements plus tard** (**abattue à distance** — décharge de batterie, laser, onde sismique — **elle explose aussitôt** ; abattue **au contact par la foreuse**, elle éclate comme les autres sans exploser, 28 novembre 2026)  — **20 dégâts** dans un **carré de 3 × 3, plus 5 cases tirées
   au hasard parmi les 12 qui le bordent par un côté** (les coins du 5 × 5 exclus), à la foreuse et à
   toute créature qui s'y trouve. Les flammes se dessinent sur toute la zone, si bien qu'aucune explosion n'a la même forme. Détruite avant, elle n'explose pas ; elle n'a pas d'autre attaque.
   **L'explosion brise la roche et la montagne tendre** du carré : elles deviennent des gravats, et le

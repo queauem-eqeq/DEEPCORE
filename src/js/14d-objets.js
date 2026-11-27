@@ -289,7 +289,7 @@ function butinPrend(c,more){const l=G.items&&G.items[c];if(!l)return;const dire=
 // la visée montre toujours une seule case (22 novembre 2026) : une zone dessinée trahirait la charge sismique ou le fumigène
 function viseeCases(){return VISEE?[[VISEE.x,VISEE.y]]:[];}
 function retire(c){const isB=(G.beasts||[]).includes(c);(isB?G.beasts:G.animals).splice((isB?G.beasts:G.animals).indexOf(c),1);
-  bleed(c.x,c.y);if(isB)butinMort(c);}
+  bleed(c.x,c.y);if(isB){butinMort(c);minePartie(c);}}
 function consoCible(i,x,y){const o=G.inv[i];if(!o)return;const k=o.k,d=ITEMS[k],V=ITEM_VAL[k]||{},st=G.st,nom=d.vrai.n,connu=identifie(k);
   const moi=x===G.px&&y===G.py,b=beastAt(x,y),an=b?null:animalAt(x,y),c=b||an,sp=b?BEASTS[b.sp]:an?SPECIES[an.sp]:null;
   // objet connu, inutile sur la foreuse : refusé, rien n'est dépensé

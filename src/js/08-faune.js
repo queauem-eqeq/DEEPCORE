@@ -553,6 +553,9 @@ function zoneBoom(x,y){const out=[],bord=[];
   for(let n=0;n<BOOM_EXTRA&&bord.length;n++)out.push(bord.splice(rnd(0,bord.length-1),1)[0]);
   return out;}
 const dansZone=(z,x,y)=>z.some(c=>c[0]===x&&c[1]===y);
+/* Une mine abattue à distance (décharge de batterie, laser, onde sismique) explose ; abattue au contact par la foreuse, elle
+   éclate comme les autres sans exploser (28 novembre 2026). À appeler une fois la mine retirée de la liste. */
+function minePartie(c){if(G&&!G.over&&c&&BEASTS[c.sp]&&BEASTS[c.sp].mine)explose(c);}
 function explose(b){const sp=BEASTS[b.sp],k=G.beasts.indexOf(b);if(k>=0)G.beasts.splice(k,1);
   const zone=zoneBoom(b.x,b.y),dans=o=>dansZone(zone,o.x,o.y),vu=vis[idx(b.x,b.y)];
   addFx({kind:'boom',x:b.x,y:b.y,cases:zone,dur:420});
