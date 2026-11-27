@@ -1043,3 +1043,23 @@ Version de la PR #56 (branche `claude/2026-11-26_Mesures_fluidite-cpu`), Chromiu
 Pics restants, ponctuels : première image d'une descente (60 à 110 ms, écran encore noir), premier rendu d'un niveau
 (environ 100 à 190 ms : voile du sol, bords des gouffres, toutes les cases du décor), un pas isolé de 80 ms au niveau 1 non
 reproduit (ramasse-miettes probable). Mémoire JS : 28 Mo (20 Mo avant ; les canevas des caches).
+
+### Sur le PC du joueur (27 novembre 2026)
+
+Navigateur intégré de l'application Claude (Chrome 156, Windows, carte graphique RTX 2070, 12 cœurs), page en 1280 × 800,
+densité 1. Comparaison entre la version d'avant les optimisations (`fe1874a`, branche de la PR #55) et celle de la PR #56
+(`3f44ef7`), servies depuis GitHub par rawcdn.githack.com.
+
+| | Avant | Après |
+|---|---|---|
+| Image en jouant (moy · p95) | 5,7 à 6,3 · 11 à 12,5 ms | **3,0 à 3,2 · 5,3 à 5,9 ms** |
+| Même scène redessinée | 4,2 à 5,4 ms | **1,0 ms** |
+| Pas complet (moy · p95) | 7,1 à 8,0 · 12 à 15 ms | **4,2 à 4,3 · 7,7 ms** |
+| Intro puis niveau 1 (Niv1) | 63 images/s, 54 % de CPU, p95 27 ms | **20 images/s, 9,5 %**, p95 13 ms |
+| Première descente (Niv2) | **42 images/s au lieu de 60** (saccadé), 77 % de CPU | **20 images/s stables, 11 %** |
+| Seconde descente, mines (Niv3) | **35 images/s au lieu de 60** (saccadé), 81 % de CPU | **20 images/s stables, 12 %** |
+
+Avant, les descentes ne tenaient pas le rythme demandé sur ce PC : chaque image prenait 18 à 23 ms de calcul. La carte
+graphique ne change presque rien au coût du dessin en grille de caractères : ce sont les opérations de dessin qui coûtent.
+Avec le cache seul (même version, `DECOR_OFF` vrai puis faux) : image en jouant 4,7 à 5,0 → 3,0 à 3,2 ms ; même scène 3,7 à
+3,9 → 1,0 ms.
