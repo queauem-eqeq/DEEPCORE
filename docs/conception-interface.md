@@ -262,3 +262,5 @@ sa liste et posera **en priorité**, avant de générer le reste. **Branché sur
 - **Enregistrement** : dans le navigateur à chaque modification (`np-modules`) ; « Enregistrer » l'envoie dans la base
   de l'artefact (champ `modules` de `reglages/courant` : `liste` et `nb`). Code : `14f-modules.js`.
 - **Reste à faire** : brancher les niveaux 2 (cavernes), 3 (grande base) et la recette classique.
+
+- **Journal en grand (28 novembre 2026).** Le bouton **+** en haut à droite du journal du bas ouvre une grande fenêtre qui en montre une **copie figée** : rien ne la refait toute seule (ni nouveau message, ni assombrissement par tour), si bien que l'on peut lire et **sélectionner le texte** sans qu'il se décale. **Actualiser** la reconstruit (la position de lecture est gardée si l'on n'était pas tout en bas) ; Échap, Fermer ou un clic à côté la ferment. Le jeu ignore les touches tant qu'elle est ouverte.

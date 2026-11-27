@@ -56,6 +56,13 @@
   </div>
 </div>
 <!-- Fenêtre Items (Lab, 22 novembre 2026) : tous les objets, leurs valeurs modifiables, et le butin des robots. -->
+<div class="modal" id="logBig" role="dialog" aria-modal="true" aria-labelledby="lbTitle" hidden>
+  <div class="mcard" tabindex="-1">
+    <div class="mhead"><h2 id="lbTitle">Journal de bord</h2><button id="lbRefresh" type="button" title="Recharger le journal avec les derniers messages">Actualiser</button><button id="lbClose" type="button" aria-label="Fermer le journal">Fermer</button></div>
+    <p class="mnote">Texte figé : il ne bouge plus pendant que vous le sélectionnez. « Actualiser » ajoute les messages récents.</p>
+    <div class="logbig" id="lbTxt"></div>
+  </div>
+</div>
 <div class="modal" id="items" role="dialog" aria-modal="true" aria-labelledby="itTitle" hidden>
   <div class="mcard wide" tabindex="-1">
     <div class="mhead"><h2 id="itTitle">Items</h2><span class="saved" id="itMsg" role="status"></span><button id="itReset" title="Rétablir toutes les valeurs d’origine">Rétablir</button><button id="itSave">Enregistrer</button><button id="itClose" aria-label="Fermer les items">Fermer</button></div>
@@ -162,7 +169,7 @@
     <div class="camtag" id="camTag" hidden>MODE CARTE · déplacements = défilement · mini-carte : clic = recentrer, glisser = défiler · <kbd>M</kbd> pour revenir</div>
     <div class="overlay" id="overlay" hidden><div class="card" id="card"></div></div>
   </section>
-  <section class="log" aria-label="Journal de bord"><ul id="log" aria-live="polite"></ul></section>
+  <section class="log" aria-label="Journal de bord"><ul id="log" aria-live="polite"></ul><button class="logplus" id="logPlus" type="button" title="Ouvrir le journal en grand (texte fixe, sélectionnable)" aria-label="Ouvrir le journal en grand">+</button></section>
   </div>
   <aside class="col">
     <!-- 22 novembre 2026 : le haut de la colonne (barres, boutons, inventaire) reste fixe ; seul ce qui suit défile.

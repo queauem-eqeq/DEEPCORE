@@ -575,3 +575,15 @@ kbd{font-family:var(--mono);color:var(--fg);border:1px solid var(--line);padding
 .itfs{display:flex;flex-wrap:wrap;gap:6px 12px}
 .itf{display:flex;align-items:center;gap:6px;color:var(--dim)}
 .itf input{width:64px;background:var(--black);color:var(--text,#fff);border:1px solid var(--line);font:inherit;padding:2px 4px}
+
+/* Journal en grand (28 novembre 2026) : une copie figée du journal, que l'on peut lire et sélectionner sans qu'elle défile. */
+.log{position:relative}
+.logplus{position:absolute;top:4px;right:20px;width:22px;height:22px;padding:0;line-height:20px;text-align:center;font-size:16px;z-index:2}
+#logBig .mcard{width:min(1100px,100%);height:calc(100vh - 40px);height:calc(100dvh - 40px);display:flex;flex-direction:column;overflow:hidden}
+#logBig .mcard>*{flex:0 0 auto}
+#logBig .mhead{display:flex;gap:8px;align-items:center}
+#logBig .mhead h2{margin-right:auto}
+.logbig{flex:1 1 auto!important;min-height:0;overflow-y:auto;font-size:13px;line-height:1.55;-webkit-user-select:text;user-select:text;cursor:text;padding-right:6px}
+.logbig .lgl{display:grid;grid-template-columns:calc(4ch + 10px) minmax(0,1fr);color:var(--fg);overflow-wrap:anywhere;margin-bottom:2px}
+.logbig .t{color:var(--dim)}.logbig .sep{color:var(--dim);margin:0 .6ch}
+.logbig .ev.warn{color:var(--c3)}.logbig .ev.info{color:var(--c2)}.logbig .ev.good{color:var(--c1)}

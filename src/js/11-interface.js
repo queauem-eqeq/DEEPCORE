@@ -85,6 +85,20 @@ function mini(){
     x0=Math.round((PHASE.x+.5)*k-q/2),y0=Math.round((PHASE.y+.5)*k-q/2);mctx.fillStyle=ok?PAL['2']:PAL['4'];
     mctx.fillRect(x0,y0,q,u);mctx.fillRect(x0,y0+q-u,q,u);mctx.fillRect(x0,y0,u,q);mctx.fillRect(x0+q-u,y0,u,q);}
 }
+/* Journal en grand (28 novembre 2026) : le bouton + ouvre une copie FIGÉE du journal dans une grande fenêtre. Rien ne la refait
+   toute seule (ni nouveau message, ni assombrissement par tour) : on peut lire et sélectionner sans que le texte se décale.
+   « Actualiser » la reconstruit, en gardant la position de lecture si l'on n'était pas tout en bas. */
+function logBigBuild(){const lg=G&&G.log||[],blocs=[];
+  for(const e of lg){const b=blocs[blocs.length-1];if(b&&b.t===e.t)b.ev.push(e);else blocs.push({t:e.t,ev:[e]});}
+  $('lbTxt').innerHTML=blocs.map(b=>`<div class="lgl"><span class="t">T${String(b.t).padStart(3,'0')}</span><span>`+
+    b.ev.map((e,k)=>`<span class="ev ${e.c||''}">${e.m}${e.n>1?` ×${e.n}`:''}</span>`+(k<b.ev.length-1?'<span class="sep">║</span>':'')).join('')+'</span></div>').join('');}
+function logBigOpen(){if(!G)return;if(TRAV)stopTravel();if(REST)stopRest();if(EXPL)stopExplore();
+  logBigBuild();$('logBig').hidden=false;const t=$('lbTxt');t.scrollTop=t.scrollHeight;$('lbClose').focus();}
+function logBigClose(){$('logBig').hidden=true;$('logPlus').focus();render();}
+function logBigRefresh(){const t=$('lbTxt'),bas=t.scrollHeight-t.scrollTop-t.clientHeight<4,h=t.scrollTop;logBigBuild();t.scrollTop=bas?t.scrollHeight:h;}
+$('logPlus').addEventListener('click',logBigOpen);$('lbClose').addEventListener('click',logBigClose);$('lbRefresh').addEventListener('click',logBigRefresh);
+$('logBig').addEventListener('keydown',ev=>{if(ev.key==='Escape'){ev.preventDefault();logBigClose();}ev.stopPropagation();});
+$('logBig').addEventListener('pointerdown',ev=>{if(ev.target===$('logBig'))logBigClose();});
 /* ---------- Panneau « En vue » : chaque élément visible, sans répétition ---------- */
 let ICON={};
 /* Barre ASCII : ░ sur toute la largeur, recouvert d'un calque de █ découpé à la largeur exacte (16 novembre 2026).
