@@ -143,6 +143,11 @@ function phaseVers(x,y){if(!PHASE)return;const cx=Math.max(1,Math.min(W-2,x)),cy
 /* Défilement de la vue pendant le phasage (28 novembre 2026) : la vue reste centrée sur la foreuse ; quand le viseur s'approche
    du bord du cadre (PHASE_BORD cases), elle défile d'une case vers lui, au rythme de PHASE_PAS. Un viseur posé hors de la vue
    par la mini-carte ne la déplace pas : on le suit sur la mini-carte. `loin` : on ramène la vue d'un coup (touches). */
+// cases intermédiaires, en ligne droite, entre la boule restée sur place et le viseur (le phasage ignore le terrain) ; ni l'une ni l'autre
+function phaseLigne(){if(!PHASE)return null;let x=PHASE.x0,y=PHASE.y0;const tx=PHASE.x,ty=PHASE.y,dx=Math.abs(tx-x),dy=-Math.abs(ty-y),
+  sx=x<tx?1:-1,sy=y<ty?1:-1,p=[];let e=dx+dy;
+  for(let n=0;n<W+H;n++){if(x===tx&&y===ty)break;const e2=2*e;if(e2>=dy){e+=dy;x+=sx;}if(e2<=dx){e+=dx;y+=sy;}if(!(x===tx&&y===ty))p.push([x,y]);}
+  return p;}
 const PHASE_BORD=2,PHASE_PAS=70;let phaseTimer=0,phasePtr=null;
 function phaseDefile(loin){if(!PHASE)return false;const vc=Math.floor(vw/S),vr=Math.floor(vh/S);let bouge=false;
   const sens=(v,cam,n,max)=>{if(v<cam+PHASE_BORD&&cam>0)return -1;if(v>cam+n-1-PHASE_BORD&&cam<max-n)return 1;return 0;};

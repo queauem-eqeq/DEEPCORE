@@ -431,6 +431,12 @@ function render(){
      pas : la mini-carte le montre. */
   if(PHASE&&CURT_PH){const ok=phaseConnu(PHASE.x,PHASE.y)&&phaseTient(PHASE.x,PHASE.y);ctx.globalAlpha=1;
     ctx.drawImage(ok?CURT_PH:CURT_PHX,(PHASE.x-camX)*S,(PHASE.y-camY)*S,S,S);}
+  /* Boule du phaseur (28 novembre 2026) : tant que la foreuse est démontée, une petite boule bio frémit à son emplacement ;
+     le pointillé du trajet (drawPath) la relie au viseur. Elle tremble d'un pixel de tuile, au rythme de l'animation. */
+  if(PHASE){const u=S/16,t=Math.floor(performance.now()/50),jx=reduced?0:((t*7+3)%3)-1,jy=reduced?0:((t*5+1)%3)-1,
+    bx=(PHASE.x0-camX)*S+(5+jx)*u,by=(PHASE.y0-camY)*S+(5+jy)*u;ctx.globalAlpha=1;
+    const B=['..xx..','.xxxx.','xxxxxx','xxxxxx','.xxxx.','..xx..'];
+    for(let j=0;j<6;j++)for(let i=0;i<6;i++)if(B[j][i]==='x'){ctx.fillStyle=(i===2&&j===1)?'#ffffff':PAL['2'];ctx.fillRect(bx+i*u,by+j*u,u,u);}}
   /* Phaseur : la foreuse se démonte pixel par pixel (out), ou se reforme (arrivée). Entre les deux, pendant la visée longue,
      elle n'est plus dessinée du tout — elle n'est nulle part. */
   const fph=FX.find(f=>f.kind==='phase'&&f.robot);

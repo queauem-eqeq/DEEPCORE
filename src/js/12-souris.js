@@ -31,9 +31,9 @@ function getPath(){if(!HOV||!G)return null;const k=[HOV.x,HOV.y,G.turn,G.px,G.py
 // Trajet : un petit rond blanc en pixel art (4 × 4 pixels de tuile) au centre de chaque case intermédiaire,
 // rien sur la case du viseur (trajet en cours, sinon trajet vers la case survolée)
 const PATH_DOT=curCanvas(Array.from({length:16},(_,y)=>y===6||y===9?'.......ww.......':y===7||y===8?'......wwww......':'................'));
-function drawPath(){const p=TRAV?TRAV.path.slice(TRAV.i):(HOV&&!busy()?getPath():null);if(!p||!p.length)return;
+function drawPath(){const p=PHASE?phaseLigne():TRAV?TRAV.path.slice(TRAV.i):(HOV&&!busy()?getPath():null);if(!p||!p.length)return;   // phaseur (28 novembre 2026) : même pointillé, en ligne droite
   ctx.globalAlpha=.7;
-  for(const [x,y] of p){if(HOV&&x===HOV.x&&y===HOV.y)continue;ctx.drawImage(PATH_DOT,(x-camX)*S,(y-camY)*S,S,S);}
+  for(const [x,y] of p){if(!PHASE&&HOV&&x===HOV.x&&y===HOV.y)continue;ctx.drawImage(PATH_DOT,(x-camX)*S,(y-camY)*S,S,S);}
   ctx.globalAlpha=1;}
 function goTo(x,y){if(busy())return;const d=Math.max(Math.abs(x-G.px),Math.abs(y-G.py));
   if(d===0){if(siteAt(x,y))askDrill();return;}

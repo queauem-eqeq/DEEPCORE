@@ -584,7 +584,7 @@ function explose(b){const sp=BEASTS[b.sp],k=G.beasts.indexOf(b);if(k>=0)G.beasts
    pour toucher ordinaire, et le trait rouge se voit toujours — droit sur la foreuse s'il touche, à côté s'il rate.
    La clé interne de l'espèce reste `paralyzor`, pour que les groupes déjà réglés continuent de marcher. */
 // une mine armée clignote : le rendu doit tourner
-const animVif=()=>!!(G&&((G.beasts&&G.beasts.some(b=>b.fuse>0))||(G.balises&&G.balises.length)||(typeof PONT_AN!=='undefined'&&PONT_AN.size)));
+const animVif=()=>!!(G&&(PHASE||(G.beasts&&G.beasts.some(b=>b.fuse>0))||(G.balises&&G.balises.length)||(typeof PONT_AN!=='undefined'&&PONT_AN.size)));
 /* Le battement, côté ennemis : détection, alarmes, mémoire, effets qui s'épuisent, mèche des mines, soins du
    Soudeur. Les pas et les coups se jouent sur l'horloge de chaque créature, dans beastJoue. Ce qui est décidé ici
    (b.sees, b.hunt) sert jusqu'au battement suivant. */
