@@ -50,7 +50,7 @@ Object.assign(ITEMS,{
      elle se reforme n'importe où sur le terrain DÉJÀ DÉCOUVERT (G.seen), pourvu qu'elle y tienne. Sur un ennemi : il se
      disperse et reparaît au hasard sur le niveau, à `loin` cases au moins, et perd la trace de la foreuse. */
   phaseur:{n:'Phaseur',conso:1,son:'phase',eff:'Téléportation sur le terrain connu',
-    d:'Un champ de phase à usage unique. Sur la foreuse : elle se démonte et se reforme où l’on veut, pourvu que le terrain ait déjà été découvert. Lancé sur un ennemi : il se disperse et reparaît ailleurs sur le niveau, sans plus savoir où la foreuse se trouve.',
+    d:'Un champ de phase à usage unique. Sur la foreuse : elle entre en phase et sort de phase où l’on veut, pourvu que le terrain ait déjà été découvert. Lancé sur un ennemi : il passe en phase ailleurs sur le niveau, sans plus savoir où la foreuse se trouve.',
     plein:st=>false,non:'',use:st=>'',
     art:["     ▄▄▄▄▄     ", "    █ ▐▌  █    ", "    █ ▐▌░ █    ", "    █ ▐▌  █    ", "     ▀▀▀▀▀     "],
     col:[".....wwwww.....", "....w.11..w....", "....w.112.w....", "....w.11..w....", ".....wwwww....."]},
@@ -162,12 +162,12 @@ function phaseSouris(ev){if(!PHASE)return;phasePtr=ev;
 function phaseOk(){if(!PHASE||G.over)return;const {x,y}=PHASE;
   if(!phaseConnu(x,y)||!phaseTient(x,y)){PHASE.rate++;SFX.blocked();
     say(phaseConnu(x,y)?'Le champ de phase refuse cette case : la foreuse n’y tiendrait pas.':'Terrain jamais découvert : le champ de phase n’a pas de point d’ancrage.','warn');
-    if(PHASE.rate>=3)phaseRetour('Trop d’essais : la foreuse se reforme sur place.');else render();return;}
+    if(PHASE.rate>=3)phaseRetour('Trop d’essais : la foreuse sort de phase sur place.');else render();return;}
   const loin=Math.round(Math.hypot(x-PHASE.x0,y-PHASE.y0));PHASE=null;phasePtr=null;
   G.px=x;G.py=y;G.tracks=null;   // la trace s'arrête net : rien ne relie les deux points
-  phaseArrive(`La foreuse se reforme ${loin} case${loin>1?'s':''} plus loin.`);}
+  phaseArrive(`La foreuse sort de phase ${loin} case${loin>1?'s':''} plus loin.`);}
 // Échap, ou trois refus : retour sur place
-function phaseRetour(m){if(!PHASE)return;G.px=PHASE.x0;G.py=PHASE.y0;PHASE=null;phasePtr=null;phaseArrive(m||'Le champ de phase se referme : la foreuse se reforme sur place.');}
+function phaseRetour(m){if(!PHASE)return;G.px=PHASE.x0;G.py=PHASE.y0;PHASE=null;phasePtr=null;phaseArrive(m||'Le champ de phase se referme : la foreuse sort de phase sur place.');}
 function phaseArrive(m){addFx({kind:'phase',x:G.px,y:G.py,robot:1,dur:PHASE_DUR});
   addFx({kind:'onde',x:G.px,y:G.py,r:4.5,dur:PHASE_DUR});SFX.phase();
   say(m,'good');computeFOV();invChanged();
@@ -346,7 +346,7 @@ addFx({kind:'ener',x,y,dur:1000,gr:fxGrains(12)});}
       c.x=p[0];c.y=p[1];c.tient=0;c.leurre=0;
       if(b){b.hunt=0;b.fuse=0;}else an.aware=0;
       forget(c);phaseFx(c.x,c.y,null,0);
-      txt=`${leNom(sp)} se disperse et se reforme ailleurs sur le niveau`;}}
+      txt=`${leNom(sp)} passe en phase, ailleurs sur le niveau`;}}
     else{txt='le champ de phase se referme sur le vide';ton='warn';}}
   else if(k==='court'){if(moi){st.energie=0;txt='surtension : l’énergie tombe à zéro';ton='warn';addFx({kind:'shake',amp:5,dur:250});
     addFx({kind:'zap',ax:x-.5,ay:y-.5,bx:x+.5,by:y+.5,dur:320});addFx({kind:'zap',ax:x+.5,ay:y-.5,bx:x-.5,by:y+.5,dur:320});}
