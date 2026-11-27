@@ -173,10 +173,10 @@ const cellAt=ev=>{const r=cv.getBoundingClientRect();
   return {x:Math.floor((ev.clientX-r.left)/(S*VZ))+camX,y:Math.floor((ev.clientY-r.top)/(S*VZ))+camY};};   // VZ : zoom de la vue sur tablette
 cv.addEventListener('pointerdown',ev=>{lastPT=ev.pointerType||'mouse';});
 cv.addEventListener('pointermove',ev=>{if(ev.pointerType==='touch'||!G)return;const c=cellAt(ev);if(c.x<0||c.y<0||c.x>=W||c.y>=H)return;
-  if(PHASE){phaseVers(c.x,c.y);return;}   // visée longue du phaseur (26 novembre 2026)
+  if(PHASE){phaseVers(c.x,c.y);phaseSouris(ev);return;}   // visée du phaseur : la vue défile près du bord (28 novembre 2026)
   if(VISEE){viseeVers(c.x,c.y);return;}
   if(!HOV||HOV.x!==c.x||HOV.y!==c.y){HOV=c;render();}});
-cv.addEventListener('pointerleave',()=>{if(INSPECT||lastPT==='touch')return;if(HOV){HOV=null;render();}});
+cv.addEventListener('pointerleave',()=>{phasePtr=null;if(INSPECT||lastPT==='touch')return;if(HOV){HOV=null;render();}});
 cv.addEventListener('click',ev=>{if(PHASE){const c=cellAt(ev);phaseVers(c.x,c.y);phaseOk();return;}
   if(VISEE){const c=cellAt(ev);viseeVers(c.x,c.y);viseeOk();return;}
   if(busy())return;if(EXPL){stopExplore('Exploration interrompue.');return;}if(REST){stopRest('Repos interrompu.');return;

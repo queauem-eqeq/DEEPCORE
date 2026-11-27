@@ -17,7 +17,7 @@ function miniMove(ev){const [x,y]=miniCell(ev);camCX=Math.max(0,Math.min(W-1,Mat
   camCY=Math.max(0,Math.min(H-1,Math.round(y-miniDrag.oy)));render();}
 mv.addEventListener('pointerdown',ev=>{if(!G||!$('overlay').hidden||ev.button>0)return;ev.preventDefault();
   // visée longue du phaseur (26 novembre 2026) : la mini-carte sert à viser loin d'un seul geste, sans toucher au mode carte
-  if(PHASE){const [x,y]=miniCell(ev);phaseVers(Math.round(x),Math.round(y));return;}
+  if(PHASE){const [x,y]=miniCell(ev);phasePtr=null;phaseVers(Math.round(x),Math.round(y));return;}
   if(TRAV)stopTravel('Trajet interrompu.');if(REST)stopRest('Repos interrompu.');if(EXPL)stopExplore('Exploration interrompue.');
     if(INSPECT){INSPECT=false;$('inspTag').hidden=true;}
   if(!freeCam)setFreeCam(true);
@@ -80,6 +80,10 @@ function mini(){
   mctx.strokeRect(X(camX)+.5,Y(camY)+.5,X(camX+Math.min(W,Math.ceil(vw/S)))-X(camX)-1,Y(camY+Math.min(H,Math.ceil(vh/S)))-Y(camY)-1);
   mctx.globalAlpha=1;mctx.fillStyle='#ffffff';const pr=Math.max(2,Math.round(k*1.5));
     mctx.fillRect(Math.round((G.px+.5)*k-pr/2),Math.round((G.py+.5)*k-pr/2),pr,pr);
+  // viseur du phaseur (28 novembre 2026) : un carré creux, bio ou danger comme à l'écran, pour viser hors de la vue
+  if(PHASE){const ok=phaseConnu(PHASE.x,PHASE.y)&&phaseTient(PHASE.x,PHASE.y),q=Math.max(5,Math.round(k*3)),u=Math.max(1,Math.round(dpr)),
+    x0=Math.round((PHASE.x+.5)*k-q/2),y0=Math.round((PHASE.y+.5)*k-q/2);mctx.fillStyle=ok?PAL['2']:PAL['4'];
+    mctx.fillRect(x0,y0,q,u);mctx.fillRect(x0,y0+q-u,q,u);mctx.fillRect(x0,y0,u,q);mctx.fillRect(x0+q-u,y0,u,q);}
 }
 /* ---------- Panneau « En vue » : chaque élément visible, sans répétition ---------- */
 let ICON={};
@@ -213,7 +217,7 @@ addEventListener('keydown',ev=>{
   /* Visée longue du phaseur (26 novembre 2026) : la foreuse est démontée, le viseur traverse toute la carte et la vue le suit.
      Shift accélère de cinq cases, comme le mode carte. Rien d'autre ne répond tant qu'elle n'est pas reformée. */
   if(PHASE){ev.preventDefault();
-    if(KEYS[k]){const st=ev.shiftKey?5:1;phaseVers(PHASE.x+KEYS[k][0]*st,PHASE.y+KEYS[k][1]*st);}
+    if(KEYS[k]){const st=ev.shiftKey?5:1;phaseVers(PHASE.x+KEYS[k][0]*st,PHASE.y+KEYS[k][1]*st);phaseDefile(1);}
     else if(k==='enter'||k===' ')phaseOk();
     else if(k==='escape')phaseRetour();
     return;}

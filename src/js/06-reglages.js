@@ -1,12 +1,20 @@
 /* ---------- Viseur (curseur de la souris et du mode inspection) ---------- */
-let CURT=null,CURT_DIM=null;
+let CURT=null,CURT_DIM=null,CURT_PH=null,CURT_PHX=null;
 function rowsOf(k){const f=TF(k),[w,h]=tileDim(k),r=[];for(let y=0;y<h;y++){let l='';for(let x=0;x<w;x++)l+=f(x,y)||'.';
   r.push(l);}return r;}
 function curCanvas(rows,ink){const c=document.createElement('canvas');c.width=c.height=16;const x=c.getContext('2d');
   for(let j=0;j<16;j++)for(let i=0;i<16;i++){const ch=rows[j][i];if(ch==='.')continue;x.fillStyle=ch==='w'&&ink?ink:inkCol(ch);
     x.fillRect(i,j,1,1);}return c;}
 // viseur tel que dessiné sur une case accessible ; ses pixels blancs passent en gris sur une case inexplorée ou hors d'atteinte
-function buildCursor(){const r=rowsOf('cursor');CURT=curCanvas(r);CURT_DIM=curCanvas(r,'#8aa9a2');}
+/* Viseur du phaseur (28 novembre 2026) : le dessin du viseur habituel (mêmes pointillés, contour noir compris), mais tout en
+   couleur bio ; sur une case interdite, en rouge danger avec une croix en X d'un coin à l'autre. */
+function phaseCurseur(rows,col,croix){const c=document.createElement('canvas');c.width=c.height=16;const x=c.getContext('2d');
+  for(let j=0;j<16;j++)for(let i=0;i<16;i++){const ch=rows[j][i];if(ch==='.')continue;x.fillStyle=ch==='0'?inkCol('0'):col;x.fillRect(i,j,1,1);}
+  if(croix){x.fillStyle=inkCol('0');for(let k=2;k<=13;k++){for(const [a,b] of [[k,k],[k,15-k]]){x.fillRect(a-1,b,1,1);x.fillRect(a+1,b,1,1);}}
+    x.fillStyle=col;for(let k=3;k<=12;k++){x.fillRect(k,k,1,1);x.fillRect(k,15-k,1,1);}}
+  return c;}
+function buildCursor(){const r=rowsOf('cursor');CURT=curCanvas(r);CURT_DIM=curCanvas(r,'#8aa9a2');
+  CURT_PH=phaseCurseur(r,PAL['2'],0);CURT_PHX=phaseCurseur(r,PAL['4'],1);}
 
 /* ---------- Réglages de génération ---------- */
 // Maximums par terrain : au-delà, la planète perd son intérêt (eau : plus assez de terre ferme ; montagne : le jeu doit percer

@@ -133,23 +133,36 @@ function phaseCase(c,loin){const b=(G.beasts||[]).includes(c);
   return null;}
 // la foreuse se démonte : le viseur s'ouvre
 function phaseOuvre(neuf){const nom=ITEMS.phaseur.vrai.n;
-  PHASE={x:G.px,y:G.py,x0:G.px,y0:G.py,rate:0};
+  PHASE={x:G.px,y:G.py,x0:G.px,y0:G.py,cx:G.px,cy:G.py,rate:0};
   phaseFx(G.px,G.py,null,1);addFx({kind:'phase',x:G.px,y:G.py,robot:1,out:1,dur:PHASE_DUR});
   SFX.phase();camoCasse();
   say(`${neuf?`Capsule ${savoir().codes.phaseur} : c’était un ${nom}. `:''}${nom} : la foreuse se démonte. Choisissez où elle se reforme — déplacement ou souris, Entrée ou clic pour valider, Échap pour revenir sur place.`,'warn');
   render();}
 function phaseVers(x,y){if(!PHASE)return;const cx=Math.max(1,Math.min(W-2,x)),cy=Math.max(1,Math.min(H-2,y));
   if(cx!==PHASE.x||cy!==PHASE.y){PHASE.x=cx;PHASE.y=cy;render();}}
+/* Défilement de la vue pendant le phasage (28 novembre 2026) : la vue reste centrée sur la foreuse ; quand le viseur s'approche
+   du bord du cadre (PHASE_BORD cases), elle défile d'une case vers lui, au rythme de PHASE_PAS. Un viseur posé hors de la vue
+   par la mini-carte ne la déplace pas : on le suit sur la mini-carte. `loin` : on ramène la vue d'un coup (touches). */
+const PHASE_BORD=2,PHASE_PAS=70;let phaseTimer=0,phasePtr=null;
+function phaseDefile(loin){if(!PHASE)return false;const vc=Math.floor(vw/S),vr=Math.floor(vh/S);let bouge=false;
+  const sens=(v,cam,n,max)=>{if(v<cam+PHASE_BORD&&cam>0)return -1;if(v>cam+n-1-PHASE_BORD&&cam<max-n)return 1;return 0;};
+  for(let k=0;k<(loin?60:1);k++){const dx=sens(PHASE.x,camX,vc,W),dy=sens(PHASE.y,camY,vr,H);if(!dx&&!dy)break;
+    PHASE.cx+=dx;PHASE.cy+=dy;camX+=dx;camY+=dy;bouge=true;}
+  if(bouge)render();return bouge;}
+// souris : tant qu'elle reste près du bord, la vue continue de défiler (le viseur suit la case sous le pointeur)
+function phaseSouris(ev){if(!PHASE)return;phasePtr=ev;
+  if(!phaseTimer)phaseTimer=setInterval(()=>{if(!PHASE){clearInterval(phaseTimer);phaseTimer=0;return;}
+    if(phasePtr&&phaseDefile(0)&&phasePtr.type!=='click'){const c=cellAt(phasePtr);phaseVers(c.x,c.y);}},PHASE_PAS);}
 // la foreuse se reforme sur la case visée
 function phaseOk(){if(!PHASE||G.over)return;const {x,y}=PHASE;
   if(!phaseConnu(x,y)||!phaseTient(x,y)){PHASE.rate++;SFX.blocked();
     say(phaseConnu(x,y)?'Le champ de phase refuse cette case : la foreuse n’y tiendrait pas.':'Terrain jamais découvert : le champ de phase n’a pas de point d’ancrage.','warn');
     if(PHASE.rate>=3)phaseRetour('Trop d’essais : la foreuse se reforme sur place.');else render();return;}
-  const loin=Math.round(Math.hypot(x-PHASE.x0,y-PHASE.y0));PHASE=null;
+  const loin=Math.round(Math.hypot(x-PHASE.x0,y-PHASE.y0));PHASE=null;phasePtr=null;
   G.px=x;G.py=y;G.tracks=null;   // la trace s'arrête net : rien ne relie les deux points
   phaseArrive(`La foreuse se reforme ${loin} case${loin>1?'s':''} plus loin.`);}
 // Échap, ou trois refus : retour sur place
-function phaseRetour(m){if(!PHASE)return;G.px=PHASE.x0;G.py=PHASE.y0;PHASE=null;phaseArrive(m||'Le champ de phase se referme : la foreuse se reforme sur place.');}
+function phaseRetour(m){if(!PHASE)return;G.px=PHASE.x0;G.py=PHASE.y0;PHASE=null;phasePtr=null;phaseArrive(m||'Le champ de phase se referme : la foreuse se reforme sur place.');}
 function phaseArrive(m){addFx({kind:'phase',x:G.px,y:G.py,robot:1,dur:PHASE_DUR});
   addFx({kind:'onde',x:G.px,y:G.py,r:4.5,dur:PHASE_DUR});SFX.phase();
   say(m,'good');computeFOV();invChanged();

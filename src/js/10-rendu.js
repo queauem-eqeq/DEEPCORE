@@ -339,8 +339,8 @@ function render(){
   if(G&&G.sonar===1&&G.turn>=(G.sonarAt||0)&&started&&!INTRO&&!BOOM&&!G.over&&$('overlay').hidden&&$('introCv').hidden)sonarStart();
   if(!G||!TL.robot)return;ensureChasmOv();ensureSolOv();
   const vc=vw/S,vr=vh/S;
-  // la vue suit le viseur du phaseur (26 novembre 2026), comme elle suit le cadre du mode carte
-  const fx0=PHASE?PHASE.x:freeCam?camCX:G.px,fy0=PHASE?PHASE.y:freeCam?camCY:G.py;
+  // pendant le phasage (28 novembre 2026) la vue reste centrée sur la foreuse, point de départ ; elle ne défile que près du bord
+  const fx0=PHASE?PHASE.cx:freeCam?camCX:G.px,fy0=PHASE?PHASE.cy:freeCam?camCY:G.py;
   camX=Math.max(0,Math.min(W-Math.floor(vc),fx0-Math.floor(vc/2)));camY=Math.max(0,Math.min(H-Math.floor(vr),fy0-Math.floor(vr/2)));
   ox=0;oy=0;
   ctx.globalAlpha=1;ctx.imageSmoothingEnabled=false;ctx.fillStyle=FOND;ctx.fillRect(0,0,vw,vh);
@@ -426,13 +426,11 @@ function render(){
   if(VISEE){const t=viseeTuile();ctx.globalAlpha=1;
     for(const [zx,zy] of viseeCases()){
       if(zx<0||zy<0||zx>=W||zy>=H)continue;ctx.drawImage(t,(zx-camX)*S,(zy-camY)*S,S,S);}}
-  /* Viseur du phaseur (26 novembre 2026) : un cadre d'un pixel de tuile et une croix au centre. Il dit tout de suite si la
-     case convient — bio quand la foreuse peut s'y reformer, danger quand le terrain est inconnu ou ne la porterait pas. */
-  if(PHASE){const u=S/16,ok=phaseConnu(PHASE.x,PHASE.y)&&phaseTient(PHASE.x,PHASE.y),px=(PHASE.x-camX)*S,py=(PHASE.y-camY)*S;
-    ctx.globalAlpha=1;ctx.fillStyle=ok?PAL['2']:PAL['4'];
-    for(let k=0;k<16;k++)if(k<5||k>10){ctx.fillRect(px+k*u,py,u,u);ctx.fillRect(px+k*u,py+15*u,u,u);
-      ctx.fillRect(px,py+k*u,u,u);ctx.fillRect(px+15*u,py+k*u,u,u);}
-    for(let k=6;k<10;k++){ctx.fillRect(px+k*u,py+7*u,u,u);ctx.fillRect(px+7*u,py+k*u,u,u);}}
+  /* Viseur du phaseur (28 novembre 2026) : le viseur habituel, en couleur bio quand la foreuse peut s'y reformer ; sur une case
+     inconnue ou qui ne la porterait pas, le même viseur en rouge danger barré d'une croix en X. Hors de la vue, on ne le dessine
+     pas : la mini-carte le montre. */
+  if(PHASE&&CURT_PH){const ok=phaseConnu(PHASE.x,PHASE.y)&&phaseTient(PHASE.x,PHASE.y);ctx.globalAlpha=1;
+    ctx.drawImage(ok?CURT_PH:CURT_PHX,(PHASE.x-camX)*S,(PHASE.y-camY)*S,S,S);}
   /* Phaseur : la foreuse se démonte pixel par pixel (out), ou se reforme (arrivée). Entre les deux, pendant la visée longue,
      elle n'est plus dessinée du tout — elle n'est nulle part. */
   const fph=FX.find(f=>f.kind==='phase'&&f.robot);
