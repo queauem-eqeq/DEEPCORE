@@ -867,3 +867,199 @@ Lecture. Le rayon se resserre (5 → 3) et l'attente devient plus efficace (25 �
 la dernière ligne : **passer devant une porte dérobée suffit maintenant à la trouver plus d'une fois sur deux**,
 alors qu'avant il fallait s'arrêter au bon endroit sans savoir qu'il y avait quelque chose. Se reposer reste la
 façon de fouiller un endroit précis : deux fois moins de battements qu'en marchant sur place.
+
+## Fluidité et temps de calcul (26 novembre 2026)
+
+Mesuré avec `python3 outils/jeu.py DOSSIER outils/scripts/mesure-perf.js`, sur la branche de la PR #55 (carte 96×64, Chromium sans carte graphique : **les chiffres sont pessimistes** par rapport à un vrai ordinateur, à refaire sur la machine du joueur avant de conclure). Objectifs : image sous 16 ms, tour sous 50 ms.
+
+| Étape | Médiane | p95 | Pire |
+|---|---|---|---|
+| Génération d'un niveau (`newGame`) | 386 ms | 475 ms | 475 ms |
+| `computeFOV` | 0,1 ms | 0,4 ms | 2,9 ms |
+| `render` | 1,7 ms | 29 ms | 79 ms |
+| `beastsAct` | 0,1 ms | 3,3 ms | 8,4 ms |
+| `animalsAct` | 1,7 ms | 2,7 ms | 12,9 ms |
+| Tour complet (`tryMove`) | 5,8 ms | 36 ms | 159 ms |
+| Au repos, rappels d'image sur 3 s | 3,0 ms | 7,4 ms | 10,4 ms |
+
+Mémoire JS : 19,6 Mo. *Correction du même jour : les « 8 % de CPU au repos » venaient des effets laissés par les pas d'essai.
+Une fois ces effets finis, la boucle d'animation s'arrête bien ; au repos, seul le battement des liquides (`setInterval`, toutes
+les 650 ms) redessine l'écran.*
+
+Lecture :
+- Le moteur (vue, ennemis) est léger. Le coût vient du **dessin** : `render` redessine toute la fenêtre à chaque appel.
+- Les pics de 30 à 80 ms **ne sont pas un effet de démarrage** : ils reviennent tout au long de la mesure (ramasse-miettes probable, à confirmer au profileur).
+### Allègement du rendu (26 novembre 2026, même jour)
+
+Profil (`python3 outils/profil.py`, 200 rendus + 200 pas) avant : `drawImage` 49 %, `fillRect` 10 %, journal (`logDraw`) 9 %,
+mini-carte 6 %, patrouilles (`etend`) 5 %. Deux changements, **sans rien changer à l'écran** (contrôlé au pixel près par
+`outils/scripts/empreinte-image.js`, vue + mini-carte + journal) ni au jeu (`outils/verifier.py` : empreinte identique) :
+- **Mini-carte** : son fond est gardé dans un canevas à part ; on ne repeint que les cases dont le terrain ou l'état « vu »
+  a changé (avant : 6 144 cases à chaque rendu, y compris chaque image d'effet et chaque battement des liquides).
+- **Journal** : seuls les tours qui ont changé sont refaits (avant : les 200 messages reconstruits à chaque tour).
+
+Résultat, trois passes de chaque côté : **environ 15 % de CPU en moins** sur le même scénario (17 300 → 14 700
+échantillons de profil). Les temps moyens de `render` et du tour bougent peu (≈ 6 ms et ≈ 11 ms) : le bruit de Chromium
+sans carte graphique est du même ordre.
+
+Ce qui reste : **60 % du temps est le dessin des tuiles de la vue principale** (`drawImage`, plusieurs couches par case).
+Le gros gain serait un cache du terrain de la vue (ne repeindre que les cases changées, décaler l'image quand la caméra
+bouge, liquides à part). C'est une refonte de `render` (voisins des murs, ponts, gisements, brouillard) : à faire avec Opus,
+contrôlée par `empreinte-image.js`, et **après une mesure sur un vrai navigateur** : avec une carte graphique, `drawImage`
+coûte bien moins cher et le gain pourrait ne pas valoir le risque.
+
+### Tablette : vue plafonnée à 21 cases (26 novembre 2026)
+
+Rendu moyen (`render`, 100 appels), écran d'iPad simulé (densité 2), même Chromium sans carte graphique :
+
+| | Pleine résolution, sans plafond | Plafond 21 cases, zoom entier, pleine résolution | Plafond 21 cases, canevas à la résolution de l'ordinateur (retenu) |
+|---|---|---|---|
+| Paysage 1180 × 820 | 11 à 14 ms (29 × 22 cases) | 15 à 17 ms (19 × 15 cases) | **3,7 à 4,0 ms** |
+| Portrait 820 × 1180 | 10 à 15 ms (23 × 41 cases) | 19 à 23 ms (11 × 20 cases) | **3,8 à 4,4 ms** |
+
+Leçon : ici, le coût suit le **nombre de pixels à remplir**, pas le nombre de cases. Moins de cases agrandies à pleine
+résolution coûte même plus cher. Le gain vient de dessiner moins de pixels et de laisser le navigateur agrandir ; l'image
+obtenue est identique au pixel près à la pleine résolution (comparée). Sur ordinateur, l'écran reste identique
+(`empreinte-image.js`).
+
+
+### Ce qui ralentit un tour (26 novembre 2026)
+
+Outils : `outils/scripts/acoups.js` (chaque étape d'un pas chronométrée, 300 pas, hasard fixé) et
+`outils/scripts/mesure-logique.js` (le calcul de jeu seul, sans dessin, 1000 pas par recette).
+
+- **Le calcul de jeu est léger.** Sans le dessin, un pas coûte en moyenne 1 à 2 ms ; 99 % des pas restent sous 7 ms ;
+  le pire vu, 16 ms (cavernes, 33 ennemis). Rien à corriger d'urgence.
+- **Les pics de 30 à 50 ms d'un tour sont tous dans le dessin**, et **pas dans le jeu** : la même scène, redessinée
+  100 fois de suite sans jouer, dépasse 15 ms une fois sur trois. C'est Chromium sans carte graphique qui exécute le
+  dessin par paquets ; sur une vraie machine, ce comportement est probablement différent. À confirmer sur le PC du joueur.
+- Une seule exception réelle dans le dessin : le **premier rendu d'un niveau** calcule le voile du sol et les bords des
+  gouffres (environ 30 ms, une fois par niveau ; pendant la descente, invisible).
+- Ce qui coûte dans les pas les plus lents du calcul de jeu :
+  - **`patBfs` (chemins de patrouille de la faune)** : 1 à 1,5 ms par appel, jusqu'à 6 appels dans un même battement ;
+  - **poursuites** (`chaseStep`, `robotDistAvoid`, `distFrom`) : jusqu'à 6 ou 7 ms quand plusieurs ennemis chassent ;
+  - **champ de vision** dans les cavernes : jusqu'à 8 ms (près de 400 lignes de vue tirées).
+- Pendant les effets (coups, projectiles, sonar), la boucle d'animation redessine **tout l'écran à chaque image** (60 fois
+  par seconde). C'est là que le dessin pèse vraiment en combat, sur n'importe quelle machine.
+
+Pistes, par gain attendu : (1) pendant un effet, ne redessiner que la couche des effets (`fxv`) quand le décor ne bouge
+pas ; (2) garder en mémoire les chemins de patrouille de la faune, recalculés seulement si la carte change ; (3) le cache
+du terrain de la vue (voir plus haut).
+
+**Effets à 30 images par seconde (même jour)** : pendant un effet de 2 s, 61 → 31 rendus par seconde, et le dessin
+passe de 20 % à 8,5 % de CPU (Chromium sans carte graphique). Écran identique hors animation (`empreinte-image.js`).
+
+**20 images par seconde et effets de surface (même jour)** : pendant un effet de surface de 2 s, 4 rendus complets
+(8 ms) et 40 images rapides (**0,17 ms**) ; le dessin passe de **20 % de CPU (60 images/s) à environ 2 %**. Un effet
+qui touche le décor (secousse…) : 22 rendus complets par seconde au lieu de 61, soit environ 6 % au lieu de 20 %.
+
+### Décor en cache (26 novembre 2026, même jour)
+
+Recette classique, hasard fixé, 300 pas puis la même scène redessinée 100 fois (`render`, en ms ; moyenne · p95) :
+
+| Écran | Sans cache, en jouant | Avec cache, en jouant | Sans cache, même scène | Avec cache, même scène |
+|---|---|---|---|---|
+| Ordinateur 1280 × 800 | 8,2 à 8,7 · 23 à 26 | 5,7 à 6,3 · 15 à 17 | 6,6 à 7,3 · 18 à 22 | **1,0** · 1,3 |
+| Ordinateur, densité 2 | 18 · 58 | 11,6 · 31 | 15 · 46 | **1,6** · 2,7 |
+| Ordinateur, zoom 125 % | 10,3 · 30 | 7,0 · 19 | 9,0 · 30 | **1,0** · 1,3 |
+| Tablette (iPad simulé) | 6,3 · 22 | 4,3 · 9 | 5,2 · 23 | **0,9** · 1,4 |
+
+Une scène qui ne bouge pas (battement de l'eau sans eau visible, survol, effets qui touchent le décor) coûte 5 à 9 fois
+moins. En jouant, la caméra suit la foreuse à chaque pas : il faut décaler l'image et peindre une rangée de cases, d'où un
+gain plus faible (environ un tiers). Le premier rendu d'un niveau reste cher (60 à 80 ms : voile du sol, bords des
+gouffres et toutes les cases), une fois, pendant la descente. Écran identique au pixel près (`test-decor-cache.js` sur
+quatre recettes et trois écrans, `empreinte-image.js`, `test-fx-surface.js`).
+
+
+### Intro et descentes : audit (26 novembre 2026)
+
+Outil : `python3 outils/perf_scenes.py [intro|niv1|niv2] [--profil] [--densite D]`. Chromium sans carte graphique, 1280 × 800.
+
+| Scène | Images/s | Calcul par image dessinée (moy · p95) | CPU |
+|---|---|---|---|
+| Arrivée (intro) | 20 | 15 ms · 31 à 36 ms | 29 à 30 % |
+| Première descente | 20 | 22 ms · 32 à 35 ms | 43 à 45 % |
+| Seconde descente (mines) | 20 | 24 à 26 ms · 34 à 39 ms | 48 à 51 % |
+
+- Ces scènes sont des grilles de caractères plein écran : 146 × 55 cases dans les descentes, environ 160 × 50 pour
+  l'arrivée. **Chaque case est redessinée à chaque image** (fond noir, puis le caractère) : 8 000 à 15 000 opérations de
+  dessin par image. C'est le nombre d'opérations qui coûte, pas le nombre de pixels : en densité 2, le coût ne change
+  presque pas.
+- Descentes : la roche est une fonction fixe de la position. Elle défile d'environ 0,8 rangée par image, et presque pas
+  sur le côté. La foreuse, les mines, la Matière, la fumée et les débris se dessinent par-dessus.
+- Arrivée : la grille est reconstruite à chaque image (étoiles, planète, nuages, vaisseau, flammes), puis dessinée en
+  entier, décalée d'un bloc quand ça tremble.
+- Les bruits de la roche (`fgH`, `fgNz`) prennent 4 à 5 %.
+
+**Après la mise en cache (même jour)** :
+
+| Scène | Calcul par image (moy · p95 · pire), avant → après | CPU, avant → après |
+|---|---|---|
+| Arrivée (intro) | 15 · 31 à 36 · 47 à 53 ms → **9,4 · 27 · 35 ms** | 30 % → **19 %** |
+| Première descente | 22 · 32 à 35 ms → **8,5 · 15 ms** | 43 à 45 % → **17 %** |
+| Seconde descente (mines) | 24 à 26 · 34 à 39 ms → **9,1 · 16 ms** | 48 à 51 % → **19 %** |
+
+La première image d'une descente coûte 50 à 110 ms au lieu d'environ 45 (création du cache, pendant l'entrée encore noire).
+Images identiques au pixel près, contrôlées sur trois écrans (`test-forage-cache.js`) et pendant toute l'intro
+(`arrivee_cache.py`). Ce qui reste dans l'intro : le calcul de la grille (planète, nuages, flammes) et les moments où
+presque toutes les cases changent (descente vers la planète).
+
+**Taille des cases (même jour)** : descentes à 40 rangées, arrivée en grosses cases jusqu'à 8,7 s.
+
+| Scène, 1280 × 800 | Calcul par image (moy · p95) | CPU |
+|---|---|---|
+| Arrivée | 9,4 · 27 ms → **8,1 · 21 ms** | 19 % → **15 à 17 %** |
+| Première descente | 8,5 · 15 ms → **6,9 · 12 ms** | 17 % → **14 %** |
+| Seconde descente | 9,1 · 16 ms → **7,2 · 12 ms** | 19 % → **15 %** |
+
+En plein écran 1920 × 1080, l'arrivée passe de 34 % de CPU (p95 65 ms, 63 ms en moyenne vers 7 s) à 24-28 % (p95 35-44 ms,
+27 ms au plus fort). Le plus lourd reste le calcul des nuages vers 6 à 8 s, pas le dessin.
+
+**Arrivée en grosses cases jusqu'au bout, nuages (même jour)** : 1280 × 800 : 14 % de CPU (moy 7 ms, p95 19 ms) ;
+1920 × 1080 : 22 % (moy 10,5 ms, p95 31 à 34 ms), contre 34 % (p95 65 ms) au départ. Le bruit des nuages saute ses deux
+étages fins quand le premier suffit à rester sous le seuil (`fbmSous`, image identique) : il pèse désormais moins de 1 %. Ce
+qui reste en plein écran, c'est la pose des grandes images par le navigateur (« program » au profil, 29 %), bien moins chère
+avec une carte graphique.
+
+
+### Bilan (27 novembre 2026)
+
+Version de la PR #56 (branche `claude/2026-11-26_Mesures_fluidite-cpu`), Chromium sans carte graphique.
+
+| | Au départ (26 novembre) | Aujourd'hui |
+|---|---|---|
+| Rendu, même scène | 6,6 à 7,3 ms | **1,1 ms** |
+| Rendu en jouant (moy · p95) | 8,2 à 8,7 · 23 à 26 ms | **5,8 · 15 ms** |
+| Pas complet (moy · p95) | 7,8 à 11 · 36 ms | **7,8 · 17 à 20 ms** |
+| Calcul de jeu seul (moy · p99) | 1 à 2 · 7 ms | 0,6 à 1,4 · 3 à 7 ms (inchangé) |
+| Effet de surface, 2 s | 20 % de CPU | **1,2 %** |
+| Effet qui touche le décor, 2 s | 20 % | **6 %** |
+| Au repos (eau) | 0,4 % | 0,4 % |
+| Tablette, un rendu | 10 à 15 ms | **1 à 1,6 ms** |
+| Intro 1280 × 800 · 1920 × 1080 | 30 % · 34 % (p95 65 ms) | **14 % · 22 %** (p95 20 · 35 ms) |
+| Descentes 1280 × 800 · 1920 × 1080 | 45 à 51 % | **16 % · 17 %** |
+| Génération d'un niveau | 0,4 s | 0,3 à 0,4 s (inchangé) |
+
+Pics restants, ponctuels : première image d'une descente (60 à 110 ms, écran encore noir), premier rendu d'un niveau
+(environ 100 à 190 ms : voile du sol, bords des gouffres, toutes les cases du décor), un pas isolé de 80 ms au niveau 1 non
+reproduit (ramasse-miettes probable). Mémoire JS : 28 Mo (20 Mo avant ; les canevas des caches).
+
+### Sur le PC du joueur (27 novembre 2026)
+
+Navigateur intégré de l'application Claude (Chrome 156, Windows, carte graphique RTX 2070, 12 cœurs), page en 1280 × 800,
+densité 1. Comparaison entre la version d'avant les optimisations (`fe1874a`, branche de la PR #55) et celle de la PR #56
+(`3f44ef7`), servies depuis GitHub par rawcdn.githack.com.
+
+| | Avant | Après |
+|---|---|---|
+| Image en jouant (moy · p95) | 5,7 à 6,3 · 11 à 12,5 ms | **3,0 à 3,2 · 5,3 à 5,9 ms** |
+| Même scène redessinée | 4,2 à 5,4 ms | **1,0 ms** |
+| Pas complet (moy · p95) | 7,1 à 8,0 · 12 à 15 ms | **4,2 à 4,3 · 7,7 ms** |
+| Intro puis niveau 1 (Niv1) | 63 images/s, 54 % de CPU, p95 27 ms | **20 images/s, 9,5 %**, p95 13 ms |
+| Première descente (Niv2) | **42 images/s au lieu de 60** (saccadé), 77 % de CPU | **20 images/s stables, 11 %** |
+| Seconde descente, mines (Niv3) | **35 images/s au lieu de 60** (saccadé), 81 % de CPU | **20 images/s stables, 12 %** |
+
+Avant, les descentes ne tenaient pas le rythme demandé sur ce PC : chaque image prenait 18 à 23 ms de calcul. La carte
+graphique ne change presque rien au coût du dessin en grille de caractères : ce sont les opérations de dessin qui coûtent.
+Avec le cache seul (même version, `DECOR_OFF` vrai puis faux) : image en jouant 4,7 à 5,0 → 3,0 à 3,2 ms ; même scène 3,7 à
+3,9 → 1,0 ms.

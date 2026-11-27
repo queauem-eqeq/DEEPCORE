@@ -143,6 +143,37 @@ molette ou fine barre pour remonter jusqu'aux 200 derniers messages ; un nouveau
 - Sous **REGEN · MONDE · LIFE**, une rangée **NIV1 · NIV2 · NIV3** .
 - Sous-menus repliables : **Inventaire**, **Carte**, **Lab** (Bestiaire, Groupes, Artefacts, Items, Discrétion, Tile editor, **Combat** : un lien qui ouvre le banc dans un autre onglet), **Palette**, **Contrôles** (l'aide des touches, une commande par ligne : la touche, puis ce qu'elle fait ; trois groupes : Se déplacer, Objets, Voir).
 
+### Tablette : vue plafonnée à 21 cases (26 novembre 2026)
+Sur un écran tactile sans souris, la vue montre **au plus 21 cases** sur son plus grand côté (21 = la portée de vue de la
+foreuse, capteur 10, de part et d'autre) ; le petit côté en montre moins selon la forme de l'écran (iPad en paysage :
+environ 19 × 15 ; en portrait : 11 × 20). Les cases sont agrandies d'un facteur entier, pour rester nettes au pixel près.
+Le canevas est dessiné à la résolution de l'ordinateur puis agrandi par le navigateur : même image, trois fois moins de
+calcul qu'à pleine résolution. Sur ordinateur, rien ne change (autant de cases que la fenêtre en permet). **À régler plus
+tard** : le Téléobjectif (capteur 13) voit au-delà de ce qui est affiché.
+
+### Rythme des animations et effets de surface (26 novembre 2026)
+- **20 images par seconde partout** (effets, fumée, explosion, intro, descentes) : `FPS` et `raf20()` dans `00-base.js`,
+  au lieu du rythme du navigateur (60 ou plus). Les animations suivent l'horloge : leur durée ne change pas.
+- **Effets de surface** : la plupart des effets (dégâts, soins, énergie, lasers, glu, braises, alertes, ondes, boost,
+  fureur, voile, éclairs) se posent par-dessus le décor. Pendant qu'ils jouent, le décor n'est plus redessiné : une copie
+  est recollée et seuls les effets sont repeints (`fxRapide`, `10-rendu.js`). Dès qu'un effet touche le décor (secousse,
+  élan, éclair sur une bête, phaseur, sonar, balise en vol) ou que le décor s'anime seul (mine armée, balise, pont, antenne,
+  rayons du Bloqueur, explosion), tout est redessiné comme avant. Contrôle : `outils/scripts/test-fx-surface.js` (chaque
+  effet, image identique au pixel près entre les deux chemins).
+
+### Décor de la vue en cache (26 novembre 2026)
+Le décor (sol, roches, montagnes, murs, machines, eau, gouffres, brouillard) est gardé dans un canevas de la taille de la vue
+(`decorVue`, `caseDecor`, `10-rendu.js`). À chaque rendu, chaque case enregistre ce qu'elle dessinerait ; elle n'est repeinte
+que si cette liste a changé. Quand la caméra bouge, l'image est décalée et seules les cases nouvelles (et celles que le bord
+coupait) sont peintes. Créatures, objets, traces, effets et curseur se dessinent par-dessus, comme avant. Si une case ne tombe
+pas sur un nombre entier de pixels, le dessin se fait directement, sans cache. `DECOR_OFF = true` revient au dessin direct.
+Contrôle : `outils/scripts/test-decor-cache.js` (quatre recettes, cache contre dessin direct, au pixel près).
+
+### Plein écran (26 novembre 2026)
+Bouton **PLEIN ÉCRAN** sous Niv1 · Niv2 · Niv3 : met toute la page en plein écran (Échap ou le même bouton, devenu
+« QUITTER LE PLEIN ÉCRAN », pour en sortir) ; le jeu se redimensionne seul. Dans l'artefact claude.ai, le jeu est dans un
+cadre : si le site hôte refuse, le journal propose d'ouvrir le jeu dans un onglet à part ou d'appuyer sur F11.
+
 ### Souris et inspection
 
 - Le curseur système est masqué sur la carte ; le **viseur** est dessiné sur la case survolée. Dès qu'on appuie sur

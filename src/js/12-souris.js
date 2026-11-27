@@ -170,7 +170,7 @@ function setInspect(on){INSPECT=on;$('inspTag').hidden=!on;if(on){if(freeCam)set
 function moveInspect(dx,dy){const vc=Math.floor(vw/S),vr=Math.floor(vh/S);
   HOV={x:Math.max(camX,Math.min(Math.min(W,camX+vc)-1,HOV.x+dx)),y:Math.max(camY,Math.min(Math.min(H,camY+vr)-1,HOV.y+dy))};render();}
 const cellAt=ev=>{const r=cv.getBoundingClientRect();
-  return {x:Math.floor((ev.clientX-r.left)/S)+camX,y:Math.floor((ev.clientY-r.top)/S)+camY};};
+  return {x:Math.floor((ev.clientX-r.left)/(S*VZ))+camX,y:Math.floor((ev.clientY-r.top)/(S*VZ))+camY};};   // VZ : zoom de la vue sur tablette
 cv.addEventListener('pointerdown',ev=>{lastPT=ev.pointerType||'mouse';});
 cv.addEventListener('pointermove',ev=>{if(ev.pointerType==='touch'||!G)return;const c=cellAt(ev);if(c.x<0||c.y<0||c.x>=W||c.y>=H)return;
   if(PHASE){phaseVers(c.x,c.y);return;}   // visée longue du phaseur (26 novembre 2026)
