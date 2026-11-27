@@ -170,7 +170,7 @@ const DEVANT={u:[0,-1],r:[1,0],d:[0,1],l:[-1,0]};
 function viseeStart(i){const o=G.inv[i],c=CONSO[o.k]||{},soi=c.soi||!identifie(o.k),[dx,dy]=soi?[0,0]:DEVANT[G.face||'u'];
   VISEE={i,x:Math.max(1,Math.min(W-2,G.px+dx)),y:Math.max(1,Math.min(H-2,G.py+dy))};
   invOpen(false);SAC_NAV=false;SAC_H='';
-  say(`${ITEMS[o.k].n} : choisissez la cible (déplacement ou souris), Entrée ou clic pour valider, Échap pour annuler.${soi?' Entrée tout de suite : sur la foreuse.':''}`,'warn');render();}
+  say(`${ITEMS[o.k].n} : choisissez la cible.`,'warn');render();}
 function viseeVers(x,y){if(!VISEE)return;
   const cx=Math.max(G.px-VISEE_R,Math.min(G.px+VISEE_R,Math.max(1,Math.min(W-2,x)))),
         cy=Math.max(G.py-VISEE_R,Math.min(G.py+VISEE_R,Math.max(1,Math.min(H-2,y))));

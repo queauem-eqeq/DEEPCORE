@@ -136,7 +136,7 @@ function phaseOuvre(neuf){const nom=ITEMS.phaseur.vrai.n;
   PHASE={x:G.px,y:G.py,x0:G.px,y0:G.py,cx:G.px,cy:G.py,rate:0};
   phaseFx(G.px,G.py,null,1);addFx({kind:'phase',x:G.px,y:G.py,robot:1,out:1,dur:PHASE_DUR});
   SFX.phase();camoCasse();
-  say(`${neuf?`Capsule ${savoir().codes.phaseur} : c’était un ${nom}. `:''}${nom} : la foreuse entre en phase. Choisir la destination — déplacement ou souris, Entrée ou clic pour valider, Échap pour revenir sur place.`,'warn');
+  say(`${neuf?`Capsule ${savoir().codes.phaseur} : c’était un ${nom}. `:''}${nom} : la foreuse entre en phase. Choisir la destination.`,'warn');
   render();}
 function phaseVers(x,y){if(!PHASE)return;const cx=Math.max(1,Math.min(W-2,x)),cy=Math.max(1,Math.min(H-2,y));
   if(cx!==PHASE.x||cy!==PHASE.y){PHASE.x=cx;PHASE.y=cy;render();}}

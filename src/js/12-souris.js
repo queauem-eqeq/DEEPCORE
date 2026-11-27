@@ -118,7 +118,7 @@ function startExplore(){
   for(const e of [...(G.beasts||[]),...(G.animals||[])])if(vis[idx(e.x,e.y)])EXPL_VUS.add(e);
   for(const g of G.choix||[])if(g.c.some(i=>vis[i]))EXPL_VIT.add(g);   // vitrines déjà en vue : elles n'arrêtent pas aussitôt
   EXPL={vie:G.st.vie,sites:G.sites.filter(s=>s.seen).length,vu:new Set(),n:0,tm:0};$('explBtn').classList.add('on');
-  say('Exploration automatique. Une touche ou un clic pour l’arrêter.','info');exploreStep();}
+  say('Exploration automatique.','info');exploreStep();}
 function exploreStep(){const E=EXPL;if(!E)return;if(busy()){stopExplore();return;}
   E.vu.add(idx(G.px,G.py));
   const r=exploreScan(E,false)||exploreScan(E,true);
