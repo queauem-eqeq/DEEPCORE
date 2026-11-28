@@ -110,9 +110,10 @@
 </div>
 <!-- Terminal : le texte lu par la foreuse. -->
 <div class="modal" id="terminal" role="dialog" aria-modal="true" aria-labelledby="termTitre" hidden>
+  <!-- Terminaux et antennes (28 novembre 2026) : menu DATA / CONNEXION / ENCODAGE à gauche, sortie de la machine à droite. Voir 07i-terminaux. -->
   <div class="mcard" tabindex="-1">
     <div class="mhead"><h2 id="termTitre">Terminal</h2><button id="termClose" aria-label="Fermer le terminal">Fermer</button></div>
-    <p class="termtxt" id="termTxt"></p>
+    <div class="termwrap"><div id="termMenu"></div><div id="termOut" class="termtxt" aria-live="polite"></div></div>
   </div>
 </div>
 <!-- FABLAB (21 novembre 2026, renommé le 26) : des objets contre de la Matière. Voir 14c-fabricateur. -->
@@ -311,6 +312,7 @@
 <script src="js/07f-machines.js"></script>
 <script src="js/07g-base.js"></script>
 <script src="js/07h-astroport.js"></script>
+<script src="js/07i-terminaux.js"></script>
 <script src="js/08-faune.js"></script>
 <script src="js/09-vision-deplacement-forage.js"></script>
 <script src="js/10-rendu.js"></script>

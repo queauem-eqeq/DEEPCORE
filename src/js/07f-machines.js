@@ -97,7 +97,8 @@ function circApplique(c,muet){const t=G.t;
     else if(k.t==='lasers'){for(const l of G.las||[])if(l.g===k.g)l.cut=c.on?1:0;machZone();}}}
 const circTxt=c=>c.cib.map(k=>k.t==='pont'?(c.on?'un pont se déploie':'le pont se rétracte'):k.t==='grille'?(c.on?'une grille d’énergie s’éteint':'la grille d’énergie se rallume'):(c.on?'les lasers de la salle s’éteignent':'les lasers se rallument')).join(', ');
 // les socles : alimentés tant qu'une pile est posée dessus
-function socMaj(){for(const k in G.soc||{}){const c=G.circ[G.soc[k]];if(!c)continue;const on=G.t[+k]===PILE?1:0;if(on!==c.on){c.on=on;
+function socMaj(){for(const k in G.soc||{}){const c=G.circ[G.soc[k]];if(!c)continue;const on=c.term||G.t[+k]===PILE?1:0;   // c.term : grille coupée depuis un terminal, pour de bon (07i)
+  if(on!==c.on){c.on=on;
   circApplique(c);sayMore((on?'Socle alimenté : ':'Socle hors tension : ')+circTxt(c)+'.',on?'good':'warn');if(on)SFX.spot();}}}
 // la foreuse avance sur une machine. Renvoie 'go' si le pas peut se faire (pile poussée), sinon le coup est déjà joué.
 function machBump(nx,ny,dx,dy){const i=idx(nx,ny),v=G.t[i],fin=d=>{G.turn++;G.msg=null;pass(d||100);computeFOV();render();

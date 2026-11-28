@@ -354,3 +354,6 @@ Ce qui a été remplacé, et pourquoi (demandes de l'utilisateur, « chaque mach
   sas) tant qu'on ne les attaque pas et qu'on n'approche pas de leur épave (3 cases ; un battement d'avertissement, « ? »).
   Provoqué, le groupe chasse puis retourne à l'ouvrage. Rôle réglable dans Lab → Groupes. Un temps envisagé : chasse directe à
   l'entrée du périmètre ; gardé l'avertissement d'un battement, plus lisible.
+- 28 novembre 2026 : terminaux et antennes ouvrent un menu DATA / CONNEXION / ENCODAGE. La connexion ouvre une porte, coupe des
+  lasers ou une grille, ouvre une porte dérobée ou la cloison d'un réduit creusé exprès ; l'allumage de l'antenne y passe ; liaison
+  au noyau (échec). Deux terminaux au moins par niveau. Avant : le terminal affichait un texte, l'antenne s'allumait au contact.

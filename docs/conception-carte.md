@@ -348,10 +348,10 @@ Code : `07c-artefacts.js`, appelé à la fin de la génération des bâtiments.
 
 | Artefact | Ce qu'il fait | Fréquence − / = / + |
 |---|---|---|
-| **Antenne** | La foreuse l'active **en avançant dessus** (un battement). Elle ne lève le brouillard que **15 tours**, sur un **disque de 30 cases de large**, murs compris (découvert anneau par anneau) ; ensuite le brouillard revient, mais elle **continue de signaler les ennemis** du disque par un **point en couleur danger**, sur la carte et la mini-carte.  |
+| **Antenne** | Au contact, elle ouvre le menu DATA / CONNEXION (voir `conception-joueur.md`, Terminaux et antennes) ; l'action **RÉSEAU DU SITE** l'allume (un battement). Elle ne lève le brouillard que **15 tours**, sur un **disque de 30 cases de large**, murs compris (découvert anneau par anneau) ; ensuite le brouillard revient, mais elle **continue de signaler les ennemis** du disque par un **point en couleur danger**, sur la carte et la mini-carte.  |
 | **Pièces envahies d'herbe** | La pièce entière est couverte d'herbes hautes et basses mêlées par touffes (le site et les clés gardent leur sol). | 8 % / 18 % / 35 % des pièces |
 | **Machines** | Dix machines hors d'usage (tuyaux, serveur, caisses, ordinateur, établi, cuve, générateur, console, turbine, armoire électrique), posées en **obstacles** : une à cinq par pièce choisie. **Elles barrent le pas mais pas la vue**, au contraire des piliers. Une charge sismique les réduit en gravats. | 15 % / 35 % / 60 % des pièces |
-| **Terminal** | La foreuse l'active en avançant dessus : une fenêtre affiche **un texte** (huit fragments de journal, provisoires ; le temps ne passe pas). | 1 / 2 / 4 par carte |
+| **Terminal** | Au contact, il ouvre le menu **DATA / CONNEXION / ENCODAGE** (voir `conception-joueur.md`, Terminaux et antennes). **Deux au moins par niveau** dans le complexe, dont un à 15 cases au plus du site ou d'un FABLAB (`terminauxFin`, 07i), si l'artefact est permis. | 1 / 2 / 4 par carte (2 au moins) |
 
 - Trois terrains : `MACHINE`, `ANTENNA`, `TERMINAL`. Infranchissables pour tous, transparents à la vue, sans effet
   sur la discrétion. `G.art[case]` : la variante d'une machine, l'état d'une antenne, le texte d'un terminal.

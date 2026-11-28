@@ -87,6 +87,9 @@ const SFX={
   // sonar : « blip blip » répété pendant toute la durée du balayage (s, en secondes)
   sonar(s){const n=Math.max(3,Math.ceil(s/.62));for(let i=0;i<n;i++){tone(1480,.13,'sine',.09,1380,i*.62);
     tone(1480,.11,'sine',.045,1380,i*.62+.17);}},
+  // menu des terminaux (28 novembre 2026) : un tic discret quand la sélection bouge ; la liaison au noyau, porteuse qui monte puis se rompt
+  bip(){tone(1500,.025,'square',.02);},
+  liaison(){[330,440,550,660].forEach((f,i)=>tone(f,.1,'triangle',.05,null,i*.1));tone(660,.5,'sine',.035,90,.42);noiz(.3,.03,2400,'highpass',.45);},
   analyse(){[660,880,1100,1320].forEach((f,i)=>tone(f,.08,'triangle',.07,null,i*.07));},
   start(){tone(110,.6,'sawtooth',.06,440);tone(220,.6,'square',.03,880,.05);},
   drill(k){tone(48+k*6,.12,'sawtooth',.09);noiz(.1,.12,600+k*120);},

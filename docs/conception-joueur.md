@@ -42,6 +42,37 @@ retouchables dans le Tile editor (groupe « Machines »).
 
 Essais : `outils/scripts/test-machines.js` (33 vérifications dans le vrai moteur).
 
+### Terminaux et antennes : le menu (`07i-terminaux.js`, 28 novembre 2026)
+
+Avancer sur un terminal, un enregistreur d'épave ou une antenne ouvre une fenêtre (le jeu attend) : menu à gauche, sortie
+de la machine à droite. Clavier (flèches, ZQSD, pavé ; Entrée ; Échap), souris, doigt (lignes de 44 px). L'exploration
+automatique ne l'ouvre jamais (les machines barrent le pas).
+
+| Entrée | Terminal | Enregistreur d'épave | Antenne |
+|---|---|---|---|
+| **DATA** | une donnée tirée sans choix (`dataTirer`) : aujourd'hui le texte du terminal | l'enregistreur de l'épave | le relevé du site (signatures, formations, épaves, cap du site) |
+| **CONNEXION** | actions locales, puis LIAISON AU NOYAU | LIAISON AU NOYAU | RÉSEAU DU SITE, puis LIAISON AU NOYAU |
+| **ENCODAGE** | HACK, BLUEPRINT (une fois chacun) | — | — |
+
+- Chaque ligne ne sert qu'une fois ; une ligne faite reste affichée, grisée (« RIEN À LIRE », « PORTE DÉVERROUILLÉE »…).
+- **Actions locales** (règle des machines lisibles : la cible est à 15 cases au plus ; chaque cible n'appartient qu'à un
+  terminal ; la ligne donne la distance et le cap) : **ouvrir la porte** à clé la plus proche (sinon **couper une grille
+  d'énergie**, pour de bon : le socle n'y peut plus rien) ; **couper les lasers** d'une salle, pour de bon (son levier reste
+  baissé) ; **ouvrir une porte dérobée**. Une cible déjà ouverte autrement disparaît du menu. Aucune action : « AUCUN
+  RÉSEAU LOCAL ».
+- **Réduit à cloison** : si aucun terminal de la carte n'a d'action, un réduit de 3 × 3 ou 4 × 3 cases est creusé dans la
+  masse derrière le mur de la salle d'un terminal, butin de pièce secrète dedans ; sa CONNEXION fait tomber la cloison
+  (gravats praticables).
+- **RÉSEAU DU SITE** (antenne) : l'effet d'avant — brouillard levé 15 tours sur 30 cases, puis ennemis signalés.
+- **LIAISON AU NOYAU** : une tentative par machine, numérotée (`G.st.liaisons`) ; texte `liaisonTexte(niv, n)`, toujours un
+  échec pour l'instant ; une ligne au journal.
+- **ENCODAGE** : branché sur `encodageHack` et `encodageBlueprint` (à venir) ; d'ici là, « MODULE D'ENCODAGE INDISPONIBLE ».
+- Le temps : lire et encoder ne coûtent rien ; une action de CONNEXION (actions locales, réseau, liaison exceptée) prend un
+  battement, compté à la fermeture de la fenêtre, quand les repères « ! » apparaissent sur les cibles.
+- État : `G.term[case]` (créé au premier besoin : une partie d'avant se recharge, antennes allumées comprises).
+
+Essais : `outils/scripts/test-terminaux.js`.
+
 ### Butin d'exploration (`butinExplo`, `14d-objets.js`)
 
 Posé à la fin de la génération, sur toutes les recettes. **Ordre de priorité des lieux** (24 novembre 2026) :

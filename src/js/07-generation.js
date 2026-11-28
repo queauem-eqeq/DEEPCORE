@@ -324,6 +324,7 @@ function niveau(refait){drilling=false;
   machines();
   PLANS_POSES=PLANS_POSES_M;butinExplo();   // butin des pièces secrètes, des culs-de-sac et des coins reculés (22 novembre 2026)
   if(astroRec())astroportFin();   // butin des épaves, enregistreurs des épaves scellées
+  terminauxFin();   // deux terminaux au moins, leurs actions locales, le réduit à cloison au besoin (07i)
   // garde-fou : un site inatteignable, la carte est refaite (trois fois au plus)
   if(G.sites[0]&&accesSite()<0&&(refait||0)<3)return niveau((refait||0)+1);
   spawnGroupes();mdlRemplit();   // butin et ennemis des emplacements de modules (07b)

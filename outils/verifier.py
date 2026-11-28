@@ -17,7 +17,7 @@ import os, pathlib, subprocess, sys
 
 RACINE = pathlib.Path(__file__).resolve().parent.parent
 REF = RACINE / 'outils' / 'empreinte-reference.txt'
-ESSAIS = ['test-machines', 'test-ennemis', 'test-forage', 'test-descente', 'test-astroport', 'test-ouvrage']
+ESSAIS = ['test-machines', 'test-ennemis', 'test-forage', 'test-descente', 'test-astroport', 'test-ouvrage', 'test-terminaux']
 ECHECS_CONNUS = ['lieux : les groupes d’extérieur naissent dehors']   # déjà en échec avant le 23 novembre 2026
 
 
