@@ -203,7 +203,7 @@ function viseeOk(){if(!VISEE||G.over)return;const {i,x,y}=VISEE,o=G.inv[i];
     addFx({kind:'num',x:G.px,y:G.py,txt:'-'+moi,col:PAL['4'],dur:1000});if(G.st.vie<=0)G.over={dead:true};}
   engage();invTake(i);sacFix();SAC_H='';
   addFx({kind:'boom',x,y,cases:zone,dur:420});addFx({kind:'shake',amp:moi?10:8,dur:300});SFX.explode();
-  say(`${neufCh?`Capsule ${savoir().codes.charge} : c’était une charge sismique. `:''}${moi?`La foreuse est prise dans l’explosion : −${moi} vie. `:''}Charge sismique : ${n?`${n} ennemi${n>1?'s':''} touché${n>1?'s':''}${k?`, ${k} abattu${k>1?'s':''}`:''}`:'personne dans la zone'}${roches?`, ${roches} case${roches>1?'s':''} de roche pulvérisée${roches>1?'s':''}`:''}.`,moi||!(n||roches)?'warn':'good');
+  say(`${neufCh?`Capsule ${savoir().codes.charge} : c’était une charge sismique. `:''}${moi?`${NOM_FOREUSE} est prise dans l’explosion : −${moi} vie. `:''}Charge sismique : ${n?`${n} ennemi${n>1?'s':''} touché${n>1?'s':''}${k?`, ${k} abattu${k>1?'s':''}`:''}`:'personne dans la zone'}${roches?`, ${roches} case${roches>1?'s':''} de roche pulvérisée${roches>1?'s':''}`:''}.`,moi||!(n||roches)?'warn':'good');
   if(consoTemps('dig'))return;
   render();}
 /* Visuel de la foreuse selon l'équipement : l'arme dessine la moitié avant (lignes 0 à 7, pointe en haut), l'armure la moitié arrière

@@ -524,12 +524,12 @@ function hurtRobot(b,sp,o){sp=sp||BEASTS[b.sp];o=o||{};const le=LeNom(sp),nom=''
 function effTick(){const E=G.eff;if(!E||G.over)return;
   if(E.poison>0){E.poison--;const dm=Math.min(G.st.vie,E.pdmg||2);G.st.vie-=dm;
     addFx({kind:'num',x:G.px,y:G.py,txt:'-'+dm,col:PAL['4'],dur:750});
-    if(G.st.vie<=0){G.over={dead:true};sayMore('Le poison achève la foreuse.','warn');return;}
+    if(G.st.vie<=0){G.over={dead:true};sayMore('Le poison achève '+NOM_FOREUSE+'.','warn');return;}
     if(!E.poison)sayMore('Le poison est éliminé.','good');}
   // réparation et recharge réparties sur plusieurs battements (28 novembre 2026) : une part égale du reste à chaque battement
   for(const [k,champ,mx] of [['repar','vie','vieMax'],['recharge','energie','energieMax']]){const r=E[k];if(!r)continue;
     if(r.t>0){const p=r.v/r.t;r.v-=p;r.t--;G.st[champ]=Math.min(G.st[mx],G.st[champ]+p);}if(!(r.t>0))delete E[k];}
-  if(E.glu>0&&--E.glu===0)sayMore('La glu se détache : la foreuse retrouve sa vitesse.','good');
+  if(E.glu>0&&--E.glu===0)sayMore('La glu se détache : '+NOM_FOREUSE+' retrouve sa vitesse.','good');
   if(E.berserk>0&&--E.berserk===0)sayMore('Le surrégime retombe.','info');
   if(E.camo>0&&--E.camo===0)sayMore('Le camouflage optique s’éteint.','info');
   fumTick();}
@@ -545,7 +545,7 @@ function glue(b,sp){const ch=hitChance(sp.pre,robotDef());engage();if(G.px!==b.x
     addFx({kind:'boule',ax:b.x,ay:b.y,bx:G.px+Math.cos(an)*r,by:G.py+Math.sin(an)*r,dur:320});
   if(rate){sayMore(`${LeNom(sp)} crache sa glu et rate (${ch} %).`);return;}
   G.eff=G.eff||{};G.eff.glu=Math.max(G.eff.glu||0,3);addFx({kind:'num',x:G.px,y:G.py,txt:'glu',col:PAL['2'],dur:900});
-    sayMore(`${LeNom(sp)} englue la foreuse : elle avance deux fois moins vite pendant 3 battements.`,'warn');}
+    sayMore(`${LeNom(sp)} englue ${NOM_FOREUSE} : il avance deux fois moins vite pendant 3 battements.`,'warn');}
 /* Zone d'une explosion (mine, charge sismique ; 22 novembre 2026) : le carré de 3 × 3 centré sur (x, y), plus 5 cases tirées
    au hasard parmi les 12 qui le bordent par un côté (les coins du 5 × 5, qui ne le touchent que par un angle, en sont exclus).
    Rend une liste de [x, y] ; dansZone teste une case. L'effet « boom » reçoit la même liste pour dessiner les flammes. */
@@ -643,7 +643,7 @@ function beastJoue(b){const sp=BEASTS[b.sp],fits=(x,y)=>beastFits(b,x,y),mouille
   if(sp.laser&&b.hunt>0&&b.sees&&cheb(b,G.px,G.py)<=sp.laser&&los(b.x,b.y,G.px,G.py)){
     hurtRobot(b,sp,{laser:1});return dcoupDe(b,sp);}
   if(b.hunt>0&&nearRobot(b)){if(sp.bloque&&!b.tient){b.tient=1;
-    if(beastVisible(b)){sayMore(`${LeNom(sp)} agrippe la foreuse : elle ne peut plus se déplacer tant qu’il tient.`,'warn');SFX.blocked();
+    if(beastVisible(b)){sayMore(`${LeNom(sp)} agrippe ${NOM_FOREUSE} : il ne peut plus se déplacer tant que l’ennemi le tient.`,'warn');SFX.blocked();
     }}hurtRobot(b);return dcoupDe(b,sp);}
   if(b.hunt>0&&b.sees)chaseStep(b,distCarte(mouille,sp.vol),fits);
   else if(b.hunt>0&&b.search>0)searchStep(b,fits,DC,mouille);        // fouille autour du dernier point connu

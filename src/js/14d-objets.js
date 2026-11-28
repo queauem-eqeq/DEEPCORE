@@ -139,7 +139,7 @@ function phaseOuvre(neuf){const nom=ITEMS.phaseur.vrai.n;
   PHASE={x:G.px,y:G.py,x0:G.px,y0:G.py,cx:G.px,cy:G.py,rate:0};
   phaseFx(G.px,G.py,null,1);addFx({kind:'phase',x:G.px,y:G.py,robot:1,out:1,dur:PHASE_DUR});
   SFX.phase();camoCasse();
-  say(`${neuf?`Capsule ${savoir().codes.phaseur} : c’était un ${nom}. `:''}${nom} : la foreuse entre en phase. Choisir la destination.`,'warn');
+  say(`${neuf?`Capsule ${savoir().codes.phaseur} : c’était un ${nom}. `:''}${nom} : ${NOM_FOREUSE} entre en phase. Choisir la destination.`,'warn');
   render();}
 function phaseVers(x,y){if(!PHASE)return;const cx=Math.max(1,Math.min(W-2,x)),cy=Math.max(1,Math.min(H-2,y));
   if(cx!==PHASE.x||cy!==PHASE.y){PHASE.x=cx;PHASE.y=cy;render();}}
@@ -164,13 +164,13 @@ function phaseSouris(ev){if(!PHASE)return;phasePtr=ev;
 // la foreuse se reforme sur la case visée
 function phaseOk(){if(!PHASE||G.over)return;const {x,y}=PHASE;
   if(!phaseConnu(x,y)||!phaseTient(x,y)){PHASE.rate++;SFX.blocked();
-    say(phaseConnu(x,y)?'Le champ de phase refuse cette case : la foreuse n’y tiendrait pas.':'Terrain jamais découvert : le champ de phase n’a pas de point d’ancrage.','warn');
-    if(PHASE.rate>=3)phaseRetour('Trop d’essais : la foreuse sort de phase sur place.');else render();return;}
+    say(phaseConnu(x,y)?'Le champ de phase refuse cette case : '+NOM_FOREUSE+' n’y tiendrait pas.':'Terrain jamais découvert : le champ de phase n’a pas de point d’ancrage.','warn');
+    if(PHASE.rate>=3)phaseRetour('Trop d’essais : '+NOM_FOREUSE+' sort de phase sur place.');else render();return;}
   const loin=Math.round(Math.hypot(x-PHASE.x0,y-PHASE.y0));PHASE=null;phasePtr=null;
   G.px=x;G.py=y;G.tracks=null;   // la trace s'arrête net : rien ne relie les deux points
-  phaseArrive(`La foreuse sort de phase ${loin} case${loin>1?'s':''} plus loin.`);}
+  phaseArrive(`${NOM_FOREUSE} sort de phase ${loin} case${loin>1?'s':''} plus loin.`);}
 // Échap, ou trois refus : retour sur place
-function phaseRetour(m){if(!PHASE)return;G.px=PHASE.x0;G.py=PHASE.y0;PHASE=null;phasePtr=null;phaseArrive(m||'Le champ de phase se referme : la foreuse sort de phase sur place.');}
+function phaseRetour(m){if(!PHASE)return;G.px=PHASE.x0;G.py=PHASE.y0;PHASE=null;phasePtr=null;phaseArrive(m||'Le champ de phase se referme : '+NOM_FOREUSE+' sort de phase sur place.');}
 function phaseArrive(m){addFx({kind:'phase',x:G.px,y:G.py,robot:1,dur:PHASE_DUR});
   addFx({kind:'onde',x:G.px,y:G.py,r:4.5,dur:PHASE_DUR});SFX.phase();
   say(m,'good');computeFOV();invChanged();
@@ -331,7 +331,7 @@ addFx({kind:'ener',x,y,dur:1000,gr:fxGrains(12)});}
     else{txt='la dose se perd';ton='warn';}}
   else if(k==='camo'){if(moi){G.eff.camo=V.duree;
     for(const e of G.beasts||[])if(e.hunt&&Math.max(Math.abs(e.x-G.px),Math.abs(e.y-G.py))>1){e.hunt=0;forget(e);
-    }txt=`la foreuse disparaît pendant ${V.duree} battements`;addFx({kind:'veil',x,y,dur:750});}
+    }txt=`${NOM_FOREUSE} disparaît pendant ${V.duree} battements`;addFx({kind:'veil',x,y,dur:750});}
     else if(b){b.camo=V.duree;txt=`${leNom(sp)} disparaît pendant ${V.duree} battements`;ton='warn';
       addFx({kind:'veil',x,y,dur:750});}
     else{txt='le voile se dissipe sans rien couvrir';ton='warn';}}
@@ -339,7 +339,7 @@ addFx({kind:'ener',x,y,dur:1000,gr:fxGrains(12)});}
     if(moi){const camo=G.eff&&G.eff.camo>0;if(camo)G.eff.camo=0;let n=0;
       /* sur la foreuse : tous savent où elle est, et le camouflage se rompt */
       for(const e of G.beasts||[])if(Math.max(Math.abs(e.x-x),Math.abs(e.y-y))<=V.rayon&&!(e.stun>0)){e.hunt=1;e.leurre=0;spot(e);n++;}
-      addFx({kind:'shake',amp:4,dur:250});txt=`la balise hurle sur la foreuse : ${n} ennemi${n>1?'s':''} alentour ${n>1?'savent':'sait'} où elle est`+(camo?' ; le camouflage optique se rompt':'');ton='warn';}
+      addFx({kind:'shake',amp:4,dur:250});txt=`la balise hurle sur ${NOM_FOREUSE} : ${n} ennemi${n>1?'s':''} alentour ${n>1?'savent':'sait'} où il est`+(camo?' ; le camouflage optique se rompt':'');ton='warn';}
     else{const q=balisePose(x,y);
       txt=`la balise tombe au sol et hurle : ${q} ennemi${q>1?'s':''} l’${q>1?'oublient':'oublie'} pour elle, pendant ${V.duree} battements`;}}
   // Phaseur sur une créature : elle se disperse et reparaît au hasard, à `loin` cases au moins, et perd la trace de la foreuse

@@ -348,7 +348,7 @@ function fgAmas(F){
 function endForage(){const F=FORAGE;if(F&&F.snd)F.snd.stop();FORAGE=null;fgCv.hidden=true;$('forageSkip').hidden=true;
   const cb=FG_CB;FG_CB=null;
   // détruite pendant la descente : pas de niveau suivant
-  if(F&&F.mort){G.over={dead:true,forage:1};try{say('Une mine de trop : la foreuse explose dans le puits.','warn');render();
+  if(F&&F.mort){G.over={dead:true,forage:1};try{say('Une mine de trop : '+NOM_FOREUSE+' explose dans le puits.','warn');render();
     }catch(e){}dead();return;}
   try{render();}catch(e){}if(cb)cb();
   if(F&&F.recolte&&typeof G!=='undefined'&&G&&!G.over){try{sayMore(`Amas de Matière {µ} récolté pendant la descente : +${F.recolte} (réserve : ${G.st.matiere}).`,'good');

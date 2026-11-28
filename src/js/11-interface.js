@@ -87,7 +87,7 @@ function mini(){
 }
 /* Journal en grand (28 novembre 2026) : le bouton + ouvre une copie FIGÉE du journal dans une grande fenêtre. Rien ne la refait
    toute seule (ni nouveau message, ni assombrissement par tour) : on peut lire et sélectionner sans que le texte se décale.
-   « Actualiser » la reconstruit, en gardant la position de lecture si l'on n'était pas tout en bas. */
+   Pas de bouton d'actualisation : on ferme et on rouvre. */
 function logBigBuild(){const lg=G&&G.log||[],blocs=[];
   for(const e of lg){const b=blocs[blocs.length-1];if(b&&b.t===e.t)b.ev.push(e);else blocs.push({t:e.t,ev:[e]});}
   $('lbTxt').innerHTML=blocs.map(b=>`<div class="lgl"><span class="t">T${String(b.t).padStart(3,'0')}</span><span>`+
@@ -95,8 +95,7 @@ function logBigBuild(){const lg=G&&G.log||[],blocs=[];
 function logBigOpen(){if(!G)return;if(TRAV)stopTravel();if(REST)stopRest();if(EXPL)stopExplore();
   logBigBuild();$('logBig').hidden=false;const t=$('lbTxt');t.scrollTop=t.scrollHeight;$('lbClose').focus();}
 function logBigClose(){$('logBig').hidden=true;$('logPlus').focus();render();}
-function logBigRefresh(){const t=$('lbTxt'),bas=t.scrollHeight-t.scrollTop-t.clientHeight<4,h=t.scrollTop;logBigBuild();t.scrollTop=bas?t.scrollHeight:h;}
-$('logPlus').addEventListener('click',logBigOpen);$('lbClose').addEventListener('click',logBigClose);$('lbRefresh').addEventListener('click',logBigRefresh);
+$('logPlus').addEventListener('click',logBigOpen);$('lbClose').addEventListener('click',logBigClose);
 $('logBig').addEventListener('keydown',ev=>{if(ev.key==='Escape'){ev.preventDefault();logBigClose();}ev.stopPropagation();});
 $('logBig').addEventListener('pointerdown',ev=>{if(ev.target===$('logBig'))logBigClose();});
 /* ---------- Panneau « En vue » : chaque élément visible, sans répétition ---------- */

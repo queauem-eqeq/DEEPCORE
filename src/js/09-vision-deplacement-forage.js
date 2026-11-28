@@ -117,7 +117,7 @@ function toggleSprint(){if(!G||G.over)return;
   if(!G.sprint&&G.st.energie<SPRINT_COST){say(`Énergie insuffisante pour courir (${Math.floor(G.st.energie)}/${SPRINT_COST}).`,'warn');
     SFX.blocked();render();return;}
   G.sprint=!G.sprint;G.sprint?SFX.motorOn():SFX.motorOff();
-    say(G.sprint?`Course : deux fois plus vite, ${SPRINT_COST} d’énergie par pas, et ${SPRINT_NOISE} cases de discrétion en plus.`:'La foreuse reprend la marche.','info');render();}
+    say(G.sprint?`Course : deux fois plus vite, ${SPRINT_COST} d’énergie par pas, et ${SPRINT_NOISE} cases de discrétion en plus.`:''+NOM_FOREUSE+' reprend la marche.','info');render();}
 
 /* ---------- Déplacement ---------- */
 const siteAt=(x,y)=>G.sites.find(s=>s.x===x&&s.y===y);
@@ -143,34 +143,34 @@ function tryMove(dx,dy){if(PHASE)return;   // foreuse démontée : elle ne march
     /* frappé, il oublie la balise */const sur=!(bz.hunt>0),cr=sur||roll((G.st.crit??5)+critBonus());
     {const ch=hitChance(robotPre(),sp.def+terrModDe(sp,nx,ny));if(!sur&&!roll(ch)){if(!bz.hunt)alerte(bz);bz.hunt=1;spot(bz);
       addFx({kind:'lunge',robot:true,dx,dy,dur:180});addFx({kind:'num',x:nx,y:ny,txt:'0',col:'#8aa9a2',dur:750});
-      say(`La foreuse rate ${leNom(sp)} (${ch} %).`);SFX.whoosh();pass(coupDur());computeFOV();render();if(G.over&&G.over.dead)dead();return;}}
+      say(`${NOM_FOREUSE} rate ${leNom(sp)} (${ch} %).`);SFX.whoosh();pass(coupDur());computeFOV();render();if(G.over&&G.over.dead)dead();return;}}
     const dm=robotDeg()*(cr?CRIT_X:1);bz.hp-=dm;if(!bz.hunt&&bz.hp>0)alerte(bz);bz.hunt=1;spot(bz);
       addFx({kind:'num',x:nx,y:ny,txt:'-'+dm+(cr?'!':''),col:cr?PAL['1']:PAL['3'],dur:cr?1000:750});
       if(cr){addFx({kind:'shake',amp:6,dur:220});SFX.crit();}
     addFx({kind:'lunge',robot:true,dx,dy,dur:180});addFx({kind:'flash',beast:bz,dur:180});if(bz.hp<=0)addFx({kind:'shake',amp:4,dur:200});
     const tag=sur?'Coup par surprise ! ':cr?'Coup critique ! ':'';
     if(bz.hp<=0){G.beasts.splice(G.beasts.indexOf(bz),1);bleed(bz.x,bz.y);butinMort(bz);
-      say(`${tag}La foreuse abat ${leNom(sp)}.`,'good');SFX.break();}
-    else{say(`${tag}La foreuse percute ${leNom(sp)} : −${dm} PV (${bz.hp}/${pvDe(sp)}).`,'warn');SFX.coup();}
+      say(`${tag}${NOM_FOREUSE} abat ${leNom(sp)}.`,'good');SFX.break();}
+    else{say(`${tag}${NOM_FOREUSE} percute ${leNom(sp)} : −${dm} PV (${bz.hp}/${pvDe(sp)}).`,'warn');SFX.coup();}
     pass(coupDur());computeFOV();render();if(G.over&&G.over.dead)dead();return;}
   const an=animalAt(nx,ny);
   if(an){const sp=SPECIES[an.sp];G.turn++;G.msg=null;engage();camoCasse();const sur=!an.aware,cr=sur||roll((G.st.crit??5)+critBonus());
     {const ch=hitChance(robotPre(),sp.def+terrModDe(sp,nx,ny));if(!sur&&!roll(ch)){an.aware=1;an.enraged=true;spot(an);
       addFx({kind:'lunge',robot:true,dx,dy,dur:180});addFx({kind:'num',x:nx,y:ny,txt:'0',col:'#8aa9a2',dur:750});
-      say(`La foreuse rate ${leNom(sp)} (${ch} %).`);SFX.whoosh();pass(coupDur());computeFOV();render();if(G.over&&G.over.dead)dead();return;}}
+      say(`${NOM_FOREUSE} rate ${leNom(sp)} (${ch} %).`);SFX.whoosh();pass(coupDur());computeFOV();render();if(G.over&&G.over.dead)dead();return;}}
     const dm=robotDeg()*(cr?CRIT_X:1),tag=sur?'Coup par surprise ! ':cr?'Coup critique ! ':'';an.hp=(an.hp??pvDe(sp))-dm;
       addFx({kind:'num',x:nx,y:ny,txt:'-'+dm+(cr?'!':''),col:cr?PAL['1']:PAL['3'],dur:cr?1000:750});
       if(cr){addFx({kind:'shake',amp:6,dur:220});SFX.crit();}addFx({kind:'lunge',robot:true,dx,dy,dur:180});
-    if(an.hp<=0){G.animals.splice(G.animals.indexOf(an),1);bleed(an.x,an.y);say(`${tag}La foreuse écrase ${leNom(sp)}.`,'warn');SFX.squish();}
-    else{if(!an.aware)alerte(an);an.aware=1;an.enraged=true;spot(an);say(`${tag}La foreuse heurte ${leNom(sp)}.`);SFX.coup();}
+    if(an.hp<=0){G.animals.splice(G.animals.indexOf(an),1);bleed(an.x,an.y);say(`${tag}${NOM_FOREUSE} écrase ${leNom(sp)}.`,'warn');SFX.squish();}
+    else{if(!an.aware)alerte(an);an.aware=1;an.enraged=true;spot(an);say(`${tag}${NOM_FOREUSE} heurte ${leNom(sp)}.`);SFX.coup();}
    pass(coupDur());computeFOV();render();if(G.over&&G.over.dead)dead();return;}
   // Bloqueur (22 novembre 2026)
   {const bl=tenuPar();
-    if(bl){say(`${LeNom(BEASTS[bl.sp])} tient la foreuse : impossible de bouger tant qu’il n’est pas détruit ou étourdi.`,'warn');
+    if(bl){say(`${LeNom(BEASTS[bl.sp])} tient ${NOM_FOREUSE} : impossible de bouger tant qu’il n’est pas détruit ou étourdi.`,'warn');
     SFX.blocked();render();return;}}
   if(v===CHASM){say('Gouffre : passage impossible.');SFX.blocked();render();return;}
   if(v===SHIP){say('Coque du vaisseau : indestructible.');SFX.blocked();render();return;}
-  if(v===HARD){say('Roche dure : la foreuse ne l’entame pas. Seule une charge sismique en vient à bout.');SFX.blocked();render();return;}
+  if(v===HARD){say('Roche dure : '+NOM_FOREUSE+' ne l’entame pas. Seule une charge sismique en vient à bout.');SFX.blocked();render();return;}
   if(v===LOCK){const i=idx(nx,ny);
     if(!nbCles()){say('Porte verrouillée : il faut une clé.');SFX.blocked();render();return;}
     invTake(G.inv.findIndex(o=>o.k==='cle'));sacFix();SAC_H='';G.t[i]=DOOR;G.turn++;G.msg=null;SFX.serrure();
@@ -179,7 +179,7 @@ function tryMove(dx,dy){if(PHASE)return;   // foreuse démontée : elle ne march
   if(v===ANTENNA){antenneUse(idx(nx,ny));return;}
   if(v===TERMINAL){terminalUse(idx(nx,ny));return;}
   if(v===MACHINE){say('Machine hors d’usage : elle barre le passage. Une charge sismique la réduirait en gravats.');SFX.blocked();render();return;}
-  if(bati(v)||v===VITRE){say((v===PILLAR?'Pilier':v===VITRE?'Mur vitré':'Mur bâti')+' : la foreuse ne l’entame pas. Seule une charge sismique l’ouvre.');
+  if(bati(v)||v===VITRE){say((v===PILLAR?'Pilier':v===VITRE?'Mur vitré':'Mur bâti')+' : '+NOM_FOREUSE+' ne l’entame pas. Seule une charge sismique l’ouvre.');
     SFX.blocked();render();return;}
   if(v===ROCK||v===MOUNT){
     if(nx===0||ny===0||nx===W-1||ny===H-1){say('Bord de la carte : roche impossible à briser.');SFX.blocked();render();return;}
@@ -191,14 +191,14 @@ function tryMove(dx,dy){if(PHASE)return;   // foreuse démontée : elle ne march
       say(v===ROCK?'Rocher brisé : il ne reste que des gravats.':'La paroi cède : passage ouvert.','good');
       if(G.ore&&G.ore[i]&&!oreSol(G.ore[i])){const l=oreLv(G.ore[i]),mt=oreMat(G.ore[i]);G.ore[i]=(mt?'m':'')+'sol'+l;sayMore(mt?['','Un peu de Matière {µ} tombe au sol.','De la Matière {µ} tombe au sol.','Un gros bloc de Matière {µ} tombe au sol.'][l]:['','De petits éclats de métal tombent au sol.','Des éclats de métal tombent au sol.','De gros éclats de métal tombent au sol.'][l],'info');}}
     else{G.dmg[i]=hits;SFX.crack();
-      say(v===ROCK?'La foreuse frappe le rocher : il se fissure.':`La foreuse attaque la montagne : fissure ${hits}/${hp-1}.`,'warn');}
+      say(v===ROCK?''+NOM_FOREUSE+' frappe le rocher : il se fissure.':`${NOM_FOREUSE} attaque la montagne : fissure ${hits}/${hp-1}.`,'warn');}
     pass(DUR.forage);computeFOV();render();if(G.over&&G.over.dead)dead();return;}
   // eau profonde : une fois sur deux, le courant emporte le pas dans une autre direction au hasard
   if(G.t[idx(G.px,G.py)]===DEEP&&Math.random()<DEEP_MISS){const o=DIRS.map((d,k)=>k).filter(k=>DIRS[k][0]!==dx||DIRS[k][1]!==dy),
     k=o[rnd(0,o.length-1)],[ex,ey]=DIRS[k],ax=G.px+ex,ay=G.py+ey,av=G.t[idx(ax,ay)];
     const dirs=['l’est','l’ouest','le sud','le nord','le sud-est','le nord-est','le sud-ouest','le nord-ouest'];
     if(ax<1||ay<1||ax>=W-1||ay>=H-1||blocks(av)||!diagOk(G.px,G.py,ex,ey)||beastAt(ax,ay)||animalAt(ax,ay)){G.turn++;G.msg=null;SFX.thud();
-      say(`Eau profonde : le courant plaque la foreuse contre un obstacle (${dirs[k]}).`,'warn');pass(DUR.pas);computeFOV();render();
+      say(`Eau profonde : le courant plaque ${NOM_FOREUSE} contre un obstacle (${dirs[k]}).`,'warn');pass(DUR.pas);computeFOV();render();
         if(G.over&&G.over.dead)dead();return;}
     dx=ex;dy=ey;nx=ax;ny=ay;v=av;G.face=dx>0?'r':dx<0?'l':dy>0?'d':'u';SFX.drift();
       G.devMsg=`Eau profonde : le courant dévie la foreuse vers ${dirs[k]}.`;}
@@ -213,7 +213,7 @@ function tryMove(dx,dy){if(PHASE)return;   // foreuse démontée : elle ne march
   if(v===GRASS){G.t[idx(nx,ny)]=FLAT;SFX.grass();}else if(v===FLAT)SFX.grass();
   if(v===LIQ)SFX.water();else if(v===DEEP)SFX.deep();else SFX.step();
   if(run)SFX.motor();
-  if(doorway){SFX.door();say(v===DECK?'La porte du vaisseau s’ouvre : la foreuse rentre dans la soute.':'La porte du vaisseau s’ouvre : la foreuse sort.','info');}
+  if(doorway){SFX.door();say(v===DECK?'La porte du vaisseau s’ouvre : '+NOM_FOREUSE+' rentre dans la soute.':'La porte du vaisseau s’ouvre : '+NOM_FOREUSE+' sort.','info');}
   pass(stepDur(v,run));
   if(G.t[idx(G.px,G.py)]===DOOR)SFX.porte();   // la foreuse pousse une porte
   {const ci=idx(G.px,G.py);if(G.cles&&G.cles[ci]){delete G.cles[ci];G.items=G.items||{};(G.items[ci]=G.items[ci]||[]).push('cle');
@@ -258,7 +258,7 @@ function drill(s){drilling=true;let k=0;const n=12;
 function dead(){if(G.over.boom)return;G.over.boom=true;if(TRAV)stopTravel();if(REST)stopRest();
   // à la mort, toutes les capsules se dévoilent dans l'inventaire (23 novembre 2026)
   let devoile=0;for(const k in CONSO)if(identifier(k))devoile++;
-  if(devoile){say('La foreuse détruite, toutes les capsules se dévoilent.','warn');try{side();}catch(e){}}
+  if(devoile){say(''+NOM_FOREUSE+' détruite, toutes les capsules se dévoilent.','warn');try{side();}catch(e){}}
   const carte=()=>{$('card').innerHTML=`<h2 class="huge mort">FOREUSE<br>DÉTRUITE</h2>
     <div class="upg one"><button id="again"><span>Déployer une nouvelle foreuse</span><b>▶</b></button><button id="quit"><span>Quitter</span><b>■</b></button></div>`;
     $('overlay').classList.toggle('noir',!!G.over.forage);$('overlay').hidden=false;$('again').onclick=()=>{unlock();SFX.start();

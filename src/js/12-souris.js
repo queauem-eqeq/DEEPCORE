@@ -152,7 +152,7 @@ function startRest(){
   if(G.st.energie>=G.st.energieMax){say('Énergie déjà au maximum : repos inutile.');SFX.blocked();render();return;}
   const T={seen:visibles(),vie:G.st.vie,n:0,tm:0},why=restEvent(T);
   if(why){say(`Repos impossible : ${why}.`,'warn');SFX.blocked();render();return;}
-  REST=T;say('La foreuse se met au repos.');restStep();}
+  REST=T;say(''+NOM_FOREUSE+' se met au repos.');restStep();}
 function stopRest(m,c){if(!REST)return;clearTimeout(REST.tm);REST=null;if(m)sayMore(m,c||'warn');render();}
 function restStep(){const T=REST;if(!T)return;if(busy()){stopRest();return;}
   const turn=G.turn;waitTurn();
