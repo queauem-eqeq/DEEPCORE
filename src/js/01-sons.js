@@ -1,4 +1,7 @@
 /* ---------- Sons (synthèse Web Audio) ---------- */
+/* SON_DECAL (28 novembre 2026) : retard, en secondes, ajouté aux sons joués pendant le coup d'une créature,
+   pour qu'ils tombent avec l'animation étalée du coup (voir FX_RETARD, 10-rendu). */
+let SON_DECAL=0;
 let AC=null,MASTER=null,SND={on:true,vol:60},unlocked=false;
 try{const v=JSON.parse(localStorage.getItem('np-son')||'null');if(v&&typeof v.vol==='number')SND=v;}catch(e){}
 function audio(){
@@ -9,12 +12,12 @@ function audio(){
       lim.release.value=.25;
     MASTER.connect(lim);lim.connect(AC.destination);}catch(e){return null;}}
   if(AC.state==='suspended')AC.resume();MASTER.gain.value=SND.vol/100*.8;return AC;}
-function tone(f,dur,type,g,f2,delay){const a=audio();if(!a)return;const t=a.currentTime+(delay||0),o=a.createOscillator(),v=a.createGain();
+function tone(f,dur,type,g,f2,delay){const a=audio();if(!a)return;const t=a.currentTime+(delay||0)+SON_DECAL,o=a.createOscillator(),v=a.createGain();
   o.type=type||'square';o.frequency.setValueAtTime(f,t);if(f2)o.frequency.exponentialRampToValueAtTime(f2,t+dur);
   v.gain.setValueAtTime(0.0001,t);v.gain.exponentialRampToValueAtTime(g,t+.008);v.gain.exponentialRampToValueAtTime(0.0001,t+dur);
   o.connect(v);v.connect(MASTER);o.start(t);o.stop(t+dur+.02);}
 let NB=null;
-function noiz(dur,g,freq,ftype,delay,f2){const a=audio();if(!a)return;const t=a.currentTime+(delay||0);
+function noiz(dur,g,freq,ftype,delay,f2){const a=audio();if(!a)return;const t=a.currentTime+(delay||0)+SON_DECAL;
   if(!NB){NB=a.createBuffer(1,a.sampleRate,a.sampleRate);const d=NB.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;}
   const src=a.createBufferSource(),fl=a.createBiquadFilter(),v=a.createGain();src.buffer=NB;
   fl.type=ftype||'lowpass';fl.frequency.setValueAtTime(freq,t);if(f2)fl.frequency.exponentialRampToValueAtTime(f2,t+dur);
@@ -23,7 +26,7 @@ function noiz(dur,g,freq,ftype,delay,f2){const a=audio();if(!a)return;const t=a.
     v.gain.exponentialRampToValueAtTime(0.0001,t+dur);
   src.connect(fl);fl.connect(v);v.connect(MASTER);src.start(t,Math.random()*.5);src.stop(t+dur+.02);}
 // Souffle : bruit en bande large, montée et descente lentes et linéaires (aucun transitoire, donc aucun crépitement)
-function souffle(dur,g,f1,f2,att,delay){const a=audio();if(!a)return;const t=a.currentTime+(delay||0);if(!NB)noiz(.01,.0001,1000);
+function souffle(dur,g,f1,f2,att,delay){const a=audio();if(!a)return;const t=a.currentTime+(delay||0)+SON_DECAL;if(!NB)noiz(.01,.0001,1000);
   const src=a.createBufferSource(),fl=a.createBiquadFilter(),bas=a.createBiquadFilter(),v=a.createGain();src.buffer=NB;
   fl.type='bandpass';fl.Q.value=.7;fl.frequency.setValueAtTime(f1,t);fl.frequency.linearRampToValueAtTime(f2,t+dur);
   bas.type='lowpass';bas.frequency.value=5000;

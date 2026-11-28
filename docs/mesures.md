@@ -1063,3 +1063,19 @@ Avant, les descentes ne tenaient pas le rythme demandé sur ce PC : chaque image
 graphique ne change presque rien au coût du dessin en grille de caractères : ce sont les opérations de dessin qui coûtent.
 Avec le cache seul (même version, `DECOR_OFF` vrai puis faux) : image en jouant 4,7 à 5,0 → 3,0 à 3,2 ms ; même scène 3,7 à
 3,9 → 1,0 ms.
+
+### Combat rapproché (28 novembre 2026)
+
+Outil : `python3 outils/jeu.py DOSSIER outils/scripts/mesure-combat.js` (`window.NB` ennemis collés à la foreuse, Drones par
+défaut, coup 50 : deux coups par tour ; 30 tours, une touche toutes les 150 ms). Chromium sans carte graphique.
+
+| Drones | Calcul d'un tour (moy · p95 · pire) | Images pendant les animations |
+|---|---|---|
+| 1 | 3,7 · 8 · 15 ms | 20 par seconde |
+| 6 | 5,4 · 11 · 16 ms | 20 par seconde |
+| 8 (23 effets par tour) | 7,8 · 19 · 22 ms | 20 par seconde, image 3,6 ms |
+
+Le moteur ne rame pas, même avec plusieurs coups par tour : l'impression venait des animations à 20 images par seconde,
+et de tous les coups d'un tour affichés au même instant. Après le passage du combat à 60 images par seconde et les coups
+étalés : 8 Drones, tour 4,8 ms en moyenne (pire 14,5), image 3,3 ms en moyenne, jusqu'à 60 images par seconde pendant
+les coups.
