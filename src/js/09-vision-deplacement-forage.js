@@ -82,7 +82,7 @@ function turnStealth(){G.stealth=stealthRange(lastAct);}
 const TICK=100;
 const DUR={pas:100,coup:100,forage:100,attente:100};   // durée de chaque action ; un équipement pourra les modifier
 const PALIERS=[50,75,100,150,200];                     // les durées des créatures s'écrivent sur ces paliers (voir 03-tuiles)
-const SLOW={[LIQ]:1.5,[DEEP]:2};                        // terrains lents : eau peu profonde ×1,5, eau profonde ×2
+const SLOW={[LIQ]:2,[DEEP]:2};                          // terrains lents : toute eau ×2 (28 novembre 2026 ; avant, eau peu profonde ×1,5)
 const SPRINT_COST=5,SPRINT_MULT=.5;                     // course : énergie par pas, et durée du pas multipliée
 const WAIT_REGEN=2;                                     // attendre sur place : recharge d'énergie multipliée
 const slowOf=(v,swim)=>swim?1:(SLOW[v]||1);             // les nageurs (crabos) ne sont pas ralentis par l'eau

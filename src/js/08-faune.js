@@ -22,7 +22,7 @@ const terrestre=sp=>!sp.nage&&!sp.aqua&&!sp.vol;
 /* ---------- Horloge des créatures (25 novembre 2026) ----------
    Deux durées par espèce, en unités de temps comme pour la foreuse (100 = l'allure de base, voir l'horloge dans 09) :
    `dpas` pour un pas, `dcoup` pour un coup. **Plus petit, plus rapide.** Le terrain allonge le pas (eau peu profonde
-   ×1,5, eau profonde ×2) et jamais le coup ; les nageurs n'en souffrent pas. Avant, une seule VIT servait aux deux et
+   ×2, eau profonde ×2 : toute eau ×2 depuis le 28 novembre 2026) et jamais le coup ; les nageurs n'en souffrent pas. Avant, une seule VIT servait aux deux et
    un coup prenait toujours un battement : une créature rapide ne pouvait ni frapper en arrivant, ni frapper deux fois.
    Les tirs sur cadence (laser, glu) deviennent des coups : l'intervalle est dcoup, multiplié par sp.cadence pour la glu. */
 const ficheDe=o=>(G.beasts&&G.beasts.includes(o))?BEASTS[o.sp]:SPECIES[o.sp];

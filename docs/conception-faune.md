@@ -157,7 +157,7 @@ Ajoutées à la fin de `BEASTS` (tuiles `bz6` à `bz10`, dessins de départ). St
   - **terrestres** (Broyeur, Relais, Mine, Sentinelle, Bloqueur, Artilleur, Soudeur, Englueur, Puce) : ils **ne naissent pas
     dans l'eau** et aucun **point de patrouille** n'y tombe. Ils y entrent pour **poursuivre la foreuse** ; en patrouille, ils ne la
     franchissent que si **aucun chemin à sec** ne mène à leur point ; calmes, ils **regagnent la terre la plus proche** et n'y
-    restent pas. Dans l'eau ils sont **ralentis** (×1,5) et perdent **20 de défense**. Exception gardée : le **Relais** n'y met
+    restent pas. Dans l'eau ils sont **ralentis** (×2, en eau peu profonde comme profonde, depuis le 28 novembre 2026) et perdent **20 de défense**. Exception gardée : le **Relais** n'y met
     jamais une patte, même pour poursuivre (`sec`) ;
   - **aquatiques** (Torpille) : ils **ne naissent que dans l'eau** et n'en sortent pas ; **aucun malus d'eau** (avant : −20 de
     défense et ralentie, comme les autres) ;

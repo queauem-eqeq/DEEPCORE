@@ -145,6 +145,7 @@ function side(){
   sacDraw();
   {const E=G.eff||{},l=[];if(E.poison>0)l.push(`<span style="color:var(--life)">Poison ${E.poison}</span>`);
     if(E.glu>0)l.push(`Englué ${E.glu}`);
+    {const sl=SLOW[G.t[idx(G.px,G.py)]];if(sl)l.push(`Ralenti ×${sl}`);}   // dans l'eau (28 novembre 2026)
     if(E.berserk>0)l.push(`<span style="color:var(--life)">Surrégime ${E.berserk}</span>`);
     if(E.repar&&E.repar.t>0)l.push(`<span style="color:var(--c2)">Réparation ${E.repar.t}</span>`);
     if(E.recharge&&E.recharge.t>0)l.push(`<span style="color:var(--armor)">Recharge ${E.recharge.t}</span>`);if(E.camo>0)l.push(`<span style="color:var(--c3)">Camouflé ${E.camo}</span>`);

@@ -378,7 +378,7 @@ Code : `07c-artefacts.js`, appelé à la fin de la génération des bâtiments.
 | Rocher | brisé en 2 coups | libre | laisse des gravats ; **trois dessins tirés à parts égales** (`rock`, `rock2`, `rock3`, 24 novembre 2026) |
 | Montagne | brisée en 2 coups (sauf bord de carte) | bloquée | 10 % contiennent des éclats de métal |
 | Roche dure | **indestructible à la foreuse** | bloquée | le cœur des massifs ; seule une **charge sismique** la brise. **Pas de métal** dedans |
-| Eau peu profonde | oui | libre | −20 de défense ; **terrain lent : pas ×1,5**, sauf pour les nageurs |
+| Eau peu profonde | oui | libre | −20 de défense ; **terrain lent : pas ×2** (×1,5 avant le 28 novembre 2026), sauf pour les nageurs |
 | Eau profonde | oui | libre | −20 de défense ; **chaque pas a 50 % de chance de partir dans une autre direction** (si cette case est bloquée, la foreuse est plaquée contre l'obstacle et le tour passe) ; **attendre** y déplace d'une case au hasard ; **pas ×2**, sauf pour les nageurs. Seule la foreuse dérive : les créatures y nagent droit |
 | Herbes hautes | oui | bloquée | **deviennent des herbes basses** au passage ; +12 de défense pour qui s'y trouve ; froufrou |
 | Herbes basses | oui | libre | **portée de discrétion ÷ 2** : c'est le couvert du jeu |

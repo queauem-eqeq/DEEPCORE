@@ -136,7 +136,7 @@ Le jeu compte en **unités de temps**, pas en tours.
 
 - Chaque action de la foreuse a une **durée** (table `DUR` dans `09`) : pas 100, coup de foreuse 100, coup sur la
   roche 100, attendre 100.
-- Durée d'un pas = PAS × terrain (eau peu profonde 1,5 ; eau profonde 2) × 0,5 en course × 2 si la foreuse est engluée.
+- Durée d'un pas = PAS × terrain (toute eau ×2, peu profonde comme profonde, depuis le 28 novembre 2026 ; avant 1,5 en eau peu profonde) × 0,5 en course × 2 si la foreuse est engluée.
 - Le monde **bat toutes les 100 unités**. À chaque battement : la détection et la perte de trace sont tirées,
   l'énergie remonte de POW, les effets s'épuisent (étourdi, glu, mèche d'une mine), le Soudeur répare, les machines
   tournent. Une action de 50 laisse passer un battement une fois sur deux ; une action de 200 en laisse passer deux.
@@ -155,7 +155,7 @@ ni frapper deux fois. Maintenant elles comptent le temps comme la foreuse.
 - `o.pret` est l'instant où la créature pourra agir. Elle agit, l'effet est immédiat, puis elle est occupée pendant
   la durée de son action. Le temps avance jusqu'au plus proche des deux instants suivants : la créature prête la
   première, ou le prochain battement. **Rien n'est arrondi ni perdu** : le reste de temps se reporte tout seul.
-- Le terrain allonge le pas (eau peu profonde ×1,5, eau profonde ×2, sauf pour les nageurs) et **jamais le coup**.
+- Le terrain allonge le pas (toute eau ×2, sauf pour les nageurs ; statut « Ralenti ×2 » affiché tant que la foreuse est dans l'eau) et **jamais le coup**.
 - Les tirs sur cadence deviennent des coups : l'intervalle entre deux lasers est `dcoup` (Sentinelle 100, Artilleur
   150) ; la glu garde son `cadence` comme multiplicateur (Englueur 100 × 3 = 300, inchangé).
 - **Au calme** — patrouille, bande, errance, retour à terre — un pas prend au moins un battement, quelle que soit la
