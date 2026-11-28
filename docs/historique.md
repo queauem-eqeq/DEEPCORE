@@ -329,3 +329,4 @@ Ce qui a été remplacé, et pourquoi (demandes de l'utilisateur, « chaque mach
   « Water HUB », « Arene BIG » et « Arene SMALL » ajoutés ; 1 au niveau 1, 2 en cavernes, 2 en base).
 - Identiques, rien à recopier : groupes et niveaux, artefacts, discrétion, prix et effets des autres objets, butin.
 - Non recopié, comme toujours : la configuration d'essai (génération, taille de planète, état de la foreuse).
+- Le pas du Soudeur, réglé à 125 (hors paliers), est porté à **150** à la demande du joueur.

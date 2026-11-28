@@ -101,10 +101,10 @@ plus rapide. Elles ont remplacé la VIT le 25 novembre 2026 ; les paliers sont 5
 | Bloqueur | 50 | 100 | 30 | 2-4 | 100 | 15 | 0 % |
 | Artilleur | 75 | 200 | 14 | 4-7 (laser, 5 cases) | 65 | 5 | 0 % |
 | Drone | 50 | 75 | 6 | 2-3 | 80 | 30 | 0 % |
-| Soudeur | 125 | 100 | 16 | 1-2 | 60 | 10 | 0 % |
+| Soudeur | 150 | 100 | 16 | 1-2 | 60 | 10 | 0 % |
 | Englueur | 100 | 100 | 18 | 2 (glu, 4 cases) | 75 | 10 | 0 % |
 
-Ce sont les valeurs réglées en jeu par l'utilisateur et recopiées dans le code (dernière relecture : 28 novembre 2026, 2 h 10). Le pas du Soudeur, 125, sort des paliers : c'est le réglage du joueur, gardé tel quel. Une nouvelle espèce s'ajoute à la fin de la liste (`conception.md`).
+Ce sont les valeurs réglées en jeu par l'utilisateur et recopiées dans le code (dernière relecture : 28 novembre 2026, 2 h 10). Une nouvelle espèce s'ajoute à la fin de la liste (`conception.md`).
 
 **Les articles des messages suivent le genre de l'espèce** (champ `fem`), avec élision devant une voyelle et pas de
 s au pluriel sur un nom qui en porte déjà un : « la puce », « la torpille », « le crabot », « les relais ».

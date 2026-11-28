@@ -305,7 +305,7 @@ const BEASTS=[
      "................",
      "................",
      "................"]},
-  {n:'Soudeur',key:'soudeur',nb:1,role:'Répare ses alliés à 4 cases, 5 PV par battement, et fuit le contact',dpas:125,dcoup:100,pv:16,dmin:1,dmax:2,pre:60,
+  {n:'Soudeur',key:'soudeur',nb:1,role:'Répare ses alliés à 4 cases, 5 PV par battement, et fuit le contact',dpas:150,dcoup:100,pv:16,dmin:1,dmax:2,pre:60,
     def:10,crit:0,soin:5,portee:4,recul:1,
    rows:["................",
      "................",
