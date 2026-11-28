@@ -578,7 +578,7 @@ kbd{font-family:var(--mono);color:var(--fg);border:1px solid var(--line);padding
 
 /* Journal en grand (28 novembre 2026) : une copie figée du journal, que l'on peut lire et sélectionner sans qu'elle défile. */
 .log{position:relative}
-.logplus{position:absolute;top:4px;right:20px;width:22px;height:22px;padding:0;line-height:20px;text-align:center;font-size:16px;z-index:2}
+.logplus{position:absolute;top:4px;right:20px;width:22px;height:22px;padding:0;line-height:20px;text-align:center;font-size:16px;z-index:2;color:var(--c1)}
 #logBig .mcard{width:min(1100px,100%);height:calc(100vh - 40px);height:calc(100dvh - 40px);display:flex;flex-direction:column;overflow:hidden}
 #logBig .mcard>*{flex:0 0 auto}
 #logBig .mhead{display:flex;gap:8px;align-items:center}

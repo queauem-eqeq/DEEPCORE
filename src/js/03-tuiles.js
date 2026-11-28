@@ -227,7 +227,7 @@ const BEASTS=[
      "....1...........",
      "................",
      "................"]},
-  {n:'Mine',fem:true,key:'mine',nb:4,role:'Fonce sur la foreuse, s’arme à une case, puis explose 2 à 3 battements plus tard sur un carré de 3 × 3 et 5 cases autour',dpas:50,dcoup:100,pv:12,dmin:20,dmax:20,pre:100,def:0,crit:0,mine:true,rows:["................",
+  {n:'Mine',fem:true,key:'mine',nb:4,role:'Fonce sur '+NOM_FOREUSE+', s’arme à une case, puis explose 2 à 3 battements plus tard sur un carré de 3 × 3 et 5 cases autour',dpas:50,dcoup:100,pv:12,dmin:20,dmax:20,pre:100,def:0,crit:0,mine:true,rows:["................",
      "................",
      "................",
      ".......11.......",
@@ -265,7 +265,7 @@ const BEASTS=[
      distance), soin + portee (répare un allié blessé), glu (portée du jet de glu). Dessins de départ, à retoucher dans le Tile editor. */
   // l'ancien Gardien (22 novembre 2026) ; la clé reste « gardien » pour les groupes déjà réglés, ses stats sont enregistrées sous « bloqueur »
   {n:'Bloqueur',key:'gardien',bk:'bloqueur',bloque:true,nb:2,
-    role:'Rapide : il agrippe la foreuse, qui ne peut plus se déplacer tant qu’il vit. Frappe peu fort',dpas:50,dcoup:100,pv:30,dmin:2,dmax:4,
+    role:'Rapide : il agrippe '+NOM_FOREUSE+', qui ne peut plus se déplacer tant qu’il vit. Frappe peu fort',dpas:50,dcoup:100,pv:30,dmin:2,dmax:4,
     pre:100,def:15,crit:0,
   
    rows:["................", "................", ".....1....1.....", ".....1....1.....", "...1111111111...", "..112222222211..", ".31123322332113.", ".33122222222133.", "..312223322213..", "..312233332213..", "...1122222211...", "...1111111111...", "...11......11...", "..111......111..", "................", "................"]},
@@ -323,7 +323,7 @@ const BEASTS=[
      "..11........11..",
      "................",
      "................"]},
-  {n:'Englueur',key:'englueur',nb:2,role:'Crache de la glu jusqu’à 4 cases et garde ses distances : la foreuse avance deux fois moins vite pendant 3 battements',dpas:100,dcoup:100,pv:18,dmin:1,dmax:2,pre:75,def:10,crit:0,glu:4,cadence:3,recul:2,
+  {n:'Englueur',key:'englueur',nb:2,role:'Crache de la glu jusqu’à 4 cases et garde ses distances : '+NOM_FOREUSE+' avance deux fois moins vite pendant 3 battements',dpas:100,dcoup:100,pv:18,dmin:1,dmax:2,pre:75,def:10,crit:0,glu:4,cadence:3,recul:2,
    rows:["................",
      "................",
      "................",

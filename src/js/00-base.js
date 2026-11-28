@@ -1,4 +1,4 @@
-const NOM_FOREUSE='F.467 mkIV'; // nom du modèle de la foreuse, utilisé dans les messages du journal
+const NOM_FOREUSE='F467'; // nom du modèle de la foreuse, utilisé dans les messages du journal
 let W=96,H=64;const NSITES=1,S=32;   // un seul site de forage par carte (13 novembre 2026)
 // Taille de la carte : réglage « Taille » de Génération, de 1 à 5 ; 4 = la taille d'origine (96 × 64)
 const SIZES=[null,[32,22],[48,32],[72,48],[96,64],[144,96]];

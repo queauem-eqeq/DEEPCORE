@@ -201,12 +201,12 @@ function tryMove(dx,dy){if(PHASE)return;   // foreuse démontée : elle ne march
       say(`Eau profonde : le courant plaque ${NOM_FOREUSE} contre un obstacle (${dirs[k]}).`,'warn');pass(DUR.pas);computeFOV();render();
         if(G.over&&G.over.dead)dead();return;}
     dx=ex;dy=ey;nx=ax;ny=ay;v=av;G.face=dx>0?'r':dx<0?'l':dy>0?'d':'u';SFX.drift();
-      G.devMsg=`Eau profonde : le courant dévie la foreuse vers ${dirs[k]}.`;}
+      G.devMsg=`Eau profonde : le courant dévie ${NOM_FOREUSE} vers ${dirs[k]}.`;}
   {const oi=idx(G.px,G.py),ov=G.t[oi],dk=DIRS.findIndex(d=>d[0]===dx&&d[1]===dy);
     if(ov!==LIQ&&ov!==DEEP&&ov!==BRIDGE&&ov!==DECK){G.tracks=G.tracks||{};G.tracks[oi]={t:G.turn+1,i:G.lastDir??dk,o:dk};}G.lastDir=dk;}
   // course : chaque pas coûte SPRINT_COST d'énergie et dure moitié moins ; à sec, la foreuse reprend la marche
   let run=false;if(G.sprint){if(G.st.energie>=SPRINT_COST){G.st.energie-=SPRINT_COST;run=true;}else{G.sprint=false;SFX.motorOff();
-    G.devMsg=(G.devMsg?G.devMsg+' ':'')+'Énergie insuffisante : la foreuse reprend la marche.';}}
+    G.devMsg=(G.devMsg?G.devMsg+' ':'')+'Énergie insuffisante : '+NOM_FOREUSE+' reprend la marche.';}}
   lastRun=run;
   const doorway=(G.t[idx(G.px,G.py)]===DECK)!==(v===DECK);   // passage de la porte du vaisseau
   G.px=nx;G.py=ny;G.turn++;G.dist++;G.msg=null;if(G.devMsg){say(G.devMsg,'warn');G.devMsg=null;}
@@ -276,7 +276,7 @@ function end(s){
   if((G.niv||1)<NIV_MAX){$('overlay').hidden=true;descendre(G.niv||1);return;
     }const bilan=`<div class="stats"><span>${G.turn} tours · ${G.dist} cases parcourues</span><span>Matière {µ} en réserve : ${G.st.matiere||0}</span></div>`;
   G.over={site:s.id,win:true};
-  $('card').innerHTML=`<div class="tag">Site ${s.id} foré</div><h2>NOYAU<br>ATTEINT</h2>${bilan}<p>La foreuse a percé jusqu’au noyau de la planète.</p><button class="go" id="again">Nouvelle exploration</button>`;
+  $('card').innerHTML=`<div class="tag">Site ${s.id} foré</div><h2>NOYAU<br>ATTEINT</h2>${bilan}<p>${NOM_FOREUSE} a percé jusqu’au noyau de la planète.</p><button class="go" id="again">Nouvelle exploration</button>`;
   $('overlay').hidden=false;$('again').onclick=()=>{nouvellePartie();};$('again').focus();
 }
 

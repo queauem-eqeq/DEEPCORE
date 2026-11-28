@@ -206,7 +206,7 @@ Modèle Brogue :
   Matière sont toujours connues. Ce que la foreuse sait (plans, capsules identifiées, codes) est dans `G.st.savoir` et la
   suit d'un niveau à l'autre. **À la mort de la foreuse, toutes les capsules se dévoilent** dans l'inventaire (message dans
   le journal) ; la partie suivante repart avec de nouveaux codes.
-- **Tout consommable se vise**, comme la charge sismique, jusqu'à 4 cases. **La visée montre toujours une seule case**
+- **Tout consommable se vise**, comme la charge sismique, jusqu'à la portée de vue (capteur), depuis le 28 novembre 2026. **La visée montre toujours une seule case**
    : une capsule inconnue ne se trahit
   pas par sa zone. La visée s'ouvre **sur la foreuse** pour les objets qui la servent **et pour toute capsule non
   identifiée** : Entrée deux fois = sur soi, quitte à faire sauter une charge sismique sous ses pieds. La charge connue
@@ -288,7 +288,7 @@ inconnue sur soi peut coûter cher, la lancer sur un ennemi peut le servir. Fabr
 | Réparobots (×2) | consommable | – | Vie +50 ; **croix rouges** autour de la foreuse |
 | Batterie (×2) | consommable | – | Énergie +50 ; **flèches bio** qui montent |
 | Fumigène (×2) | consommable | – | un **nuage de fumée** (ci-dessous) |
-| Charge sismique (×2) | consommable | – | **visée** d'une case jusqu'à 4 cases ; explosion de mine, **30 dégâts** ; bruyante |
+| Charge sismique (×2) | consommable | – | **visée** d'une case jusqu'à la portée de vue ; explosion de mine, **30 dégâts** ; bruyante |
 
 **Fumigène.** À la pose, une **galette ovale** autour de la foreuse (7 cases de large et de haut, 5 en diagonale : 37 cases). Chaque case dure de **15 à 25 battements** ; à chaque battement le nuage **gagne une à trois cases voisines** au hasard, plus brèves : il s'étend de travers, plafonné à 90 cases, puis s'efface case par case. Les ennemis qui chassaient **perdent aussitôt la trace**.
 - **Il passe au-dessus des gouffres** ; seuls les obstacles pleins l'arrêtent.

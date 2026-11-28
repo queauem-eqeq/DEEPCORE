@@ -1,5 +1,5 @@
 /* ---------- Rendu ---------- */
-const cv=$('view'),ctx=cv.getContext('2d'),fcv=$('fxv'),fctx=fcv.getContext('2d');let cols=20,rows=15,camX=0,camY=0,vw=0,vh=0;
+const cv=$('view'),ctx=cv.getContext('2d'),fcv=$('fxv'),fctx=fcv.getContext('2d');let cols=20,rows=15,camX=0,camY=0,vw=0,vh=0,SELCAM=null;
 /* Tablette (26 novembre 2026) : sur un écran tactile, la vue montre au plus VUE_MAX × VUE_MAX cases. 21 = la portée de vue de
    la foreuse (capteur 10) de part et d'autre : tout ce qu'elle voit tient à l'écran. Le canevas est dessiné à la résolution
    de l'ordinateur (un point = un pixel), puis agrandi par le navigateur d'un facteur entier (VZ × densité de l'écran) :
@@ -340,7 +340,7 @@ function render(){
   if(!G||!TL.robot)return;ensureChasmOv();ensureSolOv();
   const vc=vw/S,vr=vh/S;
   // pendant le phasage (28 novembre 2026) la vue reste centrée sur la foreuse, point de départ ; elle ne défile que près du bord
-  const fx0=PHASE?PHASE.cx:freeCam?camCX:G.px,fy0=PHASE?PHASE.cy:freeCam?camCY:G.py;
+  const fx0=PHASE?PHASE.cx:freeCam?camCX:SELCAM?SELCAM.cx:G.px,fy0=PHASE?PHASE.cy:freeCam?camCY:SELCAM?SELCAM.cy:G.py;
   camX=Math.max(0,Math.min(W-Math.floor(vc),fx0-Math.floor(vc/2)));camY=Math.max(0,Math.min(H-Math.floor(vr),fy0-Math.floor(vr/2)));
   ox=0;oy=0;
   ctx.globalAlpha=1;ctx.imageSmoothingEnabled=false;ctx.fillStyle=FOND;ctx.fillRect(0,0,vw,vh);

@@ -9,10 +9,10 @@
    4. Terminal  : la foreuse l'active en avançant dessus ; il affiche un texte.
    Terrains : MACHINE, ANTENNA, TERMINAL (00-base). G.art[case] : la variante d'une machine, l'état d'une antenne (1 = allumée),
    le texte d'un terminal. Posés par artefacts(), appelé à la fin de la génération des bâtiments. */
-const ART_LISTE=[['antenne','Antenne','Activée par la foreuse, elle lève le brouillard 15 tours sur un disque de 30 cases, puis y signale les ennemis par un point rouge.',[.5,1,2]],
+const ART_LISTE=[['antenne','Antenne','Activée par '+NOM_FOREUSE+', elle lève le brouillard 15 tours sur un disque de 30 cases, puis y signale les ennemis par un point rouge.',[.5,1,2]],
   ['herbe','Pièces envahies d’herbe','Des pièces remplies d’herbes hautes et basses mêlées.',[.08,.18,.35]],
   ['machines','Machines','Dix machines hors d’usage posées en obstacles : elles barrent le pas, pas la vue.',[.15,.35,.6]],
-  ['terminal','Terminal','Activé par la foreuse, il affiche un texte.',[1,2,4]],
+  ['terminal','Terminal','Activé par '+NOM_FOREUSE+', il affiche un texte.',[1,2,4]],
   // machines (21 novembre 2026, 07f-machines) : nombre de salles par carte dans la grande base ; un tiers ailleurs (le fabricateur : partout pareil)
   ['lasers','Tourelles laser','Des tourelles encastrées dans un mur balaient la pièce par bandes. Aucun avertissement : chaque bande a son rythme.',[1,2,4]],
   ['croix','Croix laser','Un champ de pylônes qui éclairent leurs quatre cases voisines, chacun à son rythme.',[1,2,3]],
@@ -47,7 +47,7 @@ const TERM_TXT=[
   ['Message non envoyé','Les machines du dehors ne sont pas hostiles tant qu’on ne les regarde pas. Elles font leur ronde. Nous avons appris les horaires. Hier, l’une d’elles a changé d’itinéraire.'],
   ['Consigne de sécurité','En présence d’une mine : ne restez pas à côté. Elle clignote avant d’exploser. Trois battements, parfois moins. Comptez en reculant.'],
   ['Journal personnel','Les herbes ont gagné la salle des cuves. Personne ne sait d’où viennent les graines. On s’y cache bien, cela dit. Les sentinelles ne tirent pas sur ce qu’elles ne voient pas.'],
-  ['Dernière entrée','Le noyau est plus près qu’on ne le pensait. Le site est derrière la dernière porte. Nous laissons la foreuse suivante finir le travail.']];
+  ['Dernière entrée','Le noyau est plus près qu’on ne le pensait. Le site est derrière la dernière porte. Nous laissons '+NOM_FOREUSE+' suivante finir le travail.']];
 
 // une case de pièce où poser un obstacle sans rien couper : pas devant un passage, et les cases praticables autour d'elle restent d'un seul tenant
 function artLibre(B,i,site){const t=G.t;if(t[i]!==FLOOR||G.cles[i]||i===site||(G.art&&G.art[i]!=null))return false;const x=i%W,y=(i/W)|0;

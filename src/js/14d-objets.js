@@ -31,18 +31,18 @@ Object.assign(ITEMS,{
     art:["          ▄▄   ", "        ▄▀▒▀   ", "      ▄▀▒▄▀    ", "    ▄▀▒▄▀      ", "  ▄█▄▄▀        ", "  ▀▀           "],
     col:["..........ww...", "........wwrw...", "......wwrww....", "....wwrww......", "..wwwww........", "..ww..........."]},
   camo:{n:'Camouflage optique',conso:1,son:'veil',eff:'Invisible 10 battements',
-    d:'La coque renvoie ce qui l’entoure : les ennemis ne voient plus la foreuse, sauf au contact. Un coup ou un forage rompt l’effet.',
+    d:'La coque renvoie ce qui l’entoure : les ennemis ne voient plus '+NOM_FOREUSE+', sauf au contact. Un coup ou un forage rompt l’effet.',
     plein:st=>false,non:'',use:st=>'',
     art:["   ·  ·  ·  ·  ", "  ·  ▄▄▄▄▄  ·  ", "  · █░▒█▒░█ ·  ", "  ·  ▀▀▀▀▀  ·  ", "   ·  ·  ·  ·  "],
     col:["...3..3..3..3..", "..3..wwwww..3..", "..3.w33w33w.3..", "..3..wwwww..3..", "...3..3..3..3.."]},
   // Capsules néfastes (22 novembre 2026) : mauvaises sur la foreuse, utiles lancées ailleurs. C'est ce qui fait de l'identification un pari.
   balise:{n:'Balise',conso:1,son:'alarme',eff:'Leurre : attire les ennemis 25 battements',
-    d:'Un émetteur qui hurle. Lancée au loin, elle reste au sol 25 battements : les ennemis à 20 cases, et tous ceux qui chassent la foreuse, l’oublient et s’acharnent sur la balise (40 PV) ; détruite, elle explose. Ils restent en chasse : pas de coup par surprise, et ensuite ils cherchent la foreuse. Sur la foreuse, c’est une catastrophe : tous savent où elle est.',
+    d:'Un émetteur qui hurle. Lancée au loin, elle reste au sol 25 battements : les ennemis à 20 cases, et tous ceux qui chassent '+NOM_FOREUSE+', l’oublient et s’acharnent sur la balise (40 PV) ; détruite, elle explose. Ils restent en chasse : pas de coup par surprise, et ensuite ils cherchent '+NOM_FOREUSE+'. Sur '+NOM_FOREUSE+', c’est une catastrophe : tous savent où il est.',
     plein:st=>false,non:'',use:st=>'',
     art:["      ) ) )    ", "     ▄▄█▄▄     ", "     █ ● █     ", "     ▀▀█▀▀     ", "    ▄▄▄█▄▄▄    "],
     col:["......r.r.r....", ".....wwwww.....", ".....w.r.w.....", ".....wwwww.....", "....wwwwwww...."]},
   court:{n:'Court-circuit',conso:1,son:'zap',eff:'Énergie à zéro, ou ennemi hors service',
-    d:'Une surtension brutale. Sur la foreuse : l’énergie tombe à zéro. Lancé sur un ennemi : il reste hors service 10 battements, sans dégât.',
+    d:'Une surtension brutale. Sur '+NOM_FOREUSE+' : l’énergie tombe à zéro. Lancé sur un ennemi : il reste hors service 10 battements, sans dégât.',
     plein:st=>false,non:'',use:st=>'',
     art:["     ▄▄▄▄▄     ", "    █  ▄▀ █    ", "    █ ▀▄  █    ", "    █  ▄▀ █    ", "     ▀▀▀▀▀     "],
     col:[".....wwwww.....", "....w..11.w....", "....w.11..w....", "....w..11.w....", ".....wwwww....."]},
@@ -50,7 +50,7 @@ Object.assign(ITEMS,{
      elle se reforme n'importe où sur le terrain DÉJÀ DÉCOUVERT (G.seen), pourvu qu'elle y tienne. Sur un ennemi : il se
      disperse et reparaît au hasard sur le niveau, à `loin` cases au moins, et perd la trace de la foreuse. */
   phaseur:{n:'Phaseur',conso:1,son:'phase',eff:'Téléportation sur le terrain connu',
-    d:'Un champ de phase à usage unique. Sur la foreuse : elle entre en phase et sort de phase où l’on veut, pourvu que le terrain ait déjà été découvert. Lancé sur un ennemi : il passe en phase ailleurs sur le niveau, sans plus savoir où la foreuse se trouve.',
+    d:'Un champ de phase à usage unique. Sur '+NOM_FOREUSE+' : il entre en phase et sort de phase où l’on veut, pourvu que le terrain ait déjà été découvert. Lancé sur un ennemi : il passe en phase ailleurs sur le niveau, sans plus savoir où '+NOM_FOREUSE+' se trouve.',
     plein:st=>false,non:'',use:st=>'',
     art:["     ▄▄▄▄▄     ", "    █ ▐▌  █    ", "    █ ▐▌░ █    ", "    █ ▐▌  █    ", "     ▀▀▀▀▀     "],
     col:[".....wwwww.....", "....w.11..w....", "....w.112.w....", "....w.11..w....", ".....wwwww....."]},
@@ -86,11 +86,11 @@ for(const k in CONSO){const d=ITEMS[k],v={n:d.n,eff:d.eff,d:d.d,art:d.art,col:d.
    (statuts « Réparation » et « Recharge » avec les battements restants). Sur un ennemi, la réparation reste immédiate. */
 const RECUP_TOURS=5;
 function itemTxt(){const V=ITEM_VAL,v=k=>ITEMS[k].vrai;
-  v('repar').eff=`Vie +${V.repar.soin} sur ${RECUP_TOURS} battements`;v('repar').d=`Essaim de micro-robots réparateurs : rend ${V.repar.soin} points de vie à ce qu’il touche — la foreuse (répartis sur ${RECUP_TOURS} battements) ou un ennemi (d’un coup).`;
+  v('repar').eff=`Vie +${V.repar.soin} sur ${RECUP_TOURS} battements`;v('repar').d=`Essaim de micro-robots réparateurs : rend ${V.repar.soin} points de vie à ce qu’il touche — ${NOM_FOREUSE} (répartis sur ${RECUP_TOURS} battements) ou un ennemi (d’un coup).`;
   v('batterie').eff=`Énergie +${V.batterie.energie} sur ${RECUP_TOURS} battements, ou décharge`;
-    v('batterie').d=`Sur la foreuse : rend ${V.batterie.energie} points d’énergie, répartis sur ${RECUP_TOURS} battements. Lancée sur un ennemi : ${V.batterie.choc} dégâts, et il reste étourdi ${V.batterie.etourdi} battements.`;
-  v('fumigene').d='Un nuage opaque là où on le lance : il cache la vue des deux côtés. Si la foreuse est dedans, les ennemis perdent sa trace.';
-  v('charge').eff=`${V.charge.degats} dégâts, roche brisée, 3 × 3 et plus`;v('charge').d=`Explose jusqu’à 4 cases, comme une mine : un carré de 3 × 3 et 5 cases autour, au hasard. ${V.charge.degats} dégâts, la foreuse comprise si elle est dedans, et roche brisée, même la roche dure. Très bruyante.`;
+    v('batterie').d=`Sur ${NOM_FOREUSE} : rend ${V.batterie.energie} points d’énergie, répartis sur ${RECUP_TOURS} battements. Lancée sur un ennemi : ${V.batterie.choc} dégâts, et il reste étourdi ${V.batterie.etourdi} battements.`;
+  v('fumigene').d='Un nuage opaque là où on le lance : il cache la vue des deux côtés. Si '+NOM_FOREUSE+' est dedans, les ennemis perdent sa trace.';
+  v('charge').eff=`${V.charge.degats} dégâts, roche brisée, 3 × 3 et plus`;v('charge').d=`Explose jusqu’à la portée de vue, comme une mine : un carré de 3 × 3 et 5 cases autour, au hasard. ${V.charge.degats} dégâts, ${NOM_FOREUSE} comprise si elle est dedans, et roche brisée, même la roche dure. Très bruyante.`;
   v('puissance').eff=`POW +${V.puissance.pow}, pour toujours`;
   v('berserk').eff=`CRIT +${V.berserk.crit} pendant ${V.berserk.duree} battements`;
   v('camo').eff=`Invisible ${V.camo.duree} battements`;
@@ -337,7 +337,7 @@ addFx({kind:'ener',x,y,dur:1000,gr:fxGrains(12)});}
     else{txt='le voile se dissipe sans rien couvrir';ton='warn';}}
   else if(k==='balise'){
     if(moi){const camo=G.eff&&G.eff.camo>0;if(camo)G.eff.camo=0;let n=0;
-      /* sur la foreuse : tous savent où elle est, et le camouflage se rompt */
+      /* sur la foreuse : tous savent où il est, et le camouflage se rompt */
       for(const e of G.beasts||[])if(Math.max(Math.abs(e.x-x),Math.abs(e.y-y))<=V.rayon&&!(e.stun>0)){e.hunt=1;e.leurre=0;spot(e);n++;}
       addFx({kind:'shake',amp:4,dur:250});txt=`la balise hurle sur ${NOM_FOREUSE} : ${n} ennemi${n>1?'s':''} alentour ${n>1?'savent':'sait'} où il est`+(camo?' ; le camouflage optique se rompt':'');ton='warn';}
     else{const q=balisePose(x,y);
