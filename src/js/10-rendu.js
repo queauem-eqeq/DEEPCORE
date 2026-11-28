@@ -421,9 +421,12 @@ function render(){
   // nuage d'un fumigène : les tuiles de nuage par-dessus le terrain et les créatures, sous la foreuse ; elles pâlissent en se dissipant
   // la fumée se voit même là où elle coupe la vue : sinon on ne verrait que les neuf cases autour de la foreuse
   if(G.fum)for(const k in G.fum){const i=+k;if(fog&&!vis[i]&&!G.seen[i])continue;const c=G.fum[k],t=TL['nuage'+c.k];
-    /* Fumée en pixels opaques (28 novembre 2026) : jamais d'alpha. Plus le nuage se dissipe, moins il garde de pixels de sa tuile
-       (le même effeuillage que le phaseur) ; hors de vue, il est tenu à 55 % de pixels. */
-    if(t){ctx.globalAlpha=1;ctx.drawImage(tuilePhase(t,Math.min(1,c.v/4)*(vis[i]?1:.55)),(i%W-camX)*S,((i/W|0)-camY)*S,S,S);}}
+    /* Fumée opaque (28 novembre 2026) : jamais d'alpha. On garde l'ancien dessin — des tuiles de nuage, plein au cœur, hachures
+       de tailles, d'inclinaisons et de densités variées sur les bords — mais chaque pixel est opaque ou absent. En se dissipant
+       (ou hors de vue) le nuage passe à des hachures de plus en plus claires : plein, puis rayures, puis pointillé. */
+    if(t){const x=i%W,y=(i/W)|0,v=Math.min(c.v,vis[i]?9:3);let kk=c.k;
+      if(v<=1)kk=3;else if(v<=3&&kk<2)kk=2+((x+y)%3===0?2:(x+y)%2);
+      const u=TL['nuage'+kk]||t;ctx.globalAlpha=1;ctx.drawImage(u,(x-camX)*S,(y-camY)*S,S,S);}}
   // case visée d'un consommable : « Bord croisé » rouge, toujours sur une seule case, pour ne rien trahir (22 novembre 2026)
   if(VISEE){const t=viseeTuile();ctx.globalAlpha=1;
     for(const [zx,zy] of viseeCases()){
