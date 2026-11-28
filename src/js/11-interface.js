@@ -74,7 +74,7 @@ function mini(){
        dot(cx-g,cy+e);dot(cx+g,cy+e);}}}
   // ennemis : points rouges (dans le champ de vision, ou partout sans brouillard)
   {const d=Math.max(2,Math.round(k*1.2));mctx.fillStyle=PAL['4'];
-   for(const e of [...(G.beasts||[]),...(G.animals||[])]){if(fog&&!vis[idx(e.x,e.y)]&&!(G.beasts.includes(e)&&antDetecte(e)))continue;
+   for(const e of [...(G.beasts||[]),...(G.animals||[])]){if(fog&&!vis[idx(e.x,e.y)]&&!(G.beasts.includes(e)&&(antDetecte(e)||(typeof traqueVoit==='function'&&traqueVoit(e))||sonarVoit(e))))continue;
      mctx.fillRect(Math.round((e.x+.5)*k-d/2),Math.round((e.y+.5)*k-d/2),d,d);}}
   mctx.strokeStyle=PAL['1'];mctx.globalAlpha=.5;mctx.lineWidth=Math.max(1,Math.round(dpr));
   mctx.strokeRect(X(camX)+.5,Y(camY)+.5,X(camX+Math.min(W,Math.ceil(vw/S)))-X(camX)-1,Y(camY+Math.min(H,Math.ceil(vh/S)))-Y(camY)-1);
@@ -118,17 +118,24 @@ function seenHTML(){
   const near=(a,b)=>Math.hypot(a.x-G.px,a.y-G.py)-Math.hypot(b.x-G.px,b.y-G.py);
   /* Ordre (25 novembre 2026) : d'abord celles qui sont en jeu, dans l'ordre où elles vont agir (leur horloge, o.pret),
      puis les autres par distance. Les calmes restent donc en bas sans sauter d'une ligne à l'autre à chaque action. */
-  const ans=[...(G.beasts||[]).filter(b=>vis[idx(b.x,b.y)]&&!beastCache(b)).map(b=>({o:b,sp:BEASTS[b.sp],ic:'bz'+b.sp+'r',hp:b.hp,st:b.hunt>0?(b.sees?'en chasse':b.search>0?'fouille':'cherche'):'',agg:true,ch:b.hunt>0})),
-             ...(G.animals||[]).filter(a=>vis[idx(a.x,a.y)]).map(a=>({o:a,sp:SPECIES[a.sp],ic:'an'+a.sp+'r',hp:a.hp??pvDe(SPECIES[a.sp]),st:{attack:'attaque',flee:'recule',follow:'suit',hold:'observe',seek:'cherche',search:'fouille'}[a.mode]||'',agg:a.mode==='attack',ch:!!a.mode}))]
+  const ans=[...(G.beasts||[]).filter(b=>vis[idx(b.x,b.y)]&&!beastCache(b)).map(b=>({o:b,sp:BEASTS[b.sp],ic:'bz'+b.sp+'r',hp:b.hp,st:b.hunt>0?(b.sees?'en chasse':b.search>0?'fouille':'cherche'):'',agg:true,ch:b.hunt>0,
+               ouv:aOuvrage(b)?(ouvrAlerte(b)?'ALERTÉE':'À L’OUVRAGE'):''})),
+             ...(G.animals||[]).filter(a=>vis[idx(a.x,a.y)]).map(a=>({o:a,ouv:aOuvrage(a)?(ouvrAlerte(a)?'ALERTÉE':'À L’OUVRAGE'):'',sp:SPECIES[a.sp],ic:'an'+a.sp+'r',hp:a.hp??pvDe(SPECIES[a.sp]),st:{attack:'attaque',flee:'recule',follow:'suit',hold:'observe',seek:'cherche',search:'fouille'}[a.mode]||'',agg:a.mode==='attack',ch:!!a.mode}))]
     .sort((p,q)=>(p.ch?0:1)-(q.ch?0:1)||(p.ch?(p.o.pret||0)-(q.o.pret||0):near(p.o,q.o)));
   if(ans.length){const max=6;
     const calc=e=>{const tmA=terrModDe(e.sp,e.o.x,e.o.y),tmR=terrMod(G.px,G.py),me=hitChance(robotPre(),e.sp.def+tmA),
       them=e.agg?hitChance(e.sp.pre,robotDef()):null;return {tmA,tmR,me,them};};
     const head='<div class="hd"><span></span><span title="Sa cadence : le nombre d’actions qu’elle fait pendant une action normale de '+NOM_FOREUSE+'"></span><span>Vie</span><span title="Votre chance de le toucher">Toucher</span><span title="Sa chance de vous toucher">Subir</span></div>';
-    out.push('<div class="grp">'+head+ans.slice(0,max).map(e=>{const pv=pvDe(e.sp),d=Math.max(Math.abs(e.o.x-G.px),Math.abs(e.o.y-G.py)),c=calc(e);
+    const ligne=e=>{const pv=pvDe(e.sp),d=Math.max(Math.abs(e.o.x-G.px),Math.abs(e.o.y-G.py)),c=calc(e);
       const dp=Math.round(dpasDe(e.o,e.sp)),dc=dcoupDe(e.o,e.sp),cd=d<=1?dc:dp;
-      return `<div class="an${e.agg&&e.st?' hunt':''}" title="${e.sp.n}${e.st?' · '+e.st:''} · ${d} case${d>1?'s':''} · ${Math.max(0,e.hp)}/${pv} PV · pas ${dp} (${motDuree(dp)}), coup ${dc} (${motDuree(dc)})"><img src="${ICON[e.ic]||''}" alt="${e.sp.n}"><span class="cad${cd<=50?' vif':''}" title="${cd<=100?'Jusqu’à '+cadenceDe(cd).toFixed(cadenceDe(cd)%1?1:0)+' action':'Une action toutes les '+(1/cadenceDe(cd)).toFixed(1)}${cd<=100?'s par action de '+NOM_FOREUSE+'':' actions de '+NOM_FOREUSE+''}">${CADGL(cd)}</span><span class="hp">${asciiBar(Math.max(0,e.hp),pv)}</span><span class="n" style="color:${chanceCol(c.me)}">${c.me} %</span><span class="n" style="color:${c.them==null?'var(--dim)':chanceCol(100-c.them)}">${c.them==null?'—':c.them+' %'}</span></div>`;}).join('')
-    +(ans.length>max?`<div class="none">+ ${ans.length-max} autre${ans.length-max>1?'s':''}</div>`:'')+'</div>');
+      return `<div class="an${e.agg&&e.st?' hunt':''}" title="${e.sp.n}${e.ouv?' · '+e.ouv.toLowerCase():e.st?' · '+e.st:''} · ${d} case${d>1?'s':''} · ${Math.max(0,e.hp)}/${pv} PV · pas ${dp} (${motDuree(dp)}), coup ${dc} (${motDuree(dc)})"><img src="${ICON[e.ic]||''}" alt="${e.sp.n}"><span class="cad${cd<=50?' vif':''}" title="${cd<=100?'Jusqu’à '+cadenceDe(cd).toFixed(cadenceDe(cd)%1?1:0)+' action':'Une action toutes les '+(1/cadenceDe(cd)).toFixed(1)}${cd<=100?'s par action de '+NOM_FOREUSE+'':' actions de '+NOM_FOREUSE+''}">${CADGL(cd)}</span><span class="hp">${asciiBar(Math.max(0,e.hp),pv)}</span><span class="n" style="color:${chanceCol(c.me)}">${c.me} %</span><span class="n" style="color:${c.them==null?'var(--dim)':chanceCol(100-c.them)}">${c.them==null?'—':c.them+' %'}</span>${e.ouv==='ALERTÉE'?`<span class="ouv al">${e.ouv}</span>`:''}</div>`;};
+    /* « En vue » en deux parties (28 novembre 2026) : d'abord les menaces actives (ferrailleuses alertées comprises), puis, sous
+       l'intertitre « À L'OUVRAGE », les ferrailleuses indifférentes, en couleur neutre. */
+    const men=ans.filter(e=>e.ouv!=='À L’OUVRAGE'),ouv=ans.filter(e=>e.ouv==='À L’OUVRAGE'),plus=n=>n>0?`<div class="none">+ ${n} autre${n>1?'s':''}</div>`:'';
+    const nm=Math.min(men.length,ouv.length?max-Math.min(2,ouv.length):max),no=Math.max(0,Math.min(ouv.length,max-nm));
+    out.push('<div class="grp">'+head+men.slice(0,nm).map(ligne).join('')+plus(men.length-nm)
+      +(ouv.length?`<div class="ouvhd" title="Ferrailleuses : indifférentes tant qu’on ne les attaque pas et qu’on n’entre pas dans le périmètre de leur épave">À L’OUVRAGE</div>`
+        +ouv.slice(0,no).map(e=>ligne(e).replace('<div class="an','<div class="an ouvr')).join('')+plus(ouv.length-no):'')+'</div>');
   }
   const ins=HOV&&!busy()&&!viseCible()?inspectHTML(HOV):'';   // en mode viseur, la fiche est dans la colonne
   return ins+(out.join('')||'<div class="none">Rien en vue.</div>');
@@ -139,11 +146,20 @@ function side(){
 
   for(const [t,v,mx,nm] of [['lifeT',st.vie,st.vieMax,'lifeN'],['enT',st.energie,st.energieMax,'enN']]){$(t).innerHTML=asciiBar(v,mx);
     $(nm).textContent=Math.floor(v)+'/'+mx;$(t).setAttribute('aria-valuenow',Math.floor(v));$(t).setAttribute('aria-valuemax',mx);}
+  // jauge de fuel (28 novembre 2026) : alerte sous REGLES.FUEL_ALERTE, « À SEC » à zéro
+  if($('fuT')){fuelInit(st);const f=Math.floor(st.fuel),sec=st.fuel<=0,bas=!sec&&fuelAlerte(st);$('fuT').innerHTML=asciiBar(st.fuel,st.fuelMax);
+    $('fuN').textContent=sec?'À SEC':f+'/'+st.fuelMax;$('fuT').setAttribute('aria-valuenow',f);$('fuT').setAttribute('aria-valuemax',st.fuelMax);
+    $('fuRow').classList.toggle('bas',bas);$('fuRow').classList.toggle('sec',sec);}
   {const b=$('sprintBtn');b.textContent=G.sprint?'COURSE':'MARCHE';b.classList.toggle('on',!!G.sprint);
     b.setAttribute('aria-pressed',!!G.sprint);}
   // Le sous-menu Statistiques a été retiré le 15 novembre 2026 : les stats sont dans la fenêtre Équipement.
   sacDraw();
-  {const E=G.eff||{},l=[];if(E.poison>0)l.push(`<span style="color:var(--life)">Poison ${E.poison}</span>`);
+  {const E=G.eff||{},l=[];
+    // fuel et repos (28 novembre 2026) : « À SEC » tant que la réserve est vide ; « Repos » quand la foreuse vient de passer son tour
+    // à l'arrêt et que la vie remonte vite (G.reposT, survieTick)
+    if(st.fuel<=0)l.push('<span style="color:var(--life)">À SEC</span>');
+    else if(G.reposT===G.turn&&st.vie<st.vieMax)l.push('<span style="color:var(--c2)">Repos</span>');
+    if(E.poison>0)l.push(`<span style="color:var(--life)">Poison ${E.poison}</span>`);
     if(E.glu>0)l.push(`Englué ${E.glu}`);
     {const sl=SLOW[G.t[idx(G.px,G.py)]];if(sl)l.push(`Ralenti ×${sl}`);}   // dans l'eau (28 novembre 2026)
     if(E.berserk>0)l.push(`<span style="color:var(--life)">Surrégime ${E.berserk}</span>`);
@@ -229,7 +245,8 @@ addEventListener('keydown',ev=>{
   if(!$('monde').hidden){if(ev.key==='Escape'){ev.preventDefault();mondeClose();}return;}
   if(!$('faune').hidden){if(ev.key==='Escape'){ev.preventDefault();lifeClose();}return;}
   if(!$('fabric').hidden){fabKey(ev);return;}
-  if(!$('terminal').hidden){if(ev.key==='Escape'||ev.key==='Enter'||ev.key===' '){ev.preventDefault();closeTerminal();}return;}
+  if(!$('terminal').hidden){termKey(ev);return;}
+  if(!$('jdb').hidden){jnKey(ev);return;}   // journal de bord (14k)
   if(!$('artefacts').hidden){if(ev.key==='Escape'){ev.preventDefault();closeArtefacts();}return;}
   if(!$('groupes').hidden){if(ev.key==='Escape'){ev.preventDefault();closeGroupes();}return;}
   if(!$('discretion').hidden){if(ev.key==='Escape'){ev.preventDefault();closeDisc();}return;}
@@ -247,6 +264,12 @@ addEventListener('keydown',ev=>{
     if(KEYS[k])viseeVers(VISEE.x+KEYS[k][0],VISEE.y+KEYS[k][1]);
     else if(k==='enter'||k===' ')viseeOk();
     else if(k==='escape')viseeStop('Charge sismique annulée.');
+    return;}
+  if(TIR){ev.preventDefault();                                    // visée de l'arme de tir (14m) : rien d'autre ne répond
+    if(KEYS[k])tirVers(TIR.x+KEYS[k][0],TIR.y+KEYS[k][1]);
+    else if(k==='tab')tirCycle(ev.shiftKey?-1:1);
+    else if(k==='enter'||k===' '||k==='g')tirOk();
+    else if(k==='escape')tirStop('Tir annulé.');
     return;}
   if(TRAV||REST||EXPL){if(!['shift','control','alt','meta'].includes(k)){ev.preventDefault();stopTravel('Trajet interrompu.');
     stopRest('Repos interrompu.');stopExplore('Exploration interrompue.');}return;}
@@ -269,7 +292,9 @@ addEventListener('keydown',ev=>{
   if(KEYS[k]){ev.preventDefault();tryMove(...KEYS[k]);}else if(k==='f'){ev.preventDefault();askDrill();
     }else if(k==='b'){ev.preventDefault();toggleFog();}else if(k==='r'){ev.preventDefault();toggleSprint();
     }else if(k==='p'){ev.preventDefault();startRest();}else if(k==='t'){ev.preventDefault();invToggle();
+    }else if(k==='j'){ev.preventDefault();jnOuvre();   // journal de bord (14k, 28 novembre 2026)
     }else if(k==='i'){ev.preventDefault();sacNav(true);}else if(k==='o'){ev.preventDefault();startExplore();
+    }else if(k==='g'){ev.preventDefault();tirStart();   // arme de tir (14m, 28 novembre 2026)
     }else if(k===' '||k==='5'||k==='.'||ev.code==='Numpad5'){ev.preventDefault();waitTurn();}
 });
 $('pad').addEventListener('click',ev=>{const b=ev.target.closest('button[data-d]');if(!b||!$('overlay').hidden)return;const [dx,dy]=b.dataset.d.split(',').map(Number);if(freeCam)panCam(dx*2,dy*2);else tryMove(dx,dy);});
@@ -291,7 +316,7 @@ function applySaved(d){
   if(d.artefacts){ARTEFACTS=artefactsSains(d.artefacts);saveArtefacts();}
   if(d.items&&typeof itemsApplique==='function'){itemsApplique(d.items);saveItems();}
   // les anciennes intensités par espèce (d.intensite) ne sont plus lues
-  if(d.groupes){const g=groupesSains(d.groupes);if(g){GROUPES=groupesV2(g);saveGroupes();}}
+  if(d.groupes){const g=groupesSains(d.groupes);if(g){GROUPES=groupesAstroport(groupesV2(g));saveGroupes();}}
   // les archétypes d'avant cette date ont été effacés
   if(d.mondes&&typeof d.mondes==='object'&&Date.parse(d.enregistreLe)>Date.parse('2026-11-21T05:00:00Z')){
     MONDES=Object.assign({},MONDES,d.mondes);saveMondes();}
@@ -354,6 +379,7 @@ $('bestList').addEventListener('change',e=>{const t=e.target;
   // toutes les créatures l'étaient — baisser les PV du drone à 6 mettait les broyeurs à 6)
   if(t.dataset.f==='pv'&&G){for(const a of G.animals||[])if(SPECIES[a.sp]===ent.o&&a.hp>v)a.hp=v;
     for(const b of G.beasts||[])if(BEASTS[b.sp]===ent.o&&b.hp>v)b.hp=v;}
+  if(t.dataset.f==='dmin'||t.dataset.f==='dmax'){const c=$('breel-'+t.dataset.k);if(c)c.innerHTML=bestReel(ent.o);}
   saveBest();});
 $('bestReset').onclick=()=>{BEST_LIST().forEach(e=>Object.assign(e.o,BEST_DEF[e.key]));saveBest();buildBest();};
 const saveSnd=()=>{try{localStorage.setItem('np-son',JSON.stringify(SND));}catch(e){}};
@@ -366,7 +392,7 @@ $('fd-carte').addEventListener('toggle',()=>{if(G)render();});   // la mini-cart
 ['fd-sac','fd-carte','fd-stats','fd-pal','fd-lab','fd-ctrl'].forEach(id=>{const d=$(id);
   try{const v=localStorage.getItem('np-'+id);d.open=v?v==='open':id==='fd-stats';}catch(e){}
   d.addEventListener('toggle',()=>{try{localStorage.setItem('np-'+id,d.open?'open':'closed');}catch(e){}});});
-$('restart').onclick=e=>{e.preventDefault();e.stopPropagation();unlock();SFX.start();newGame();started=true;
+$('restart').onclick=e=>{e.preventDefault();e.stopPropagation();unlock();SFX.start();enJeu(newGame);started=true;
   $('overlay').hidden=true;render();};
 /* Plein écran (26 novembre 2026) : le bouton met toute la page en plein écran, ou en sort. Dans l'artefact claude.ai, la page
    est dans un cadre : si le site hôte ne l'autorise pas, le navigateur refuse, et le journal le dit (ouvrir alors l'artefact

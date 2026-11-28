@@ -341,3 +341,107 @@ Ce qui a été remplacé, et pourquoi (demandes de l'utilisateur, « chaque mach
 - **Défaut corrigé le même jour** : de 2 h 37 à 3 h, en adoucissant la secousse, un commentaire avait avalé la ligne qui retire la vie :
   les ennemis frappaient sans faire de dégâts (vu par `outils/simul.py` : vie restante 100 partout). La vérification
   `outils/verifier.py` ne l'avait pas vu : son empreinte ne couvre pas les dégâts reçus.
+
+## 28 novembre 2026 — l'Astroport (niveau 1)
+- Le niveau 1 devient un cimetière spatial : carte en taille 4 (les autres niveaux en taille 3), une vingtaine de fosses
+  d'atterrissage numérotées, épaves de cinq modèles en quatre états, numérotées sous le nôtre (0467), plus vieilles près
+  de l'entrée du dépôt ; FABLAB toujours au dépôt ; ferrailleuses et gardes (rôles `ferraille` et `garde`) ; modules du
+  thème (dehors, dans les fosses, et dans le dépôt). Les groupes et modules enregistrés du joueur sont gardés : les
+  nouveautés s'y ajoutent une fois (marqueur `astro`). Le curseur « Taille » du menu Monde ne règle plus que GÉNÉRER LA
+  CARTE.
+
+- Ferrailleuses « à l'ouvrage » : les groupes de rôle `ferraille` ignorent la foreuse (découpe à leur épave, navette vers le
+  sas) tant qu'on ne les attaque pas et qu'on n'approche pas de leur épave (3 cases ; un battement d'avertissement, « ? »).
+  Provoqué, le groupe chasse puis retourne à l'ouvrage. Rôle réglable dans Lab → Groupes. Un temps envisagé : chasse directe à
+  l'entrée du périmètre ; gardé l'avertissement d'un battement, plus lisible.
+- 28 novembre 2026 : terminaux et antennes ouvrent un menu DATA / CONNEXION / ENCODAGE. La connexion ouvre une porte, coupe des
+  lasers ou une grille, ouvre une porte dérobée ou la cloison d'un réduit creusé exprès ; l'allumage de l'antenne y passe ; liaison
+  au noyau (échec). Deux terminaux au moins par niveau. Avant : le terminal affichait un texte, l'antenne s'allumait au contact.
+- 28 novembre 2026 : hacks, programmes gratuits choisis parmi 3 au terminal (ENCODAGE → HACK), dans des emplacements à part
+  (2, puis 3, 4, 5 aux niveaux 3, 6, 9). Familles Base / Tir / Noyau ; Tir défini mais jamais proposé (pas d'arme de tir) ; hack
+  « Voix » refusé par l'utilisateur. SYMBIOSE donne une réparation lente (+1 vie / 4 battements) : seule exception, payée en
+  énergie, à « pas de réparation automatique ».
+- 28 novembre 2026 : blueprints choisis parmi 3 au terminal (ENCODAGE → BLUEPRINT), appris aussitôt. Retiré : les plans au sol,
+  dans les dépôts, salles piégées, vitrines, pièces secrètes et le butin des robots (depuis le 22 novembre) ; leur place va à la
+  Matière, aux capsules et à l'équipement. Sonar 3 à 7 (accessoire du FABLAB, ennemis en point rouge). Génération des terminaux
+  rendue sûre : repli réduit 2 × 2 puis porte dérobée pour l'action locale, pose dans les couloirs ou sur une case encombrée,
+  un terminal près du FABLAB.
+- 28 novembre 2026 : journal de bord (fenêtre, touche J) : six onglets, fiches de robots à quatre paliers (Stats à 10
+  destructions), fiches d'objets complètes, pages lues aux terminaux, hacks vus, tutoriel ; gardé d'une partie à l'autre
+  (`np-journal`, et `journal/courant` dans la base de l'artefact). La DATA des terminaux ne lit plus les anciens textes
+  narratifs (`TERM_TXT`, gardés en vestige dans 07c) : elle tire une page ou un palier du niveau en cours.
+- 28 novembre 2026 : niveau 1 raconté. Journal de la foreuse en jargon machine (atterrissage, contact, épaves 1re / 5e / 14e,
+  états d'épave, structures, dépôt), rapport de mission et accusé de l'origine dans la cinématique de la descente du niveau 1,
+  registre du port (parties précédentes du joueur) lu au terminal du dépôt, numéro d'unité qui monte à chaque destruction (F467,
+  F468…, `np-unite`), ferrailleuses qui prennent notre vaisseau pour épave après l'entrée au dépôt. Lignes d'ambiance des hacks
+  réécrites sans « je ». « F.376 mkII » devient « mkIII » et les épaves ne sont « mkIV » qu'à partir du n° 456 (accord avec les
+  journaux des anciennes unités).
+
+## 28 novembre 2026 — chantier survie, bloc A : pilote automatique
+- `outils/pilote.py` (+ `outils/scripts/pilote.js`) joue des parties entières, profils prudent et fonceur, pour mesurer avant/après
+  chaque règle du chantier survie (fuel, repos, tir). Aucune règle changée. Référence : `mesures.md`, « Référence avant le chantier survie ».
+- Trouvé en passant, **non corrigé** (bloc sans changement de jeu) : `fxGrains` n'est défini nulle part dans `src/` ; ramasser des
+  éclats blessé, utiliser des réparobots ou une station lève une erreur après le soin (la fin du geste est sautée). Le pilote la contourne.
+
+## 28 novembre 2026 — chantier survie, bloc B : fuel, vie qui remonte, repos qui soigne
+- **Règle levée : « pas de réparation automatique »** (en vigueur depuis le début). La vie remonte seule (+1 / 20 battements en
+  marche, +1 / 4 au repos), contre un **fuel** qui baisse en permanence (1 / 12 battements ; à sec, −1 vie / 5 battements et plus
+  aucun soin). Valeurs arbitrées par l'utilisateur, regroupées dans `REGLES` (`00-base.js`).
+- Les **éclats de métal** donnent du fuel (+15 / +20 / +25) au lieu de la vie et de l'énergie (règle du 16 novembre) ; 4 gisements
+  de métal par carte au lieu de 3 par taille 2 en proportion de la surface (7 sur les cartes de jeu). Nouvelle **cellule de fuel**
+  (+30). Chaque descente rend +30.
+- **Réparobots** deux fois et demie plus rares dans le butin (poids 5 → 2). **Forage** : 5 d'énergie par coup (10 avant).
+  **Module de puissance** : +10 de vie max en plus du POW. **SYMBIOSE** revient à sa définition d'origine (vie × 2, fuel × 1,5) ;
+  le bricolage « +1 vie / 4 battements contre 25 % d'énergie » (27-28 novembre) est retiré.
+- **Bouton REPOS** : servait à refaire l'énergie ; sert maintenant à se réparer (s'arrête vie et énergie pleines, au chasseur, sous
+  25 % de fuel). Trajet, exploration et repos jugent « attaquée » par rapport au battement d'avant (la vie remonte).
+- **Bug corrigé : `fxGrains`** (grains des effets de consommables), perdue avec la PR #58 (commit `753b007`) : éclats ramassés blessé,
+  réparobots et station levaient une `ReferenceError` et la fin du geste sautait. Rétablie dans `10-rendu.js` ; le pilote ne la
+  contourne plus ; `test-survie.js` joue ces gestes jusqu'au bout.
+
+## 28 novembre 2026 — chantier survie, bloc C : ennemis moins nombreux, plus dangereux
+- Décision de l'utilisateur : nombre × 0,6, dégâts × 1,6, recalés par simulation sur « un groupe affronté de face ≈ un tiers de la
+  vie ». Deux réglages par niveau dans `REGLES` (`MENACE_NB`, `MENACE_DEG`), par-dessus les réglages du joueur.
+- Essayé au pilote (séries de 14 à 16 parties) : 0,6 / 1,6 partout → prudent au noyau 3 sur 14, groupes du niveau 3 trop coûteux
+  (9e décile 78) ; dégâts 2,0 au niveau 1 → 11 prudents sur 16 morts à l'Astroport ; 0,5 / 1,2 aux niveaux 2-3 → survie correcte mais un
+  groupe y coûte peu (médiane 14-15). Retenu : **0,6 / 0,4 / 0,4** et **1,4 / 1,6 / 1,6** (prudent au noyau 13 sur 30, fonceur 3 sur 30).
+- Ferrailleuses de l'Astroport non réduites ; lasers des machines et mini-jeu des descentes inchangés ; explosions de mines multipliées.
+
+## 28 novembre 2026 — chantier survie, bloc D : arme de tir, cinq emplacements d'objets, hacks Tir
+- Décision de l'utilisateur (27-28 novembre) : une arme de tir dès le départ, le **canon** (portée la vue, bruit du forage, 20 d'énergie
+  par tir) ; **pas de plug-ins** (la décision du 27 novembre, « chaque plug-in ajoute à la consommation », est remplacée) : lance-flammes,
+  canon à glu, shotgun et laser sont des armes à part entière qui remplacent le canon. Objets « forage silencieux » et « tir silencieux ».
+  Équipement : foreuse + tir + armure + **5 objets** (3 accessoires jusque-là). Fichier `14m-tir.js`.
+- Choix faits sans l'utilisateur : le canon ne prend jamais de place et ne se perd pas ; armes et silencieux hors du butin (blueprint
+  puis FABLAB seulement) ; brûlure 3 × 4 battements (pas de feu au sol) ; glu sur un ennemi = pas et coups × 2 pendant 4 battements ;
+  « bruit ÷ 2 » = la portée de discrétion de l'action divisée par 2 (15 → 8), sans plancher ; tir refusé (gratuitement) quand la ligne
+  est obstruée ; coup par surprise au tir gardé tel quel (× 3, touche toujours).
+- `TIR_DISPO` passe à vrai : les hacks Tir sont proposés selon la table (Base 85 / Tir 15 / Noyau 0 aux niveaux 1-3…) et agissent
+  sur l'arme équipée. Journal de bord : 17 sortes de hacks. Tutoriel : page TIR.
+- Mesuré (pilote, 30 parties par profil) : prudent au noyau 17 / 30 (13 au bloc C), fonceur 9 / 30 (3 au bloc C, mais 7 / 30 sur les
+  mêmes graines avec le tir coupé : l'essentiel de l'écart vient d'ailleurs). Détail : `mesures.md`, « Survie D ».
+
+## 28 novembre 2026 — chantier survie, bloc E : terminal à action locale garanti au niveau 1
+- L'essai `test-terminaux` retombait une fois sur 300 cartes : salle de terminal close (massif, chemin de terre, module fixe), ni réduit
+  ni porte dérobée possibles (graine 164). Rien n'était défait après coup : les replis restaient collés à la salle. Ajout d'un dernier
+  repli `termNiche` (réduit creusé depuis n'importe quelle case praticable proche, puis de toute la carte) : 0 sur 600 cartes.
+
+## 28 novembre 2026 — chantier survie, bloc F : ferrailleuses lisibles (retour du joueur après essai)
+- Le joueur : « On ne voit pas vraiment les robots travailler sur les coques. Ils doivent rester 60 % du temps sur les coques à
+  travailler et faire ensuite un aller-retour. » ; « J'ai l'impression qu'une fois que j'ai approché une coque, tous m'attaquent. Je ne
+  comprends pas la logique hostile / pas hostile en jouant. » ; « Pour l'instant on ne fait que le niveau 1 ; les autres vont être
+  refondus en suivant l'histoire. On ne les teste plus. »
+- Diagnostic (`outils/scripts/diag-ferrailleuses.js`, 8 cartes, groupes enregistrés du joueur) : **aucune** propagation entre groupes de
+  ferrailleuses. Ce qui attaquait : les groupes du joueur restés au niveau 1 sans rôle, « Crabots » (mêmes crabots que les
+  ferrailleuses) et « Bande de relais » (ce qu'un relais voit, toute la bande le sait : jusqu'à 24 cases), qui chassent à vue sur
+  l'aire ; et l'avertissement d'un seul battement, trop court pour être compris. Côté travail : un tiers des équipes posées sur une
+  fosse vide (rien à découper), des équipes coupées du sas par un lac (le Soudeur ne nage pas : la file l'attendait sur la rive et
+  faisait demi-tour sans fin), une découpe de 6 à 12 battements contre des trajets de 100 à 150.
+- Changé : niveau 1, un groupe sans rôle posé dehors et fait d'espèces de chantier devient une équipe de ferrailleuses (règle de pose,
+  banque du joueur intacte) ; avertissement de 3 battements, retour immédiat au travail en ressortant, chasse directe à la seconde
+  intrusion dans les 20 battements ; contour du périmètre au sol ; « ! » fixe en chasse ; « En vue » en deux parties ; fiche « INDIFFÉRENT
+  TANT QUE… » ; cycle 60 % découpe / 40 % aller-retour, recalé sur l'aller-retour mesuré ; postes répartis autour de la coque ;
+  équipes en file ; quai au sec ; jamais d'équipe sur une fosse vide ; la première équipe près de l'arrivée, au travail ; phases
+  décalées au départ ; découpe franche (éclat et dix étincelles sur la plaque, à chaque action).
+- Pilote : option `--niveaux 1` (et `--reglages` pour jouer avec les groupes enregistrés du joueur). Mesures : `mesures.md`, « Niveau 1
+  après retouche des ferrailleuses ».

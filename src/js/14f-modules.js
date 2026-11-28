@@ -10,9 +10,10 @@
    de l'artefact). La pose est dans 07b-batiments.js (mdlTirage, mdlPrepare, accretion) : NIVEAU 1 SEULEMENT pour l'instant. */
 const MDL_TERR=[['?','Libre',''],['.','Sol','ground0'],['R','Rocher','rock'],['M','Montagne','mtBody'],['H','Roche dure','hardBody'],
   ['E','Eau','liq0'],['P','Eau profonde','deep0'],['G','Herbes hautes','grass0'],['F','Herbes basses','flat0'],['X','Mur','wall'],['V','Mur vitré','vitre'],
-  ['S','Sol bâti','floor'],['B','Sol (pont)','solPont'],['C','Gouffre',''],['D','Porte','door'],['O','Pilier','pillar']];
+  ['S','Sol bâti','floor'],['B','Sol (pont)','solPont'],['C','Gouffre',''],['D','Porte','door'],['O','Pilier','pillar'],
+  ['K','Coque d’épave','coque'],['U','Gravats','rubble'],['A','Antenne','antenne']];   // K, U, A : Astroport, 28 novembre 2026
 const MDL_MARQ=[['x','Entrée','1','E'],['m','Machine','5','M'],['b','Butin','2','B'],['e','Ennemi','4','!']];
-const MDL_PRAT='.GFSDB',MDL_MIN=3,MDL_MAX=16,MDL_NB_MAX=6,MDL_C=32;
+const MDL_PRAT='.GFSDBU',MDL_MIN=3,MDL_MAX=16,MDL_NB_MAX=6,MDL_C=32;
 let MODULES=[],MODULES_NB={},MDL_ED={i:0,couche:'t',code:'X',suppr:false,nbRec:''};
 const mdlRecs=()=>Object.keys(RECETTES).map(k=>[k,String(RECETTES[k].n||k).split(' :')[0]]);
 const mdlLigne=(n,c)=>c.repeat(n);
@@ -29,12 +30,19 @@ function mdlValide(o){if(!o||typeof o!=='object')return null;const w=o.w|0,h=o.h
     for(let x=0;x<w;x++){const ca=tc.includes(a[x])?a[x]:'?';la+=ca;lb+=mc.includes(b[x])&&MDL_PRAT.includes(ca)?b[x]:'.';}
     t.push(la);m.push(lb);}
   const rec={};for(const [k] of mdlRecs())if(o.rec&&o.rec[k])rec[k]=true;
-  return {id:String(o.id||'m'+Math.random().toString(36).slice(2,9)).slice(0,24),nom:String(o.nom||'Module').slice(0,30),w,h,t,m,rec};}
-function modulesEtat(){return {liste:JSON.parse(JSON.stringify(MODULES)),nb:Object.assign({},MODULES_NB)};}
+  const r={id:String(o.id||'m'+Math.random().toString(36).slice(2,9)).slice(0,24),nom:String(o.nom||'Module').slice(0,30),w,h,t,m,rec};
+  if(o.ext)r.ext=1;   // module d'extérieur : posé dans une fosse de l'Astroport (07h), pas dans les bâtiments
+  return r;}
+function modulesEtat(){return {liste:JSON.parse(JSON.stringify(MODULES)),nb:Object.assign({},MODULES_NB),astro:1};}
 function modulesApplique(o){if(!o||typeof o!=='object')return;
   if(Array.isArray(o.liste))MODULES=o.liste.map(mdlValide).filter(Boolean).slice(0,200);
   MODULES_NB={};for(const [k] of mdlRecs()){const v=o.nb?+o.nb[k]:0;
-    MODULES_NB[k]=isFinite(v)?Math.max(0,Math.min(MDL_NB_MAX,Math.round(v))):0;}}
+    MODULES_NB[k]=isFinite(v)?Math.max(0,Math.min(MDL_NB_MAX,Math.round(v))):0;}
+  /* Passage à l'Astroport (28 novembre 2026), une fois (marqueur astro dans la banque enregistrée) : la banque du joueur passe avant
+     le code, mais reçoit les modules du thème qui lui manquent (par identifiant ; un module du même identifiant est gardé tel
+     quel), et le niveau 1 pose au moins MDL_ASTRO_NB modules de bâtiment, pour que le dépôt ait les siens. Rejouée : rien de plus. */
+  if(!(o.astro>=1)){for(const d of MODULES_ASTRO)if(!MODULES.some(x=>x.id===d.id)&&MODULES.length<200){const v=mdlValide(d);if(v)MODULES.push(v);}
+    const r=RECETTE_NIV(1);MODULES_NB[r]=Math.max(MODULES_NB[r]||0,MDL_ASTRO_NB);}}
 function saveModules(){try{localStorage.setItem('np-modules',JSON.stringify(modulesEtat()));}catch(e){}touchLocal();}
 /* Banque de modules de départ : celle du joueur, relue dans la base de l'artefact le 28 novembre 2026 à 2 h 10 (avant : le 25 novembre à 22 h 05). Elle sert tant que le
    navigateur n'a pas sa propre banque (np-modules) : sur GitHub Pages et dans la copie du disque, le jeu part donc de ces modules. */
@@ -52,6 +60,34 @@ const MODULES_DEF={nb:{"atterrissage": 1, "base": 2, "cavernes": 2, "classique":
   {"h": 6, "id": "mmwwkj3xc891", "m": ["......x....", "...........", "x..........", "..........x", "...........", "....x......"], "nom": "Water HUB", "rec": {"atterrissage": true, "base": true, "cavernes": true}, "t": ["XXXXXXDXXXX", "XEEEEEEEEEX", "DEEEEEEEEEX", "XEEEEEEEEED", "XEEEEEEEEEX", "XXXXDXXXXXX"], "w": 11},
   {"h": 16, "id": "mmwwv9y1l489", "m": [".....x......x...", ".mm.....mm...mm.", ".m............m.", "x....e.....ee...", ".m.eeeeeeeeee..x", ".m.eeeeeeeeee...", ".m..eeeeeeee..m.", ".m...eeeeeee..m.", ".mm.eeeeeeee....", ".mm.eeeeeeeeee..", ".m.eeeeeeeeeee.x", "...eeeeeeeeee...", "x...ee..e.ee....", "..............m.", ".mm...mmm....mm.", "....x......x...."], "nom": "Arene BIG", "rec": {}, "t": ["XXXXXSXXXXXXSXXX", "X..SSSSS..SSS..X", "X.SSSSSSSSSSSS.X", "SSSSSSSSSSSSSSSX", "X.SSSSSSSSSSSSSS", "X.SSSSSSSSSSSSSX", "X.SSSSSSSSSSSS.X", "X.SSSSSSSSSSSS.X", "X..SSSSSSSSSSSSX", "X..SSSSSSSSSSSSX", "X.SSSSSSSSSSSSSS", "XSSSSSSSSSSSSSSX", "SSSSSSSSSSSSSSSX", "XSSSSSSSSSSSSS.X", "X..SSS...SSSS..X", "XXXXSXXXXXXSXXXX"], "w": 16},
   {"h": 7, "id": "mmwx9hd1s31", "m": ["..x......", ".m.mmmmm.", "x.eeeeem.", ".meeeeem.", ".meeeeem.", ".mmm.mmm.", "....x...."], "nom": "Arene SMALL", "rec": {"atterrissage": true}, "t": ["XXDXXXXXX", "XSSSSSSSX", "DSSSSSSSX", "XSSSSSSSX", "XSSSSSSSX", "XSSSSSSSX", "XXXXDXXXX"], "w": 9}]};
+/* Modules de l'Astroport (28 novembre 2026). Extérieur (ext) : posés dans les fosses, environ une sur quatre, quel que soit le nombre
+   réglé pour la recette. Bâtiment : sas, magasin de pièces, quai de tri, tirés pour le dépôt avec ceux du joueur. */
+const MDL_ASTRO_NB=4;
+const MODULES_ASTRO=[
+  {id:'astro-fosse-vide',nom:'Fosse vide',ext:1,rec:{atterrissage:true},w:7,h:5,
+    t:['?..U..?','.......','U.....U','.......','?..U..?'],m:['.......','.......','.......','.......','.......']},
+  {id:'astro-epave-capsule',nom:'Épave éventrée (capsule)',ext:1,rec:{atterrissage:true},w:5,h:5,
+    t:['?KKK?','KK.KK','K...K','KK.UU','?U.U?'],m:['.....','..b..','.....','.....','.....']},
+  {id:'astro-epave-porteur',nom:'Épave scellée (porteur)',ext:1,rec:{atterrissage:true},w:6,h:6,
+    t:['?KKKK?','KKKKKK','KKKKKK','KKKKKK','?KKKK?','?K??K?'],m:['......','......','......','......','......','......']},
+  {id:'astro-grand-porteur',nom:'Grand porteur dépecé',ext:1,rec:{atterrissage:true},w:9,h:11,
+    t:['???KKK???','??KU.UK??','?K.....K?','KU..U..UK','K.......K','KU..b..UK','K.......K','KU..U..UK','?K.....K?','??KU.UK??','??K???K??'],
+    m:['.........','.........','.........','.........','.........','....b....','.........','.........','.........','.........','.........']},
+  {id:'astro-rangee-coques',nom:'Rangée de coques',ext:1,rec:{atterrissage:true},w:14,h:6,
+    t:['KKK.KKKK.KKK..','KKK.KKKK.KKKU.','..............','..............','.UKKK.KKKK.KKK','..KKK.KKKK.KKK'],
+    m:['..............','..............','......b.......','..............','..............','..............']},
+  {id:'astro-tas-ferraille',nom:'Tas de ferraille',ext:1,rec:{atterrissage:true},w:7,h:6,
+    t:['?UUU.??','UUKUUU?','UKK.KUU','.UU.UU.','?UUKUU?','??U.U??'],m:['.......','.......','...m...','.......','.....b.','.......']},
+  {id:'astro-mat-balise',nom:'Mât-balise',ext:1,rec:{atterrissage:true},w:5,h:5,
+    t:['?U.U?','U...U','..A..','U...U','?U.U?'],m:['.....','.....','.....','.....','.....']},
+  {id:'astro-sas-depot',nom:'Sas du dépôt',rec:{atterrissage:true},w:7,h:5,
+    t:['XXXDXXX','XSSSSSX','XOSSSOX','XSSSSSX','XXXDXXX'],m:['...x...','.......','.......','..e....','...x...']},
+  {id:'astro-magasin',nom:'Magasin de pièces',rec:{atterrissage:true},w:9,h:7,
+    t:['XXXXXXXXX','XSSSSSSSX','XSOSOSOSX','XSSSSSSSX','XSOSOSOSX','XSSSSSSSX','XXXXDXXXX'],
+    m:['.........','.b.....b.','.........','...m.m...','.........','.........','....x....']},
+  {id:'astro-quai-tri',nom:'Quai de tri',rec:{atterrissage:true},w:11,h:6,
+    t:['XXXXXXXXXXX','DSSSSSSSSSD','XSSSSSSSSSX','XSSSSSSSSSX','XSSSSSSSSSX','XXXXXVXXXXX'],
+    m:['...........','x.........x','..mmm.mmm..','...........','..b.....b..','...........']}];
 try{modulesApplique(JSON.parse(localStorage.getItem('np-modules')||'null')||MODULES_DEF);}catch(e){modulesApplique(MODULES_DEF);}
 
 // la k-ième variante d'un module : k%4 quarts de tour, puis un miroir gauche-droite si k ≥ 4
@@ -69,7 +105,7 @@ function mdlAvis(o){const a=[],plein=o.t.some(l=>/[^?]/.test(l));if(!plein)retur
   for(let y=0;y<o.h;y++)for(let x=0;x<o.w;x++){if(o.m[y][x]!=='x')continue;entrees++;
     const bord=x===0||y===0||x===o.w-1||y===o.h-1||[[1,0],[-1,0],[0,1],[0,-1]].some(([dx,dy])=>o.t[y+dy][x+dx]==='?');
     if(!bord)dedans++;}
-  if(!entrees)a.push('Aucune entrée : ce module ne sera pas posé, le jeu ne saurait pas par où le raccorder.');
+  if(!entrees&&!o.ext)a.push('Aucune entrée : ce module ne sera pas posé, le jeu ne saurait pas par où le raccorder.');
   if(dedans)a.push(`${dedans} entrée${dedans>1?'s':''} à l’intérieur : une entrée doit toucher le bord du module ou une case libre.`);
   if(!Object.keys(o.rec).length)a.push('Aucune recette cochée : ce module ne sera jamais tiré.');
   return a;}
@@ -121,7 +157,8 @@ function mdlPinceaux(){const b=(couche,code,nom,ic)=>`<button class="mdlpn" data
 function mdlFiche(){const o=mdlCourant(),F=$('mdlFiche');$('mdlEd').hidden=!o;F.hidden=!o;$('mdlVide').hidden=!!o;
   if(!o){$('mdlAvis').innerHTML='';return;}
   mdlDessine($('mdlCv'),o,MDL_C,true);$('mdlNom').value=o.nom;$('mdlW').value=o.w;$('mdlH').value=o.h;
-  $('mdlRec').innerHTML=mdlRecs().map(([k,n])=>`<label><input type="checkbox" data-rec="${k}"${o.rec[k]?' checked':''}> ${mdlEsc(n)}</label>`).join('');
+  $('mdlRec').innerHTML=mdlRecs().map(([k,n])=>`<label><input type="checkbox" data-rec="${k}"${o.rec[k]?' checked':''}> ${mdlEsc(n)}</label>`).join('')
+    +`<label title="Posé dans une fosse de l’Astroport (niveau 1), pas dans un bâtiment"><input type="checkbox" data-rec="@ext"${o.ext?' checked':''}> Extérieur (fosse)</label>`;
   const av=mdlAvis(o);
     $('mdlAvis').innerHTML=av.length?av.map(t=>`<li>${mdlEsc(t)}</li>`).join(''):'<li class="ok">Module prêt à servir.</li>';
   MDL_ED.suppr=false;$('mdlSuppr').textContent='Supprimer';}
@@ -177,7 +214,7 @@ if(typeof document!=='undefined'&&$('mdlBtn')){
   $('mdlW').addEventListener('change',()=>mdlTaille(+$('mdlW').value,0));
     $('mdlH').addEventListener('change',()=>mdlTaille(0,+$('mdlH').value));
   $('mdlRec').addEventListener('change',ev=>{const o=mdlCourant(),k=ev.target.dataset.rec;if(!o||!k)return;
-    if(ev.target.checked)o.rec[k]=true;else delete o.rec[k];mdlChange();});
+    if(k==='@ext'){if(ev.target.checked)o.ext=1;else delete o.ext;}else if(ev.target.checked)o.rec[k]=true;else delete o.rec[k];mdlChange();});
   $('mdlFill').onclick=()=>{const o=mdlCourant();if(!o||MDL_ED.couche!=='t')return;
     for(let y=0;y<o.h;y++)for(let x=0;x<o.w;x++)mdlPose(x,y);mdlChange();};
   // dessin : on peint tant que le bouton est tenu ; la banque n'est enregistrée qu'au relâcher

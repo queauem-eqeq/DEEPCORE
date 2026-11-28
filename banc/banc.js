@@ -38,6 +38,8 @@ function carte(cfg){const g0=GEN,gen=cfg.carte==='arene'?{eau:0,montagne:0,gouff
   for(const k in cfg.conso||{})if(CONSO[k]&&cfg.conso[k]>0)G.inv.push({k,eq:0,n:Math.round(cfg.conso[k])});
   if(cfg.alerte){for(const b of G.beasts){b.hunt=1;spot(b);}for(const a of G.animals){a.aware=1;spot(a);}}   // assaut : tout le monde sait où est la foreuse et vient
   if(cfg.vie>0)G.st.vieMax=Math.round(cfg.vie);   // vie d'essai (voir l'interface)
+  // dégâts des créatures : ceux de base (0) ou ceux d'un niveau de la descente (REGLES.MENACE_DEG, 28 novembre 2026)
+  G.niv=cfg.niv>0?Math.round(cfg.niv):0;
   G.st.vie=G.st.vieMax;G.st.energie=G.st.energieMax;lastAct='move';if(typeof robotTiles==='function')robotTiles();turnStealth();computeFOV();}
 const vivants=()=>[...(G.beasts||[]),...(G.animals||[])];
 
@@ -93,16 +95,16 @@ function serie(cfg,n){const l=[];for(let i=0;i<n;i++)l.push(essai(cfg));return b
 const nomObj=k=>(ITEMS[k]||{n:k+' (retiré)'}).n;   // un résultat gardé peut citer un objet retiré depuis
 function titre(cfg){const e=ESP().filter(s=>(cfg.ennemis||{})[s.key]>0).map(s=>cfg.ennemis[s.key]+' '+s.n).join(' + ')||'aucun ennemi';
   const k=[cfg.arme&&cfg.arme!=='foreuse'?nomObj(cfg.arme):null,cfg.armure?nomObj(cfg.armure):null,...(cfg.acc||[]).map(nomObj)].filter(Boolean);
-  return {e,carte:(CARTES().find(c=>c[0]===cfg.carte)||['','?'])[1],kit:(k.length?k.join(', '):'foreuse nue')+(cfg.vie>0?` · vie d’essai ${cfg.vie}`:''),pilote:(cfg.pilote==='traversee'?'traversée':'chasse')+(cfg.alerte?', ennemis en alerte':'')};}
+  return {e,carte:(CARTES().find(c=>c[0]===cfg.carte)||['','?'])[1],kit:(k.length?k.join(', '):'foreuse nue')+(cfg.vie>0?` · vie d’essai ${cfg.vie}`:'')+(cfg.niv>0?` · dégâts du niveau ${cfg.niv}`:''),pilote:(cfg.pilote==='traversee'?'traversée':'chasse')+(cfg.alerte?', ennemis en alerte':'')};}
 
 /* ---------- Interface ---------- */
 let SESSION=[];try{SESSION=JSON.parse(localStorage.getItem('banc-session')||'[]')||[];}catch(e){}
 const garde=()=>{try{localStorage.setItem('banc-session',JSON.stringify(SESSION.slice(-200)));}catch(e){}};
 let COURS=null;                                                     // série ou combat en cours
 function lire(){const ennemis={};ESP().forEach(s=>{const v=+$b('bq-'+s.key).value||0;if(v>0)ennemis[s.key]=Math.min(60,Math.round(v));});
-  return {carte:$b('bcarte').value,ennemis,arme:$b('barme').value,armure:$b('barmure').value,acc:[...document.querySelectorAll('.bacc:checked')].map(c=>c.value).slice(0,3),pilote:$b('bpilote').value,vie:+$b('bvie').value||0,alerte:$b('balerte').checked};}
+  return {carte:$b('bcarte').value,ennemis,arme:$b('barme').value,armure:$b('barmure').value,acc:[...document.querySelectorAll('.bacc:checked')].map(c=>c.value).slice(0,3),pilote:$b('bpilote').value,vie:+$b('bvie').value||0,niv:+$b('bniv').value||0,alerte:$b('balerte').checked};}
 function poser(cfg){$b('bcarte').value=cfg.carte||'arene';ESP().forEach(s=>{$b('bq-'+s.key).value=(cfg.ennemis||{})[s.key]||0;});$b('barme').value=cfg.arme||'foreuse';$b('barmure').value=cfg.armure||'';
-  document.querySelectorAll('.bacc').forEach(c=>{c.checked=(cfg.acc||[]).includes(c.value);});$b('bpilote').value=cfg.pilote||'chasse';$b('bvie').value=cfg.vie||0;$b('balerte').checked=!!cfg.alerte;onglet('essai');}
+  document.querySelectorAll('.bacc').forEach(c=>{c.checked=(cfg.acc||[]).includes(c.value);});$b('bpilote').value=cfg.pilote||'chasse';$b('bvie').value=cfg.vie||0;$b('bniv').value=cfg.niv||0;$b('balerte').checked=!!cfg.alerte;onglet('essai');}
 function ligne(cfg,r,i,src){const t=titre(cfg),cl=r.mort>=50?'bad':r.vic>=90?'ok':'';
   return `<tr class="${cl}" data-src="${src}" data-i="${i}" title="Cliquer pour reprendre cette configuration"><td><b>${esc(t.e)}</b><br><span>${esc(t.carte)} · ${esc(t.kit)} · ${t.pilote} · ${r.n} essais</span></td>
     <td>${r.vic} %${r.inc?`<br><span>${r.inc} % inachevés</span>`:''}</td><td>${r.vie==null?'—':r.vie}<span>/${r.v0}</span></td><td>${r.perte}</td><td><b>${r.parMonstre==null?'—':r.parMonstre}</b></td><td>${r.bat}</td></tr>`;}
@@ -159,6 +161,7 @@ function monter(){
     <div class="brow"><label for="barmure">Armure</label><select id="barmure"><option value="">Coque d’usine (départ)</option>${OBJ('armure').map(([k,l])=>`<option value="${k}">${esc(l)}</option>`).join('')}</select></div>
     <div class="bacs">${OBJ('acc').map(([k,l])=>`<label><input type="checkbox" class="bacc" value="${k}">${esc(l)}</label>`).join('')}</div>
     <div class="brow"><label for="bvie" title="0 : la vie normale de la foreuse. Une grande valeur (1000) sert à mesurer les dégâts encaissés sans que la mort n’arrête le combat.">Vie d’essai (0 = normale)</label><input type="number" id="bvie" min="0" max="9999" step="100" value="0"></div>
+    <div class="brow"><label for="bniv" title="Les dégâts des ennemis sont multipliés à chaque niveau de la descente (REGLES.MENACE_DEG). « Base » : les valeurs du Bestiaire, sans multiplicateur (mesure de la valeur des groupes).">Dégâts des ennemis</label><select id="bniv"><option value="0">Base (Bestiaire)</option>${NIVS.map(n=>`<option value="${n}">Niveau ${n} (× ${String(menaceDeg(n)).replace('.',',')})</option>`).join('')}</select></div>
     <h4>Pilote automatique</h4>
     <div class="brow"><label for="bpilote">Consigne</label><select id="bpilote">${PILOTES.map(([k,l])=>`<option value="${k}">${esc(l)}</option>`).join('')}</select></div>
     <label class="bcheck"><input type="checkbox" id="balerte">Ennemis en alerte : ils savent où est la foreuse et viennent tous</label>

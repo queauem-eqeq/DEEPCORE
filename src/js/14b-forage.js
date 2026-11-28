@@ -274,7 +274,8 @@ function playForage(suite,niv,opt){
     seed:(Math.random()*1e9)|0,atl:{},pt:[],t0:performance.now(),last:performance.now(),t:0,ph:0,d:0,cx:0,vx:0,hs:0,evit:0,
     th:90,nx:0,ny:-FG_POSE,side:1,camX:0,camY:0,imp:0,flash:0,matPrev:-1,kl:0,kr:0,man:0,
     snd:fgSound(),acc:{ex:0,dust:0,chip:0,spark:0,roc:0},vy:0,ox:null};
-  {const o=opt||{},pa=o.palA||Object.assign({},PAL);FORAGE.palA=pa;FORAGE.palB=o.palB||pa;FORAGE.decD=o.decD||null;FORAGE.decA=o.decA||null;}
+  {const o=opt||{},pa=o.palA||Object.assign({},PAL);FORAGE.palA=pa;FORAGE.palB=o.palB||pa;FORAGE.decD=o.decD||null;FORAGE.decA=o.decA||null;
+    FORAGE.rap=o.rap||null;}   // rapport de mission (niveau 1 : rapportMission, 14l)
   fgStart();FG_CB=suite||null;
   // première descente : les profondeurs des amas, proches et lointains, étalées sur toute la descente
   if(!jeu){const F=FORAGE,D=F.D0,l=[];
@@ -287,12 +288,16 @@ function playForage(suite,niv,opt){
   raf20(forageFrame);}
 /* Descente complète (23 novembre 2026) : le décor du départ est lu sur la carte actuelle, le niveau d'arrivée est généré (palette tirée) AVANT la
    scène pour qu'on en voie le décor sur le plancher d'arrivée, puis la scène se joue par-dessus la partie déjà changée. prep : Lab (niveau forcé). */
+/* Le rapport de mission (28 novembre 2026) est rédigé avant que la carte ne change (état de l'unité, menaces, épaves du niveau),
+   rangé au journal de bord, affiché pendant la descente (fgRapport) et signalé au journal du jeu à l'arrivée. */
 function descendre(niv,hasard,prep){
-  if(reduced||FORAGE){if(prep)prep();niveauSuivant(hasard);render();return;}
+  const rap=!prep&&typeof rapportMission==='function'?rapportMission():null,
+    envoi=()=>{if(rap&&typeof rapportEnvoye==='function')rapportEnvoye(rap);};
+  if(reduced||FORAGE){if(prep)prep();niveauSuivant(hasard);envoi();render();return;}
   const A=Object.assign({},PAL),dep=fgCoupe(G.px,G.py);
-  if(prep)prep();niveauSuivant(hasard);
+  if(prep)prep();niveauSuivant(hasard);envoi();
   const arr=fgCoupe(G.px,G.py);
-  playForage(()=>{render();},niv,{palA:A,palB:Object.assign({},PAL),decD:dep,decA:arr});}
+  playForage(()=>{render();},niv,{palA:A,palB:Object.assign({},PAL),decD:dep,decA:arr,rap});}
 function skipForage(){const F=FORAGE;if(!F||F.ph>=4)return;
   // descente en aveugle : elle coûte, sans jamais tuer
   if(F.jeu&&F.ph<2&&typeof G!=='undefined'&&G&&G.st){const dm=Math.max(0,Math.min(FG_PASSE_DM,Math.floor(G.st.vie)-1));G.st.vie-=dm;
@@ -325,6 +330,7 @@ function fgMines(F,dt){const bas=F.R*1.15;   // bien sous le bas de l'écran (0,
     fgBoom(F,'impact');fgExploseMine(F,m);   /* la mine explose comme la foreuse : cratère, onde de choc, éclats */
     for(let i=0;i<8;i++)fgSmoke(F,m.x+fgRnd(-4,4),m.y+fgRnd(-2,2),fgRnd(-9,9),fgRnd(-6,3),fgRnd(1.2,2),1,2.4);
     if(typeof G!=='undefined'&&G&&G.st){const dm=Math.min(FG_MINE_DM,G.st.vie);G.st.vie-=dm;F.perdu+=dm;
+      if(G.st.vie<=0&&!F.mort&&typeof sursisSauve==='function')sursisSauve();   // hack SURSIS (14g)
       if(G.st.vie<=0&&!F.mort){F.mort=1;F.ph=5;F.tMort=F.t;F.flash=0;F.imp=2.6;F.pt.length=0;fgExploseForeuse(F);fgBoom(F,'perce');}}}
   F.stun=Math.max(0,F.stun-dt);}
 /* L’amas naît juste sous le bas de l’écran quand la foreuse approche de sa profondeur, de 9 à 13 cases à côté de là où elle va (côté au hasard) :
@@ -682,6 +688,37 @@ function fgAnnonce(F,t){const x=F.x,{w,h}=F,[l1,l2]=F.jeu?['EXPLOSIFS DÉTECTÉS
     if(s<.45){const g=FG_ANN_RAMPE[Math.min(2,Math.floor(s/.45*3))];dosCar(x,g,px,py,p,gris);continue;}
     const g=FG_ANN_GL[Math.floor(H(c,r,tic)*FG_ANN_GL.length)],fond=H(c,r,tic+7)<.5?col:gris;
     if(H(c,r,tic+3)<.55)dosCar(x,g,px,py,p,'#000',fond);else dosCar(x,g,px,py,p,H(c,r,tic+5)<.5?col:blanc);}}
+/* Rapport de mission et accusé de l'origine (28 novembre 2026, histoire du niveau 1) : à la descente du niveau 1, deux cadres de la
+   même facture que l'annonce (police DOS, cases opaques sur fond noir, montée « . i 0 » puis caractères au hasard, rebord et bandes
+   en « ░ ▒ ▓ █ », jamais d'alpha), à droite de l'écran, à côté de la coupe. Le rapport se forme de FG_RAP[0] à FG_RAP[1], l'accusé
+   de FG_RAP[2] à FG_RAP[3] ; les deux se défont de FG_RAP[4] à FG_RAP[5] (colonne par colonne). F.rap = {r : lignes du rapport,
+   a : lignes de l'accusé} (rapportMission, 14l). Le texte est aussi au journal de bord (onglet Journaux). */
+const FG_RAP=[1.4,3.4,6.2,7.6,15,16];
+const fgRapCar=c=>c==='—'||c==='–'?'-':c==='’'?"'":c;   // tiret long et apostrophe typographique : absents de la police DOS (CP437)
+function fgCadre(F,t,o){const x=F.x,{lignes,cols,x0,y0,p,col,txt,t0,t1,f0,f1,coul}=o,rows=lignes.length+6,cw=8*p,chh=16*p,gris=F.cRock2;
+  const pa=Math.max(0,Math.min(1,(t-t0)/(t1-t0))),q=Math.max(0,Math.min(1,(t-f0)/(f1-f0))),tic=Math.floor(t*20);
+  if(pa<=0||q>=1)return;
+  const H=(a,b,k)=>{let v=(a*73856093)^(b*19349663)^(k*83492791);v^=v<<13;v^=v>>>17;v^=v<<5;return (v>>>0)/4294967296;};
+  const cible=(c,r)=>{if(r===0||r===rows-1||c===0||c===cols-1)return ['█',col,1];
+    if(r===1||r===rows-2)return (c+(r===1?0:1))%2?['█',col,1]:[' ',col,0];
+    const l=lignes[r-3];if(l!=null&&c>=2&&c-2<l.length)return [fgRapCar(l[c-2]),coul?coul(r-3):txt,0];return [' ',txt,0];};
+  for(let r=-1;r<=rows;r++)for(let c=-1;c<=cols;c++){const px=x0+c*cw,py=y0+r*chh,bord=r<0||c<0||r>=rows||c>=cols;
+    let s=Math.max(0,Math.min(1,pa*2.05-(c+1)/(cols+2)*.7-H(c,r,1)*.35));
+    if(q>0)s=Math.min(s,Math.max(0,Math.min(1,((c+1)/(cols+2))*1.2+.25-q*1.6+H(c,r,2)*.15)));
+    if(s<=0)continue;x.fillStyle='#000';x.fillRect(px,py,cw,chh);
+    if(bord)continue;const [ch,cc,cadre]=cible(c,r);
+    if(s>=1){if(ch!==' ')dosCar(x,ch,px,py,p,cc);continue;}
+    if(cadre){dosCar(x,FG_ANN_BLOC[Math.min(2,Math.floor(s*3))],px,py,p,col);continue;}
+    if(s<.45){dosCar(x,FG_ANN_RAMPE[Math.min(2,Math.floor(s/.45*3))],px,py,p,gris);continue;}
+    const g=FG_ANN_GL[Math.floor(H(c,r,tic)*FG_ANN_GL.length)],fond=H(c,r,tic+7)<.5?col:gris;
+    if(H(c,r,tic+3)<.55)dosCar(x,g,px,py,p,'#000',fond);else dosCar(x,g,px,py,p,H(c,r,tic+5)<.5?col:txt);}}
+function fgRapport(F,t){const R=F.rap;if(!R||F.mort||t<FG_RAP[0]||t>=FG_RAP[5])return;const {w,dpr}=F,p=fgAnnP(w,dpr),cw=8*p,chh=16*p,
+    m=Math.round(20*dpr),sw=Math.round(8*dpr),lg=l=>Math.max(...l.map(s=>s.length)),c1=lg(R.r)+4,c2=lg(R.a)+4,cols=Math.max(c1,c2);
+  // contre la coupe, à droite ; si l'écran est trop étroit, le cadre se cale au bord gauche de l'écran
+  const x0=Math.max(cw,w-m-sw-8*cw-cols*cw),y0=m+chh;
+  fgCadre(F,t,{lignes:R.r,cols,x0,y0,p,col:F.pal.a,txt:F.pal.w,t0:FG_RAP[0],t1:FG_RAP[1],f0:FG_RAP[4],f1:FG_RAP[5],coul:i=>i===0?F.pal.a:F.pal.w});
+  fgCadre(F,t,{lignes:R.a,cols,x0,y0:y0+(R.r.length+7)*chh,p,col:F.pal.g,txt:F.pal.w,t0:FG_RAP[2],t1:FG_RAP[3],f0:FG_RAP[4],f1:FG_RAP[5],
+    coul:i=>i===R.a.length-1?F.pal.o:i===0?F.pal.g:F.pal.w});}
 function fgHud(F,t){const x=F.x,{w,h,dpr}=F,fs=Math.round(12*dpr),lh=Math.round(17*dpr),m=Math.round(20*dpr),
   fall=F.ph>=2,M=FG_MAT[fgIci(F)];
   x.font=`${fs}px ${FG_FONT}`;x.textAlign='left';x.textBaseline='top';
@@ -716,7 +753,7 @@ function fgHud(F,t){const x=F.x,{w,h,dpr}=F,fs=Math.round(12*dpr),lh=Math.round(
   if(F.ph<=1){const aide=F.jeu?'◄ ►  Q D  4 6   ÉVITER LES MINES':'◄ ►  Q D  4 6   DIRIGER LA FOREUSE';x.fillStyle='#000';
     x.fillRect(m-Math.round(8*dpr),h-m-fs-Math.round(6*dpr),Math.round(x.measureText(aide).width)+Math.round(16*dpr),fs+Math.round(12*dpr));
     x.fillStyle=F.ph===0?F.pal.g:F.pal.d;x.fillText(aide,m,h-m-fs);}
-  if(t>=FG_ANN_T0&&t<FG_ANNONCE&&!F.mort)fgAnnonce(F,t);x.textAlign='left';x.textBaseline='top';x.font=`${fs}px ${FG_FONT}`;
+  if(t>=FG_ANN_T0&&t<FG_ANNONCE&&!F.mort)fgAnnonce(F,t);if(F.rap)fgRapport(F,t);x.textAlign='left';x.textBaseline='top';x.font=`${fs}px ${FG_FONT}`;
   // coupe : les matières de fond du niveau, et le repère de profondeur
   const sw=Math.round(8*dpr),sx=w-m-sw,st=Math.round(h*.22),sh=Math.round(h*.5),B=F.P.b;
   B.forEach((e,i)=>{const y0=st+sh*e[0],y1=st+sh*(i+1<B.length?B[i+1][0]:1);x.fillStyle=F.mcT[Math.min(FG_PS-1,Math.round(e[0]*(FG_PS-1)))][e[1]][1];x.fillRect(sx,Math.round(y0),sw,Math.max(1,Math.round(y1-y0)));});

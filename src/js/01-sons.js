@@ -82,9 +82,14 @@ const SFX={
     noiz(.6,.18,600,'bandpass',.25,200);},
   break(){noiz(.45,.35,1500,'lowpass',0,200);tone(95,.35,'sawtooth',.12,35);noiz(.2,.15,3500,'highpass',.05);},
   spot(){tone(880,.07,'square',.05);tone(1320,.09,'square',.05,null,.08);},
+  // découpe d'une ferrailleuse contre une coque (28 novembre 2026) : grésillement bref et discret, seulement si on la voit
+  decoupe(){const r=.9+Math.random()*.2;noiz(.05,.03,5200*r,'highpass');tone(2600*r,.03,'square',.008,1900*r);},
   // sonar : « blip blip » répété pendant toute la durée du balayage (s, en secondes)
   sonar(s){const n=Math.max(3,Math.ceil(s/.62));for(let i=0;i<n;i++){tone(1480,.13,'sine',.09,1380,i*.62);
     tone(1480,.11,'sine',.045,1380,i*.62+.17);}},
+  // menu des terminaux (28 novembre 2026) : un tic discret quand la sélection bouge ; la liaison au noyau, porteuse qui monte puis se rompt
+  bip(){tone(1500,.025,'square',.02);},
+  liaison(){[330,440,550,660].forEach((f,i)=>tone(f,.1,'triangle',.05,null,i*.1));tone(660,.5,'sine',.035,90,.42);noiz(.3,.03,2400,'highpass',.45);},
   analyse(){[660,880,1100,1320].forEach((f,i)=>tone(f,.08,'triangle',.07,null,i*.07));},
   start(){tone(110,.6,'sawtooth',.06,440);tone(220,.6,'square',.03,880,.05);},
   drill(k){tone(48+k*6,.12,'sawtooth',.09);noiz(.1,.12,600+k*120);},
@@ -115,6 +120,10 @@ const SFX={
   /* Consommables, suite (26 novembre 2026) : chaque objet a maintenant son bruit, aucun n'est partagé avec un autre.
      Avant, le module de puissance empruntait celui de l'analyse, le surrégime celui des coups critiques, le camouflage
      celui du fumigène et le court-circuit celui des lasers : on ne les distinguait pas à l'oreille. */
+  // Cellule de fuel (28 novembre 2026) : le bouchon qui saute, le liquide qui glougloute en trois gorgées, la pompe qui se tait
+  fuel(){tone(900,.04,'square',.05,400);noiz(.05,.1,4200,'highpass',.02);
+    [0,1,2].forEach(i=>{tone(210-i*25,.11,'sine',.07,120-i*12,.1+i*.14);noiz(.09,.05,700,'lowpass',.12+i*.14,300);});
+    tone(70,.35,'triangle',.05,55,.55);},
   // Module de puissance : trois paliers qui montent et se verrouillent, puis une basse qui s'installe
   boost(){[392,523,659].forEach((f,i)=>tone(f,.12,'square',.05,null,i*.1));
     tone(1046,.3,'triangle',.05,1318,.3);tone(98,.5,'sawtooth',.05,65,.3);},

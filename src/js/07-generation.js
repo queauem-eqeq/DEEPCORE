@@ -205,8 +205,14 @@ function massif(t,ext,forme){const N=W*H,n1=noise(SZ(9,4)),n2=noise(SZ(3,2)),val
     cut=val[sol[Math.max(0,garde-1)]],z=new Uint8Array(N);
   for(let i=0;i<N;i++)if(val[i]<cut){z[i]=1;t[i]=MOUNT;}
   ZINFO={f,cut,forme};return z;}
+/* Taille de la carte en jeu (28 novembre 2026) : chaque niveau a la sienne (NIVEAUX[n].taille, 00-base). TAILLE_JEU la porte
+   pendant une génération lancée par le jeu (nouvelle partie, REGEN, descente, boutons Niv) ; sinon (GÉNÉRER LA CARTE, outils
+   d'essai, banc) c'est le curseur du menu Monde, GEN.taille. */
+let TAILLE_JEU=0;
+const tailleNiv=n=>(NIVEAUX[nivBorne(n)]||{}).taille||GEN.taille;
+function enJeu(f,niv){TAILLE_JEU=tailleNiv(niv??NIV_RECETTE(GEN.recette));try{return f();}finally{TAILLE_JEU=0;}}
 function genPlanet(){
-  setSize(GEN.taille);vis=new Uint8Array(W*H);
+  setSize(TAILLE_JEU||GEN.taille);vis=new Uint8Array(W*H);
   const N=W*H,rec=RECETTES[GEN.recette]||RECETTES.classique;let Nt=N;
     const P=k=>Math.round(Nt*GEN[k]/100),fill=GEN.remplissage/100,it=GEN.iterations;
   for(let attempt=0;attempt<30;attempt++){
@@ -274,7 +280,8 @@ function genPlanet(){
       if(sites.some(s=>Math.abs(s.x-x)+Math.abs(s.y-y)<(last?4:gap)))continue;sites.push({x,y});}
     if(sites.length<NSITES&&!last)continue;
     G={t,recette:ZONE?GEN.recette:'classique',seen:new Array(N).fill(0),px:sx,py:sy,turn:0,dist:0,over:null,msg:null,ship,face:'d',
-      st:{detec:3,vie:100,vieMax:100,energie:100,energieMax:100,repar:0,power:10,pas:0,degats:0,capteur:10,cout:10,pre:100,def:10,crit:5},
+      st:{detec:3,vie:100,vieMax:100,energie:100,energieMax:100,repar:0,power:10,pas:0,degats:0,capteur:10,cout:REGLES.FORAGE_ENERGIE,pre:100,def:10,crit:5,
+        fuel:REGLES.FUEL_MAX,fuelMax:REGLES.FUEL_MAX},
       sites:sites.map((s,i)=>({x:s.x,y:s.y,depth:10,id:LETTERS[i],seen:false,known:false}))};
     return;
   }
@@ -284,11 +291,12 @@ function genPlanet(){
    dans le menu Monde. La descente en 5 niveaux, ses six biomes, ses archétypes de monde, son budget de menace par
    niveau et les cartes d'essai ont été retirés ce jour-là, à la demande de l'utilisateur : le jeu se règle maintenant
    entièrement depuis le menu Monde, et REGEN tire une nouvelle carte avec les mêmes réglages. */
-// pvDe / dmgDe : points de vie et dégâts d'une espèce tels que le jeu les lit. Aujourd'hui ce sont les valeurs du Bestiaire, sans modification ;
+// pvDe / dmgDe : points de vie et dégâts d'une espèce tels que le jeu les lit (PV : ceux du Bestiaire ; dégâts : voir plus bas) ;
 // ces deux fonctions restent le seul endroit à changer si l'on veut un jour les faire varier.
 // dégâts d'une créature : tirés à chaque coup entre dmin et dmax (16 novembre 2026 ; une valeur fixe avant)
-const pvDe=sp=>sp.pv,dmgDe=sp=>sp.dmin+Math.floor(Math.random()*(sp.dmax-sp.dmin+1)),
-  dmgTxt=sp=>sp.dmin===sp.dmax?''+sp.dmin:sp.dmin+'-'+sp.dmax;
+// 28 novembre 2026 (bloc C du chantier survie) : les dégâts sont ceux du niveau en cours (degReels, 00-base : Bestiaire × REGLES.MENACE_DEG).
+const pvDe=sp=>sp.pv,dmgDe=sp=>{const [a,b]=degReels(sp);return a+Math.floor(Math.random()*(Math.max(a,b)-a+1));},
+  dmgTxt=(sp,n)=>{const [a,b]=degReels(sp,n);return a===b?''+a:a+'-'+b;};
 // Gisements pour une carte de taille 2 ; les autres tailles en proportion de leur surface.
 const GISEMENTS={metal:3,mat:1};
 let SANS_VAISSEAU=false;
@@ -302,12 +310,13 @@ function niveau(refait){drilling=false;
     if(cv){const e=cvBilan();if(!mieux||e<mieux.e)mieux={e,G,ZONE,ZINFO,SECT,CVT,BD:BATI_DER};if(e<=1.6||k>=5)break;continue;}
     if(G.batis.length||!ZONE||!(ENFOUI()||GEN.structure>0))break;}
   if(mieux&&mieux.G!==G){G=mieux.G;ZONE=mieux.ZONE;ZINFO=mieux.ZINFO;SECT=mieux.SECT;CVT=mieux.CVT;BATI_DER=mieux.BD;}
+  if(astroRec())astroport();   // Astroport (niveau 1) : fosses d'atterrissage et épaves (07h)
   {const o=cv&&typeof document!=='undefined'&&document.getElementById('genObt');if(o)o.textContent=obtenuTxt();}
   // les deux archétypes, un par un, pour la Carte de la colonne
   // « monde · bâti », les deux archétypes, affiché dans le Statut et à l'arrivée
   G.amb=ambDouble();G.archM=ambMNom(GEN.ambM)||'Personnalisé';G.archB=ambNom(GEN.recette,GEN.amb)||'Personnalisé';
   durcir();   // la roche dure avant les métaux : ils n'y apparaissent jamais
-  {const a=W*H/(48*32);G.eff={};G.fum={};hideOre(Math.max(1,Math.round(GISEMENTS.metal*a)),Math.max(1,Math.round(GISEMENTS.mat*a)));}
+  {const a=W*H/(48*32);G.eff={};G.fum={};hideOre(REGLES.FUEL_GISEMENTS,Math.max(1,Math.round(GISEMENTS.mat*a)));}   // métal : 4 par carte (fuel, 28 novembre 2026)
   G.sonar=1;   // sonar à émettre (voir sonarStart, 10-rendu) : il part 10 à 30 tours après l’arrivée (22 novembre 2026 ; avant 10 à 20)
   G.items={};G.tracks={};G.lastDir=null;G.beasts=[];G.blood={};G.fv=2;
   G.inv=invTest();G.log=[];
@@ -316,6 +325,8 @@ function niveau(refait){drilling=false;
   const PLANS_POSES_M=PLANS_POSES={};
   machines();
   PLANS_POSES=PLANS_POSES_M;butinExplo();   // butin des pièces secrètes, des culs-de-sac et des coins reculés (22 novembre 2026)
+  if(astroRec())astroportFin();   // butin des épaves, enregistreurs des épaves scellées
+  terminauxFin();   // deux terminaux au moins, leurs actions locales, le réduit à cloison au besoin (07i)
   // garde-fou : un site inatteignable, la carte est refaite (trois fois au plus)
   if(G.sites[0]&&accesSite()<0&&(refait||0)<3)return niveau((refait||0)+1);
   spawnGroupes();mdlRemplit();   // butin et ennemis des emplacements de modules (07b)
@@ -323,18 +334,22 @@ function niveau(refait){drilling=false;
 /* Le niveau d'une carte générée depuis le menu (REGEN, GÉNÉRER LA CARTE) est celui de sa recette (22 novembre 2026 ; avant,
    toujours 1) : une carte « cavernes » est un niveau 2, une « base » un niveau 3, et prend la faune (fenêtre LIFE) et les
    artefacts de ce niveau. La descente reprend de là. */
-function newGame(){palNiveauRaz();SANS_VAISSEAU=false;NIV_GEN=NIV_RECETTE(GEN.recette);niveau();G.niv=NIV_GEN;   // G n'existe qu'une fois la carte générée
-  if(G.ship)say('Atterrissage confirmé. Un site de forage signalé par l’orbiteur. '+NOM_FOREUSE+' est dans la soute ; la porte est à l’arrière.','info');
+function newGame(){if(typeof uniteApplique==='function')uniteApplique();   // numéro d'unité en service (14l : +1 après une destruction)
+  palNiveauRaz();SANS_VAISSEAU=false;NIV_GEN=NIV_RECETTE(GEN.recette);niveau();G.niv=NIV_GEN;   // G n'existe qu'une fois la carte générée
+  // niveau 1 de l'Astroport : atterrissage en jargon machine, partie notée au registre du port (14l)
+  if(G.ship&&G.niv===1&&G.fosses&&typeof n1Debut==='function')n1Debut();
+  else if(G.ship)say('Atterrissage confirmé. Un site de forage signalé par l’orbiteur. '+NOM_FOREUSE+' est dans la soute ; la porte est à l’arrière.','info');
   else if(G.arrivee==='base')say(`Niveau ${G.niv} : ${NOM_FOREUSE} a traversé le plafond d’une salle, dans une base enfouie. Un site de forage est signalé plus loin.`,'info');
   // arrivée par un puits
-  else say(`Niveau ${G.niv} : ${NOM_FOREUSE} a débouché dans un réseau de cavernes. Un site de forage plus bas est signalé.`,'info');}
+  else say(`Niveau ${G.niv} : ${NOM_FOREUSE} a débouché dans un réseau de cavernes. Un site de forage plus bas est signalé.`,'info');
+  G.st.nivMax=G.niv;if(typeof heritageRecoit==='function')heritageRecoit();}   // hacks hérités de l'unité précédente (14g)
 // Nouvelle partie lancée par le joueur : la cinématique d'arrivée se rejoue (21 novembre 2026)
-function nouvellePartie(){newGame();started=true;$('overlay').hidden=true;render();playIntro();}
+function nouvellePartie(){enJeu(newGame);started=true;$('overlay').hidden=true;render();playIntro();}
 /* Foreuse détruite → « Déployer une nouvelle foreuse » (22 novembre 2026) : on repart toujours du niveau 1 (recette
    « atterrissage », avec le vaisseau), quelle que soit la recette affichée dans le menu Monde, et la cinématique d'arrivée
    se rejoue. La foreuse est neuve : rien n'est gardé de la précédente. Le menu Monde du joueur est remis en place après. */
 function deployerForeuse(){const sauve=JSON.parse(JSON.stringify(GEN));recRange();recPrend(RECETTE_NIV(1));
-  GEN.recette='atterrissage';newGame();genRemet(sauve);started=true;$('overlay').hidden=true;render();playIntro();}
+  GEN.recette='atterrissage';enJeu(newGame,1);genRemet(sauve);started=true;$('overlay').hidden=true;render();playIntro();}
 /* Niveau suivant (21 novembre 2026) : pas de vaisseau, on arrive par le puits. Le niveau 2 (et les suivants, tant qu'ils n'ont
    pas leur recette) est généré avec la recette « cavernes » et les réglages que le joueur lui a donnés dans le menu Monde,
    quelle que soit la recette affichée ; la case « Réglages au hasard » les tire d'abord, comme pour REGEN. Le menu Monde du
@@ -364,14 +379,16 @@ function niveauSuivant(hasard){   // hasard : un archétype monde et un archéty
   const sauve=JSON.parse(JSON.stringify(GEN)),inv=G.inv,st=G.st,tour=G.turn,dist=G.dist,niv=(G.niv||1)+1;SAV_GARDE=st.savoir||null;
   // sans hasard : les réglages en cours du menu Monde pour cette recette
   palNiveauSuivant();recRange();recPrend(RECETTE_NIV(niv));if(hasard)hasardReglages();SANS_VAISSEAU=true;NIV_GEN=niv;
-  niveau();   // genPlanet refait l'objet G : tout ce que la foreuse garde est remis en place juste après
+  enJeu(niveau,niv);   // genPlanet refait l'objet G : tout ce que la foreuse garde est remis en place juste après
   SANS_VAISSEAU=false;genRemet(sauve);
   G.inv=inv;G.st=st;G.niv=niv;G.turn=tour;G.dist=dist;G.over=null;drilling=false;SAV_GARDE=null;
   // le délai du sonar (10 à 30 battements) part de l'arrivée : niveau() l'a compté depuis 0, avant qu'on remette le compteur de tours (22
   // novembre 2026 : il partait tout de suite)
   G.sonarAt=tour+(G.sonarAt||0);
   eboulis();
-  say(G.arrivee==='base'?`Niveau ${G.niv}${G.amb?' — '+G.amb:''}. ${NOM_FOREUSE} a traversé le plafond d’une salle : il est dans une base enfouie. Un site de forage est signalé plus loin.`:`Niveau ${G.niv}${G.amb?' — '+G.amb:''}. ${NOM_FOREUSE} a percé le plafond et s'est écrasée plus bas. Un nouveau site de forage est signalé.`,'info');}
+  say(G.arrivee==='base'?`Niveau ${G.niv}${G.amb?' — '+G.amb:''}. ${NOM_FOREUSE} a traversé le plafond d’une salle : il est dans une base enfouie. Un site de forage est signalé plus loin.`:`Niveau ${G.niv}${G.amb?' — '+G.amb:''}. ${NOM_FOREUSE} a percé le plafond et s'est écrasée plus bas. Un nouveau site de forage est signalé.`,'info');
+  fuelDescente();   // chaque descente rend du fuel (28 novembre 2026)
+  if(typeof hacksArrivee==='function')hacksArrivee();}   // emplacements de hack aux niveaux 3, 6, 9 (14g)
 // devant un passage : pas de débris
 const B_PORTE=i=>!!(BATI_DER&&BATI_DER.B.porte[i])||D4.some(([dx,dy])=>{const v=G.t[idx(i%W+dx,((i/W)|0)+dy)];return v===DOOR||v===LOCK;});
 
@@ -409,12 +426,15 @@ try{if(localStorage.getItem('np-mig')!=='horloge1'){saveBest();
    espèces choisies, côte à côte dans un tableau — une ligne par statistique — pour les modifier et les comparer.
    Un clic dans la liste ajoute ou retire une espèce ; la cinquième choisie remplace la plus ancienne. */
 let BEST_SEL=null;
+// dégâts en jeu de chaque niveau (bloc C du chantier survie, 28 novembre 2026) : lecture seule, sous les champs du Bestiaire
+const bestReel=o=>NIVS.map(n=>`<span>niv. ${n} : <b>${dmgTxt(o,n)}</b></span>`).join('<br>');
 function buildBest(){const L=BEST_LIST();
   if(!BEST_SEL)BEST_SEL=L.slice(0,4).map(e=>e.key);BEST_SEL=BEST_SEL.filter(k=>L.some(e=>e.key===k));
   const S=BEST_SEL.map(k=>L.find(e=>e.key===k));
   $('bestSide').innerHTML=L.map(e=>{const n=BEST_SEL.indexOf(e.key);return `<button class="bli${n>=0?' sel':''}" data-k="${e.key}" aria-pressed="${n>=0}"><img src="${ICON[e.ic]||''}" alt=""><b>${e.o.n}</b><span>${n>=0?n+1:''}</span></button>`;}).join('');
   $('bestList').innerHTML=!S.length?'<p class="mnote">Choisissez jusqu’à quatre espèces dans la liste.</p>':`<table class="btab"><thead><tr><th></th>${S.map(e=>`<th scope="col"><img src="${ICON[e.ic]||''}" alt=""><b>${e.o.n}</b><button class="gx" data-x="${e.key}" aria-label="Retirer ${e.o.n} de la comparaison" title="Retirer">×</button></th>`).join('')}</tr></thead>
     <tbody>${BFIELDS.map(([f,l,mn,mx])=>`<tr><th scope="row">${l}</th>${S.map(e=>`<td><input type="number" id="bf-${e.key}-${f}" data-k="${e.key}" data-f="${f}" min="${mn}" max="${mx}" step="1" value="${e.o[f]}" aria-label="${l} : ${e.o.n}"></td>`).join('')}</tr>`).join('')}
+    <tr class="breel"><th scope="row" title="Dégâts min et max multipliés par la menace de chaque niveau (REGLES.MENACE_DEG) : c’est ce qui frappe en jeu">Dégâts en jeu</th>${S.map(e=>`<td id="breel-${e.key}">${bestReel(e.o)}</td>`).join('')}</tr>
     <tr class="brole"><th scope="row">Rôle</th>${S.map(e=>`<td>${e.role}</td>`).join('')}</tr></tbody></table>`;}
 function bestToggle(k){const i=BEST_SEL.indexOf(k);if(i>=0)BEST_SEL.splice(i,1);else{BEST_SEL.push(k);
   if(BEST_SEL.length>4)BEST_SEL.shift();}buildBest();}

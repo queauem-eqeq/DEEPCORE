@@ -267,7 +267,7 @@ function introFrame(now){const I=INTRO;if(!I)return;ensureChasmOv();ensureSolOv(
 for(const b of ['niv1Btn','niv2Btn','niv3Btn'])$(b).addEventListener('click',e=>e.currentTarget.blur());
   /* plus de cadre de focus qui reste autour du bouton après le clic */
 $('niv1Btn').onclick=()=>{unlock();if(TRAV)stopTravel();
-  const sauve=JSON.parse(JSON.stringify(GEN));recRange();recPrend(RECETTE_NIV(1));hasardReglages();newGame();
+  const sauve=JSON.parse(JSON.stringify(GEN));recRange();recPrend(RECETTE_NIV(1));hasardReglages();enJeu(newGame,1);
   genRemet(sauve);started=true;$('overlay').hidden=true;render();playIntro();};
 $('niv2Btn').onclick=()=>{unlock();if(TRAV)stopTravel();$('overlay').hidden=true;started=true;
   descendre(1,true,()=>{G.niv=1;});};
@@ -312,10 +312,11 @@ function start(data){
   if(data&&data.G&&data.G.t){const g=data.G,w=g.w||96,h=g.h||64;if(g.t.length===w*h){W=w;H=h;F=W/96;vis=new Uint8Array(W*H);}}
   const fromHot=!!(data&&data.G&&data.G.t&&data.G.t.length===W*H);
   if(data&&data.G&&data.G.t&&data.G.st&&data.G.t.length===W*H){G=data.G;G.dmg=G.dmg||{};
-    if(G.st)G.st.cout=10;
+    if(G.st)G.st.cout=REGLES.FORAGE_ENERGIE;
     if(!G.ore)hideOre();
       if(!G.st||G.st.pre==null||G.st.energieMax==null){G.st={vie:100,vieMax:100,energie:100,energieMax:100,repar:0,power:10,pas:0,
-      degats:0,capteur:10,cout:10,pre:100,def:10,crit:5};if(G.inv)G.inv.forEach(o=>o.eq=0);}
+      degats:0,capteur:10,cout:REGLES.FORAGE_ENERGIE,pre:100,def:10,crit:5};if(G.inv)G.inv.forEach(o=>o.eq=0);}
+    fuelInit(G.st);   // partie enregistrée avant le fuel (28 novembre 2026) : jauge pleine
   if(!G.inv)G.inv=invTest();if(!G.items)G.items={};if(!G.eff)G.eff={};if(!G.fum)G.fum={};delete G.amb;G.w=W;G.h=H;invMigre();
   /* Retiré le 22 novembre 2026 : la renumérotation des espèces du 17 novembre (rangs 2 à 7 supprimés, 8 → 2, 9 → 3) se
      rejouait sur toute partie reprise qui n'en portait pas la marque G.bz17 — or une partie neuve ne la porte pas. À chaque
@@ -328,7 +329,7 @@ function start(data){
   palBiome(null);buildTiles();   // partie commencée avant l'inventaire
   delete G.gems;   // le joyau et son menu d'amélioration ont été retirés le 16 novembre 2026
   if(!G.beasts||!G.animals)spawnGroupes();
-  if(G.fv!==2){G.fv=2;G.blood={};spawnGroupes();}started=!!data.started;computeFOV();}else newGame();
+  if(G.fv!==2){G.fv=2;G.blood={};spawnGroupes();}started=!!data.started;computeFOV();}else enJeu(newGame);
   new ResizeObserver(resize).observe($('mapwrap'));resize();
   // pas d'écran d'accueil : la partie commence directement
   if(G.over&&G.over.dead)dead();else if(G.over)end(G.sites.find(s=>s.id===G.over.site));else{started=true;$('overlay').hidden=true;}

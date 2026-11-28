@@ -9,17 +9,22 @@ const TILE_LIST=[
   ['Viseur',[['cursor','Viseur']]],
   ['Foreuse et faune',[['robot_u','Foreuse'],['an0r',SPECIES[0].n],...BEASTS.map((b,i)=>['bz'+i+'r',b.n])]],
   ['Terrain',[['ground0','Sol'],['rock','Rocher'],['rock2','Rocher 2'],['rock3','Rocher 3'],['mtTop','Crête'],['mtBody','Montagne'],['hardTop','Crête dure'],['hardBody','Montagne dure'],['wall','Mur'],['wallFace','Mur (face)'],['floor','Sol bâti'],['solPont','Sol (pont)'],['door','Porte'],['doorOpen','Porte ouverte'],['doorOpenV','Porte ouverte (côté)'],['pillar','Pilier'],['vitre','Mur vitré'],['lock','Porte verrouillée'],['cle','Clé'],['liq0','Eau A'],['liq1','Eau B'],['deep0','Eau profonde'],['grass0','Herbes hautes'],['flat0','Herbes basses'],['rubble','Gravats'],['crackH','Fissures'],['wade','Remous'],['wadeDeep','Remous profond']]],
-  ['Objets au sol',[['o_foreuse','Foreuse'],['o_usine','Coque d’usine'],['o_servo','Servomoteur'],['o_optique','Téléobjectif'],['o_viseur','Viseur laser'],['o_conden','Condensateur'],['o_gyro','Gyroscope'],['o_stabil','Stabilisateur'],['o_accu','Accumulateur'],['o_repar','Réparobots'],['o_batterie','Batterie'],['o_fumigene','Fumigène'],['o_charge','Charge sismique'],['o_vrille','Vrille rapide'],['o_trepan','Trépan lourd'],['o_carene','Carène légère'],['o_blindage','Blindage composite'],['o_capsule','Consommable non identifié'],['o_puissance','Module de puissance'],['o_berserk','Surrégime'],['o_camo','Camouflage optique'],['o_balise','Balise'],['o_court','Court-circuit'],['o_plan','Plan de fabrication']]],
+  ['Objets au sol',[['o_foreuse','Foreuse'],['o_usine','Coque d’usine'],['o_servo','Servomoteur'],['o_optique','Téléobjectif'],['o_viseur','Viseur laser'],['o_conden','Condensateur'],['o_gyro','Gyroscope'],['o_stabil','Stabilisateur'],['o_accu','Accumulateur'],['o_sonar3','Sonar 3'],['o_sonar4','Sonar 4'],['o_sonar5','Sonar 5'],['o_sonar6','Sonar 6'],['o_sonar7','Sonar 7'],['o_repar','Réparobots'],['o_batterie','Batterie'],['o_fuel','Cellule de fuel'],['o_fumigene','Fumigène'],['o_charge','Charge sismique'],['o_vrille','Vrille rapide'],['o_trepan','Trépan lourd'],['o_carene','Carène légère'],['o_blindage','Blindage composite'],['o_capsule','Consommable non identifié'],['o_puissance','Module de puissance'],['o_berserk','Surrégime'],['o_camo','Camouflage optique'],['o_balise','Balise'],['o_court','Court-circuit'],['o_plan','Plan de fabrication'],['o_hack','Hack (puce)']]],
   ['Objets',[['siteUnknown','Site'],['objet','Objet au sol (générique)'],['ore1','Éclats petits (montagne)'],['ore2','Éclats moyens (montagne)'],['ore','Éclats gros (montagne)'],['oreSol1','Éclats petits (sol)'],['oreSol2','Éclats moyens (sol)'],['oreSol','Éclats gros (sol)']]],
   ['Artefacts',[['antenne','Antenne'],['antenneOn','Antenne allumée'],['terminal','Terminal'],['mach0','Tuyaux'],['mach1','Serveur'],['mach2','Caisses'],['mach3','Ordinateur'],['mach4','Établi'],['mach5','Cuve'],['mach6','Générateur'],['mach7','Console'],['mach8','Turbine'],['mach9','Armoire électrique']]],
   ['Machines',[['tourelle','Tourelle laser'],['tourelleOn','Tourelle laser (tir)'],['pylone','Croix laser'],['pyloneOn','Croix laser (allumée)'],['pile','Pile énergétique'],['socle','Socle'],['socleOn','Socle alimenté'],['levier','Levier'],['levierOn','Levier (actionné)'],['grille','Grille d’énergie'],['station','Station de réparation'],['stationOff','Station (vide)'],['chargeur','Distributeur de pile'],['fabric','FABLAB'],['niche','Niche (salle piégée)'],['nicheOuverte','Niche ouverte'],['glu','Boule de glu'],['vitrine','Vitrine'],['vitrineOff','Vitrine verrouillée']]],
   ['Vaisseau',[['ship','Cargo']]],
+  ['Épaves',[...EPV_CLES.map(k=>['epv_'+k,EPV_MODELES[k].n[0]+EPV_MODELES[k].n.slice(1).toLowerCase()]),['coque','Plaque de coque'],
+    ['fosseSol','Fosse (sol)'],['fosseBord','Fosse (bord)']]],
   ['FX',[['boom0','Explosion 1 (éclair)'],['boom1','Explosion 2 (damier)'],['boom2','Explosion 3 (braises)'],['laserV','Laser (rayon)'],['laserX','Laser (croix)'],['nuage0','Nuage plein'],['nuage1','Nuage texturé'],['nuage2','Bord diagonal'],['nuage3','Bord croisé'],['nuage4','Bord rayé'],['nuage5','Bord tramé']]]];
 const TILE_DEPS={robot_u:['robot_u','robot_r','robot_d','robot_l'],an0r:['an0r','an0l'],bz0r:['bz0r','bz0l'],bz1r:['bz1r','bz1l'],
   deep0:['deep0','deep1'],grass0:['grass0'],gem:['gem','gemDim','gemHole'],ship:['ship',...SHIP_KEYS]};
 // dimensions en pixels : 16 x 16, sauf le vaisseau édité d'un bloc (5 x 6 tuiles)
 BEASTS.forEach((_,i)=>{TILE_DEPS['bz'+i+'r']=['bz'+i+'r','bz'+i+'l'];});
-const tileDim=k=>k==='ship'?[SGW*16,SGH*16]:[16,16];
+// grandes tuiles, retouchées d'un bloc : le cargo et les modèles d'épaves (28 novembre 2026)
+const TILE_GRANDES={ship:[SGW*16,SGH*16]};
+for(const k of EPV_CLES){const g=EPV_MODELES[k].g;TILE_GRANDES['epv_'+k]=[Math.max(...g.map(r=>r.length))*16,g.length*16];}
+const tileDim=k=>TILE_GRANDES[k]||[16,16];
 const validTile=(r,k)=>{const [w,h]=tileDim(k);
   return Array.isArray(r)&&r.length===h&&r.every(l=>typeof l==='string'&&l.length===w&&/^[.0w123r5Rd]+$/.test(l));};
 const PAT_ORIG={};
@@ -33,8 +38,9 @@ try{const o=JSON.parse(localStorage.getItem('np-tiles')||'null');
 const saveTiles=()=>{try{localStorage.setItem('np-tiles',JSON.stringify(TILE_OV));}catch(e){}touchLocal();};
 // version retouchée si elle existe, sinon l'originale
 const TF=k=>{const o=TILE_OV[k];if(o)return (x,y)=>o[y][x];const p=PAT_ORIG[k];return typeof p==='function'?p:(x,y)=>p[y][x];};
-for(const [,l] of TILE_LIST)for(const [k] of l)PAT_ORIG[k]=k==='cursor'?CURSOR_DEF:k==='ship'?shipPixels(SHIP_GRID):PAT[k];
-for(const k in PAT_ORIG)if(k!=='cursor'&&k!=='ship')PAT[k]=(x,y)=>TF(k)(x,y);
+for(const [,l] of TILE_LIST)for(const [k] of l)PAT_ORIG[k]=k==='cursor'?CURSOR_DEF:k==='ship'?shipPixels(SHIP_GRID):
+  k.startsWith('epv_')?epvPixels(EPV_MODELES[k.slice(4)].g):PAT[k];
+for(const k in PAT_ORIG)if(k!=='cursor'&&!TILE_GRANDES[k])PAT[k]=(x,y)=>TF(k)(x,y);
 // tuiles du vaisseau posées case par case sur la carte, découpées dans l'image d'ensemble
 for(const k of SHIP_KEYS){const [,cx,cy]=k.split('_').map(Number);PAT[k]=(x,y)=>TF('ship')(cx*16+x,cy*16+y);}
 // tourelle : quatre sens de tir
@@ -88,7 +94,8 @@ const tuileDans=(bas,haut)=>{const b=tuileSrc(bas),h=tuileSrc(haut);
 const MUR_DANS=['niche','nicheOuverte'];
 function murComposites(){for(const bas of ['wall','wallFace'])for(const haut of MUR_DANS)
   TL[bas+'_'+haut]=tileCanvas(tuileDans(bas,haut));}
-function rebuildTile(k){for(const d of TILE_DEPS[k]||[k]){if(d==='ship')TL.ship=tileCanvas(TF('ship'),SGW*16,SGH*16);
+function rebuildTile(k){if(k.startsWith('epv_')&&typeof epvOublie==='function')epvOublie();
+  for(const d of TILE_DEPS[k]||[k]){if(TILE_GRANDES[d])TL[d]=tileCanvas(TF(d),...TILE_GRANDES[d]);
   else if(PAT[d])TL[d]=tileCanvas(tuileSrc(d));if(/^(an|bz)\d+r$|^robot_r$/.test(d)){try{ICON[d]=TL[d].toDataURL();
   }catch(e){}}}murComposites();buildCursor();if(k==='robot_u')robotTiles();}
 function buildTiles(){
@@ -96,7 +103,7 @@ function buildTiles(){
   // la Matière reprend les dessins des éclats de métal (retouches comprises), en couleur accent au lieu de bio
   for(const k of ['ore','ore1','ore2','oreSol','oreSol1','oreSol2']){const f=TF(k);
     TL[k.replace('ore','mat')]=tileCanvas((x,y)=>{const c=f(x,y);return c==='2'?'1':c;});
-    }TL.ship=tileCanvas(TF('ship'),SGW*16,SGH*16);murComposites();buildCursor();
+    }for(const k in TILE_GRANDES)TL[k]=tileCanvas(TF(k),...TILE_GRANDES[k]);murComposites();buildCursor();
   ICON={};for(const k in TL)if(/^(an|bz)\d+r$|^robot_r$/.test(k)){try{ICON[k]=TL[k].toDataURL();}catch(e){}}
   robotTiles();
   ANIMG=SPECIES.map((_,i)=>{try{return TL['an'+i+'r'].toDataURL();}catch(e){return '';}});

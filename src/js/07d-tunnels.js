@@ -86,4 +86,7 @@ function tunnels(t,B,strs,dE){
       if(!vu[j]&&(tun[j]||j===principal[0])){vu[j]=1;q.push(j);}}}
     for(let k=all.length-1;k>=0;k--){const i=all[k];if(!vu[i]){t[i]=MOUNT;tun[i]=0;all.splice(k,1);}}}
   G.tun={};for(const i of all)G.tun[i]=1;   // les cases de tunnel, pour la faune par lieu (étape suivante)
+  // Astroport (28 novembre 2026) : le sas du dépôt (la case devant la porte du complexe, au fond du boyau principal) et les
+  // débouchés du réseau sur l'extérieur ; les épaves vieillissent en s'en approchant, les ferrailleuses y font la navette
+  G.sas=principal[0];G.debouches=sorties.slice();
   G.tunN=all.length;G.tunS=sorties.length;return all.length>=100*aire;}   // moins de 100 cases : le massif était trop étroit, on recommence

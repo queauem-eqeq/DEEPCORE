@@ -49,6 +49,7 @@ function carteAscii(){MAP=new Array(W*H);FICT.clear();NX=Math.max(2,Math.round(W
     else if(v===FLOOR)e=['·','T',.45];
     else if(v===DOOR)e=['▒','T',1];
     else if(v>=MACHINE)e=['■','T',1.1];
+    else if(v===SHIP&&G.epI&&G.epI[i]!=null)e=[h<.5?'▓':'▒','T',.75];   // épaves de l'Astroport (07h)
     else e=h<.07?['.','M',.4]:h<.09?['o','M',.6]:h<.2?['·','M',.3]:[' ','K',1];   // sol nu (et la place du vaisseau, encore vide)
     MAP[i]=e;}}
 /* Au-delà de la carte (et à la place de son mur de bord), un terrain inventé, comme celui de l'essai : le vaisseau se pose

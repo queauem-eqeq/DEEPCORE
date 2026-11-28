@@ -159,6 +159,9 @@ function drawBoom(){const fl=1-(performance.now()-BOOM.t0)/180;
 const FX_VIF=new Set(['lunge','shake','num']);
 function addFx(f){f.t0=performance.now();if(f.kind==='num')f.stack=FX.filter(o=>o.kind==='num'&&o.x===f.x&&o.y===f.y&&fxP(o)<.5).length;
   FX.push(f);if(!fxRaf)fxRaf=fxSuite();}
+// grains d'un effet de consommable : position dans la case et instant d'apparition, tirés une fois pour toutes
+// (perdue le 28 novembre 2026 avec la PR #58, rétablie : sans elle, éclats, réparobots et station levaient une erreur)
+const fxGrains=n=>Array.from({length:n},()=>({x:rnd(0,13),y:rnd(3,14),d:Math.random()*.55}));
 // prochaine image : à 60 images/s tant qu'un effet de combat bouge, sinon au pas de FPS
 const fxSuite=()=>FX.some(f=>FX_VIF.has(f.kind))?requestAnimationFrame(fxLoop):raf20(fxLoop);
 function fxLoop(){const now=performance.now();FX=FX.filter(f=>now-f.t0<f.dur);if(antAnime())antVis();
@@ -276,7 +279,8 @@ function caseDecor(x,y,P){
   // le voile de couleur monde (voir voile()) ; rien de bâti ne porte la texture du sol naturel
   if(t!==CHASM){if(!(pb||t>=WALL)&&SOL_OV&&SOL_OV._g===G)P.sub(SOL_OV,x*16,y*16,k);else P.rect(PAL['3'],.08*k);}
   if(pb)P.img(TL.solPont,.5*k);
-  if(t>=WALL)batiTuile(t,x,y,(tl,a)=>P.img(tl,a*k));else
+  const ep=G.epT&&G.epT[i];   // case d'épave de l'Astroport (07h) ; sa trappe peut porter l'enregistreur (terminal)
+  if(t>=WALL&&!(ep&&t===TERMINAL))batiTuile(t,x,y,(tl,a)=>P.img(tl,a*k));else
   if(!pb)P.img(TL.ground0,.6*k);   // sol uniforme : plus de variations près des sites (13 novembre 2026)
   if(t===ROCK)P.img(h%3===0?TL.rock2:h%3===1?TL.rock:TL.rock3,.95*k);   // trois rochers, à parts égales (24 novembre 2026)
   // sous de la roche dure, la crête se pose sur un fond de roche dure
@@ -285,7 +289,8 @@ function caseDecor(x,y,P){
     P.img(TL.mtTop,.9*k);}}
   else if(t===HARD){const up=y>0?G.t[idx(x,y-1)]:t;   // comme la montagne : crête irrégulière en haut, posée sur de la roche tendre
     if(up!==HARD){if(up===MOUNT||up===ROCK)P.img(TL.hardTopBg,.9*k);P.img(TL.hardTop,.9*k);}else P.img(TL.hardBody,.9*k);}
-  else if((t===SHIP||t===DECK)&&G.ship){const sk=TL['ship_'+(x-G.ship.x)+'_'+(y-G.ship.y)];if(sk)P.img(sk,k);}
+  else if((t===SHIP||t===DECK)&&!ep){const sk=G.ship&&TL['ship_'+(x-G.ship.x)+'_'+(y-G.ship.y)];if(sk)P.img(sk,k);
+    else if(t===SHIP)P.img(TL.coque,k);}   // coque posée par un module, hors épave
   if(t===MOUNT&&G.ore&&G.ore[i]&&!oreSol(G.ore[i]))P.img(oreTile(G.ore[i],false),k);
   else if(t===LIQ){P.rect(PAL['e'],.24*k);P.img((liqFrame+(h%2))%2?TL.liq1:TL.liq0,.9*k);}
   else if(t===DEEP){P.rect('#01060c',k);P.rect(PAL['e'],.08*k);P.img((liqFrame+(h%2))%2?TL.deep1:TL.deep0,.4*k);}
@@ -294,6 +299,10 @@ function caseDecor(x,y,P){
   // herbes assombries de moitié le 15 novembre 2026 (elles ressortaient trop) : même teinte, luminosité divisée par deux
   else if(t===GRASS)P.img(TL.grass0,.45*k);
   else if(t===FLAT)P.img(TL.flat0,.38*k);
+  if(ep){const c=epTuile(ep);if(c)P.img(c,k);if(t===TERMINAL)P.img(TL.terminal,k);}
+  // fosse d'atterrissage : marquages au sol, plus serrés sur le pourtour
+  else if(G.fosI&&G.fosI[i]!=null&&(t===GROUND||t===RUBBLE)){const f=G.fosI[i];
+    P.img(DIRS.some(([dx,dy])=>G.fosI[idx(x+dx,y+dy)]!==f)?TL.fosseBord:TL.fosseSol,k);}
   const dm=G.dmg&&G.dmg[i];if(dm&&(t===ROCK||t===MOUNT))P.img(TL.crackH,.95*k);
   if(!v)P.rect(FOND,1-FOG_K);   // le voile du brouillard, une seule fois sur la case finie
 }
@@ -380,11 +389,12 @@ function render(){
   ctx.globalAlpha=1;
   // (les taches de sang ne sont plus dessinées depuis le 19 novembre 2026 : les ennemis laissent des débris)
   for(const s of G.sites){if(fog&&!G.seen[idx(s.x,s.y)])continue;put(TL.siteUnknown,s.x,s.y,!fog||vis[idx(s.x,s.y)]?1:.35);}
+  ouvrContour();   // périmètre des épaves où l'on travaille, sous les créatures (28 novembre 2026)
   // touche V : portée de discrétion de la foreuse — les cases d'où un ennemi peut vous remarquer, entourées d'un pointillé
   if(SHOWVIS&&!G.over){
     const r=G.stealth||STEALTH_BASE,cells=new Set();
     for(let y=Math.max(0,G.py-r);y<=Math.min(H-1,G.py+r);y++)for(let x=Math.max(0,G.px-r);x<=Math.min(W-1,G.px+r);x++){
-      const i=idx(x,y);if(Math.hypot(x-G.px,y-G.py)>r)continue;if(lastAct==='dig'||los(G.px,G.py,x,y))cells.add(i);}
+      const i=idx(x,y);if(Math.hypot(x-G.px,y-G.py)>r)continue;if(lastAct==='dig'||lastAct==='tir'||los(G.px,G.py,x,y))cells.add(i);}
     drawVisCells(cells,'#ffffff');}
   machDraw();
   drawPath();
@@ -421,7 +431,8 @@ function render(){
   {for(const i of SOUS){const l=G.items&&G.items[i];if(!(l&&l.length)&&!(G.cles&&G.cles[i]))continue;const q=S/16,px=(i%W-camX)*S+12*q,py=(((i/W)|0)-camY)*S+12*q;
       ctx.globalAlpha=1;ctx.fillStyle='#ffffff';ctx.fillRect(px+q,py,q,3*q);ctx.fillRect(px,py+q,3*q,q);}}
   // antenne : un ennemi hors de vue dans le disque d'une antenne allumée se montre par un point en couleur danger (22 novembre 2026)
-  if(G.beasts&&fog)for(const b of G.beasts){if(vis[idx(b.x,b.y)]||!antDetecte(b))continue;const q=S/16;ctx.globalAlpha=1;
+  // hack TRAQUE (14g) : un ennemi en chasse tout près se montre de la même façon ; Sonar porté (14d) : tout ennemi à sa portée
+  if(G.beasts&&fog)for(const b of G.beasts){if(vis[idx(b.x,b.y)]||!(antDetecte(b)||(typeof traqueVoit==='function'&&traqueVoit(b))||sonarVoit(b)))continue;const q=S/16;ctx.globalAlpha=1;
     ctx.fillStyle=PAL['4'];ctx.fillRect((b.x-camX)*S+6*q,(b.y-camY)*S+6*q,4*q,4*q);}
   // nuage d'un fumigène : les tuiles de nuage par-dessus le terrain et les créatures, sous la foreuse ; elles pâlissent en se dissipant
   // la fumée se voit même là où elle coupe la vue : sinon on ne verrait que les neuf cases autour de la foreuse
@@ -436,6 +447,7 @@ function render(){
   if(VISEE){const t=viseeTuile();ctx.globalAlpha=1;
     for(const [zx,zy] of viseeCases()){
       if(zx<0||zy<0||zx>=W||zy>=H)continue;ctx.drawImage(t,(zx-camX)*S,(zy-camY)*S,S,S);}}
+  if(TIR&&typeof tirDessin==='function')tirDessin();   // visée de l'arme de tir (14m)
   /* Viseur du phaseur (28 novembre 2026) : le viseur habituel, en couleur bio quand la foreuse peut s'y reformer ; sur une case
      inconnue ou qui ne la porterait pas, le même viseur en rouge danger barré d'une croix en X. Hors de la vue, on ne le dessine
      pas : la mini-carte le montre. */
@@ -479,13 +491,29 @@ function fxSurface(){return !!G&&FX_SNAP.cle===fxCle()&&!BOOM&&!INTRO&&!animVif(
   FX.every(f=>!FX_DECOR.has(f.kind));}
 function fxRapide(){ctx.save();ctx.setTransform(1,0,0,1,0,0);ctx.globalAlpha=1;ctx.globalCompositeOperation='copy';
   ctx.drawImage(FX_SNAP.cv,0,0);ctx.restore();ctx.save();fxCouche();ctx.restore();smokeKick();curseurCase();ctx.globalAlpha=1;}
+/* Périmètre de découpe (28 novembre 2026) : quand la foreuse est à OUVR_CONTOUR cases ou moins d'une épave où travaille un groupe de
+   ferrailleuses, le bord de son périmètre (emprise + OUVR_R cases) est tracé au sol : un pointillé d'un pixel de tuile, quatre pixels
+   pleins, deux vides, continu d'une case à l'autre, couleur accent ; rouge danger quand le groupe est en alerte ou en chasse. Opaque,
+   seulement sur les cases en vue et praticables. Rien autour d'une épave sans ouvriers. */
+function ouvrContour(){const vu=[];if(!G||!G.epaves||!G.patr)return vu;const u=S/16;ctx.globalAlpha=1;
+  for(let k=0;k<G.epaves.length;k++){const e=G.epaves[k];if(!e.groupes||!e.groupes.length||ouvrDist(e,G.px,G.py)>OUVR_CONTOUR)continue;
+    const Ps=e.groupes.map(id=>G.patr[id]).filter(P=>P&&P.role==='ferraille'&&P.epave===k);if(!Ps.length)continue;
+    const rouge=Ps.some(P=>P.ouv==='alerte'||P.ouv==='hostile'),T={k,rouge,n:0};vu.push(T);ctx.fillStyle=rouge?PAL['4']:PAL['1'];
+    const x0=e.x-OUVR_R,x1=e.x+e.w-1+OUVR_R,y0=e.y-OUVR_R,y1=e.y+e.h-1+OUVR_R;
+    const bord=(x,y,cote)=>{if(x<0||y<0||x>=W||y>=H)return;const i=idx(x,y);if((fog&&!vis[i])||blocks(G.t[i]))return;
+      const ox=(x-camX)*16,oy=(y-camY)*16,hor=cote<2;T.n++;
+      for(let p=0;p<16;p++){const g=(hor?x:y)*16+p;if(g%6>3)continue;
+        if(hor)ctx.fillRect((ox+p)*u,(oy+(cote?15:0))*u,u,u);else ctx.fillRect((ox+(cote===3?15:0))*u,(oy+p)*u,u,u);}};
+    for(let x=x0;x<=x1;x++){bord(x,y0,0);bord(x,y1,1);}
+    for(let y=y0;y<=y1;y++){bord(x0,y,2);bord(x1,y,3);}}
+  return vu;}   // pour les essais : [{k, rouge, n cases tracées}]
 function curseurCase(){
   if(HOV&&CURT&&!busy()){const ok=(x,y)=>{const i=idx(x,y);
     return (!fog||G.seen[i])&&(getPath()||Math.max(Math.abs(x-G.px),Math.abs(y-G.py))<=1);};
     ctx.globalAlpha=1;ctx.drawImage(ok(HOV.x,HOV.y)?CURT:CURT_DIM,(HOV.x-camX)*S,(HOV.y-camY)*S,S,S);}
 }
 function fxCouche(){
-  for(const f of FX){if(f.kind!=='num')continue;const p=fxP(f),rise=reduced?0:p*14;
+  for(const f of FX){if(f.kind!=='num')continue;const p=fxP(f),rise=reduced?0:p*14;if(p<0)continue;   // chiffre d'un tir : il attend l'arrivée du projectile
     ctx.globalAlpha=p<.6?1:1-(p-.6)/.4;ctx.font='bold 14px "JetBrains Mono", ui-monospace, monospace';ctx.textAlign='center';
       ctx.textBaseline='bottom';
     const tx=(f.x-camX)*S+S/2,ty=(f.y-camY)*S-2-rise-(f.stack||0)*14;ctx.fillStyle='#000';ctx.fillText(f.txt,tx+1,ty+1);ctx.fillStyle=f.col;
@@ -502,6 +530,12 @@ function fxCouche(){
        if(f.kind==='soin'){ctx.fillRect(gx*u,(gy+1)*u,3*u,u);ctx.fillRect((gx+1)*u,gy*u,u,3*u);}           // une petite croix
        // une flèche vers le haut
        else{ctx.fillRect((gx+1)*u,gy*u,u,4*u);ctx.fillRect(gx*u,(gy+1)*u,u,u);ctx.fillRect((gx+2)*u,(gy+1)*u,u,u);}}}
+   /* Cellule de fuel (28 novembre 2026) : des gouttes couleur monde tombent d'au-dessus de la case et plongent dans la foreuse
+      (l'inverse des flèches de la batterie, qui montent). Une goutte : 1 pixel, puis 3, puis 1 (losange étiré), opaque, sur la grille. */
+   ctx.fillStyle=PAL['3'];
+   for(const f of FX){if(f.kind!=='fuel')continue;const p=fxP(f),bx=(f.x-camX)*16,by=(f.y-camY)*16;
+     for(const g of f.gr){const q=(p-g.d)*2.2;if(q<0||q>1)continue;const gx=Math.round(bx+g.x),gy=Math.round(by+g.y-16+q*16);
+       ctx.fillRect((gx+1)*u,gy*u,u,u);ctx.fillRect(gx*u,(gy+1)*u,3*u,2*u);ctx.fillRect((gx+1)*u,(gy+3)*u,u,u);}}
 }
   // Dessins au pixel de tuile (u = 1/16 de case), calés sur la grille, opaques : le projectile d'un tireur et l'onde du sonar
   {const u=S/16;ctx.fillStyle=PAL['1'];
@@ -527,6 +561,36 @@ function fxCouche(){
      px=Math.round((f.o.x-camX)*16)+7,py=Math.round((f.o.y-camY)*16)-10-(reduced?2:Math.min(2,Math.floor(p*12)));
      ctx.fillStyle='#000';ctx.fillRect((px-1)*u,(py-1)*u,3*u,9*u);ctx.fillStyle='#fff';ctx.fillRect(px*u,py*u,u,5*u);
        ctx.fillRect(px*u,(py+6)*u,u,u);ctx.fillStyle=PAL['1'];}
+   /* Ferrailleuses à l'ouvrage (28 novembre 2026). Découpe : un point blanc là où la ferrailleuse touche la coque, et trois
+      étincelles d'un pixel, couleur accent, qui jaillissent vers elle et changent de place douze fois par seconde. Alertée (elle
+      s'arrête, la foreuse est dans le périmètre de son épave) : un « ? » blanc cerné de noir au-dessus d'elle, fixe, tant que dure
+      l'avertissement — même dessin que le « ! » du repérage. Opaque, sur la grille des pixels de tuile. */
+   for(const f of FX)if(f.kind==='etinc'&&G.beasts.includes(f.o)&&vis[idx(f.o.x,f.o.y)]&&f.o.x===f.x0&&f.o.y===f.y0&&aOuvrage(f.o)&&!ouvrAlerte(f.o)){
+     // découpe (revue le soir du 28 novembre 2026 : « on ne les voit pas travailler ») : sur la plaque elle-même, un éclat en croix
+     // accent à cœur blanc (grande, petite, éteinte), et dix étincelles qui changent de place 12 fois par seconde, tant qu'elle coupe
+     const ph=reduced?0:Math.floor((performance.now()-f.t0)/80),
+       bx=Math.round((f.o.x-camX)*16)+7+f.dx*9,by=Math.round((f.o.y-camY)*16)+7+f.dy*9;
+     if(reduced||ph%3!==2){const r=ph%3===0?2:1;ctx.fillStyle=PAL['1'];ctx.fillRect((bx-r)*u,by*u,(2*r+1)*u,u);ctx.fillRect(bx*u,(by-r)*u,u,(2*r+1)*u);
+       ctx.fillStyle='#ffffff';ctx.fillRect((bx-1)*u,by*u,3*u,u);ctx.fillRect(bx*u,(by-1)*u,u,3*u);}
+     ctx.fillStyle='#ffffff';ctx.fillRect(bx*u,by*u,u,u);
+     // elles glissent le long de la plaque, de part et d'autre du point de coupe, et rebondissent vers la ferrailleuse
+     const tx=-f.dy,ty=f.dx,ax=-f.dx,ay=-f.dy;
+     for(let k=0;k<10;k++){const h=(ph*7+k*13+f.s*3)%35,cote=k&1?1:-1,l=(2+h%6)*cote,r=(h/5|0)%5;
+       const ex=tx||ty?tx*l+ax*r:l,ey=tx||ty?ty*l+ay*r:((h/7|0)%5-2);
+       ctx.fillStyle=k%3?PAL['1']:'#ffffff';ctx.fillRect((bx+ex)*u,(by+ey)*u,u,u);}}
+   /* Marques d'état d'une ferrailleuse (28 novembre 2026) : en chasse, un « ! » fixe (même dessin que le repérage) tant qu'elle
+      chasse ; en route vers le quai, la pièce qu'elle porte (un petit bloc couleur bâti cerné de noir) au-dessus d'elle. */
+   for(const b of G.beasts||[]){if(b.role!=='ferraille'||!vis[idx(b.x,b.y)]||!beastVisible(b))continue;const P=ouvrP(b);if(!P)continue;
+     const px=Math.round((b.x-camX)*16),py=Math.round((b.y-camY)*16);
+     if(P.ouv==='hostile'&&b.hunt>0&&!FX.some(f=>f.kind==='alerte'&&f.o===b)){const x=px+7,y=py-12;
+       ctx.fillStyle='#000';ctx.fillRect((x-1)*u,(y-1)*u,3*u,9*u);ctx.fillStyle='#fff';ctx.fillRect(x*u,y*u,u,5*u);ctx.fillRect(x*u,(y+6)*u,u,u);}
+     else if(!P.ouv&&P.k===1&&!(P.pause>0)){const x=px+6,y=py-5;
+       ctx.fillStyle='#000';ctx.fillRect((x-1)*u,(y-1)*u,6*u,4*u);ctx.fillStyle=PAL['5'];ctx.fillRect(x*u,y*u,4*u,2*u);
+       ctx.fillStyle='#fff';ctx.fillRect(x*u,y*u,u,u);}}
+   for(const b of G.beasts||[])if(b.role==='ferraille'&&ouvrAlerte(b)&&vis[idx(b.x,b.y)]&&beastVisible(b)){
+     const px=Math.round((b.x-camX)*16)+6,py=Math.round((b.y-camY)*16)-10,Q=['xxx','..x','.xx','.x.','...','.x.'];
+     ctx.fillStyle='#000';for(let j=0;j<6;j++)for(let i=0;i<3;i++)if(Q[j][i]==='x')ctx.fillRect((px+i-1)*u,(py+j-1)*u,3*u,3*u);
+     ctx.fillStyle='#fff';for(let j=0;j<6;j++)for(let i=0;i<3;i++)if(Q[j][i]==='x')ctx.fillRect((px+i)*u,(py+j)*u,u,u);}
    for(const f of FX)if(f.kind==='sonar'){const R=fxP(f)*f.r*16,cx=Math.round((f.x+.5-camX)*16),cy=Math.round((f.y+.5-camY)*16),
      w=Math.ceil(vw/u),h=Math.ceil(vh/u),q=R*Math.SQRT1_2;
      const dot=(px,py)=>{if(px>=0&&py>=0&&px<w&&py<h)ctx.fillRect(px*u,py*u,u,u);};
@@ -572,6 +636,7 @@ function fxCouche(){
        pt.push([ax+dx*t+nx*o,ay+dy*t+ny*o]);}
      pt.push([bx,by]);
      for(let k=0;k<4;k++)traitLaser(u,pt[k][0],pt[k][1],pt[k+1][0],pt[k+1][1],f.t0+k+ph,k===3?4:2,'#ffffff');}}
+  if(typeof tirFx==='function')tirFx(S/16);   // projectiles de l'arme de tir et brûlure (14m)
   if(BOOM)drawBoom();
 }
 const mv=$('mini'),mctx=mv.getContext('2d');

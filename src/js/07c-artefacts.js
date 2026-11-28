@@ -6,13 +6,13 @@
    2. Herbe     : des pièces entièrement envahies d'herbes, hautes et basses mêlées.
    3. Machines  : dix machines hors d'usage, posées en obstacles dans certaines pièces. Elles barrent le pas mais pas la vue
                   (au contraire des piliers). Une charge sismique les réduit en gravats.
-   4. Terminal  : la foreuse l'active en avançant dessus ; il affiche un texte.
+   4. Terminal  : la foreuse l'active en avançant dessus ; il ouvre le menu DATA / CONNEXION / ENCODAGE (07i-terminaux).
    Terrains : MACHINE, ANTENNA, TERMINAL (00-base). G.art[case] : la variante d'une machine, l'état d'une antenne (1 = allumée),
    le texte d'un terminal. Posés par artefacts(), appelé à la fin de la génération des bâtiments. */
-const ART_LISTE=[['antenne','Antenne','Activée par '+NOM_FOREUSE+', elle lève le brouillard 15 tours sur un disque de 30 cases, puis y signale les ennemis par un point rouge.',[.5,1,2]],
+const ART_LISTE=[['antenne','Antenne','Au contact, un menu DATA / CONNEXION : sa connexion lève le brouillard 15 tours sur un disque de 30 cases, puis y signale les ennemis par un point rouge.',[.5,1,2]],
   ['herbe','Pièces envahies d’herbe','Des pièces remplies d’herbes hautes et basses mêlées.',[.08,.18,.35]],
   ['machines','Machines','Dix machines hors d’usage posées en obstacles : elles barrent le pas, pas la vue.',[.15,.35,.6]],
-  ['terminal','Terminal','Activé par '+NOM_FOREUSE+', il affiche un texte.',[1,2,4]],
+  ['terminal','Terminal','Au contact, un menu DATA / CONNEXION / ENCODAGE : une donnée, des portes, lasers ou pièces secrètes proches, la liaison au noyau. Deux au moins par niveau.',[1,2,4]],
   // machines (21 novembre 2026, 07f-machines) : nombre de salles par carte dans la grande base ; un tiers ailleurs (le fabricateur : partout pareil)
   ['lasers','Tourelles laser','Des tourelles encastrées dans un mur balaient la pièce par bandes. Aucun avertissement : chaque bande a son rythme.',[1,2,4]],
   ['croix','Croix laser','Un champ de pylônes qui éclairent leurs quatre cases voisines, chacun à son rythme.',[1,2,3]],
@@ -104,21 +104,19 @@ function antVis(){if(!G.art)return;const now=performance.now();for(const k in G.
     else{const r=Math.floor(p*(ANT_R+1))+1;R2=Math.min(R2,r*r);}}
   for(let dy=-ANT_R;dy<=ANT_R;dy++)for(let dx=-ANT_R;dx<=ANT_R;dx++){const a=x+dx,b=y+dy;if(a<0||b<0||a>=W||b>=H||dx*dx+dy*dy>R2)continue;
     const j=idx(a,b);vis[j]=1;G.seen[j]=1;}}}
-function antenneUse(i){G.art=G.art||{};const x=i%W,y=(i/W)|0;
-  if(G.art[i]===1||G.art[i]===2){say('Antenne : déjà en service.');SFX.blocked();render();return;}
-  // compté ici, découvert par antVis
+/* 28 novembre 2026 : la foreuse qui avance sur une antenne ou un terminal ouvre le menu DATA / CONNEXION / ENCODAGE (07i-terminaux).
+   L'allumage de l'antenne est l'action RÉSEAU DU SITE de ce menu : antAllume (l'effet, renvoie le nombre de cases découvertes) et
+   antAnime0 (le cercle et l'anneau qui s'étend, joués à la fermeture de la fenêtre). */
+function antAllume(i){G.art=G.art||{};const x=i%W,y=(i/W)|0;
   G.art[i]=1;(G.antFin=G.antFin||{})[i]=G.turn+1+ANT_TOURS;let n=0;
     for(let dy=-ANT_R;dy<=ANT_R;dy++)for(let dx=-ANT_R;dx<=ANT_R;dx++){const a=x+dx,b=y+dy;
     if(a<0||b<0||a>=W||b>=H||dx*dx+dy*dy>ANT_R*ANT_R+ANT_R)continue;if(!G.seen[idx(a,b)])n++;}
-  if(!reduced)ANT_ANIM[i]=performance.now();
-  G.turn++;G.msg=null;addFx({kind:'sonar',ant:1,x,y,r:ANT_R+1,dur:reduced?1:ANT_DUR});SFX.sonar(.7);
-  say(`L’antenne s’allume : ${n?`${n} cases apparaissent sur la carte`:'la zone alentour est en vue'} pendant ${ANT_TOURS} tours. Ensuite elle signalera encore les ennemis.`,'good');pass(DUR.wait||100);computeFOV();render();}
-// la foreuse avance sur un terminal : il affiche son texte (le temps ne passe pas)
-function terminalUse(i){const [titre,txt]=TERM_TXT[((G.art&&G.art[i])||0)%TERM_TXT.length];
-  if(TRAV)stopTravel();if(EXPL)stopExplore();$('termTitre').textContent=titre;$('termTxt').textContent=txt;$('terminal').hidden=false;
-    $('termClose').focus();SFX.spot();}
-function closeTerminal(){$('terminal').hidden=true;render();}
-$('termClose').onclick=closeTerminal;$('terminal').addEventListener('pointerdown',ev=>{if(ev.target===$('terminal'))closeTerminal();});
+  SFX.sonar(.7);
+  say(`L’antenne s’allume : ${n?`${n} cases apparaissent sur la carte`:'la zone alentour est en vue'} pendant ${ANT_TOURS} tours. Ensuite elle signalera encore les ennemis.`,'good');
+  return n;}
+function antAnime0(i){if(!reduced)ANT_ANIM[i]=performance.now();addFx({kind:'sonar',ant:1,x:i%W,y:(i/W)|0,r:ANT_R+1,dur:reduced?1:ANT_DUR});}
+function antenneUse(i){termOuvre(i);}
+function terminalUse(i){termOuvre(i);}
 
 // Fenêtre Lab → Artefacts
 function buildArtefacts(){const n=G&&G.artN;

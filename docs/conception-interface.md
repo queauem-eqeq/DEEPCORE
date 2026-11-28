@@ -101,7 +101,7 @@ Partie du document de conception (sommaire et règles à ne pas casser : `concep
 - **Barres de défilement** : 4 pixels, sans fond, couleur du texte secondaire (`--dim`), plus
   claires au survol ; « thin » sous Firefox. Ne pas poser `scrollbar-width` ou `scrollbar-color` sur un élément :
   Chrome les préférerait et rendrait la barre épaisse.
-- Plein écran ; colonne noire à droite. **Son haut reste fixe** : barres Vie, Énergie, Matière,
+- Plein écran ; colonne noire à droite. **Son haut reste fixe** : barres Vie, Énergie, Fuel, Matière,
   boutons, effets en cours et **Inventaire**. **Seul ce qui suit défile**, à la molette ou au doigt, sans barre de
   défilement. 
   Journal
@@ -117,13 +117,27 @@ molette ou fine barre pour remonter jusqu'aux 200 derniers messages ; un nouveau
   (0,40) : le tour en cours reste franc, les anciens s'effacent sans disparaître. Chaque événement garde sa couleur
   (avertissement, information, bonne nouvelle). Mesuré sur cinq tours : 1 · 0,87 · 0,74 · 0,61 · 0,48.
 - **Statistiques de la foreuse** (25 novembre 2026, rangées dans un sous-menu le 26) : sous les boutons EXPLORER et REPOS, le repli **STATS** (`#fd-stats`, ouvert la première fois, son état est retenu comme les autres replis ; **5 px** sous le bloc des boutons, comme Inventaire, Carte, Palette et Contrôles sous ce qui les précède) contient dix statistiques (`#hstats`), valeurs du moment, terrain compris, dans l'ordre **POW, EYE, DEG, PRE, DEF, CRIT, PAS, COUP, DIS, DET** (`HSTATS_ORDRE` dans `11-interface.js`, indépendant de l'ordre de la fenêtre Équipement ; VIE et ÉNER retirées le 25 novembre, les barres les donnent déjà). **Un encadré par statistique** (« VIE 100 », un espace entre le nom et la valeur), rangés à gauche, **à la ligne quand la place manque**. **Au survol** (ou au clavier) : une infobulle (`#stip`, `statInfo` dans `14-inventaire.js`) donne la **définition** et le **détail des modificateurs en cours** — base, chaque pièce d'équipement portée, bonus permanents, puis POW requis, terrain, action (forage, arrêt, course, parois) — et la valeur du moment.
-- **Barres** (l'ancien Statut) : barres ASCII `█`/`░` — Vie en bio, Énergie en blanc  — suivies de leur valeur chiffrée. Le
+- **Barres** (l'ancien Statut) : barres ASCII `█`/`░` — Vie en bio, Énergie en blanc, **Fuel** en couleur monde (28 novembre 2026,
+  sous l'Énergie, même style ; **sous 25 %** la barre et le chiffre passent en rouge danger, **à sec** le chiffre devient « À SEC »
+  en gras et le libellé rougit ; statuts « À SEC » et « Repos » sur la ligne des statuts) — suivies de leur valeur chiffrée. Le
   remplissage est un **calque de `█` découpé à la largeur exacte** posé sur un fond de `░`, donc juste à toute
   largeur de colonne et à toute taille de police.
 - **En vue** (sous la Carte) : la fiche d'inspection de la case survolée, puis les créatures visibles (icône,
   barre de vie ASCII, colonnes TOUCHER / SUBIR colorées). Une créature **en chasse** porte un cadre couleur monde autour de son
   icône. La colonne de l'icône fait 20 px, pas 16 : le cadre déborde de 2 px de chaque côté et la colonne défilante
   (`overflow-y:auto`) lui coupait son bord gauche (24 novembre 2026).
+  **Ferrailleuses (28 novembre 2026, soir)** : la liste est en deux parties — d'abord les menaces actives (ferrailleuses
+  alertées comprises, avec « ALERTÉE » en accent), puis un intertitre « À L'OUVRAGE » (petites capitales, couleur atténuée, filet
+  au-dessus) et les ferrailleuses indifférentes, en couleur neutre (`.an.ouvr`). Six lignes en tout ; les menaces gardent au
+  moins quatre lignes quand il y a des ouvrières ; « + N autres » par partie.
+- **Périmètre de découpe au sol (28 novembre 2026, soir)** : quand la foreuse est à 6 cases ou moins (`OUVR_CONTOUR`) d'une
+  épave où travaille une équipe, le bord du périmètre (emprise + 3 cases) est tracé : pointillé d'un pixel de tuile (4 pleins,
+  2 vides, continu d'une case à l'autre), couleur accent ; **rouge danger** quand l'équipe est en alerte ou en chasse. Opaque,
+  seulement sur les cases en vue et praticables, sous les créatures (`ouvrContour`, `10-rendu.js`, appelé dans `render()` après
+  le décor : hors du cache du décor, et dans l'image que `fxInstantane` fige). Rien autour d'une épave sans ouvriers.
+- **Marques des ferrailleuses** : « ? » fixe en alerte ; « ! » fixe en chasse (même dessin que le « ! » du repérage) ; rien à
+  l'ouvrage (on voit l'éclat de la découpe) ; en route vers le quai, la pièce portée (bloc couleur bâti cerné de noir). Fiche de
+  survol, première ligne : « INDIFFÉRENT TANT QUE : PAS D'ATTAQUE, PAS D'INTRUSION DANS SON PÉRIMÈTRE. ».
 - **En tête de colonne, au-dessus de Vie**  : trois lignes en capitales couleur monde, sans étiquette — `NIVEAU 2 · −1564 M · 96×64` (le niveau, sa profondeur et la taille de la carte ; la
   profondeur vaut 0 au niveau 1, puis la fin de chaque descente, les mêmes chiffres que le compteur PROFONDEUR des
   cinématiques de forage, qui part de la profondeur du niveau quitté : `profNiv`, 14b), puis l'**archétype monde** et
@@ -231,11 +245,19 @@ animaux tournés à gauche, 2ᵉ image de l'eau profonde).
 dans `np-tiles` ; « Enregistrer » les écrit dans la base et en fait la nouvelle référence (`np-tiles-base`).
 Codes des motifs : `CLAUDE.md`.
 
+### Visée de l'arme de tir (28 novembre 2026)
+
+G ou le bouton **TIR** (à côté de JOURNAL) ouvre la visée sur l'ennemi le plus proche ; Tab / Maj+Tab changent de cible, les
+flèches déplacent le viseur, Entrée ou G tire, Échap annule ; la souris vise et un clic tire ; au doigt, un appui vise, un second
+sur la même case tire. Viseur habituel couleur accent et pointillé blanc **opaque** jusqu'à la cible ; case impossible : viseur rouge
+barré du phaseur. Le bouton TIR est allumé pendant la visée ; la fiche de la case visée s'affiche dans la colonne. Sous les boutons,
+une ligne « CANON · DÉG 4–8 · ÉNER 20 · PORTÉE VUE » (rouge si l'énergie manque). Détail : `conception-joueur.md`, « Arme de tir ».
+
 ### Touches
 
 ZQSD / flèches / pavé numérique : déplacer · A E W C : diagonales · Souris : survol = inspection, clic = y aller ·
 X : inspection au clavier · R : courir / marcher · T : équipement · I : inventaire · O : exploration automatique ·
-F : forer · Espace / 5 : attendre · P : repos · V : portée de discrétion · B : brouillard · ! : son · M : mode
+J : journal de bord · G : tir (viser, Tab, Entrée) · F : forer · Espace / 5 : attendre · P : repos · V : portée de discrétion · B : brouillard · ! : son · M : mode
 carte (déplacements = défilement, Maj = plus vite, Échap ou M pour revenir ; Espace / 5 y attendent toujours, pour les
 essais, sans bouger la vue ).
 
@@ -245,6 +267,33 @@ Le panneau **Contrôles** met la touche et ce qu'elle fait **sur la même ligne*
 **F6** : enregistre **tout** dans la base de l'artefact (bestiaire, tuiles, palettes, stats de la foreuse, LIFE, Monde, objets,
 artefacts, groupes) — le même enregistrement que les boutons « Enregistrer » du Lab (24 novembre 2026). **F9** : un exemplaire de
 chaque consommable dans l'inventaire.
+
+### Journal de bord (`14k-journal.js`, 28 novembre 2026)
+
+Fenêtre « JOURNAL DE BORD » (bouton JOURNAL sous MARCHE / ÉQUIPEMENT / EXPLORER / REPOS, touche J ; rien à voir avec le
+journal des messages en bas de l'écran). Six onglets en haut, chacun avec son compteur (« ROBOTS 3/12 ») ; fiche à gauche,
+liste défilante à droite (entrées inconnues en pointillé : « — INCONNU — », « — PAGE NON LUE — ») ; jamais plus haute que
+l'écran. Pastille (carré de l'accent) sur une entrée acquise et pas encore ouverte, sur son onglet et sur le bouton JOURNAL.
+Clavier : ← → onglets, ↑ ↓ entrées, Échap ou J ferme. Boutons et lignes de 44 px (tablette).
+Pages générées (28 novembre 2026, `14l-histoire.js`) : le **registre du port** (Documents, tel qu'à la dernière lecture) et le
+**rapport de mission** envoyé à la descente du niveau 1 (Journaux, le dernier envoyé), listés d'office (« PAGE NON LUE » avant).
+Format : `pg[id] = {t, l, a, o, d}` ; `JN.u` (numéro d'unité) et `JN.reg` (registre) voyagent avec le journal, et un effacement
+(Lab) les garde.
+
+- **Robots** (une fiche par espèce, Puce comprise) : tuile de l'espèce agrandie (6 ×, pixels nets), puis quatre paliers l'un
+  sous l'autre ; un palier non acquis affiche « [DONNÉES MANQUANTES] ». 0 Contact (vue une fois) ; 1 Stats (10 destructions
+  cumulées d'une partie à l'autre, ou une DATA : vie, dégâts, précision, défense, pas, coup, lus dans le jeu en cours,
+  bestiaire du joueur compris) ; 2 Comportement (DATA : rôle, comportement, butin) ; 3 Origine (DATA lue à un niveau au moins
+  égal à l'éveil requis de la fiche ; acquise ensuite pour toujours, même au niveau 1). Une destruction compte comme pour
+  RECYCLAGE (coup, laser, mine abattue, capsule ; pas une mine qui saute d'elle-même). Passage de palier : une ligne au journal
+  du jeu (« FICHE MISE À JOUR : CRABOT — STATS. »).
+- **Objets** : fiche complète (illustration ASCII, effet, chiffres, prix au FABLAB, description) dès que l'objet est connu :
+  porté, identifié, plan appris, ou DATA. Les capsules gardent leur nom de code en partie tant qu'elles n'y sont pas identifiées.
+- **Journaux**, **Documents** : pages lues aux terminaux (texte et ligne d'analyse). **Hacks** : sortes proposées ou portées,
+  effet à chaque rang (les rangs au-delà du plus haut vu en gris). **Tutoriel** : trois pages d'office, les autres par DATA.
+- **Gardé d'une partie à l'autre** : `np-journal` (navigateur) et, dans l'artefact claude.ai, le document `journal/courant` de
+  la base (pas `reglages/courant`), fusionnés au chargement (union ; un effacement plus récent l'emporte). Lab : « Journal :
+  tout débloquer », « Journal : effacer » (un second clic confirme, dans les 4 secondes).
 
 ## 10. Sauvegarde des réglages
 

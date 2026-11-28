@@ -69,7 +69,10 @@ body{margin:0;background:var(--black);color:var(--fg);font:13px/1.45 var(--mono)
 /* Barre ASCII : le calque plein est posé sur le fond et découpé à la largeur exacte (voir asciiBar, 11-interface) */
 .abar,.seen .an .hp{position:relative}
 .abar .af,.seen .an .hp .af{position:absolute;left:0;top:0;bottom:0;overflow:hidden}
-.abar.life{color:var(--c2)}.abar.energy{color:#ffffff}   /* énergie en blanc depuis le 22 novembre 2026 (avant : accent) */
+.abar.life{color:var(--c2)}.abar.energy{color:#ffffff}
+.abar.fuel{color:var(--c3)}   /* fuel (28 novembre 2026) : couleur monde ; en alerte (sous 25 %) et à sec, rouge danger */
+#fuRow.bas .abar.fuel,#fuRow.bas .bnum,#fuRow.sec>span:first-child,#fuRow.sec .bnum{color:var(--life)}
+#fuRow.sec .bnum{font-weight:700}   /* énergie en blanc depuis le 22 novembre 2026 (avant : accent) */
 .track{position:relative;height:9px;overflow:hidden}
 .track::before{content:"";position:absolute;inset:0;background:currentColor;opacity:.2}
 .track i{position:absolute;left:0;top:0;bottom:0;width:100%;background:currentColor;transition:width .2s}
@@ -97,6 +100,14 @@ body{margin:0;background:var(--black);color:var(--fg);font:13px/1.45 var(--mono)
 .seen .an.hunt img{outline:1px solid var(--c3);outline-offset:1px}
 .seen .an .st{font-size:11px;color:var(--dim);font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden}
 .seen .an .hp{color:var(--c2);white-space:nowrap;overflow:hidden;font-size:12px;line-height:1}
+/* ferrailleuse à l'ouvrage (28 novembre 2026) : son état, sous la ligne ; alertée, en couleur d'accent */
+.seen .an .ouv{grid-column:2/-1;font-size:10px;letter-spacing:.08em;color:var(--dim);line-height:1.3;white-space:nowrap;overflow:hidden}
+.seen .an .ouv.al{color:var(--c1)}
+/* « En vue » : intertitre des ferrailleuses à l'ouvrage, et leurs lignes en couleur neutre (28 novembre 2026, soir) */
+.seen .ouvhd{font-size:10px;letter-spacing:.12em;color:var(--dim);border-top:1px solid var(--line);margin-top:3px;padding-top:2px}
+.seen .an.ouvr,.seen .an.ouvr .hp,.seen .an.ouvr .n{color:var(--dim)!important}
+.ouvrp{letter-spacing:.04em;color:var(--fg)}
+.ouvrp.al{color:var(--c1)}
 .seen .site{color:var(--c2)}.seen .site.k{color:var(--c3)}
 .seen .ter{color:var(--dim);line-height:1.6}
 .seen .ter b{font-weight:400;color:var(--fg)}
@@ -452,9 +463,12 @@ kbd{font-family:var(--mono);color:var(--fg);border:1px solid var(--line);padding
 .btab td input{width:100%;font:inherit;color:var(--fg);background:var(--void);border:1px solid var(--line);padding:2px 4px;text-align:right}
 .btab .brole td{font-size:11px;color:var(--dim);vertical-align:top;padding-top:8px}
 .btab .brole th{vertical-align:top;padding-top:8px}
+.btab .breel td{font-size:11px;color:var(--dim);vertical-align:top;padding-top:6px;white-space:nowrap}
+.btab .breel td b{color:var(--c1)}
+.btab .breel th{vertical-align:top;padding-top:6px}
 
 /* Artefacts, terminal et sélecteur de fréquence [− = +] (20 novembre 2026) */
-#artefacts .mcard{width:min(640px,100%)}#terminal .mcard{width:min(520px,100%)}
+#artefacts .mcard{width:min(640px,100%)}
 .artliste{display:grid;gap:6px;max-height:max(200px,calc(100vh - 260px));overflow-y:auto;padding-right:8px}   /* défile (22 novembre 2026) */
 #life .lfscroll{max-height:max(160px,calc(100vh - 300px));overflow-y:auto;padding-right:8px;display:grid;gap:inherit;align-content:start}   /* LIFE : tout ce qui suit le budget défile */
 .artl{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:center;border:1px solid var(--line);padding:8px 10px}
@@ -467,6 +481,22 @@ kbd{font-family:var(--mono);color:var(--fg);border:1px solid var(--line);padding
 .freq button[aria-pressed=true]{color:var(--void);background:var(--c1);border-color:var(--c1)}
 .gfq{display:flex;align-items:center;gap:6px;color:var(--dim);font-size:12px}
 .termtxt{font-size:13px;line-height:1.6;color:var(--fg);margin:0;white-space:pre-wrap;max-width:60ch}
+/* Menu des terminaux et antennes (28 novembre 2026) : jamais plus haut que l'écran, lignes de 44 px pour le doigt */
+#terminal .mcard{width:min(860px,100%);max-height:calc(100vh - 40px);max-height:calc(100dvh - 40px);display:flex;flex-direction:column;overflow:hidden}
+.termwrap{display:grid;grid-template-columns:minmax(0,300px) minmax(0,1fr);gap:16px;min-height:0;flex:1 1 auto;overflow:hidden}
+#termMenu{display:grid;gap:12px;align-content:start;overflow-y:auto;min-height:0}
+.tsec{display:grid;gap:4px}
+.tsec h3{margin:0;font-family:var(--display);font-size:14px;letter-spacing:.2em;color:var(--c3)}
+.tsec small{color:var(--c1);font-size:11px;letter-spacing:.05em;margin-bottom:2px}
+.tl{display:flex;justify-content:space-between;align-items:center;gap:10px;min-height:44px;width:100%;text-align:left;padding:6px 12px;background:var(--black);border:1px solid var(--line);color:var(--fg);font:inherit;font-size:13px;letter-spacing:.05em;cursor:pointer}
+.tl u{text-decoration:none;color:var(--dim);font-size:11px;white-space:nowrap}
+.tl.sel{border-color:var(--c1);color:var(--c1)}
+.tl:disabled{cursor:default;color:var(--dim);border-style:dashed}
+.tl.fait:disabled{color:var(--c2)}
+#termOut{border:1px solid var(--line);padding:12px 14px;overflow-y:auto;min-height:0;max-width:none;white-space:pre-wrap;font-family:ui-monospace,Consolas,monospace;font-size:12.5px}
+#termOut h3{margin:0 0 8px;font-family:var(--display);font-size:14px;letter-spacing:.15em;color:var(--c3)}
+#termOut p{margin:0}
+@media (max-width:640px){.termwrap{grid-template-columns:1fr;overflow-y:auto}#termMenu{overflow:visible}#termOut{min-height:120px}}
 
 /* Fabricateur (21 novembre 2026) */
 /* FABLAB (26 novembre 2026) : les boutons ne portent plus que [n], le nom et le prix — deux fois moins larges qu'avant, où
@@ -593,3 +623,70 @@ kbd{font-family:var(--mono);color:var(--fg);border:1px solid var(--line);padding
 .logbig .lgl{display:grid;grid-template-columns:calc(4ch + 10px) minmax(0,1fr);color:var(--fg);overflow-wrap:anywhere;margin-bottom:2px}
 .logbig .t{color:var(--dim)}.logbig .sep{color:var(--dim);margin:0 .6ch}
 .logbig .ev.warn{color:var(--c3)}.logbig .ev.info{color:var(--c2)}.logbig .ev.good{color:var(--c1)}
+/* Hacks (28 novembre 2026, 14g) : trois cartes au terminal, côte à côte (empilées sur écran étroit) ; section HACKS de l'équipement */
+.hkcartes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:10px 0;white-space:normal}
+.tl.hkc{display:grid;grid-template-rows:auto auto auto 1fr;justify-items:center;align-content:start;gap:4px;text-align:center;padding:10px 6px;min-height:0;white-space:normal;border-color:var(--line)}
+.tl.hkc b{color:var(--fg);font-size:13px;letter-spacing:.08em}
+.tl.hkc i{font-style:normal;color:var(--hk);font-size:11px;letter-spacing:.15em}
+.tl.hkc span{color:var(--c1);font-size:12px}
+.tl.hkc small{color:var(--dim);font-size:11px;font-style:italic;line-height:1.4}
+.tl.hkc.sel{border-color:var(--hk);box-shadow:inset 0 0 0 1px var(--hk)}
+.tl.hkc .hkart{font-size:15px;margin:2px auto 4px;min-height:0}
+.tl.hkr,.tl.hke{margin-top:6px}
+#termOut .tl{white-space:normal}
+@media (max-width:640px){.hkcartes{grid-template-columns:1fr}}
+.ihk{margin-top:12px;border-top:1px solid var(--line);padding-top:8px}
+.ihkh{font-size:12px;letter-spacing:.2em;color:var(--c3);margin-bottom:4px}
+.ihkh b{font-weight:400;color:var(--fg);letter-spacing:0}
+.ihks{max-height:none}
+.ilist .it.hk i,.ilist .it.hk.eq em.st{color:var(--hk)}
+.hkvide{padding:2px 8px;font-size:11px;letter-spacing:.15em;color:var(--dim);border:1px dashed var(--line);margin:2px 0}
+.hkwrap{min-width:0}
+.hktab{width:auto;border-collapse:collapse;font-size:11px;margin:6px 0 12px;font-variant-numeric:tabular-nums}
+.hktab th,.hktab td{border:1px solid var(--line);padding:2px 6px;text-align:left;white-space:nowrap}
+.hktab th{color:var(--dim);font-weight:400}
+/* Journal de bord (28 novembre 2026, 14k-journal) : onglets en haut, fiche à gauche, liste défilante à droite ; jamais plus haut que l'écran */
+#jdb .mcard{width:min(940px,100%);max-height:calc(100vh - 40px);max-height:calc(100dvh - 40px);display:flex;flex-direction:column;overflow:hidden}
+.jdbtabs{display:flex;flex-wrap:wrap;gap:6px}
+.jtab{position:relative;flex:1 1 auto;min-height:44px;padding:6px 10px;background:var(--black);border:1px solid var(--line);color:var(--dim);font:inherit;font-size:12px;letter-spacing:.1em;cursor:pointer}
+.jtab i{font-style:normal;color:var(--dim);margin-left:4px}
+.jtab.sel{border-color:var(--c1);color:var(--c1)}
+.jtab.sel i{color:var(--c1)}
+.jnew{display:inline-block;width:8px;height:8px;background:var(--c1);margin-left:8px;vertical-align:middle;flex:none}
+.jtab .jnew{position:absolute;top:4px;right:4px;margin:0}
+.jdbwrap{display:grid;grid-template-columns:minmax(0,1fr) minmax(200px,280px);gap:16px;min-height:0;flex:1 1 auto;overflow:hidden}
+.jdbfiche{border:1px solid var(--line);padding:12px 14px;overflow-y:auto;min-height:0;font-family:ui-monospace,Consolas,monospace;font-size:12.5px;line-height:1.6}
+.jdbfiche h3{text-transform:none;margin:0 0 6px;font-family:var(--display);font-size:15px;letter-spacing:.15em;color:var(--c3)}
+.jdbfiche p{margin:0}
+.jdbliste{display:grid;gap:4px;align-content:start;overflow-y:auto;min-height:0;padding-right:2px}
+.jli{display:flex;align-items:center;gap:8px;min-height:44px;width:100%;text-align:left;padding:4px 10px;background:var(--black);border:1px solid var(--line);color:var(--fg);font:inherit;font-size:12.5px;letter-spacing:.05em;cursor:pointer}
+.jli span{text-transform:none;flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.jli img{width:32px;height:32px;image-rendering:pixelated;flex:none}
+.jli.sel{border-color:var(--c1);color:var(--c1)}
+.jli.inc{color:var(--dim);border-style:dashed;cursor:default}
+.jfhead{display:flex;gap:16px;align-items:center;margin-bottom:10px}
+.jsil{width:96px;height:96px;image-rendering:pixelated;image-rendering:crisp-edges;border:1px solid var(--line);background:var(--black);flex:none}
+.jmen{color:var(--life);font-weight:normal}
+.jdim{color:var(--dim)}
+.jpal{border-top:1px solid var(--line);padding:8px 0 6px}
+.jpal h4{margin:0 0 4px;font-size:11px;letter-spacing:.2em;color:var(--c1);font-weight:normal}
+.jpal.manque h4{color:var(--dim)}
+.jman{color:var(--dim);letter-spacing:.1em}
+.jrole{color:var(--c1)}
+.jstat{border-collapse:collapse;font-size:inherit}
+.jstat th{text-align:left;font-weight:normal;color:var(--dim);padding:1px 18px 1px 0;letter-spacing:.08em}
+.jstat td{color:var(--fg)}
+.jstat tr.jdim td{color:var(--dim)}
+.jfobj .iart{margin:0 0 8px;font-size:22px;min-height:0;text-align:left}
+.jdesc{color:var(--dim);font-style:italic;margin-top:8px!important}
+.jnana,#termOut p.jnana{color:var(--dim);margin-top:8px}
+#termOut p.jnajout{color:var(--c1);margin-top:8px}
+.jdbfiche .jpage p.jnana{margin-top:10px}
+#jdbBtn.neuf::after{content:'';display:inline-block;width:7px;height:7px;background:var(--c1);margin-left:7px;vertical-align:middle}
+#jnLabEff.conf{color:var(--life);border-color:var(--life)}
+@media (max-width:640px){.jdbwrap{grid-template-columns:1fr;grid-template-rows:auto minmax(120px,40%);overflow:hidden}.jdbliste{order:2}}
+/* Arme de tir (28 novembre 2026, bloc D) : ligne sous les boutons ; cadres d'équipement plus serrés que ceux des hacks */
+.tirinfo{font-size:11px;letter-spacing:.06em;color:var(--dim);margin-top:2px}
+.tirinfo.bas{color:var(--life)}
+.ihk.ieq{margin-top:6px;padding-top:4px}
+.ihk.ieq:first-child{margin-top:0;border-top:0;padding-top:0}

@@ -3,7 +3,7 @@ const EYE_SVG='<svg class="eyeic" viewBox="0 0 11 7" width="22" height="14" shap
 /* ---------- Souris, inspection et déplacement automatique (inspirés de Brogue) ---------- */
 let HOV=null,INSPECT=false,TRAV=null,lastPT='mouse',PC={k:'',p:null};
 // pendant la visée longue du phaseur la foreuse est démontée : aucune action ne doit partir (26 novembre 2026)
-const busy=()=>!G||!!G.over||drilling||!!PHASE||!$('overlay').hidden;
+const busy=()=>!G||!!G.over||drilling||!!PHASE||!!TIR||!$('overlay').hidden;   // TIR : visée de l'arme de tir (14m)
 // créature visible sur une case (les animaux cachés par le brouillard ne bloquent pas le tracé)
 function occupant(x,y){const seenHere=!fog||vis[idx(x,y)];if(!seenHere)return null;const b=beastAt(x,y);
   return (b&&!beastCache(b)?b:null)||animalAt(x,y)||null;}
@@ -40,14 +40,17 @@ function goTo(x,y){if(busy())return;const d=Math.max(Math.abs(x-G.px),Math.abs(y
   if(d===1){tryMove(x-G.px,y-G.py);return;}
   const p=findPath(x,y)||findPath(x,y,true);if(!p){say('Destination inaccessible.');SFX.blocked();render();return;}
   const seen=new Set();for(const e of [...(G.beasts||[]),...(G.animals||[])])if(vis[idx(e.x,e.y)])seen.add(e);
-  TRAV={path:p,i:0,tx:x,ty:y,explore:p.some(([a,b])=>fog&&!G.seen[idx(a,b)]),seen,vie:G.st.vie,sites:G.sites.filter(s=>s.seen).length,
+  TRAV={path:p,i:0,tx:x,ty:y,explore:p.some(([a,b])=>fog&&!G.seen[idx(a,b)]),seen,vie:G.st.vie,sec:G.st.secN||0,sites:G.sites.filter(s=>s.seen).length,
     tm:0};travelStep();}
 function stopTravel(m){if(!TRAV)return;clearTimeout(TRAV.tm);TRAV=null;if(m)sayMore(m,'warn');render();}
+/* La vie remonte seule depuis le 28 novembre 2026 : « attaquée » se juge par rapport à la vie du pas précédent (T.vie suit),
+   et la perte d'un point à sec (G.st.secN, 08-faune) n'est pas une attaque. */
+function attaquee(T){const s=G.st.secN||0,v=G.st.vie,r=v<T.vie-(T.sec==null?0:s-T.sec);T.vie=v;T.sec=s;return r;}
 // Un pas par tour ; le trajet s'arrête au moindre imprévu
 function travelEvent(T){
-  if(G.st.vie<T.vie)return 'Trajet interrompu : '+NOM_FOREUSE+' est attaquée.';
-  for(const b of G.beasts||[])if(vis[idx(b.x,b.y)]&&!T.seen.has(b))return `Trajet interrompu : ${BEASTS[b.sp].n.toLowerCase()} en vue.`;
-  for(const a of G.animals||[])if(vis[idx(a.x,a.y)]&&!T.seen.has(a))return `Trajet interrompu : ${SPECIES[a.sp].n.toLowerCase()} en vue.`;
+  if(attaquee(T))return 'Trajet interrompu : '+NOM_FOREUSE+' est attaquée.';
+  for(const b of G.beasts||[])if(vis[idx(b.x,b.y)]&&!T.seen.has(b)&&!aOuvrage(b))return `Trajet interrompu : ${BEASTS[b.sp].n.toLowerCase()} en vue.`;
+  for(const a of G.animals||[])if(vis[idx(a.x,a.y)]&&!T.seen.has(a)&&!aOuvrage(a))return `Trajet interrompu : ${SPECIES[a.sp].n.toLowerCase()} en vue.`;
   if(G.sites.filter(s=>s.seen).length>T.sites)return 'Trajet interrompu : site de forage repéré.';
   if(T.i<T.path.length&&siteAt(G.px,G.py))return 'Trajet interrompu : site de forage atteint.';
   return null;}
@@ -70,7 +73,7 @@ function travelStep(){const T=TRAV;if(!T)return;if(busy()){stopTravel();return;}
   T.tm=setTimeout(travelStep,reduced?30:90);}
 /* ---------- Exploration automatique (touche O, bouton EXPLORER) ----------
    La foreuse va d'elle-même à la case connue la plus proche d'où l'on découvre du terrain, en ramassant au passage ce qui est en vue
-   (objets, Matière, et les éclats de réparation seulement si la vie n'est pas pleine : sinon elle les contourne pour ne pas les gâcher).
+   (objets, Matière, et les éclats de métal seulement si le fuel n'est pas plein : sinon elle les contourne pour ne pas les gâcher).
    Elle ne fore jamais et n'entre dans l'eau profonde que s'il ne reste rien d'autre. Elle s'arrête au moindre événement (exploreEvent),
    à la moindre touche ou au moindre clic. Quand tout est exploré, elle rejoint le site de forage s'il est connu. */
 let EXPL=null;
@@ -78,11 +81,12 @@ let EXPL=null;
 const EXPL_VUS=new WeakSet();
 // vitrines déjà signalées : chacune n'arrête l'exploration qu'une fois (26 novembre 2026)
 const EXPL_VIT=new WeakSet();
-function exploreScan(E,deep){const N=W*H,prev=new Int32Array(N).fill(-2),q=[idx(G.px,G.py)];prev[q[0]]=-1;const plein=G.st.vie>=G.st.vieMax;
+// éclats de métal : l'exploration les ramasse quand le fuel n'est pas plein (28 novembre 2026 ; avant, quand la vie ne l'était pas)
+function exploreScan(E,deep){const N=W*H,prev=new Int32Array(N).fill(-2),q=[idx(G.px,G.py)];prev[q[0]]=-1;const plein=!(G.st.fuel<G.st.fuelMax);
   const butin=j=>{if(G.cles&&G.cles[j])return 'une clé';
     if(G.items&&G.items[j]&&G.items[j].length&&!(G.pieges||[]).some(p=>p.on&&p.c===j)&&!(G.vit&&G.vit[j]))return 'un objet';
     /* l'exploration automatique ne touche ni à l'appât d'une salle piégée ni aux vitrines : c'est au joueur de choisir */const o=G.ore&&G.ore[j];
-    if(o&&oreSol(o)&&(oreMat(o)||!plein))return oreMat(o)?'de la Matière {µ}':'des éclats de métal';
+    if(o&&oreSol(o)&&(oreMat(o)||!plein))return oreMat(o)?'de la Matière {µ}':'des éclats de métal (fuel)';
     return null;};
   for(let k=0;k<q.length;k++){const c=q[k],x=c%W,y=(c/W)|0;
     if(k>0){if(butin(c))return {c,prev};
@@ -97,8 +101,8 @@ function exploreScan(E,deep){const N=W*H,prev=new Int32Array(N).fill(-2),q=[idx(
       prev[j]=c;q.push(j);}}
   return null;}
 function exploreEvent(E){
-  if(G.st.vie<E.vie)return ''+NOM_FOREUSE+' est attaquée';
-  let nv=null;for(const e of [...(G.beasts||[]),...(G.animals||[])])if(vis[idx(e.x,e.y)]&&!EXPL_VUS.has(e)){EXPL_VUS.add(e);nv=nv||e;}
+  if(attaquee(E))return ''+NOM_FOREUSE+' est attaquée';
+  let nv=null;for(const e of [...(G.beasts||[]),...(G.animals||[])])if(vis[idx(e.x,e.y)]&&!EXPL_VUS.has(e)&&!aOuvrage(e)){EXPL_VUS.add(e);nv=nv||e;}
   if(nv)return `${(G.beasts.includes(nv)?BEASTS:SPECIES)[nv.sp].n.toLowerCase()} en vue`;
   if((G.beasts||[]).some(b=>b.hunt>0&&vis[idx(b.x,b.y)]))return 'un ennemi vous chasse';
   // des vitrines en vue : on s'arrête, le choix revient au joueur
@@ -117,7 +121,7 @@ function startExplore(){
     SFX.blocked();render();return;}
   for(const e of [...(G.beasts||[]),...(G.animals||[])])if(vis[idx(e.x,e.y)])EXPL_VUS.add(e);
   for(const g of G.choix||[])if(g.c.some(i=>vis[i]))EXPL_VIT.add(g);   // vitrines déjà en vue : elles n'arrêtent pas aussitôt
-  EXPL={vie:G.st.vie,sites:G.sites.filter(s=>s.seen).length,vu:new Set(),n:0,tm:0};$('explBtn').classList.add('on');
+  EXPL={vie:G.st.vie,sec:G.st.secN||0,sites:G.sites.filter(s=>s.seen).length,vu:new Set(),n:0,tm:0};$('explBtn').classList.add('on');
   say('Exploration automatique.','info');exploreStep();}
 function exploreStep(){const E=EXPL;if(!E)return;if(busy()){stopExplore();return;}
   E.vu.add(idx(G.px,G.py));
@@ -133,24 +137,31 @@ function exploreStep(){const E=EXPL;if(!E)return;if(busy()){stopExplore();return
   if(busy()){stopExplore();return;}
   const why=exploreEvent(E);if(why){stopExplore(why==='alerte'?'Exploration interrompue.':`Exploration interrompue : ${why}.`);return;}
   E.tm=setTimeout(exploreStep,reduced?20:70);}
-/* ---------- Repos (touche P) : attendre jusqu'à l'énergie pleine ----------
-   Chaque battement est une attente normale (recharge doublée, portée de discrétion ÷ 2). Le repos
-   s'arrête dès que l'énergie est pleine, qu'une créature entre dans le champ de vision, qu'un ennemi
-   visible vous repère, que la foreuse est touchée, ou au moindre geste du joueur. */
+/* ---------- Repos (touche P) : attendre pour se réparer (28 novembre 2026 ; avant : jusqu'à l'énergie pleine) ----------
+   Chaque battement est une attente normale (recharge doublée, portée de discrétion ÷ 2, vie +1 tous les VIE_REPOS_BAT
+   battements tant qu'il reste du fuel). Le repos s'arrête quand la vie et l'énergie sont pleines, quand le fuel passe sous
+   l'alerte (ou tombe à sec), qu'une créature entre dans le champ de vision, qu'un ennemi vous repère ou vous chasse, que la
+   foreuse est touchée, ou au moindre geste du joueur. Attendre à la main soigne de même, chasseur ou pas. */
 let REST=null;
-const REST_MAX=400;                                   // garde-fou : jamais plus de 400 battements d'affilée
+const REST_MAX=REGLES.REPOS_MAX;                      // garde-fou : jamais plus de 600 battements d'affilée (un plein de vie : 400)
+const restPlein=()=>G.st.vie>=G.st.vieMax&&G.st.energie>=G.st.energieMax;
 const visibles=()=>{const s=new Set();for(const e of [...(G.beasts||[]),...(G.animals||[])])if(vis[idx(e.x,e.y)])s.add(e);return s;};
 function restEvent(T){
-  if(G.st.vie<T.vie)return ''+NOM_FOREUSE+' est attaquée';
-  for(const b of G.beasts||[])if(vis[idx(b.x,b.y)]&&!T.seen.has(b))return `${BEASTS[b.sp].n.toLowerCase()} en vue`;
-  for(const a of G.animals||[])if(vis[idx(a.x,a.y)]&&!T.seen.has(a))return `${SPECIES[a.sp].n.toLowerCase()} en vue`;
+  if(attaquee(T))return ''+NOM_FOREUSE+' est attaquée';
+  for(const b of G.beasts||[])if(vis[idx(b.x,b.y)]&&!T.seen.has(b)&&!aOuvrage(b))return `${BEASTS[b.sp].n.toLowerCase()} en vue`;
+  for(const a of G.animals||[])if(vis[idx(a.x,a.y)]&&!T.seen.has(a)&&!aOuvrage(a))return `${SPECIES[a.sp].n.toLowerCase()} en vue`;
   for(const b of G.beasts||[])if(b.hunt>0&&vis[idx(b.x,b.y)])return `${BEASTS[b.sp].n.toLowerCase()} vous a repéré`;
   for(const a of G.animals||[])if(a.aware&&vis[idx(a.x,a.y)])return `${SPECIES[a.sp].n.toLowerCase()} vous a repéré`;
+  // un ennemi qui chasse la foreuse, même hors de vue (28 novembre 2026)
+  for(const b of G.beasts||[])if(b.hunt>0&&b.sees&&!aOuvrage(b))return `${BEASTS[b.sp].n.toLowerCase()} vous chasse`;
+  if(G.st.fuel<=0)return 'fuel à sec, plus de réparation';
+  if(fuelAlerte(G.st)&&!T.bas)return 'fuel sous le seuil d’alerte';
   return null;}
 function startRest(){
   if(busy()||TRAV||EXPL)return;
-  if(G.st.energie>=G.st.energieMax){say('Énergie déjà au maximum : repos inutile.');SFX.blocked();render();return;}
-  const T={seen:visibles(),vie:G.st.vie,n:0,tm:0},why=restEvent(T);
+  if(restPlein()){say('Vie et énergie déjà au maximum : repos inutile.');SFX.blocked();render();return;}
+  // déjà sous l'alerte : le repos est permis, il s'arrête à sec
+  const T={seen:visibles(),vie:G.st.vie,sec:G.st.secN||0,n:0,tm:0,bas:fuelAlerte(G.st)},why=restEvent(T);
   if(why){say(`Repos impossible : ${why}.`,'warn');SFX.blocked();render();return;}
   REST=T;say(''+NOM_FOREUSE+' se met au repos.');restStep();}
 function stopRest(m,c){if(!REST)return;clearTimeout(REST.tm);REST=null;if(m)sayMore(m,c||'warn');render();}
@@ -161,7 +172,7 @@ function restStep(){const T=REST;if(!T)return;if(busy()){stopRest();return;}
   T.n++;
   const why=restEvent(T);
   if(why){stopRest(`Repos interrompu (${T.n} tour${T.n>1?'s':''}) : ${why}.`);return;}
-  if(G.st.energie>=G.st.energieMax){stopRest(`Repos terminé : énergie au maximum, en ${T.n} tour${T.n>1?'s':''}.`,'good');SFX.spot();return;}
+  if(restPlein()){stopRest(`Repos terminé : vie et énergie au maximum, en ${T.n} tour${T.n>1?'s':''}.`,'good');SFX.spot();return;}
   if(T.n>=REST_MAX){stopRest('Repos interrompu : trop long.');return;}
   T.tm=setTimeout(restStep,reduced?0:45);}
 
@@ -175,6 +186,7 @@ cv.addEventListener('pointerdown',ev=>{lastPT=ev.pointerType||'mouse';});
 cv.addEventListener('pointermove',ev=>{if(ev.pointerType==='touch'||!G)return;const c=cellAt(ev);if(c.x<0||c.y<0||c.x>=W||c.y>=H)return;
   if(PHASE){phaseVers(c.x,c.y);phaseSouris(ev);return;}   // visée du phaseur : la vue défile près du bord (28 novembre 2026)
   if(VISEE){viseeVers(c.x,c.y);return;}
+  if(TIR){tirVers(c.x,c.y);return;}
   selSouris(ev);
   if(!HOV||HOV.x!==c.x||HOV.y!==c.y){HOV=c;render();}});
 /* Sélecteur habituel (28 novembre 2026) : comme le viseur du phaseur, la vue défile d'une case vers le bord quand le pointeur
@@ -192,6 +204,8 @@ function selSouris(ev){if(PHASE||freeCam||INSPECT||lastPT==='touch')return;selPt
 cv.addEventListener('pointerleave',()=>{selStop();phasePtr=null;if(INSPECT||lastPT==='touch')return;if(HOV){HOV=null;render();}});
 cv.addEventListener('click',ev=>{if(PHASE){const c=cellAt(ev);phaseVers(c.x,c.y);phaseOk();return;}
   if(VISEE){const c=cellAt(ev);viseeVers(c.x,c.y);viseeOk();return;}
+  // tir : un clic vise et tire ; au doigt, un premier appui vise, un second sur la même case tire
+  if(TIR){const c=cellAt(ev);if(lastPT==='touch'&&(c.x!==TIR.x||c.y!==TIR.y)){tirVers(c.x,c.y);return;}tirVers(c.x,c.y);tirOk();return;}
   if(busy())return;if(EXPL){stopExplore('Exploration interrompue.');return;}if(REST){stopRest('Repos interrompu.');return;
     }if(TRAV){stopTravel('Trajet interrompu.');return;}
   const c=cellAt(ev);if(c.x<0||c.y<0||c.x>=W||c.y>=H)return;
@@ -203,7 +217,7 @@ cv.addEventListener('click',ev=>{if(PHASE){const c=cellAt(ev);phaseVers(c.x,c.y)
 // Fiche complète de la case visée : en tête du panneau « En vue » au survol, dans la colonne en mode viseur.
 /* 28 novembre 2026 : les textes sont le relevé de F467, en jargon machine, sans règle chiffrée ni mode d'emploi ; les
    chiffres restent dans les stats (PV, DÉG, Toucher…) et la ligne d'action. */
-const viseCible=()=>!G?null:PHASE?{x:PHASE.x,y:PHASE.y}:VISEE?{x:VISEE.x,y:VISEE.y}:INSPECT&&HOV?HOV:null;
+const viseCible=()=>!G?null:PHASE?{x:PHASE.x,y:PHASE.y}:VISEE?{x:VISEE.x,y:VISEE.y}:TIR?{x:TIR.x,y:TIR.y}:INSPECT&&HOV?HOV:null;
 const TDESC={[GROUND]:['Sol rocheux','Roche tassée. Praticable. Particules plus denses à l’approche d’une couche profonde.'],
   [ROCK]:['Rocher','Bloc isolé. Gêne le passage, pas les capteurs. Friable.'],
   [MOUNT]:['Montagne','Paroi de massif. Opaque. Forable.'],
@@ -214,8 +228,8 @@ const TDESC={[GROUND]:['Sol rocheux','Roche tassée. Praticable. Particules plus
   [SECRET]:['Mur bâti','Alliage de construction, origine non répertoriée. Hors de portée de la foreuse. Un explosif, peut-être.'],
   [LOCK]:['Porte verrouillée','Battant scellé. Serrure codée. Il existe une clé. Ou un explosif.'],
   [MACHINE]:['Machine hors d’usage','Carcasse mécanique. Inerte. Les capteurs passent par-dessus.'],
-  [ANTENNA]:['Antenne','Relais de communication en veille. Un contact pourrait le réveiller.'],
-  [TERMINAL]:['Terminal','Console de données. Encore alimentée. Lecture possible au contact.'],
+  [ANTENNA]:['Antenne','Relais de communication. Accès au contact : DATA, CONNEXION.'],
+  [TERMINAL]:['Terminal','Console de données. Encore alimentée. Accès au contact : DATA, CONNEXION, ENCODAGE.'],
   [TURRET]:['Tourelle laser','Émetteur encastré. Cycle de tir irrégulier, aucun signal préalable. Observer avant de traverser.'],
   [PYLON]:['Croix laser','Pylône émetteur. Balaie ses abords par intermittence. Les angles semblent épargnés.'],
   [PILE]:['Pile énergétique','Cellule d’énergie mobile. Se déplace par poussée. Format compatible avec les socles du secteur.'],
@@ -246,17 +260,19 @@ const BEHAV={puce:'Petite unité furtive. Suit à distance, se dérobe au contac
   drone:'Unité volante, légère. Ignore failles et liquides. Arrive en essaim.',
   soudeur:'Unité de maintenance. Remet ses alliés en état et fuit le combat. Cible prioritaire.',
   englueur:'Projette une substance adhésive. Entrave les mouvements. Garde ses distances.'};
-function inspectHTML(c){const {x,y}=c||HOV;if(x<0||y<0||x>=W||y>=H)return '';const vise=!!(PHASE||VISEE);
+function inspectHTML(c){const {x,y}=c||HOV;if(x<0||y<0||x>=W||y>=H)return '';const vise=!!(PHASE||VISEE||TIR);
   const i=idx(x,y),seen=!fog||G.seen[i],see=!fog||vis[i],d=Math.max(Math.abs(x-G.px),Math.abs(y-G.py)),dt=d?`${d} case${d>1?'s':''}`:'ici';
   const head=(ic,n,ex)=>`<div class="ih">${ic?`<img src="${ic}" alt="">`:''}<b>${n}</b><span>${ex||''}</span></div>`;
   if(!seen&&G.ore&&G.ore[i]&&sonarVu(i,sonarR())){const o=G.ore[i];
-    return `<div class="insp">${head('','Gisement détecté',dt)}<p>Écho sonar : <b>${oreMat(o)?'Matière {µ}':'éclats de métal'}</b>, ${oreSol(o)?'au sol':'pris dans la roche'}.</p></div>`;}
+    return `<div class="insp">${head('','Gisement détecté',dt)}<p>Écho sonar : <b>${oreMat(o)?'Matière {µ}':'éclats de métal (fuel)'}</b>, ${oreSol(o)?'au sol':'pris dans la roche'}.</p></div>`;}
   if(!seen)return `<div class="insp">${head('','Zone inexplorée',dt)}<p>Aucune donnée. Secteur jamais balayé par les capteurs.</p></div>`;
   const out=[],t=G.t[i];let [tn,td]=TDESC[t]||['Terrain',''];const border=x===0||y===0||x===W-1||y===H-1;
   // Une niche de salle piégée repérée se nomme par ce qu'elle cache ; cachée, c'est un mur ordinaire.
   {const nc=G.niche&&G.niche[i];
     if(nc===1)[tn,td]=['Niche fermée','Cavité dans la paroi. Présence mécanique en veille. Elle attend quelque chose.'];
     else if(nc===2)[tn,td]=['Niche ouverte','Cavité vide. Ce qui s’y tenait est sorti.'];}
+  // épaves et fosses de l'Astroport (07h) : nom, numéro, état
+  {const f=typeof epaveFiche==='function'&&(G.epI||G.fosI)?epaveFiche(i):null;if(f)[tn,td]=f;}
   const occ=see?occupant(x,y):null;
   if(d===0){const st=G.st;out.push(head(ICON.robot_r,NOM_FOREUSE,dt),
     `<div class="kv"><span>Vie <b>${Math.ceil(st.vie)}/${st.vieMax}</b></span><span>Énergie <b>${Math.floor(st.energie)}/${st.energieMax}</b></span><span>DEF <b>${robotDef()}</b></span></div>`,
@@ -264,20 +280,27 @@ function inspectHTML(c){const {x,y}=c||HOV;if(x<0||y<0||x>=W||y>=H)return '';con
   else if(occ){const isB=(G.beasts||[]).includes(occ),sp=isB?BEASTS[occ.sp]:SPECIES[occ.sp],key=isB?sp.key:'puce',
     hp=Math.max(0,occ.hp??pvDe(sp));
     const P=isB&&sp.pack&&G.packs?G.packs[occ.pack]:null;
-    const state=isB?(occ.hunt>0?(occ.sees?'en chasse':occ.search>0?'fouille les environs':'remonte la trace'):P?(P.pause>0?'au repos':'en route'):'erre'):({attack:'attaque',flee:'recule',follow:'suit',hold:'observe',seek:'remonte la trace',search:'fouille les environs'}[occ.mode]||'n’a rien repéré');
+    const ouv=aOuvrage(occ)?(ouvrAlerte(occ)?'alertée':'à l’ouvrage'):'';
+    const state=ouv?ouv:isB?(occ.hunt>0?(occ.sees?'en chasse':occ.search>0?'fouille les environs':'remonte la trace'):P?(P.pause>0?'au repos':'en route'):'erre'):({attack:'attaque',flee:'recule',follow:'suit',hold:'observe',seek:'remonte la trace',search:'fouille les environs'}[occ.mode]||'n’a rien repéré');
     const me=hitChance(robotPre(),sp.def+terrModDe(sp,x,y)),them=isB||occ.mode==='attack'?hitChance(sp.pre,robotDef()):null;
-    out.push(head(ICON[isB?'bz'+occ.sp+'r':'an'+occ.sp+'r'],sp.n,`${state} · ${dt}`),
+    /* première ligne de la fiche d'une ferrailleuse (28 novembre 2026, soir) : la règle, en clair ; alertée, le compte à rebours */
+    const Pv=ouv?ouvrP(occ):null,regle=!ouv?'':ouv==='alertée'?`<p class="ouvrp al">PÉRIMÈTRE FRANCHI. CHASSE DANS ${Math.max(1,Pv&&Pv.al||1)} BATTEMENT${(Pv&&Pv.al||1)>1?'S':''}. RECULER.</p>`
+      :'<p class="ouvrp">INDIFFÉRENT TANT QUE : PAS D’ATTAQUE, PAS D’INTRUSION DANS SON PÉRIMÈTRE.</p>';
+    out.push(head(ICON[isB?'bz'+occ.sp+'r':'an'+occ.sp+'r'],sp.n,`${state} · ${dt}`),regle+
       `<div class="kv"><span>PV <b>${hp}/${pvDe(sp)}</b></span><span>DÉG <b>${dmgTxt(sp)}</b></span><span>PRE <b>${sp.pre}</b></span><span>DEF <b>${sp.def+terrModDe(sp,x,y)}</b></span><span title="Durée d’un pas sur cette case : plus petit, plus rapide">PAS <b>${Math.round(dpasDe(occ,sp))}</b></span><span title="Durée d’un coup : 50 frappe deux fois par battement, 200 une fois sur deux">COUP <b>${dcoupDe(occ,sp)}</b></span></div>`,
-      ((isB?!(occ.hunt>0):!occ.mode)?`<p class="eye" title="Chance qu’il vous repère à chaque tour">${EYE_SVG} <b>${detectChance(occ)} %</b></p>`:''),
-      `<p>Toucher <b style="color:${chanceCol(me)}">${me} %</b> · Subir <b style="color:${them==null?'var(--dim)':chanceCol(100-them)}">${them==null?'—':them+' %'}</b></p>`,
+
+      (!ouv&&(isB?!(occ.hunt>0):!occ.mode)?`<p class="eye" title="Chance qu’il vous repère à chaque tour">${EYE_SVG} <b>${detectChance(occ)} %</b></p>`:''),
+      `<p>Toucher <b style="color:${chanceCol(me)}">${me} %</b> · Subir <b style="color:${them==null?'var(--dim)':chanceCol(100-them)}">${them==null?'—':them+' %'}</b></p>`+
+      (typeof tirChanceTxt==='function'?tirChanceTxt(occ,sp,x,y):''),
       `<p>${BEHAV[key]||''}</p>`);}
   else out.push(head('',tn,dt));
   const s=siteAt(x,y);
   if(s)out.push(`<p><b>Site de forage</b> · ${s.known?'couche profonde confirmée. Descente possible.':'signature probable. Analyse sur place requise.'}</p>`);
   const om=G.ore&&G.ore[i];
   if(om&&oreMat(om))out.push(oreSol(om)?'<p><b>Matière {µ}</b> · au sol. Récupérable au passage.</p>':'<p><b>Matière {µ}</b> · prise dans la paroi. Forer pour la libérer.</p>');
-  else if(om&&oreSol(om))out.push(`<p><b>Éclats de métal ${ORE_NOM[oreLv(om)]}</b> · au sol. Métal assimilable, récupérable au passage.</p>`);
-  else if(om)out.push(`<p><b>Éclats de métal ${ORE_NOM[oreLv(om)]}</b> · pris dans la paroi. Forer pour les libérer.</p>`);
+  // éclats de métal : du fuel depuis le 28 novembre 2026
+  else if(om&&oreSol(om))out.push(`<p><b>Éclats de métal ${ORE_NOM[oreLv(om)]}</b> · au sol. Fuel +${REGLES.FUEL_ECLATS[oreLv(om)]}, récupérable au passage.</p>`);
+  else if(om)out.push(`<p><b>Éclats de métal ${ORE_NOM[oreLv(om)]}</b> · pris dans la paroi : fuel +${REGLES.FUEL_ECLATS[oreLv(om)]}. Forer pour les libérer.</p>`);
   if(G.cles&&G.cles[i])out.push('<p><b>Clé</b> · codée pour une serrure du secteur.</p>');
   const sol=G.items&&G.items[i];
   if(sol&&sol.length)out.push(`<p><b>${sol.length>1?'Objets au sol':'Objet au sol'}</b> · ${sol.map(k=>ITEMS[k].n).join(', ')}. Récupérable au passage.</p>`);

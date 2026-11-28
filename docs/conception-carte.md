@@ -48,6 +48,11 @@ suivent l'échelle.
 | 4 | 96 × 64 | **défaut** |
 | 5 | 144 × 96 | |
 
+**En jeu, chaque niveau a sa taille** (28 novembre 2026, `NIVEAUX[n].taille`, `00-base.js`) : **4 pour l'Astroport
+(niveau 1), 3 pour les niveaux 2 et 3**. Nouvelle partie, REGEN, descente et boutons Niv1/Niv2/Niv3 la prennent
+(`enJeu`, `TAILLE_JEU`, `07-generation.js`). Le curseur « Taille » du menu Monde ne vaut plus que pour **GÉNÉRER LA
+CARTE**, les outils d'essai et le banc.
+
 ## 3 bis. Le niveau
 
 La partie tient sur **une seule carte**, celle de l'atterrissage : le vaisseau, un site de forage, le relief et la
@@ -56,8 +61,9 @@ avec les réglages du moment. Forer le site atteint le noyau : écran « NOYAU A
 Mort : idem.
 
 - **Taille** : celle du menu Monde. Affichée en jeu en haut de la colonne (« Niveau 1 · 96 × 64 »).
-- **Gisements** : 3 de métal et 1 de Matière pour une carte de taille 2, les autres tailles en proportion de leur
-  surface. Chaque gisement vaut **30, 40 ou 50**.
+- **Gisements** : **4 de métal par carte**, quelle que soit sa taille (fuel +15, +20 ou +25 ; 28 novembre 2026, avant : 3 pour une
+  carte de taille 2, en proportion de la surface), et 1 de Matière pour une carte de taille 2, les autres tailles en proportion de
+  leur surface. Un gisement de Matière vaut **30, 40 ou 50**.
 - **Palette** : celle du joueur, sans variation.
 
 ### La carte est un plan de zones
@@ -343,10 +349,10 @@ Code : `07c-artefacts.js`, appelé à la fin de la génération des bâtiments.
 
 | Artefact | Ce qu'il fait | Fréquence − / = / + |
 |---|---|---|
-| **Antenne** | La foreuse l'active **en avançant dessus** (un battement). Elle ne lève le brouillard que **15 tours**, sur un **disque de 30 cases de large**, murs compris (découvert anneau par anneau) ; ensuite le brouillard revient, mais elle **continue de signaler les ennemis** du disque par un **point en couleur danger**, sur la carte et la mini-carte.  |
+| **Antenne** | Au contact, elle ouvre le menu DATA / CONNEXION (voir `conception-joueur.md`, Terminaux et antennes) ; l'action **RÉSEAU DU SITE** l'allume (un battement). Elle ne lève le brouillard que **15 tours**, sur un **disque de 30 cases de large**, murs compris (découvert anneau par anneau) ; ensuite le brouillard revient, mais elle **continue de signaler les ennemis** du disque par un **point en couleur danger**, sur la carte et la mini-carte.  |
 | **Pièces envahies d'herbe** | La pièce entière est couverte d'herbes hautes et basses mêlées par touffes (le site et les clés gardent leur sol). | 8 % / 18 % / 35 % des pièces |
 | **Machines** | Dix machines hors d'usage (tuyaux, serveur, caisses, ordinateur, établi, cuve, générateur, console, turbine, armoire électrique), posées en **obstacles** : une à cinq par pièce choisie. **Elles barrent le pas mais pas la vue**, au contraire des piliers. Une charge sismique les réduit en gravats. | 15 % / 35 % / 60 % des pièces |
-| **Terminal** | La foreuse l'active en avançant dessus : une fenêtre affiche **un texte** (huit fragments de journal, provisoires ; le temps ne passe pas). | 1 / 2 / 4 par carte |
+| **Terminal** | Au contact, il ouvre le menu **DATA / CONNEXION / ENCODAGE** (voir `conception-joueur.md`, Terminaux et antennes). **Deux au moins par niveau** dans le complexe, dont un à 15 cases au plus du site ou d'un FABLAB (`terminauxFin`, 07i), si l'artefact est permis. | 1 / 2 / 4 par carte (2 au moins) |
 
 - Trois terrains : `MACHINE`, `ANTENNA`, `TERMINAL`. Infranchissables pour tous, transparents à la vue, sans effet
   sur la discrétion. `G.art[case]` : la variante d'une machine, l'état d'une antenne, le texte d'un terminal.
@@ -391,6 +397,37 @@ Code : `07c-artefacts.js`, appelé à la fin de la génération des bâtiments.
 | Machine, antenne, terminal | non | libre | `conception-carte.md` |
 | Coque du vaisseau | non, indestructible | libre | — |
 | Soute du vaisseau (intérieur + porte) | oui | libre | point de départ ; pas de traces de chenilles |
+
+### L'Astroport : fosses et épaves (niveau 1, `07h-astroport.js`)
+
+Validé le 27 novembre 2026, codé le 28 (récit : `docs/histoire-niveau-1.md`). Le niveau 1 garde son terrain (extérieur,
+tunnels, complexe enfoui) et devient un **cimetière spatial** :
+- **Fosses d'atterrissage** : des ovales dégagés (une à deux cases de marge autour de l'engin) dans la zone extérieure,
+  jamais sur le massif, les tunnels, le bâti ni à moins de trois cases d'un débouché de tunnel ; une vingtaine par carte
+  (environ une pour 110 cases libres de l'extérieur, de 10 à 32). L'ovale autour de notre vaisseau est l'une d'elles.
+  Numérotées **FOSSE 01…** depuis l'entrée du dépôt (les débouchés des tunnels), la nôtre comprise. Au sol, des
+  marquages (tuiles `fosseSol`, `fosseBord`).
+- **Épaves** : cinq modèles (`EPV_MODELES`, `04-vaisseau.js`) — sonde (3 × 3), capsule (3 × 4), porteur (4 × 5), cargo
+  (le nôtre, 5 × 6), grand porteur (6 × 7, plus rare). Dessins tirés de leur grille comme celui du cargo, en encres ternies
+  (contour monde, rivets bâti), **retouchables** dans le Tile editor (groupe « Épaves ») ; les états en sont dérivés.
+- **Quatre états** : **scellée** (toute la coque, infranchissable ; une sur deux garde son **enregistreur** dans la trappe,
+  un terminal lisible au contact, au moins un par carte), **éventrée** (trappe ouverte et une ou deux brèches : abri, et un
+  objet dedans quatre fois sur cinq), **squelette** (réacteurs et une plaque sur trois debout, le reste en gravats et
+  membrures), **fosse vide** (l'empreinte au sol, quelques débris).
+- **Âge** : numéros à quatre chiffres tirés sous le nôtre (**0467**), croissants en s'éloignant de l'entrée ; près de
+  l'entrée, vieux modèles (sondes, capsules) et épaves dépecées (fosses vides, squelettes), loin, porteurs et cargos
+  scellés ou éventrés.
+- **Inspection** : nom, numéro, état et fosse, en relevé (« PORTEUR 0211 — STRUCTURE : VAISSEAU. HORS SERVICE. NON
+  RÉPERTORIÉ. ÉTAT : ÉVENTRÉE. FOSSE 07. »). Une case de fosse donne son numéro et son occupant.
+- **Modules d'extérieur** : un module coché « Extérieur (fosse) » dans Lab → Modules est posé dans une fosse (environ
+  une sur quatre, quel que soit le nombre réglé pour la recette). Lettres ajoutées : **K** coque d'épave (son dessin est
+  tiré des cases K posées), **U** gravats, **A** antenne. Banque du thème : fosse vide, épave éventrée (capsule), épave
+  scellée (porteur), grand porteur dépecé, rangée de coques, tas de ferraille, mât-balise ; et pour le dépôt (bâtiment) :
+  sas du dépôt, magasin de pièces, quai de tri. Au niveau 1, un module de bâtiment du thème est toujours du tirage, et le
+  niveau en pose au moins quatre.
+- **FABLAB** : toujours un au dépôt du niveau 1 dès que l'artefact est actif (`07f-machines.js`).
+- **Pour les étapes suivantes** : `G.fosses`, `G.epaves`, `G.epI`, `G.fosI`, `G.sas`, `G.debouches` (détail en tête de
+  `07h-astroport.js`).
 
 ### Vaisseau Cargo
 

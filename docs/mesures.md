@@ -1099,3 +1099,275 @@ Version retenue, **coup 100 au moins** (Broyeur 150, Artilleur 200 gardés) : vo
 
 Essais : 16-26 → seul 56 de vie restante ; **18-30 (retenu) → seul 52-53, 95-96 % de victoires ; avec 2 Crabots 38, 83 %** ;
 18-28 et 75 PV → seul 43-47, 87-92 % ; avec 2 Crabots 32, 72 %.
+
+### L'Astroport, niveau 1 en taille 4 (28 novembre 2026)
+
+- **Peuplement du niveau 1** (12 cartes, ambiances tirées) : avant, taille 3 : 28 créatures (8,2 pour 1 000 cases), 26 avec les
+  groupes du joueur ; après, taille 4 avec `dens` 0,55 : **28 créatures (4,6 pour 1 000 cases)**, 27 avec les groupes du joueur
+  (essai à 0,7 : 37 créatures, écarté). Même nombre, deux fois moins serrées.
+- **Carte** (`test-astroport.js`, 8 cartes) : 22 fosses et 20 épaves en moyenne ; états mêlés (squelettes et fosses vides près
+  de l'entrée : numéro moyen 75 contre 368 loin) ; FABLAB 8/8 ; module du thème au dépôt 8/8.
+- **Temps** (`mesure-perf.js`, même hasard) : génération 197 ms (taille 3, avant) → 246 ms (taille 4, Astroport ; 316 en taille 4
+  avant l'Astroport) ; tour complet 6,3 → 8,3 ms en moyenne (p95 13,5 → 18) ; rendu 1,4 → 1,5 ms ; mémoire 15 → 45 Mo.
+- `outils/simul.py tout` : détection, fuite et combat inchangés (règles de combat non touchées).
+
+### Ferrailleuses à l'ouvrage (28 novembre 2026)
+
+- **Niveau 1** (12 cartes, ambiances tirées, groupes par défaut) : 27,8 créatures par carte, dont **16,5 à l'ouvrage (59 %)**,
+  5,3 gardes et 6,0 autres ; les périmètres de découpe (3 cases autour des épaves tenues) couvrent **20 %** de l'extérieur praticable.
+  Dehors, la menace active tombe donc à peu près au tiers de ce qu'elle était.
+- `test-ouvrage.js` : provoqué par un coup puis semé (fumigène), un groupe redevient indifférent en 24 battements.
+- `outils/simul.py tout` : détection, fuite et combat inchangés (arènes sans rôle).
+
+### Hacks (28 novembre 2026, `outils/simul.py combat`, 300 duels par cas)
+
+Mastok + 2 Crabos, foreuse nue (stats du niveau 1), puis avec les hacks de combat qu'on peut équiper au rang donné :
+
+| Hacks | Victoires | Vie restante | Durée |
+|---|---|---|---|
+| aucun | 82 % | 41 | 21 battements |
+| R1 : CRIT.SYS, FORCE | 85 % | 37 | 21 |
+| R4 : + BLINDAGE.RT | 94 % | 48 | 20 |
+| R7 : + VISÉE | 98 % | 55 | 17 |
+| R10 : + RÉGÉN.CELL | 100 % | 63 | 15 |
+
+Aux rangs 1-3 l'effet se perd dans le bruit (modeste, comme voulu) ; aux rangs profonds, les hacks compensent des ennemis plus
+durs. Détection, fuite et le reste du combat : inchangés (empreinte identique, aucun hack porté dans ces mesures).
+
+### Blueprints au terminal, plus aucun plan au sol (28 novembre 2026)
+
+Plans obtenables par niveau (12 cartes par recette ; robots : chance de butin × part des plans, si on les abat tous) :
+
+| Niveau | Avant : au sol | Avant : robots | Avant : total | Après : terminaux complets (1 plan chacun, choisi parmi 3) |
+|---|---|---|---|---|
+| 1 (atterrissage) | 1,58 | 0,74 | 2,3 | 2,50 |
+| 2 (cavernes) | 2,08 | 0,64 | 2,7 | 2,50 |
+| 3 (base) | 2,83 | 0,89 | 3,7 | 2,67 |
+
+Butin redistribué : robots abattus Matière 50 % / capsule 38 % / équipement 12 % (avant 40 / 35 / plan 18 / 7) ; dépôt : le plan
+devient deux blocs de Matière ; salle piégée : un équipement ; pièce secrète (une fois sur deux) : une capsule ; vitrine : trois blocs
+de Matière ; butin d'exploration : le lot « plan » devient un équipement. `outils/simul.py tout` : détection, fuite, combat
+inchangés (le Sonar porté ne change rien au duel : 78-79 de vie restante, comme la foreuse nue).
+
+## Référence avant le chantier survie (28 novembre 2026)
+
+Mesuré avec `outils/pilote.py` (pilote automatique, vrai moteur, une graine par partie, graines 1000 à 1029) sur la branche
+`claude/2026-11-28_Version_astroport-terminaux-hacks`, avant toute règle du chantier (pas de fuel, pas de soin au repos, pas d'arme de
+tir). Deux profils : **prudent** (explore tout ce qui s'atteint sans forer, contourne les groupes calmes, attend l'ennemi au contact, se
+replie sous 30 % de vie, réparobots sous 50 %, mine les éclats sous 75 %, terminaux DATA/HACK/BLUEPRINT/CONNEXION, FABLAB → réparobots)
+et **fonceur** (connaît la position du site, y va droit en forant au besoin, frappe tout ce qui est au contact ou en travers, ne se
+soigne pas). Deux séries de 30 parties par profil : **normale** (la foreuse meurt) et **immortelle** (`--immortel` : à 0, la vie
+repart au maximum, les pertes restent comptées ; seule façon de mesurer la durée de chaque niveau sans biais de survie).
+Commandes : `python3 outils/pilote.py tout 30 2` puis la même avec `--immortel` (≈ 10 min chacune sur 2 processeurs).
+
+### Issue des parties (série normale, 30 par profil)
+
+| | Noyau atteint | Mort au niv. 1 | Mort au niv. 2 | Mort au niv. 3 | Bloquée |
+|---|---|---|---|---|---|
+| Prudent | 8 (27 %) | 2 | 13 | 6 | 1 |
+| Fonceur | 1 (3 %) | 3 | 20 | 6 | 0 |
+
+Tueurs principaux : prudent, artilleur (9), crabot (5), broyeur (2), sentinelle (2) ; fonceur, mines (7, niveau 2), crabot (9), artilleur (5).
+Le **niveau 2** (cavernes) concentre les morts : 13 prudents sur 28 arrivés et 20 fonceurs sur 27.
+
+### Durée réelle d'un niveau, en battements (réponse à la question ouverte de `arbitrage-survie.md`)
+
+Série immortelle, parties finies (médiane, 1er décile – 9e décile) :
+
+| | Niveau 1 (Astroport) | Niveau 2 (cavernes) | Niveau 3 (base) | Partie entière |
+|---|---|---|---|---|
+| Prudent | **1 216** (1 033 – 2 396) | **872** (626 – 1 243) | **915** (723 – 1 668) | **3 187** (2 548 – 5 640) |
+| Fonceur | **609** (214 – 1 441) | **847** (213 – 1 335) | **637** (143 – 1 403) | **2 079** (1 243 – 3 121) |
+
+Série normale (survivants seulement, biaisé vers les parties courtes) : prudent 1 216 / 808 / 808, partie gagnée 2 724 ; fonceur 594 / 223 / 712.
+Le prudent explore 99 % / 99 % / 95 % des cases praticables ; le fonceur 50 % / 57 % / 52 % (il explore quand le site est fermé).
+Les longues queues du niveau 1 (jusqu'à 4 300) viennent d'Astroports très étendus que le prudent visite en entier.
+
+### Vie, par niveau (série immortelle, moyenne par partie)
+
+| | Niv. 1 | Niv. 2 | Niv. 3 |
+|---|---|---|---|
+| Prudent : vie perdue | 95 | 318 | 257 |
+| Prudent : vie rendue (éclats + réparobots + station) | 76 (54 + 22) | 208 (70 + 138) | 226 (87 + 127 + 12) |
+| Prudent : groupes affrontés / sur la carte | 4,7 / 8,6 | 11,3 / 11,4 | 11,2 / 12,2 |
+| Prudent : vie perdue par groupe affronté (moy., 9e décile) | 14 (30) | 27 (55) | 20 (53) |
+| Prudent : « aurait été détruite » (parties sur 30) | 1 | 13 | 10 |
+| Fonceur : vie perdue | 57 | 167 | 127 |
+| Fonceur : vie rendue (éclats ramassés en route) | 2 | 5 | 4 |
+| Fonceur : vie perdue par groupe affronté (moy., 9e décile) | 10 (20) | 25 (59) | 17 (41) |
+
+Vie restante avant chaque descente (série normale, médiane) : prudent 92 puis 78 ; fonceur 50 puis 34. Le mini-jeu des mines (2 → 3)
+coûte 9 à 11 de vie en moyenne au pilote (évitement simple). Énergie : le prudent ne reste presque jamais à 0 (2 à 7 battements par
+niveau) ; le fonceur, qui fore en ligne droite, y passe 30 à 40 battements par niveau. Matière gagnée par le prudent : 194 / 87 / 111
+(l'Astroport est de loin le plus riche) ; terminaux utilisés 5,1 / 3,2 / 3,8 ; hacks 2,2 / 2,2 / 2,9 ; plans 2,2 / 2,2 / 2,9 ;
+FABLAB 1 par niveau.
+
+### Les rythmes arbitrés face à ces durées
+
+| Rythme arbitré | Ce qu'il donne sur un niveau médian du prudent (1 216 / 872 / 915 battements) | Sur la partie |
+|---|---|---|
+| Fuel : 1 point / 12 battements, réserve 100 (1 200 battements) | 101 / 73 / 76 points consommés | 266 points pour une partie médiane (3 187 battements), 470 au 9e décile |
+| Fuel : 4 gisements de +15/+20/+25 par carte, +30 par descente | ≈ +80 par carte si tout est miné | 100 + 3 × 80 + 2 × 30 = **400 points** disponibles (4 800 battements) |
+| Vie : +1 / 20 battements en marche | +61 / +44 / +46 | ≈ +160, contre 670 de vie perdue |
+| Vie : +1 / 4 battements au repos | un plein (100) = 400 battements = 33 points de fuel | combler le déficit des niveaux 2 et 3 (≈ 140) ≈ 560 battements, 47 points de fuel |
+
+Le tableau des cibles de `boucle-amelioration.md` n'a pas pu être rempli : ce document du projet claude.ai n'était pas lisible
+depuis la session qui a fait ces mesures (voir le rapport du bloc A). Toutes les grandeurs qu'il demande sont dans
+`pilote.py --json` (par partie et par niveau).
+
+## Survie B (28 novembre 2026) : fuel, vie qui remonte, repos qui soigne, forage à 5
+
+Mêmes graines (1000 à 1029) et mêmes commandes que la référence ci-dessus, après le bloc B (`REGLES`, `00-base.js`). Le pilote
+se repose (prudent seulement) de 60 % à 95 % de vie quand rien ne le chasse et que le fuel est au-dessus de 25 % ; les deux profils
+vont miner le gisement connu le plus proche sous 40 % de fuel et boivent une cellule sous 30 %. Attention : les niveaux 2 et 3 ne
+se rejouent pas à l'identique (voir la référence) ; deux séries normales du prudent ont donné 6 puis 4 noyaux sur 30.
+
+| | Référence | Survie B | Cible (arbitrage) |
+|---|---|---|---|
+| Prudent : noyau atteint (série normale) | 8 / 30 (27 %) | **6 puis 4 / 30** (20 %, 13 %) | 5 à 6 sur 10 |
+| Fonceur : noyau atteint | 1 / 30 (3 %) | **2 / 30** (7 %) | 1 sur 10 au plus |
+| Prudent : durée d'un niveau (immortel, médiane) | 1 216 / 872 / 915 | **1 590 / 1 300 / 1 308** | – |
+| Prudent : partie entière (médiane, D1 – D9) | 3 187 (2 548 – 5 640) | **4 297** (3 179 – 5 186) | – |
+| Fonceur : partie entière | 2 079 | **1 826** (901 – 3 052) | – |
+| Prudent : vie perdue par niveau (immortel, finis, médiane) | – (moy. 95 / 318 / 257) | **58 / 304 / 293** (moy. 109 / 314 / 322) | 30 à 50 % |
+| Prudent : vie rendue — repos / marche / réparobots | – / – / 22, 138, 127 | **22 / 38 / 8 · 97 / 34 / 71 · 92 / 40 / 85** | – |
+| Prudent : battements au repos par niveau | – | **102 / 418 / 369** | – |
+| Prudent : fuel à la descente (médiane, minimum) | – | **46 (5) · 43 (4) · 42 (0)** | – |
+| Prudent : niveaux finis passés à sec | – | **0 / 2 / 7** sur 26 | – |
+| Prudent : gisements de métal minés (sur 4) ; fuel des éclats ; des cellules | – | **3,0 / 3,1 / 3,2** ; ≈ 57 par niveau ; ≈ 16 | – |
+| Fonceur : fuel à la descente (médiane, minimum) | – | **66 (10) · 49 (32) · 55 (28)** ; jamais à sec | – |
+| Fonceur : gisements minés | – | 0,5 / 1,1 / 1,1 | – |
+
+- Le **repos** devient la première source de soin du prudent aux niveaux 2 et 3 (≈ 95 PV par niveau, ≈ 400 battements, ≈ 33 de fuel) ;
+  les **réparobots** fabriqués tombent de 138 / 127 à 71 / 85 (le pilote en fabrique moins : moins de Matière dépensée pour se soigner).
+- **Rester longtemps coûte** : le prudent, qui explore tout et se repose, finit un niveau sur quatre du niveau 3 à sec ou presque
+  (D1 du fuel à la descente : 0). Le **fonceur ne manque jamais de fuel** : 1 826 battements = 152 points, contre 100 + 2 × 30 = 160 sans
+  rien miner.
+- La **survie** ne s'améliore pas : les morts restent au niveau 2 (sentinelles, artilleurs, crabots) et la vie perdue par niveau vaut
+  3 fois la vie maximale aux niveaux 2 et 3. C'est l'affaire du bloc C (nombre et dégâts des ennemis).
+- Série immortelle : 4 parties « bloquées » sur 30 (le pilote ne trouve pas l'entrée du site, puis reste à sec jusqu'au plafond) ; elles
+  sont exclues des chiffres ci-dessus.
+- `simul.py tout` : détection, fuite et combat inchangés (1 Broyeur 95 % / 51 PV, Mastok + 2 Crabos 86 % / 36 PV) ; un combat dure
+  trop peu pour que la vie qui remonte en marche compte.
+
+## Survie C (28 novembre 2026) : ennemis moins nombreux, plus dangereux
+
+`REGLES.MENACE_NB` = 0,6 / 0,4 / 0,4 et `REGLES.MENACE_DEG` = 1,4 / 1,6 / 1,6 (niveaux 1, 2, 3), par-dessus les réglages du joueur.
+Mêmes graines (1000 à 1029) et commandes que « Survie B » ; les essais de réglage passent par `pilote.py --regles '{…}'` sans toucher à `src/`.
+
+**Essais de dégrossissage** (14 à 16 parties par profil, série normale ; N = MENACE_NB, D = MENACE_DEG, par niveau) :
+
+| Réglage | Graines | Prudent au noyau | Fonceur au noyau | Groupe affronté, prudent : médiane / 9e décile (niv. 1 · 2 · 3) |
+|---|---|---|---|---|
+| N 0,6 partout, D 1,6 partout (consigne) | 1000 | 3 / 14 | 2 / 14 | 15/47 · 15/70 · 24/78 |
+| N 0,6/0,5/0,5, D 1,6/1,2/1,2 | 1000 | 5 / 16 | 3 / 16 | 17/48 · 15/58 · 14/41 |
+| **N 0,6/0,4/0,4, D 1,4/1,6/1,6** | 1000 | **6 / 16** | 2 / 16 | 12/40 · 23/69 · 13/68 |
+| N 0,6/0,4/0,4, D 2,0/1,6/1,6 | 2000 | 2 / 16 (11 morts au niv. 1) | 2 / 16 | 27/66 · 16/115 · 17/55 |
+| N 0,6/0,4/0,4, D 1,3/1,6/1,6 | 2000 | 3 / 16 (9 morts au niv. 1) | 2 / 16 | 16/36 · 15/43 · 17/49 |
+| Survie B (N 1, D 1), pour comparer | 2000 | 2 / 16 (7 morts au niv. 1) | – | 11/28 · 12/51 · 12/50 |
+
+Les graines 2000 à 2015 donnent des Astroports bien plus durs pour le pilote, même sans le bloc C (7 morts sur 16 au niveau 1).
+
+**Réglage retenu, 30 parties par profil :**
+
+| | Référence | Survie B | **Survie C** | Cible |
+|---|---|---|---|---|
+| Prudent : noyau atteint (normale) | 8 / 30 | 6 puis 4 / 30 | **13 / 30** (43 %) | 5 à 6 sur 10 — presque |
+| Fonceur : noyau atteint | 1 / 30 | 2 / 30 | **3 / 30** (10 %) | 1 sur 10 au plus — tenue |
+| Prudent : morts par niveau (normale) | 2 / 13 / 6 | – | **4 / 8 / 5** (dont 2 à sec et 1 laser au niv. 3) | – |
+| Groupes sur la carte (prudent) | 8,6 / 11,4 / 12,2 | – | **7,8 / 4,6 / 5,2** (ferrailleuses comprises au niv. 1) | – |
+| Groupes affrontés (prudent) | 4,7 / 11,3 / 11,2 | – | **3,4 / 4,0 / 4,4** | – |
+| Groupe affronté, prudent, normale : médiane / moy. / D9 | – | – | **13 / 19 / 38 · 21 / 33 / 76 · 17,5 / 29 / 69** | méd. 25-40, D9 < 70 |
+| Idem, série immortelle (hors partie 1028) | moy. / D9 : 14/30 · 27/55 · 20/53 | – | **14 / 19 / 38 · 29 / 61 / 103 · 18 / 31 / 63** | – |
+| Groupes affrontés à plus de 70 PV (prudent, normale) | – | – | **1 % · 13 % · 10 %** | – |
+| Fonceur, groupe affronté : médiane / D9 | moy. / D9 : 10/20 · 25/59 · 17/41 | – | **11 / 27 · 19 / 67 · 14 / 38** | – |
+| Prudent : vie perdue par niveau (immortel, finis, médiane) | moy. 95 / 318 / 257 | 58 / 304 / 293 | **72 / 191 / 206** | « fini entamé mais vivant » |
+| Prudent : vie à la fin du niveau (normale, finis, moy.) | 92 puis 78 (méd.) | – | **91 / 89 / 90** | – |
+| Prudent : durée d'un niveau (immortel, médiane) | 1 216 / 872 / 915 | 1 590 / 1 300 / 1 308 | **1 707 / 928 / 1 202** | – |
+| Prudent : battements au repos par niveau (immortel) | – | 102 / 418 / 369 | **142 / 270 / 311** | – |
+| Prudent : fuel à la descente (normale, moy., D1) | – | 46 (5) · 43 (4) · 42 (0) | **39 (19) · 54 (42) · 49 (41)** | – |
+| Prudent : niveaux passés à sec (normale) | – | 0 / 2 / 7 sur 26 | **1 / 1 / 2** ; 2 morts à sec au niv. 3 | « rester longtemps coûte » — tenue |
+| Fonceur : fuel à la descente (normale, moy.) | – | 66 · 49 · 55 | **67 · 58 · 53**, jamais à sec | – |
+
+- **Survie** : le prudent passe de 4-6 à 13 noyaux sur 30. Les morts ne sont plus massées au niveau 2 (8 sur 17) ; au niveau 3, trois sur
+  cinq ne viennent pas des ennemis (fuel à sec ×2, laser de machine ×1). Le fonceur reste à 1 sur 10.
+- **Coût d'un groupe** : la médiane reste sous la cible (13 / 21 / 17) parce que beaucoup de groupes affrontés sont faibles (sentinelles,
+  relais, drones) ; le 9e décile est à la limite (69-76) parce que quelques groupes coûtent trois à cinq fois plus que les autres
+  (Broyeur, Batterie d'artilleurs, Large crabot groupe, Mines & Sentinelles : 45 à 60 PV au banc **en dégâts de base**). Un seul
+  multiplicateur ne peut pas resserrer cet écart : monter les dégâts pour remonter la médiane tue au 9e décile.
+- **Duel sans fin contre l'artilleur** (série immortelle) : graine 1028, niveau 2, 35 058 PV perdus contre un artilleur (il recule et
+  tire, le pilote ne l'atteint jamais) ; graine 1022, 1 595. C'est l'IA de l'artilleur (recul) contre un joueur sans arme de tir, pas le nombre.
+- **Fuel** : avec moins de combats et moins de repos, le prudent finit ses niveaux avec plus de fuel qu'en B (D1 19 / 42 / 41) : le
+  fuel contraint encore les longues parties (2 morts à sec au niveau 3) mais moins qu'en B.
+- Banc (`outils/cout_groupes.py`, foreuse de série, assaut, 300 groupes par niveau, dégâts de base) : médiane 11 / 21 / 19, D9 23 / 66 / 55 ;
+  × 1,4 / 1,6 / 1,6 ≈ 15 / 34 / 30 et 32 / 106 / 88.
+- `simul.py tout` (dégâts du niveau 1, × 1,4) : détection et fuite inchangées ; combat : Mastok seul 79 % de victoires / 45 PV restants
+  (95 % / 51 avant), Mastok + 2 Crabos 50 % / 33 (86 % / 36), 2 Crabos 100 % / 78, RÉF. (2 Crabos + 1 Vipérin) 100 % / 71.
+
+## Survie D (28 novembre 2026) : arme de tir
+
+Pilote (`outils/scripts/pilote.js`, `piloteTir`) : le prudent tire sur le chasseur en vue le plus proche, à 2 cases ou plus, s'il lui
+reste 15 d'énergie après le tir, puis finit au contact ; le fonceur tire dès qu'il a l'énergie du tir. Arme : le canon seul (le pilote
+n'équipe pas d'autre arme de tir). Mêmes graines (1000 à 1029). Valeurs des armes : celles du coordinateur, inchangées.
+Témoin : `pilote.py fonceur 30 2 --regles '{"PILOTE_TIR":0}'` (mêmes graines, tir coupé).
+
+| | Survie C | **Survie D** | Cible |
+|---|---|---|---|
+| Prudent : noyau atteint (normale) | 13 / 30 | **17 / 30** (57 %) | 5 à 6 sur 10 — tenue |
+| Fonceur : noyau atteint | 3 / 30 | **9 / 30** (30 %) ; **7 / 30 avec le tir coupé** | 1 sur 10 au plus — dépassée, surtout hors du tir |
+| Prudent : morts par niveau (normale) | 4 / 8 / 5 | **4 / 7 / 2** | – |
+| Prudent, groupe affronté, normale : médiane / D9 | 13/38 · 21/76 · 17,5/69 | **7/23 · 14/72 · 16/58** | méd. 25-40, D9 < 70 |
+| Fonceur, groupe affronté : médiane / D9 | 11/27 · 19/67 · 14/38 | **8/23 · 15,5/50 · 10/30** | – |
+| Prudent : durée d'un niveau (immortel, médiane) | 1 707 / 928 / 1 202 | **1 619 / 867 / 974** | – |
+| Prudent : vie perdue par niveau (immortel, médiane) | 72 / 191 / 206 | **50 / 131 / 169** | – |
+| Prudent : « aurait été détruite » (immortel, parties) | – | **4 / 8 / 9** | – |
+| Prudent : fuel à la descente (normale, moy., D1) | 39 (19) · 54 (42) · 49 (41) | **41 (16) · 51 (28) · 46 (38)** | – |
+| Prudent : tirs par niveau / énergie au tir / dégâts au tir (normale, moy.) | – | **13 / 268 / 80 · 12 / 232 / 69 · 16 / 310 / 94** | – |
+| Fonceur : idem | – | **6 / 128 / 41 · 4,5 / 90 / 29 · 6 / 126 / 40** | – |
+| Battements à énergie 0 (prudent · fonceur) | – | **2 / 0,6 / 8,5 · 21 / 23 / 14** | – |
+| Artilleur : pire perte en un niveau (prudent, immortel) | 35 058 (graine 1028, duel sans fin) | **55** | duel réglé |
+
+- **L'artilleur se règle au tir** : plus aucun duel sans fin (pire niveau : 55 PV contre lui, graine 1011, niveau 3) ; en série normale,
+  1 mort sur 13 lui revient chez le prudent. Soudeur et englueur ne coûtent presque plus rien (0 à 0,3 PV par partie).
+- **Le prudent** gagne 4 parties ; les groupes coûtent moins (médiane 7 / 14 / 16) : la cible « un tiers de vie » s'éloigne encore.
+- **Le fonceur** sort de la cible, mais le témoin sans tir fait 7 / 30 sur les mêmes graines (les niveaux 2 et 3 ne se rejouent pas à
+  l'identique, voir « Survie C ») : le tir ne lui donne que 2 parties. Valeurs des armes laissées telles quelles ; à revoir après essai.
+- `simul.py tout` : inchangé (le tir n'entre pas dans ces combats au contact) ; « RÉF. avec Forage silencieux / Tir silencieux » :
+  100 % de victoires, vie restante 70 / 72.
+
+## Niveau 1 après retouche des ferrailleuses (28 novembre 2026, bloc F)
+
+Niveau 1 seul (`pilote.py tout 30 2 --niveaux 1`, graines 1000 à 1029), avec les groupes **enregistrés du joueur** (`--reglages`,
+reglages/courant lu le 28 novembre 2026 : Crabots, Bande de relais, Banc de torpilles + groupes de l'Astroport) et avec les groupes du
+code. « Avant » = commit 1dc3c8c, joué avec le même pilote (le prudent contourne désormais le périmètre des épaves occupées et recule
+à l'alerte ; le fonceur l'ignore). Niveau 1 compté fini à la descente.
+
+| Groupes du joueur | Avant | **Après** |
+|---|---|---|
+| Prudent : niveau fini / morts | 27 / 3 | **28 / 2** |
+| Prudent : vie perdue (moy · méd) | 64,6 · 45 | **60,7 · 41,5** |
+| Prudent : groupes affrontés (moy) · vie par groupe (méd) | 4,6 · 6 | **3,7 · 7** |
+| Prudent : durée (méd, battements) · fuel à la descente (moy) | 1 770 · 36 | **1 906 · 36** |
+| Fonceur : niveau fini / morts | 28 / 2 | **29 / 1** |
+| Fonceur : vie perdue (moy · méd) | 54,7 · 60 | **42,7 · 34** |
+| Fonceur : groupes affrontés · durée (méd) · fuel | 4,4 · 400 · 64 | **3,2 · 533 · 62** |
+
+| Groupes du code | Avant | **Après** |
+|---|---|---|
+| Prudent : niveau fini / morts | 24 / 6 | **26 / 4** |
+| Prudent : vie perdue (moy · méd) | 106 · 89 | **107 · 85** |
+| Prudent : groupes affrontés · vie par groupe (méd) | 2,7 · 8 | **4,1 · 13** |
+| Prudent : durée (méd) · fuel à la descente | 2 371 · 21 | **2 227 · 25** |
+| Fonceur : niveau fini / morts | 24 / 6 | **28 / 2** |
+| Fonceur : vie perdue (moy · méd) · groupes affrontés | 65,6 · 68 · 4,4 | **62,8 · 57,5 · 3,5** |
+
+- **Cycle des équipes** (`outils/scripts/mesure-ouvrage.js`, 6 cartes × 2 000 battements, foreuse au vaisseau) : part du temps contre
+  la coque par groupe — groupes du joueur : 35 groupes, moyenne **57,8 %**, médiane 59,7, D1 51,9, D9 62,6, 29 sur 35 entre 55 et 65 ;
+  groupes du code : 36 groupes, moyenne **55,6 %**, médiane 56,5, D1 50,1, D9 62,4. Trajet aller : 80 à 180 battements (le quai est loin) ;
+  découpe 250 à 550. Les écarts restants : ouvrières dont le poste est bloqué (elles attendent à côté) et cycles coupés par la fenêtre.
+- **Au départ** : la première équipe est posée sur l'épave éligible la plus proche (13 cases au moins) et commence au travail, mais la
+  vue de la foreuse (10 cases) ne l'atteint pas depuis le vaisseau : 0 ferrailleuse en vue à la sortie sur 10 cartes sur 12 ; on la voit
+  après quelques pas.
+- **Périmètres** : part de l'extérieur praticable dans un périmètre d'épave occupée, groupes du joueur : 11,7 % avant, **21 %** après
+  (ses Crabots et relais deviennent des équipes) ; groupes du code : 20 % (inchangé).
+- `simul.py tout` : inchangé (arènes sans rôle).

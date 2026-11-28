@@ -55,11 +55,12 @@ function machTick(){if(!G.las||!G.las.length||G.over)return;G.mt=(G.mt||0)+1;con
     const pieds=liste===G.beasts&&typeof FOOT!=='undefined'?FOOT:[[0,0]];if(!pieds.some(([dx,dy])=>lit[idx(o.x+dx,o.y+dy)]))continue;
     o.hp=(o.hp??pvDe(fiches[o.sp]))-MACH_DM;if(vis[idx(o.x,o.y)])addFx({kind:'num',x:o.x,y:o.y,txt:'-'+MACH_DM,col:PAL['3'],dur:750});
     if(o.hp<=0){liste.splice(liste.indexOf(o),1);bleed(o.x,o.y);if(liste===G.beasts&&typeof butinMort==='function')butinMort(o);
+      else if(liste!==G.beasts&&typeof jnDetruit==='function')jnDetruit(o,0);
       if(vis[idx(o.x,o.y)])sayMore(`${LeNom(fiches[o.sp])} est détruit par un laser.`,'good');
       if(liste===G.beasts&&typeof minePartie==='function')minePartie(o);}}
   if(lit[idx(G.px,G.py)]){G.st.vie=Math.max(0,G.st.vie-MACH_DM);addFx({kind:'num',x:G.px,y:G.py,txt:'-'+MACH_DM,col:PAL['4'],dur:900});
     addFx({kind:'shake',amp:5,dur:220});
-    sayMore(`Laser : −${MACH_DM} vie.`,'warn');if(G.st.vie<=0)G.over={dead:true};}}
+    sayMore(`Laser : −${MACH_DM} vie.`,'warn');mortForeuse();}}
 // rendu des rayons allumés : cases pleines, sans transparence (consigne « pixel perfect »)
 // tuiles du Tile editor, groupe FX (22 novembre 2026) : laserV (vertical ; l'horizontal en est la rotation) et laserX (croix)
 function machDraw(){if(!G.las||!G.las.length)return;const lit=machLit(),T={v:TL.laserV_,h:TL.laserH_,x:TL.laserX_};ctx.globalAlpha=1;
@@ -97,7 +98,8 @@ function circApplique(c,muet){const t=G.t;
     else if(k.t==='lasers'){for(const l of G.las||[])if(l.g===k.g)l.cut=c.on?1:0;machZone();}}}
 const circTxt=c=>c.cib.map(k=>k.t==='pont'?(c.on?'un pont se déploie':'le pont se rétracte'):k.t==='grille'?(c.on?'une grille d’énergie s’éteint':'la grille d’énergie se rallume'):(c.on?'les lasers de la salle s’éteignent':'les lasers se rallument')).join(', ');
 // les socles : alimentés tant qu'une pile est posée dessus
-function socMaj(){for(const k in G.soc||{}){const c=G.circ[G.soc[k]];if(!c)continue;const on=G.t[+k]===PILE?1:0;if(on!==c.on){c.on=on;
+function socMaj(){for(const k in G.soc||{}){const c=G.circ[G.soc[k]];if(!c)continue;const on=c.term||G.t[+k]===PILE?1:0;   // c.term : grille coupée depuis un terminal, pour de bon (07i)
+  if(on!==c.on){c.on=on;
   circApplique(c);sayMore((on?'Socle alimenté : ':'Socle hors tension : ')+circTxt(c)+'.',on?'good':'warn');if(on)SFX.spot();}}}
 // la foreuse avance sur une machine. Renvoie 'go' si le pas peut se faire (pile poussée), sinon le coup est déjà joué.
 function machBump(nx,ny,dx,dy){const i=idx(nx,ny),v=G.t[i],fin=d=>{G.turn++;G.msg=null;pass(d||100);computeFOV();render();
@@ -121,7 +123,7 @@ function machBump(nx,ny,dx,dy){const i=idx(nx,ny),v=G.t[i],fin=d=>{G.turn++;G.ms
     G.art[i]=1;const dv=Math.round(G.st.vieMax-G.st.vie),de=Math.round(G.st.energieMax-G.st.energie);G.st.vie=G.st.vieMax;
       G.st.energie=G.st.energieMax;
     addFx({kind:'num',x:G.px,y:G.py,txt:'+'+dv,col:PAL['2'],dur:900});addFx({kind:'soin',x:G.px,y:G.py,dur:900,gr:fxGrains(9)});SFX.analyse();
-    let n=0;for(const b of G.beasts||[])if(!b.hunt&&Math.hypot(b.x-G.px,b.y-G.py)<=12&&!BEASTS[b.sp].mine){b.hunt=1;spot(b);n++;}
+    let n=0;for(const b of G.beasts||[])if(!b.hunt&&Math.hypot(b.x-G.px,b.y-G.py)<=12&&!BEASTS[b.sp].mine&&!aOuvrage(b)){b.hunt=1;spot(b);n++;}
     say(`Station de réparation : +${dv} vie, +${de} énergie. Le vacarme s’entend de loin${n?` : ${n} ennemi${n>1?'s':''} vien${n>1?'nent':'t'} voir`:''}.`,'good');return fin(200);}
   if(v===FABRIC){if(typeof fabOpen==='function')fabOpen(i);else{say('FABLAB.');render();}return 'stop';}
   if(v===GRILLE){say('Grille d’énergie : fermée. Son socle, tout près, attend une pile.');SFX.blocked();render();return 'stop';}
@@ -368,7 +370,8 @@ function machines(){G.las=[];G.lz={};G.circ=[];G.soc={};G.piles={};G.mt=0;G.mach
     for(const k of [d0+1,d0+3]){t[banc.niches[k]]=VITRE;t[banc.portes[k]]=VITRE;}         // cloisons, deux cases de fond
     for(const k of [d0,d0+2,d0+4])t[banc.portes[k]]=DOOR;                                  // une porte devant chaque niche
     const bc=typeof butinCoffre==='function';
-    const lots=bc?[[planTire()],[equipTire()],[consoTire(),consoTire()]]:[['matiere'],['matiere'],['matiere']];
+    // 28 novembre 2026 : plus de plan dans une vitrine (les plans viennent des terminaux) ; à sa place, trois blocs de Matière
+    const lots=bc?[['matiere','matiere','matiere'],[equipTire()],[consoTire(),consoTire()]]:[['matiere'],['matiere'],['matiere']];
     sel.forEach((i,n)=>{G.items[i]=lots[n].slice();G.vit[i]=1;});G.choix.push({c:sel,on:1});p.mach='vitrines';return true;};
   // récompense d'une salle à lasers : un butin au fond, là où mène la traversée
   const recompense=p=>{const d=dist(),c=p.c.filter(i=>libre(i)&&d[i]>=0&&!G.lz[i]).sort((a,b)=>d[b]-d[a])[0];
@@ -384,7 +387,10 @@ function machines(){G.las=[];G.lz={};G.circ=[];G.soc={};G.piles={};G.mt=0;G.mach
   for(let k=fq('station');k>0;k--)for(const p of mel(pieces)){if(p.mach==='lasers'||p.mach==='croix')continue;
     if(pose(p,STATION,0,true)>=0){inc('station');break;}}
   // le fabricateur : dans une pièce sans laser ; à défaut (petit complexe du niveau 1), n'importe où dans un bâtiment
-  for(let k=fq('fabric',1);k>0;k--){let fait=false;for(const p of mel(pieces)){if(p.mach==='lasers'||p.mach==='croix')continue;
+  // Astroport (28 novembre 2026) : le dépôt de tri a toujours son FABLAB, dès que l'artefact est actif (même si la fenêtre LIFE ne
+  // le permet pas au niveau 1)
+  const nFab=astroRec()&&ARTEFACTS.fabric&&ARTEFACTS.fabric.on?Math.max(1,fq('fabric',1)||0):fq('fabric',1);
+  for(let k=nFab;k>0;k--){let fait=false;for(const p of mel(pieces)){if(p.mach==='lasers'||p.mach==='croix')continue;
     if(pose(p,FABRIC,0,true)>=0){fait=true;break;}}
     if(!fait)for(const S of mel(strs)){for(const p of mel(S.pieces)){if(p.c.length>=6&&pose(p,FABRIC,0,true)>=0){fait=true;
       break;}}if(fait)break;}
