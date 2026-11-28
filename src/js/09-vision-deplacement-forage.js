@@ -101,14 +101,14 @@ function portesBruit(av){for(const i of portesPrises())if(!av.has(i)&&vis[i]){SF
    tombent pendant la durée d de l'action de la foreuse. G.bat porte l'instant du prochain battement. */
 function pass(d,wait){const fin=(G.time||0)+d;
   if(G.bat==null)G.bat=(G.time||0)+TICK;
-  let garde=0,place=performance.now()-FX_DERNIER<30?1:0;   // la foreuse vient de montrer son propre geste : on passe après
+  let garde=0,place=0;const base=finGesteForeuse();          // les créatures attendent la fin du geste de la foreuse
   while(!G.over&&garde++<4000){
     const c=prochaineCreature(),tc=c?c.pret:Infinity,
       batOk=G.bat<=fin+1e-6,                            // le battement qui tombe au bout de l'action compte, lui
       creOk=tc<fin-1e-6;                                // mais la foreuse joue avant une créature prête au même instant
     if(!batOk&&!creOk)break;
     if(creOk&&(!batOk||tc<G.bat)){G.time=tc;                     // une créature agit sur son horloge
-      const n=FX_AJOUTS,r=Math.min(place,RETARD_MAX)*ECART_COUP;FX_RETARD=r;SON_DECAL=r/1000;   // son geste attend son tour (10-rendu)
+      const n=FX_AJOUTS,r=base+Math.min(place,RETARD_MAX)*ECART_COUP;FX_RETARD=r;SON_DECAL=r/1000;   // son geste attend son tour (10-rendu)
       try{creatureJoue(c);}finally{FX_RETARD=0;SON_DECAL=0;}
       if(FX_AJOUTS>n)place++;}
     else{G.time=G.bat;G.bat+=TICK;battement(wait);}}    // le battement du monde (égalité : il passe d'abord)

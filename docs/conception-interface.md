@@ -156,15 +156,15 @@ calcul qu'à pleine résolution. Sur ordinateur, rien ne change (autant de cases
 tard** : le Téléobjectif (capteur 13) voit au-delà de ce qui est affiché.
 
 ### Rythme des animations et effets de surface (26 novembre 2026)
-- **20 images par seconde partout** (effets, fumée, explosion, intro, descentes) : `FPS` et `raf20()` dans `00-base.js`,
+- **30 images par seconde partout** (effets, fumée, explosion, intro, descentes ; 20 du 26 au 28 novembre 2026, jugé saccadé) : `FPS` et `raf20()` dans `00-base.js`,
   au lieu du rythme du navigateur (60 ou plus). Les animations suivent l'horloge : leur durée ne change pas.
 - **Sauf le combat (28 novembre 2026)** : l'élan d'un coup, la secousse et les chiffres de dégâts s'animent à
   **60 images par seconde** (`FX_VIF`, `10-rendu.js`) ; à 20, un élan de 200 ms ne faisait que 4 images et le combat
-  paraissait saccadé (« le jeu rame »). La boucle repasse à 20 dès que ces effets sont finis.
+  paraissait saccadé (« le jeu rame »). La boucle repasse à 30 dès que ces effets sont finis.
 - **Coups étalés (28 novembre 2026)** : les coups des créatures pendant un même tour ne s'affichent plus tous au même
-  instant. Chaque créature qui montre quelque chose prend son tour, **70 ms** après la précédente (`ECART_COUP`, au plus
-  6 crans : `RETARD_MAX`), et ses sons suivent (`SON_DECAL`, `01-sons.js`) ; si la foreuse vient de frapper, la première
-  riposte passe après son geste. Seul l'affichage attend (`FX_ATT`) : le tour est déjà joué, les commandes répondent
+  instant. Les créatures attendent **la fin du geste de la foreuse** (élan, éclair, secousse : `finGesteForeuse`), puis
+  chacune qui montre quelque chose prend son tour, **100 ms** après la précédente (`ECART_COUP`, au plus 6 crans :
+  `RETARD_MAX`), et ses sons suivent (`SON_DECAL`, `01-sons.js`). Seul l'affichage attend (`FX_ATT`) : le tour est déjà joué, les commandes répondent
   tout de suite. Rien n'est retardé en mouvement réduit.
 - **Effets de surface** : la plupart des effets (dégâts, soins, énergie, lasers, glu, braises, alertes, ondes, boost,
   fureur, voile, éclairs) se posent par-dessus le décor. Pendant qu'ils jouent, le décor n'est plus redessiné : une copie

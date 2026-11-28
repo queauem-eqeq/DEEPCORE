@@ -49,7 +49,7 @@ const LETTERS='ABCDE';
    lieu du rythme du navigateur (60, plus sur un écran rapide). Chaque image redessine beaucoup : trois fois moins
    d'images, trois fois moins de dessin. Les animations suivent l'horloge, pas le nombre d'images : leur durée ne change
    pas. raf20(f) remplace requestAnimationFrame(f) : il laisse passer les images trop rapprochées. */
-const FPS=20;
+const FPS=30;   // 30 images par seconde depuis le 28 novembre 2026 (demande du joueur : 20 paraissait saccadé)
 function raf20(cb){return requestAnimationFrame(function attend(now){
   if(now-(cb._img||0)<1000/FPS-4){requestAnimationFrame(attend);return;}cb._img=now;cb(now);});}
 

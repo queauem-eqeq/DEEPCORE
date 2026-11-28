@@ -158,10 +158,16 @@ function drawBoom(){const fl=1-(performance.now()-BOOM.t0)/180;
    - L'élan d'un coup, la secousse et les chiffres de dégâts s'animent à 60 images/s (FX_VIF) ; tout le reste garde 20.
      À 20 images/s, un élan de 200 ms ne faisait que 4 images : le combat paraissait saccadé.
    - Les coups des créatures d'un même tour ne partent plus tous au même instant : pass() donne à chacun un retard
-     (FX_RETARD, ECART_COUP ms de plus par créature qui a montré quelque chose), et ses sons suivent (SON_DECAL).
+     (FX_RETARD : la fin du geste de la foreuse, puis ECART_COUP ms de plus par créature qui a montré quelque chose), et
+     ses sons suivent (SON_DECAL).
      Les effets en attente vivent dans FX_ATT et entrent dans FX à leur heure. Le jeu, lui, est déjà joué : les commandes
      répondent tout de suite. */
-const FX_VIF=new Set(['lunge','shake','num']),ECART_COUP=70,RETARD_MAX=6;
+const FX_VIF=new Set(['lunge','shake','num']),ECART_COUP=100,RETARD_MAX=6;
+// Fin du geste que la foreuse vient de lancer (élan, éclair, secousse), en ms à partir de maintenant : les créatures attendent
+// qu'il soit fini pour montrer le leur (28 novembre 2026). Les chiffres de dégâts, longs, ne comptent pas.
+function finGesteForeuse(){const now=performance.now();let fin=0;
+  for(const f of FX)if(now-f.t0<30&&(f.kind==='lunge'||f.kind==='flash'||f.kind==='shake'))fin=Math.max(fin,f.t0+f.dur-now);
+  return fin;}
 let FX_ATT=[],FX_RETARD=0,FX_AJOUTS=0,FX_DERNIER=-1e9;
 function fxEntre(f){f.t0=performance.now();if(f.kind==='num')f.stack=FX.filter(o=>o.kind==='num'&&o.x===f.x&&o.y===f.y&&fxP(o)<.5).length;
   FX.push(f);}
