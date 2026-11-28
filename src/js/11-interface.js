@@ -285,7 +285,9 @@ let DB=null;
 // À l'ouverture, les réglages enregistrés en base sont rechargés (même d'un autre appareil)
 function applySaved(d){
   const num=v=>typeof v==='number'&&isFinite(v);
-  clePuce(d.bestiaire);if(d.bestiaire)BEST_LIST().forEach(e=>{const b=d.bestiaire[e.key];if(b)BFIELDS.forEach(([f])=>{if(num(b[f]))e.o[f]=b[f];});});saveBest();
+  const vieux=(Date.parse(d.enregistreLe)||0)<COUP100_LE;   // coups d'avant le passage de tous à 100 : non repris (07-generation)
+  clePuce(d.bestiaire);if(d.bestiaire)BEST_LIST().forEach(e=>{const b=d.bestiaire[e.key];if(b)BFIELDS.forEach(([f])=>{
+    if(vieux&&coupAncien(f))return;if(num(b[f]))e.o[f]=b[f];});});saveBest();
   if(num(d.discretion))setStealthBase(d.discretion);
   if(d.artefacts){ARTEFACTS=artefactsSains(d.artefacts);saveArtefacts();}
   if(d.items&&typeof itemsApplique==='function'){itemsApplique(d.items);saveItems();}

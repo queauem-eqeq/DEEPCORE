@@ -118,7 +118,7 @@ PAT.crackH=(x,y)=>{const c=(a,b)=>PAT.crack2[b]&&PAT.crack2[b][a]==='0';
 PAT.rubble=["................","..33.......3....","..3.....33......","........3...33..","....3.......3...",".33......3......","..........33....","...3..3.........","..33.......3....","........33......",".3...3......33..","...........3....","....33..........","..........3..3..",".3..3...........","................"];
 // Petits animaux : dpas et dcoup = durées d'un pas et d'un coup (100 = l'allure de base), d = portée de détection en cases
 const SPECIES=[
-  {n:'Puce',fem:true,dpas:75,dcoup:75,pv:10,dmin:1,dmax:2,pre:80,def:20,crit:2,b:'2',a:'3',rx:4,ry:2,hr:1.6,legs:3,ears:'antennes',tail:'',pat:'rayures',
+  {n:'Puce',fem:true,dpas:75,dcoup:100,pv:10,dmin:1,dmax:2,pre:80,def:20,crit:2,b:'2',a:'3',rx:4,ry:2,hr:1.6,legs:3,ears:'antennes',tail:'',pat:'rayures',
    // dessin robotique adopté comme norme le 17 novembre 2026
    rows:["................",
      "................",
@@ -191,7 +191,7 @@ const BEASTS=[
      "....11.....11...",
      "................",
      "................"]},
-  {n:'Broyeur',key:'mastok',nb:1,role:'Colosse lent : très résistant, frappe très fort',dpas:150,dcoup:150,pv:60,dmin:12,dmax:20,pre:60,def:0,crit:0,
+  {n:'Broyeur',key:'mastok',nb:1,role:'Colosse lent : très résistant, frappe très fort',dpas:150,dcoup:100,pv:60,dmin:12,dmax:20,pre:60,def:0,crit:0,
    rows:["................",
      "......2222......",
      "....22211222....",
@@ -243,7 +243,7 @@ const BEASTS=[
      "...1...11...1...",
      ".......11.......",
      "................"]},
-  {n:'Sentinelle',fem:true,key:'paralyzor',nb:3,role:'Tire un laser jusqu’à 2 cases, en ligne de vue',dpas:75,dcoup:50,pv:18,dmin:1,dmax:1,pre:70,def:10,
+  {n:'Sentinelle',fem:true,key:'paralyzor',nb:3,role:'Tire un laser jusqu’à 2 cases, en ligne de vue',dpas:75,dcoup:100,pv:18,dmin:1,dmax:1,pre:70,def:10,
     crit:0,laser:2,rows:["................",
      "................",
      "......1111......",
@@ -269,7 +269,7 @@ const BEASTS=[
     pre:100,def:15,crit:0,
   
    rows:["................", "................", ".....1....1.....", ".....1....1.....", "...1111111111...", "..112222222211..", ".31123322332113.", ".33122222222133.", "..312223322213..", "..312233332213..", "...1122222211...", "...1111111111...", "...11......11...", "..111......111..", "................", "................"]},
-  {n:'Artilleur',key:'artilleur',nb:2,role:'Tire un laser jusqu’à 5 cases, un battement sur deux, et recule quand on l’approche',dpas:75,dcoup:200,pv:14,
+  {n:'Artilleur',key:'artilleur',nb:2,role:'Tire un laser jusqu’à 5 cases, un battement sur deux, et recule quand on l’approche',dpas:75,dcoup:100,pv:14,
     dmin:4,dmax:7,pre:65,def:5,crit:0,laser:5,cadence:2,recul:2,
    rows:["................",
      "................",
@@ -287,7 +287,7 @@ const BEASTS=[
      "..11....11......",
      "................",
      "................"]},
-  {n:'Drone',key:'drone',nb:4,role:'Vole : ni gouffre ni eau ne l’arrêtent. Fragile, rapide, en essaim',dpas:50,dcoup:75,pv:6,dmin:2,dmax:3,pre:80,
+  {n:'Drone',key:'drone',nb:4,role:'Vole : ni gouffre ni eau ne l’arrêtent. Fragile, rapide, en essaim',dpas:50,dcoup:100,pv:6,dmin:2,dmax:3,pre:80,
     def:30,crit:0,vol:true,swim:true,nage:true,pack:true,
    rows:["................",
      "................",

@@ -154,38 +154,16 @@ function drawBoom(){const fl=1-(performance.now()-BOOM.t0)/180;
     ctx.arc((G.px+.5-camX)*S,(G.py+.5-camY)*S,S*1.6,0,Math.PI*2);ctx.fill();}
   ctx.globalAlpha=1;for(const q of BOOM.p){ctx.fillStyle=q.c;
     ctx.fillRect(Math.round((q.x-camX)*S/2)*2,Math.round((q.y-q.z-camY)*S/2)*2,q.sz,q.sz);}}
-/* Combat lisible (28 novembre 2026).
-   - L'élan d'un coup, la secousse et les chiffres de dégâts s'animent à 60 images/s (FX_VIF) ; tout le reste garde 20.
-     À 20 images/s, un élan de 200 ms ne faisait que 4 images : le combat paraissait saccadé.
-   - Les coups des créatures d'un même tour ne partent plus tous au même instant : pass() donne à chacun un retard
-     (FX_RETARD : la fin du geste de la foreuse, puis ECART_COUP ms de plus par créature qui a montré quelque chose), et
-     ses sons suivent (SON_DECAL).
-     Les effets en attente vivent dans FX_ATT et entrent dans FX à leur heure. Le jeu, lui, est déjà joué : les commandes
-     répondent tout de suite. */
-const FX_VIF=new Set(['lunge','shake','num']),ECART_COUP=130,RETARD_MAX=6,GROUPE_T=50;
-let PASS_N=0;
-// Fin du geste que la foreuse vient de lancer (élan, éclair, secousse), en ms à partir de maintenant : les créatures attendent
-// qu'il soit fini pour montrer le leur (28 novembre 2026). Les chiffres de dégâts, longs, ne comptent pas.
-// Seul l'élan de la foreuse compte, et les créatures partent un peu avant sa fin (60 ms) : le combat s'enchaîne sans temps mort.
-function finGesteForeuse(){const now=performance.now();let fin=0;
-  for(const f of FX)if(now-f.t0<30&&f.kind==='lunge'&&f.robot)fin=Math.max(fin,f.t0+f.dur-now-60);
-  return Math.max(0,fin);}
-let FX_ATT=[],FX_RETARD=0,FX_AJOUTS=0,FX_DERNIER=-1e9;
-function fxEntre(f){f.t0=performance.now();if(f.kind==='num')f.stack=FX.filter(o=>o.kind==='num'&&o.x===f.x&&o.y===f.y&&fxP(o)<.5).length;
-  FX.push(f);}
-function addFx(f){FX_AJOUTS++;FX_DERNIER=performance.now();
-  if(FX_RETARD>0&&!reduced){f.debut=FX_DERNIER+FX_RETARD;FX_ATT.push(f);}else fxEntre(f);
-  if(!fxRaf)fxRaf=fxSuite();}
-// prochaine image : à 60 images/s tant qu'un effet de combat bouge (ou va bientôt partir), sinon au pas de 20
-const fxSuite=()=>FX.some(f=>FX_VIF.has(f.kind))||FX_ATT.length?requestAnimationFrame(fxLoop):raf20(fxLoop);
-// grains d'un effet de consommable : position dans la case et instant d'apparition, tirés une fois pour toutes
-const fxGrains=n=>Array.from({length:n},()=>({x:rnd(0,13),y:rnd(3,14),d:Math.random()*.55}));
-// une mine armée ou un paralyzor accroché gardent le rendu en marche
-function fxLoop(){const now=performance.now();FX=FX.filter(f=>now-f.t0<f.dur);
-  if(FX_ATT.length){const prets=FX_ATT.filter(f=>f.debut<=now);if(prets.length){FX_ATT=FX_ATT.filter(f=>f.debut>now);prets.forEach(fxEntre);}}
-  if(antAnime())antVis();
+/* Combat lisible (28 novembre 2026) : l'élan d'un coup, la secousse et les chiffres de dégâts s'animent à 60 images/s
+   (FX_VIF) ; tout le reste garde le pas de FPS. Les coups étalés puis groupés du même jour ont été retirés (historique.md). */
+const FX_VIF=new Set(['lunge','shake','num']);
+function addFx(f){f.t0=performance.now();if(f.kind==='num')f.stack=FX.filter(o=>o.kind==='num'&&o.x===f.x&&o.y===f.y&&fxP(o)<.5).length;
+  FX.push(f);if(!fxRaf)fxRaf=fxSuite();}
+// prochaine image : à 60 images/s tant qu'un effet de combat bouge, sinon au pas de FPS
+const fxSuite=()=>FX.some(f=>FX_VIF.has(f.kind))?requestAnimationFrame(fxLoop):raf20(fxLoop);
+function fxLoop(){const now=performance.now();FX=FX.filter(f=>now-f.t0<f.dur);if(antAnime())antVis();
   if(fxSurface())fxRapide();else render();
-  fxLoop._img=now;fxRaf=(FX.length||FX_ATT.length||animVif())?fxSuite():0;}
+  fxLoop._img=now;fxRaf=(FX.length||animVif())?fxSuite():0;}
 const fxP=f=>Math.min(1,(performance.now()-f.t0)/f.dur);
 function lungeOff(match){if(reduced)return [0,0];const f=FX.find(match);if(!f)return [0,0];const k=Math.sin(Math.PI*fxP(f))*.4*S;
   return [f.dx*k,f.dy*k];}

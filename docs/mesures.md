@@ -1085,3 +1085,9 @@ les coups.
 Avant → après : Broyeur seul 76 → 67 ; Broyeur + 2 Crabots 60 → 50 (98 % de victoires au lieu de 100) ; 3 Relais 86 → 91 ;
 4 Relais 82 → 88 ; un Relais 96 → 98. Les autres combats bougent d'un point au plus. Le Broyeur frappe plus fort et plus souvent
 (12-20 toutes les 150 au lieu de 10-18 toutes les 200), les Relais sont plus fragiles (10 PV au lieu de 15).
+
+### Coup 100 pour toutes les espèces (28 novembre 2026, `outils/simul.py`, combat, vie restante sur 100)
+
+Comparé à la recopie du même jour : Broyeur seul 67 → 54 (99 % de victoires) ; Broyeur + 2 Crabots 50 → 38, **88 % de
+victoires** au lieu de 98 : le Broyeur, passé de 150 à 100, frappe 12-20 à chaque battement. Les autres combats bougent de deux
+points au plus (Drone et Sentinelle frappent moins souvent, Artilleur plus souvent).

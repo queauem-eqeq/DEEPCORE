@@ -1,11 +1,4 @@
 /* ---------- Sons (synthèse Web Audio) ---------- */
-/* SON_DECAL (28 novembre 2026) : retard, en secondes, ajouté aux sons joués pendant le coup d'une créature,
-   pour qu'ils tombent avec l'animation étalée du coup (voir FX_RETARD, 10-rendu). */
-let SON_DECAL=0;
-/* SON_GROUPE (28 novembre 2026) : les coups d'un même groupe (attaque combinée, voir pass) ne jouent qu'un bruit de morsure et
-   un bruit de coup raté, au lieu d'un par créature qui s'empilaient. */
-let SON_GROUPE='';const SON_DEJA={};
-const sonGroupe=nom=>{if(!SON_GROUPE)return true;if(SON_DEJA[nom]===SON_GROUPE)return false;SON_DEJA[nom]=SON_GROUPE;return true;};
 let AC=null,MASTER=null,SND={on:true,vol:60},unlocked=false;
 try{const v=JSON.parse(localStorage.getItem('np-son')||'null');if(v&&typeof v.vol==='number')SND=v;}catch(e){}
 function audio(){
@@ -16,12 +9,12 @@ function audio(){
       lim.release.value=.25;
     MASTER.connect(lim);lim.connect(AC.destination);}catch(e){return null;}}
   if(AC.state==='suspended')AC.resume();MASTER.gain.value=SND.vol/100*.8;return AC;}
-function tone(f,dur,type,g,f2,delay){const a=audio();if(!a)return;const t=a.currentTime+(delay||0)+SON_DECAL,o=a.createOscillator(),v=a.createGain();
+function tone(f,dur,type,g,f2,delay){const a=audio();if(!a)return;const t=a.currentTime+(delay||0),o=a.createOscillator(),v=a.createGain();
   o.type=type||'square';o.frequency.setValueAtTime(f,t);if(f2)o.frequency.exponentialRampToValueAtTime(f2,t+dur);
   v.gain.setValueAtTime(0.0001,t);v.gain.exponentialRampToValueAtTime(g,t+.008);v.gain.exponentialRampToValueAtTime(0.0001,t+dur);
   o.connect(v);v.connect(MASTER);o.start(t);o.stop(t+dur+.02);}
 let NB=null;
-function noiz(dur,g,freq,ftype,delay,f2){const a=audio();if(!a)return;const t=a.currentTime+(delay||0)+SON_DECAL;
+function noiz(dur,g,freq,ftype,delay,f2){const a=audio();if(!a)return;const t=a.currentTime+(delay||0);
   if(!NB){NB=a.createBuffer(1,a.sampleRate,a.sampleRate);const d=NB.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;}
   const src=a.createBufferSource(),fl=a.createBiquadFilter(),v=a.createGain();src.buffer=NB;
   fl.type=ftype||'lowpass';fl.frequency.setValueAtTime(freq,t);if(f2)fl.frequency.exponentialRampToValueAtTime(f2,t+dur);
@@ -30,7 +23,7 @@ function noiz(dur,g,freq,ftype,delay,f2){const a=audio();if(!a)return;const t=a.
     v.gain.exponentialRampToValueAtTime(0.0001,t+dur);
   src.connect(fl);fl.connect(v);v.connect(MASTER);src.start(t,Math.random()*.5);src.stop(t+dur+.02);}
 // Souffle : bruit en bande large, montée et descente lentes et linéaires (aucun transitoire, donc aucun crépitement)
-function souffle(dur,g,f1,f2,att,delay){const a=audio();if(!a)return;const t=a.currentTime+(delay||0)+SON_DECAL;if(!NB)noiz(.01,.0001,1000);
+function souffle(dur,g,f1,f2,att,delay){const a=audio();if(!a)return;const t=a.currentTime+(delay||0);if(!NB)noiz(.01,.0001,1000);
   const src=a.createBufferSource(),fl=a.createBiquadFilter(),bas=a.createBiquadFilter(),v=a.createGain();src.buffer=NB;
   fl.type='bandpass';fl.Q.value=.7;fl.frequency.setValueAtTime(f1,t);fl.frequency.linearRampToValueAtTime(f2,t+dur);
   bas.type='lowpass';bas.frequency.value=5000;
@@ -55,7 +48,7 @@ const SFX={
   deep(){noiz(.3,.14,900,'bandpass',0,300);tone(180,.3,'sine',.06,110);},
   drift(){noiz(.45,.12,500,'lowpass',0,1400);tone(260,.4,'sine',.05,130);},
   thud(){tone(70,.12,'square',.09,45);noiz(.08,.1,400);},
-  whoosh(){if(!sonGroupe('whoosh'))return;noiz(.16,.12,1200,'bandpass',0,3000);},
+  whoosh(){noiz(.16,.12,1200,'bandpass',0,3000);},
   blocked(){tone(110,.07,'square',.06,90);},
   crack(){noiz(.07,.3,3000,'highpass');tone(140,.1,'square',.1,60);noiz(.12,.12,900,'lowpass',.04);},
   /* Coups de combat variés (24 novembre 2026) : chaque bruit de coup existe en plusieurs versions, tirées au hasard sans
@@ -96,7 +89,7 @@ const SFX={
   start(){tone(110,.6,'sawtooth',.06,440);tone(220,.6,'square',.03,880,.05);},
   drill(k){tone(48+k*6,.12,'sawtooth',.09);noiz(.1,.12,600+k*120);},
   roar(){tone(140,.45,'sawtooth',.1,55);noiz(.35,.12,500,'lowpass',.05);},
-  bite(){if(!sonGroupe('bite'))return;const r=.92+sAlea()*.16,k=.9+sAlea()*.2;
+  bite(){const r=.92+sAlea()*.16,k=.9+sAlea()*.2;
     switch(SFX.varie('bite',4)){
       // la morsure d'origine
       case 0:tone(90*r,.15,'square',.14*k,40*r);noiz(.12,.2*k,2500*r,'highpass');tone(600*r,.08,'square',.05*k,200*r,.05);break;
