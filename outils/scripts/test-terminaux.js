@@ -35,7 +35,7 @@
     ok(!lance('data')&&/RIEN À LIRE/.test($('termMenu').textContent),'DATA : une seule fois, puis « RIEN À LIRE »');
     const n0=G.st.liaisons||0;lance('liaison');
     ok(m.liaison===n0+1&&G.st.liaisons===n0+1&&/TENTATIVE/.test($('termOut').textContent)&&!lance('liaison'),`liaison : tentative ${m.liaison}, une seule par machine`);
-    lance('hack');ok(m.hack===0&&/INDISPONIBLE/.test($('termOut').textContent),'ENCODAGE → HACK : module indisponible (étape suivante)');
+    lance('hack');ok(m.hack===0&&$('termOut').querySelectorAll('.hkc').length===3,'ENCODAGE → HACK : trois cartes (étape 4, détail dans test-hacks.js)');
     lance('bp');ok(m.bp===0&&/INDISPONIBLE/.test($('termOut').textContent),'ENCODAGE → BLUEPRINT : module indisponible (étape suivante)');
     k('Escape');ok($('terminal').hidden,'Échap ferme la fenêtre');
     termOuvre(m.i);ok(lignes()[0]==='DATA:-undefined','rouvert : la DATA reste lue');ferme();}

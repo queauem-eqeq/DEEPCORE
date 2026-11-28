@@ -23,7 +23,8 @@
 
   // 1. à 6 cases, en vue, hors du périmètre : jamais de chasse
   arene();{const ep=epave(40,23),m=groupe(0,'crabos',[[36,24],[37,25]],'ferraille',ep);let max=0,hos=false;
-    for(let k=0;k<30;k++){G.px=Math.min(...m.map(b=>b.x))-6;G.py=m[0].y;computeFOV();pass(100);max=Math.max(max,chasse(m));if(G.patr[0].ouv==='hostile')hos=true;}
+    // jamais dans le périmètre (28 novembre 2026 : une ferrailleuse passée à l'est de l'épave y attirait la foreuse, 1 fois sur 5)
+    for(let k=0;k<30;k++){G.px=Math.min(Math.min(...m.map(b=>b.x))-6,40-OUVR_R-2);G.py=m[0].y;computeFOV();pass(100);max=Math.max(max,chasse(m));if(G.patr[0].ouv==='hostile')hos=true;}
     v('à l’ouvrage : foreuse en vue à 6 cases pendant 30 battements, aucune chasse',max===0&&!hos,`${max} en chasse au plus`);
     v('journal : « MOBILE IGNORE L’UNITÉ » la première fois',(G.log||[]).some(l=>/MOBILE IGNORE L’UNITÉ/.test(l.m||l)));}
   // témoin : le même groupe sans rôle la repère

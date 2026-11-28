@@ -189,7 +189,7 @@ const CONSO_POIDS=[['repar',5],['batterie',4],['fumigene',3],['charge',3],['bers
   ['phaseur',2]];
 function consoTire(){let t=CONSO_POIDS.reduce((a,c)=>a+c[1],0),r=Math.random()*t;
   for(const [k,p] of CONSO_POIDS){if((r-=p)<0)return k;}return 'repar';}
-function equipTire(){const l=Object.keys(ITEMS).filter(k=>ITEMS[k].slot&&!ITEMS[k].base&&k!=='usine'&&PLAN_RANG(k)<=nivCarte()+1);
+function equipTire(){const l=Object.keys(ITEMS).filter(k=>ITEMS[k].slot&&!ITEMS[k].hack&&!ITEMS[k].base&&k!=='usine'&&PLAN_RANG(k)<=nivCarte()+1);
   return l.length?l[rnd(0,l.length-1)]:'matiere';}
 // contenu d'un coffre : dépôt derrière une grille, appât d'une salle piégée, pièce secrète
 function butinCoffre(q){const h=p=>Math.random()<p;
@@ -198,7 +198,8 @@ function butinCoffre(q){const h=p=>Math.random()<p;
   return [consoTire(),'matiere',...(h(.5)?[planTire()]:[]),...(h(.25)?['puissance']:[])];}
 // un robot abattu lâche parfois un objet (les relais d'une salle piégée, jamais : b.nd)
 // Un objet au plus par robot, quel que soit le nombre de coups qui l'achèvent au même battement (b.butin, 25 novembre 2026).
-function butinMort(b){if(!b||b.nd||b.butin)return;b.butin=1;const sp=BEASTS[b.sp],p=DROPS[sp.key]||0;if(Math.random()*100>=p)return;
+function butinMort(b){if(b&&typeof hackDetruit==='function'&&!(BEASTS[b.sp]||{}).mine)hackDetruit(b);   // hack RECYCLAGE (14g)
+  if(!b||b.nd||b.butin)return;b.butin=1;const sp=BEASTS[b.sp],p=DROPS[sp.key]||0;if(Math.random()*100>=p)return;
   const i0=idx(b.x,b.y);if(blocks(G.t[i0])||G.t[i0]===DEEP)return;
     const r=Math.random(),k=r<.4?'matiere':r<.75?consoTire():r<.93?planTire():equipTire();
   const i=caseSol(b.x,b.y,true);   // un objet déjà là : celui-ci roule sur la case libre la plus proche (22 novembre 2026)
@@ -457,7 +458,7 @@ function robotTuile(){const base=TL['robot_'+(G.face||'u')],E=G.eff||{};
   return m[cle]=c;}
 
 /* ----- Réglages : Lab → Items ----- */
-const itemsEtat=()=>{const mod={},req={},de={};for(const k in ITEMS){const d=ITEMS[k];if(!d.slot)continue;mod[k]=Object.assign({},d.mod);
+const itemsEtat=()=>{const mod={},req={},de={};for(const k in ITEMS){const d=ITEMS[k];if(!d.slot||d.hack)continue;mod[k]=Object.assign({},d.mod);
   if(d.req!=null)req[k]=d.req;if(d.de)de[k]=Object.assign({},d.de);}
   return {val:JSON.parse(JSON.stringify(ITEM_VAL)),prix:Object.assign({},FAB_PRIX),drops:Object.assign({},DROPS),mod,req,de};};
 const ITEMS_DEF=itemsEtat();
@@ -468,7 +469,7 @@ function itemsApplique(o){const num=v=>typeof v==='number'&&isFinite(v);if(!o||t
   for(const k of ['berserk','camo'])if(o.val&&o.val[k]&&o.val[k].duree===10)ITEM_VAL[k].duree=30;
   for(const k in o.prix||{})if(k in FAB_PRIX&&num(o.prix[k]))FAB_PRIX[k]=o.prix[k];
   for(const k in o.drops||{})if(k in DROPS&&num(o.drops[k]))DROPS[k]=o.drops[k];
-  for(const k in o.mod||{})if(ITEMS[k]&&ITEMS[k].slot)for(const f in o.mod[k])if(MODS[f]&&num(o.mod[k][f]))ITEMS[k].mod[f]=o.mod[k][f];
+  for(const k in o.mod||{})if(ITEMS[k]&&ITEMS[k].slot&&!ITEMS[k].hack)for(const f in o.mod[k])if(MODS[f]&&num(o.mod[k][f]))ITEMS[k].mod[f]=o.mod[k][f];
   for(const k in o.req||{})if(ITEMS[k]&&ITEMS[k].req!=null&&num(o.req[k]))ITEMS[k].req=o.req[k];
   for(const k in o.de||{})if(ITEMS[k]&&ITEMS[k].de)for(const f of ['n','f','p'])if(num(o.de[k][f]))ITEMS[k].de[f]=o.de[k][f];
   itemTxt();}
@@ -496,6 +497,7 @@ function buildItems(){TOUT_CONNU=true;
       for(const m in d.mod||{})f.push(champ(MODS[m]?MODS[m][0]:m,`mod.${k}.${m}`,d.mod[m],-200,200));
       const tu=(k==='matiere'?TL.mat2:TL[k==='cle'?'cle':'o_'+k])||TL.objet;let ic='';try{ic=tu.toDataURL();}catch(e){}
       h+=`<div class="itl"><img src="${ic}" alt="" width="32" height="32"><div><b>${(d.vrai||d).n}</b><small>${k in FAB_PRIX?'fabricable (plan)':k==='puissance'?'se trouve, ne se fabrique pas':k==='matiere'?'butin':d.base?'équipement de départ':'se trouve'} · ${(d.vrai||d).eff||(d.slot?fabEffet(k):'')}</small></div><div class="itfs">${f.join('')||'<i>rien à régler</i>'}</div></div>`;}}
+  if(typeof hacksLabHTML==='function')h+=hacksLabHTML();   // famille « Hacks », en lecture (14g)
   h+=`<h3>Butin des robots abattus (chance en %)</h3><div class="itl"><div></div><div><small>Ce qu’un robot lâche : Matière {µ} 40 %, capsule 35 %, plan 18 %, équipement 7 %.</small></div><div class="itfs">${BEASTS.map(b=>champ(b.n,`drops.${b.key}`,DROPS[b.key]||0,0,100)).join('')}</div></div>`;
   $('itList').innerHTML=h;TOUT_CONNU=false;}
 function itemsLit(){const o=itemsEtat();for(const e of $('itList').querySelectorAll('input[data-c]')){const v=+e.value;

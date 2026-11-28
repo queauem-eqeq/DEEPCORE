@@ -613,3 +613,25 @@ kbd{font-family:var(--mono);color:var(--fg);border:1px solid var(--line);padding
 .logbig .lgl{display:grid;grid-template-columns:calc(4ch + 10px) minmax(0,1fr);color:var(--fg);overflow-wrap:anywhere;margin-bottom:2px}
 .logbig .t{color:var(--dim)}.logbig .sep{color:var(--dim);margin:0 .6ch}
 .logbig .ev.warn{color:var(--c3)}.logbig .ev.info{color:var(--c2)}.logbig .ev.good{color:var(--c1)}
+/* Hacks (28 novembre 2026, 14g) : trois cartes au terminal, côte à côte (empilées sur écran étroit) ; section HACKS de l'équipement */
+.hkcartes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:10px 0;white-space:normal}
+.tl.hkc{display:grid;grid-template-rows:auto auto auto 1fr;justify-items:center;align-content:start;gap:4px;text-align:center;padding:10px 6px;min-height:0;white-space:normal;border-color:var(--line)}
+.tl.hkc b{color:var(--fg);font-size:13px;letter-spacing:.08em}
+.tl.hkc i{font-style:normal;color:var(--hk);font-size:11px;letter-spacing:.15em}
+.tl.hkc span{color:var(--c1);font-size:12px}
+.tl.hkc small{color:var(--dim);font-size:11px;font-style:italic;line-height:1.4}
+.tl.hkc.sel{border-color:var(--hk);box-shadow:inset 0 0 0 1px var(--hk)}
+.tl.hkc .hkart{font-size:15px;margin:2px auto 4px;min-height:0}
+.tl.hkr,.tl.hke{margin-top:6px}
+#termOut .tl{white-space:normal}
+@media (max-width:640px){.hkcartes{grid-template-columns:1fr}}
+.ihk{margin-top:12px;border-top:1px solid var(--line);padding-top:8px}
+.ihkh{font-size:12px;letter-spacing:.2em;color:var(--c3);margin-bottom:4px}
+.ihkh b{font-weight:400;color:var(--fg);letter-spacing:0}
+.ihks{max-height:none}
+.ilist .it.hk i,.ilist .it.hk.eq em.st{color:var(--hk)}
+.hkvide{padding:2px 8px;font-size:11px;letter-spacing:.15em;color:var(--dim);border:1px dashed var(--line);margin:2px 0}
+.hkwrap{min-width:0}
+.hktab{width:auto;border-collapse:collapse;font-size:11px;margin:6px 0 12px;font-variant-numeric:tabular-nums}
+.hktab th,.hktab td{border:1px solid var(--line);padding:2px 6px;text-align:left;white-space:nowrap}
+.hktab th{color:var(--dim);font-weight:400}

@@ -121,14 +121,14 @@ function voitForeuse(o,chasse){
     if(d>G.stealth*HUNT_MULT)return false;
     if(d>G.stealth&&Math.random()<LOSE_TRACK){o.lost=1;return false;}   // perd la trace
     return true;}
-  if(d<=G.stealth&&Math.random()<NOTICE){o.lost=0;return true;}         // vous remarque (de nouveau)
+  if(d<=G.stealth&&Math.random()<noticeCh()){o.lost=0;return true;}         // vous remarque (de nouveau)
   return false;}
 // Petit « ! » au-dessus d'un ennemi qui vient de repérer la foreuse (15 novembre 2026) : seulement s'il est en vue
 function alerte(o){if(vis[idx(o.x,o.y)])addFx({kind:'alerte',o,dur:900});}
 function spot(o){o.mem=[G.px,G.py];o.search=0;o.stuck=0;o.lost=0;o.sg=null;const dx=Math.sign(G.px-o.x);if(dx)o.dir=dx;}
 /* Chance qu'un ennemi calme vous remarque ce tour-ci (affichée au survol) : plate dans la portée de
    discrétion et en ligne de vue, nulle au-delà. Voir la portée de discrétion dans 09. */
-function detectChance(o){return (Math.hypot(o.x-G.px,o.y-G.py)<=(G.stealth||STEALTH_BASE)&&(lastAct==='dig'||los(o.x,o.y,G.px,G.py)))?Math.round(NOTICE*100):0;}
+function detectChance(o){return (Math.hypot(o.x-G.px,o.y-G.py)<=(G.stealth||STEALTH_BASE)&&(lastAct==='dig'||los(o.x,o.y,G.px,G.py)))?Math.round(noticeCh()*100):0;}
 function forget(o){o.mem=null;o.search=0;o.stuck=0;o.lost=0;o.sg=null;}
 // un pas vers la dernière position connue ; renvoie false quand il faut passer à la fouille
 function seekStep(o,fits,DC,m){const [mx,my]=o.mem,k=mx+','+my+','+(m?1:0),d=DC[k]||(DC[k]=distFrom(mx,my,m)),h=d[idx(o.x,o.y)];
@@ -583,7 +583,7 @@ const robotPre=(st,d)=>{st=st||G.st;return Math.round(st.pre*armeFact(st,d===und
 // armes légères en profitaient trop) (réglable, Lab → Items → Module de
 // puissance) ; avant, +1,5 % seulement, comme pour la précision : un Module de puissance ne se sentait pas.
 const degFact=(st,d)=>{const e=powEcart(d,st);
-  return e<0?Math.pow(POW_MANQUE,-e):Math.pow(1+(typeof ITEM_VAL!=='undefined'?ITEM_VAL.puissance.deg:5)/100,e);};
+  return (e<0?Math.pow(POW_MANQUE,-e):Math.pow(1+(typeof ITEM_VAL!=='undefined'?ITEM_VAL.puissance.deg:5)/100,e))*(1+(st.degPct||0)/100);};   // degPct : hack FORCE (14g)
 const robotDegs=(st,d)=>{st=st||G.st;const a=d===undefined?eqDe('arme'):d,de=armeDe(a),k=degFact(st,a),b=st.degats||0;
   return [Math.max(1,Math.round((de.n+de.p+b)*k)),Math.max(1,Math.round((de.n*de.f+de.p+b)*k))];};
 // le coup réel suit la même règle que la fourchette affichée (robotDegs) : degFact, soit +5 % par point de POW en trop. Jusqu'au
@@ -591,6 +591,12 @@ const robotDegs=(st,d)=>{st=st||G.st;const a=d===undefined?eqDe('arme'):d,de=arm
 const robotDeg=()=>{const a=eqDe('arme');return Math.max(1,Math.round((deTire(armeDe(a))+(G.st.degats||0))*degFact(G.st,a)));};
 const robotDefNu=(st,d)=>{st=st||G.st;return st.def+armureDef(st,d===undefined?eqDe('armure'):d);};
 const robotDef=()=>robotDefNu()+terrMod(G.px,G.py);
+/* La mort de la foreuse est décidée ici, et seulement ici (28 novembre 2026, hack SURSIS) : à 0 de vie, sursisSauve (14g) peut
+   la remettre à 1 PV une fois. Renvoie true si la foreuse est détruite. La descente (14b) appelle sursisSauve elle-même. */
+function mortForeuse(o){if(!G||!G.st||G.st.vie>0)return false;if(typeof sursisSauve==='function'&&sursisSauve())return false;
+  G.over=Object.assign({dead:true},o||{});return true;}
+// dépense d'énergie : SYMBIOSE (14g) la renchérit
+const coutE=c=>G&&G.st&&G.st.symb>0&&typeof SYMB_COUT==='number'?Math.ceil(c*SYMB_COUT):c;
 const roll=ch=>Math.random()*100<ch;
 const chanceCol=ch=>ch>=70?'var(--c1)':ch>=40?'var(--c3)':'var(--life)';
 /* Attaque d'un ennemi sur la foreuse. o.sur : par surprise (touche toujours, critique). */
@@ -620,12 +626,12 @@ function hurtRobot(b,sp,o){sp=sp||BEASTS[b.sp];o=o||{};const le=LeNom(sp),nom=''
   addFx({kind:'shake',amp:cr?5:3,dur:cr?220:150});G.st.vie=Math.max(0,G.st.vie-dm);
     addFx({kind:'num',x:G.px,y:G.py,txt:'-'+dm+(cr?'!':''),col:PAL['4'],dur:cr?1000:750});if(!o.laser)SFX.bite();
     sayMore(`${le}${nom} ${verbe}${o.sur?' par surprise':cr?' : coup critique':''} : −${dm} vie.`,'warn');
-  if(G.st.vie<=0){G.over={dead:true};return;}}
+  mortForeuse();}
 // Une fois par battement : effets durables sur la foreuse
 function effTick(){const E=G.eff;if(!E||G.over)return;
   if(E.poison>0){E.poison--;const dm=Math.min(G.st.vie,E.pdmg||2);G.st.vie-=dm;
     addFx({kind:'num',x:G.px,y:G.py,txt:'-'+dm,col:PAL['4'],dur:750});
-    if(G.st.vie<=0){G.over={dead:true};sayMore('Le poison achève '+NOM_FOREUSE+'.','warn');return;}
+    if(G.st.vie<=0&&mortForeuse()){sayMore('Le poison achève '+NOM_FOREUSE+'.','warn');return;}
     if(!E.poison)sayMore('Le poison est éliminé.','good');}
   // réparation et recharge réparties sur plusieurs battements (28 novembre 2026) : une part égale du reste à chaque battement
   for(const [k,champ,mx] of [['repar','vie','vieMax'],['recharge','energie','energieMax']]){const r=E[k];if(!r)continue;
@@ -671,7 +677,7 @@ function explose(b){const sp=BEASTS[b.sp],k=G.beasts.indexOf(b);if(k>=0)G.beasts
       if(liste===G.beasts)butinMort(o);}}
   if(dans({x:G.px,y:G.py})){const dm=dmgDe(sp);G.st.vie=Math.max(0,G.st.vie-dm);
     addFx({kind:'num',x:G.px,y:G.py,txt:'-'+dm,col:PAL['4'],dur:1000});
-    sayMore(`La mine explose : −${dm} vie.`,'warn');if(G.st.vie<=0)G.over={dead:true};}
+    sayMore(`La mine explose : −${dm} vie.`,'warn');mortForeuse();}
   else if(vu)sayMore('La mine explose.','warn');
   else if(cheb(b,G.px,G.py)<=10)sayMore('Une explosion, tout près.','warn');
   for(const q of [...(G.balises||[])])if(dans(q))baliseCoup(q,dmgDe(sp));   // une balise posée dans la zone encaisse aussi
@@ -758,10 +764,11 @@ function beastJoue(b){const sp=BEASTS[b.sp],fits=(x,y)=>beastFits(b,x,y),mouille
   return dpasDe(b,sp);}
 // Plus de réparation automatique : seule l'énergie se recharge à chaque battement.
 // Attendre sur place la recharge WAIT_REGEN fois plus vite (13 novembre 2026) : 2/t au lieu de 1/t à POW 1.
-function regen(wait){if(G.over)return;G.st.energie=Math.min(G.st.energieMax,G.st.energie+G.st.power/POW_BASE*(wait?WAIT_REGEN:1));}
+function regen(wait){if(G.over)return;G.st.energie=Math.min(G.st.energieMax,G.st.energie+G.st.power/POW_BASE*(wait?WAIT_REGEN:1)*(1+(G.st.regen||0)/100));
+  if(G.st.symb>0&&typeof symbTick==='function')symbTick();}   // regen : hack RÉGÉN.CELL ; symb : SYMBIOSE (14g)
 // Coup de foreuse : consomme de l'énergie ; refusé si la réserve est insuffisante
-function spend(){if(G.st.energie<G.st.cout){say(`Énergie insuffisante pour frapper (${Math.floor(G.st.energie)}/${G.st.cout}). Attendez qu’elle se recharge.`,'warn');
-  SFX.blocked();render();return false;}G.st.energie-=G.st.cout;return true;}
+function spend(){const c=coutE(G.st.cout);if(G.st.energie<c){say(`Énergie insuffisante pour frapper (${Math.floor(G.st.energie)}/${c}). Attendez qu’elle se recharge.`,'warn');
+  SFX.blocked();render();return false;}G.st.energie-=c;return true;}
 const TRACK_LIFE=10;   // tours avant que la trace des chenilles ait disparu (5 jusqu'au 25 novembre 2026)
 // Bande : chaque cafar reste à PACK_R cases au plus du centre de son groupe, sinon il y revient.
 // Hors chasse, la bande voyage vers un point accessible tiré au hasard, s'y arrête PACK_PAUSE tours, puis repart.

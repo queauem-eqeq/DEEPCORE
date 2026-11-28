@@ -1118,3 +1118,18 @@ Essais : 16-26 → seul 56 de vie restante ; **18-30 (retenu) → seul 52-53, 95
   Dehors, la menace active tombe donc à peu près au tiers de ce qu'elle était.
 - `test-ouvrage.js` : provoqué par un coup puis semé (fumigène), un groupe redevient indifférent en 24 battements.
 - `outils/simul.py tout` : détection, fuite et combat inchangés (arènes sans rôle).
+
+### Hacks (28 novembre 2026, `outils/simul.py combat`, 300 duels par cas)
+
+Mastok + 2 Crabos, foreuse nue (stats du niveau 1), puis avec les hacks de combat qu'on peut équiper au rang donné :
+
+| Hacks | Victoires | Vie restante | Durée |
+|---|---|---|---|
+| aucun | 82 % | 41 | 21 battements |
+| R1 : CRIT.SYS, FORCE | 85 % | 37 | 21 |
+| R4 : + BLINDAGE.RT | 94 % | 48 | 20 |
+| R7 : + VISÉE | 98 % | 55 | 17 |
+| R10 : + RÉGÉN.CELL | 100 % | 63 | 15 |
+
+Aux rangs 1-3 l'effet se perd dans le bruit (modeste, comme voulu) ; aux rangs profonds, les hacks compensent des ennemis plus
+durs. Détection, fuite et le reste du combat : inchangés (empreinte identique, aucun hack porté dans ces mesures).

@@ -59,7 +59,7 @@ function machTick(){if(!G.las||!G.las.length||G.over)return;G.mt=(G.mt||0)+1;con
       if(liste===G.beasts&&typeof minePartie==='function')minePartie(o);}}
   if(lit[idx(G.px,G.py)]){G.st.vie=Math.max(0,G.st.vie-MACH_DM);addFx({kind:'num',x:G.px,y:G.py,txt:'-'+MACH_DM,col:PAL['4'],dur:900});
     addFx({kind:'shake',amp:5,dur:220});
-    sayMore(`Laser : −${MACH_DM} vie.`,'warn');if(G.st.vie<=0)G.over={dead:true};}}
+    sayMore(`Laser : −${MACH_DM} vie.`,'warn');mortForeuse();}}
 // rendu des rayons allumés : cases pleines, sans transparence (consigne « pixel perfect »)
 // tuiles du Tile editor, groupe FX (22 novembre 2026) : laserV (vertical ; l'horizontal en est la rotation) et laserX (croix)
 function machDraw(){if(!G.las||!G.las.length)return;const lit=machLit(),T={v:TL.laserV_,h:TL.laserH_,x:TL.laserX_};ctx.globalAlpha=1;

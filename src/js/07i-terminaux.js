@@ -202,7 +202,9 @@ function termFait(id){if(!TERM||G.over)return;const m=TERM.m;let ok=false;
   else if(id==='hack'||id==='bp')ok=termEncode(m,id);else if(/^act\d+$/.test(id))ok=termAgit(m,+id.slice(3));
   const avant=termBoutons()[TERM.sel];termMenu();
   // la sélection reste sur la même ligne si elle existe encore, sinon sur la suivante
-  const b=termBoutons(),k=avant?b.findIndex(x=>x.dataset.a===avant.dataset.a):-1;termSel(k>=0?k:TERM.sel);render();return ok;}
+  const b=termBoutons(),k=avant?b.findIndex(x=>x.dataset.a===avant.dataset.a):-1;
+  // TERM.vise : l'encodage demande que la sélection passe sur ses cartes (sélecteur CSS, 14g)
+  const v=TERM.vise?b.findIndex(x=>x.matches(TERM.vise)):-1;TERM.vise=null;termSel(v>=0?v:k>=0?k:TERM.sel);render();return ok;}
 const TERM_TITRE={terminal:'TERMINAL',antenne:'ANTENNE'};
 function termOuvre(i){if(!G||G.over)return;const m=termEtat(i);if(!m)return;if(TRAV)stopTravel();if(EXPL)stopExplore();if(REST)stopRest();
   TERM={m,sel:0,apres:[],cout:0};

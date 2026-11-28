@@ -325,6 +325,7 @@ function fgMines(F,dt){const bas=F.R*1.15;   // bien sous le bas de l'écran (0,
     fgBoom(F,'impact');fgExploseMine(F,m);   /* la mine explose comme la foreuse : cratère, onde de choc, éclats */
     for(let i=0;i<8;i++)fgSmoke(F,m.x+fgRnd(-4,4),m.y+fgRnd(-2,2),fgRnd(-9,9),fgRnd(-6,3),fgRnd(1.2,2),1,2.4);
     if(typeof G!=='undefined'&&G&&G.st){const dm=Math.min(FG_MINE_DM,G.st.vie);G.st.vie-=dm;F.perdu+=dm;
+      if(G.st.vie<=0&&!F.mort&&typeof sursisSauve==='function')sursisSauve();   // hack SURSIS (14g)
       if(G.st.vie<=0&&!F.mort){F.mort=1;F.ph=5;F.tMort=F.t;F.flash=0;F.imp=2.6;F.pt.length=0;fgExploseForeuse(F);fgBoom(F,'perce');}}}
   F.stun=Math.max(0,F.stun-dt);}
 /* L’amas naît juste sous le bas de l’écran quand la foreuse approche de sa profondeur, de 9 à 13 cases à côté de là où elle va (côté au hasard) :

@@ -427,7 +427,8 @@ function render(){
   {for(const i of SOUS){const l=G.items&&G.items[i];if(!(l&&l.length)&&!(G.cles&&G.cles[i]))continue;const q=S/16,px=(i%W-camX)*S+12*q,py=(((i/W)|0)-camY)*S+12*q;
       ctx.globalAlpha=1;ctx.fillStyle='#ffffff';ctx.fillRect(px+q,py,q,3*q);ctx.fillRect(px,py+q,3*q,q);}}
   // antenne : un ennemi hors de vue dans le disque d'une antenne allumée se montre par un point en couleur danger (22 novembre 2026)
-  if(G.beasts&&fog)for(const b of G.beasts){if(vis[idx(b.x,b.y)]||!antDetecte(b))continue;const q=S/16;ctx.globalAlpha=1;
+  // hack TRAQUE (14g) : un ennemi en chasse tout près se montre de la même façon
+  if(G.beasts&&fog)for(const b of G.beasts){if(vis[idx(b.x,b.y)]||!(antDetecte(b)||(typeof traqueVoit==='function'&&traqueVoit(b))))continue;const q=S/16;ctx.globalAlpha=1;
     ctx.fillStyle=PAL['4'];ctx.fillRect((b.x-camX)*S+6*q,(b.y-camY)*S+6*q,4*q,4*q);}
   // nuage d'un fumigène : les tuiles de nuage par-dessus le terrain et les créatures, sous la foreuse ; elles pâlissent en se dissipant
   // la fumée se voit même là où elle coupe la vue : sinon on ne verrait que les neuf cases autour de la foreuse

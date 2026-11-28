@@ -73,6 +73,59 @@ automatique ne l'ouvre jamais (les machines barrent le pas).
 
 Essais : `outils/scripts/test-terminaux.js`.
 
+### Hacks (`14g-hacks.js`, 28 novembre 2026)
+
+Programmes **gratuits**, écrits dans la foreuse au terminal : **ENCODAGE → HACK**, **un choix parmi 3** (trois cartes côte à
+côte : nom, famille en couleur, effet chiffré, puce ASCII ; empilées sur écran étroit ; flèches, Entrée, Échap, souris). Renoncer
+(RENONCER ou Échap) laisse la ligne disponible, avec **les trois mêmes propositions** (`m.hkChoix`). Le choix est **équipé** s'il le
+peut, sinon **rangé dans l'inventaire** ; emplacements et inventaire pleins : on peut **écraser** un hack actif. Jamais dans le butin
+ni au FABLAB.
+
+- **Ce sont des objets** (`hk_<sorte>_<rang>`, `hk_<sorte>` pour un Noyau) : on les retire (ils prennent alors une place dans
+  l'inventaire, refus si plein), on les rééquipe, on les jette (puce au sol, tuile `o_hack`). Section **HACKS** de la fenêtre
+  d'équipement : un cadre par emplacement, puis les hacks transportés.
+- **Emplacements à part** des objets : **2**, puis **3, 4, 5** en arrivant aux niveaux **3, 6, 9** (le plus profond atteint,
+  `G.st.nivMax` ; une ligne au journal). **Un seul exemplaire équipé par sorte, un seul hack Noyau.**
+- **Rang = niveau où le hack est obtenu.** Échelle `E` par rang : 1, 2, 3, 5, 6, 8, 10, 12, 13, 15.
+- Les effets passent par les **modificateurs d'équipement** (`G.st`) : la colonne Stats, la fenêtre d'équipement (« si vous
+  l'équipez ») et le survol des stats montrent la part de chaque hack.
+- **Chances** (chaque proposition tirée à part, jamais deux fois la même sorte ; un Noyau déjà porté n'est pas reproposé) :
+
+| Niveaux | Base | Tir | Noyau |
+|---|---|---|---|
+| 1 à 3 | 85 % | 15 % | 0 % |
+| 4 à 6 | 50 % | 40 % | 10 % |
+| 7 à 10 | 25 % | 35 % | 40 % |
+
+  **Pas d'arme de tir dans le jeu** (`TIR_DISPO=false`) : les hacks Tir existent mais ne sont jamais proposés, leur part va à Base
+  (donc 100 / 0 / 0, 90 / 0 / 10, 60 / 0 / 40 aujourd'hui).
+
+| Hack | Famille | Effet au rang n (E = échelle) | R1 | R4 | R7 | R10 |
+|---|---|---|---|---|---|---|
+| CRIT.SYS | Base | CRIT + E % | +1 % | +5 % | +10 % | +15 % |
+| FORCE | Base | dégâts du coup + 2E % (multiplie le jet) | +2 % | +10 % | +20 % | +30 % |
+| VISÉE | Base | PRE + E | +1 | +5 | +10 | +15 |
+| BLINDAGE.RT | Base | DEF + E | +1 | +5 | +10 | +15 |
+| RÉGÉN.CELL | Base | recharge d'énergie + 5E % | +5 % | +25 % | +50 % | +75 % |
+| ÉCHO.SCAN | Base | vue +1 (rangs 1-3), +2 (4-6), +3 (7-10) | +1 | +2 | +3 | +3 |
+| SOURDINE | Base | multiplicateur du forage (× 1,5) − 3E %, jamais sous × 1 | −3 % | −15 % | −30 % | −45 % |
+| SIGNATURE | Base | chance d'être remarqué (25 %/battement) − 2,5E % | −2,5 % | −12,5 % | −25 % | −37,5 % |
+| RECYCLAGE | Base | + E énergie par ennemi détruit (tout moyen, sauf une mine qui explose) | +1 | +5 | +10 | +15 |
+| TRAQUE | Base | ennemis en chasse signalés à travers les murs (point danger, comme l'antenne) à 2 + E/2 cases | 3 | 5 | 7 | 10 |
+| SURCHARGE | Tir | dégâts du tir + 3E %, coût + 2E % | | | | |
+| SILENCE.TIR | Tir | bruit du tir − 3E %, dégâts − E % | | | | |
+| ÉCONOMIE | Tir | coût du tir − 2E %, dégâts − E % | | | | |
+| PERFORANT | Tir | crit du tir + E %, précision − E/2 | | | | |
+| SYMBIOSE | Noyau | vie +1 tous les 4 battements ; coup et course coûtent 25 % d'énergie en plus (pas de fuel dans le jeu) | | | | |
+| SURSIS | Noyau | à 0 de vie, survit une fois à 1 PV ; le hack s'efface | | | | |
+| HÉRITAGE | Noyau | à la destruction, ce hack et l'autre hack équipé de meilleur rang passent à la foreuse suivante (`np-heritage`, vidée à la réception) ; ne donne rien d'autre | | | | |
+
+- **Mort décidée à un seul endroit** : `mortForeuse()` (08-faune), appelée par les coups, le poison, les mines, les lasers, la charge
+  sismique ; la descente (14b) appelle SURSIS elle-même. HÉRITAGE s'enregistre dans `dead()` ; la foreuse suivante reçoit les hacks
+  équipés (dans l'inventaire si un emplacement manque).
+- **Lab** : bouton **Hacks** (un choix parmi 3 au rang du niveau, comme au terminal) ; Lab → Items : famille « Hacks (lecture) ».
+- Fiches : une ligne d'ambiance du point de vue de F467 et l'effet chiffré, en majuscules.
+
 ### Butin d'exploration (`butinExplo`, `14d-objets.js`)
 
 Posé à la fin de la génération, sur toutes les recettes. **Ordre de priorité des lieux** (24 novembre 2026) :

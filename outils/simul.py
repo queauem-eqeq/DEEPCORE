@@ -124,7 +124,8 @@ const N = 300, out = {};
 addFx = () => {}; render = () => {}; dead = () => {}; SND.on = false; fog = false;
 const neuf = () => { G.st = { vie: 100, vieMax: 100, energie: 100, energieMax: 100, repar: 0, power: 10, vitesse: 5, degats: 0, capteur: 10, cout: 10, pre: 100, def: 10, crit: 5 };
   G.inv = invTest(); G.eff = {}; G.over = null; G.sprint = false; G.debt = 0; G.time = 0; G.items = {}; G.ore = {};  G.blood = {}; G.log = []; };
-const equipe = (ks) => { for (const k of ks) invEquip(G.inv.findIndex(o => o.k === k)); };
+// un hack (14g) n'est pas dans le sac de départ : il y est ajouté avant d'être équipé ; G.st.nivMax donne ses emplacements
+const equipe = (ks) => { for (const k of ks) { if (!G.inv.some(o => o.k === k)) { G.inv.push({ k, eq: 0 }); G.st.nivMax = 10; } invEquip(G.inv.findIndex(o => o.k === k)); } };
 const bete = (sp, x, y) => ({ sp, x, y, hp: pvDe(BEASTS[sp]), mp: 0, hunt: 1, dir: -1, pack: -1, mem: [G.px, G.py], search: 0, lost: 0 });
 const proche = () => { let b = null, bd = 1e9; for (const o of G.beasts) { const d = Math.max(Math.abs(o.x - G.px), Math.abs(o.y - G.py)); if (d < bd) { bd = d; b = o; } } return b; };
 const duel = (nom, pose, kit) => { let vic = 0, vie = 0, bat = 0;
@@ -153,6 +154,10 @@ duel('RÉF. (2 Crabos + 1 Vipérin) · foreuse nue', ref);
 // accessoires seulement : depuis le 16 novembre 2026 la foreuse et la Coque d'usine sont le seul équipement, déjà porté
 for (const k of Object.keys(ITEMS)) { const d = ITEMS[k]; if (d.conso || d.base || d.slot !== 'acc') continue; duel('RÉF. avec ' + d.n, ref, [k]); }
 duel('Mastok seul', seul(I('mastok')));
+// hacks (28 novembre 2026) : les hacks de combat qu'on peut équiper au rang r (2, 3, 4, 5 emplacements aux niveaux 1, 3, 6, 9)
+const HK = ['crit', 'force', 'blindage', 'visee', 'regen'];
+for (const r of [1, 4, 7, 10]) { const ks = HK.slice(0, hackPlaces(r)).map(h => hackCle(h, r)), pose = () => { groupe(I('crabos'), 2)(); G.beasts.push(bete(I('mastok'), 38, 32)); };
+  duel(`Mastok + 2 Crabos · hacks R${r} (${ks.map(k => HACKS[ITEMS[k].hk].n).join(', ')})`, pose, ks); }
 """
 COMBAT = COMBAT.replace('/*CAS*/', CAS_COMBAT)
 

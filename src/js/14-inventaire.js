@@ -96,7 +96,7 @@ const invTest=()=>INV_TEST.map(([k,n])=>n?{k,eq:0,n}:{k,eq:k==='foreuse'||k==='u
 // les clés sont des objets du sac (21 novembre 2026), plus un compteur
 const nbCles=()=>{const o=(G.inv||[]).find(o=>o.k==='cle');return o?(o.n||1):0;};
 // tuile d'un objet posé au sol ; la Matière (butin) prend le dessin des éclats moyens, couleur Matière (23 novembre 2026 ; sa tuile propre est retirée)
-const itemTile=k=>k==='cle'?TL.cle:k==='matiere'?(TL.mat2||TL.objet):ITEMS[k]&&ITEMS[k].plan?(TL.o_plan||TL.objet):typeof identifie==='function'&&!identifie(k)?(TL.o_capsule||TL.objet):(TL['o_'+k]||TL.objet);
+const itemTile=k=>k==='cle'?TL.cle:ITEMS[k]&&ITEMS[k].hack?(TL.o_hack||TL.objet):k==='matiere'?(TL.mat2||TL.objet):ITEMS[k]&&ITEMS[k].plan?(TL.o_plan||TL.objet):typeof identifie==='function'&&!identifie(k)?(TL.o_capsule||TL.objet):(TL['o_'+k]||TL.objet);
 // ancien compteur de clés -> objet
 function invMigre(){if(G.st&&G.st.cles>0){const o=G.inv.find(o=>o.k==='cle');if(o)o.n=(o.n||1)+G.st.cles;
   else G.inv.push({k:'cle',eq:0,n:G.st.cles});}if(G.st)delete G.st.cles;
@@ -124,10 +124,11 @@ const signe=v=>(v>0?'+':'−')+Math.abs(v);
 // « DEG +4 » ; la durée du coup se lit mieux en clair : « coup rapide (75) », 100 étant le coup ordinaire
 const modLib=(k,v)=>k==='coup'?`coup ${v<0?'rapide':'lent'} (${DUR.coup+v})`:`${MODS[k][0]} ${signe(v)}${MODS[k][2]}`;
 function modHTML(d){if(d.base)return 'Arme de référence : pas de modificateur';
+  if(d.hack)return `<span style="color:var(--c1)">${d.eff}</span>`;   // hack (14g) : son effet chiffré
   if(d.conso)return `<span style="color:var(--c1)">${d.eff}</span> · usage unique`;
   return Object.entries(d.mod||{}).map(([k,v])=>`<span style="color:${v*MODS[k][1]>0?'var(--c1)':'var(--life)'}">${modLib(k,v)}</span>`).join(' · ');}
-const modTxt=d=>Object.entries(d.mod||{}).map(([k,v])=>modLib(k,v)).join(', ');
-const typeNom=d=>d.conso?'Consommable':SLOTS[d.slot].nom;
+const modTxt=d=>d.hack?d.eff:Object.entries(d.mod||{}).map(([k,v])=>modLib(k,v)).join(', ');
+const typeNom=d=>d.conso?'Consommable':d.hack?'Hack '+HACK_FAM[d.fam].n.toLowerCase():SLOTS[d.slot].nom;
 const accord=d=>(d.f?'e':'')+(d.pl?'s':'');   // « équipée », « utilisés »
 // total apporté par l'équipement porté sur une stat (sert à colorer le panneau Statistiques)
 function invApply(o,sg){const m=ITEMS[o.k].mod||{},st=G.st,v0=st.vieMax,e0=st.energieMax;for(const k in m)st[k]=(st[k]||0)+sg*m[k];
@@ -144,7 +145,9 @@ const invCount=s=>G.inv.filter(o=>o.eq&&ITEMS[o.k].slot===s).length;
    La grille du FABLAB (4 rangées de 5 carrés) montre ces vingt places, classées par type. */
 const SAC_MAX=20;
 const sacPlaces=()=>G.inv.reduce((t,o)=>t+(o.eq?0:(o.n||1)),0);   // places occupées : un par exemplaire transporté
-const invEquipables=()=>G.inv.map((o,i)=>i).filter(i=>!ITEMS[G.inv[i].k].conso);
+// ordre de la fenêtre : l'équipement, puis les hacks actifs, puis les hacks transportés (14g)
+const invRang=o=>ITEMS[o.k].hack?(o.eq?1:2):0;
+const invEquipables=()=>G.inv.map((o,i)=>i).filter(i=>!ITEMS[G.inv[i].k].conso).sort((a,b)=>invRang(G.inv[a])-invRang(G.inv[b])||a-b);
 const invConsos=()=>G.inv.map((o,i)=>i).filter(i=>ITEMS[G.inv[i].k].conso);
 function invFix(){const l=invEquipables();if(!l.length){INV_SEL=-1;return;}if(!l.includes(INV_SEL))INV_SEL=l[0];}
 
@@ -203,7 +206,7 @@ function viseeOk(){if(!VISEE||G.over)return;const {i,x,y}=VISEE,o=G.inv[i];
   for(const q of [...(G.balises||[])])if(dansZone(zone,q.x,q.y))baliseCoup(q,VISEE_DM);   // une balise posée dans la zone encaisse aussi
   // comme la mine, la charge blesse la foreuse si elle est dans la zone (22 novembre 2026)
   if(dansZone(zone,G.px,G.py)){moi=VISEE_DM;G.st.vie=Math.max(0,G.st.vie-moi);
-    addFx({kind:'num',x:G.px,y:G.py,txt:'-'+moi,col:PAL['4'],dur:1000});if(G.st.vie<=0)G.over={dead:true};}
+    addFx({kind:'num',x:G.px,y:G.py,txt:'-'+moi,col:PAL['4'],dur:1000});mortForeuse();}
   engage();invTake(i);sacFix();SAC_H='';
   addFx({kind:'boom',x,y,cases:zone,dur:420});addFx({kind:'shake',amp:moi?10:8,dur:300});SFX.explode();
   say(`${neufCh?`Capsule ${savoir().codes.charge} : c’était une charge sismique. `:''}${moi?`${NOM_FOREUSE} est prise dans l’explosion : −${moi} vie. `:''}Charge sismique : ${n?`${n} ennemi${n>1?'s':''} touché${n>1?'s':''}${k?`, ${k} abattu${k>1?'s':''}`:''}`:'personne dans la zone'}${roches?`, ${roches} case${roches>1?'s':''} de roche pulvérisée${roches>1?'s':''}`:''}.`,moi||!(n||roches)?'warn':'good');
@@ -228,6 +231,7 @@ function invEquip(i){const o=G.inv[i];if(!o||G.over)return;const d=ITEMS[o.k],e=
     const r=d.use(G.st);invTake(i);invSay(`${d.n} utilisé${e} : ${r}.`,'good');(d.son&&SFX[d.son]?SFX[d.son]:SFX.spot)();
     if(d.fx)addFx({kind:d.fx,x:G.px,y:G.py,dur:1000,gr:fxGrains(12)});
     consoTemps();invChanged();return;}   // un consommable coûte un battement (16 novembre 2026)
+  if(d.hack&&!o.eq){const r=hackRefus(o);if(r){invSay(r,'warn');SFX.blocked();render();return;}}   // emplacements de hack, un seul Noyau (14g)
   if(o.eq){if(d.slot==='arme'){invSay(ARME_FIXE,'warn');SFX.blocked();render();return;}
     // retiré, l'objet est transporté : il prend une place (26 novembre 2026)
     if(sacPlaces()>=SAC_MAX){invSay(`Inventaire plein (${SAC_MAX}/${SAC_MAX}) : ${d.n} retiré${e} n’aurait plus sa place. Jetez quelque chose d’abord.`,'warn');
@@ -283,6 +287,7 @@ function invPickup(more){const c=idx(G.px,G.py);if(G.items&&G.items[c]&&G.items[
 const INV_STATS=[['vieMax','VIE'],['energieMax','ÉNER'],['pas','PAS'],['capteur','EYE'],['degats','DEG'],['pre','PRE'],['def','DEF'],['crit','CRIT'],['power','POW'],['dis','DIS'],['coup','COUP'],['detec','DET']];
 function invDelta(o){const d=ITEMS[o.k],m={};if(d.conso)return m;const add=(mm,sg)=>{for(const k in mm||{})m[k]=(m[k]||0)+sg*mm[k];};
   if(o.eq){if(d.slot!=='arme')add(d.mod,-1);return m;}
+  if(d.hack){if(!hackRefus(o))add(d.mod,1);return m;}
   const sl=SLOTS[d.slot];if(invCount(d.slot)>=sl.n){if(sl.n>1)return m;add(ITEMS[G.inv.find(p=>p.eq&&ITEMS[p.k].slot===d.slot).k].mod,-1);}
   add(d.mod,1);return m;}
 // Dés de dégâts d'une arme, et la fourchette qu'ils donnent une fois le POW requis pris en compte
@@ -338,6 +343,11 @@ function statInfo(k){const st=G.st,A=eqDe('arme')||null,B=eqDe('armure')||null,L
   if(k==='def'){const e=powEcart(B,st),t=terrMod(G.px,G.py);if(e)L.push([`POW : ${Math.abs(e)} point${pt(e)} ${e>0?'en trop':'manquant'+pt(e)} pour l’armure`,signe(armureDef(st,B))]);
     if(t)L.push([t<0?'Dans l’eau':'Dans les herbes hautes',signe(t)]);}
   if(k==='crit'&&critBonus())L.push(['Surcharge en cours',signe(critBonus())+u]);
+  // hacks dont l'effet n'est pas un point de stat (14g) : dégâts en %, bruit du forage, détection
+  for(const o of G.inv||[]){const d=ITEMS[o.k];if(!o.eq||!d||!d.hack)continue;const md=d.mod;
+    if(k==='degats'&&md.degPct)L.push([d.n,signe(md.degPct)+' %']);
+    if(k==='dis'&&md.bruitDig)L.push([d.n+' (forage)',signe(md.bruitDig)+' %']);
+    if(k==='dis'&&md.detect)L.push([d.n+' (chance d’être remarqué)',signe(md.detect).replace('.',',')+' %']);}
   if(k==='power'){if(A&&A.req)L.push([`Requis par l’arme (${A.n})`,A.req]);if(B&&B.req)L.push([`Requis par l’armure (${B.n})`,B.req]);}
   if(k==='pas'){const v=G.t[idx(G.px,G.py)];if(G.sprint)L.push(['En courant',fois(SPRINT_MULT)]);if(SLOW[v])L.push([v===DEEP?'En eau profonde : pas plus lents':'Dans l’eau : pas plus lents',fois(SLOW[v])]);
     if(G.eff&&G.eff.glu>0)L.push(['Engluée : pas plus lents',fois(2)]);}
@@ -367,9 +377,16 @@ function statsHTML(o){const H=invHyp(o),A=eqDe('arme')||null,B=eqDe('armure')||n
 function invHTML(){const inv=G.inv||[],liste=invEquipables();invFix();
   const cnt=s=>`${SLOTS[s].nom} <b>${invCount(s)}/${SLOTS[s].n}</b>`;
   let h=`<div class="iwrap"><div class="ileft"><div class="islots"><span>${cnt('arme')}</span><span>${cnt('armure')}</span><span>${cnt('acc')}</span></div>`;
-  h+=liste.length?`<div class="ilist" role="listbox" aria-label="Équipement">${liste.map(i=>{const o=inv[i],d=ITEMS[o.k];
-    return `<button class="it${o.eq?' eq':''}${i===INV_SEL?' sel':''}" data-i="${i}" role="option" aria-selected="${i===INV_SEL}"><i>${SLOTS[d.slot].g}</i><span>${d.n}</span><em>${typeNom(d)}</em><em class="st">${o.eq?'équipé':''}</em></button>`;}).join('')}</div>`
+  const ligne=i=>{const o=inv[i],d=ITEMS[o.k],c=d.hack?` style="--hk:${HACK_FAM[d.fam].v}"`:'';
+    return `<button class="it${o.eq?' eq':''}${d.hack?' hk':''}${i===INV_SEL?' sel':''}" data-i="${i}" role="option" aria-selected="${i===INV_SEL}"${c}><i>${SLOTS[d.slot].g}</i><span>${d.n}</span><em>${typeNom(d)}</em><em class="st">${o.eq?(d.hack?'actif':'équipé'):''}</em></button>`;};
+  const eqL=liste.filter(i=>!ITEMS[inv[i].k].hack);
+  h+=eqL.length?`<div class="ilist" role="listbox" aria-label="Équipement">${eqL.map(ligne).join('')}</div>`
     :'<p class="inone">Aucun équipement.</p>';
+  // Section HACKS (28 novembre 2026, 14g) : un cadre par emplacement, le hack actif dedans ; puis les hacks transportés
+  {const act=liste.filter(i=>ITEMS[inv[i].k].hack&&inv[i].eq),res=liste.filter(i=>ITEMS[inv[i].k].hack&&!inv[i].eq),N=SLOTS.hack.n;
+    h+=`<div class="ihk"><div class="ihkh">HACKS <b>${act.length}/${N}</b></div><div class="ilist ihks" role="listbox" aria-label="Hacks">`;
+    for(let s=0;s<N;s++)h+=s<act.length?ligne(act[s]):'<div class="hkvide">EMPLACEMENT LIBRE</div>';
+    h+=res.map(ligne).join('')+'</div></div>';}
   const sol=G.items&&G.items[idx(G.px,G.py)];
   if(sol&&sol.length)h+=`<div class="isol"><span>Au sol ici : ${sol.map(k=>ITEMS[k].n).join(', ')}</span><button class="pace" data-a="pick">Ramasser</button></div>`;
   h+='</div>';

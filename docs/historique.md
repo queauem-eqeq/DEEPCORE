@@ -357,3 +357,7 @@ Ce qui a été remplacé, et pourquoi (demandes de l'utilisateur, « chaque mach
 - 28 novembre 2026 : terminaux et antennes ouvrent un menu DATA / CONNEXION / ENCODAGE. La connexion ouvre une porte, coupe des
   lasers ou une grille, ouvre une porte dérobée ou la cloison d'un réduit creusé exprès ; l'allumage de l'antenne y passe ; liaison
   au noyau (échec). Deux terminaux au moins par niveau. Avant : le terminal affichait un texte, l'antenne s'allumait au contact.
+- 28 novembre 2026 : hacks, programmes gratuits choisis parmi 3 au terminal (ENCODAGE → HACK), dans des emplacements à part
+  (2, puis 3, 4, 5 aux niveaux 3, 6, 9). Familles Base / Tir / Noyau ; Tir défini mais jamais proposé (pas d'arme de tir) ; hack
+  « Voix » refusé par l'utilisateur. SYMBIOSE donne une réparation lente (+1 vie / 4 battements) : seule exception, payée en
+  énergie, à « pas de réparation automatique ».

@@ -53,9 +53,9 @@ let lastRun=false;                                     // ce pas a-t-il été co
 // retrait maximal dû aux parois adjacentes (−2 depuis le 18 novembre 2026 ; −4 avant)
 const WALL_MAX=2;
 // flat : sur des herbes basses ; walls : parois adjacentes (0 à 8) : retrait = parois ÷ 2 arrondi au supérieur, au plus WALL_MAX
-function stealthCalc(base,act,flat,walls,run){
+function stealthCalc(base,act,flat,walls,run,dm){
   let r=base;
-  if(act==='dig')r=Math.ceil(r*DIG_MULT);
+  if(act==='dig')r=Math.ceil(r*(dm||DIG_MULT));   // dm : hack SOURDINE (digMult, 14g)
   if(act==='wait')r=Math.ceil(r/2);
   if(flat)r=Math.ceil(r/2);                           // herbes basses : couvert
   r=Math.max(STEALTH_MIN,r-Math.min(Math.ceil(walls/2),WALL_MAX));
@@ -63,7 +63,7 @@ function stealthCalc(base,act,flat,walls,run){
 function stealthRange(act){
   let walls=0;for(const [dx,dy] of DIRS){const x=G.px+dx,y=G.py+dy;if(x<0||y<0||x>=W||y>=H)continue;const v=G.t[idx(x,y)];
     if(v===ROCK||v===MOUNT||bati(v))walls++;}
-  return stealthCalc(Math.max(STEALTH_MIN,STEALTH_BASE+(G.st.dis||0)),act,G.t[idx(G.px,G.py)]===FLAT,walls,lastRun);}
+  return stealthCalc(Math.max(STEALTH_MIN,STEALTH_BASE+(G.st.dis||0)),act,G.t[idx(G.px,G.py)]===FLAT,walls,lastRun,typeof digMult==='function'?digMult():DIG_MULT);}
 function turnStealth(){G.stealth=stealthRange(lastAct);}
 
 /* ---------- Horloge (13 novembre 2026, horloge par créature le 25 novembre 2026) ----------
@@ -114,7 +114,7 @@ function pass(d,wait){const fin=(G.time||0)+d;
 function battement(wait){if(wait)drift(true);const av=portesPrises();animalsAct();beastsAct();machTick();
   portesBruit(av);effTick();regen(wait);chercheSecrets(wait);}   // la foreuse cherche les portes dérobées à chaque battement (07b)
 function toggleSprint(){if(!G||G.over)return;
-  if(!G.sprint&&G.st.energie<SPRINT_COST){say(`Énergie insuffisante pour courir (${Math.floor(G.st.energie)}/${SPRINT_COST}).`,'warn');
+  if(!G.sprint&&G.st.energie<coutE(SPRINT_COST)){say(`Énergie insuffisante pour courir (${Math.floor(G.st.energie)}/${SPRINT_COST}).`,'warn');
     SFX.blocked();render();return;}
   G.sprint=!G.sprint;G.sprint?SFX.motorOn():SFX.motorOff();
     say(G.sprint?`Course : deux fois plus vite, ${SPRINT_COST} d’énergie par pas, et ${SPRINT_NOISE} cases de discrétion en plus.`:''+NOM_FOREUSE+' reprend la marche.','info');render();}
@@ -206,7 +206,7 @@ function tryMove(dx,dy){if(PHASE)return;   // foreuse démontée : elle ne march
   {const oi=idx(G.px,G.py),ov=G.t[oi],dk=DIRS.findIndex(d=>d[0]===dx&&d[1]===dy);
     if(ov!==LIQ&&ov!==DEEP&&ov!==BRIDGE&&ov!==DECK){G.tracks=G.tracks||{};G.tracks[oi]={t:G.turn+1,i:G.lastDir??dk,o:dk};}G.lastDir=dk;}
   // course : chaque pas coûte SPRINT_COST d'énergie et dure moitié moins ; à sec, la foreuse reprend la marche
-  let run=false;if(G.sprint){if(G.st.energie>=SPRINT_COST){G.st.energie-=SPRINT_COST;run=true;}else{G.sprint=false;SFX.motorOff();
+  let run=false;if(G.sprint){const sc=coutE(SPRINT_COST);if(G.st.energie>=sc){G.st.energie-=sc;run=true;}else{G.sprint=false;SFX.motorOff();
     G.devMsg=(G.devMsg?G.devMsg+' ':'')+'Énergie insuffisante : '+NOM_FOREUSE+' reprend la marche.';}}
   lastRun=run;
   const doorway=(G.t[idx(G.px,G.py)]===DECK)!==(v===DECK);   // passage de la porte du vaisseau
@@ -256,7 +256,8 @@ function drill(s){drilling=true;let k=0;const n=12;
 // Mort : la foreuse explose (voir explode, rendu), puis « Déployer une nouvelle foreuse » : retour au niveau 1, intro comprise
 // « FOREUSE DÉTRUITE » toujours en rouge, quelle que soit la palette (23 novembre 2026). Détruite pendant une descente (G.over.forage),
 // l'explosion s'est jouée dans le puits : pas d'explosion sur la carte, et un fond noir plein cache le niveau.
-function dead(){if(G.over.boom)return;G.over.boom=true;if(TRAV)stopTravel();if(REST)stopRest();
+function dead(){if(G.over.boom)return;G.over.boom=true;if(typeof heritageMort==='function')heritageMort();   // hack HÉRITAGE (14g)
+ if(TRAV)stopTravel();if(REST)stopRest();
   // à la mort, toutes les capsules se dévoilent dans l'inventaire (23 novembre 2026)
   let devoile=0;for(const k in CONSO)if(identifier(k))devoile++;
   if(devoile){say(''+NOM_FOREUSE+' détruite, toutes les capsules se dévoilent.','warn');try{side();}catch(e){}}
