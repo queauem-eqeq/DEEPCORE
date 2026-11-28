@@ -302,7 +302,7 @@ function applySaved(d){
   if(d.palette&&Array.isArray(d.palette.palettes)){d.palette.palettes.forEach((pp,k)=>{const t=PRESETS[k]||PRESETS.find(x=>x.n===pp.nom);if(!t)return;
       if(Array.isArray(pp.couleurs)&&pp.couleurs.length===PAL_N)t.c=pp.couleurs.slice();
       if(typeof pp.nom==='string'&&pp.nom.trim())t.n=pp.nom;});
-    savePresets();const ai=PRESETS.findIndex(x=>x.n===d.palette.active);usePreset(ai>=0?ai:PRESET_ACTIVE);}
+    savePresets();usePreset(PRESET_ACTIVE);}   // la palette active enregistrée n'est pas reprise : départ sur Braise (28 novembre 2026)
   // banque de modules (Lab → Modules, 24 novembre 2026)
   if(d.modules&&typeof modulesApplique==='function'){modulesApplique(d.modules);saveModules();}
   if(d.tuiles&&typeof d.tuiles==='object'){TILE_OV={};

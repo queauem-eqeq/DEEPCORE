@@ -36,8 +36,9 @@ Partie du document de conception (sommaire et règles à ne pas casser : `concep
   L'ordre de dissolution du phaseur est tiré **sans `Math.random`** (générateur à graine fixe, `PHASE_ORD`) : l'empreinte des
   cartes ne bouge pas. Contrôle : poser les effets avec une durée très longue et un `t0` reculé les fige à mi-course le temps
   d'une capture.
-- **Réglages du joueur adoptés le 28 novembre 2026** (base de l'artefact, enregistrés à 2 h 10) : **Magma** devient la palette de départ
-  (`PRESET_ACTIVE`) ; dix dessins retouchés (bz9r, mach5, o_accu, o_batterie, o_repar, siteUnknown, vitre dans `TUILES_JOUEUR` ;
+- **Réglages du joueur adoptés le 28 novembre 2026** (base de l'artefact, enregistrés à 2 h 10) : **Braise** est la palette de départ
+  (`PRESET_ACTIVE`), **toujours, sauf demande contraire** : la palette active enregistrée dans la base ne se recopie pas, et
+  le jeu ne reprend plus au lancement la dernière palette choisie (ni `np-preset-active`, ni la base) : on en change en jeu ; dix dessins retouchés (bz9r, mach5, o_accu, o_batterie, o_repar, siteUnknown, vitre dans `TUILES_JOUEUR` ;
   levier, levierOn, o_camo dans `TUILES_JOUEUR_B`) ; banque de modules de départ à 13 modules (`MODULES_DEF`). Stats : `conception-faune.md`.
 - **Réglages du joueur adoptés le 23 novembre 2026** : les dessins retouchés dans l'artefact (`reglages/courant`) sont recopiés dans
   `TUILES_JOUEUR` (`03-tuiles.js`) et `TUILES_JOUEUR_B` (`03b-tuiles-machines.js`) — bz6r, bz7r, mach5, robot_u, siteUnknown, niche,

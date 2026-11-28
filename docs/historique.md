@@ -324,7 +324,7 @@ Ce qui a été remplacé, et pourquoi (demandes de l'utilisateur, « chaque mach
   moteur (`applySaved` contre l'état du code, contrôle : plus aucune différence après recopie).
 - **Recopié** : les stats de 9 espèces sur 12 (Puce, Relais, Broyeur, Mine, Sentinelle, Artilleur, Drone, Soudeur, Englueur ; le
   Crabot, la Torpille et le Bloqueur étaient déjà identiques) ; la batterie étourdit 10 battements au lieu de 6 ; le phaseur envoie un
-  ennemi à 25 cases au moins au lieu de 14 ; **Magma** palette de départ ; 10 tuiles (bz9r, mach5, o_accu, o_batterie, o_repar,
+  ennemi à 25 cases au moins au lieu de 14 ; palette de départ : **Braise**, toujours, sauf demande contraire (la palette active de la base, Magma, n'est pas recopiée) ; 10 tuiles (bz9r, mach5, o_accu, o_batterie, o_repar,
   siteUnknown, vitre, levier, levierOn, o_camo) ; la banque de modules (13 modules : « Vitrine REF » retirée, « Gouffre HUB2 »,
   « Water HUB », « Arene BIG » et « Arene SMALL » ajoutés ; 1 au niveau 1, 2 en cavernes, 2 en base).
 - Identiques, rien à recopier : groupes et niveaux, artefacts, discrétion, prix et effets des autres objets, butin.

@@ -142,7 +142,8 @@ modification, marquer la version actuelle. Dernière version à fichier unique :
   réglages deviennent ceux du jeu publié, les lire avec `db_get` sur `reglages/courant` (artefact
   `acb8696b-fff0-42ad-824a-fd58fe7cdf1e`) et les recopier dans `src/` : dessins dans `rows` des `BEASTS` et dans `PAT`,
   stats dans les `BEASTS`, couleurs dans `PRESETS`, objets (`items` : prix, effets, butin) dans `14c`/`14d`. Ne pas recopier la configuration d'essai que la base contient aussi
-  (génération, intensités, état de la partie). Le 16 novembre, la Puce a été laissée telle quelle à sa demande. Renommer une tuile (clé de `PAT`) abandonne les retouches faites dessus : le signaler.
+  (génération, intensités, état de la partie), ni la palette active : **la palette de départ est Braise, toujours, sauf demande
+  contraire** (consigne du 28 novembre 2026). Le 16 novembre, la Puce a été laissée telle quelle à sa demande. Renommer une tuile (clé de `PAT`) abandonne les retouches faites dessus : le signaler.
 - **Une nouvelle espèce s'ajoute à la fin de `BEASTS`**, jamais au milieu : les tuiles des créatures sont numérotées
   (`bz0`…`bz9`, dans l'ordre de la liste) et les retouches du joueur sont enregistrées sous ces numéros. Insérer une
   espèce décale toutes les suivantes et colle leurs retouches sur la mauvaise bête (16 novembre 2026 : le brochon,
