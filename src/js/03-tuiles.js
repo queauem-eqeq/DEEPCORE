@@ -191,7 +191,7 @@ const BEASTS=[
      "....11.....11...",
      "................",
      "................"]},
-  {n:'Broyeur',key:'mastok',nb:1,role:'Colosse lent : très résistant, frappe très fort',dpas:150,dcoup:150,pv:60,dmin:12,dmax:20,pre:60,def:0,crit:0,
+  {n:'Broyeur',key:'mastok',nb:1,role:'Colosse lent, ennemi de rang 2 : très résistant, frappe très fort',dpas:150,dcoup:150,pv:60,dmin:18,dmax:30,pre:60,def:0,crit:0,
    rows:["................",
      "......2222......",
      "....22211222....",

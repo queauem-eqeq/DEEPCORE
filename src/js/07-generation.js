@@ -389,11 +389,17 @@ const BEST_DEF={};BEST_LIST().forEach(e=>{BEST_DEF[e.key]={};BFIELDS.forEach(([f
    (navigateur, base de l'artefact, Lab) sont ramenées à COUP_MIN au plus bas. */
 const COUP_MIN=100;
 const coupBorne=()=>BEST_LIST().forEach(e=>{if(!(e.o.dcoup>=COUP_MIN))e.o.dcoup=COUP_MIN;});
-try{const b=clePuce(JSON.parse(localStorage.getItem('np-best')||'null'));
-  if(b)BEST_LIST().forEach(e=>{if(b[e.key])BFIELDS.forEach(([f])=>{if(typeof b[e.key][f]==='number')e.o[f]=b[e.key][f];});});}catch(e){}
+/* Bestiaire du code (28 novembre 2026) : quand les stats changent dans le code après une recopie des réglages du joueur, on
+   avance BEST_CODE_LE. Un bestiaire enregistré avant cette date (base de l'artefact, navigateur) est déjà dans le code : il
+   n'est pas repris, sinon il écraserait le changement. Un nouvel enregistrement depuis le Lab est repris normalement. */
+const BEST_CODE_LE=Date.parse('2026-11-28T02:15:00Z');
+try{const b=clePuce(JSON.parse(localStorage.getItem('np-best')||'null')),
+    ok=(+localStorage.getItem('np-best-le')||0)>=BEST_CODE_LE;
+  if(b&&ok)BEST_LIST().forEach(e=>{if(b[e.key])BFIELDS.forEach(([f])=>{if(typeof b[e.key][f]==='number')e.o[f]=b[e.key][f];});});}catch(e){}
 coupBorne();
 function saveBest(){const o={};BEST_LIST().forEach(e=>{o[e.key]={};BFIELDS.forEach(([f])=>o[e.key][f]=e.o[f]);});
-  try{localStorage.setItem('np-best',JSON.stringify(o));}catch(e){}touchLocal();}
+  try{localStorage.setItem('np-best',JSON.stringify(o));localStorage.setItem('np-best-le',String(Math.max(Date.now(),BEST_CODE_LE)));
+    }catch(e){}touchLocal();}
 /* Les réglages enregistrés d'avant le 25 novembre 2026 portaient une Vitesse, qui n'existe plus : les durées
    gardent alors les valeurs du code, et le reste (PV, dégâts, précision…) reste celui du joueur. */
 try{if(localStorage.getItem('np-mig')!=='horloge1'){saveBest();

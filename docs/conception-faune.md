@@ -95,7 +95,7 @@ plus rapide. Elles ont remplacé la VIT le 25 novembre 2026 ; les paliers sont 5
 | Crabot | 100 | 100 | 22 | 3-6 | 65 | 0 | 2 % |
 | Relais | 75 | 100 | 10 | 2-4 | 50 | 10 | 2 % |
 | Torpille | 75 | 100 | 14 | 4-5 | 80 | 20 | 2 % |
-| Broyeur | 150 | 150 | 60 | 12-20 | 60 | 0 | 0 % |
+| Broyeur | 150 | 150 | 60 | 18-30 | 60 | 0 | 0 % |
 | Mine | 50 | 100 | 18 | 20-30 (explosion) | — | 0 | 0 % |
 | Sentinelle | 75 | 100 | 18 | 1 (laser, 2 cases) | 70 | 10 | 0 % |
 | Bloqueur | 50 | 100 | 30 | 2-4 | 100 | 15 | 0 % |
@@ -106,7 +106,8 @@ plus rapide. Elles ont remplacé la VIT le 25 novembre 2026 ; les paliers sont 5
 
 Ce sont les valeurs réglées en jeu par l'utilisateur et recopiées dans le code (dernière relecture : 28 novembre 2026, 2 h 10). **Coup 100 au moins depuis le 28 novembre 2026** (`COUP_MIN`) : le double coup
 d'une créature rapide se lisait mal ; les plus lentes (Broyeur 150, Artilleur 200) gardent leur durée. Toute valeur plus basse
-(Lab, navigateur, base de l'artefact) est ramenée à 100. Une nouvelle espèce s'ajoute à la fin de la liste (`conception.md`).
+(Lab, navigateur, base de l'artefact) est ramenée à 100.
+**Broyeur, ennemi de rang 2** (28 novembre 2026) : dégâts portés de 12-20 à **18-30** ; seul, il coûte environ la moitié de la vie. Une nouvelle espèce s'ajoute à la fin de la liste (`conception.md`).
 
 **Les articles des messages suivent le genre de l'espèce** (champ `fem`), avec élision devant une voyelle et pas de
 s au pluriel sur un nom qui en porte déjà un : « la puce », « la torpille », « le crabot », « les relais ».

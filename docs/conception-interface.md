@@ -36,6 +36,10 @@ Partie du document de conception (sommaire et règles à ne pas casser : `concep
   L'ordre de dissolution du phaseur est tiré **sans `Math.random`** (générateur à graine fixe, `PHASE_ORD`) : l'empreinte des
   cartes ne bouge pas. Contrôle : poser les effets avec une durée très longue et un `t0` reculé les fige à mi-course le temps
   d'une capture.
+- **Bestiaire changé dans le code après une recopie** (28 novembre 2026) : `BEST_CODE_LE` (`07-generation.js`) donne l'heure du
+  dernier changement de stats fait dans le code. Un bestiaire enregistré avant (base de l'artefact, ou navigateur : `np-best` daté
+  par `np-best-le`) n'est pas repris, sinon il écraserait le changement ; un enregistrement plus récent depuis le Lab l'est.
+  **À avancer à chaque changement de stats des espèces fait dans le code.**
 - **Réglages du joueur adoptés le 28 novembre 2026** (base de l'artefact, enregistrés à 2 h 10) : **Braise** est la palette de départ
   (`PRESET_ACTIVE`), **toujours, sauf demande contraire** : la palette active enregistrée dans la base ne se recopie pas, et
   le jeu ne reprend plus au lancement la dernière palette choisie (ni `np-preset-active`, ni la base) : on en change en jeu ; dix dessins retouchés (bz9r, mach5, o_accu, o_batterie, o_repar, siteUnknown, vitre dans `TUILES_JOUEUR` ;

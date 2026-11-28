@@ -1094,3 +1094,8 @@ points au plus (Drone et Sentinelle frappent moins souvent, Artilleur plus souve
 
 Version retenue, **coup 100 au moins** (Broyeur 150, Artilleur 200 gardés) : voir la ligne suivante.
 | Coup 100 au moins | Broyeur seul : vie restante 68 ; Broyeur + 2 Crabots : 48, 98 % de victoires ; Artilleur 96, Drone 98, Sentinelle 98. |
+
+### Broyeur à 18-30 de dégâts (28 novembre 2026, `outils/simul.py`)
+
+Essais : 16-26 → seul 56 de vie restante ; **18-30 (retenu) → seul 52-53, 95-96 % de victoires ; avec 2 Crabots 38, 83 %** ;
+18-28 et 75 PV → seul 43-47, 87-92 % ; avec 2 Crabots 32, 72 %.
