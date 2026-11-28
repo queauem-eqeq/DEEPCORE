@@ -114,7 +114,7 @@
     ok(bb.h>0&&bb.h<a.h*.6&&bb.h>a.h*.2,`niveau 2 : groupes hostiles posés ${a.h.toFixed(1)} → ${bb.h.toFixed(1)} avec MENACE_NB 0,4 (sautés : ${Object.values(G.menace.saute).reduce((x,y)=>x+y,0)})`);
     ok(GROUPES.niv[2].budget===150&&tot===Math.round(150*W*H/(96*64)),`budget du joueur gardé (150 → total ${tot} sur cette carte), rien de réécrit`);
     GROUPES.niv[2].budget=b0;ok(JSON.stringify(GROUPES)===avant&&localStorage.getItem('np-groupes')===ls0,'groupes et réglages enregistrés intacts après le peuplement');
-    carte('atterrissage');const c=compte([1,1,1],6),d=compte([.4,.4,.4],6);
+    carte('atterrissage');const c=compte([1,1,1],60),d=compte([.4,.4,.4],60);   // 60 peuplements : 6 ne suffisaient pas (gardes 1,5 → 1,5 au hasard)
     ok(c.f>0&&Math.abs(d.f-c.f)<=Math.max(1,c.f*.25)&&d.h<c.h,`Astroport : ferrailleuses ${c.f.toFixed(1)} → ${d.f.toFixed(1)} (inchangées), gardes ${c.h.toFixed(1)} → ${d.h.toFixed(1)}`);
     REGLES.MENACE_NB=R0.nb;
     // dégâts
