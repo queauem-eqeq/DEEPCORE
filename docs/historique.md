@@ -335,8 +335,8 @@ Ce qui a été remplacé, et pourquoi (demandes de l'utilisateur, « chaque mach
 - **Coups étalés** (chaque créature montrait son coup 70 puis 100 ms après la précédente, après le geste de la foreuse) puis
   **attaques combinées** (un groupe par demi-battement, 130 ms d'écart, un seul bruit par groupe) : essayés le 28 novembre 2026,
   retirés le même jour à la demande du joueur : le combat paraissait en retard et le double coup ne se lisait pas.
-- **Coup 100 pour toutes les espèces** : plus de créature qui frappe deux fois dans un tour. Les durées de coup déjà enregistrées
-  (navigateur, base de l'artefact) ne sont pas reprises si elles datent d'avant (`COUP100_LE`, `07-generation.js`).
+- **Coup 100 au moins** (`COUP_MIN`, `07-generation.js`) : plus de créature qui frappe deux fois dans un tour ; le Broyeur (150)
+  et l'Artilleur (200) gardent leur coup plus lent. D'abord toutes à 100 exactement, corrigé le même jour à la demande.
 - Gardés : 30 images/s, élan, secousse et chiffres à 60 images/s, secousse adoucie.
 - **Défaut corrigé le même jour** : de 2 h 37 à 3 h, en adoucissant la secousse, un commentaire avait avalé la ligne qui retire la vie :
   les ennemis frappaient sans faire de dégâts (vu par `outils/simul.py` : vie restante 100 partout). La vérification

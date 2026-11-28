@@ -28,7 +28,7 @@ const terrestre=sp=>!sp.nage&&!sp.aqua&&!sp.vol;
 const ficheDe=o=>(G.beasts&&G.beasts.includes(o))?BEASTS[o.sp]:SPECIES[o.sp];
 const dpasDe=(o,sp)=>{sp=sp||ficheDe(o);
   return Math.max(10,(sp.dpas||100)*slowOf(G.t[idx(o.x,o.y)],eauLibre(sp)));};
-const dcoupDe=(o,sp)=>Math.max(10,((sp||ficheDe(o)).dcoup||100));
+const dcoupDe=(o,sp)=>Math.max(COUP_MIN,((sp||ficheDe(o)).dcoup||100));   // coup 100 au moins (07-generation)
 // Le mot qui dit une durée, pour les fiches et le journal (plus petit, plus rapide), et la cadence : combien de
 // gestes la créature fait pendant une action normale de la foreuse (100 unités).
 const motDuree=d=>d<=50?'très rapide':d<=75?'rapide':d<=100?'normal':d<=150?'lent':'très lent';

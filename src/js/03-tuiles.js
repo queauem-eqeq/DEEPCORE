@@ -191,7 +191,7 @@ const BEASTS=[
      "....11.....11...",
      "................",
      "................"]},
-  {n:'Broyeur',key:'mastok',nb:1,role:'Colosse lent : très résistant, frappe très fort',dpas:150,dcoup:100,pv:60,dmin:12,dmax:20,pre:60,def:0,crit:0,
+  {n:'Broyeur',key:'mastok',nb:1,role:'Colosse lent : très résistant, frappe très fort',dpas:150,dcoup:150,pv:60,dmin:12,dmax:20,pre:60,def:0,crit:0,
    rows:["................",
      "......2222......",
      "....22211222....",
@@ -269,7 +269,7 @@ const BEASTS=[
     pre:100,def:15,crit:0,
   
    rows:["................", "................", ".....1....1.....", ".....1....1.....", "...1111111111...", "..112222222211..", ".31123322332113.", ".33122222222133.", "..312223322213..", "..312233332213..", "...1122222211...", "...1111111111...", "...11......11...", "..111......111..", "................", "................"]},
-  {n:'Artilleur',key:'artilleur',nb:2,role:'Tire un laser jusqu’à 5 cases, un battement sur deux, et recule quand on l’approche',dpas:75,dcoup:100,pv:14,
+  {n:'Artilleur',key:'artilleur',nb:2,role:'Tire un laser jusqu’à 5 cases, un battement sur deux, et recule quand on l’approche',dpas:75,dcoup:200,pv:14,
     dmin:4,dmax:7,pre:65,def:5,crit:0,laser:5,cadence:2,recul:2,
    rows:["................",
      "................",

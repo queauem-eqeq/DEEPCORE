@@ -378,21 +378,20 @@ const B_PORTE=i=>!!(BATI_DER&&BATI_DER.B.porte[i])||D4.some(([dx,dy])=>{const v=
 /* ---------- Bestiaire : édition des statistiques ---------- */
 /* Durées à la place de la Vitesse (25 novembre 2026) : « Pas » et « Coup » en unités de temps, sur les paliers
    50 / 75 / 100 / 150 / 200 — plus petit, plus rapide (voir l'horloge dans 09 et 08-faune). */
-const BFIELDS=[['dpas','Pas',25,400],['dcoup','Coup',25,400],['pv','PV',1,200],['dmin','Dégâts min',0,100],['dmax','Dégâts max',0,100],['pre','Précision',0,250],
+const BFIELDS=[['dpas','Pas',25,400],['dcoup','Coup',100,400],['pv','PV',1,200],['dmin','Dégâts min',0,100],['dmax','Dégâts max',0,100],['pre','Précision',0,250],
   ['def','Défense',0,150],['crit','Crit %',0,100]];
 const BEST_LIST=()=>[{key:'puce',o:SPECIES[0],ic:'an0r',
   role:'Suit à distance et recule ; attaque dès qu’un coup est tenté, par vous ou contre vous'},
   ...BEASTS.map((o,i)=>({key:o.bk||o.key,o,ic:'bz'+i+'r',role:o.role}))];
 const BEST_DEF={};BEST_LIST().forEach(e=>{BEST_DEF[e.key]={};BFIELDS.forEach(([f])=>BEST_DEF[e.key][f]=e.o[f]);});
-/* Coup 100 pour tous (28 novembre 2026, demande du joueur : le double coup ne marchait pas). Les durées de coup enregistrées avant
-   (navigateur : np-best sans la marque np-best-coup ; base de l'artefact : enregistreLe avant COUP100_LE) ne sont pas reprises,
-   le reste du bestiaire l'est. Un nouvel enregistrement depuis le Lab les reprend normalement. */
-const COUP100_LE=Date.parse('2026-11-28T01:55:00Z');
-const coupAncien=f=>f==='dcoup';
-try{const b=clePuce(JSON.parse(localStorage.getItem('np-best')||'null')),vieux=localStorage.getItem('np-best-coup')!=='1';
-  if(b)BEST_LIST().forEach(e=>{if(b[e.key])BFIELDS.forEach(([f])=>{if(vieux&&coupAncien(f))return;
-    if(typeof b[e.key][f]==='number')e.o[f]=b[e.key][f];});});
-  localStorage.setItem('np-best-coup','1');}catch(e){}
+/* Coup 100 au moins (28 novembre 2026, demande du joueur : le double coup ne marchait pas) : aucune créature ne frappe plus
+   vite qu'un battement ; celles qui frappent plus lentement (Broyeur, Artilleur) gardent leur durée. Les durées enregistrées
+   (navigateur, base de l'artefact, Lab) sont ramenées à COUP_MIN au plus bas. */
+const COUP_MIN=100;
+const coupBorne=()=>BEST_LIST().forEach(e=>{if(!(e.o.dcoup>=COUP_MIN))e.o.dcoup=COUP_MIN;});
+try{const b=clePuce(JSON.parse(localStorage.getItem('np-best')||'null'));
+  if(b)BEST_LIST().forEach(e=>{if(b[e.key])BFIELDS.forEach(([f])=>{if(typeof b[e.key][f]==='number')e.o[f]=b[e.key][f];});});}catch(e){}
+coupBorne();
 function saveBest(){const o={};BEST_LIST().forEach(e=>{o[e.key]={};BFIELDS.forEach(([f])=>o[e.key][f]=e.o[f]);});
   try{localStorage.setItem('np-best',JSON.stringify(o));}catch(e){}touchLocal();}
 /* Les réglages enregistrés d'avant le 25 novembre 2026 portaient une Vitesse, qui n'existe plus : les durées
