@@ -1,6 +1,6 @@
 # Fiches du journal de bord : robots et objets
 
-Établi le 28 novembre 2026. Complète `claude/terminaux-journal.md`. Rien n'est encore codé.
+Établi le 28 novembre 2026. Complète `claude/terminaux-journal.md`. Codé le 28 novembre 2026 (voir conception-*.md) ; écarts : la fiche du Gardien n'a pas d'espèce en jeu (l'ancien Gardien est le Bloqueur) ; la fiche d'inspection en jeu ne suit pas les paliers.
 
 ## Décisions de l'utilisateur (28 novembre 2026)
 

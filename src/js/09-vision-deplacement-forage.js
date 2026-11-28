@@ -33,6 +33,7 @@ function computeFOV(){vis=new Uint8Array(W*H);const r=G.st.capteur,px=G.px,py=G.
     sayMore(`Ennemi repéré : ${sp.n} (pas ${motDuree(sp.dpas)}, coup ${motDuree(sp.dcoup)}, ${pvDe(sp)} PV).`,'warn');SFX.roar();}}
   for(const s of G.sites)if(vis[idx(s.x,s.y)]&&!s.seen){s.seen=true;SFX.spot();say(`Site ${s.id} repéré.`,'info');}
   if(typeof jnSync==='function')jnSync();   // journal de bord : objets et hacks connus, une fois par battement (14k)
+  if(typeof n1Vue==='function')n1Vue();     // journal de la foreuse au niveau 1 : contact, épaves, structures, dépôt (14l)
 }
 
 /* ---------- Portée de discrétion (13 novembre 2026) ----------
@@ -258,6 +259,7 @@ function drill(s){drilling=true;let k=0;const n=12;
 // « FOREUSE DÉTRUITE » toujours en rouge, quelle que soit la palette (23 novembre 2026). Détruite pendant une descente (G.over.forage),
 // l'explosion s'est jouée dans le puits : pas d'explosion sur la carte, et un fond noir plein cache le niveau.
 function dead(){if(G.over.boom)return;G.over.boom=true;if(typeof heritageMort==='function')heritageMort();   // hack HÉRITAGE (14g)
+  if(typeof uniteMort==='function')uniteMort();   // l'unité suivante portera le numéro suivant (14l)
  if(TRAV)stopTravel();if(REST)stopRest();
   // à la mort, toutes les capsules se dévoilent dans l'inventaire (23 novembre 2026)
   let devoile=0;for(const k in CONSO)if(identifier(k))devoile++;

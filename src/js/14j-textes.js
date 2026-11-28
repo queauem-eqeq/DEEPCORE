@@ -11,7 +11,7 @@ const TEXTES_N1 = {
       "ATTERRISSAGE CONFORME. UNITÉ {UNITE} OPÉRATIONNELLE.\nSYSTÈMES : NOMINAUX. GREFFON : VIDE."
     ],
     premier_contact: [
-      "CONTACT : 3 MOBILES. SIGNATURE : MÉTAL. CLASSEMENT : MENACE.",
+      "CONTACT : {N} MOBILES. SIGNATURE : MÉTAL. CLASSEMENT : MENACE.",
       "CONTACT : MOBILE. SIGNATURE : MÉTAL. CLASSEMENT : MENACE.",
       "CONTACT : 2 MOBILES. ACTIVITÉ : DÉCOUPE.\nCLASSEMENT : MENACE.",
       "CONTACT : MOBILE. TAILLE : RÉDUITE. CLASSEMENT : MENACE."
@@ -77,7 +77,13 @@ const TEXTES_N1 = {
       "MOBILES AUTOUR DU VAISSEAU DE L'UNITÉ.\nACTIVITÉ : DÉCOUPE. VAISSEAU : EN SERVICE.",
       "MOBILES SUR COQUE DU VAISSEAU DE L'UNITÉ.\nOCCURRENCE : NOUVELLE.",
       "VAISSEAU DE L'UNITÉ : MOBILES EN APPROCHE.\nCLASSEMENT : STRUCTURE À DÉCOUPER."
-    ]
+    ],
+    // après la 14e épave vue (étape 7, 28 novembre 2026)
+    analyse_epaves: "ANALYSE : ÉPAVES : {N}. PLAN DE MISSION :\nMISSIONS ANTÉRIEURES = 0. ÉCART SIGNALÉ.",
+    // seconde ligne de l'atterrissage, à la place de « la porte est à l'arrière »
+    soute: "UNITÉ EN SOUTE. SORTIE : ARRIÈRE DU VAISSEAU.",
+    // à la descente, une fois le rapport parti (journal du jeu)
+    rapport_envoye: "RAPPORT {NUM_RAPPORT} TRANSMIS. ORIGINE : REÇU.\nNOYAU D'ORIGINE : 61 %."
   },
 
   rapport: [
@@ -100,9 +106,9 @@ const TEXTES_N1 = {
   terminaux: [
     {
       id: 'bn_porteur_0211', source: 'boite_noire',
-      titre: 'PORTEUR 0211 — ENREGISTREUR',
+      titre: 'PORTEUR {NUM} — ENREGISTREUR',
       lignes: [
-        "LARGAGE UNITÉ F.211 mkII : CONFORME.",
+        "LARGAGE UNITÉ F.{NUM} {MK} : CONFORME.",
         "ATTENTE RETOUR UNITÉ.",
         "ATTENTE RETOUR UNITÉ.",
         "[9 412 ENTRÉES IDENTIQUES]",
@@ -240,7 +246,7 @@ const TEXTES_N1 = {
     },
     {
       id: 'jf_376', source: 'journal_foreuse',
-      titre: 'F.376 mkII — JOURNAL',
+      titre: 'F.376 mkIII — JOURNAL',
       lignes: [
         "ÉNERGIE : 88 %.",
         "ÉNERGIE : 41 %.",
@@ -331,7 +337,8 @@ const TEXTES_N1 = {
     ligne_arrivee: "ARRIVÉE {NUM}   FOSSE {FOSSE}",
     suffixe_liberee: " (LIBÉRÉE)",
     depart: "DÉPART  —",
-    derniere: "FOSSE {FOSSE} : LIBÉRATION PRÉVUE."
+    derniere: "FOSSE {FOSSE} : LIBÉRATION PRÉVUE.",
+    analyse: "ANALYSE : NUMÉROTATION CROISSANTE. DÉPARTS : 0.\nCAUSE : NON DÉTERMINÉE."
   },
 
   analyses: [

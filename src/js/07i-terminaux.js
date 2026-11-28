@@ -186,7 +186,7 @@ function dataTirer(m){
   if(m.s==='boite_noire'){const k=G.art[m.i].boite,[ti,x]=epaveBoite(k);return {type:'boite_noire',id:'epave-'+k,titre:ti,lignes:x.split('\n')};}
   if(m.s==='antenne'){const b=(G.beasts||[]).filter(o=>!BEASTS[o.sp].mine),gr=new Set(b.map(o=>o.gi).filter(g=>g!=null)),s=G.sites&&G.sites[0];
     const l=[`SIGNATURES MOBILES : ${b.length}.`,`FORMATIONS : ${gr.size}.`];
-    if(G.epaves&&G.epaves.length)l.push(`ÉPAVES SUR SITE : ${G.epaves.filter(e=>e.etat!=='v').length}.`);
+    if(G.epaves&&G.epaves.length)l.push(`ÉPAVES SUR SITE : ${G.epaves.filter(e=>e.etat!=='v'&&!e.notre).length}.`);
     if(s)l.push(`SITE DE FORAGE : ${termCap(m.i,idx(s.x,s.y))}.`);
     return {type:'releve',id:'releve-'+(G.niv||1),titre:'RELEVÉ DU SITE',lignes:l};}
   const k=(+G.art[m.i]||0)%TERM_TXT.length,[ti,x]=TERM_TXT[k];return {type:'journal',id:'term-'+k,titre:ti,lignes:[x]};}

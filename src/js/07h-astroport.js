@@ -12,10 +12,12 @@
      G.epMod[n] = grille d'une coque de module (dessin tiré à la volée). G.sas (case devant la porte du dépôt) et G.debouches
      (débouchés des tunnels) viennent de 07d-tunnels.
    Plus une fosse est proche de l'entrée du complexe (les débouchés), plus son épave est ancienne (petit numéro, vieux
-   modèle) et dépecée. Notre unité est la 467 : tous les numéros sont plus petits. */
-const EPV_ETATS={s:'SCELLÉE',e:'ÉVENTRÉE',q:'SQUELETTE',v:'FOSSE VIDE'},EPV_UNITE=467;
+   modèle) et dépecée. Notre unité est la 467 à la première partie (UNITE_NUM) : tous les numéros sont plus petits. */
+const EPV_ETATS={s:'SCELLÉE',e:'ÉVENTRÉE',q:'SQUELETTE',v:'FOSSE VIDE'};
+let EPV_UNITE=UNITE_NUM;   // le numéro de l'unité en cours (vivant : 14l, uniteApplique) ; toutes les épaves ont un numéro plus petit
 const num4=n=>String(n).padStart(4,'0'),num2=n=>String(n).padStart(2,'0');
-const epvMk=n=>n<150?'mkI':n<300?'mkII':n<430?'mkIII':'mkIV';
+// modèle d'une ancienne unité selon son numéro (accordé aux journaux de TEXTES_N1 : F.087 mkI, F.211 mkII, F.302 / F.376 / F.455 mkIII)
+const epvMk=n=>n<150?'mkI':n<300?'mkII':n<456?'mkIII':'mkIV';
 const epvHash=(x,y)=>{let h=(x*73856093)^(y*19349663);h=Math.imul(h^(h>>>13),1274126177);return (h^(h>>>16))>>>0;};
 // le niveau en cours de génération est-il l'Astroport ? (recette du niveau 1, avec le vaisseau)
 const astroRec=()=>GEN.recette===RECETTE_NIV(1)&&!SANS_VAISSEAU;
@@ -155,7 +157,8 @@ function astroportFin(){if(!G.epaves||!G.epaves.length)return;const t=G.t;let bo
       if(d&&(Math.random()<.5||(!boites&&e===scel[scel.length-1]))){t[d[0]]=TERMINAL;G.art[d[0]]={boite:k};e.boite=d[0];boites++;}}});}
 
 /* ---------- Lecture ---------- */
-const epaveA=i=>G&&G.epI&&G.epI[i]!=null?G.epaves[G.epI[i]]:null;
+// notre vaisseau, pris pour une épave en fin de niveau (14l, n1Fin), n'est pas une épave pour la fiche ni pour le forage
+const epaveA=i=>{const e=G&&G.epI&&G.epI[i]!=null?G.epaves[G.epI[i]]:null;return e&&!e.notre?e:null;};
 const fosseA=i=>G&&G.fosI&&G.fosI[i]!=null?G.fosses[G.fosI[i]]:null;
 const epNom=e=>e.nom+' '+num4(e.num);
 // la fiche d'inspection d'une case d'épave ou de fosse : [titre, texte], en relevé de la foreuse
@@ -166,7 +169,7 @@ function epaveFiche(i){const e=epaveA(i),F=e?G.fosses[e.fosse]:fosseA(i);
     if(e.boite===i)l.push('ENREGISTREUR DE BORD. ALIMENTÉ. LECTURE AU CONTACT.');
     return [epNom(e),l.join(' ')];}
   if(F){const o=F.notre?`CARGO ${num4(EPV_UNITE)}. UNITÉ ${NOM_FOREUSE} EN SERVICE.`:F.epave>=0?epNom(G.epaves[F.epave])+'.':'AUCUN ENGIN.';
-    return ['FOSSE '+num2(F.num),`AIRE D’ATTERRISSAGE. OCCUPATION : ${o}`];}
+    return ['FOSSE '+num2(F.num),`AIRE D’ATTERRISSAGE. OCCUPATION : ${o}`+(F.notre&&G.h1&&G.h1.fin!=null?' MOBILES SUR COQUE. ACTIVITÉ : DÉCOUPE.':'')];}
   return null;}
 // texte d'un enregistreur d'épave scellée (l'étape des terminaux le réécrira)
 function epaveBoite(k){const e=G.epaves[k];if(!e)return ['ENREGISTREUR','DONNÉES ILLISIBLES.'];const n=rnd(800,12000);

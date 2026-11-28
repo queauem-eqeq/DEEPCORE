@@ -309,7 +309,7 @@ function ouvrTick(){if(!G.patr||G.over)return;const mb={};
     else if(--P.al<=0)ouvrProvoque(id,true);
     // la première fois qu'une ferrailleuse en vue, à OUVR_VUE cases au plus, ignore la foreuse
     if(!G.ouvrVu&&P.ouv!=='hostile'&&m.some(o=>vis[idx(o.x,o.y)]&&cheb(o,G.px,G.py)<=OUVR_VUE)){G.ouvrVu=1;
-      logPush('MOBILE IGNORE L’UNITÉ. ACTIVITÉ : DÉCOUPE. CLASSEMENT MAINTENU : MENACE.','info');}}}
+      logPush(typeof n1Texte==='function'?n1Texte('ferrailleuse_ignore',0):'MOBILE IGNORE L’UNITÉ. ACTIVITÉ : DÉCOUPE. CLASSEMENT MAINTENU : MENACE.','info');}}}
 /* Le travail d'une ferrailleuse calme, à la place du pas de patrouille (rend true si elle a joué) : alertée, elle s'arrête face à
    la foreuse ; en halte à son épave (P.k = 0), elle rejoint la coque puis la découpe. Ailleurs, la navette ordinaire. */
 let OUVR_SON=-1;

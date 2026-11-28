@@ -370,3 +370,9 @@ Ce qui a été remplacé, et pourquoi (demandes de l'utilisateur, « chaque mach
   destructions), fiches d'objets complètes, pages lues aux terminaux, hacks vus, tutoriel ; gardé d'une partie à l'autre
   (`np-journal`, et `journal/courant` dans la base de l'artefact). La DATA des terminaux ne lit plus les anciens textes
   narratifs (`TERM_TXT`, gardés en vestige dans 07c) : elle tire une page ou un palier du niveau en cours.
+- 28 novembre 2026 : niveau 1 raconté. Journal de la foreuse en jargon machine (atterrissage, contact, épaves 1re / 5e / 14e,
+  états d'épave, structures, dépôt), rapport de mission et accusé de l'origine dans la cinématique de la descente du niveau 1,
+  registre du port (parties précédentes du joueur) lu au terminal du dépôt, numéro d'unité qui monte à chaque destruction (F467,
+  F468…, `np-unite`), ferrailleuses qui prennent notre vaisseau pour épave après l'entrée au dépôt. Lignes d'ambiance des hacks
+  réécrites sans « je ». « F.376 mkII » devient « mkIII » et les épaves ne sont « mkIV » qu'à partir du n° 456 (accord avec les
+  journaux des anciennes unités).

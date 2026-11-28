@@ -239,6 +239,31 @@ CRIT +5, POW 9), **Trépan lourd** (2d6+6 ; coup +25, POW 12), **Carène légèr
   assez d'énergie, la foreuse reprend la marche. **Le moteur s'entend : + 2 cases de portée de discrétion**,
   appliquées après tous les autres modificateurs.
 
+### Numéro d'unité, registre du port, niveau 1 raconté (`14l-histoire.js`, 28 novembre 2026)
+
+- **Numéro d'unité** : la foreuse s'appelle **F467** à la première partie ; chaque **destruction** donne le numéro suivant à la
+  partie d'après (F468, F469…). Une partie recommencée (REGEN, Nouvelle exploration, Quitter puis rallumer) garde le numéro.
+  Rangé dans `np-unite` et dans le journal de bord (`JN.u`, donc aussi dans la base de l'artefact `journal/courant`) ; le plus
+  grand des deux gagne. `NOM_FOREUSE` est vivant : `uniteApplique()` (début de partie) le met à jour, avec `EPV_UNITE` (toutes les
+  épaves ont un numéro plus petit), et réécrit les textes construits au chargement (rôles des robots, objets, stats, aides).
+  « Journal : effacer » (Lab) ne remet pas le numéro à zéro.
+- **Registre du port** : chaque partie note son unité et le numéro de sa fosse au niveau 1 (`np-registre`, `JN.reg`, une entrée par
+  unité). Le registre (« REGISTRE — AIRE 3 ») est le **premier DATA du terminal du dépôt le plus proche de l'entrée** (`G.regTerm`) :
+  les 6 dernières unités précédentes « ARRIVÉE 04xx   FOSSE nn (LIBÉRÉE) », complétées au besoin par les épaves aux plus grands numéros
+  de la carte (deux lignes au moins avant la nôtre : à la toute première partie, rien n'est inventé), puis la partie en cours,
+  « DÉPART  — » et « FOSSE nn : LIBÉRATION PRÉVUE. ». La page du journal de bord (onglet Documents) garde le registre **tel qu'il
+  était à la dernière lecture**.
+- **Journal de la foreuse** (niveau 1 de l'Astroport) : atterrissage en jargon (« ATTERRISSAGE CONFORME. SITE : ASTROPORT. UNITÉ F467
+  EN SERVICE. »), premier contact (nombre de mobiles en vue), épaves vues (la 1re, la 5e et la 14e, avec « OCCURRENCE : N » ; à la 14e,
+  une analyse « MISSIONS ANTÉRIEURES = 0. ÉCART SIGNALÉ. »), l'état de chaque sorte d'épave et la fosse vide à la première rencontre,
+  FABLAB, terminal, mât-balise vus, entrée au dépôt. Une ligne par battement au plus (le contact passe tout de suite).
+- **Fin de niveau** : à l'entrée au dépôt, le groupe de ferrailleuses à l'ouvrage (non provoqué) le plus proche de notre vaisseau le
+  prend pour épave : il y va, découpe la coque, fait la navette avec le sas. Notre vaisseau ne compte comme épave qu'à partir de là
+  (pas de piège à l'atterrissage) ; s'en approcher ensuite les alerte comme ailleurs. Une ligne au journal si la foreuse les voit autour.
+- **Terminaux** : la liaison tire ses textes de `TEXTES_N1.connexion` (5 variantes, toujours un échec au niveau 1) ; une page lue
+  sans analyse propre reçoit une analyse générique de `TEXTES_N1.analyses` ; quelques libellés du menu viennent de `terminal_ui`.
+- **Hacks** : les lignes d'ambiance sont un relevé de l'unité en jargon machine, sans « je » (la foreuse n'en a pas avant le niveau 7).
+
 ## 5 bis. Horloge : le temps continu
 
 Le jeu compte en **unités de temps**, pas en tours.

@@ -1,7 +1,7 @@
 # Niveau 1 : l'Astroport (cimetière spatial)
 
 Validé par l'utilisateur le 27 novembre 2026. Complète `claude/histoire.md` (cadre général, qui fait foi pour la trame).
-Rien n'est encore codé. À recopier dans `docs/` du dépôt avec le reste de l'histoire.
+Codé le 28 novembre 2026 (voir conception-*.md) ; écarts : l'unité s'écrit F467 (pas « F.467 mkIV ») ; à la première partie, le registre montre les deux épaves aux plus grands numéros avant la nôtre ; les ferrailleuses prennent notre vaisseau pour épave à l'entrée au dépôt (pas au site de forage, qui finit le niveau aussitôt). À recopier dans `docs/` du dépôt avec le reste de l'histoire.
 
 ## Décisions de l'utilisateur
 

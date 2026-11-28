@@ -24,7 +24,16 @@ const JN_TEXTES={1:JN_TX};   // les textes de chaque niveau (seul le niveau 1 ex
 const JN_TUTO_DEPART=3;      // pages de tutoriel acquises d'office
 const JN_ONGLETS=[['rob','Robots'],['obj','Objets'],['jou','Journaux'],['doc','Documents'],['hk','Hacks'],['tut','Tutoriel']];
 const JN_MANQUE='[DONNÉES MANQUANTES]';
-const jnVide=()=>({v:JN_VER,raz:0,maj:0,rob:{},obj:{},hk:{},pg:{},ouv:{}});
+const jnVide=()=>({v:JN_VER,raz:0,maj:0,rob:{},obj:{},hk:{},pg:{},ouv:{},u:0,reg:[]});
+/* Étape 7 (28 novembre 2026) : u = numéro de l'unité en service (le plus grand gagne), reg = registre du port [{u, f}] (numéro d'unité,
+   numéro de fosse de chaque partie, 14l-histoire.js) ; une page générée (registre lu, rapport envoyé) garde son texte dans pg :
+   {t : titre, l : lignes, a : analyse, o : onglet 'jou' | 'doc', d : date}. Un effacement (Lab) ne touche ni u ni reg. */
+const jnCh=(v,n)=>String(v==null?'':v).slice(0,n||90);
+function jnPgSain(v,n){if(!v||typeof v!=='object')return {};const o=v.n!=null?{n:n(v.n)}:{};
+  if(Array.isArray(v.l)){o.l=v.l.slice(0,30).map(x=>jnCh(x));o.t=jnCh(v.t);o.a=jnCh(v.a,200);o.o=v.o==='doc'?'doc':'jou';o.d=n(v.d);}
+  return o;}
+const jnRegSain=r=>(Array.isArray(r)?r:[]).filter(x=>x&&Number.isFinite(+x.u)&&+x.u>0).map(x=>({u:Math.round(+x.u),f:Math.max(0,Math.round(+x.f)||0)}));
+function jnRegFusion(a,b){const m=new Map();for(const x of [...jnRegSain(a),...jnRegSain(b)])m.set(x.u,x);return [...m.values()].sort((x,y)=>x.u-y.u).slice(-12);}
 // relecture tolérante : champs inconnus ignorés, types remis d'aplomb (un format plus récent ou plus ancien se lit sans erreur)
 function jnSain(d){const o=jnVide();if(!d||typeof d!=='object')return o;const n=v=>Number.isFinite(+v)?Math.max(0,Math.round(+v)):0,
     obj=v=>v&&typeof v==='object'&&!Array.isArray(v)?v:{};
@@ -32,15 +41,19 @@ function jnSain(d){const o=jnVide();if(!d||typeof d!=='object')return o;const n=
   for(const [k,r] of Object.entries(obj(d.rob)))if(r&&typeof r==='object')o.rob[k]={vu:r.vu?1:0,det:n(r.det),s:r.s?1:0,c:r.c?1:0,o:r.o?1:0};
   for(const [k,v] of Object.entries(obj(d.obj)))if(v)o.obj[k]=1;
   for(const [k,v] of Object.entries(obj(d.hk)))o.hk[k]=Math.max(1,Math.min(10,n(v)||1));
-  for(const [k,v] of Object.entries(obj(d.pg)))o.pg[k]=v&&typeof v==='object'&&v.n!=null?{n:n(v.n)}:{};
+  for(const [k,v] of Object.entries(obj(d.pg)))o.pg[k]=jnPgSain(v,n);
+  o.u=n(d.u);o.reg=jnRegSain(d.reg);
   for(const [k,v] of Object.entries(obj(d.ouv)))if(v)o.ouv[k]=1;
   return o;}
 // fusion de deux journaux : le plus récemment effacé l'emporte ; sinon, union (rien ne se perd)
-function jnFusion(a,b){a=jnSain(a);b=jnSain(b);if(a.raz!==b.raz)return a.raz>b.raz?a:b;const o=a;o.maj=Math.max(a.maj,b.maj);
+function jnFusion(a,b){a=jnSain(a);b=jnSain(b);const u=Math.max(a.u,b.u),reg=jnRegFusion(a.reg,b.reg);
+  if(a.raz!==b.raz){const o=a.raz>b.raz?a:b;o.u=u;o.reg=reg;return o;}const o=a;o.maj=Math.max(a.maj,b.maj);o.u=u;o.reg=reg;
   for(const k in b.rob){const x=o.rob[k]||(o.rob[k]={vu:0,det:0,s:0,c:0,o:0}),y=b.rob[k];
     x.vu|=y.vu;x.det=Math.max(x.det,y.det);x.s|=y.s;x.c|=y.c;x.o|=y.o;}
   for(const k in b.obj)o.obj[k]=1;for(const k in b.hk)o.hk[k]=Math.max(o.hk[k]||0,b.hk[k]);
-  for(const k in b.pg)if(!o.pg[k])o.pg[k]=b.pg[k];for(const k in b.ouv)o.ouv[k]=1;return o;}
+  for(const k in b.pg)if(!o.pg[k]||(b.pg[k].l&&(b.pg[k].d||0)>(o.pg[k].d||0)))o.pg[k]=b.pg[k];
+    // page générée (registre, rapport) : la plus récente l'emporte
+  for(const k in b.ouv)o.ouv[k]=1;return o;}
 let JN=jnVide(),JN_DB=null,JN_DBT=0;
 function jnCharge(){let d=null;try{d=JSON.parse(localStorage.getItem(JN_CLE)||'null');}catch(e){}JN=jnSain(d);return JN;}
 function jnSauve(){JN.maj=Date.now();try{localStorage.setItem(JN_CLE,JSON.stringify(JN));}catch(e){}
@@ -54,6 +67,7 @@ jnCharge();
       const av=JSON.stringify(JN);JN=jnFusion(JN,r);if(JSON.stringify(JN)!==av){try{localStorage.setItem(JN_CLE,JSON.stringify(JN));}catch(e){}}
       if(JSON.stringify(jnSain(r))!==JSON.stringify(JN))jnBaseEcrit();}
     else jnBaseEcrit();}catch(e){}
+  if(typeof uniteBase==='function')uniteBase();   // numéro d'unité et registre rangés dans la base (14l)
   if(!$('jdb').hidden)jnRendu();}).catch(()=>{});
 
 /* ----- Ce qui existe ----- */
@@ -66,12 +80,16 @@ const jnConnuR=r=>!!(r&&(r.vu||r.s||r.c||r.o||r.det>0));
 const jnObjets=()=>Object.keys(ITEMS).filter(k=>!estHack(k)&&!/^plan_/.test(k)&&k!=='matiere');
 const jnHacks=()=>Object.keys(HACKS).filter(h=>TIR_DISPO||HACKS[h].f!=='tir');
 const jnTous=()=>[...(JN_TX.terminaux||[]),...(JN_TX.documents||[]),...(JN_TX.tutoriel||[])];
-const jnTexte=id=>jnTous().find(t=>t.id===id)||null;
+// pages générées (14l) : toujours listées dans leur onglet, connues une fois écrites
+const JN_GEN=[{id:'registre_port',o:'doc',titre:'REGISTRE — AIRE 3'},{id:'rapport_1',o:'jou',titre:'RAPPORT 001'}];
+const jnTexte=id=>{const t=jnTous().find(t=>t.id===id);if(t)return t;const p=JN.pg[id];
+  if(p&&p.l)return {id,titre:p.t,lignes:p.l,analyse:p.a||''};const g=JN_GEN.find(g=>g.id===id);return g?{id,titre:g.titre,lignes:[]}:null;};
 const jnTuto=()=>JN_TX.tutoriel||[];
 const jnTutoLu=id=>!!JN.pg[id]||jnTuto().findIndex(t=>t.id===id)<JN_TUTO_DEPART;
 const jnUnite=s=>String(s).split('{UNITE}').join(typeof NOM_FOREUSE!=='undefined'?NOM_FOREUSE:'F467');
 // texte d'une page, jetons remplacés ({NUM} : numéro de l'épave, sur 4 chiffres)
-function jnLignes(t,n){const N=n!=null?String(n).padStart(4,'0'):'????',f=s=>jnUnite(String(s).split('{NUM}').join(N));
+function jnLignes(t,n){const N=n!=null?String(n).padStart(4,'0'):'????',
+    f=s=>jnUnite(String(s).split('{NUM}').join(N).split('{MK}').join(n!=null&&typeof epvMk==='function'?epvMk(n):'mk?'));
   return {titre:f(t.titre),lignes:(t.lignes||[]).map(f),analyse:t.analyse?f(t.analyse).split('\n'):[]};}
 
 /* ----- Ce qui entre dans le journal ----- */
@@ -119,7 +137,7 @@ function jnEspecesNiv(){const s=new Set(),ks=ESPECES().map(e=>e[0]);
   return ks.filter(k=>s.has(k));}
 function jnReleve(m){const b=(G.beasts||[]).filter(o=>!BEASTS[o.sp].mine),gr=new Set(b.map(o=>o.gi).filter(g=>g!=null)),s=G.sites&&G.sites[0];
   const l=[`SIGNATURES MOBILES : ${b.length}.`,`FORMATIONS : ${gr.size}.`];
-  if(G.epaves&&G.epaves.length)l.push(`ÉPAVES SUR SITE : ${G.epaves.filter(e=>e.etat!=='v').length}.`);
+  if(G.epaves&&G.epaves.length)l.push(`ÉPAVES SUR SITE : ${G.epaves.filter(e=>e.etat!=='v'&&!e.notre).length}.`);
   if(s)l.push(`SITE DE FORAGE : ${termCap(m.i,idx(s.x,s.y))}.`);
   return {type:'releve',id:'releve-'+(G.niv||1),titre:'RELEVÉ DU SITE',lignes:l};}
 function jnRobotData(k){const niv=G.niv||1,p=jnMonte(k,niv);if(!p)return null;const sp=jnEspece(k),T=jnFicheTx(k)||{};
@@ -154,7 +172,10 @@ function dataTirer(m){jnSync(true);
 function jnObjetData(k){identifier(k);jnObjet(k);const d=ITEMS[k],v=d.vrai||d;
   return {type:'objet',id:'o:'+k,titre:'FICHE : '+v.n.toUpperCase(),lignes:[jnTC(()=>fabEffet(k)),...jnChiffres(k),v.d||''].filter(Boolean),page:1};}
 // le terminal : texte lu à droite, « PAGE AJOUTÉE AU JOURNAL DE BORD » et, pour un texte, sa ligne d'analyse (aussi au journal du jeu)
+// analyse générique (TEXTES_N1.analyses), toujours la même pour un texte donné : pour une page lue qui n'a pas la sienne
+function jnAnaGen(id){const A=JN_TX.analyses||[];if(!A.length)return [];let h=0;for(const c of String(id))h=(h*31+c.charCodeAt(0))>>>0;return [A[h%A.length]];}
 function termData(m){if(m.data)return false;const d=dataTirer(m);m.data=1;m.lu={type:d.type,id:d.id,titre:d.titre,lignes:d.lignes};SFX.analyse();
+  if(d.page&&!(d.analyse&&d.analyse.length)&&d.type!=='robot'&&d.type!=='objet')d.analyse=jnAnaGen(d.id);
   termSortie(d.titre,d.lignes);const el=$('termOut'),p=(t,c)=>{const e=document.createElement('p');e.className=c;e.textContent=t;el.appendChild(e);};
   if(d.maj)p(`FICHE MISE À JOUR — ${d.maj}.`,'jnajout');
   if(d.page)p('PAGE AJOUTÉE AU JOURNAL DE BORD.','jnajout');
@@ -175,7 +196,8 @@ function jnEntrees(t){
   if(t==='hk')return jnHacks().map(h=>({cle:'h:'+h,k:h,nom:HACKS[h].n,connu:!!JN.hk[h]}));
   const l=t==='jou'?JN_TX.terminaux:t==='doc'?JN_TX.documents:JN_TX.tutoriel;
   return (l||[]).map(x=>{const pg=JN.pg[x.id],n=pg&&pg.n!=null?pg.n:null;
-    return {cle:'p:'+x.id,k:x.id,nom:jnLignes(x,n).titre,connu:t==='tut'?jnTutoLu(x.id):!!pg};});}
+    return {cle:'p:'+x.id,k:x.id,nom:jnLignes(x,n).titre,connu:t==='tut'?jnTutoLu(x.id):!!pg};})
+    .concat(JN_GEN.filter(g=>g.o===t).map(g=>{const p=JN.pg[g.id];return {cle:'p:'+g.id,k:g.id,nom:p&&p.l?p.t:g.titre,connu:!!(p&&p.l)};}));}
 const jnNeuf=e=>e.connu&&!JN.ouv[e.cle]&&!(e.cle.startsWith('p:tuto')&&!JN.pg[e.k]);   // les pages données d'office ne sont pas « nouvelles »
 function jnOngletsHTML(){return JN_ONGLETS.map(([t,n])=>{const E=jnEntrees(t),c=E.filter(e=>e.connu).length,nv=E.some(jnNeuf);
   return `<button class="jtab${t===JN_TAB?' sel':''}" role="tab" aria-selected="${t===JN_TAB}" data-t="${t}">${n.toUpperCase()} <i>${c}/${E.length}</i>${nv?'<b class="jnew" title="Nouveau"></b>':''}</button>`;}).join('');}
@@ -238,7 +260,8 @@ $('jdbListe').addEventListener('click',ev=>{const b=ev.target.closest('.jli');if
 function jnToutDebloquer(){for(const [k] of ESPECES()){const r=jnRob(k);r.vu=1;r.s=1;r.c=1;r.o=1;r.det=Math.max(r.det,JN_STATS);}
   for(const k of jnObjets())JN.obj[k]=1;for(const h of jnHacks())JN.hk[h]=HACKS[h].f==='noyau'?1:10;
   for(const t of jnTous())if(!JN.pg[t.id])JN.pg[t.id]=/\{NUM\}/.test(t.titre)?{n:0}:{};jnSauve();jnBouton();}
-function jnEfface(){const raz=Date.now();JN=jnVide();JN.raz=raz;JN_SEL={};jnSauve();jnBaseEcrit();jnBouton();}
+function jnEfface(){const raz=Date.now(),u=JN.u,reg=JN.reg;JN=jnVide();JN.raz=raz;JN.u=u;JN.reg=reg;   // le numéro d'unité et le registre restent
+ JN_SEL={};jnSauve();jnBaseEcrit();jnBouton();}
 $('jnLabTout').onclick=()=>{jnToutDebloquer();$('jnLabTout').textContent='Journal : tout débloqué';
   setTimeout(()=>{$('jnLabTout').textContent='Journal : tout débloquer';},2000);};
 $('jnLabEff').onclick=()=>{const b=$('jnLabEff');

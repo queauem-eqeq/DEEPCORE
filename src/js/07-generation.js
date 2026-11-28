@@ -332,8 +332,11 @@ function niveau(refait){drilling=false;
 /* Le niveau d'une carte générée depuis le menu (REGEN, GÉNÉRER LA CARTE) est celui de sa recette (22 novembre 2026 ; avant,
    toujours 1) : une carte « cavernes » est un niveau 2, une « base » un niveau 3, et prend la faune (fenêtre LIFE) et les
    artefacts de ce niveau. La descente reprend de là. */
-function newGame(){palNiveauRaz();SANS_VAISSEAU=false;NIV_GEN=NIV_RECETTE(GEN.recette);niveau();G.niv=NIV_GEN;   // G n'existe qu'une fois la carte générée
-  if(G.ship)say('Atterrissage confirmé. Un site de forage signalé par l’orbiteur. '+NOM_FOREUSE+' est dans la soute ; la porte est à l’arrière.','info');
+function newGame(){if(typeof uniteApplique==='function')uniteApplique();   // numéro d'unité en service (14l : +1 après une destruction)
+  palNiveauRaz();SANS_VAISSEAU=false;NIV_GEN=NIV_RECETTE(GEN.recette);niveau();G.niv=NIV_GEN;   // G n'existe qu'une fois la carte générée
+  // niveau 1 de l'Astroport : atterrissage en jargon machine, partie notée au registre du port (14l)
+  if(G.ship&&G.niv===1&&G.fosses&&typeof n1Debut==='function')n1Debut();
+  else if(G.ship)say('Atterrissage confirmé. Un site de forage signalé par l’orbiteur. '+NOM_FOREUSE+' est dans la soute ; la porte est à l’arrière.','info');
   else if(G.arrivee==='base')say(`Niveau ${G.niv} : ${NOM_FOREUSE} a traversé le plafond d’une salle, dans une base enfouie. Un site de forage est signalé plus loin.`,'info');
   // arrivée par un puits
   else say(`Niveau ${G.niv} : ${NOM_FOREUSE} a débouché dans un réseau de cavernes. Un site de forage plus bas est signalé.`,'info');

@@ -36,7 +36,7 @@
     // espèce sans texte : stats seulement
     ok(Object.keys(JN_FICHE).every(k=>ESPECES().some(e=>e[0]===k))&&ESPECES().every(([k])=>JN_FICHE[k]),'chaque espèce a sa clé de fiche');}
   // DATA au terminal : Math.random fixé → une fiche de robot du niveau monte d'un palier
-  {const T=Object.values(G.term).filter(m=>m.s==='terminal'),m=T[0],R=jnEspecesNiv().filter(k=>jnSuivant(k,1)),
+  {const T=Object.values(G.term).filter(m=>m.s==='terminal'&&m.i!==G.regTerm),m=T[0],R=jnEspecesNiv().filter(k=>jnSuivant(k,1)),
       av=JSON.parse(JSON.stringify(JN.rob)),pal=r=>r?(jnStats(r)?1:0)+r.c+r.o:-1;
     zero();termOuvre(m.i);$('termMenu').querySelector('.tl[data-a="data"]').click();Math.random=rnd0;
     const t=$('termOut').textContent;
@@ -45,7 +45,8 @@
       `DATA : fiche ${k} du niveau montée d’un palier (${JSON.stringify(av[k]||null)} → ${JSON.stringify(JN.rob[k])})`);
     closeTerminal();
     // un journal : sa ligne d'analyse au terminal
-    const m2=T[1];JN.rob={};for(const [kk] of ESPECES())JN.rob[kk]={vu:1,det:99,s:1,c:1,o:1};
+    const m2=T[1]||(T[0].data=0,T[0]);   // le terminal du registre (14l) est écarté : s'il n'en reste qu'un, on le relit
+    JN.rob={};for(const [kk] of ESPECES())JN.rob[kk]={vu:1,det:99,s:1,c:1,o:1};
     for(const c in CONSO)identifier(c);zero();termOuvre(m2.i);$('termMenu').querySelector('.tl[data-a="data"]').click();Math.random=rnd0;
     const t2=$('termOut').textContent,id=m2.lu.id,tx=jnTexte(id);
     ok(tx&&tx.source!=='boite_noire'&&JN.pg[id]&&/PAGE AJOUTÉE/.test(t2)&&/ANALYSE/.test(t2)&&!/\{UNITE\}|\{NUM\}/.test(t2),`DATA : journal « ${m2.lu.titre} » lu, analyse affichée`);

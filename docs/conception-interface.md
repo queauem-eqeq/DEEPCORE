@@ -253,6 +253,10 @@ journal des messages en bas de l'écran). Six onglets en haut, chacun avec son c
 liste défilante à droite (entrées inconnues en pointillé : « — INCONNU — », « — PAGE NON LUE — ») ; jamais plus haute que
 l'écran. Pastille (carré de l'accent) sur une entrée acquise et pas encore ouverte, sur son onglet et sur le bouton JOURNAL.
 Clavier : ← → onglets, ↑ ↓ entrées, Échap ou J ferme. Boutons et lignes de 44 px (tablette).
+Pages générées (28 novembre 2026, `14l-histoire.js`) : le **registre du port** (Documents, tel qu'à la dernière lecture) et le
+**rapport de mission** envoyé à la descente du niveau 1 (Journaux, le dernier envoyé), listés d'office (« PAGE NON LUE » avant).
+Format : `pg[id] = {t, l, a, o, d}` ; `JN.u` (numéro d'unité) et `JN.reg` (registre) voyagent avec le journal, et un effacement
+(Lab) les garde.
 
 - **Robots** (une fiche par espèce, Puce comprise) : tuile de l'espèce agrandie (6 ×, pixels nets), puis quatre paliers l'un
   sous l'autre ; un palier non acquis affiche « [DONNÉES MANQUANTES] ». 0 Contact (vue une fois) ; 1 Stats (10 destructions

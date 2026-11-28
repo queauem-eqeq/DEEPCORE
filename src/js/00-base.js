@@ -1,4 +1,9 @@
-const NOM_FOREUSE='F467'; // nom du modèle de la foreuse, utilisé dans les messages du journal
+/* Numéro d'unité (28 novembre 2026, histoire : chaque partie est l'unité suivante). F467 à la première partie, puis +1 à chaque
+   destruction de la foreuse (pas à une partie recommencée). Gardé dans np-unite (et dans la base de l'artefact, avec le journal de
+   bord : 14l-histoire.js). NOM_FOREUSE est VIVANT : il change au début d'une partie (uniteApplique, 14l) ; les textes construits au
+   chargement (rôles des BEASTS, descriptions des objets, aides) sont réécrits à ce moment-là. */
+let UNITE_NUM=467;try{const v=parseInt(localStorage.getItem('np-unite')||'',10);if(v>=467&&v<100000)UNITE_NUM=v;}catch(e){}
+let NOM_FOREUSE='F'+UNITE_NUM; // nom de l'unité, utilisé dans les messages du journal
 let W=96,H=64;const NSITES=1,S=32;   // un seul site de forage par carte (13 novembre 2026)
 // Taille de la carte : réglage « Taille » de Génération, de 1 à 5 ; 4 = la taille d'origine (96 × 64)
 const SIZES=[null,[32,22],[48,32],[72,48],[96,64],[144,96]];

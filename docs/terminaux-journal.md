@@ -1,6 +1,6 @@
 # Terminaux, antennes, journal de bord et hacks
 
-Décidé par l'utilisateur les 27 et 28 novembre 2026. Valable pour **tous les niveaux**. Rien n'est encore codé.
+Décidé par l'utilisateur les 27 et 28 novembre 2026. Valable pour **tous les niveaux**. Codé le 28 novembre 2026 (voir conception-*.md) ; écarts : le registre du port est le premier DATA du terminal du dépôt le plus proche de l'entrée ; la page du journal de bord garde le registre de la dernière lecture.
 Complète `claude/histoire.md` (les cinq canaux) et `claude/histoire-niveau-1.md`.
 
 ## Décisions de l'utilisateur
