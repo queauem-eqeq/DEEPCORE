@@ -29,6 +29,13 @@ Ne jamais lire un fichier en entier : y chercher la section utile (mot-clé).
 - `conception-descente.md` : objectifs, cinématique d'intro, cinématique de forage, seconde descente (mini-jeu des mines).
 - `conception-interface.md` : direction visuelle, interface, souris, éditeur de tuiles, touches, sauvegarde des réglages.
 
+Documents d'histoire (recopiés du projet claude.ai le 28 novembre 2026 ; **ils font foi** pour l'histoire, le niveau 1, les terminaux, hacks et journal de bord, et les fiches de robots ; rien n'y est encore codé) :
+
+- `histoire.md` : le cadre de l'histoire (ton, trame, éveil de la foreuse niveau par niveau, cinq canaux de récit, les deux fins).
+- `histoire-niveau-1.md` : le niveau 1, l'Astroport (cimetière spatial) : bâtisseur, épaves, ennemis, textes de référence, chantiers de code.
+- `terminaux-journal.md` : terminaux et antennes (menu DATA / CONNEXION / ENCODAGE), journal de bord, hacks (familles Base, Tir, Noyau), blueprints et FABLAB.
+- `fiches-robots.md` : fiches du journal de bord, paliers d'information des robots (contact, stats, comportement, origine), fiches d'objets.
+
 ## 11. Règles à ne pas casser
 
 - **Pas de blindage, pas de réparation automatique.** La défense fait rater les coups, elle ne les réduit jamais.
