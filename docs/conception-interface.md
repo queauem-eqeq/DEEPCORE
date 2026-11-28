@@ -178,6 +178,13 @@ cadre : si le site hôte refuse, le journal propose d'ouvrir le jeu dans un ongl
 
 - Le curseur système est masqué sur la carte ; le **viseur** est dessiné sur la case survolée. Dès qu'on appuie sur
   une touche, viseur, fiche et trajet disparaissent jusqu'au prochain mouvement de souris.
+- **Fiche en mode viseur (28 novembre 2026)** : en inspection (X), au viseur du phaseur et à la visée d'une capsule, la
+  fiche de la case visée passe dans la colonne, sous les statuts, et remplace tout ce qui suit (Stats, Inventaire,
+  Carte, En vue, boutons) ; seul le pavé tactile reste. Elle n'a pas de ligne d'action au phaseur ni à la visée.
+  Avant, elle disparaissait au phaseur (`busy()`). `viseCible()`, `12-souris.js`.
+- **Textes des fiches (28 novembre 2026)** : relevés de F467 en jargon machine, sans règle chiffrée ni mode d'emploi
+  (`TDESC`, `BEHAV`, gisements, sites, objets, clés). Les chiffres restent dans les stats (PV, DÉG, Toucher…) et dans la
+  ligne d'action. Les douze espèces ont leur texte (avant, huit n'en avaient pas).
 - **Survol** : fiche complète dans « En vue » — terrain et ses effets, distance, créature (état, PV, DÉG, PRE, DEF
   modifiée, durées du pas et du coup, chances Toucher / Subir, comportement), site, roche fissurée, bord indestructible, objets posés,
   « souvenir » si la case est hors de vue, et l'action du clic (« y aller · N tours », « frapper », « forer »).

@@ -130,9 +130,10 @@ function seenHTML(){
       return `<div class="an${e.agg&&e.st?' hunt':''}" title="${e.sp.n}${e.st?' · '+e.st:''} · ${d} case${d>1?'s':''} · ${Math.max(0,e.hp)}/${pv} PV · pas ${dp} (${motDuree(dp)}), coup ${dc} (${motDuree(dc)})"><img src="${ICON[e.ic]||''}" alt="${e.sp.n}"><span class="cad${cd<=50?' vif':''}" title="${cd<=100?'Jusqu’à '+cadenceDe(cd).toFixed(cadenceDe(cd)%1?1:0)+' action':'Une action toutes les '+(1/cadenceDe(cd)).toFixed(1)}${cd<=100?'s par action de '+NOM_FOREUSE+'':' actions de '+NOM_FOREUSE+''}">${CADGL(cd)}</span><span class="hp">${asciiBar(Math.max(0,e.hp),pv)}</span><span class="n" style="color:${chanceCol(c.me)}">${c.me} %</span><span class="n" style="color:${c.them==null?'var(--dim)':chanceCol(100-c.them)}">${c.them==null?'—':c.them+' %'}</span></div>`;}).join('')
     +(ans.length>max?`<div class="none">+ ${ans.length-max} autre${ans.length-max>1?'s':''}</div>`:'')+'</div>');
   }
-  const ins=HOV&&!busy()?inspectHTML():'';
+  const ins=HOV&&!busy()&&!viseCible()?inspectHTML(HOV):'';   // en mode viseur, la fiche est dans la colonne
   return ins+(out.join('')||'<div class="none">Rien en vue.</div>');
 }
+let FICHE_H='';
 function side(){
   const st=G.st;
 
@@ -169,6 +170,9 @@ function side(){
     if(h!==HSTATS_H&&$('hstats')){HSTATS_H=h;$('hstats').innerHTML=h;}if(typeof stipMaj==='function')stipMaj();}   // avalée par le commentaire depuis le 16 novembre 2026 : la matière ne s'affichait plus
   if(!$('inventaire').hidden)invDraw();
   $('msg').innerHTML=seenHTML();
+  // fiche de la case visée (28 novembre 2026) : inspection, phaseur, visée d'une capsule ; réécrite seulement si elle change
+  {const vc=viseCible(),f=$('fiche');f.closest('.col').classList.toggle('vise',!!vc);f.hidden=!vc;
+    const h=vc?inspectHTML(vc):'';if(h!==FICHE_H){FICHE_H=h;f.innerHTML=h;}}
   logDraw();
 }
 /* Journal du bas (22 novembre 2026) : il défile (molette, barre) pour relire les messages plus anciens. Il n'est refait que
