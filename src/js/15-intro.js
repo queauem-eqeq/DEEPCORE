@@ -312,10 +312,11 @@ function start(data){
   if(data&&data.G&&data.G.t){const g=data.G,w=g.w||96,h=g.h||64;if(g.t.length===w*h){W=w;H=h;F=W/96;vis=new Uint8Array(W*H);}}
   const fromHot=!!(data&&data.G&&data.G.t&&data.G.t.length===W*H);
   if(data&&data.G&&data.G.t&&data.G.st&&data.G.t.length===W*H){G=data.G;G.dmg=G.dmg||{};
-    if(G.st)G.st.cout=10;
+    if(G.st)G.st.cout=REGLES.FORAGE_ENERGIE;
     if(!G.ore)hideOre();
       if(!G.st||G.st.pre==null||G.st.energieMax==null){G.st={vie:100,vieMax:100,energie:100,energieMax:100,repar:0,power:10,pas:0,
-      degats:0,capteur:10,cout:10,pre:100,def:10,crit:5};if(G.inv)G.inv.forEach(o=>o.eq=0);}
+      degats:0,capteur:10,cout:REGLES.FORAGE_ENERGIE,pre:100,def:10,crit:5};if(G.inv)G.inv.forEach(o=>o.eq=0);}
+    fuelInit(G.st);   // partie enregistrée avant le fuel (28 novembre 2026) : jauge pleine
   if(!G.inv)G.inv=invTest();if(!G.items)G.items={};if(!G.eff)G.eff={};if(!G.fum)G.fum={};delete G.amb;G.w=W;G.h=H;invMigre();
   /* Retiré le 22 novembre 2026 : la renumérotation des espèces du 17 novembre (rangs 2 à 7 supprimés, 8 → 2, 9 → 3) se
      rejouait sur toute partie reprise qui n'en portait pas la marque G.bz17 — or une partie neuve ne la porte pas. À chaque

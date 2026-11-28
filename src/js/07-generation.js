@@ -280,7 +280,8 @@ function genPlanet(){
       if(sites.some(s=>Math.abs(s.x-x)+Math.abs(s.y-y)<(last?4:gap)))continue;sites.push({x,y});}
     if(sites.length<NSITES&&!last)continue;
     G={t,recette:ZONE?GEN.recette:'classique',seen:new Array(N).fill(0),px:sx,py:sy,turn:0,dist:0,over:null,msg:null,ship,face:'d',
-      st:{detec:3,vie:100,vieMax:100,energie:100,energieMax:100,repar:0,power:10,pas:0,degats:0,capteur:10,cout:10,pre:100,def:10,crit:5},
+      st:{detec:3,vie:100,vieMax:100,energie:100,energieMax:100,repar:0,power:10,pas:0,degats:0,capteur:10,cout:REGLES.FORAGE_ENERGIE,pre:100,def:10,crit:5,
+        fuel:REGLES.FUEL_MAX,fuelMax:REGLES.FUEL_MAX},
       sites:sites.map((s,i)=>({x:s.x,y:s.y,depth:10,id:LETTERS[i],seen:false,known:false}))};
     return;
   }
@@ -314,7 +315,7 @@ function niveau(refait){drilling=false;
   // « monde · bâti », les deux archétypes, affiché dans le Statut et à l'arrivée
   G.amb=ambDouble();G.archM=ambMNom(GEN.ambM)||'Personnalisé';G.archB=ambNom(GEN.recette,GEN.amb)||'Personnalisé';
   durcir();   // la roche dure avant les métaux : ils n'y apparaissent jamais
-  {const a=W*H/(48*32);G.eff={};G.fum={};hideOre(Math.max(1,Math.round(GISEMENTS.metal*a)),Math.max(1,Math.round(GISEMENTS.mat*a)));}
+  {const a=W*H/(48*32);G.eff={};G.fum={};hideOre(REGLES.FUEL_GISEMENTS,Math.max(1,Math.round(GISEMENTS.mat*a)));}   // métal : 4 par carte (fuel, 28 novembre 2026)
   G.sonar=1;   // sonar à émettre (voir sonarStart, 10-rendu) : il part 10 à 30 tours après l’arrivée (22 novembre 2026 ; avant 10 à 20)
   G.items={};G.tracks={};G.lastDir=null;G.beasts=[];G.blood={};G.fv=2;
   G.inv=invTest();G.log=[];
@@ -385,6 +386,7 @@ function niveauSuivant(hasard){   // hasard : un archétype monde et un archéty
   G.sonarAt=tour+(G.sonarAt||0);
   eboulis();
   say(G.arrivee==='base'?`Niveau ${G.niv}${G.amb?' — '+G.amb:''}. ${NOM_FOREUSE} a traversé le plafond d’une salle : il est dans une base enfouie. Un site de forage est signalé plus loin.`:`Niveau ${G.niv}${G.amb?' — '+G.amb:''}. ${NOM_FOREUSE} a percé le plafond et s'est écrasée plus bas. Un nouveau site de forage est signalé.`,'info');
+  fuelDescente();   // chaque descente rend du fuel (28 novembre 2026)
   if(typeof hacksArrivee==='function')hacksArrivee();}   // emplacements de hack aux niveaux 3, 6, 9 (14g)
 // devant un passage : pas de débris
 const B_PORTE=i=>!!(BATI_DER&&BATI_DER.B.porte[i])||D4.some(([dx,dy])=>{const v=G.t[idx(i%W+dx,((i/W)|0)+dy)];return v===DOOR||v===LOCK;});

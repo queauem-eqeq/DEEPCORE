@@ -134,7 +134,7 @@ ni au FABLAB.
 | SILENCE.TIR | Tir | bruit du tir − 3E %, dégâts − E % | | | | |
 | ÉCONOMIE | Tir | coût du tir − 2E %, dégâts − E % | | | | |
 | PERFORANT | Tir | crit du tir + E %, précision − E/2 | | | | |
-| SYMBIOSE | Noyau | vie +1 tous les 4 battements ; coup et course coûtent 25 % d'énergie en plus (pas de fuel dans le jeu) | | | | |
+| SYMBIOSE | Noyau | récupération de vie × 2 ; baisse du fuel × 1,5 (28 novembre 2026) | | | | |
 | SURSIS | Noyau | à 0 de vie, survit une fois à 1 PV ; le hack s'efface | | | | |
 | HÉRITAGE | Noyau | à la destruction, ce hack et l'autre hack équipé de meilleur rang passent à la foreuse suivante (`np-heritage`, vidée à la réception) ; ne donne rien d'autre | | | | |
 
@@ -213,8 +213,9 @@ CRIT +5, POW 9), **Trépan lourd** (2d6+6 ; coup +25, POW 12), **Carène légèr
 
 | Stat | Valeur | Rôle |
 |---|---|---|
-| Vie | 100 | **pas de réparation automatique** |
-| Énergie | 100 | se recharge de POW par battement, **× 2 en attendant sur place** ; se déplacer ne coûte rien, un coup sur la roche 10, frapper un animal rien |
+| Vie | 100 | **remonte seule** depuis le 28 novembre 2026 : +1 tous les 20 battements en marche, +1 tous les 4 au repos, rien à sec (voir « Fuel, vie qui remonte, repos ») |
+| Énergie | 100 | se recharge de POW par battement, **× 2 en attendant sur place** ; se déplacer ne coûte rien, un coup sur la roche **5** (10 jusqu'au 28 novembre 2026), un pas de course 5, frapper un animal rien |
+| Fuel | 100 | réserve qui baisse **en permanence** (1 tous les 12 battements) ; voir ci-dessous |
 | PAS | 100 | **durée d'un déplacement**, en unités de temps comme pour les créatures : 100 = un battement. Plus c'est bas, plus la foreuse marche vite. Ne joue ni sur les coups ni sur le forage |
 | EYE | 10 | rayon de vision |
 | DEG | 0 | **bonus fixe** ajouté au jet de dés de l'arme |
@@ -230,14 +231,39 @@ CRIT +5, POW 9), **Trépan lourd** (2d6+6 ; coup +25, POW 12), **Carène légèr
   pas à travers les obstacles.
 - **Attendre** (Espace ou 5) : la recharge d'énergie est doublée. C'est la façon de refaire le plein après avoir
   couru ou foré.
-- **Repos** (P) : enchaîne des attentes **jusqu'à l'énergie pleine**. Chaque battement est une attente ordinaire
-  (recharge doublée, portée de discrétion ÷ 2) ; le journal n'en garde que le début et la fin. S'arrête net si une
-  créature **entre dans le champ de vision**, si un ennemi déjà visible **repère** la foreuse, si elle est
-  **touchée**, ou à la moindre touche. Refusé si l'énergie est pleine ou si un ennemi visible vous chasse.
-  Garde-fou : 400 battements.
+- **Repos** (P, bouton REPOS ; refait le 28 novembre 2026 pour **se réparer**) : enchaîne des attentes **jusqu'à la vie et
+  l'énergie pleines**. Chaque battement est une attente ordinaire (recharge doublée, portée de discrétion ÷ 2, vie +1 tous
+  les 4 battements tant qu'il reste du fuel) ; le journal n'en garde que le début et la fin. S'arrête net si une créature
+  **entre dans le champ de vision**, si un ennemi **repère** la foreuse ou **la chasse** (même hors de vue), si elle est
+  **touchée** (la vie qui baisse par rapport au battement d'avant ; la perte à sec n'en est pas une), si le fuel **passe sous
+  25 %** (un repos commencé sous 25 % va jusqu'à sec) ou **tombe à sec**, ou à la moindre touche. Refusé si vie et énergie
+  sont pleines ou si un ennemi vous chasse. Garde-fou : 600 battements (un plein de vie en demande 400). **Attendre à la
+  main compte comme du repos**, chasseur ou pas.
 - **Course** (R) : mode qu'on allume et qu'on éteint. Chaque pas dure moitié moins et coûte **5 d'énergie** ; sans
   assez d'énergie, la foreuse reprend la marche. **Le moteur s'entend : + 2 cases de portée de discrétion**,
   appliquées après tous les autres modificateurs.
+
+### Fuel, vie qui remonte, repos (28 novembre 2026, chantier « Survie », bloc B)
+
+Valeurs arbitrées par l'utilisateur, toutes dans l'objet `REGLES` (`00-base.js`), une constante par règle ; le battement les
+applique dans `survieTick` (`08-faune.js`), appelé par `regen`.
+- **Fuel** : jauge de **100** (maximum 100), pleine au départ, qui **suit la foreuse** d'un niveau à l'autre. Elle baisse de
+  **1 tous les 12 battements**, en marche comme au repos. **À sec : −1 de vie tous les 5 battements**, et plus aucune
+  réparation automatique (ni en marche ni au repos) ; le dernier point perdu détruit la foreuse.
+- **Où en trouver** : les **éclats de métal** (+15 / +20 / +25 selon la densité ; **4 gisements de métal par carte**, quelle que
+  soit sa taille), la **cellule de fuel** (+30, consommable), et **chaque descente rend +30** (« FUEL : +30 RÉCUPÉRÉ DANS LE PUITS »).
+- **Vie** : **+1 tous les 20 battements en marche**, en permanence, même en combat ; **+1 tous les 4 battements au repos**
+  (= la foreuse est à l'arrêt et passe son tour : attente, bouton REPOS). Rien quand le fuel est à sec. Statut **« Repos »**
+  sous les boutons quand la foreuse vient de passer son tour et que la vie remonte vite ; **« À SEC »** tant que la jauge est vide.
+- **Journal** (jargon machine) : au passage sous 25 % (« FUEL : 25 %. RÉSERVE BASSE. »), à sec, à la première conversion de
+  métal (« MÉTAL ASSIMILÉ : CONVERTI EN FUEL. »), puis à chaque éclat ramassé et à chaque descente.
+- **Réparobots** gardés (+50 sur 5 battements), **deux fois et demie plus rares dans le butin** (poids 5 → 2 parmi les capsules).
+  Prix au FABLAB inchangé (réglage du joueur). **Station de réparation** et autres soins inchangés.
+- **Module de puissance** : POW +1 **et vie maximale +10** par module (la vie courante monte d'autant).
+- **Hack SYMBIOSE** : **récupération de vie × 2, baisse du fuel × 1,5** (définition d'origine ; du 27 au 28 novembre, faute de
+  fuel, il valait +1 vie / 4 battements contre 25 % d'énergie en plus).
+- **Mini-jeu des mines** (descentes) : la vie qu'on y perd reste telle quelle.
+- Une partie enregistrée avant le fuel se recharge avec la jauge pleine (`fuelInit`).
 
 ### Numéro d'unité, registre du port, niveau 1 raconté (`14l-histoire.js`, 28 novembre 2026)
 
@@ -351,9 +377,10 @@ Modèle Brogue :
 |---|---|---|
 | Réparobots | Vie +50 | le répare de 50 PV |
 | Batterie | Énergie +50 | décharge : 12 dégâts, **étourdi 10 battements** (un Bloqueur étourdi lâche prise) |
+| **Cellule de fuel** (28 novembre 2026) | Fuel +30 ; refusée si le fuel est plein (une fois identifiée) | se vide sur le sol, sans effet |
 | Fumigène | nuage là où on le lance ; **les ennemis ne perdent la trace que si la foreuse est dedans** | idem |
 | Charge sismique | explose comme une mine (3 × 3 et 5 cases autour), 30 dégâts **à la foreuse aussi**, roche brisée | idem |
-| **Module de puissance** | **POW +1 pour toujours** ; chaque point de POW au-dessus du POW requis par l'arme donne **+5 % de dégâts**  | ses coups portent 25 % plus fort |
+| **Module de puissance** | **POW +1 et vie max +10 pour toujours** (vie courante +10) ; chaque point de POW au-dessus du POW requis par l'arme donne **+5 % de dégâts**  | ses coups portent 25 % plus fort |
 | **Surrégime** | CRIT +50 pendant 10 battements ; la foreuse vire au rouge | ses coups sont tous critiques pendant 10 battements |
 | **Camouflage optique** | invisible 10 battements : vue seulement au contact, les poursuivants à distance lâchent ; **rompu par un coup ou un forage** ; « Camouflé N » sous les barres, comme « Englué N » | il disparaît 10 battements (visible au contact) |
 | **Balise** (néfaste sur soi) | une **sirène à deux tons** retentit ; tous les ennemis à 20 cases savent où est la foreuse ; **elle rompt son camouflage optique** | **lancée ailleurs, c'est un leurre posé au sol** (ci-dessous) |
@@ -421,6 +448,7 @@ inconnue sur soi peut coûter cher, la lancer sur un ennemi peut le servir. Fabr
 | Accumulateur | accessoire | – | Énergie max +40 |
 | Réparobots (×2) | consommable | – | Vie +50 ; **croix rouges** autour de la foreuse |
 | Batterie (×2) | consommable | – | Énergie +50 ; **flèches bio** qui montent |
+| Cellule de fuel | consommable | – | Fuel +30 ; **gouttes couleur monde** qui tombent dans la foreuse ; son propre bruit (bouchon, trois gorgées) ; tuile `o_fuel` ; capsule à identifier ; aussi courante que la batterie dans le butin ; blueprint de rang 1 (14 Matière) |
 | Fumigène (×2) | consommable | – | un **nuage de fumée** (ci-dessous) |
 | Charge sismique (×2) | consommable | – | **visée** d'une case jusqu'à la portée de vue ; explosion de mine, **30 dégâts** ; bruyante |
 

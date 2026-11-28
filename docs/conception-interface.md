@@ -101,7 +101,7 @@ Partie du document de conception (sommaire et règles à ne pas casser : `concep
 - **Barres de défilement** : 4 pixels, sans fond, couleur du texte secondaire (`--dim`), plus
   claires au survol ; « thin » sous Firefox. Ne pas poser `scrollbar-width` ou `scrollbar-color` sur un élément :
   Chrome les préférerait et rendrait la barre épaisse.
-- Plein écran ; colonne noire à droite. **Son haut reste fixe** : barres Vie, Énergie, Matière,
+- Plein écran ; colonne noire à droite. **Son haut reste fixe** : barres Vie, Énergie, Fuel, Matière,
   boutons, effets en cours et **Inventaire**. **Seul ce qui suit défile**, à la molette ou au doigt, sans barre de
   défilement. 
   Journal
@@ -117,7 +117,9 @@ molette ou fine barre pour remonter jusqu'aux 200 derniers messages ; un nouveau
   (0,40) : le tour en cours reste franc, les anciens s'effacent sans disparaître. Chaque événement garde sa couleur
   (avertissement, information, bonne nouvelle). Mesuré sur cinq tours : 1 · 0,87 · 0,74 · 0,61 · 0,48.
 - **Statistiques de la foreuse** (25 novembre 2026, rangées dans un sous-menu le 26) : sous les boutons EXPLORER et REPOS, le repli **STATS** (`#fd-stats`, ouvert la première fois, son état est retenu comme les autres replis ; **5 px** sous le bloc des boutons, comme Inventaire, Carte, Palette et Contrôles sous ce qui les précède) contient dix statistiques (`#hstats`), valeurs du moment, terrain compris, dans l'ordre **POW, EYE, DEG, PRE, DEF, CRIT, PAS, COUP, DIS, DET** (`HSTATS_ORDRE` dans `11-interface.js`, indépendant de l'ordre de la fenêtre Équipement ; VIE et ÉNER retirées le 25 novembre, les barres les donnent déjà). **Un encadré par statistique** (« VIE 100 », un espace entre le nom et la valeur), rangés à gauche, **à la ligne quand la place manque**. **Au survol** (ou au clavier) : une infobulle (`#stip`, `statInfo` dans `14-inventaire.js`) donne la **définition** et le **détail des modificateurs en cours** — base, chaque pièce d'équipement portée, bonus permanents, puis POW requis, terrain, action (forage, arrêt, course, parois) — et la valeur du moment.
-- **Barres** (l'ancien Statut) : barres ASCII `█`/`░` — Vie en bio, Énergie en blanc  — suivies de leur valeur chiffrée. Le
+- **Barres** (l'ancien Statut) : barres ASCII `█`/`░` — Vie en bio, Énergie en blanc, **Fuel** en couleur monde (28 novembre 2026,
+  sous l'Énergie, même style ; **sous 25 %** la barre et le chiffre passent en rouge danger, **à sec** le chiffre devient « À SEC »
+  en gras et le libellé rougit ; statuts « À SEC » et « Repos » sur la ligne des statuts) — suivies de leur valeur chiffrée. Le
   remplissage est un **calque de `█` découpé à la largeur exacte** posé sur un fond de `░`, donc juste à toute
   largeur de colonne et à toute taille de police.
 - **En vue** (sous la Carte) : la fiche d'inspection de la case survolée, puis les créatures visibles (icône,

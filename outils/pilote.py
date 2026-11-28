@@ -112,6 +112,17 @@ def resume(parties):
             'groupes vus (moy)': moy([l['grVus'] for l in L]), 'groupes affrontés (moy)': moy([l['grAff'] for l in L]),
             'vie perdue par groupe affronté (moy)': moy(vg), 'par groupe affronté D9': q(vg, .9),
             'battements à énergie 0 (moy)': moy([l['e0'] for l in L]),
+            # fuel et repos (bloc B, 28 novembre 2026) ; absents des parties d'avant le fuel
+            'fuel au départ (moy)': moy([l['fuelDebut'] for l in L if l.get('fuelDebut', -1) >= 0]),
+            'fuel à la descente (finis, moy)': moy([l['fuelFin'] for l in finis if (l.get('fuelFin') if l.get('fuelFin') is not None else -1) >= 0]),
+            'fuel à la descente D1': q([l['fuelFin'] for l in finis if (l.get('fuelFin') if l.get('fuelFin') is not None else -1) >= 0], .1),
+            'fuel gagné par source (moy/partie)': {k: round(sum(l.get('fuelGagne', {}).get(k, 0) for l in L) / len(L), 1)
+                                                  for k in sorted({k for l in L for k in l.get('fuelGagne', {})})},
+            'fuel consommé (moy)': moy([l.get('fuelConso', 0) for l in L]),
+            'battements à sec (moy)': moy([l.get('sec', 0) for l in L]),
+            'parties passées à sec (niveau)': sum(1 for l in L if l.get('sec', 0) > 0),
+            'battements au repos (moy)': moy([l.get('repos', 0) for l in L]),
+            'gisements de métal minés (moy)': moy([l.get('gisementsMines', 0) for l in L]),
             'Matière gagnée (moy)': moy([l['matiere'] for l in L]),
             'objets utilisés (moy)': moy([sum(l['objets'].values()) for l in L]),
             'terminaux (moy)': moy([l['term'] for l in L]), 'hacks pris (moy)': moy([l['hacks'] for l in L]),

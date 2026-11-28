@@ -38,7 +38,11 @@ Documents d'histoire (recopiés du projet claude.ai le 28 novembre 2026 ; **ils 
 
 ## 11. Règles à ne pas casser
 
-- **Pas de blindage, pas de réparation automatique.** La défense fait rater les coups, elle ne les réduit jamais.
+- **Pas de blindage.** La défense fait rater les coups, elle ne les réduit jamais.
+- **La vie remonte seule, contre du fuel** (règle levée le 28 novembre 2026 : jusque-là, « pas de réparation automatique »).
+  +1 vie tous les 20 battements en marche, tous les 4 au repos (à l'arrêt, un tour passé) ; le **fuel** baisse en permanence
+  (1 tous les 12 battements) et, à sec, plus rien ne répare et la coque perd 1 vie tous les 5 battements. Toutes les valeurs
+  sont dans `REGLES` (`00-base.js`) ; détail : `conception-joueur.md`, « Fuel, vie qui remonte, repos ».
 - **Une nouvelle espèce s'ajoute à la fin de `BEASTS`** (`conception-faune.md`).
 - **Un objet ne change pas de clé** (`ITEMS`) : les plans connus, les capsules identifiées et les réglages de Lab → Items
   sont enregistrés sous ces clés.

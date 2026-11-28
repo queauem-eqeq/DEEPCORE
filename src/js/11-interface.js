@@ -140,11 +140,20 @@ function side(){
 
   for(const [t,v,mx,nm] of [['lifeT',st.vie,st.vieMax,'lifeN'],['enT',st.energie,st.energieMax,'enN']]){$(t).innerHTML=asciiBar(v,mx);
     $(nm).textContent=Math.floor(v)+'/'+mx;$(t).setAttribute('aria-valuenow',Math.floor(v));$(t).setAttribute('aria-valuemax',mx);}
+  // jauge de fuel (28 novembre 2026) : alerte sous REGLES.FUEL_ALERTE, « À SEC » à zéro
+  if($('fuT')){fuelInit(st);const f=Math.floor(st.fuel),sec=st.fuel<=0,bas=!sec&&fuelAlerte(st);$('fuT').innerHTML=asciiBar(st.fuel,st.fuelMax);
+    $('fuN').textContent=sec?'À SEC':f+'/'+st.fuelMax;$('fuT').setAttribute('aria-valuenow',f);$('fuT').setAttribute('aria-valuemax',st.fuelMax);
+    $('fuRow').classList.toggle('bas',bas);$('fuRow').classList.toggle('sec',sec);}
   {const b=$('sprintBtn');b.textContent=G.sprint?'COURSE':'MARCHE';b.classList.toggle('on',!!G.sprint);
     b.setAttribute('aria-pressed',!!G.sprint);}
   // Le sous-menu Statistiques a été retiré le 15 novembre 2026 : les stats sont dans la fenêtre Équipement.
   sacDraw();
-  {const E=G.eff||{},l=[];if(E.poison>0)l.push(`<span style="color:var(--life)">Poison ${E.poison}</span>`);
+  {const E=G.eff||{},l=[];
+    // fuel et repos (28 novembre 2026) : « À SEC » tant que la réserve est vide ; « Repos » quand la foreuse vient de passer son tour
+    // à l'arrêt et que la vie remonte vite (G.reposT, survieTick)
+    if(st.fuel<=0)l.push('<span style="color:var(--life)">À SEC</span>');
+    else if(G.reposT===G.turn&&st.vie<st.vieMax)l.push('<span style="color:var(--c2)">Repos</span>');
+    if(E.poison>0)l.push(`<span style="color:var(--life)">Poison ${E.poison}</span>`);
     if(E.glu>0)l.push(`Englué ${E.glu}`);
     {const sl=SLOW[G.t[idx(G.px,G.py)]];if(sl)l.push(`Ralenti ×${sl}`);}   // dans l'eau (28 novembre 2026)
     if(E.berserk>0)l.push(`<span style="color:var(--life)">Surrégime ${E.berserk}</span>`);

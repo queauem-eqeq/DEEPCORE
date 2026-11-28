@@ -321,8 +321,8 @@ function statVal(k,st,arme,armure,dDis){
    chaque pièce d'équipement portée, les bonus permanents (modules), puis ce qui tient à la situation (POW requis, terrain, action). */
 // valeurs de la foreuse nue ; la défense de départ (10) vient de la Coque d'usine, portée dès le début
 const ST_BASE={vieMax:100,energieMax:100,pas:0,capteur:10,degats:0,pre:100,def:0,crit:5,power:10,dis:0,coup:0,detec:3};
-const ST_DEF={vieMax:['Vie maximale','Ce que '+NOM_FOREUSE+' peut encaisser avant d’être détruite.'],
-  energieMax:['Énergie maximale','La réserve dépensée par la course (5 par pas) ; elle se recharge au repos.'],
+const ST_DEF={vieMax:['Vie maximale','Ce que '+NOM_FOREUSE+' peut encaisser avant d’être détruite. La vie remonte seule tant qu’il reste du fuel : +1 tous les 20 battements en marche, tous les 4 au repos. Chaque Module de puissance ajoute 10.'],
+  energieMax:['Énergie maximale','La réserve dépensée par la course (5 par pas) et le forage (5 par coup) ; elle se recharge sans cesse, deux fois plus vite au repos.'],
   pas:['Durée du pas','Le temps que prend un déplacement : 100 vaut un battement, comme pour les robots. Plus c’est bas, plus '+NOM_FOREUSE+' marche vite.'],
   capteur:['Capteur','La portée de vue, en cases.'],
   degats:['Dégâts','Ce qu’un coup retire à un robot : le dé de l’arme plus les bonus.'],

@@ -595,8 +595,9 @@ const robotDef=()=>robotDefNu()+terrMod(G.px,G.py);
    la remettre à 1 PV une fois. Renvoie true si la foreuse est détruite. La descente (14b) appelle sursisSauve elle-même. */
 function mortForeuse(o){if(!G||!G.st||G.st.vie>0)return false;if(typeof sursisSauve==='function'&&sursisSauve())return false;
   G.over=Object.assign({dead:true},o||{});return true;}
-// dépense d'énergie : SYMBIOSE (14g) la renchérit
-const coutE=c=>G&&G.st&&G.st.symb>0&&typeof SYMB_COUT==='number'?Math.ceil(c*SYMB_COUT):c;
+// dépense d'énergie (une seule porte d'entrée : un hack ou un objet pourrait la renchérir ; SYMBIOSE ne le fait plus depuis le
+// 28 novembre 2026, elle joue sur la vie et le fuel)
+const coutE=c=>c;
 const roll=ch=>Math.random()*100<ch;
 const chanceCol=ch=>ch>=70?'var(--c1)':ch>=40?'var(--c3)':'var(--life)';
 /* Attaque d'un ennemi sur la foreuse. o.sur : par surprise (touche toujours, critique). */
@@ -762,10 +763,40 @@ function beastJoue(b){const sp=BEASTS[b.sp],fits=(x,y)=>beastFits(b,x,y),mouille
     if(!ouvrJoue(b,fits)&&!patMove(b,fits)&&!sortEau(b,sp,fits)){if(b.pack>=0&&patDe(b)!=='errance')packMove(b);else errStep(b,fits);}
     return Math.max(TICK,dpasDe(b,sp));}
   return dpasDe(b,sp);}
-// Plus de réparation automatique : seule l'énergie se recharge à chaque battement.
-// Attendre sur place la recharge WAIT_REGEN fois plus vite (13 novembre 2026) : 2/t au lieu de 1/t à POW 1.
+// L'énergie se recharge à chaque battement ; attendre sur place la recharge WAIT_REGEN fois plus vite (13 novembre 2026).
+// Depuis le 28 novembre 2026, la vie remonte aussi seule et le fuel baisse : survieTick.
 function regen(wait){if(G.over)return;G.st.energie=Math.min(G.st.energieMax,G.st.energie+G.st.power/POW_BASE*(wait?WAIT_REGEN:1)*(1+(G.st.regen||0)/100));
-  if(G.st.symb>0&&typeof symbTick==='function')symbTick();}   // regen : hack RÉGÉN.CELL ; symb : SYMBIOSE (14g)
+  survieTick(wait);}   // regen : hack RÉGÉN.CELL (14g)
+/* ---------- Fuel et vie qui remonte (28 novembre 2026, chantier « Survie », bloc B ; valeurs : REGLES, 00-base) ----------
+   - Le fuel baisse d'un point tous les FUEL_BAISSE_BAT battements, en permanence (× SYMB_FUEL avec le hack SYMBIOSE).
+   - À sec : −1 de vie tous les SEC_PERTE_BAT battements, et plus aucune réparation automatique.
+   - Sinon la vie remonte d'un point tous les VIE_MARCHE_BAT battements, ou tous les VIE_REPOS_BAT au repos (wait : la
+     foreuse est à l'arrêt et passe son tour) ; × SYMB_VIE avec SYMBIOSE. Les compteurs (fuelT, secT, vieT) vivent dans G.st :
+     ils suivent la foreuse d'un niveau à l'autre et dans une partie enregistrée.
+   G.reposT : le tour où la foreuse s'est reposée en dernier (statut « Repos », 11-interface). */
+function fuelInit(st){if(!st)return;if(!(st.fuelMax>0))st.fuelMax=REGLES.FUEL_MAX;if(typeof st.fuel!=='number'||!isFinite(st.fuel))st.fuel=st.fuelMax;}
+const fuelAlerte=st=>st.fuel<st.fuelMax*REGLES.FUEL_ALERTE;
+// le fuel change : messages au passage sous l'alerte et à sec
+function fuelPose(st,n){const av=st.fuel;st.fuel=Math.max(0,Math.min(st.fuelMax,n));
+  if(st.fuel<=0&&av>0)sayMore('FUEL : 0. RÉSERVE À SEC. RÉPARATION SUSPENDUE. COQUE EN DÉGRADATION.','warn');
+  else if(fuelAlerte(st)&&!(av<st.fuelMax*REGLES.FUEL_ALERTE))sayMore(`FUEL : ${Math.round(REGLES.FUEL_ALERTE*100)} %. RÉSERVE BASSE. SOURCE : ÉCLATS DE MÉTAL.`,'warn');
+  return st.fuel-av;}
+function survieTick(wait){const st=G.st;if(!st||G.over)return;fuelInit(st);const symb=st.symb>0;
+  st.fuelT=(st.fuelT||0)+(symb?REGLES.SYMB_FUEL:1);
+  while(st.fuelT>=REGLES.FUEL_BAISSE_BAT-1e-9){st.fuelT-=REGLES.FUEL_BAISSE_BAT;if(st.fuel>0)fuelPose(st,st.fuel-1);}
+  if(wait)G.reposT=G.turn;
+  if(st.fuel<=0){st.vieT=0;st.secT=(st.secT||0)+1;
+    if(st.secT>=REGLES.SEC_PERTE_BAT){st.secT=0;st.secN=(st.secN||0)+1;st.vie-=1;
+      if(typeof addFx==='function')addFx({kind:'num',x:G.px,y:G.py,txt:'-1',col:PAL['4'],dur:750});
+      if(st.vie<=0&&mortForeuse({fuel:1}))sayMore('FUEL : 0. COQUE : 0. UNITÉ PERDUE.','warn');}
+    return;}
+  st.secT=0;
+  if(st.vie<=0||st.vie>=st.vieMax){st.vieT=0;return;}
+  st.vieT=(st.vieT||0)+(symb?REGLES.SYMB_VIE:1)/(wait?REGLES.VIE_REPOS_BAT:REGLES.VIE_MARCHE_BAT);
+  if(st.vieT>=1-1e-9){st.vieT-=1;st.vie=Math.min(st.vieMax,st.vie+1);}}
+// la descente rend du fuel (07-generation, niveauSuivant)
+function fuelDescente(){const st=G.st;fuelInit(st);const g=fuelPose(st,st.fuel+REGLES.FUEL_DESCENTE);
+  if(g>0)sayMore(`FUEL : +${g} RÉCUPÉRÉ DANS LE PUITS. RÉSERVE : ${Math.floor(st.fuel)}/${st.fuelMax}.`,'good');}
 // Coup de foreuse : consomme de l'énergie ; refusé si la réserve est insuffisante
 function spend(){const c=coutE(G.st.cout);if(G.st.energie<c){say(`Énergie insuffisante pour frapper (${Math.floor(G.st.energie)}/${c}). Attendez qu’elle se recharge.`,'warn');
   SFX.blocked();render();return false;}G.st.energie-=c;return true;}

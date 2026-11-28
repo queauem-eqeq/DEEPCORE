@@ -61,8 +61,9 @@ avec les réglages du moment. Forer le site atteint le noyau : écran « NOYAU A
 Mort : idem.
 
 - **Taille** : celle du menu Monde. Affichée en jeu en haut de la colonne (« Niveau 1 · 96 × 64 »).
-- **Gisements** : 3 de métal et 1 de Matière pour une carte de taille 2, les autres tailles en proportion de leur
-  surface. Chaque gisement vaut **30, 40 ou 50**.
+- **Gisements** : **4 de métal par carte**, quelle que soit sa taille (fuel +15, +20 ou +25 ; 28 novembre 2026, avant : 3 pour une
+  carte de taille 2, en proportion de la surface), et 1 de Matière pour une carte de taille 2, les autres tailles en proportion de
+  leur surface. Un gisement de Matière vaut **30, 40 ou 50**.
 - **Palette** : celle du joueur, sans variation.
 
 ### La carte est un plan de zones

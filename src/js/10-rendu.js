@@ -159,6 +159,9 @@ function drawBoom(){const fl=1-(performance.now()-BOOM.t0)/180;
 const FX_VIF=new Set(['lunge','shake','num']);
 function addFx(f){f.t0=performance.now();if(f.kind==='num')f.stack=FX.filter(o=>o.kind==='num'&&o.x===f.x&&o.y===f.y&&fxP(o)<.5).length;
   FX.push(f);if(!fxRaf)fxRaf=fxSuite();}
+// grains d'un effet de consommable : position dans la case et instant d'apparition, tirés une fois pour toutes
+// (perdue le 28 novembre 2026 avec la PR #58, rétablie : sans elle, éclats, réparobots et station levaient une erreur)
+const fxGrains=n=>Array.from({length:n},()=>({x:rnd(0,13),y:rnd(3,14),d:Math.random()*.55}));
 // prochaine image : à 60 images/s tant qu'un effet de combat bouge, sinon au pas de FPS
 const fxSuite=()=>FX.some(f=>FX_VIF.has(f.kind))?requestAnimationFrame(fxLoop):raf20(fxLoop);
 function fxLoop(){const now=performance.now();FX=FX.filter(f=>now-f.t0<f.dur);if(antAnime())antVis();
@@ -509,6 +512,12 @@ function fxCouche(){
        if(f.kind==='soin'){ctx.fillRect(gx*u,(gy+1)*u,3*u,u);ctx.fillRect((gx+1)*u,gy*u,u,3*u);}           // une petite croix
        // une flèche vers le haut
        else{ctx.fillRect((gx+1)*u,gy*u,u,4*u);ctx.fillRect(gx*u,(gy+1)*u,u,u);ctx.fillRect((gx+2)*u,(gy+1)*u,u,u);}}}
+   /* Cellule de fuel (28 novembre 2026) : des gouttes couleur monde tombent d'au-dessus de la case et plongent dans la foreuse
+      (l'inverse des flèches de la batterie, qui montent). Une goutte : 1 pixel, puis 3, puis 1 (losange étiré), opaque, sur la grille. */
+   ctx.fillStyle=PAL['3'];
+   for(const f of FX){if(f.kind!=='fuel')continue;const p=fxP(f),bx=(f.x-camX)*16,by=(f.y-camY)*16;
+     for(const g of f.gr){const q=(p-g.d)*2.2;if(q<0||q>1)continue;const gx=Math.round(bx+g.x),gy=Math.round(by+g.y-16+q*16);
+       ctx.fillRect((gx+1)*u,gy*u,u,u);ctx.fillRect(gx*u,(gy+1)*u,3*u,2*u);ctx.fillRect((gx+1)*u,(gy+3)*u,u,u);}}
 }
   // Dessins au pixel de tuile (u = 1/16 de case), calés sur la grille, opaques : le projectile d'un tireur et l'onde du sonar
   {const u=S/16;ctx.fillStyle=PAL['1'];

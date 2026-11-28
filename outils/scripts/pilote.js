@@ -24,9 +24,6 @@ const graine = s => {let a = s >>> 0; Math.random = () => {a = (a + 0x6D2B79F5) 
   PIL.tir = (PIL.tir || 0) + 1; t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296;};};
 
 /* ---------- Sans dessin ni son ---------- */
-// fxGrains n'est défini nulle part dans src/ (28 novembre 2026) : ramasser des éclats blessé, utiliser des réparobots ou une station lève
-// une ReferenceError après le soin. Le pilote le remplace par une fonction vide pour que le geste aille au bout (voir le rapport du bloc A).
-if (typeof fxGrains === 'undefined') window.fxGrains = () => [];
 window.requestAnimationFrame = () => 0;
 render = () => {}; side = () => {}; try {mini = () => {};} catch (e) {}
 addFx = () => {}; try {logDraw = () => {};} catch (e) {}
@@ -38,15 +35,25 @@ const stockRemet = () => {localStorage.clear(); for (const k in STOCK) localStor
   if (typeof jnCharge === 'function') jnCharge(); if (typeof SAV_GARDE !== 'undefined') SAV_GARDE = null;};
 
 /* ---------- Points d'accroche (blocs suivants du chantier survie) ---------- */
+/* Repos qui soigne (bloc B, 28 novembre 2026 : +1 vie / 4 battements au repos tant qu'il reste du fuel). Le prudent se met au repos
+   sous 60 % de vie, sans chasseur, avec du fuel au-dessus de l'alerte (25 %) ; il le tient jusqu'à 95 % de vie (comme le bouton
+   REPOS, qui s'arrête au plein, au chasseur et à l'alerte du fuel). Le fonceur ne se repose jamais. */
 window.piloteBesoinRepos = window.piloteBesoinRepos || (P => {
-  // règle « repos qui soigne » : si le jeu définit REPOS_SOIN (ou G.st.reposSoin), le prudent se repose sous 60 % de vie, à l'abri
-  const regle = typeof REPOS_SOIN !== 'undefined' || (G.st && G.st.reposSoin);
-  if (!regle || P.profil !== 'prudent') return false;
-  return G.st.vie < G.st.vieMax * .6 && !P.chasseurs.length;});
+  if (P.profil !== 'prudent' || typeof REGLES === 'undefined') return false;
+  const st = G.st, fuelOk = st.fuel >= st.fuelMax * REGLES.FUEL_ALERTE;
+  if (P.chasseurs.length || !fuelOk) {P.enRepos = false; return false;}
+  if (P.enRepos) {if (st.vie >= st.vieMax * .95) P.enRepos = false;}
+  else if (st.vie < st.vieMax * .6) P.enRepos = true;
+  return P.enRepos;});
+/* Fuel à miner (bloc B) : sous 40 % de fuel, le pilote va au gisement d'éclats de métal connu le plus proche (dans la paroi ou au
+   sol). Connus : tous après l'onde du sonar d'arrivée, sinon ceux des cases déjà vues. */
+window.PILOTE_FUEL_CASES = window.PILOTE_FUEL_CASES || (() => {const l = [];
+  for (const k in G.ore || {}) {const o = G.ore[k], i = +k; if (oreMat(o)) continue; if (G.sonar !== 2 && !G.seen[i]) continue;
+    const x = i % W, y = (i / W) | 0; if (!oreSol(o) && (x <= 0 || y <= 0 || x >= W - 1 || y >= H - 1)) continue; l.push(i);}
+  return l;});
 window.piloteBesoinFuel = window.piloteBesoinFuel || (P => {
-  // règle « fuel à miner » : si G.st.fuel existe, le pilote va au gisement connu le plus proche sous 40 % ; à brancher sur la tuile réelle
   if (G.st.fuel == null || !window.PILOTE_FUEL_CASES) return null;
-  const mx = G.st.fuelMax || 100; return G.st.fuel < mx * .4 ? window.PILOTE_FUEL_CASES() : null;});
+  const mx = G.st.fuelMax || 100; if (G.st.fuel >= mx * .4) return null; const l = window.PILOTE_FUEL_CASES(); return l.length ? l : null;});
 window.piloteTir = window.piloteTir || ((P, cibles) => false);   // arme de tir : à écrire quand elle existe (tir sur la cible la plus proche)
 window.PILOTE_MESURES = window.PILOTE_MESURES || [];
 
@@ -64,13 +71,17 @@ enveloppe('consoCible', () => ({t: 'objet'}));
 enveloppe('viseeOk', () => ({t: 'objet'}));
 enveloppe('tryMove', () => ({t: 'eclats'}));        // les seuls gains de vie dans un pas, hors enveloppes ci-dessus : les éclats ramassés
 enveloppe('forageFrame', () => ({t: 'descente'}));
+enveloppe('niveauSuivant', () => ({t: 'descente'}));            // +30 de fuel à l'arrivée (bloc B)
+enveloppe('survieTick', w => ({t: w ? 'repos' : 'marche'}));      // vie qui remonte seule, fuel qui baisse, pertes à sec (bloc B)
 {const o = battement; battement = function (w) {const R = PIL.R; if (R && R.niv) {R.niv.bat++; if (G.st.energie < 1) R.niv.e0++;
+    if (w) R.niv.repos++; if (G.st.fuel <= 0) R.niv.sec++;
     for (const f of PILOTE_MESURES) try {f(R.niv);} catch (e) {}}
   return o.apply(this, arguments);};}
 // source d'une perte de vie : l'ennemi (par espèce), le laser, la descente, le poison, un objet ; le reste : « autre »
 const cle = c => !c ? 'autre' : c.t === 'ennemi' ? 'ennemi:' + c.nom : c.t === 'effets' || c.t === 'reparobots' ? 'poison'
+  : c.t === 'repos' || c.t === 'marche' ? 'fuel à sec'
   : ['laser', 'descente', 'objet'].includes(c.t) ? c.t : 'autre';
-function surveille(st) {if (st.__pil) return; let v = st.vie, m = st.matiere || 0;
+function surveille(st) {if (st.__pil) return; let v = st.vie, m = st.matiere || 0, fu = st.fuel;
   Object.defineProperty(st, '__pil', {value: 1, enumerable: false});
   // mode « immortel » (mesure de la durée pure d'un niveau) : à 0, la vie repart au maximum ; les pertes sont comptées en entier
   Object.defineProperty(st, 'vie', {enumerable: true, configurable: true, get: () => v, set: n => {const R = PIL.R, d = n - v; let sauve = false;
@@ -79,6 +90,11 @@ function surveille(st) {if (st.__pil) return; let v = st.vie, m = st.matiere || 
     if (d > 0) {const k = c && c.t !== 'ennemi' ? c.t : 'autre'; N.rendu[k] = (N.rendu[k] || 0) + d;}
     else {const k = cle(c); N.perdu[k] = (N.perdu[k] || 0) - d; R.dernier = k; if (sauve) {N.morts = (N.morts || 0) + 1; if (!N.mortIci) {N.mortIci = k; N.mortBat = N.bat;}}
       if (c && c.t === 'ennemi' && c.gi != null) {N.grAff.add(c.gi); N.grVie[c.gi] = (N.grVie[c.gi] || 0) - d;}}}});
+  // fuel gagné par source (éclats, cellule, descente) et consommé
+  Object.defineProperty(st, 'fuel', {enumerable: true, configurable: true, get: () => fu, set: n => {const d = n - (fu || 0); fu = n;
+    const R = PIL.R; if (!R || !R.niv || !d || fu == null) return; const N = R.niv, c = ctx();
+    if (d > 0) {const k = !c ? 'autre' : c.t === 'eclats' ? 'eclats' : c.t === 'objet' ? 'cellule' : c.t === 'descente' ? 'descente' : c.t;
+      N.fuelGagne[k] = (N.fuelGagne[k] || 0) + d;} else N.fuelConso -= d;}});
   Object.defineProperty(st, 'matiere', {enumerable: true, configurable: true, get: () => m, set: n => {const d = n - m; m = n;
     const R = PIL.R; if (R && R.niv && d > 0) R.niv.matiere += d;}});}
 
@@ -161,7 +177,7 @@ function equiper() {for (let i = 0; i < G.inv.length; i++) {const o = G.inv[i], 
 /* ---------- La décision d'un pas ---------- */
 function cibleEcl(i) {const o = G.ore && G.ore[i]; return o && !oreSol(o) && !oreMat(o);}
 function choixPrudent(P, forer) {
-  const prud = P.profil === 'prudent', sacLibre = sacPlaces() < SAC_MAX, st = G.st, plein = st.vie >= st.vieMax, cib = new Set(), but = new Map(), sonar = G.sonar === 2;
+  const prud = P.profil === 'prudent', sacLibre = sacPlaces() < SAC_MAX, st = G.st, plein = !(st.fuel < st.fuelMax), cib = new Set(), but = new Map(), sonar = G.sonar === 2;
   // pénalité autour des groupes calmes en vue (et de ceux vus récemment, mémorisés)
   const ev = new Float32Array(W * H);
   for (const [k, p] of P.tireurs) {if (G.turn - p.t > 80 || !(G.beasts || []).includes(k)) {P.tireurs.delete(k); continue;}
@@ -178,13 +194,14 @@ function choixPrudent(P, forer) {
       {cib.add(i); but.set(i, 'term'); continue;}
     if (prud && v === FABRIC && !P.fabFait.has(i) && (G.st.matiere || 0) >= 20) {cib.add(i); but.set(i, 'fab'); continue;}
     if (prud && v === STATION && !(G.art && G.art[i]) && st.vie < st.vieMax * .6) {cib.add(i); but.set(i, 'station'); continue;}
-    if (prud && sonar && forable(v) && !bord(x, y) && cibleEcl(i) && st.vie < st.vieMax * .75) {cib.add(i); but.set(i, 'eclat'); continue;}
+    // éclats dans la paroi : du fuel depuis le bloc B ; le prudent les mine en passant sous 75 % de fuel
+    if (prud && sonar && forable(v) && !bord(x, y) && cibleEcl(i) && st.fuel < st.fuelMax * .75) {cib.add(i); but.set(i, 'eclat'); continue;}
     if (blocks(v)) continue;
     if (G.cles && G.cles[i]) {but.set(i, 'cle'); continue;}
     if (G.items && G.items[i] && G.items[i].length && (sacLibre && !P.jetes.has(i) || G.items[i].includes('cle')) && !(G.pieges || []).some(p => p.on && p.c === i) && !(G.vit && G.vit[i])) {but.set(i, 'objet'); continue;}
     const o = G.ore && G.ore[i]; if (o && oreSol(o) && (oreMat(o) || !plein)) {but.set(i, 'sol'); continue;}
     if (!P.vu.has(i)) for (const [dx, dy] of DIRS) {const a = x + dx, b = y + dy; if (a >= 0 && b >= 0 && a < W && b < H && !G.seen[idx(a, b)]) {but.set(i, 'front'); break;}}}
-  const fuel = piloteBesoinFuel(P); if (fuel) for (const i of fuel) {cib.add(i); but.set(i, 'fuel');}
+  const fuel = piloteBesoinFuel(P); if (fuel) for (const i of fuel) {if (!(G.ore[i] && oreSol(G.ore[i]))) cib.add(i); but.set(i, 'fuel');}
   const D = dijkstra({cibles: cib, evite: ev, forer});
   let best = -1, bd = Infinity;
   for (const [i, k] of but) {let d = D.d[i]; if (d === Infinity || i === D.s0) continue;
@@ -211,6 +228,7 @@ function pas(P) {if (PIL.trace) PIL.trace.push([G.turn, G.px, G.py, Math.round(G
   const adj = vus.filter(e => frappable(e.o) && (e.chasse || (e.b && !aOuvrage(e.o) && P.profil === 'fonceur' && P.barre && P.barre.has(idx(e.o.x, e.o.y)))));
   if (prudent && st.vie < st.vieMax * .5 && !(G.eff && G.eff.repar) && G.inv.some(o => o.k === 'repar')) if (utilise('repar')) return true;
   if (prudent && st.vie < st.vieMax * .3 && ch.length) {const r = repli(ch); if (r != null && vers(r)) {N.replis++; return true;}}
+  if (st.fuel < st.fuelMax * .3 && G.inv.some(o => o.k === 'fuel')) if (utilise('fuel')) return true;   // cellule de fuel (bloc B)
   if (window.piloteTir(P, ch)) return true;
   if (adj.length) {adj.sort((a, b) => (a.o.hp ?? 99) - (b.o.hp ?? 99)); const e = adj[0];
     if (e.o.gi != null) N.grAff.add(e.o.gi); N.coups++;
@@ -225,6 +243,8 @@ function pas(P) {if (PIL.trace) PIL.trace.push([G.turn, G.px, G.py, Math.round(G
     if (allerFrapper(P)) return true;}
   else P.attente = 0;
   if (piloteBesoinRepos(P)) return attendre();
+  // sous 40 % de fuel, les deux profils vont miner le gisement connu le plus proche, en forant au besoin
+  {const f = piloteBesoinFuel(P); if (f) {const r = allerFuel(P, f); if (r !== null) {N.versFuel = (N.versFuel || 0) + 1; return r;}}}
   // 3. le fonceur : droit au site ; s'il est hors d'atteinte (pièce fermée à clé…), il explore comme le prudent
   if (!prudent) {const r = versSite(P, true); if (r !== null) return r; return explorer(P, false) ?? explorer(P, true) ?? (P.bloque++, attendre());}
   // 4. le prudent : explorer, ramasser, utiliser ; puis le site ; s'il est hors d'atteinte, explorer en forant
@@ -247,6 +267,18 @@ function explorer(P, forer) {const st = G.st, N = PIL.R.niv;
     if (forable(G.t[n])) {if (st.energie < coutE(st.cout)) {if (P.profil === 'prudent' && G.inv.some(o => o.k === 'batterie') && utilise('batterie')) return true; return attendre();}}
     P.vu.add(idx(G.px, G.py)); const ok = vers(n); P.vu.add(idx(G.px, G.py)); if (!ok) P.vu.add(n); return ok || attendre();}}
 
+// aller au gisement de fuel le plus proche, en forant au besoin ; null s'il n'y en a aucun d'atteignable
+// un gisement visé plus de 200 pas sans l'atteindre (derrière un mur inconnu, roche dure…) est laissé 600 battements
+function allerFuel(P, l) {const st = G.st; P.fuelVise = P.fuelVise || new Map(); P.fuelLaisse = P.fuelLaisse || new Map();
+  l = l.filter(i => !(P.fuelLaisse.get(i) > G.turn)); if (!l.length) return null;
+  const cib = new Set(l.filter(i => !(G.ore[i] && oreSol(G.ore[i])))), D = dijkstra({cibles: cib, forer: true, inconnu: true});
+  let best = -1, bd = Infinity; for (const i of l) {const d = D.d[i]; if (d < bd && i !== D.s0) {bd = d; best = i;}}
+  if (best < 0) return null;
+  {const n = (P.fuelVise.get(best) || 0) + 1; P.fuelVise.set(best, n); if (n > 200) {P.fuelVise.delete(best); P.fuelLaisse.set(best, G.turn + 600); return null;}}
+  if (D.pr[best] === D.s0) {if (cib.has(best) && st.energie < coutE(st.cout)) return attendre(); return vers(best) || attendre();}
+  const n = premierPas(D, best); if (n == null) return null;
+  if (forable(G.t[n]) && st.energie < coutE(st.cout)) return attendre();
+  return vers(n) || attendre();}
 // marcher vers le chasseur le plus proche (pour le frapper) ; false s'il est hors d'atteinte
 function allerFrapper(P) {const e = P.chasseurs.slice().sort((a, b) => cheb(a.o.x, a.o.y, G.px, G.py) - cheb(b.o.x, b.o.y, G.px, G.py))[0];
   if (!e) return false; const j = idx(e.o.x, e.o.y), D = dijkstra({but: j}), c = premierPas(D, j);
@@ -278,7 +310,8 @@ function versSite(P, foncer) {const s = G.sites[0], st = G.st; if (!s) return nu
 
 /* ---------- La descente : scène de forage jouée sans dessin, comme test-descente ---------- */
 function descente(R) {const N = R.niv, vie0 = G.st.vie, s = G.sites[0];
-  N.vieFin = Math.round(G.st.vie); N.finT = G.time; N.explore = explore(); N.tirFin = PIL.tir;
+  N.vieFin = Math.round(G.st.vie); N.finT = G.time; N.explore = explore(); N.tirFin = PIL.tir; N.fuelFin = Math.round(G.st.fuel ?? -1);
+  N.gisementsMines = N.gisements - metal();
   if ((G.niv || 1) >= NIV_MAX) {end(s); return;}   // dernier forage : la barre « Forage en cours » est minutée (setTimeout), on va droit au noyau
   askDrill();
   const F = FORAGE; let n = 0;
@@ -289,7 +322,9 @@ function descente(R) {const N = R.niv, vie0 = G.st.vie, s = G.sites[0];
     N.descente = {jeu: !!F.jeu, mines: F.touche || 0, perdu: Math.round(vie0 - G.st.vie)};}
   if (!G.over && !$('overlay').hidden && (G.niv || 1) <= NIV_MAX && !(G.over && G.over.win)) $('overlay').hidden = true;}
 
+const metal = () => Object.values(G.ore || {}).filter(o => !oreMat(o)).length;
 function nouveauNiveau(R) {const N = {niv: G.niv || 1, recette: G.recette, amb: G.amb || '', bat: 0, e0: 0, debT: G.time, vieDebut: Math.round(G.st.vie),
+    fuelDebut: Math.round(G.st.fuel ?? -1), fuelFin: null, fuelGagne: {}, fuelConso: 0, sec: 0, repos: 0, gisements: metal(), gisementsMines: 0,
     perdu: {}, rendu: {}, grVus: new Set(), grAff: new Set(), grVie: {}, matiere: 0, objets: {}, term: 0, termData: 0, hacks: 0, plans: 0,
     fablab: 0, fabrique: {}, jetes: {}, stations: 0, coups: 0, replis: 0, equipe: [], erreurs: [], descente: null, groupesNiveau: 0};
   {const s = new Set(); for (const b of G.beasts || []) if (b.gi != null) s.add(b.gi); for (const a of G.animals || []) if (a.gi != null) s.add(a.gi); N.groupesNiveau = s.size;}
@@ -299,9 +334,10 @@ function nouveauNiveau(R) {const N = {niv: G.niv || 1, recette: G.recette, amb: 
 function explore() {let vu = 0, tot = 0; for (let i = 0; i < W * H; i++) {const v = G.t[i]; if (blocks(v) && !(v === LOCK || v >= MACHINE)) continue; tot++; if (G.seen[i]) vu++;}
   return Math.round(vu / Math.max(1, tot) * 100);}
 function finNiveau(N) {if (N.explore == null) N.explore = explore();
+  if (N.fuelFin == null) {N.fuelFin = Math.round(G.st.fuel ?? -1); N.gisementsMines = N.gisements - metal();}
   const gv = N.grVie, aff = [...N.grAff]; N.grVus = N.grVus.size; N.grAff = aff.length;
   N.bloque = PIL.P ? PIL.P.bloque : 0; N.vieParGroupe = aff.map(g => Math.round(gv[g] || 0)); delete N.grVie;
-  for (const o of [N.perdu, N.rendu]) for (const k in o) o[k] = Math.round(o[k] * 10) / 10;}
+  for (const o of [N.perdu, N.rendu, N.fuelGagne]) for (const k in o) o[k] = Math.round(o[k] * 10) / 10;}
 
 window.pilotePartie = function (cfg) {
   const profil = cfg.profil || 'prudent', plafond = cfg.plafond || 8000, t0 = performance.now();

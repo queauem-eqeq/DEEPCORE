@@ -85,7 +85,7 @@ const TICK=100;
 const DUR={pas:100,coup:100,forage:100,attente:100};   // durée de chaque action ; un équipement pourra les modifier
 const PALIERS=[50,75,100,150,200];                     // les durées des créatures s'écrivent sur ces paliers (voir 03-tuiles)
 const SLOW={[LIQ]:2,[DEEP]:2};                          // terrains lents : toute eau ×2 (28 novembre 2026 ; avant, eau peu profonde ×1,5)
-const SPRINT_COST=5,SPRINT_MULT=.5;                     // course : énergie par pas, et durée du pas multipliée
+const SPRINT_COST=REGLES.COURSE_ENERGIE,SPRINT_MULT=.5;                     // course : énergie par pas, et durée du pas multipliée
 const WAIT_REGEN=2;                                     // attendre sur place : recharge d'énergie multipliée
 const slowOf=(v,swim)=>swim?1:(SLOW[v]||1);             // les nageurs (crabos) ne sont pas ralentis par l'eau
 /* La foreuse compte comme les créatures depuis le 26 novembre 2026 : deux durées, le pas et le coup, en base 100.
@@ -225,14 +225,11 @@ function tryMove(dx,dy){if(PHASE)return;   // foreuse démontée : elle ne march
   {const oi=idx(G.px,G.py);if(G.ore&&G.ore[oi]&&oreSol(G.ore[oi])){const l=oreLv(G.ore[oi]),mt=oreMat(G.ore[oi]);delete G.ore[oi];
     if(mt){G.st.matiere=(G.st.matiere||0)+ORE_PV[l];addFx({kind:'num',x:G.px,y:G.py,txt:'+'+ORE_PV[l],col:PAL['1'],dur:750});
       sayMore(`Matière {µ} récupérée : +${ORE_PV[l]} (réserve : ${G.st.matiere}).`,'good');SFX.spot();}
-    else{const av=G.st.vie,ae=G.st.energie;   // les éclats refont le plein de vie ET d'énergie (16 novembre 2026)
-    G.st.vie=Math.min(G.st.vieMax,G.st.vie+ORE_PV[l]);G.st.energie=Math.min(G.st.energieMax,G.st.energie+ORE_PV[l]);
-    const dv=Math.round(G.st.vie-av),de=Math.round(G.st.energie-ae);
-    addFx({kind:'num',x:G.px,y:G.py,txt:'+'+dv,col:PAL['2'],dur:750});   // affiché comme les dégâts, couleur des éclats
-    // l'énergie regagnée, en blanc comme sa barre (22 novembre 2026)
-    if(de)addFx({kind:'num',x:G.px,y:G.py,txt:'+'+de,col:'#ffffff',dur:750,stack:1});
-    sayMore(`Éclats de métal récupérés : +${dv} PV, +${de} d’énergie.`,'good');SFX.spot();
-    if(dv)addFx({kind:'soin',x:G.px,y:G.py,dur:900,gr:fxGrains(9)});if(de)addFx({kind:'ener',x:G.px,y:G.py,dur:900,gr:fxGrains(9)});}}}
+    else{   // les éclats de métal donnent du fuel (28 novembre 2026 ; du 16 au 28 novembre : vie et énergie)
+    const st=G.st;fuelInit(st);const g=fuelPose(st,st.fuel+REGLES.FUEL_ECLATS[l]);
+    addFx({kind:'num',x:G.px,y:G.py,txt:'+'+g,col:PAL['3'],dur:750});   // couleur du fuel, comme sa jauge
+    if(!st.fuelVu){st.fuelVu=1;sayMore('MÉTAL ASSIMILÉ : CONVERTI EN FUEL. SOURCE CONFIRMÉE.','good');}
+    sayMore(`ÉCLATS DE MÉTAL : FUEL +${g}. RÉSERVE : ${Math.floor(st.fuel)}/${st.fuelMax}.`,'good');SFX.spot();}}}
   invPickup(true);
   const s=siteAt(G.px,G.py);
   if(s){if(!s.known)SFX.analyse();s.known=true;say('Site de forage détecté. [F] pour forer.','good');}
@@ -242,7 +239,8 @@ function tryMove(dx,dy){if(PHASE)return;   // foreuse démontée : elle ne march
 /* ---------- Forage ---------- */
 function waitTurn(){if(PHASE)return;
   if(G.over||drilling||!$('overlay').hidden)return;lastAct='wait';lastRun=false;G.turn++;G.msg=null;
-    if(!REST)say(`Le robot attend : recharge ${WAIT_REGEN} fois plus vite (${+(G.st.power/POW_BASE*WAIT_REGEN).toFixed(1)}/t).`);
+    if(!REST)say(`Le robot attend : recharge ${WAIT_REGEN} fois plus vite (${+(G.st.power/POW_BASE*WAIT_REGEN).toFixed(1)}/t)`+
+      (G.st.fuel>0&&G.st.vie<G.st.vieMax?`, réparation +1 vie tous les ${REGLES.VIE_REPOS_BAT} battements.`:'.'));
   pass(DUR.attente,true);computeFOV();render();if(G.over&&G.over.dead)dead();
 }
 function askDrill(){

@@ -22,7 +22,8 @@ const HACK_E=[1,2,3,5,6,8,10,12,13,15];      // échelle par rang (CRIT : +1 % a
 // chances des familles, par tranche de niveaux (chaque proposition tirée à part)
 const HACK_CHANCES=[[3,{base:85,tir:15,noyau:0}],[6,{base:50,tir:40,noyau:10}],[10,{base:25,tir:35,noyau:40}]];
 const HACK_PALIERS=[3,6,9];                  // un emplacement de plus en arrivant à ces niveaux
-const SYMB_VIE=4,SYMB_COUT=1.25;              // SYMBIOSE : +1 vie tous les 4 battements ; dépenses d'énergie × 1,25
+// SYMBIOSE (28 novembre 2026, définition d'origine) : récupération de vie × REGLES.SYMB_VIE, baisse du fuel × REGLES.SYMB_FUEL
+// (survieTick, 08-faune). Du 27 au 28 novembre, faute de fuel : +1 vie / 4 battements contre 25 % d'énergie en plus.
 const HACK_FAM={base:{n:'BASE',c:'1',v:'var(--c1)'},tir:{n:'TIR',c:'3',v:'var(--c3)'},noyau:{n:'NOYAU',c:'r',v:'var(--life)'}};
 const pc=v=>String(Math.round(v*10)/10).replace('.',',');
 // sorte : famille, nom, code de la puce, ligne d'ambiance (relevé de l'unité, jargon machine sans « je » : 28 novembre 2026),
@@ -46,7 +47,7 @@ const HACKS={
   perforant:{f:'tir',n:'PERFORANT',g:'PRF',d:'CIBLE : SOUDURE. TÔLE : IGNORÉE.',mod:E=>({tirCrit:E,tirPre:-Math.round(E/2)}),
     eff:E=>`CRIT DU TIR +${E} % · PRÉCISION −${Math.round(E/2)}`},
   symbiose:{f:'noyau',n:'SYMBIOSE',g:'SYM',d:'COQUE : RÉPARÉE PAR SOURCE EXTERNE. ORIGINE : PROFONDEUR. COÛT : RÉSERVES DE L’UNITÉ.',mod:()=>({symb:1}),
-    eff:()=>`VIE +1 TOUS LES ${SYMB_VIE} BATTEMENTS · DÉPENSES D’ÉNERGIE +${Math.round((SYMB_COUT-1)*100)} %`},
+    eff:()=>`RÉCUPÉRATION DE VIE ×${pc(REGLES.SYMB_VIE)} · BAISSE DU FUEL ×${pc(REGLES.SYMB_FUEL)}`},
   sursis:{f:'noyau',n:'SURSIS',g:'SRS',d:'COPIE DE L’UNITÉ EN ATTENTE SOUS LA SURFACE. USAGE : 1.',mod:()=>({sursis:1}),
     eff:()=>'À 0 DE VIE : SURVIT À 1 PV, UNE FOIS · LE HACK SE DÉTRUIT'},
   heritage:{f:'noyau',n:'HÉRITAGE',g:'HRT',d:'CHARGE DE L’UNITÉ : TRANSMISE À L’UNITÉ SUIVANTE.',mod:()=>({herit:1}),
@@ -102,9 +103,6 @@ function hackDetruit(b){if(!b||b.recy||!G||!G.st||!(G.st.recyc>0))return;b.recy=
   if(g>0&&typeof addFx==='function')addFx({kind:'num',x:G.px,y:G.py-1,txt:'+'+g,col:PAL['1'],dur:700});}
 // TRAQUE : un ennemi en chasse, assez près, se montre par un point (même rendu que l'antenne)
 const traqueVoit=b=>!!(G.st&&G.st.traque>0&&b.hunt>0&&Math.max(Math.abs(b.x-G.px),Math.abs(b.y-G.py))<=G.st.traque);
-// SYMBIOSE : la vie remonte d'un point tous les SYMB_VIE battements
-function symbTick(){if(!(G.st.symb>0)||G.st.vie>=G.st.vieMax||G.st.vie<=0){G.st.symbN=0;return;}
-  G.st.symbN=(G.st.symbN||0)+1;if(G.st.symbN>=SYMB_VIE){G.st.symbN=0;G.st.vie=Math.min(G.st.vieMax,G.st.vie+1);}}
 // SURSIS : appelé là où la mort est décidée (mortForeuse, 08-faune ; la descente, 14b). true : la foreuse est sauvée.
 function sursisSauve(){if(!G||!G.inv||!G.st||G.st.vie>0)return false;const o=G.inv.find(o=>o.eq&&estHack(o.k)&&ITEMS[o.k].mod.sursis);if(!o)return false;
   invApply(o,-1);G.inv.splice(G.inv.indexOf(o),1);G.st.vie=1;

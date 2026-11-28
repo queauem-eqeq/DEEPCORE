@@ -1214,3 +1214,38 @@ FABLAB 1 par niveau.
 Le tableau des cibles de `boucle-amelioration.md` n'a pas pu être rempli : ce document du projet claude.ai n'était pas lisible
 depuis la session qui a fait ces mesures (voir le rapport du bloc A). Toutes les grandeurs qu'il demande sont dans
 `pilote.py --json` (par partie et par niveau).
+
+## Survie B (28 novembre 2026) : fuel, vie qui remonte, repos qui soigne, forage à 5
+
+Mêmes graines (1000 à 1029) et mêmes commandes que la référence ci-dessus, après le bloc B (`REGLES`, `00-base.js`). Le pilote
+se repose (prudent seulement) de 60 % à 95 % de vie quand rien ne le chasse et que le fuel est au-dessus de 25 % ; les deux profils
+vont miner le gisement connu le plus proche sous 40 % de fuel et boivent une cellule sous 30 %. Attention : les niveaux 2 et 3 ne
+se rejouent pas à l'identique (voir la référence) ; deux séries normales du prudent ont donné 6 puis 4 noyaux sur 30.
+
+| | Référence | Survie B | Cible (arbitrage) |
+|---|---|---|---|
+| Prudent : noyau atteint (série normale) | 8 / 30 (27 %) | **6 puis 4 / 30** (20 %, 13 %) | 5 à 6 sur 10 |
+| Fonceur : noyau atteint | 1 / 30 (3 %) | **2 / 30** (7 %) | 1 sur 10 au plus |
+| Prudent : durée d'un niveau (immortel, médiane) | 1 216 / 872 / 915 | **1 590 / 1 300 / 1 308** | – |
+| Prudent : partie entière (médiane, D1 – D9) | 3 187 (2 548 – 5 640) | **4 297** (3 179 – 5 186) | – |
+| Fonceur : partie entière | 2 079 | **1 826** (901 – 3 052) | – |
+| Prudent : vie perdue par niveau (immortel, finis, médiane) | – (moy. 95 / 318 / 257) | **58 / 304 / 293** (moy. 109 / 314 / 322) | 30 à 50 % |
+| Prudent : vie rendue — repos / marche / réparobots | – / – / 22, 138, 127 | **22 / 38 / 8 · 97 / 34 / 71 · 92 / 40 / 85** | – |
+| Prudent : battements au repos par niveau | – | **102 / 418 / 369** | – |
+| Prudent : fuel à la descente (médiane, minimum) | – | **46 (5) · 43 (4) · 42 (0)** | – |
+| Prudent : niveaux finis passés à sec | – | **0 / 2 / 7** sur 26 | – |
+| Prudent : gisements de métal minés (sur 4) ; fuel des éclats ; des cellules | – | **3,0 / 3,1 / 3,2** ; ≈ 57 par niveau ; ≈ 16 | – |
+| Fonceur : fuel à la descente (médiane, minimum) | – | **66 (10) · 49 (32) · 55 (28)** ; jamais à sec | – |
+| Fonceur : gisements minés | – | 0,5 / 1,1 / 1,1 | – |
+
+- Le **repos** devient la première source de soin du prudent aux niveaux 2 et 3 (≈ 95 PV par niveau, ≈ 400 battements, ≈ 33 de fuel) ;
+  les **réparobots** fabriqués tombent de 138 / 127 à 71 / 85 (le pilote en fabrique moins : moins de Matière dépensée pour se soigner).
+- **Rester longtemps coûte** : le prudent, qui explore tout et se repose, finit un niveau sur quatre du niveau 3 à sec ou presque
+  (D1 du fuel à la descente : 0). Le **fonceur ne manque jamais de fuel** : 1 826 battements = 152 points, contre 100 + 2 × 30 = 160 sans
+  rien miner.
+- La **survie** ne s'améliore pas : les morts restent au niveau 2 (sentinelles, artilleurs, crabots) et la vie perdue par niveau vaut
+  3 fois la vie maximale aux niveaux 2 et 3. C'est l'affaire du bloc C (nombre et dégâts des ennemis).
+- Série immortelle : 4 parties « bloquées » sur 30 (le pilote ne trouve pas l'entrée du site, puis reste à sec jusqu'au plafond) ; elles
+  sont exclues des chiffres ci-dessus.
+- `simul.py tout` : détection, fuite et combat inchangés (1 Broyeur 95 % / 51 PV, Mastok + 2 Crabos 86 % / 36 PV) ; un combat dure
+  trop peu pour que la vie qui remonte en marche compte.

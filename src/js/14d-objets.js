@@ -11,8 +11,8 @@
    à l'autre. Valeurs réglables : Lab → Items (np-items). */
 const ITEM_VAL_DEF={repar:{soin:50},batterie:{energie:50,choc:12,etourdi:10},charge:{degats:30},puissance:{pow:1,deg:5},
   berserk:{crit:50,duree:30},camo:{duree:30},balise:{rayon:20,duree:25,pv:40},court:{etourdi:10},matiere:{mat:15},
-  phaseur:{loin:25}};
-const ITEM_VAL_LIB={soin:'Vie rendue',energie:'Énergie rendue',choc:'Dégâts de la décharge',etourdi:'Étourdissement (battements)',degats:'Dégâts',pow:'POW gagné',deg:'Dégâts par point de POW en trop (%)',crit:'CRIT en plus (points)',duree:'Durée (battements)',rayon:'Rayon de l’appel (cases)',pv:'PV de la balise posée',mat:'Matière {µ} rendue',loin:'Distance mini où l’ennemi reparaît (cases)'};
+  phaseur:{loin:25},fuel:{fuel:REGLES.FUEL_CELLULE}};
+const ITEM_VAL_LIB={fuel:'Fuel rendu',soin:'Vie rendue',energie:'Énergie rendue',choc:'Dégâts de la décharge',etourdi:'Étourdissement (battements)',degats:'Dégâts',pow:'POW gagné',deg:'Dégâts par point de POW en trop (%)',crit:'CRIT en plus (points)',duree:'Durée (battements)',rayon:'Rayon de l’appel (cases)',pv:'PV de la balise posée',mat:'Matière {µ} rendue',loin:'Distance mini où l’ennemi reparaît (cases)'};
 let ITEM_VAL=JSON.parse(JSON.stringify(ITEM_VAL_DEF));
 // chance qu'un robot abattu lâche un objet, par espèce (clé du Bestiaire)
 const DROPS_DEF={crabos:8,cafar:6,mastok:90,brochon:10,mine:0,paralyzor:25,gardien:60,artilleur:35,drone:5,soudeur:45,englueur:35};
@@ -54,10 +54,18 @@ Object.assign(ITEMS,{
     plein:st=>false,non:'',use:st=>'',
     art:["     ▄▄▄▄▄     ", "    █ ▐▌  █    ", "    █ ▐▌░ █    ", "    █ ▐▌  █    ", "     ▀▀▀▀▀     "],
     col:[".....wwwww.....", "....w.11..w....", "....w.112.w....", "....w.11..w....", ".....wwwww....."]},
+  /* Cellule de fuel (28 novembre 2026, chantier « Survie ») : sur la foreuse, +30 de fuel (REGLES.FUEL_CELLULE) ; lancée ailleurs,
+     elle se vide sans effet. Son illustration, sa tuile (o_fuel), son animation (« fuel », 10-rendu) et son bruit (SFX.fuel) sont
+     à elle seule. */
+  fuel:{n:'Cellule de fuel',conso:1,son:'fuel',eff:'Fuel +30',
+    d:'Une cellule scellée de carburant raffiné : elle remplit la réserve de fuel de '+NOM_FOREUSE+'. Lancée ailleurs, elle se vide sur le sol.',
+    plein:st=>st.fuel>=st.fuelMax,non:'Fuel déjà au maximum : cellule inutile.',use:st=>'',
+    art:["     ▄███▄     ", "    █▀▀▀▀▀█    ", "    █ ≈≈≈ █    ", "    █▓▓▓▓▓█    ", "    █▓▓▓▓▓█    ", "     ▀▀▀▀▀     "],
+    col:[".....wwwww.....", "....wwwwwww....", "....w.333.w....", "....w33333w....", "....w33333w....", ".....wwwww....."]},
   matiere:{n:'Matière {µ}',mat:1,eff:'Matière {µ} +15',d:'Un bloc de Matière {µ} brute : il rejoint la réserve dès qu’on le ramasse.',
     art:["     ▄▄        ", "   ▄████▄  ▄▄  ", "  ████████████ ", "   ▀████████▀  ", "      ▀▀▀▀     "],
     col:[".....11........", "...11w111..11..", "..111111111w11.", "...1111111111..", "......1111....."]}});
-Object.assign(FAB_PRIX,{berserk:20,camo:24,balise:12,court:16,phaseur:45});
+Object.assign(FAB_PRIX,{berserk:20,camo:24,balise:12,court:16,phaseur:45,fuel:14});
 /* Sonar (28 novembre 2026, étape 5) : accessoire du FABLAB en cinq versions, sonar3 … sonar7. Les ennemis à N cases (distance
    en cases, diagonales comprises) se montrent par un point rouge, même hors de vue et à travers les murs : le même point que
    l'antenne et le hack TRAQUE (10-rendu, mini-carte). Plusieurs portés : le meilleur compte (sonarPortee). Rien à voir avec
@@ -77,7 +85,7 @@ const sonarVoit=b=>{const r=sonarPortee();return r>0&&!(BEASTS[b.sp]||{}).mine&&
 // zone d'effet d'un consommable : r = 0 une case, 1 l'explosion (3 × 3 et 5 cases autour), 'f' le disque du fumigène ; la visée, elle,
 // ne montre toujours qu'une case. soi : la visée s'ouvre sur la foreuse (de même pour toute capsule non identifiée)
 const CONSO={repar:{r:0,soi:1},batterie:{r:0,soi:1},fumigene:{r:'f',soi:1},charge:{r:1,soi:0},puissance:{r:0,soi:1},berserk:{r:0,soi:1},
-  camo:{r:0,soi:1},balise:{r:0,soi:1},court:{r:0,soi:1},phaseur:{r:0,soi:1}};
+  camo:{r:0,soi:1},balise:{r:0,soi:1},court:{r:0,soi:1},phaseur:{r:0,soi:1},fuel:{r:0,soi:1}};
 let SAV_GARDE=null;   // pendant la génération du niveau suivant, G.st est neuf : on garde la main sur le savoir de la foreuse
 const codeTire=()=>{const L='BDFGHJKLMNPQRSTVWXZ',H='0123456789ABCDEF',l=()=>L[rnd(0,L.length-1)],h=()=>H[rnd(0,15)];
   return `//${l()}${l()}${rnd(2,9)}-${h()}${h()}${l()}`;};
@@ -105,11 +113,14 @@ function itemTxt(){const V=ITEM_VAL,v=k=>ITEMS[k].vrai;
     v('batterie').d=`Sur ${NOM_FOREUSE} : rend ${V.batterie.energie} points d’énergie, répartis sur ${RECUP_TOURS} battements. Lancée sur un ennemi : ${V.batterie.choc} dégâts, et il reste étourdi ${V.batterie.etourdi} battements.`;
   v('fumigene').d='Un nuage opaque là où on le lance : il cache la vue des deux côtés. Si '+NOM_FOREUSE+' est dedans, les ennemis perdent sa trace.';
   v('charge').eff=`${V.charge.degats} dégâts, roche brisée, 3 × 3 et plus`;v('charge').d=`Explose jusqu’à la portée de vue, comme une mine : un carré de 3 × 3 et 5 cases autour, au hasard. ${V.charge.degats} dégâts, ${NOM_FOREUSE} comprise si elle est dedans, et roche brisée, même la roche dure. Très bruyante.`;
-  v('puissance').eff=`POW +${V.puissance.pow}, pour toujours`;
+  v('puissance').eff=`POW +${V.puissance.pow} et vie max +${REGLES.MODULE_VIE_MAX}, pour toujours`;
   v('berserk').eff=`CRIT +${V.berserk.crit} pendant ${V.berserk.duree} battements`;
   v('camo').eff=`Invisible ${V.camo.duree} battements`;
   v('balise').eff=`Appelle les ennemis à ${V.balise.rayon} cases`;v('court').eff=`Énergie à zéro, ou ennemi hors service ${V.court.etourdi} battements`;
   v('phaseur').eff='Téléportation sur le terrain connu';
+  v('fuel').eff=`Fuel +${V.fuel.fuel}`;
+    v('fuel').d=`Une cellule scellée de carburant raffiné : rend ${V.fuel.fuel} de fuel à ${NOM_FOREUSE}. Lancée ailleurs, elle se vide sur le sol.`;
+  v('puissance').d=`Un étage d’alimentation de plus : POW +${V.puissance.pow} et vie maximale +${REGLES.MODULE_VIE_MAX}, définitivement. Les coups portent plus fort et un équipement plus lourd devient utilisable.`;
   ITEMS.matiere.eff=`Matière {µ} +${V.matiere.mat}`;}
 // plans de fabrication : un objet « plan_<clé> » par objet fabricable ; jamais dans le sac, il s'apprend en le ramassant
 const ART_PLAN={art:["  ┌─────────┐  ", "  │ ┌──┐ ── │  ", "  │ │  │ ── │  ", "  │ └──┘ ── │  ", "  └─────────┘  "],col:["..wwwwwwwwwww..", "..w.2222.22.w..", "..w.2..2.22.w..", "..w.2222.22.w..", "..wwwwwwwwwww.."]};
@@ -195,12 +206,13 @@ function phaseArrive(m){addFx({kind:'phase',x:G.px,y:G.py,robot:1,dur:PHASE_DUR}
 // objets simples d'abord, les meilleurs plus bas
 // Sonar (28 novembre 2026) : rang = niveau d'apparition + 1 (Sonar 3 dès le niveau 1, 4 au niveau 2, 5 au 4, 6 au 6, 7 au 8)
 const PLAN_RANG=k=>{const d=ITEMS[k];if(d.sonar)return SONAR_RANG[d.sonar];
-  return ['repar','batterie','fumigene','balise'].includes(k)?1:d.conso||d.slot==='acc'?2:3;};
+  return ['repar','batterie','fumigene','balise','fuel'].includes(k)?1:d.conso||d.slot==='acc'?2:3;};
 const nivCarte=()=>nivBorne((typeof G!=='undefined'&&G&&G.niv)||(typeof NIV_GEN==='number'?NIV_GEN:1));
 /* 28 novembre 2026 (étape 5) : plus aucun plan n'est posé ni lâché. Les plans ne viennent que des terminaux (ENCODAGE →
    BLUEPRINT, 14i-blueprints.js). Ce que les plans occupaient revient à la Matière, aux capsules et à l'équipement. */
 let PLANS_POSES={};   // (vestige, remis à zéro par la génération)
-const CONSO_POIDS=[['repar',5],['batterie',4],['fumigene',3],['charge',3],['berserk',2],['camo',2],['balise',2],['court',2],
+// réparobots deux fois et demie plus rares (28 novembre 2026 : 5 → 2) ; cellule de fuel aussi courante que la batterie
+const CONSO_POIDS=[['repar',REGLES.REPARO_POIDS],['fuel',4],['batterie',4],['fumigene',3],['charge',3],['berserk',2],['camo',2],['balise',2],['court',2],
   ['phaseur',2]];
 function consoTire(){let t=CONSO_POIDS.reduce((a,c)=>a+c[1],0),r=Math.random()*t;
   for(const [k,p] of CONSO_POIDS){if((r-=p)<0)return k;}return 'repar';}
@@ -319,7 +331,8 @@ function retire(c){const isB=(G.beasts||[]).includes(c);(isB?G.beasts:G.animals)
 function consoCible(i,x,y){const o=G.inv[i];if(!o)return;const k=o.k,d=ITEMS[k],V=ITEM_VAL[k]||{},st=G.st,nom=d.vrai.n,connu=identifie(k);
   const moi=x===G.px&&y===G.py,b=beastAt(x,y),an=b?null:animalAt(x,y),c=b||an,sp=b?BEASTS[b.sp]:an?SPECIES[an.sp]:null;
   // objet connu, inutile sur la foreuse : refusé, rien n'est dépensé
-  if(connu&&moi&&((k==='repar'&&st.vie>=st.vieMax)||(k==='batterie'&&st.energie>=st.energieMax))){say(k==='repar'?'Vie déjà au maximum : réparobots inutiles.':'Énergie déjà au maximum : batterie inutile.','warn');
+  if(connu&&moi&&((k==='repar'&&st.vie>=st.vieMax)||(k==='batterie'&&st.energie>=st.energieMax)||(k==='fuel'&&st.fuel>=st.fuelMax))){
+    say(k==='repar'?'Vie déjà au maximum : réparobots inutiles.':k==='fuel'?'Fuel déjà au maximum : cellule inutile.':'Énergie déjà au maximum : batterie inutile.','warn');
     SFX.blocked();render();return;}
   VISEE=null;
   // Phaseur sur la foreuse : la capsule part tout de suite, la foreuse se démonte, et le grand viseur s'ouvre pour choisir
@@ -340,8 +353,13 @@ addFx({kind:'ener',x,y,dur:1000,gr:fxGrains(12)});}
       else{c.stun=V.etourdi;ouvrAttaque(c);if(b){b.hunt=1;spot(b);}else{an.aware=1;spot(an);
         }txt=`${leNom(sp)} est électrisé : −${V.choc} PV, étourdi ${V.etourdi} battements`;}engage();}
     else{txt='la décharge se perd dans le sol';ton='warn';}}
+  else if(k==='fuel'){if(moi){fuelInit(st);const g=fuelPose(st,st.fuel+V.fuel);txt=`FUEL +${g}. RÉSERVE : ${Math.floor(st.fuel)}/${st.fuelMax}`;
+    num('+'+g,PAL['3']);addFx({kind:'fuel',x,y,dur:1000,gr:fxGrains(10)});}
+    else{txt='la cellule se vide sur le sol, sans effet';ton='warn';}}
   else if(k==='fumigene'){fumPose(x,y);txt=fumDedans()?'le nuage se répand, les ennemis perdent votre trace':'le nuage se répand là-bas';}
-  else if(k==='puissance'){if(moi){st.power=(st.power||0)+V.pow;txt=`POW +${V.pow} (POW ${st.power})`;
+  else if(k==='puissance'){if(moi){st.power=(st.power||0)+V.pow;
+    // +10 de vie maximale par module (28 novembre 2026), et la vie courante monte d'autant
+    st.vieMax+=REGLES.MODULE_VIE_MAX;st.vie+=REGLES.MODULE_VIE_MAX;txt=`POW +${V.pow} (POW ${st.power}), vie max +${REGLES.MODULE_VIE_MAX}`;
     addFx({kind:'boost',x,y,dur:900,gr:fxGrains(14)});}
     else if(b){b.pow=(b.pow||0)+1;txt=`${leNom(sp)} gagne en puissance : ses coups portent plus fort`;ton='warn';num('POW+',PAL['3']);
       addFx({kind:'boost',x,y,dur:900,gr:fxGrains(14)});}

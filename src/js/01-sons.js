@@ -120,6 +120,10 @@ const SFX={
   /* Consommables, suite (26 novembre 2026) : chaque objet a maintenant son bruit, aucun n'est partagé avec un autre.
      Avant, le module de puissance empruntait celui de l'analyse, le surrégime celui des coups critiques, le camouflage
      celui du fumigène et le court-circuit celui des lasers : on ne les distinguait pas à l'oreille. */
+  // Cellule de fuel (28 novembre 2026) : le bouchon qui saute, le liquide qui glougloute en trois gorgées, la pompe qui se tait
+  fuel(){tone(900,.04,'square',.05,400);noiz(.05,.1,4200,'highpass',.02);
+    [0,1,2].forEach(i=>{tone(210-i*25,.11,'sine',.07,120-i*12,.1+i*.14);noiz(.09,.05,700,'lowpass',.12+i*.14,300);});
+    tone(70,.35,'triangle',.05,55,.55);},
   // Module de puissance : trois paliers qui montent et se verrouillent, puis une basse qui s'installe
   boost(){[392,523,659].forEach((f,i)=>tone(f,.12,'square',.05,null,i*.1));
     tone(1046,.3,'triangle',.05,1318,.3);tone(98,.5,'sawtooth',.05,65,.3);},

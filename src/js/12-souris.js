@@ -40,12 +40,15 @@ function goTo(x,y){if(busy())return;const d=Math.max(Math.abs(x-G.px),Math.abs(y
   if(d===1){tryMove(x-G.px,y-G.py);return;}
   const p=findPath(x,y)||findPath(x,y,true);if(!p){say('Destination inaccessible.');SFX.blocked();render();return;}
   const seen=new Set();for(const e of [...(G.beasts||[]),...(G.animals||[])])if(vis[idx(e.x,e.y)])seen.add(e);
-  TRAV={path:p,i:0,tx:x,ty:y,explore:p.some(([a,b])=>fog&&!G.seen[idx(a,b)]),seen,vie:G.st.vie,sites:G.sites.filter(s=>s.seen).length,
+  TRAV={path:p,i:0,tx:x,ty:y,explore:p.some(([a,b])=>fog&&!G.seen[idx(a,b)]),seen,vie:G.st.vie,sec:G.st.secN||0,sites:G.sites.filter(s=>s.seen).length,
     tm:0};travelStep();}
 function stopTravel(m){if(!TRAV)return;clearTimeout(TRAV.tm);TRAV=null;if(m)sayMore(m,'warn');render();}
+/* La vie remonte seule depuis le 28 novembre 2026 : « attaquée » se juge par rapport à la vie du pas précédent (T.vie suit),
+   et la perte d'un point à sec (G.st.secN, 08-faune) n'est pas une attaque. */
+function attaquee(T){const s=G.st.secN||0,v=G.st.vie,r=v<T.vie-(T.sec==null?0:s-T.sec);T.vie=v;T.sec=s;return r;}
 // Un pas par tour ; le trajet s'arrête au moindre imprévu
 function travelEvent(T){
-  if(G.st.vie<T.vie)return 'Trajet interrompu : '+NOM_FOREUSE+' est attaquée.';
+  if(attaquee(T))return 'Trajet interrompu : '+NOM_FOREUSE+' est attaquée.';
   for(const b of G.beasts||[])if(vis[idx(b.x,b.y)]&&!T.seen.has(b)&&!aOuvrage(b))return `Trajet interrompu : ${BEASTS[b.sp].n.toLowerCase()} en vue.`;
   for(const a of G.animals||[])if(vis[idx(a.x,a.y)]&&!T.seen.has(a)&&!aOuvrage(a))return `Trajet interrompu : ${SPECIES[a.sp].n.toLowerCase()} en vue.`;
   if(G.sites.filter(s=>s.seen).length>T.sites)return 'Trajet interrompu : site de forage repéré.';
@@ -70,7 +73,7 @@ function travelStep(){const T=TRAV;if(!T)return;if(busy()){stopTravel();return;}
   T.tm=setTimeout(travelStep,reduced?30:90);}
 /* ---------- Exploration automatique (touche O, bouton EXPLORER) ----------
    La foreuse va d'elle-même à la case connue la plus proche d'où l'on découvre du terrain, en ramassant au passage ce qui est en vue
-   (objets, Matière, et les éclats de réparation seulement si la vie n'est pas pleine : sinon elle les contourne pour ne pas les gâcher).
+   (objets, Matière, et les éclats de métal seulement si le fuel n'est pas plein : sinon elle les contourne pour ne pas les gâcher).
    Elle ne fore jamais et n'entre dans l'eau profonde que s'il ne reste rien d'autre. Elle s'arrête au moindre événement (exploreEvent),
    à la moindre touche ou au moindre clic. Quand tout est exploré, elle rejoint le site de forage s'il est connu. */
 let EXPL=null;
@@ -78,11 +81,12 @@ let EXPL=null;
 const EXPL_VUS=new WeakSet();
 // vitrines déjà signalées : chacune n'arrête l'exploration qu'une fois (26 novembre 2026)
 const EXPL_VIT=new WeakSet();
-function exploreScan(E,deep){const N=W*H,prev=new Int32Array(N).fill(-2),q=[idx(G.px,G.py)];prev[q[0]]=-1;const plein=G.st.vie>=G.st.vieMax;
+// éclats de métal : l'exploration les ramasse quand le fuel n'est pas plein (28 novembre 2026 ; avant, quand la vie ne l'était pas)
+function exploreScan(E,deep){const N=W*H,prev=new Int32Array(N).fill(-2),q=[idx(G.px,G.py)];prev[q[0]]=-1;const plein=!(G.st.fuel<G.st.fuelMax);
   const butin=j=>{if(G.cles&&G.cles[j])return 'une clé';
     if(G.items&&G.items[j]&&G.items[j].length&&!(G.pieges||[]).some(p=>p.on&&p.c===j)&&!(G.vit&&G.vit[j]))return 'un objet';
     /* l'exploration automatique ne touche ni à l'appât d'une salle piégée ni aux vitrines : c'est au joueur de choisir */const o=G.ore&&G.ore[j];
-    if(o&&oreSol(o)&&(oreMat(o)||!plein))return oreMat(o)?'de la Matière {µ}':'des éclats de métal';
+    if(o&&oreSol(o)&&(oreMat(o)||!plein))return oreMat(o)?'de la Matière {µ}':'des éclats de métal (fuel)';
     return null;};
   for(let k=0;k<q.length;k++){const c=q[k],x=c%W,y=(c/W)|0;
     if(k>0){if(butin(c))return {c,prev};
@@ -97,7 +101,7 @@ function exploreScan(E,deep){const N=W*H,prev=new Int32Array(N).fill(-2),q=[idx(
       prev[j]=c;q.push(j);}}
   return null;}
 function exploreEvent(E){
-  if(G.st.vie<E.vie)return ''+NOM_FOREUSE+' est attaquée';
+  if(attaquee(E))return ''+NOM_FOREUSE+' est attaquée';
   let nv=null;for(const e of [...(G.beasts||[]),...(G.animals||[])])if(vis[idx(e.x,e.y)]&&!EXPL_VUS.has(e)&&!aOuvrage(e)){EXPL_VUS.add(e);nv=nv||e;}
   if(nv)return `${(G.beasts.includes(nv)?BEASTS:SPECIES)[nv.sp].n.toLowerCase()} en vue`;
   if((G.beasts||[]).some(b=>b.hunt>0&&vis[idx(b.x,b.y)]))return 'un ennemi vous chasse';
@@ -117,7 +121,7 @@ function startExplore(){
     SFX.blocked();render();return;}
   for(const e of [...(G.beasts||[]),...(G.animals||[])])if(vis[idx(e.x,e.y)])EXPL_VUS.add(e);
   for(const g of G.choix||[])if(g.c.some(i=>vis[i]))EXPL_VIT.add(g);   // vitrines déjà en vue : elles n'arrêtent pas aussitôt
-  EXPL={vie:G.st.vie,sites:G.sites.filter(s=>s.seen).length,vu:new Set(),n:0,tm:0};$('explBtn').classList.add('on');
+  EXPL={vie:G.st.vie,sec:G.st.secN||0,sites:G.sites.filter(s=>s.seen).length,vu:new Set(),n:0,tm:0};$('explBtn').classList.add('on');
   say('Exploration automatique.','info');exploreStep();}
 function exploreStep(){const E=EXPL;if(!E)return;if(busy()){stopExplore();return;}
   E.vu.add(idx(G.px,G.py));
@@ -133,24 +137,31 @@ function exploreStep(){const E=EXPL;if(!E)return;if(busy()){stopExplore();return
   if(busy()){stopExplore();return;}
   const why=exploreEvent(E);if(why){stopExplore(why==='alerte'?'Exploration interrompue.':`Exploration interrompue : ${why}.`);return;}
   E.tm=setTimeout(exploreStep,reduced?20:70);}
-/* ---------- Repos (touche P) : attendre jusqu'à l'énergie pleine ----------
-   Chaque battement est une attente normale (recharge doublée, portée de discrétion ÷ 2). Le repos
-   s'arrête dès que l'énergie est pleine, qu'une créature entre dans le champ de vision, qu'un ennemi
-   visible vous repère, que la foreuse est touchée, ou au moindre geste du joueur. */
+/* ---------- Repos (touche P) : attendre pour se réparer (28 novembre 2026 ; avant : jusqu'à l'énergie pleine) ----------
+   Chaque battement est une attente normale (recharge doublée, portée de discrétion ÷ 2, vie +1 tous les VIE_REPOS_BAT
+   battements tant qu'il reste du fuel). Le repos s'arrête quand la vie et l'énergie sont pleines, quand le fuel passe sous
+   l'alerte (ou tombe à sec), qu'une créature entre dans le champ de vision, qu'un ennemi vous repère ou vous chasse, que la
+   foreuse est touchée, ou au moindre geste du joueur. Attendre à la main soigne de même, chasseur ou pas. */
 let REST=null;
-const REST_MAX=400;                                   // garde-fou : jamais plus de 400 battements d'affilée
+const REST_MAX=REGLES.REPOS_MAX;                      // garde-fou : jamais plus de 600 battements d'affilée (un plein de vie : 400)
+const restPlein=()=>G.st.vie>=G.st.vieMax&&G.st.energie>=G.st.energieMax;
 const visibles=()=>{const s=new Set();for(const e of [...(G.beasts||[]),...(G.animals||[])])if(vis[idx(e.x,e.y)])s.add(e);return s;};
 function restEvent(T){
-  if(G.st.vie<T.vie)return ''+NOM_FOREUSE+' est attaquée';
+  if(attaquee(T))return ''+NOM_FOREUSE+' est attaquée';
   for(const b of G.beasts||[])if(vis[idx(b.x,b.y)]&&!T.seen.has(b)&&!aOuvrage(b))return `${BEASTS[b.sp].n.toLowerCase()} en vue`;
   for(const a of G.animals||[])if(vis[idx(a.x,a.y)]&&!T.seen.has(a)&&!aOuvrage(a))return `${SPECIES[a.sp].n.toLowerCase()} en vue`;
   for(const b of G.beasts||[])if(b.hunt>0&&vis[idx(b.x,b.y)])return `${BEASTS[b.sp].n.toLowerCase()} vous a repéré`;
   for(const a of G.animals||[])if(a.aware&&vis[idx(a.x,a.y)])return `${SPECIES[a.sp].n.toLowerCase()} vous a repéré`;
+  // un ennemi qui chasse la foreuse, même hors de vue (28 novembre 2026)
+  for(const b of G.beasts||[])if(b.hunt>0&&b.sees&&!aOuvrage(b))return `${BEASTS[b.sp].n.toLowerCase()} vous chasse`;
+  if(G.st.fuel<=0)return 'fuel à sec, plus de réparation';
+  if(fuelAlerte(G.st)&&!T.bas)return 'fuel sous le seuil d’alerte';
   return null;}
 function startRest(){
   if(busy()||TRAV||EXPL)return;
-  if(G.st.energie>=G.st.energieMax){say('Énergie déjà au maximum : repos inutile.');SFX.blocked();render();return;}
-  const T={seen:visibles(),vie:G.st.vie,n:0,tm:0},why=restEvent(T);
+  if(restPlein()){say('Vie et énergie déjà au maximum : repos inutile.');SFX.blocked();render();return;}
+  // déjà sous l'alerte : le repos est permis, il s'arrête à sec
+  const T={seen:visibles(),vie:G.st.vie,sec:G.st.secN||0,n:0,tm:0,bas:fuelAlerte(G.st)},why=restEvent(T);
   if(why){say(`Repos impossible : ${why}.`,'warn');SFX.blocked();render();return;}
   REST=T;say(''+NOM_FOREUSE+' se met au repos.');restStep();}
 function stopRest(m,c){if(!REST)return;clearTimeout(REST.tm);REST=null;if(m)sayMore(m,c||'warn');render();}
@@ -161,7 +172,7 @@ function restStep(){const T=REST;if(!T)return;if(busy()){stopRest();return;}
   T.n++;
   const why=restEvent(T);
   if(why){stopRest(`Repos interrompu (${T.n} tour${T.n>1?'s':''}) : ${why}.`);return;}
-  if(G.st.energie>=G.st.energieMax){stopRest(`Repos terminé : énergie au maximum, en ${T.n} tour${T.n>1?'s':''}.`,'good');SFX.spot();return;}
+  if(restPlein()){stopRest(`Repos terminé : vie et énergie au maximum, en ${T.n} tour${T.n>1?'s':''}.`,'good');SFX.spot();return;}
   if(T.n>=REST_MAX){stopRest('Repos interrompu : trop long.');return;}
   T.tm=setTimeout(restStep,reduced?0:45);}
 
@@ -250,7 +261,7 @@ function inspectHTML(c){const {x,y}=c||HOV;if(x<0||y<0||x>=W||y>=H)return '';con
   const i=idx(x,y),seen=!fog||G.seen[i],see=!fog||vis[i],d=Math.max(Math.abs(x-G.px),Math.abs(y-G.py)),dt=d?`${d} case${d>1?'s':''}`:'ici';
   const head=(ic,n,ex)=>`<div class="ih">${ic?`<img src="${ic}" alt="">`:''}<b>${n}</b><span>${ex||''}</span></div>`;
   if(!seen&&G.ore&&G.ore[i]&&sonarVu(i,sonarR())){const o=G.ore[i];
-    return `<div class="insp">${head('','Gisement détecté',dt)}<p>Écho sonar : <b>${oreMat(o)?'Matière {µ}':'éclats de métal'}</b>, ${oreSol(o)?'au sol':'pris dans la roche'}.</p></div>`;}
+    return `<div class="insp">${head('','Gisement détecté',dt)}<p>Écho sonar : <b>${oreMat(o)?'Matière {µ}':'éclats de métal (fuel)'}</b>, ${oreSol(o)?'au sol':'pris dans la roche'}.</p></div>`;}
   if(!seen)return `<div class="insp">${head('','Zone inexplorée',dt)}<p>Aucune donnée. Secteur jamais balayé par les capteurs.</p></div>`;
   const out=[],t=G.t[i];let [tn,td]=TDESC[t]||['Terrain',''];const border=x===0||y===0||x===W-1||y===H-1;
   // Une niche de salle piégée repérée se nomme par ce qu'elle cache ; cachée, c'est un mur ordinaire.
@@ -280,8 +291,9 @@ function inspectHTML(c){const {x,y}=c||HOV;if(x<0||y<0||x>=W||y>=H)return '';con
   if(s)out.push(`<p><b>Site de forage</b> · ${s.known?'couche profonde confirmée. Descente possible.':'signature probable. Analyse sur place requise.'}</p>`);
   const om=G.ore&&G.ore[i];
   if(om&&oreMat(om))out.push(oreSol(om)?'<p><b>Matière {µ}</b> · au sol. Récupérable au passage.</p>':'<p><b>Matière {µ}</b> · prise dans la paroi. Forer pour la libérer.</p>');
-  else if(om&&oreSol(om))out.push(`<p><b>Éclats de métal ${ORE_NOM[oreLv(om)]}</b> · au sol. Métal assimilable, récupérable au passage.</p>`);
-  else if(om)out.push(`<p><b>Éclats de métal ${ORE_NOM[oreLv(om)]}</b> · pris dans la paroi. Forer pour les libérer.</p>`);
+  // éclats de métal : du fuel depuis le 28 novembre 2026
+  else if(om&&oreSol(om))out.push(`<p><b>Éclats de métal ${ORE_NOM[oreLv(om)]}</b> · au sol. Fuel +${REGLES.FUEL_ECLATS[oreLv(om)]}, récupérable au passage.</p>`);
+  else if(om)out.push(`<p><b>Éclats de métal ${ORE_NOM[oreLv(om)]}</b> · pris dans la paroi : fuel +${REGLES.FUEL_ECLATS[oreLv(om)]}. Forer pour les libérer.</p>`);
   if(G.cles&&G.cles[i])out.push('<p><b>Clé</b> · codée pour une serrure du secteur.</p>');
   const sol=G.items&&G.items[i];
   if(sol&&sol.length)out.push(`<p><b>${sol.length>1?'Objets au sol':'Objet au sol'}</b> · ${sol.map(k=>ITEMS[k].n).join(', ')}. Récupérable au passage.</p>`);

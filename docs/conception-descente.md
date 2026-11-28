@@ -8,9 +8,10 @@ Partie du document de conception (sommaire et règles à ne pas casser : `concep
   pièce la plus profonde** du complexe, la plus éloignée des entrées : traverser le bâtiment est l'objectif.
 - **Forer** : touche F sur le site (ou clic sur la foreuse posée dessus). Aux niveaux intermédiaires la descente en ASCII part tout de suite (`conception-descente.md`) ; seul le dernier forage (le noyau), et le mode « moins d'animations », passent par la barre « Forage en cours » d'une seconde, puis l'écran **« NOYAU ATTEINT »** (bilan en tours, cases parcourues, Matière) et **Nouvelle exploration**.
 - **Éclats de métal** : **10 % des cases de montagne** (hors rangée extérieure ; réglage `ORE_PCT`) en contiennent.
-  Briser la paroi les fait **tomber au sol** ; passer dessus les ramasse et regagne **autant de vie que d'énergie**
-  selon la densité — **petits +10** (50 %), **moyens +15** (30 %), **gros +20** (20 %), sans dépasser les maximums.
-  Deux chiffres flottants, et les deux effets visuels (croix rouges et flèches bio) partent ensemble.
+  Briser la paroi les fait **tomber au sol** ; passer dessus les ramasse et donne **du fuel** (depuis le 28 novembre 2026 ;
+  avant, de la vie et de l'énergie) selon la densité — **petits +15** (50 %), **moyens +20** (30 %), **gros +25** (20 %),
+  sans dépasser le maximum. Un chiffre flottant couleur monde. **4 gisements de métal par carte** (`REGLES.FUEL_GISEMENTS`).
+  Chaque descente rend aussi **+30 de fuel** (voir `conception-joueur.md`).
 - **Destruction d'un ennemi** : une **gerbe d'étincelles** (35 à 50) qui filent droit, très vite, avec une courte
   traîne, éteintes en un quart de seconde, et **14 à 22 débris de carcasse** projetés en l'air qui retombent,
   **rebondissent une ou deux fois**, puis **restent au sol** (sauf dans l'eau, un gouffre ou un obstacle). **Une

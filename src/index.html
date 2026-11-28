@@ -191,9 +191,11 @@
       <div class="rows">
         <div class="bar2"><span>Vie</span><span class="abar life" role="meter" aria-label="Vie" id="lifeT"></span><span class="bnum" id="lifeN"></span></div>
         <div class="bar2"><span>Énergie</span><span class="abar energy" role="meter" aria-label="Énergie" id="enT"></span><span class="bnum" id="enN"></span></div>
+        <!-- Fuel (28 novembre 2026) : baisse en permanence ; alerte sous 25 %, « À SEC » à zéro -->
+        <div class="bar2" id="fuRow"><span>Fuel</span><span class="abar fuel" role="meter" aria-label="Fuel" id="fuT"></span><span class="bnum" id="fuN"></span></div>
         <div class="bar2"><span>Matière {µ}</span><span></span><span class="bnum mat" id="matN" title="Réserve de Matière {µ} : servira à construire de l’équipement">0</span></div>
         <div class="btnrow"><button id="sprintBtn" class="pace" aria-pressed="false" title="Courir ou marcher (R) : la course double la vitesse et coûte 5 d’énergie par pas">MARCHE</button><button id="invBtn" class="pace" aria-haspopup="dialog" title="Ouvrir l’équipement (T) : armes, armures, accessoires">ÉQUIPEMENT</button></div>
-        <div class="btnrow"><button id="explBtn" class="pace" title="Exploration automatique (O) : F467 explore seule et s’arrête au moindre événement">EXPLORER</button><button id="restBtn" class="pace" title="Repos (P) : attendre jusqu’à l’énergie pleine">REPOS</button></div>
+        <div class="btnrow"><button id="explBtn" class="pace" title="Exploration automatique (O) : F467 explore seule et s’arrête au moindre événement">EXPLORER</button><button id="restBtn" class="pace" title="Repos (P) : attendre sur place pour réparer la coque (vie +1 tous les 4 battements tant qu’il reste du fuel) et recharger l’énergie ; s’arrête si un ennemi chasse ou si le fuel baisse sous 25 %">REPOS</button></div>
         <div class="btnrow"><button id="jdbBtn" class="pace" aria-haspopup="dialog" title="Journal de bord (J) : robots, objets, journaux, documents, hacks, tutoriel">JOURNAL</button></div>
         <div class="stip" id="stip" role="tooltip" hidden></div>
         <div class="effs" id="effs" role="status" aria-label="Effets en cours"></div>
@@ -225,7 +227,7 @@
         <button data-d="-1,0" aria-label="Gauche">←</button><button id="waitPad" aria-label="Attendre un tour" title="Attendre un tour">·</button><button data-d="1,0" aria-label="Droite">→</button>
         <button data-d="-1,1" aria-label="Bas gauche">↙</button><button data-d="0,1" aria-label="Bas">↓</button><button data-d="1,1" aria-label="Bas droite">↘</button>
       </div>
-      <button id="restPad" class="pace" title="Repos (P) : attendre jusqu’à l’énergie pleine">REPOS</button>
+      <button id="restPad" class="pace" title="Repos (P) : attendre sur place pour réparer la coque (vie +1 tous les 4 battements tant qu’il reste du fuel) et recharger l’énergie ; s’arrête si un ennemi chasse ou si le fuel baisse sous 25 %">REPOS</button>
     </div>
     <div class="seenwrap"><div class="seen" id="msg" role="region" aria-label="En vue"></div></div>
     <div class="btnrow"><button class="go" id="restart" title="Relancer une carte avec les réglages en cours du menu Monde">REGEN</button><button id="mondeBtn" aria-haspopup="dialog" title="Relief, taille et archétypes de monde">MONDE</button><button id="lifeBtn" aria-haspopup="dialog" title="Faune : budget de menace et groupes d’ennemis">LIFE</button></div>

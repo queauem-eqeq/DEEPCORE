@@ -1,3 +1,25 @@
+/* Règles de survie (28 novembre 2026, chantier « Survie », bloc B : valeurs arbitrées par l'utilisateur). Une constante par règle.
+   Fuel : jauge qui baisse en permanence ; à sec, la coque se dégrade et rien ne la répare plus. Vie : remonte seule, lentement en
+   marche, vite au repos (à l'arrêt, en passant un tour). Lus par 08-faune (survieTick), 07 (gisements, descente), 09 (éclats,
+   forage), 12 (repos), 14d (cellule de fuel, Module de puissance), 14g (SYMBIOSE), 11 (jauge). */
+const REGLES={
+  FUEL_MAX:100,            // jauge de fuel : maximum, et plein au départ
+  FUEL_BAISSE_BAT:12,      // −1 de fuel tous les 12 battements, en permanence
+  SEC_PERTE_BAT:5,         // à sec : −1 de vie tous les 5 battements
+  FUEL_ALERTE:.25,         // alerte (jauge, journal, fin du repos) sous 25 % du maximum
+  FUEL_ECLATS:[0,15,20,25],// éclats de métal ramassés : fuel selon la densité (petits, moyens, gros)
+  FUEL_GISEMENTS:4,        // gisements d'éclats de métal par carte, quelle que soit sa taille
+  FUEL_CELLULE:30,         // cellule de fuel (consommable)
+  FUEL_DESCENTE:30,        // chaque descente rend du fuel
+  VIE_MARCHE_BAT:20,       // +1 de vie tous les 20 battements en marche (même en combat)
+  VIE_REPOS_BAT:4,         // +1 de vie tous les 4 battements au repos (à l'arrêt, un tour passé)
+  REPOS_MAX:600,           // bouton REPOS : garde-fou, battements d'affilée au plus
+  REPARO_POIDS:2,          // réparobots dans le butin (poids parmi les capsules ; 5 jusqu'au 28 novembre 2026)
+  FORAGE_ENERGIE:5,        // énergie d'un coup de foreuse sur la roche (10 jusqu'au 28 novembre 2026)
+  COURSE_ENERGIE:5,        // énergie d'un pas de course
+  MODULE_VIE_MAX:10,       // Module de puissance : vie maximale en plus (la vie courante monte d'autant)
+  SYMB_VIE:2,              // hack SYMBIOSE : récupération de vie multipliée
+  SYMB_FUEL:1.5};          // hack SYMBIOSE : baisse du fuel multipliée
 /* Numéro d'unité (28 novembre 2026, histoire : chaque partie est l'unité suivante). F467 à la première partie, puis +1 à chaque
    destruction de la foreuse (pas à une partie recommencée). Gardé dans np-unite (et dans la base de l'artefact, avec le journal de
    bord : 14l-histoire.js). NOM_FOREUSE est VIVANT : il change au début d'une partie (uniteApplique, 14l) ; les textes construits au

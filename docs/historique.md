@@ -382,3 +382,19 @@ Ce qui a été remplacé, et pourquoi (demandes de l'utilisateur, « chaque mach
   chaque règle du chantier survie (fuel, repos, tir). Aucune règle changée. Référence : `mesures.md`, « Référence avant le chantier survie ».
 - Trouvé en passant, **non corrigé** (bloc sans changement de jeu) : `fxGrains` n'est défini nulle part dans `src/` ; ramasser des
   éclats blessé, utiliser des réparobots ou une station lève une erreur après le soin (la fin du geste est sautée). Le pilote la contourne.
+
+## 28 novembre 2026 — chantier survie, bloc B : fuel, vie qui remonte, repos qui soigne
+- **Règle levée : « pas de réparation automatique »** (en vigueur depuis le début). La vie remonte seule (+1 / 20 battements en
+  marche, +1 / 4 au repos), contre un **fuel** qui baisse en permanence (1 / 12 battements ; à sec, −1 vie / 5 battements et plus
+  aucun soin). Valeurs arbitrées par l'utilisateur, regroupées dans `REGLES` (`00-base.js`).
+- Les **éclats de métal** donnent du fuel (+15 / +20 / +25) au lieu de la vie et de l'énergie (règle du 16 novembre) ; 4 gisements
+  de métal par carte au lieu de 3 par taille 2 en proportion de la surface (7 sur les cartes de jeu). Nouvelle **cellule de fuel**
+  (+30). Chaque descente rend +30.
+- **Réparobots** deux fois et demie plus rares dans le butin (poids 5 → 2). **Forage** : 5 d'énergie par coup (10 avant).
+  **Module de puissance** : +10 de vie max en plus du POW. **SYMBIOSE** revient à sa définition d'origine (vie × 2, fuel × 1,5) ;
+  le bricolage « +1 vie / 4 battements contre 25 % d'énergie » (27-28 novembre) est retiré.
+- **Bouton REPOS** : servait à refaire l'énergie ; sert maintenant à se réparer (s'arrête vie et énergie pleines, au chasseur, sous
+  25 % de fuel). Trajet, exploration et repos jugent « attaquée » par rapport au battement d'avant (la vie remonte).
+- **Bug corrigé : `fxGrains`** (grains des effets de consommables), perdue avec la PR #58 (commit `753b007`) : éclats ramassés blessé,
+  réparobots et station levaient une `ReferenceError` et la fin du geste sautait. Rétablie dans `10-rendu.js` ; le pilote ne la
+  contourne plus ; `test-survie.js` joue ces gestes jusqu'au bout.

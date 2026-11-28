@@ -643,27 +643,30 @@ const TEXTES_N1 = {
     {
       id: 'tuto_energie', titre: 'ÉNERGIE',
       lignes: [
-        "FORAGE ET COUPS : CONSOMMENT DE L'ÉNERGIE.",
-        "DÉPLACEMENT : SANS COÛT.",
+        "FORAGE : 5 D'ÉNERGIE PAR COUP. COURSE : 5 PAR PAS.",
+        "DÉPLACEMENT ET COUPS AUX MOBILES : SANS COÛT.",
         "ÉNERGIE 0 : FORAGE IMPOSSIBLE.",
-        "RECHARGE : CONTINUE, PLUS RAPIDE À L'ARRÊT."
+        "RECHARGE : CONTINUE, DOUBLÉE À L'ARRÊT."
       ]
     },
     {
       id: 'tuto_fuel', titre: 'FUEL',
       lignes: [
-        "FUEL : RÉSERVE DE L'UNITÉ.",
-        "LA DESCENTE CONSOMME DU FUEL.",
-        "FUEL 0 : DESCENTE IMPOSSIBLE.",
-        "RÉCUPÉRER LE FUEL PRÉSENT SUR LE SITE."
+        "FUEL : RÉSERVE DE L'UNITÉ. MAXIMUM : 100.",
+        "CONSOMMATION : 1 TOUS LES 12 BATTEMENTS. SANS ARRÊT.",
+        "SOURCES : ÉCLATS DE MÉTAL (+15 À +25), CELLULE (+30), DESCENTE (+30).",
+        "ÉCLATS DE MÉTAL : 4 GISEMENTS PAR SECTEUR. FORER LA PAROI.",
+        "FUEL 0 : RÉPARATION SUSPENDUE. COQUE : −1 TOUS LES 5 BATTEMENTS."
       ]
     },
     {
       id: 'tuto_repos', titre: 'REPOS',
       lignes: [
-        "REPOS : ATTENTE RÉPÉTÉE JUSQU'À ÉNERGIE PLEINE.",
-        "INTERROMPU PAR : MOBILE EN VUE, COUP REÇU.",
-        "REFUSÉ SI ÉNERGIE PLEINE."
+        "RÉPARATION AUTOMATIQUE : +1 VIE TOUS LES 20 BATTEMENTS EN MARCHE.",
+        "REPOS : UNITÉ À L'ARRÊT. +1 VIE TOUS LES 4 BATTEMENTS.",
+        "REPOS : ATTENTE RÉPÉTÉE JUSQU'À VIE ET ÉNERGIE PLEINES.",
+        "INTERROMPU PAR : MOBILE EN VUE, POURSUITE, COUP REÇU, FUEL SOUS 25 %.",
+        "FUEL 0 : AUCUNE RÉPARATION."
       ]
     },
     {

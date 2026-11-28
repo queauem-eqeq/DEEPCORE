@@ -69,8 +69,11 @@
   // 5. Noyau
   {neuf();met('hk_sursis');G.st.vie=0;const v=mortForeuse();ok(!v&&G.st.vie===1&&!G.over&&!G.inv.some(o=>o.k==='hk_sursis'),`SURSIS : à 0 de vie, survie à 1 PV, hack effacé`);
     G.st.vie=0;ok(mortForeuse()&&G.over&&G.over.dead,'sans SURSIS : la foreuse est détruite');G.over=null;
-    neuf();met('hk_symbiose');G.st.vie=50;for(let k=0;k<SYMB_VIE*5;k++)regen(false);const c=coutE(10);
-    ok(G.st.vie===55&&c===Math.ceil(10*SYMB_COUT),`SYMBIOSE : +5 vie en ${SYMB_VIE*5} battements, coup à ${c} d’énergie`);
+    // SYMBIOSE (28 novembre 2026, définition d'origine) : récupération de vie × 2, baisse du fuel × 1,5 ; l'énergie n'est plus touchée
+    {const mesure=symb=>{neuf();if(symb)met('hk_symbiose');Object.assign(G.st,{vie:50,vieT:0,fuel:100,fuelT:0});
+       for(let k=0;k<24;k++)regen(false);return [G.st.vie-50,100-G.st.fuel];};
+     const [v0,f0]=mesure(0),[v1,f1]=mesure(1),c=coutE(10);
+     ok(v0===1&&v1===2&&f0===2&&f1===3&&c===10,`SYMBIOSE : en 24 battements de marche, vie +${v0} → +${v1}, fuel −${f0} → −${f1}, coup à ${c} d’énergie`);}
     neuf();G.niv=4;met('hk_heritage');met(hackCle('crit',2));met(hackCle('blindage',4));localStorage.removeItem('np-heritage');
     G.over={dead:true,forage:1};dead();const cle=JSON.parse(localStorage.getItem('np-heritage')||'null');$('overlay').hidden=true;$('overlay').classList.remove('noir');
     ok(cle&&cle.length===2&&cle[0]==='hk_heritage'&&cle[1]===hackCle('blindage',4),`HÉRITAGE à la mort : np-heritage = ${JSON.stringify(cle)}`);
