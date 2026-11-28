@@ -384,7 +384,10 @@ function machines(){G.las=[];G.lz={};G.circ=[];G.soc={};G.piles={};G.mt=0;G.mach
   for(let k=fq('station');k>0;k--)for(const p of mel(pieces)){if(p.mach==='lasers'||p.mach==='croix')continue;
     if(pose(p,STATION,0,true)>=0){inc('station');break;}}
   // le fabricateur : dans une pièce sans laser ; à défaut (petit complexe du niveau 1), n'importe où dans un bâtiment
-  for(let k=fq('fabric',1);k>0;k--){let fait=false;for(const p of mel(pieces)){if(p.mach==='lasers'||p.mach==='croix')continue;
+  // Astroport (28 novembre 2026) : le dépôt de tri a toujours son FABLAB, dès que l'artefact est actif (même si la fenêtre LIFE ne
+  // le permet pas au niveau 1)
+  const nFab=astroRec()&&ARTEFACTS.fabric&&ARTEFACTS.fabric.on?Math.max(1,fq('fabric',1)||0):fq('fabric',1);
+  for(let k=nFab;k>0;k--){let fait=false;for(const p of mel(pieces)){if(p.mach==='lasers'||p.mach==='croix')continue;
     if(pose(p,FABRIC,0,true)>=0){fait=true;break;}}
     if(!fait)for(const S of mel(strs)){for(const p of mel(S.pieces)){if(p.c.length>=6&&pose(p,FABRIC,0,true)>=0){fait=true;
       break;}}if(fait)break;}

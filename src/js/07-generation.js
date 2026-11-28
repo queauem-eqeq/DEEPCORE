@@ -205,8 +205,14 @@ function massif(t,ext,forme){const N=W*H,n1=noise(SZ(9,4)),n2=noise(SZ(3,2)),val
     cut=val[sol[Math.max(0,garde-1)]],z=new Uint8Array(N);
   for(let i=0;i<N;i++)if(val[i]<cut){z[i]=1;t[i]=MOUNT;}
   ZINFO={f,cut,forme};return z;}
+/* Taille de la carte en jeu (28 novembre 2026) : chaque niveau a la sienne (NIVEAUX[n].taille, 00-base). TAILLE_JEU la porte
+   pendant une génération lancée par le jeu (nouvelle partie, REGEN, descente, boutons Niv) ; sinon (GÉNÉRER LA CARTE, outils
+   d'essai, banc) c'est le curseur du menu Monde, GEN.taille. */
+let TAILLE_JEU=0;
+const tailleNiv=n=>(NIVEAUX[nivBorne(n)]||{}).taille||GEN.taille;
+function enJeu(f,niv){TAILLE_JEU=tailleNiv(niv??NIV_RECETTE(GEN.recette));try{return f();}finally{TAILLE_JEU=0;}}
 function genPlanet(){
-  setSize(GEN.taille);vis=new Uint8Array(W*H);
+  setSize(TAILLE_JEU||GEN.taille);vis=new Uint8Array(W*H);
   const N=W*H,rec=RECETTES[GEN.recette]||RECETTES.classique;let Nt=N;
     const P=k=>Math.round(Nt*GEN[k]/100),fill=GEN.remplissage/100,it=GEN.iterations;
   for(let attempt=0;attempt<30;attempt++){
@@ -302,6 +308,7 @@ function niveau(refait){drilling=false;
     if(cv){const e=cvBilan();if(!mieux||e<mieux.e)mieux={e,G,ZONE,ZINFO,SECT,CVT,BD:BATI_DER};if(e<=1.6||k>=5)break;continue;}
     if(G.batis.length||!ZONE||!(ENFOUI()||GEN.structure>0))break;}
   if(mieux&&mieux.G!==G){G=mieux.G;ZONE=mieux.ZONE;ZINFO=mieux.ZINFO;SECT=mieux.SECT;CVT=mieux.CVT;BATI_DER=mieux.BD;}
+  if(astroRec())astroport();   // Astroport (niveau 1) : fosses d'atterrissage et épaves (07h)
   {const o=cv&&typeof document!=='undefined'&&document.getElementById('genObt');if(o)o.textContent=obtenuTxt();}
   // les deux archétypes, un par un, pour la Carte de la colonne
   // « monde · bâti », les deux archétypes, affiché dans le Statut et à l'arrivée
@@ -316,6 +323,7 @@ function niveau(refait){drilling=false;
   const PLANS_POSES_M=PLANS_POSES={};
   machines();
   PLANS_POSES=PLANS_POSES_M;butinExplo();   // butin des pièces secrètes, des culs-de-sac et des coins reculés (22 novembre 2026)
+  if(astroRec())astroportFin();   // butin des épaves, enregistreurs des épaves scellées
   // garde-fou : un site inatteignable, la carte est refaite (trois fois au plus)
   if(G.sites[0]&&accesSite()<0&&(refait||0)<3)return niveau((refait||0)+1);
   spawnGroupes();mdlRemplit();   // butin et ennemis des emplacements de modules (07b)
@@ -329,12 +337,12 @@ function newGame(){palNiveauRaz();SANS_VAISSEAU=false;NIV_GEN=NIV_RECETTE(GEN.re
   // arrivée par un puits
   else say(`Niveau ${G.niv} : ${NOM_FOREUSE} a débouché dans un réseau de cavernes. Un site de forage plus bas est signalé.`,'info');}
 // Nouvelle partie lancée par le joueur : la cinématique d'arrivée se rejoue (21 novembre 2026)
-function nouvellePartie(){newGame();started=true;$('overlay').hidden=true;render();playIntro();}
+function nouvellePartie(){enJeu(newGame);started=true;$('overlay').hidden=true;render();playIntro();}
 /* Foreuse détruite → « Déployer une nouvelle foreuse » (22 novembre 2026) : on repart toujours du niveau 1 (recette
    « atterrissage », avec le vaisseau), quelle que soit la recette affichée dans le menu Monde, et la cinématique d'arrivée
    se rejoue. La foreuse est neuve : rien n'est gardé de la précédente. Le menu Monde du joueur est remis en place après. */
 function deployerForeuse(){const sauve=JSON.parse(JSON.stringify(GEN));recRange();recPrend(RECETTE_NIV(1));
-  GEN.recette='atterrissage';newGame();genRemet(sauve);started=true;$('overlay').hidden=true;render();playIntro();}
+  GEN.recette='atterrissage';enJeu(newGame,1);genRemet(sauve);started=true;$('overlay').hidden=true;render();playIntro();}
 /* Niveau suivant (21 novembre 2026) : pas de vaisseau, on arrive par le puits. Le niveau 2 (et les suivants, tant qu'ils n'ont
    pas leur recette) est généré avec la recette « cavernes » et les réglages que le joueur lui a donnés dans le menu Monde,
    quelle que soit la recette affichée ; la case « Réglages au hasard » les tire d'abord, comme pour REGEN. Le menu Monde du
@@ -364,7 +372,7 @@ function niveauSuivant(hasard){   // hasard : un archétype monde et un archéty
   const sauve=JSON.parse(JSON.stringify(GEN)),inv=G.inv,st=G.st,tour=G.turn,dist=G.dist,niv=(G.niv||1)+1;SAV_GARDE=st.savoir||null;
   // sans hasard : les réglages en cours du menu Monde pour cette recette
   palNiveauSuivant();recRange();recPrend(RECETTE_NIV(niv));if(hasard)hasardReglages();SANS_VAISSEAU=true;NIV_GEN=niv;
-  niveau();   // genPlanet refait l'objet G : tout ce que la foreuse garde est remis en place juste après
+  enJeu(niveau,niv);   // genPlanet refait l'objet G : tout ce que la foreuse garde est remis en place juste après
   SANS_VAISSEAU=false;genRemet(sauve);
   G.inv=inv;G.st=st;G.niv=niv;G.turn=tour;G.dist=dist;G.over=null;drilling=false;SAV_GARDE=null;
   // le délai du sonar (10 à 30 battements) part de l'arrivée : niveau() l'a compté depuis 0, avant qu'on remette le compteur de tours (22

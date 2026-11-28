@@ -267,7 +267,7 @@ function introFrame(now){const I=INTRO;if(!I)return;ensureChasmOv();ensureSolOv(
 for(const b of ['niv1Btn','niv2Btn','niv3Btn'])$(b).addEventListener('click',e=>e.currentTarget.blur());
   /* plus de cadre de focus qui reste autour du bouton après le clic */
 $('niv1Btn').onclick=()=>{unlock();if(TRAV)stopTravel();
-  const sauve=JSON.parse(JSON.stringify(GEN));recRange();recPrend(RECETTE_NIV(1));hasardReglages();newGame();
+  const sauve=JSON.parse(JSON.stringify(GEN));recRange();recPrend(RECETTE_NIV(1));hasardReglages();enJeu(newGame,1);
   genRemet(sauve);started=true;$('overlay').hidden=true;render();playIntro();};
 $('niv2Btn').onclick=()=>{unlock();if(TRAV)stopTravel();$('overlay').hidden=true;started=true;
   descendre(1,true,()=>{G.niv=1;});};
@@ -328,7 +328,7 @@ function start(data){
   palBiome(null);buildTiles();   // partie commencée avant l'inventaire
   delete G.gems;   // le joyau et son menu d'amélioration ont été retirés le 16 novembre 2026
   if(!G.beasts||!G.animals)spawnGroupes();
-  if(G.fv!==2){G.fv=2;G.blood={};spawnGroupes();}started=!!data.started;computeFOV();}else newGame();
+  if(G.fv!==2){G.fv=2;G.blood={};spawnGroupes();}started=!!data.started;computeFOV();}else enJeu(newGame);
   new ResizeObserver(resize).observe($('mapwrap'));resize();
   // pas d'écran d'accueil : la partie commence directement
   if(G.over&&G.over.dead)dead();else if(G.over)end(G.sites.find(s=>s.id===G.over.site));else{started=true;$('overlay').hidden=true;}

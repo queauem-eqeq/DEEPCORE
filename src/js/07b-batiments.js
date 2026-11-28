@@ -52,7 +52,8 @@ function formePiece(st){
    où une autre pièce peut s'y coller : une entrée posée sur une porte du bord, ou dans une brèche du mur, EST le passage ;
    posée sur un sol du bord sans mur de part et d'autre, la porte est créée juste dehors. Une entrée qui ne sert pas est murée. Le premier module tiré remplace la première pièce du complexe ; les suivants se collent
    aux pièces déjà posées par une de leurs entrées. Un module qui ne trouve pas sa place est abandonné : la carte en reçoit moins. */
-const MDL_SOL={V:VITRE,C:CHASM,B:BRIDGE,'.':GROUND,R:ROCK,M:MOUNT,H:HARD,E:LIQ,P:DEEP,G:GRASS,F:FLAT,S:FLOOR,D:DOOR,O:PILLAR};
+const MDL_SOL={V:VITRE,C:CHASM,B:BRIDGE,'.':GROUND,R:ROCK,M:MOUNT,H:HARD,E:LIQ,P:DEEP,G:GRASS,F:FLAT,S:FLOOR,D:DOOR,O:PILLAR,
+  K:SHIP,U:RUBBLE,A:ANTENNA};   // K coque d'épave, U gravats, A antenne (Astroport, 28 novembre 2026)
 // une variante prête à poser : cases possédées [x,y,terrain], murs [x,y], entrées {x,y,dx,dy,porte}, emplacements [x,y,genre]
 function mdlPrepare(v,nom){const own=[],mur=[],ent=[],marq=[],hors=(x,y)=>x<0||y<0||x>=v.w||y>=v.h||v.t[y][x]==='?',
     plein=(x,y)=>hors(x,y)||v.t[y][x]==='X'||v.t[y][x]==='V';
@@ -68,7 +69,9 @@ function mdlPrepare(v,nom){const own=[],mur=[],ent=[],marq=[],hors=(x,y)=>x<0||y
   return {nom,w:v.w,h:v.h,own,mur,ent,marq};}
 // les modules tirés pour une carte de cette recette, sans remise ; seuls comptent ceux qui ont une entrée utilisable
 function mdlTirage(rec){if(typeof MODULES==='undefined'||typeof mdlVariantes!=='function')return [];const n=(MODULES_NB&&MODULES_NB[rec])|0;
-  if(n<=0)return [];const pool=MODULES.filter(o=>o.rec&&o.rec[rec]&&mdlPrepare(o,o.nom).ent.length&&mdlPrepare(o,o.nom).own.length),out=[];
+  if(n<=0)return [];const pool=MODULES.filter(o=>!o.ext&&o.rec&&o.rec[rec]&&mdlPrepare(o,o.nom).ent.length&&mdlPrepare(o,o.nom).own.length),out=[];
+  // Astroport (28 novembre 2026) : au niveau 1, un module du thème (sas, magasin, quai de tri) est toujours du tirage
+  {const th=rec===RECETTE_NIV(1)?pool.filter(o=>/^astro-/.test(o.id)):[];if(th.length)out.push(pool.splice(pool.indexOf(th[rnd(0,th.length-1)]),1)[0]);}
   while(out.length<n&&pool.length)out.push(pool.splice(rnd(0,pool.length-1),1)[0]);
   return out.map(o=>mdlVariantes(o).map(v=>mdlPrepare(v,o.nom)));}
 // Une structure dans le lot [lx0..lx1] × [ly0..ly1] ; écrit dans own (numéro de pièce + 1), porte, pied (emprise : sols et murs).

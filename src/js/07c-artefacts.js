@@ -114,8 +114,9 @@ function antenneUse(i){G.art=G.art||{};const x=i%W,y=(i/W)|0;
   G.turn++;G.msg=null;addFx({kind:'sonar',ant:1,x,y,r:ANT_R+1,dur:reduced?1:ANT_DUR});SFX.sonar(.7);
   say(`L’antenne s’allume : ${n?`${n} cases apparaissent sur la carte`:'la zone alentour est en vue'} pendant ${ANT_TOURS} tours. Ensuite elle signalera encore les ennemis.`,'good');pass(DUR.wait||100);computeFOV();render();}
 // la foreuse avance sur un terminal : il affiche son texte (le temps ne passe pas)
-function terminalUse(i){const [titre,txt]=TERM_TXT[((G.art&&G.art[i])||0)%TERM_TXT.length];
-  if(TRAV)stopTravel();if(EXPL)stopExplore();$('termTitre').textContent=titre;$('termTxt').textContent=txt;$('terminal').hidden=false;
+function terminalUse(i){const a=G.art&&G.art[i],[titre,txt]=a&&typeof a==='object'&&a.boite!=null?epaveBoite(a.boite):TERM_TXT[(a||0)%TERM_TXT.length];
+  if(TRAV)stopTravel();if(EXPL)stopExplore();$('termTitre').textContent=titre;$('termTxt').textContent=txt;
+  $('termTxt').style.whiteSpace=txt.includes('\n')?'pre-line':'';   // enregistreurs d'épave : une ligne par entrée$('terminal').hidden=false;
     $('termClose').focus();SFX.spot();}
 function closeTerminal(){$('terminal').hidden=true;render();}
 $('termClose').onclick=closeTerminal;$('terminal').addEventListener('pointerdown',ev=>{if(ev.target===$('terminal'))closeTerminal();});

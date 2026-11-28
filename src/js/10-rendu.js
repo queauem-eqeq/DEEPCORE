@@ -276,7 +276,8 @@ function caseDecor(x,y,P){
   // le voile de couleur monde (voir voile()) ; rien de bâti ne porte la texture du sol naturel
   if(t!==CHASM){if(!(pb||t>=WALL)&&SOL_OV&&SOL_OV._g===G)P.sub(SOL_OV,x*16,y*16,k);else P.rect(PAL['3'],.08*k);}
   if(pb)P.img(TL.solPont,.5*k);
-  if(t>=WALL)batiTuile(t,x,y,(tl,a)=>P.img(tl,a*k));else
+  const ep=G.epT&&G.epT[i];   // case d'épave de l'Astroport (07h) ; sa trappe peut porter l'enregistreur (terminal)
+  if(t>=WALL&&!(ep&&t===TERMINAL))batiTuile(t,x,y,(tl,a)=>P.img(tl,a*k));else
   if(!pb)P.img(TL.ground0,.6*k);   // sol uniforme : plus de variations près des sites (13 novembre 2026)
   if(t===ROCK)P.img(h%3===0?TL.rock2:h%3===1?TL.rock:TL.rock3,.95*k);   // trois rochers, à parts égales (24 novembre 2026)
   // sous de la roche dure, la crête se pose sur un fond de roche dure
@@ -285,7 +286,8 @@ function caseDecor(x,y,P){
     P.img(TL.mtTop,.9*k);}}
   else if(t===HARD){const up=y>0?G.t[idx(x,y-1)]:t;   // comme la montagne : crête irrégulière en haut, posée sur de la roche tendre
     if(up!==HARD){if(up===MOUNT||up===ROCK)P.img(TL.hardTopBg,.9*k);P.img(TL.hardTop,.9*k);}else P.img(TL.hardBody,.9*k);}
-  else if((t===SHIP||t===DECK)&&G.ship){const sk=TL['ship_'+(x-G.ship.x)+'_'+(y-G.ship.y)];if(sk)P.img(sk,k);}
+  else if((t===SHIP||t===DECK)&&!ep){const sk=G.ship&&TL['ship_'+(x-G.ship.x)+'_'+(y-G.ship.y)];if(sk)P.img(sk,k);
+    else if(t===SHIP)P.img(TL.coque,k);}   // coque posée par un module, hors épave
   if(t===MOUNT&&G.ore&&G.ore[i]&&!oreSol(G.ore[i]))P.img(oreTile(G.ore[i],false),k);
   else if(t===LIQ){P.rect(PAL['e'],.24*k);P.img((liqFrame+(h%2))%2?TL.liq1:TL.liq0,.9*k);}
   else if(t===DEEP){P.rect('#01060c',k);P.rect(PAL['e'],.08*k);P.img((liqFrame+(h%2))%2?TL.deep1:TL.deep0,.4*k);}
@@ -294,6 +296,10 @@ function caseDecor(x,y,P){
   // herbes assombries de moitié le 15 novembre 2026 (elles ressortaient trop) : même teinte, luminosité divisée par deux
   else if(t===GRASS)P.img(TL.grass0,.45*k);
   else if(t===FLAT)P.img(TL.flat0,.38*k);
+  if(ep){const c=epTuile(ep);if(c)P.img(c,k);if(t===TERMINAL)P.img(TL.terminal,k);}
+  // fosse d'atterrissage : marquages au sol, plus serrés sur le pourtour
+  else if(G.fosI&&G.fosI[i]!=null&&(t===GROUND||t===RUBBLE)){const f=G.fosI[i];
+    P.img(DIRS.some(([dx,dy])=>G.fosI[idx(x+dx,y+dy)]!==f)?TL.fosseBord:TL.fosseSol,k);}
   const dm=G.dmg&&G.dmg[i];if(dm&&(t===ROCK||t===MOUNT))P.img(TL.crackH,.95*k);
   if(!v)P.rect(FOND,1-FOG_K);   // le voile du brouillard, une seule fois sur la case finie
 }

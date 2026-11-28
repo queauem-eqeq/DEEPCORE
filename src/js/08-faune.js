@@ -254,6 +254,12 @@ function patInit(g,id,mb){const o=mb[0],P={pat:g.pat,hx:o.x,hy:o.y,k:0,pause:0,a
   if(P.pts&&!P.pts.length)P.pts=[[P.hx,P.hy]];
   if(P.pat==='sentinelle'||P.pat==='affut')P.pause=P.pat==='affut'?9999:rnd(20,60);   // déjà en poste à l'arrivée sur la carte
   G.patr[id]=P;}
+/* Rôle d'un groupe de l'Astroport (28 novembre 2026). P.role, et o.role sur chaque membre ; une ferrailleuse retient son épave
+   (P.epave, o.epave, et l'épave la liste dans groupes) et fait la navette entre elle et le sas du dépôt. L'état « à l'ouvrage »
+   (elles ignorent la foreuse) se branchera sur ces marques. */
+function patRole(g,id,mb,epv){const P=G.patr[id];if(!P)return;P.role=g.role;for(const o of mb)o.role=g.role;
+  if(g.role==='ferraille'&&epv>=0&&G.epaves[epv]){const e=G.epaves[epv];P.epave=epv;e.groupes.push(+id);for(const o of mb)o.epave=epv;
+    const a=[P.hx,P.hy];P.pat='navette';P.pts=G.sas!=null?[a,[G.sas%W,(G.sas/W)|0]]:[a,...patPoints(P,1,8,16)];P.k=0;}}
 // une fois par battement : chaque groupe en patrouille regarde s'il est arrivé, fait sa halte, choisit le point suivant
 function patTick(){PATD={};PAT_BT++;if(!G.patr||G.over)return;const mb={};
   for(const o of [...(G.beasts||[]),...(G.animals||[])])if(o.gi!=null)(mb[o.gi]=mb[o.gi]||[]).push(o);
@@ -409,6 +415,17 @@ function poseGroupe(g,gi,id,cases){{const l=g.pats&&g.pats.length?g.pats:g.pat?[
     for(let n=rnd(Math.min(m.min,m.max),Math.max(m.min,m.max));n>0;n--)mb.push(s);}
   if(!mb.length)return 'vide';   // tous les effectifs tirés valent 0 : rien à poser, ni échec ni dépense
   const lieu=cases&&cases.length?lieuDe(cases[0]):null;
+  /* Astroport (28 novembre 2026) : une ferrailleuse naît au pied d'une épave (loin de l'arrivée, la moins entourée d'abord) et la
+     garde en mémoire ; un garde, au sas du dépôt quand il naît dans les tunnels. Ailleurs, rien ne change. */
+  let epv=-1;
+  if(g.role==='ferraille'&&G.epaves&&G.epaves.length&&lieu==='ext'){
+    const l=G.epaves.map((e,k)=>[e,k]).filter(([e])=>Math.hypot(e.x+e.w/2-G.px,e.y+e.h/2-G.py)>=SZ(20,6)+3);
+    if(l.length){l.sort((a,b)=>a[0].groupes.length-b[0].groupes.length||Math.random()-.5);const [e,k]=l[0],pres=[];epv=k;
+      for(let y=e.y-3;y<e.y+e.h+3;y++)for(let x=e.x-3;x<e.x+e.w+3;x++)if(x>2&&y>2&&x<W-3&&y<H-3&&canWalk(G.t[idx(x,y)],true)&&lieuDe(idx(x,y))==='ext')pres.push(idx(x,y));
+      if(pres.length)cases=pres;else epv=-1;}}
+  else if(g.role==='garde'&&G.sas!=null&&lieu==='tunnel'){const sx=G.sas%W,sy=(G.sas/W)|0,pres=[];
+    for(let y=sy-4;y<=sy+4;y++)for(let x=sx-4;x<=sx+4;x++)if(x>2&&y>2&&x<W-3&&y<H-3&&canWalk(G.t[idx(x,y)],true))pres.push(idx(x,y));
+    if(pres.length)cases=pres;}
   // le groupe naît dans son lieu
   for(let t=0;t<80;t++){let cx=rnd(3,W-4),cy=rnd(3,H-4);if(cases&&cases.length){const c=cases[rnd(0,cases.length-1)];cx=c%W;cy=(c/W)|0;
     if(cx<3||cy<3||cx>W-4||cy>H-4)continue;}
@@ -421,14 +438,14 @@ function poseGroupe(g,gi,id,cases){{const l=g.pats&&g.pats.length?g.pats:g.pat?[
         else{const sp=BEASTS[s],b=newBeast(s,x,y,(sp.pack||g.pat==='voyage')?id:-1,gi);b.gi=id;if(!beastFits(b,x,y))continue;
           G.beasts.push(b);posB.push(b);put=true;}}
       if(!put){ok=false;break;}}
-    if(ok){patInit(g,id,[...posB,...posA]);return true;}
+    if(ok){patInit(g,id,[...posB,...posA]);if(g.role)patRole(g,id,[...posB,...posA],epv);return true;}
     G.animals=G.animals.filter(a=>!posA.includes(a));G.beasts=G.beasts.filter(b=>!posB.includes(b));}
   return false;}
 let NIV_GEN=1;   // niveau de la descente en cours de génération (posé par newGame et niveauSuivant) : la menace monte avec lui
 const lieuDe=i=>{const v=G.t[i];return G.tun&&G.tun[i]?'tunnel':(v===FLOOR||v===DOOR||(v===BRIDGE&&G.pb&&G.pb[i]))?'bati':'ext';};
 function spawnGroupes(){G.animals=[];G.fauna=[];G.pool=[0];G.beasts=[];G.beastSeen={};G.packs={};G.patr={};
   // budget et groupes du niveau de profondeur (fenêtre LIFE)
-  const NV=nivDe(NIV_GEN),total=Math.round(NV.budget*W*H/(96*64));let id=0;const rate={},pose={};
+  const NV=nivDe(NIV_GEN),total=Math.round(NV.budget*W*H/(96*64)*(NIVEAUX[nivBorne(NIV_GEN)].dens||1));let id=0;const rate={},pose={};
   // cases praticables de chaque lieu, et part du budget qui lui revient : la répartition du niveau (fenêtre LIFE), ramenée à 100 sur les
   // lieux présents ; un lieu ne dépasse pas PART_PLAFOND fois sa part de surface, le surplus va aux autres à proportion de leur part
   const cases={ext:[],bati:[],tunnel:[]};for(let i=0;i<W*H;i++)if(canWalk(G.t[i],true))cases[lieuDe(i)].push(i);

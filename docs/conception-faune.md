@@ -20,6 +20,22 @@ et maximal, et porte une **valeur de menace** fixée à la main.
 - Mémorisé dans le navigateur (`np-groupes`) et dans l'enregistrement des réglages.
 - Les effectifs par espèce (`LIFE`, `spawnAnimals`, `spawnBeasts`) ne servent plus qu'au banc de combat et aux mesures.
 
+### Groupes de l'Astroport (niveau 1, 28 novembre 2026)
+
+- **Ferrailleuses** (`role:'ferraille'`) : *Ferrailleuses* (2-3 crabots, valeur 5), *Équipe de découpe* (2 crabots et un
+  soudeur, 7), *Essaim de récupération* (3-4 drones, 4). Dehors. Chacune naît au pied d'une épave (la moins entourée,
+  loin de l'arrivée), la retient (`G.patr[id].epave`, `o.epave` sur chaque membre, `G.epaves[k].groupes`) et fait la
+  navette entre elle et le sas du dépôt.
+- **Gardes** (`role:'garde'`) : *Sentinelles du sas* (2-3 sentinelles, 4 ; tunnels et bâti, nées au sas quand elles
+  naissent dans les tunnels), *Poste de garde du dépôt* (gardien et 1-2 sentinelles, 10 ; bâti). Patrouille garde ou
+  territoire.
+- **Écartés du niveau 1** : groupes à mines, Broyeur, artilleurs, englueur, puces en masse (`GR_ASTRO_HORS`).
+- **Densité** : le budget du niveau 1 est compté sur 55 % de la surface (`NIVEAUX[1].dens`) : sur la carte de taille 4,
+  à peu près autant de créatures qu'avant sur la taille 3, donc deux fois moins serrées.
+- **Réglages enregistrés** : une seule fois (marqueur `astro`), les groupes manquants s'ajoutent à la banque du joueur et à
+  son niveau 1, et les écartés quittent son niveau 1 (pas sa banque, ni les autres niveaux). Même chose pour les modules
+  (par identifiant, niveau 1 relevé à quatre modules). Essai : `outils/scripts/test-astroport.js`.
+
 ### Lieux, densité et valeurs mesurées
 
 - **Trois lieux** (`lieuDe`) : l'**extérieur** (terrain naturel, poches et cavernes comprises), le **bâti** (sol des bâtiments) et les **tunnels**. Le budget de chaque niveau est réparti entre eux (`GROUPES.niv[n].part`, fenêtre LIFE, en % du budget) : niveau 1 : 75 / 20 / 5 ; niveau 2 : 80 / 18 / 2 ; niveau 3 : 35 / 60 / 5 (extérieur / bâti / tunnels), ramenées à 100. Un lieu absent de la carte rend sa part aux autres ; un lieu ne reçoit jamais plus de **trois fois sa part de surface** (`PART_PLAFOND`).

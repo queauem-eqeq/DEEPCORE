@@ -1099,3 +1099,14 @@ Version retenue, **coup 100 au moins** (Broyeur 150, Artilleur 200 gardés) : vo
 
 Essais : 16-26 → seul 56 de vie restante ; **18-30 (retenu) → seul 52-53, 95-96 % de victoires ; avec 2 Crabots 38, 83 %** ;
 18-28 et 75 PV → seul 43-47, 87-92 % ; avec 2 Crabots 32, 72 %.
+
+### L'Astroport, niveau 1 en taille 4 (28 novembre 2026)
+
+- **Peuplement du niveau 1** (12 cartes, ambiances tirées) : avant, taille 3 : 28 créatures (8,2 pour 1 000 cases), 26 avec les
+  groupes du joueur ; après, taille 4 avec `dens` 0,55 : **28 créatures (4,6 pour 1 000 cases)**, 27 avec les groupes du joueur
+  (essai à 0,7 : 37 créatures, écarté). Même nombre, deux fois moins serrées.
+- **Carte** (`test-astroport.js`, 8 cartes) : 22 fosses et 20 épaves en moyenne ; états mêlés (squelettes et fosses vides près
+  de l'entrée : numéro moyen 75 contre 368 loin) ; FABLAB 8/8 ; module du thème au dépôt 8/8.
+- **Temps** (`mesure-perf.js`, même hasard) : génération 197 ms (taille 3, avant) → 246 ms (taille 4, Astroport ; 316 en taille 4
+  avant l'Astroport) ; tour complet 6,3 → 8,3 ms en moyenne (p95 13,5 → 18) ; rendu 1,4 → 1,5 ms ; mémoire 15 → 45 Mo.
+- `outils/simul.py tout` : détection, fuite et combat inchangés (règles de combat non touchées).

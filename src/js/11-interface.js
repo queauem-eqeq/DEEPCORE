@@ -291,7 +291,7 @@ function applySaved(d){
   if(d.artefacts){ARTEFACTS=artefactsSains(d.artefacts);saveArtefacts();}
   if(d.items&&typeof itemsApplique==='function'){itemsApplique(d.items);saveItems();}
   // les anciennes intensités par espèce (d.intensite) ne sont plus lues
-  if(d.groupes){const g=groupesSains(d.groupes);if(g){GROUPES=groupesV2(g);saveGroupes();}}
+  if(d.groupes){const g=groupesSains(d.groupes);if(g){GROUPES=groupesAstroport(groupesV2(g));saveGroupes();}}
   // les archétypes d'avant cette date ont été effacés
   if(d.mondes&&typeof d.mondes==='object'&&Date.parse(d.enregistreLe)>Date.parse('2026-11-21T05:00:00Z')){
     MONDES=Object.assign({},MONDES,d.mondes);saveMondes();}
@@ -366,7 +366,7 @@ $('fd-carte').addEventListener('toggle',()=>{if(G)render();});   // la mini-cart
 ['fd-sac','fd-carte','fd-stats','fd-pal','fd-lab','fd-ctrl'].forEach(id=>{const d=$(id);
   try{const v=localStorage.getItem('np-'+id);d.open=v?v==='open':id==='fd-stats';}catch(e){}
   d.addEventListener('toggle',()=>{try{localStorage.setItem('np-'+id,d.open?'open':'closed');}catch(e){}});});
-$('restart').onclick=e=>{e.preventDefault();e.stopPropagation();unlock();SFX.start();newGame();started=true;
+$('restart').onclick=e=>{e.preventDefault();e.stopPropagation();unlock();SFX.start();enJeu(newGame);started=true;
   $('overlay').hidden=true;render();};
 /* Plein écran (26 novembre 2026) : le bouton met toute la page en plein écran, ou en sort. Dans l'artefact claude.ai, la page
    est dans un cadre : si le site hôte ne l'autorise pas, le navigateur refuse, et le journal le dit (ouvrir alors l'artefact

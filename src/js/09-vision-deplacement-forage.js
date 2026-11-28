@@ -169,7 +169,7 @@ function tryMove(dx,dy){if(PHASE)return;   // foreuse démontée : elle ne march
     if(bl){say(`${LeNom(BEASTS[bl.sp])} tient ${NOM_FOREUSE} : impossible de bouger tant qu’il n’est pas détruit ou étourdi.`,'warn');
     SFX.blocked();render();return;}}
   if(v===CHASM){say('Gouffre : passage impossible.');SFX.blocked();render();return;}
-  if(v===SHIP){say('Coque du vaisseau : indestructible.');SFX.blocked();render();return;}
+  if(v===SHIP){say(epaveA(idx(nx,ny))?'COQUE D’ÉPAVE. ALLIAGE NON FORABLE.':'Coque du vaisseau : indestructible.');SFX.blocked();render();return;}
   if(v===HARD){say('Roche dure : '+NOM_FOREUSE+' ne l’entame pas. Seule une charge sismique en vient à bout.');SFX.blocked();render();return;}
   if(v===LOCK){const i=idx(nx,ny);
     if(!nbCles()){say('Porte verrouillée : il faut une clé.');SFX.blocked();render();return;}

@@ -257,6 +257,8 @@ function inspectHTML(c){const {x,y}=c||HOV;if(x<0||y<0||x>=W||y>=H)return '';con
   {const nc=G.niche&&G.niche[i];
     if(nc===1)[tn,td]=['Niche fermée','Cavité dans la paroi. Présence mécanique en veille. Elle attend quelque chose.'];
     else if(nc===2)[tn,td]=['Niche ouverte','Cavité vide. Ce qui s’y tenait est sorti.'];}
+  // épaves et fosses de l'Astroport (07h) : nom, numéro, état
+  {const f=typeof epaveFiche==='function'&&(G.epI||G.fosI)?epaveFiche(i):null;if(f)[tn,td]=f;}
   const occ=see?occupant(x,y):null;
   if(d===0){const st=G.st;out.push(head(ICON.robot_r,NOM_FOREUSE,dt),
     `<div class="kv"><span>Vie <b>${Math.ceil(st.vie)}/${st.vieMax}</b></span><span>Énergie <b>${Math.floor(st.energie)}/${st.energieMax}</b></span><span>DEF <b>${robotDef()}</b></span></div>`,

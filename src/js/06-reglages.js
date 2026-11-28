@@ -211,7 +211,7 @@ const autour=(k,p)=>GEN[k]*(1+(Math.random()*2-1)*p);
 const setv=(id,v)=>{const e=$(id);if(e)e.value=v;};
 function setTaille(v){v=Math.max(1,Math.min(5,Math.round(+v||4)));GEN.taille=v;setv('gr-taille',v);setv('gn-taille',v);
   const e=$('genTaille');
-    if(e)e.textContent=`${SIZES[v][0]} × ${SIZES[v][1]} cases${v===4?' (taille d’origine)':''}. Appliqué au prochain lancement.`;saveGen();}
+    if(e)e.textContent=`${SIZES[v][0]} × ${SIZES[v][1]} cases${v===4?' (taille d’origine)':''}. Pour GÉNÉRER LA CARTE ; en jeu, chaque niveau a sa taille (Astroport : 4, ensuite : 3).`;saveGen();}
 const saveGen=()=>{recRange();try{localStorage.setItem('np-gen',JSON.stringify(GEN));}catch(e){}touchLocal();};
 // recettes souterraines : la montagne et le gouffre du sol sont ceux du « sol sous roche »
 const SOUS_ROCHE=()=>!!(RECETTES[GEN.recette]||{}).cavernes;

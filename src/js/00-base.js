@@ -21,10 +21,14 @@ const bati=v=>v===WALL||v===PILLAR||v===LOCK||v===SECRET;
 /* LA DESCENTE, NIVEAU PAR NIVEAU (23 novembre 2026). C'est LA table à allonger pour ajouter un niveau : tout le reste du jeu
    (groupes et budget par niveau, artefacts par niveau, fenêtre LIFE, boutons du Lab, butin, fin de partie) lit NIV_MAX et NIVS.
    recette : la recette de carte du niveau (06-reglages.js, 07-generation.js) ; part : où naissent les groupes, en % du budget. */
+/* taille : la taille de la carte du niveau en jeu (SIZES ; 28 novembre 2026 : 4 pour l'Astroport, 3 ensuite). Le curseur
+   « Taille » du menu Monde ne vaut plus que pour GÉNÉRER LA CARTE et les outils d'essai.
+   dens : le budget de menace du niveau (fenêtre LIFE) est compté sur cette part de la surface : l'Astroport, deux fois plus grand
+   qu'une carte de taille 3, n'a pas deux fois plus d'ennemis (moins d'ennemis, plus dangereux). */
 const NIVEAUX=[null,
-  {recette:'atterrissage',part:{ext:75,bati:20,tunnel:5}},
-  {recette:'cavernes',part:{ext:80,bati:18,tunnel:2}},
-  {recette:'base',part:{ext:35,bati:60,tunnel:5}}];
+  {recette:'atterrissage',part:{ext:75,bati:20,tunnel:5},taille:4,dens:.55},
+  {recette:'cavernes',part:{ext:80,bati:18,tunnel:2},taille:3},
+  {recette:'base',part:{ext:35,bati:60,tunnel:5},taille:3}];
 const NIV_MAX=NIVEAUX.length-1,NIVS=NIVEAUX.map((_,i)=>i).slice(1),nivBorne=n=>Math.max(1,Math.min(NIV_MAX,n||1));
 const RECETTE_NIV=n=>NIVEAUX[nivBorne(n)].recette,   // la recette de chaque niveau de la descente
   NIV_RECETTE=r=>Math.max(1,NIVEAUX.findIndex(v=>v&&v.recette===r));   // et l'inverse (recette « classique » : niveau 1)

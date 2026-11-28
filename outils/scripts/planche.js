@@ -17,10 +17,12 @@
     SANS_VAISSEAU=(r.niv||1)>1;NIV_GEN=r.niv||1;const t0=performance.now();niveau();G.niv=r.niv||1;SANS_VAISSEAU=false;const ms=performance.now()-t0;
     const ox=10+(n%cols)*pw,oy=34+((n/cols)|0)*ph,N=W*H,cnt={};
     for(let i=0;i<N;i++){const v=G.t[i];let col='#2c3a2e',k='sol';
-      if(G.tun&&G.tun[i]){col='#f2c230';k='tunnel';}else if(v===DOOR||v===LOCK){col='#ff4d4d';k='porte';}else if(v===WALL||v===SECRET||v===PILLAR){col='#e8eef0';k='mur';}else if(v===FLOOR){col='#7fb7c9';k='bati';}
+      if(G.epI&&G.epI[i]!=null&&(v===SHIP||v===TERMINAL)){col=v===TERMINAL?'#ffffff':'#d98a5a';k='épave';}   // Astroport (07h)
+      else if(G.fosI&&G.fosI[i]!=null&&!blocks(v)){col=G.epI&&G.epI[i]!=null?'#7a5a48':'#4a4436';k='fosse';}
+      else if(G.tun&&G.tun[i]){col='#f2c230';k='tunnel';}else if(v===DOOR||v===LOCK){col='#ff4d4d';k='porte';}else if(v===WALL||v===SECRET||v===PILLAR){col='#e8eef0';k='mur';}else if(v===FLOOR){col='#7fb7c9';k='bati';}
       else if(v===SHIP||v===DECK){col='#ff9ad5';k='vaisseau';}else if(isWater(v)){col='#2f6fb0';k='eau';}else if(v===GRASS||v===FLAT){col='#4f8a4a';k='herbe';}
       else if(v===CHASM){col='#000';k='gouffre';}else if(v===BRIDGE){col='#a87a3c';k='pont';}else if(v===MACHINE||v===ANTENNA||v===TERMINAL){col='#ff8c1a';k='machine';}
-      else if(typeof machTuile==='function'&&machTuile(v)){col=machCouleur(v);k='piege';}
+      else if(typeof machTuile==='function'&&machTuile(v)){col=typeof machCouleur==='function'?machCouleur(v):'#ff8c1a';k='piege';}
       else if(blocks(v)){col=ZONE&&ZONE[i]?'#4a4f55':'#6a7077';k=ZONE&&ZONE[i]?'massif':'relief';}
       cnt[k]=(cnt[k]||0)+1;x.fillStyle=col;x.fillRect(ox+(i%W)*S,oy+((i/W)|0)*S,S,S);}
     for(const k in G.soc||{}){x.fillStyle='#ffe14d';x.fillRect(ox+(+k%W)*S+1,oy+((+k/W)|0)*S+1,S-2,S-2);}

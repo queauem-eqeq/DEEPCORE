@@ -21,7 +21,20 @@ const LIEUX=[['ext','Extérieur'],['bati','Bâti'],['tunnel','Tunnels']];
    Le budget de chaque niveau se règle à part (avant : un budget et une pente en % par niveau). Un groupe n'est posé que s'il est
    actif (Lab → Groupes) ET dans la liste du niveau. Départ : les groupes arrivent peu à peu, les plus durs au niveau 3.
    Un groupe créé par le joueur est permis partout tant qu'il ne l'a pas retiré d'un niveau. */
-const GR_NIVS=NIVS,GR_NIV_DEF={"Large crabot groupe":[2,3],"Family":[2,3],"3-5 puces + sentinelles":[2,3],"Mines & Sentinelles":[2,3],"2-3 sentinelles":[2,3],"Broyeur solitaire":[2,3],"Poste de garde":[3],"Batterie":[2,3],"Essaim de drones":[2,3],"Escouade de réparation":[3],"Embuscade gluante":[3],"Chasse à courre":[3],"Convoi":[3],"Tireurs embusqués":[2,3],"Ronde de drones":[2,3]};
+/* Astroport (28 novembre 2026) : les groupes du niveau 1. Ferrailleuses (role 'ferraille') : elles naissent près d'une épave,
+   la gardent en mémoire (G.patr[id].epave) et font la navette entre elle et le sas du dépôt. Gardes (role 'garde') : au sas et
+   dans le dépôt. Le rôle se lit dans g.role (et sur chaque créature posée, o.role). Écartés du niveau 1 : les groupes à mines,
+   Broyeur, artilleurs, englueur et les puces en masse (GR_ASTRO_HORS). */
+const GR_ROLES=['ferraille','garde'];
+const GR_ASTRO=[
+  {"cout":5,"f":1,"m":[{"k":"crabos","max":3,"min":2}],"n":"Ferrailleuses","on":1,"pats":["navette"],"lieux":["ext"],"role":"ferraille"},
+  {"cout":7,"f":1,"m":[{"k":"crabos","max":2,"min":2},{"k":"soudeur","max":1,"min":1}],"n":"Équipe de découpe","on":1,"pats":["navette"],"lieux":["ext"],"role":"ferraille"},
+  {"cout":4,"f":1,"m":[{"k":"drone","max":4,"min":3}],"n":"Essaim de récupération","on":1,"pats":["navette"],"lieux":["ext"],"role":"ferraille"},
+  {"cout":4,"f":1,"m":[{"k":"paralyzor","max":3,"min":2}],"n":"Sentinelles du sas","on":1,"pats":["garde"],"lieux":["tunnel","bati"],"role":"garde"},
+  {"cout":10,"f":1,"m":[{"k":"gardien","max":1,"min":1},{"k":"paralyzor","max":2,"min":1}],"n":"Poste de garde du dépôt","on":1,"pats":["garde","territoire"],"lieux":["bati"],"role":"garde"}];
+const GR_ASTRO_HORS=g=>g.m.some(m=>['mine','mastok','artilleur','englueur'].includes(m.k)||(m.k==='puce'&&m.max>=5));
+const GR_NIVS=NIVS,GR_NIV_DEF={"Ferrailleuses":[1],"Équipe de découpe":[1],"Essaim de récupération":[1],"Sentinelles du sas":[1],"Poste de garde du dépôt":[1],
+  "1-2 Mines":[2,3],"Puces en groupes":[2,3],"Crabots":[2,3],"Bande de relais":[2,3],"Large crabot groupe":[2,3],"Family":[2,3],"3-5 puces + sentinelles":[2,3],"Mines & Sentinelles":[2,3],"2-3 sentinelles":[2,3],"Broyeur solitaire":[2,3],"Poste de garde":[3],"Batterie":[2,3],"Essaim de drones":[2,3],"Escouade de réparation":[3],"Embuscade gluante":[3],"Chasse à courre":[3],"Convoi":[3],"Tireurs embusqués":[2,3],"Ronde de drones":[2,3]};
 function nivSains(d,liste,budget,pente){const o={};
   for(const n of GR_NIVS){const s=d&&d[n],
     b=s&&isFinite(+s.budget)?Math.max(0,Math.min(2000,Math.round(+s.budget))):Math.round(budget*(1+pente/100*(n-1)));
@@ -58,7 +71,8 @@ const GROUPES_DEF=()=>groupesSains({budget:80,v:2,pente:20,liste:[
   {"cout":7,"f":1,"m":[{"k":"englueur","max":1,"min":1},{"k":"cafar","max":4,"min":3}],"n":"Chasse à courre","on":1,"pats":["voyage","navette"],"lieux":["ext"]},
   {"cout":11,"f":1,"m":[{"k":"gardien","max":1,"min":1},{"k":"soudeur","max":1,"min":1},{"k":"drone","max":2,"min":2}],"n":"Convoi","on":1,"pats":["navette"],"lieux":[]},
   {"cout":5,"f":1,"m":[{"k":"artilleur","max":2,"min":1}],"n":"Tireurs embusqués","on":1,"pats":["affut","sentinelle"],"lieux":[]},
-  {"cout":2,"f":1,"m":[{"k":"drone","max":2,"min":2},{"k":"paralyzor","max":1,"min":1}],"n":"Ronde de drones","on":1,"pats":["ronde"],"lieux":[]}]});
+  {"cout":2,"f":1,"m":[{"k":"drone","max":2,"min":2},{"k":"paralyzor","max":1,"min":1}],"n":"Ronde de drones","on":1,"pats":["ronde"],"lieux":[]},
+  ...GR_ASTRO],astro:1});
 /* Passage à la version 2 : des groupes enregistrés avant le 21 novembre 2026 (navigateur ou base de l'artefact) n'ont ni lieux, ni
    densités, ni les neuf groupes nouveaux. Une seule fois : un groupe qui porte le nom d'un groupe de départ reçoit ses lieux et sa
    valeur mesurée (son état actif et sa fréquence sont gardés), les groupes nouveaux sont ajoutés à la suite, les autres ne bougent pas. */
@@ -76,14 +90,26 @@ const ANC_PUCE='insecto'+'ide',clePuce=o=>{if(o&&o[ANC_PUCE]!==undefined){if(o.p
 function groupesSains(d){const ks=ESPECES().map(e=>e[0]),
   n=(v,mn,mx,df)=>Number.isFinite(+v)&&v!==''&&v!=null?Math.max(mn,Math.min(mx,Math.round(+v))):df;
   if(!d||!Array.isArray(d.liste))return null;
-  const liste=d.liste.slice(0,40).map(g=>({n:String(g.n||'Groupe').slice(0,30),lieux:[...new Set(Array.isArray(g.lieux)?g.lieux:[])].filter(v=>LIEUX.some(l=>l[0]===v)),cout:n(g.cout,1,500,1),on:g.on?1:0,f:[0,1,2].includes(+g.f)?+g.f:1,
+  const liste=d.liste.slice(0,40).map(g=>({n:String(g.n||'Groupe').slice(0,30),
+    role:GR_ROLES.includes(g.role)?g.role:((GR_ASTRO.find(x=>x.n===g.n)||{}).role||''),lieux:[...new Set(Array.isArray(g.lieux)?g.lieux:[])].filter(v=>LIEUX.some(l=>l[0]===v)),cout:n(g.cout,1,500,1),on:g.on?1:0,f:[0,1,2].includes(+g.f)?+g.f:1,
     // liste vide permise : le style est alors tiré parmi tous
     pats:[...new Set(Array.isArray(g.pats)?g.pats:[g.pat||'errance'])].filter(v=>PATS.some(p=>p[0]===v)),
     m:(Array.isArray(g.m)?g.m:[]).map(m=>m&&m.k===ANC_PUCE?Object.assign({},m,{k:'puce'}):m).filter(m=>m&&ks.includes(m.k)).slice(0,6).map(m=>{const a=n(m.min,0,20,1),b=n(m.max,1,20,Math.max(1,a));return {k:m.k,min:Math.min(a,b),max:Math.max(a,b)};})}));
   const bud=n(d.budget,0,2000,80),pen=n(d.pente,0,200,20),niv=nivSains(d.niv,liste,bud,pen);
-  return {budget:niv[1].budget,v:d.v>=2?2:1,pente:pen,niv,liste};}
+  return {budget:niv[1].budget,v:d.v>=2?2:1,pente:pen,niv,liste,astro:d.astro|0};}
+/* Passage à l'Astroport (28 novembre 2026), une seule fois (marqueur astro) : des groupes enregistrés avant (navigateur, base de
+   l'artefact) passent avant le code, mais reçoivent les groupes du niveau 1 qui leur manquent (par nom ; un groupe du joueur du
+   même nom est gardé tel quel), et le niveau 1 perd les groupes écartés par le thème (ils restent dans la banque et aux autres
+   niveaux). Rejouée, elle ne change rien de plus : rien n'est ajouté deux fois. */
+function groupesAstroport(g){if(!g||g.astro>=1)return g;
+  for(const d of GR_ASTRO)if(!g.liste.some(x=>x.n===d.n)&&g.liste.length<40)g.liste.push(groupesSains({liste:[JSON.parse(JSON.stringify(d))]}).liste[0]);
+  const n1=g.niv&&g.niv[1];
+  if(n1){n1.gr=n1.gr.filter(n=>{const x=g.liste.find(y=>y.n===n);return !x||!GR_ASTRO_HORS(x);});
+    for(const d of GR_ASTRO)if(g.liste.some(x=>x.n===d.n)&&!n1.gr.includes(d.n))n1.gr.push(d.n);}
+  for(const n of GR_NIVS)if(n>1&&g.niv&&g.niv[n])g.niv[n].gr=g.niv[n].gr.filter(x=>!GR_ASTRO.some(d=>d.n===x)||(GR_NIV_DEF[x]||[]).includes(n));
+  g.astro=1;return g;}
 let GROUPES=GROUPES_DEF();
-try{const g=groupesSains(JSON.parse(localStorage.getItem('np-groupes')||'null'));if(g)GROUPES=groupesV2(g);}catch(e){}
+try{const g=groupesSains(JSON.parse(localStorage.getItem('np-groupes')||'null'));if(g)GROUPES=groupesAstroport(groupesV2(g));}catch(e){}
 // un groupe supprimé quitte les listes des niveaux
 function saveGroupes(){for(const n of GR_NIVS)GROUPES.niv[n].gr=GROUPES.niv[n].gr.filter(x=>GROUPES.liste.some(g=>g.n===x));
   GROUPES.budget=GROUPES.niv[1].budget;

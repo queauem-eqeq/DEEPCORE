@@ -341,3 +341,12 @@ Ce qui a été remplacé, et pourquoi (demandes de l'utilisateur, « chaque mach
 - **Défaut corrigé le même jour** : de 2 h 37 à 3 h, en adoucissant la secousse, un commentaire avait avalé la ligne qui retire la vie :
   les ennemis frappaient sans faire de dégâts (vu par `outils/simul.py` : vie restante 100 partout). La vérification
   `outils/verifier.py` ne l'avait pas vu : son empreinte ne couvre pas les dégâts reçus.
+
+## 28 novembre 2026 — l'Astroport (niveau 1)
+- Le niveau 1 devient un cimetière spatial : carte en taille 4 (les autres niveaux en taille 3), une vingtaine de fosses
+  d'atterrissage numérotées, épaves de cinq modèles en quatre états, numérotées sous le nôtre (0467), plus vieilles près
+  de l'entrée du dépôt ; FABLAB toujours au dépôt ; ferrailleuses et gardes (rôles `ferraille` et `garde`) ; modules du
+  thème (dehors, dans les fosses, et dans le dépôt). Les groupes et modules enregistrés du joueur sont gardés : les
+  nouveautés s'y ajoutent une fois (marqueur `astro`). Le curseur « Taille » du menu Monde ne règle plus que GÉNÉRER LA
+  CARTE.
+
