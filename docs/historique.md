@@ -366,3 +366,7 @@ Ce qui a été remplacé, et pourquoi (demandes de l'utilisateur, « chaque mach
   Matière, aux capsules et à l'équipement. Sonar 3 à 7 (accessoire du FABLAB, ennemis en point rouge). Génération des terminaux
   rendue sûre : repli réduit 2 × 2 puis porte dérobée pour l'action locale, pose dans les couloirs ou sur une case encombrée,
   un terminal près du FABLAB.
+- 28 novembre 2026 : journal de bord (fenêtre, touche J) : six onglets, fiches de robots à quatre paliers (Stats à 10
+  destructions), fiches d'objets complètes, pages lues aux terminaux, hacks vus, tutoriel ; gardé d'une partie à l'autre
+  (`np-journal`, et `journal/courant` dans la base de l'artefact). La DATA des terminaux ne lit plus les anciens textes
+  narratifs (`TERM_TXT`, gardés en vestige dans 07c) : elle tire une page ou un palier du niveau en cours.

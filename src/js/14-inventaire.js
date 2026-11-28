@@ -192,7 +192,7 @@ function viseeOk(){if(!VISEE||G.over)return;const {i,x,y}=VISEE,o=G.inv[i];
     if(!(G.beasts||[]).includes(c)&&!(G.animals||[]).includes(c))continue;   // déjà emportée par l'explosion d'une mine voisine
     const isB=(G.beasts||[]).includes(c),sp=isB?BEASTS[c.sp]:SPECIES[c.sp];n++;ouvrAttaque(c);
     c.hp=(c.hp??pvDe(sp))-VISEE_DM;addFx({kind:'num',x:c.x,y:c.y,txt:'-'+VISEE_DM,col:PAL['3'],dur:900});
-    if(c.hp<=0){k++;(isB?G.beasts:G.animals).splice((isB?G.beasts:G.animals).indexOf(c),1);bleed(c.x,c.y);if(isB){butinMort(c);minePartie(c);}}
+    if(c.hp<=0){k++;(isB?G.beasts:G.animals).splice((isB?G.beasts:G.animals).indexOf(c),1);bleed(c.x,c.y);if(isB){butinMort(c);minePartie(c);}else if(typeof jnDetruit==='function')jnDetruit(c,0);}
     else if(isB){c.hunt=1;spot(c);}else{c.aware=1;c.enraged=true;spot(c);}}
   // l'onde brise aussi la roche, la montagne et la roche dure (16 novembre 2026) : c'est le seul moyen d'entamer la roche dure
   let roches=0;

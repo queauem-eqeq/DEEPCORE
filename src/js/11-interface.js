@@ -231,6 +231,7 @@ addEventListener('keydown',ev=>{
   if(!$('faune').hidden){if(ev.key==='Escape'){ev.preventDefault();lifeClose();}return;}
   if(!$('fabric').hidden){fabKey(ev);return;}
   if(!$('terminal').hidden){termKey(ev);return;}
+  if(!$('jdb').hidden){jnKey(ev);return;}   // journal de bord (14k)
   if(!$('artefacts').hidden){if(ev.key==='Escape'){ev.preventDefault();closeArtefacts();}return;}
   if(!$('groupes').hidden){if(ev.key==='Escape'){ev.preventDefault();closeGroupes();}return;}
   if(!$('discretion').hidden){if(ev.key==='Escape'){ev.preventDefault();closeDisc();}return;}
@@ -270,6 +271,7 @@ addEventListener('keydown',ev=>{
   if(KEYS[k]){ev.preventDefault();tryMove(...KEYS[k]);}else if(k==='f'){ev.preventDefault();askDrill();
     }else if(k==='b'){ev.preventDefault();toggleFog();}else if(k==='r'){ev.preventDefault();toggleSprint();
     }else if(k==='p'){ev.preventDefault();startRest();}else if(k==='t'){ev.preventDefault();invToggle();
+    }else if(k==='j'){ev.preventDefault();jnOuvre();   // journal de bord (14k, 28 novembre 2026)
     }else if(k==='i'){ev.preventDefault();sacNav(true);}else if(k==='o'){ev.preventDefault();startExplore();
     }else if(k===' '||k==='5'||k==='.'||ev.code==='Numpad5'){ev.preventDefault();waitTurn();}
 });

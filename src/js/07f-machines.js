@@ -55,6 +55,7 @@ function machTick(){if(!G.las||!G.las.length||G.over)return;G.mt=(G.mt||0)+1;con
     const pieds=liste===G.beasts&&typeof FOOT!=='undefined'?FOOT:[[0,0]];if(!pieds.some(([dx,dy])=>lit[idx(o.x+dx,o.y+dy)]))continue;
     o.hp=(o.hp??pvDe(fiches[o.sp]))-MACH_DM;if(vis[idx(o.x,o.y)])addFx({kind:'num',x:o.x,y:o.y,txt:'-'+MACH_DM,col:PAL['3'],dur:750});
     if(o.hp<=0){liste.splice(liste.indexOf(o),1);bleed(o.x,o.y);if(liste===G.beasts&&typeof butinMort==='function')butinMort(o);
+      else if(liste!==G.beasts&&typeof jnDetruit==='function')jnDetruit(o,0);
       if(vis[idx(o.x,o.y)])sayMore(`${LeNom(fiches[o.sp])} est détruit par un laser.`,'good');
       if(liste===G.beasts&&typeof minePartie==='function')minePartie(o);}}
   if(lit[idx(G.px,G.py)]){G.st.vie=Math.max(0,G.st.vie-MACH_DM);addFx({kind:'num',x:G.px,y:G.py,txt:'-'+MACH_DM,col:PAL['4'],dur:900});

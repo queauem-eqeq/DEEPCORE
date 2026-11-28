@@ -25,13 +25,14 @@ function computeFOV(){vis=new Uint8Array(W*H);const r=G.st.capteur,px=G.px,py=G.
       if((!dx&&!dy)||nx<0||ny<0||nx>=W||ny>=H)continue;
       const j=idx(nx,ny);if(vis[j]||!opaque(nx,ny)||(G.fum&&G.fum[j]))continue;   // la fumée n'est pas un mur
       vis[j]=1;G.seen[j]=1;}}
-  if(G.animals)for(const a of G.animals)if(vis[idx(a.x,a.y)]&&!G.fauna.includes(a.sp)){G.fauna.push(a.sp);const sp=SPECIES[a.sp];
+  if(G.animals)for(const a of G.animals)if(vis[idx(a.x,a.y)]&&!G.fauna.includes(a.sp)){G.fauna.push(a.sp);if(typeof jnVu==='function')jnVu('puce');const sp=SPECIES[a.sp];
     sayMore(`Nouvelle espèce observée : ${sp.n} (pas ${motDuree(sp.dpas)}, coup ${motDuree(sp.dcoup)}).`,'info');SFX.chirp();}
   antVis();   // les antennes allumées tiennent leur zone en vue
   if(G.beasts){if(typeof G.beastSeen!=='object'||!G.beastSeen)G.beastSeen={};
-    for(const b of G.beasts){if(G.beastSeen[b.sp]||!vis[idx(b.x,b.y)]||beastCache(b))continue;G.beastSeen[b.sp]=true;const sp=BEASTS[b.sp];
+    for(const b of G.beasts){if(G.beastSeen[b.sp]||!vis[idx(b.x,b.y)]||beastCache(b))continue;G.beastSeen[b.sp]=true;const sp=BEASTS[b.sp];if(typeof jnVu==='function')jnVu(sp.key);
     sayMore(`Ennemi repéré : ${sp.n} (pas ${motDuree(sp.dpas)}, coup ${motDuree(sp.dcoup)}, ${pvDe(sp)} PV).`,'warn');SFX.roar();}}
   for(const s of G.sites)if(vis[idx(s.x,s.y)]&&!s.seen){s.seen=true;SFX.spot();say(`Site ${s.id} repéré.`,'info');}
+  if(typeof jnSync==='function')jnSync();   // journal de bord : objets et hacks connus, une fois par battement (14k)
 }
 
 /* ---------- Portée de discrétion (13 novembre 2026) ----------
@@ -162,7 +163,7 @@ function tryMove(dx,dy){if(PHASE)return;   // foreuse démontée : elle ne march
     const dm=robotDeg()*(cr?CRIT_X:1),tag=sur?'Coup par surprise ! ':cr?'Coup critique ! ':'';an.hp=(an.hp??pvDe(sp))-dm;
       addFx({kind:'num',x:nx,y:ny,txt:'-'+dm+(cr?'!':''),col:cr?PAL['1']:PAL['3'],dur:cr?1000:750});
       if(cr){addFx({kind:'shake',amp:6,dur:220});SFX.crit();}addFx({kind:'lunge',robot:true,dx,dy,dur:180});
-    if(an.hp<=0){G.animals.splice(G.animals.indexOf(an),1);bleed(an.x,an.y);say(`${tag}${NOM_FOREUSE} écrase ${leNom(sp)}.`,'warn');SFX.squish();}
+    if(an.hp<=0){G.animals.splice(G.animals.indexOf(an),1);bleed(an.x,an.y);if(typeof jnDetruit==='function')jnDetruit(an,0);say(`${tag}${NOM_FOREUSE} écrase ${leNom(sp)}.`,'warn');SFX.squish();}
     else{if(!an.aware)alerte(an);an.aware=1;an.enraged=true;spot(an);say(`${tag}${NOM_FOREUSE} heurte ${leNom(sp)}.`);SFX.coup();}
    pass(coupDur());computeFOV();render();if(G.over&&G.over.dead)dead();return;}
   // Bloqueur (22 novembre 2026)

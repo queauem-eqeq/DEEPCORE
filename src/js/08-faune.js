@@ -674,7 +674,7 @@ function explose(b){const sp=BEASTS[b.sp],k=G.beasts.indexOf(b);if(k>=0)G.beasts
   for(const [liste,fiches] of [[G.beasts,BEASTS],[G.animals||[],SPECIES]])for(const o of [...liste])if(dans(o)){const dm=dmgDe(sp);
     o.hp=(o.hp??pvDe(fiches[o.sp]))-dm;
     addFx({kind:'num',x:o.x,y:o.y,txt:'-'+dm,col:PAL['3'],dur:750});if(o.hp<=0){liste.splice(liste.indexOf(o),1);bleed(o.x,o.y);
-      if(liste===G.beasts)butinMort(o);}}
+      if(liste===G.beasts)butinMort(o);else if(typeof jnDetruit==='function')jnDetruit(o,0);}}
   if(dans({x:G.px,y:G.py})){const dm=dmgDe(sp);G.st.vie=Math.max(0,G.st.vie-dm);
     addFx({kind:'num',x:G.px,y:G.py,txt:'-'+dm,col:PAL['4'],dur:1000});
     sayMore(`La mine explose : −${dm} vie.`,'warn');mortForeuse();}

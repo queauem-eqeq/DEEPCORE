@@ -48,7 +48,7 @@
   // boîte noire
   {let bx=null;for(let k=0;k<6&&!bx;k++){carte('atterrissage');bx=Object.values(G.term).find(m=>m.s==='boite_noire');}
     if(bx){termOuvre(bx.i);const L=lignes();ok(L.length===2&&L[1]==='CONNEXION:liaison'&&/ENREGISTREUR/.test($('termTitre').textContent),`boîte noire : ${L.join(' | ')} — ${$('termTitre').textContent}`);
-      lance('data');ok(bx.lu&&bx.lu.type==='boite_noire'&&/ATTENTE RETOUR/.test($('termOut').textContent),'boîte noire : DATA = l’enregistreur de l’épave');ferme();}
+      lance('data');ok(bx.lu&&bx.lu.type==='boite_noire'&&/ENREGISTREUR/.test($('termOut').textContent),'boîte noire : DATA = un texte d’enregistreur (détail dans test-journal.js)');ferme();}
     else ok(false,'boîte noire : aucune en 6 cartes');}
   // 4. antenne : posée à la main dans une pièce
   {carte('atterrissage');const p=pieces().find(p=>p.c.some(i=>G.t[i]===FLOOR)),i=p.c.find(i=>G.t[i]===FLOOR&&!G.items[i]);
@@ -57,7 +57,7 @@
     const t0=G.turn;lance('reseau');ferme();
     ok(G.art[i]===1&&G.antFin[i]===t0+1+ANT_TOURS&&G.turn===t0+1,`antenne : RÉSEAU DU SITE l’allume (${ANT_TOURS} tours de brouillard levé), un battement compté à la fermeture`);
     termOuvre(i);ok(/EN SERVICE/.test($('termMenu').textContent)&&!lance('reseau'),'antenne : une seule fois');lance('data');
-    ok(G.term[i].lu&&G.term[i].lu.type==='releve','antenne : DATA = relevé du site');ferme();
+    ok(G.term[i].lu&&['releve','robot'].includes(G.term[i].lu.type),`antenne : DATA = relevé du site ou palier de robot (${G.term[i].lu&&G.term[i].lu.type})`);ferme();
     // ancienne partie : antenne déjà allumée, terminal déjà là, pas de G.term
     G.art[i]=2;delete G.term;let err=null;try{termOuvre(i);ferme();termOuvre(Object.keys(G.art).map(Number).find(j=>G.t[j]===TERMINAL));ferme();termOuvre(i);}catch(e){err=e;}
     ferme();ok(!err&&G.term&&G.term[i].s==='antenne'&&/EN SERVICE/.test($('termMenu').textContent),`ancienne partie relue sans erreur${err?' : '+err:''}`);}

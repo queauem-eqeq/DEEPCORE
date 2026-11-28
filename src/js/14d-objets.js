@@ -216,7 +216,8 @@ function butinCoffre(q){const h=p=>Math.random()<p;
   return [consoTire(),'matiere',...(h(.5)?[consoTire()]:[]),...(h(.25)?['puissance']:[])];}
 // un robot abattu lâche parfois un objet (les relais d'une salle piégée, jamais : b.nd)
 // Un objet au plus par robot, quel que soit le nombre de coups qui l'achèvent au même battement (b.butin, 25 novembre 2026).
-function butinMort(b){if(b&&typeof hackDetruit==='function'&&!(BEASTS[b.sp]||{}).mine)hackDetruit(b);   // hack RECYCLAGE (14g)
+function butinMort(b){if(b&&typeof jnDetruit==='function')jnDetruit(b,1);   // journal de bord (14k)
+  if(b&&typeof hackDetruit==='function'&&!(BEASTS[b.sp]||{}).mine)hackDetruit(b);   // hack RECYCLAGE (14g)
   if(!b||b.nd||b.butin)return;b.butin=1;const sp=BEASTS[b.sp],p=DROPS[sp.key]||0;if(Math.random()*100>=p)return;
   const i0=idx(b.x,b.y);if(blocks(G.t[i0])||G.t[i0]===DEEP)return;
     // 28 novembre 2026 : Matière 50 %, capsule 38 %, équipement 12 % (avant : 40 / 35 / plan 18 / 7)
@@ -314,7 +315,7 @@ function butinPrend(c,more){const l=G.items&&G.items[c];if(!l)return;const dire=
 // la visée montre toujours une seule case (22 novembre 2026) : une zone dessinée trahirait la charge sismique ou le fumigène
 function viseeCases(){return VISEE?[[VISEE.x,VISEE.y]]:[];}
 function retire(c){const isB=(G.beasts||[]).includes(c);(isB?G.beasts:G.animals).splice((isB?G.beasts:G.animals).indexOf(c),1);
-  bleed(c.x,c.y);if(isB){butinMort(c);minePartie(c);}}
+  bleed(c.x,c.y);if(isB){butinMort(c);minePartie(c);}else if(typeof jnDetruit==='function')jnDetruit(c,0);}
 function consoCible(i,x,y){const o=G.inv[i];if(!o)return;const k=o.k,d=ITEMS[k],V=ITEM_VAL[k]||{},st=G.st,nom=d.vrai.n,connu=identifie(k);
   const moi=x===G.px&&y===G.py,b=beastAt(x,y),an=b?null:animalAt(x,y),c=b||an,sp=b?BEASTS[b.sp]:an?SPECIES[an.sp]:null;
   // objet connu, inutile sur la foreuse : refusé, rien n'est dépensé

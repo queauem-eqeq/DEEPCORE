@@ -235,7 +235,7 @@ Codes des motifs : `CLAUDE.md`.
 
 ZQSD / flèches / pavé numérique : déplacer · A E W C : diagonales · Souris : survol = inspection, clic = y aller ·
 X : inspection au clavier · R : courir / marcher · T : équipement · I : inventaire · O : exploration automatique ·
-F : forer · Espace / 5 : attendre · P : repos · V : portée de discrétion · B : brouillard · ! : son · M : mode
+J : journal de bord · F : forer · Espace / 5 : attendre · P : repos · V : portée de discrétion · B : brouillard · ! : son · M : mode
 carte (déplacements = défilement, Maj = plus vite, Échap ou M pour revenir ; Espace / 5 y attendent toujours, pour les
 essais, sans bouger la vue ).
 
@@ -245,6 +245,29 @@ Le panneau **Contrôles** met la touche et ce qu'elle fait **sur la même ligne*
 **F6** : enregistre **tout** dans la base de l'artefact (bestiaire, tuiles, palettes, stats de la foreuse, LIFE, Monde, objets,
 artefacts, groupes) — le même enregistrement que les boutons « Enregistrer » du Lab (24 novembre 2026). **F9** : un exemplaire de
 chaque consommable dans l'inventaire.
+
+### Journal de bord (`14k-journal.js`, 28 novembre 2026)
+
+Fenêtre « JOURNAL DE BORD » (bouton JOURNAL sous MARCHE / ÉQUIPEMENT / EXPLORER / REPOS, touche J ; rien à voir avec le
+journal des messages en bas de l'écran). Six onglets en haut, chacun avec son compteur (« ROBOTS 3/12 ») ; fiche à gauche,
+liste défilante à droite (entrées inconnues en pointillé : « — INCONNU — », « — PAGE NON LUE — ») ; jamais plus haute que
+l'écran. Pastille (carré de l'accent) sur une entrée acquise et pas encore ouverte, sur son onglet et sur le bouton JOURNAL.
+Clavier : ← → onglets, ↑ ↓ entrées, Échap ou J ferme. Boutons et lignes de 44 px (tablette).
+
+- **Robots** (une fiche par espèce, Puce comprise) : tuile de l'espèce agrandie (6 ×, pixels nets), puis quatre paliers l'un
+  sous l'autre ; un palier non acquis affiche « [DONNÉES MANQUANTES] ». 0 Contact (vue une fois) ; 1 Stats (10 destructions
+  cumulées d'une partie à l'autre, ou une DATA : vie, dégâts, précision, défense, pas, coup, lus dans le jeu en cours,
+  bestiaire du joueur compris) ; 2 Comportement (DATA : rôle, comportement, butin) ; 3 Origine (DATA lue à un niveau au moins
+  égal à l'éveil requis de la fiche ; acquise ensuite pour toujours, même au niveau 1). Une destruction compte comme pour
+  RECYCLAGE (coup, laser, mine abattue, capsule ; pas une mine qui saute d'elle-même). Passage de palier : une ligne au journal
+  du jeu (« FICHE MISE À JOUR : CRABOT — STATS. »).
+- **Objets** : fiche complète (illustration ASCII, effet, chiffres, prix au FABLAB, description) dès que l'objet est connu :
+  porté, identifié, plan appris, ou DATA. Les capsules gardent leur nom de code en partie tant qu'elles n'y sont pas identifiées.
+- **Journaux**, **Documents** : pages lues aux terminaux (texte et ligne d'analyse). **Hacks** : sortes proposées ou portées,
+  effet à chaque rang (les rangs au-delà du plus haut vu en gris). **Tutoriel** : trois pages d'office, les autres par DATA.
+- **Gardé d'une partie à l'autre** : `np-journal` (navigateur) et, dans l'artefact claude.ai, le document `journal/courant` de
+  la base (pas `reglages/courant`), fusionnés au chargement (union ; un effacement plus récent l'emporte). Lab : « Journal :
+  tout débloquer », « Journal : effacer » (un second clic confirme, dans les 4 secondes).
 
 ## 10. Sauvegarde des réglages
 

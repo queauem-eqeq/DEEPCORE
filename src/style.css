@@ -635,3 +635,43 @@ kbd{font-family:var(--mono);color:var(--fg);border:1px solid var(--line);padding
 .hktab{width:auto;border-collapse:collapse;font-size:11px;margin:6px 0 12px;font-variant-numeric:tabular-nums}
 .hktab th,.hktab td{border:1px solid var(--line);padding:2px 6px;text-align:left;white-space:nowrap}
 .hktab th{color:var(--dim);font-weight:400}
+/* Journal de bord (28 novembre 2026, 14k-journal) : onglets en haut, fiche à gauche, liste défilante à droite ; jamais plus haut que l'écran */
+#jdb .mcard{width:min(940px,100%);max-height:calc(100vh - 40px);max-height:calc(100dvh - 40px);display:flex;flex-direction:column;overflow:hidden}
+.jdbtabs{display:flex;flex-wrap:wrap;gap:6px}
+.jtab{position:relative;flex:1 1 auto;min-height:44px;padding:6px 10px;background:var(--black);border:1px solid var(--line);color:var(--dim);font:inherit;font-size:12px;letter-spacing:.1em;cursor:pointer}
+.jtab i{font-style:normal;color:var(--dim);margin-left:4px}
+.jtab.sel{border-color:var(--c1);color:var(--c1)}
+.jtab.sel i{color:var(--c1)}
+.jnew{display:inline-block;width:8px;height:8px;background:var(--c1);margin-left:8px;vertical-align:middle;flex:none}
+.jtab .jnew{position:absolute;top:4px;right:4px;margin:0}
+.jdbwrap{display:grid;grid-template-columns:minmax(0,1fr) minmax(200px,280px);gap:16px;min-height:0;flex:1 1 auto;overflow:hidden}
+.jdbfiche{border:1px solid var(--line);padding:12px 14px;overflow-y:auto;min-height:0;font-family:ui-monospace,Consolas,monospace;font-size:12.5px;line-height:1.6}
+.jdbfiche h3{text-transform:none;margin:0 0 6px;font-family:var(--display);font-size:15px;letter-spacing:.15em;color:var(--c3)}
+.jdbfiche p{margin:0}
+.jdbliste{display:grid;gap:4px;align-content:start;overflow-y:auto;min-height:0;padding-right:2px}
+.jli{display:flex;align-items:center;gap:8px;min-height:44px;width:100%;text-align:left;padding:4px 10px;background:var(--black);border:1px solid var(--line);color:var(--fg);font:inherit;font-size:12.5px;letter-spacing:.05em;cursor:pointer}
+.jli span{text-transform:none;flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.jli img{width:32px;height:32px;image-rendering:pixelated;flex:none}
+.jli.sel{border-color:var(--c1);color:var(--c1)}
+.jli.inc{color:var(--dim);border-style:dashed;cursor:default}
+.jfhead{display:flex;gap:16px;align-items:center;margin-bottom:10px}
+.jsil{width:96px;height:96px;image-rendering:pixelated;image-rendering:crisp-edges;border:1px solid var(--line);background:var(--black);flex:none}
+.jmen{color:var(--life);font-weight:normal}
+.jdim{color:var(--dim)}
+.jpal{border-top:1px solid var(--line);padding:8px 0 6px}
+.jpal h4{margin:0 0 4px;font-size:11px;letter-spacing:.2em;color:var(--c1);font-weight:normal}
+.jpal.manque h4{color:var(--dim)}
+.jman{color:var(--dim);letter-spacing:.1em}
+.jrole{color:var(--c1)}
+.jstat{border-collapse:collapse;font-size:inherit}
+.jstat th{text-align:left;font-weight:normal;color:var(--dim);padding:1px 18px 1px 0;letter-spacing:.08em}
+.jstat td{color:var(--fg)}
+.jstat tr.jdim td{color:var(--dim)}
+.jfobj .iart{margin:0 0 8px;font-size:22px;min-height:0;text-align:left}
+.jdesc{color:var(--dim);font-style:italic;margin-top:8px!important}
+.jnana,#termOut p.jnana{color:var(--dim);margin-top:8px}
+#termOut p.jnajout{color:var(--c1);margin-top:8px}
+.jdbfiche .jpage p.jnana{margin-top:10px}
+#jdbBtn.neuf::after{content:'';display:inline-block;width:7px;height:7px;background:var(--c1);margin-left:7px;vertical-align:middle}
+#jnLabEff.conf{color:var(--life);border-color:var(--life)}
+@media (max-width:640px){.jdbwrap{grid-template-columns:1fr;grid-template-rows:auto minmax(120px,40%);overflow:hidden}.jdbliste{order:2}}

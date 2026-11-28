@@ -50,7 +50,7 @@ automatique ne l'ouvre jamais (les machines barrent le pas).
 
 | Entrée | Terminal | Enregistreur d'épave | Antenne |
 |---|---|---|---|
-| **DATA** | une donnée tirée sans choix (`dataTirer`) : aujourd'hui le texte du terminal | l'enregistreur de l'épave | le relevé du site (signatures, formations, épaves, cap du site) |
+| **DATA** | une donnée tirée sans choix (`dataTirer`, 14k) pour le journal de bord : voir plus bas | un texte d'enregistreur au numéro de l'épave | un palier de fiche de robot, ou le relevé du site (signatures, formations, épaves, cap du site) |
 | **CONNEXION** | actions locales, puis LIAISON AU NOYAU | LIAISON AU NOYAU | RÉSEAU DU SITE, puis LIAISON AU NOYAU |
 | **ENCODAGE** | HACK, BLUEPRINT (une fois chacun) | — | — |
 
@@ -80,6 +80,16 @@ automatique ne l'ouvre jamais (les machines barrent le pas).
 - État : `G.term[case]` (créé au premier besoin : une partie d'avant se recharge, antennes allumées comprises).
 
 Essais : `outils/scripts/test-terminaux.js`.
+
+**DATA (28 novembre 2026, `14k-journal.js`).** Tirée au hasard, sans choix, parmi ce qui concerne le niveau en cours : un
+palier de la fiche d'un robot du niveau (poids 4 ; espèces des groupes permis au niveau, réglages du joueur compris, et ce qui
+vit sur la carte), la fiche d'une capsule non identifiée du niveau, qui l'identifie (2), un journal non lu (3), un document
+non lu (2), une page de tutoriel non lue (1). Seules les catégories non vides comptent ; tout lu : un journal déjà lu, au
+hasard. Une fiche ne monte que si son palier suivant peut s'ouvrir (l'origine attend le niveau d'éveil). Enregistreur d'épave :
+toujours un texte de source `boite_noire`, du modèle de l'épave si possible, titré au nom et au numéro de l'épave.
+Antenne : un palier de robot (une chance sur deux) ou le relevé du site. Le texte s'affiche à droite avec « PAGE AJOUTÉE AU
+JOURNAL DE BORD. » (ou « FICHE MISE À JOUR — STATS. »…) et, pour un texte, sa ligne d'analyse, reprise au journal du jeu.
+Les textes viennent de `TEXTES_N1` (`14j-textes.js`), jeton `{UNITE}` remplacé par `NOM_FOREUSE`, `{NUM}` par le numéro.
 
 ### Hacks (`14g-hacks.js`, 28 novembre 2026)
 

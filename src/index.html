@@ -116,6 +116,15 @@
     <div class="termwrap"><div id="termMenu"></div><div id="termOut" class="termtxt" aria-live="polite"></div></div>
   </div>
 </div>
+<!-- Journal de bord (28 novembre 2026) : onglets en haut, fiche à gauche, liste défilante à droite. Voir 14k-journal.
+     Rien à voir avec le journal des messages en bas de l'écran. -->
+<div class="modal" id="jdb" role="dialog" aria-modal="true" aria-labelledby="jdbTitre" hidden>
+  <div class="mcard" tabindex="-1">
+    <div class="mhead"><h2 id="jdbTitre">Journal de bord</h2><button id="jdbClose" aria-label="Fermer le journal de bord">Fermer</button></div>
+    <div class="jdbtabs" id="jdbTabs" role="tablist" aria-label="Onglets du journal de bord"></div>
+    <div class="jdbwrap"><div id="jdbFiche" class="jdbfiche" aria-live="polite"></div><div id="jdbListe" class="jdbliste" role="listbox" aria-label="Entrées"></div></div>
+  </div>
+</div>
 <!-- FABLAB (21 novembre 2026, renommé le 26) : des objets contre de la Matière. Voir 14c-fabricateur. -->
 <div class="modal" id="fabric" role="dialog" aria-modal="true" aria-labelledby="fabTitre" hidden>
   <div class="mcard" tabindex="-1">
@@ -185,6 +194,7 @@
         <div class="bar2"><span>Matière {µ}</span><span></span><span class="bnum mat" id="matN" title="Réserve de Matière {µ} : servira à construire de l’équipement">0</span></div>
         <div class="btnrow"><button id="sprintBtn" class="pace" aria-pressed="false" title="Courir ou marcher (R) : la course double la vitesse et coûte 5 d’énergie par pas">MARCHE</button><button id="invBtn" class="pace" aria-haspopup="dialog" title="Ouvrir l’équipement (T) : armes, armures, accessoires">ÉQUIPEMENT</button></div>
         <div class="btnrow"><button id="explBtn" class="pace" title="Exploration automatique (O) : F467 explore seule et s’arrête au moindre événement">EXPLORER</button><button id="restBtn" class="pace" title="Repos (P) : attendre jusqu’à l’énergie pleine">REPOS</button></div>
+        <div class="btnrow"><button id="jdbBtn" class="pace" aria-haspopup="dialog" title="Journal de bord (J) : robots, objets, journaux, documents, hacks, tutoriel">JOURNAL</button></div>
         <div class="stip" id="stip" role="tooltip" hidden></div>
         <div class="effs" id="effs" role="status" aria-label="Effets en cours"></div>
       </div>
@@ -235,6 +245,8 @@
           <button id="hkBtn" aria-haspopup="dialog" title="Essai des hacks : un choix parmi 3 au rang du niveau, comme au terminal">Hacks</button>
           <button id="bpBtn" aria-haspopup="dialog" title="Essai des blueprints : un choix parmi 3 au rang du niveau, comme au terminal ; le plan choisi est appris">Blueprints</button>
           <button id="discBtn">Discrétion</button>
+          <button id="jnLabTout" title="Journal de bord : toutes les fiches et pages acquises (essai)">Journal : tout débloquer</button>
+          <button id="jnLabEff" title="Journal de bord : tout effacer (navigateur et base de l’artefact) ; un second clic confirme">Journal : effacer</button>
           <button id="curBtn">Tile editor</button>
           <a class="labbtn" id="combatBtn" href="https://claude.ai/artifact/9BKRaoB4hzgdWhzYFx5A6q" target="_blank" rel="noopener" title="Ouvrir le banc de combat (un autre onglet) : il rejoue des combats dans le moteur du jeu, republié à jour">Combat</a>
         </div>
@@ -329,4 +341,6 @@
 <script src="js/14f-modules.js"></script>
 <script src="js/14g-hacks.js"></script>
 <script src="js/14i-blueprints.js"></script>
+<script src="js/14j-textes.js"></script>
+<script src="js/14k-journal.js"></script>
 <script src="js/15-intro.js"></script>
