@@ -74,7 +74,7 @@ function mini(){
        dot(cx-g,cy+e);dot(cx+g,cy+e);}}}
   // ennemis : points rouges (dans le champ de vision, ou partout sans brouillard)
   {const d=Math.max(2,Math.round(k*1.2));mctx.fillStyle=PAL['4'];
-   for(const e of [...(G.beasts||[]),...(G.animals||[])]){if(fog&&!vis[idx(e.x,e.y)]&&!(G.beasts.includes(e)&&antDetecte(e)))continue;
+   for(const e of [...(G.beasts||[]),...(G.animals||[])]){if(fog&&!vis[idx(e.x,e.y)]&&!(G.beasts.includes(e)&&(antDetecte(e)||(typeof traqueVoit==='function'&&traqueVoit(e))||sonarVoit(e))))continue;
      mctx.fillRect(Math.round((e.x+.5)*k-d/2),Math.round((e.y+.5)*k-d/2),d,d);}}
   mctx.strokeStyle=PAL['1'];mctx.globalAlpha=.5;mctx.lineWidth=Math.max(1,Math.round(dpr));
   mctx.strokeRect(X(camX)+.5,Y(camY)+.5,X(camX+Math.min(W,Math.ceil(vw/S)))-X(camX)-1,Y(camY+Math.min(H,Math.ceil(vh/S)))-Y(camY)-1);

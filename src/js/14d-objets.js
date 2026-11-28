@@ -58,6 +58,20 @@ Object.assign(ITEMS,{
     art:["     ▄▄        ", "   ▄████▄  ▄▄  ", "  ████████████ ", "   ▀████████▀  ", "      ▀▀▀▀     "],
     col:[".....11........", "...11w111..11..", "..111111111w11.", "...1111111111..", "......1111....."]}});
 Object.assign(FAB_PRIX,{berserk:20,camo:24,balise:12,court:16,phaseur:45});
+/* Sonar (28 novembre 2026, étape 5) : accessoire du FABLAB en cinq versions, sonar3 … sonar7. Les ennemis à N cases (distance
+   en cases, diagonales comprises) se montrent par un point rouge, même hors de vue et à travers les murs : le même point que
+   l'antenne et le hack TRAQUE (10-rendu, mini-carte). Plusieurs portés : le meilleur compte (sonarPortee). Rien à voir avec
+   le sonar des gisements, l'onde émise à l'arrivée sur un niveau (G.sonar, 10-rendu). Plans : SONAR_RANG ; prix croissants. */
+const SONAR_VERS=[3,4,5,6,7],SONAR_RANG={3:1,4:3,5:5,6:7,7:9},SONAR_PRIX={3:30,4:45,5:60,6:80,7:100};
+for(const v of SONAR_VERS){ITEMS['sonar'+v]={n:'Sonar '+v,slot:'acc',sonar:v,mod:{},eff:`Ennemis signalés à ${v} cases, même hors de vue`,
+  d:`Ce qui bouge derrière la roche renvoie l’onde : ${NOM_FOREUSE} l’entend avant de le voir. Tout ennemi à ${v} cases ou moins se montre par un point rouge, même derrière un mur.`,
+  art:["   ▄▀▀▀▀▀▀▀▄   ", "  █ ·  │    █  ", `  █ ── ${v} ── █  `, "  █    │  · █  ", "   ▀▄▄▄▄▄▄▄▀   "],
+  col:["...333333333...", "..3.r..2....3..", "..3.22.w.22.3..", "..3....2..r.3..", "...333333333..."]};
+  FAB_PRIX['sonar'+v]=SONAR_PRIX[v];}
+// portée du meilleur Sonar porté (0 : aucun)
+const sonarPortee=()=>{let r=0;for(const o of (G&&G.inv)||[])if(o.eq){const d=ITEMS[o.k];if(d&&d.sonar>r)r=d.sonar;}return r;};
+// ce qui bouge : une mine posée ne renvoie pas l'onde
+const sonarVoit=b=>{const r=sonarPortee();return r>0&&!(BEASTS[b.sp]||{}).mine&&Math.max(Math.abs(b.x-G.px),Math.abs(b.y-G.py))<=r;};
 
 /* ----- Ce que la foreuse sait ----- */
 // zone d'effet d'un consommable : r = 0 une case, 1 l'explosion (3 × 3 et 5 cases autour), 'f' le disque du fumigène ; la visée, elle,
@@ -179,29 +193,34 @@ function phaseArrive(m){addFx({kind:'phase',x:G.px,y:G.py,robot:1,dur:PHASE_DUR}
 
 /* ----- Butin ----- */
 // objets simples d'abord, les meilleurs plus bas
-const PLAN_RANG=k=>{const d=ITEMS[k];return ['repar','batterie','fumigene','balise'].includes(k)?1:d.conso||d.slot==='acc'?2:3;};
+// Sonar (28 novembre 2026) : rang = niveau d'apparition + 1 (Sonar 3 dès le niveau 1, 4 au niveau 2, 5 au 4, 6 au 6, 7 au 8)
+const PLAN_RANG=k=>{const d=ITEMS[k];if(d.sonar)return SONAR_RANG[d.sonar];
+  return ['repar','batterie','fumigene','balise'].includes(k)?1:d.conso||d.slot==='acc'?2:3;};
 const nivCarte=()=>nivBorne((typeof G!=='undefined'&&G&&G.niv)||(typeof NIV_GEN==='number'?NIV_GEN:1));
-let PLANS_POSES={};   // plans déjà posés sur la carte en cours de génération : pas deux fois le même
-function planTire(){const s=savoir(),niv=nivCarte(),lib=Object.keys(FAB_PRIX).filter(k=>ITEMS[k]&&!s.plans[k]&&!PLANS_POSES[k]);
-  let l=lib.filter(k=>PLAN_RANG(k)<=niv);if(!l.length)l=lib.filter(k=>PLAN_RANG(k)<=niv+1);if(!l.length)return 'matiere';
-  const k=l[rnd(0,l.length-1)];PLANS_POSES[k]=1;return 'plan_'+k;}
+/* 28 novembre 2026 (étape 5) : plus aucun plan n'est posé ni lâché. Les plans ne viennent que des terminaux (ENCODAGE →
+   BLUEPRINT, 14i-blueprints.js). Ce que les plans occupaient revient à la Matière, aux capsules et à l'équipement. */
+let PLANS_POSES={};   // (vestige, remis à zéro par la génération)
 const CONSO_POIDS=[['repar',5],['batterie',4],['fumigene',3],['charge',3],['berserk',2],['camo',2],['balise',2],['court',2],
   ['phaseur',2]];
 function consoTire(){let t=CONSO_POIDS.reduce((a,c)=>a+c[1],0),r=Math.random()*t;
   for(const [k,p] of CONSO_POIDS){if((r-=p)<0)return k;}return 'repar';}
-function equipTire(){const l=Object.keys(ITEMS).filter(k=>ITEMS[k].slot&&!ITEMS[k].hack&&!ITEMS[k].base&&k!=='usine'&&PLAN_RANG(k)<=nivCarte()+1);
+// le Sonar ne se trouve pas : il se fabrique (plan au terminal)
+function equipTire(){const l=Object.keys(ITEMS).filter(k=>ITEMS[k].slot&&!ITEMS[k].hack&&!ITEMS[k].base&&!ITEMS[k].sonar&&k!=='usine'&&PLAN_RANG(k)<=nivCarte()+1);
   return l.length?l[rnd(0,l.length-1)]:'matiere';}
 // contenu d'un coffre : dépôt derrière une grille, appât d'une salle piégée, pièce secrète
+// 28 novembre 2026 : le plan d'un dépôt devient deux blocs de Matière ; celui d'une salle piégée, un équipement ; celui d'une
+// pièce secrète (une fois sur deux), une capsule
 function butinCoffre(q){const h=p=>Math.random()<p;
-  if(q==='depot')return [planTire(),consoTire(),h(.5)?equipTire():consoTire(),'matiere'];
-  if(q==='piege')return [h(.5)?planTire():equipTire(),consoTire(),'matiere'];
-  return [consoTire(),'matiere',...(h(.5)?[planTire()]:[]),...(h(.25)?['puissance']:[])];}
+  if(q==='depot')return ['matiere',consoTire(),h(.5)?equipTire():consoTire(),'matiere','matiere'];
+  if(q==='piege')return [equipTire(),consoTire(),'matiere'];
+  return [consoTire(),'matiere',...(h(.5)?[consoTire()]:[]),...(h(.25)?['puissance']:[])];}
 // un robot abattu lâche parfois un objet (les relais d'une salle piégée, jamais : b.nd)
 // Un objet au plus par robot, quel que soit le nombre de coups qui l'achèvent au même battement (b.butin, 25 novembre 2026).
 function butinMort(b){if(b&&typeof hackDetruit==='function'&&!(BEASTS[b.sp]||{}).mine)hackDetruit(b);   // hack RECYCLAGE (14g)
   if(!b||b.nd||b.butin)return;b.butin=1;const sp=BEASTS[b.sp],p=DROPS[sp.key]||0;if(Math.random()*100>=p)return;
   const i0=idx(b.x,b.y);if(blocks(G.t[i0])||G.t[i0]===DEEP)return;
-    const r=Math.random(),k=r<.4?'matiere':r<.75?consoTire():r<.93?planTire():equipTire();
+    // 28 novembre 2026 : Matière 50 %, capsule 38 %, équipement 12 % (avant : 40 / 35 / plan 18 / 7)
+    const r=Math.random(),k=r<BUTIN_ROBOT.matiere?'matiere':r<BUTIN_ROBOT.matiere+BUTIN_ROBOT.conso?consoTire():equipTire();
   const i=caseSol(b.x,b.y,true);   // un objet déjà là : celui-ci roule sur la case libre la plus proche (22 novembre 2026)
   G.items=G.items||{};(G.items[i]=G.items[i]||[]).push(k);
     if(typeof vis!=='undefined'&&vis[i])sayMore(`${LeNom(sp)} lâche quelque chose.`,'good');}
@@ -215,6 +234,7 @@ function butinMort(b){if(b&&typeof hackDetruit==='function'&&!(BEASTS[b.sp]||{})
    Appelé à la fin de la génération, après les machines. */
 // poids d'un lieu dans le tirage des meilleurs butins : une pièce fermée à clé pèse six culs-de-sac
 const BUTIN_POIDS={ferme:6,impasse:1,autres:.5};
+const BUTIN_ROBOT={matiere:.5,conso:.38,equip:.12};
 function butinExplo(){const N=W*H,t=G.t,dep=idx(G.px,G.py),s0=G.sites&&G.sites[0],site=s0?idx(s0.x,s0.y):-1;G.items=G.items||{};
   G.butinN={secret:0,explo:0,ferme:0,impasse:0,autres:0};
   const pose=(i,k)=>{(G.items[i]=G.items[i]||[]).push(k);};
@@ -264,15 +284,16 @@ function butinExplo(){const N=W*H,t=G.t,dep=idx(G.px,G.py),s0=G.sites&&G.sites[0
     cand.sort((a,b)=>dc[b]-dc[a]);
     for(const i of cand){if(pris.length>=nb)break;
       if(pris.some(j=>Math.max(Math.abs(i%W-j%W),Math.abs(((i/W)|0)-((j/W)|0)))<8))continue;pris.push(i);G.butinN.autres++;}}
-  // Qui reçoit quoi : une PRÉFÉRENCE, pas une règle fixe (24 novembre 2026). Le Module de puissance, puis le plan, puis la capsule
+  // Qui reçoit quoi : une PRÉFÉRENCE, pas une règle fixe (24 novembre 2026). Le Module de puissance, puis l'équipement (le plan jusqu'au 28 novembre 2026), puis la capsule
   // sont tirés au sort parmi les lieux encore vides, chaque lieu pesant selon sa priorité (BUTIN_POIDS) ; le reste reçoit de la Matière.
   {const nF=G.butinN.ferme,nI=G.butinN.impasse,poids=pris.map((_,n)=>n<nF?BUTIN_POIDS.ferme:n<nF+nI?BUTIN_POIDS.impasse:BUTIN_POIDS.autres),
       lot=pris.map(()=>null);
-    for(const k of ['puissance','plan','conso']){const vides=pris.map((_,n)=>n).filter(n=>!lot[n]);if(!vides.length)break;
+    // 28 novembre 2026 : le plan cède sa place à un équipement
+    for(const k of ['puissance','equip','conso']){const vides=pris.map((_,n)=>n).filter(n=>!lot[n]);if(!vides.length)break;
       let r=Math.random()*vides.reduce((a,n)=>a+poids[n],0),choix=vides[vides.length-1];
       for(const n of vides){r-=poids[n];if(r<0){choix=n;break;}}
       lot[choix]=k;}
-    pris.forEach((i,n)=>pose(i,lot[n]==='plan'?planTire():lot[n]==='conso'?consoTire():lot[n]||'matiere'));}
+    pris.forEach((i,n)=>pose(i,lot[n]==='equip'?equipTire():lot[n]==='conso'?consoTire():lot[n]||'matiere'));}
   G.butinN.explo=pris.length;}
 
 /* ----- Ramassage : la Matière rejoint la réserve, un plan s'apprend, le reste va au sac ----- */
@@ -496,9 +517,9 @@ function buildItems(){TOUT_CONNU=true;
         f.push(champ('Bonus',`de.${k}.p`,d.de.p,0,60));}
       for(const m in d.mod||{})f.push(champ(MODS[m]?MODS[m][0]:m,`mod.${k}.${m}`,d.mod[m],-200,200));
       const tu=(k==='matiere'?TL.mat2:TL[k==='cle'?'cle':'o_'+k])||TL.objet;let ic='';try{ic=tu.toDataURL();}catch(e){}
-      h+=`<div class="itl"><img src="${ic}" alt="" width="32" height="32"><div><b>${(d.vrai||d).n}</b><small>${k in FAB_PRIX?'fabricable (plan)':k==='puissance'?'se trouve, ne se fabrique pas':k==='matiere'?'butin':d.base?'équipement de départ':'se trouve'} · ${(d.vrai||d).eff||(d.slot?fabEffet(k):'')}</small></div><div class="itfs">${f.join('')||'<i>rien à régler</i>'}</div></div>`;}}
+      h+=`<div class="itl"><img src="${ic}" alt="" width="32" height="32"><div><b>${(d.vrai||d).n}</b><small>${k in FAB_PRIX?'fabricable (plan au terminal)':k==='puissance'?'se trouve, ne se fabrique pas':k==='matiere'?'butin':d.base?'équipement de départ':'se trouve'} · ${(d.vrai||d).eff||(d.slot?fabEffet(k):'')}</small></div><div class="itfs">${f.join('')||'<i>rien à régler</i>'}</div></div>`;}}
   if(typeof hacksLabHTML==='function')h+=hacksLabHTML();   // famille « Hacks », en lecture (14g)
-  h+=`<h3>Butin des robots abattus (chance en %)</h3><div class="itl"><div></div><div><small>Ce qu’un robot lâche : Matière {µ} 40 %, capsule 35 %, plan 18 %, équipement 7 %.</small></div><div class="itfs">${BEASTS.map(b=>champ(b.n,`drops.${b.key}`,DROPS[b.key]||0,0,100)).join('')}</div></div>`;
+  h+=`<h3>Butin des robots abattus (chance en %)</h3><div class="itl"><div></div><div><small>Ce qu’un robot lâche : Matière {µ} ${Math.round(BUTIN_ROBOT.matiere*100)} %, capsule ${Math.round(BUTIN_ROBOT.conso*100)} %, équipement ${Math.round(BUTIN_ROBOT.equip*100)} %. Jamais de plan : les plans s’obtiennent aux terminaux (ENCODAGE → BLUEPRINT).</small></div><div class="itfs">${BEASTS.map(b=>champ(b.n,`drops.${b.key}`,DROPS[b.key]||0,0,100)).join('')}</div></div>`;
   $('itList').innerHTML=h;TOUT_CONNU=false;}
 function itemsLit(){const o=itemsEtat();for(const e of $('itList').querySelectorAll('input[data-c]')){const v=+e.value;
   if(!isFinite(v))continue;const c=e.dataset.c.split('.');let p=o;for(let n=0;n<c.length-1;n++)p=p[c[n]]=p[c[n]]||{};

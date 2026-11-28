@@ -1133,3 +1133,18 @@ Mastok + 2 Crabos, foreuse nue (stats du niveau 1), puis avec les hacks de comba
 
 Aux rangs 1-3 l'effet se perd dans le bruit (modeste, comme voulu) ; aux rangs profonds, les hacks compensent des ennemis plus
 durs. Détection, fuite et le reste du combat : inchangés (empreinte identique, aucun hack porté dans ces mesures).
+
+### Blueprints au terminal, plus aucun plan au sol (28 novembre 2026)
+
+Plans obtenables par niveau (12 cartes par recette ; robots : chance de butin × part des plans, si on les abat tous) :
+
+| Niveau | Avant : au sol | Avant : robots | Avant : total | Après : terminaux complets (1 plan chacun, choisi parmi 3) |
+|---|---|---|---|---|
+| 1 (atterrissage) | 1,58 | 0,74 | 2,3 | 2,50 |
+| 2 (cavernes) | 2,08 | 0,64 | 2,7 | 2,50 |
+| 3 (base) | 2,83 | 0,89 | 3,7 | 2,67 |
+
+Butin redistribué : robots abattus Matière 50 % / capsule 38 % / équipement 12 % (avant 40 / 35 / plan 18 / 7) ; dépôt : le plan
+devient deux blocs de Matière ; salle piégée : un équipement ; pièce secrète (une fois sur deux) : une capsule ; vitrine : trois blocs
+de Matière ; butin d'exploration : le lot « plan » devient un équipement. `outils/simul.py tout` : détection, fuite, combat
+inchangés (le Sonar porté ne change rien au duel : 78-79 de vie restante, comme la foreuse nue).

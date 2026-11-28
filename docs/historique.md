@@ -361,3 +361,8 @@ Ce qui a été remplacé, et pourquoi (demandes de l'utilisateur, « chaque mach
   (2, puis 3, 4, 5 aux niveaux 3, 6, 9). Familles Base / Tir / Noyau ; Tir défini mais jamais proposé (pas d'arme de tir) ; hack
   « Voix » refusé par l'utilisateur. SYMBIOSE donne une réparation lente (+1 vie / 4 battements) : seule exception, payée en
   énergie, à « pas de réparation automatique ».
+- 28 novembre 2026 : blueprints choisis parmi 3 au terminal (ENCODAGE → BLUEPRINT), appris aussitôt. Retiré : les plans au sol,
+  dans les dépôts, salles piégées, vitrines, pièces secrètes et le butin des robots (depuis le 22 novembre) ; leur place va à la
+  Matière, aux capsules et à l'équipement. Sonar 3 à 7 (accessoire du FABLAB, ennemis en point rouge). Génération des terminaux
+  rendue sûre : repli réduit 2 × 2 puis porte dérobée pour l'action locale, pose dans les couloirs ou sur une case encombrée,
+  un terminal près du FABLAB.

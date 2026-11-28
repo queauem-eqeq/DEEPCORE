@@ -61,7 +61,7 @@
   // F ter. butin d'exploration
   {let ex=0,se=0,pu=0,pl=0,mat=0;const K2=12;for(let k=0;k<K2;k++){carte(['citadelle','blockhaus','piege','ruche'][k%4]);ex+=G.butinN.explo;se+=G.butinN.secret;const l=Object.values(G.items).flat();pu+=l.filter(o=>o==='puissance').length;pl+=l.filter(o=>o.startsWith('plan_')).length;mat+=l.filter(o=>o==='matiere').length;}
     v('butin d’exploration : des culs-de-sac garnis sur chaque carte',ex/K2>=2,`${(ex/K2).toFixed(1)} par carte, ${(se/K2).toFixed(1)} pièces secrètes garnies`);
-    v('par carte : modules de puissance, plans, Matière au sol',pu/K2>=.8,`${(pu/K2).toFixed(1)} · ${(pl/K2).toFixed(1)} · ${(mat/K2).toFixed(1)}`);}
+    v('par carte : modules de puissance, plans (aucun depuis le 28 novembre 2026), Matière au sol',pu/K2>=.8&&pl===0,`${(pu/K2).toFixed(1)} · ${(pl/K2).toFixed(1)} · ${(mat/K2).toFixed(1)}`);}
   // G. station
   if(trouve(()=>G.t.includes(STATION))){const i=G.t.indexOf(STATION);G.st.vie=40;G.st.energie=10;machBump(i%W,(i/W)|0,1,0);v('station : vie et énergie au maximum, une fois',G.st.vie===G.st.vieMax&&G.st.energie>=G.st.energieMax-1&&G.art[i]===1);}
   v('fabricateur présent sur la carte',G.t.includes(FABRIC)||trouve(()=>G.t.includes(FABRIC)));

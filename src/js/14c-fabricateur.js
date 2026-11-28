@@ -36,10 +36,10 @@ const FAB_PRIX={repar:18,batterie:14,fumigene:16,charge:34,accu:40,optique:40,se
 const FAB_DUREE=300;
 let FAB_CASE=-1,FAB_SEL=0;
 // ce que propose ce fabricateur : tous les consommables, et quatre équipements à lui
-// 22 novembre 2026 : seulement les objets dont la foreuse a trouvé le plan (au sol, sur les robots, dans les dépôts)
+// 22 novembre 2026 : seulement les objets dont la foreuse a le plan (depuis le 28 novembre 2026 : appris aux terminaux)
 function fabListe(i){const p=savoir().plans;
   return Object.keys(FAB_PRIX).filter(k=>ITEMS[k]&&p[k]).sort((a,b)=>(ITEMS[a].conso?0:1)-(ITEMS[b].conso?0:1)||FAB_PRIX[a]-FAB_PRIX[b]);}
-const fabEffet=k=>{const d=ITEMS[k];if(d.conso)return d.eff||'';const l=[];if(d.de)l.push('dégâts '+deTxt(d.de));
+const fabEffet=k=>{const d=ITEMS[k];if(d.conso)return d.eff||'';if(d.sonar)return SLOTS[d.slot].nom+' · '+d.eff;const l=[];if(d.de)l.push('dégâts '+deTxt(d.de));
   for(const m in d.mod||{}){const v=d.mod[m],M=MODS[m];if(M)l.push(`${M[0]} ${v>0?'+':'−'}${Math.abs(v)}${M[2]||''}`);}
   return SLOTS[d.slot].nom+(l.length?' · '+l.join(' · '):'');};
 // famille d'un objet, pour la couleur de son nom (22 novembre 2026) : consommable, accessoire, arme ou armure
@@ -67,7 +67,7 @@ function fabVue(){const k=fabListe(FAB_CASE)[FAB_SEL],d=k&&ITEMS[k];if(!d){$('fa
 function fabSel(n){if(n===FAB_SEL)return;FAB_SEL=n;
   for(const b of $('fabList').children)b.classList.toggle('sel',+b.dataset.n===n);fabVue();}
 function fabOpen(i){if(TRAV)stopTravel();if(EXPL)stopExplore();FAB_CASE=i;FAB_SEL=0;
-  $('fabMsg').textContent=fabListe(i).length?'Choisissez un objet : Entrée ou clic pour le fabriquer.':'Aucun plan connu : le FABLAB ne sait rien produire. Les plans se trouvent au sol, dans les dépôts et sur les robots abattus.';
+  $('fabMsg').textContent=fabListe(i).length?'Choisissez un objet : Entrée ou clic pour le fabriquer.':'Aucun plan connu : le FABLAB ne sait rien produire. Les plans s’obtiennent aux terminaux : ENCODAGE → BLUEPRINT.';
   fabBuild();$('fabric').hidden=false;$('fabric').querySelector('.mcard').focus();SFX.spot();}
 function fabClose(){$('fabric').hidden=true;FAB_CASE=-1;render();}
 function fabFais(n){const l=fabListe(FAB_CASE),k=l[n];if(!k||G.over)return;FAB_SEL=n;const p=FAB_PRIX[k],m=G.st.matiere||0;

@@ -124,10 +124,10 @@ const signe=v=>(v>0?'+':'−')+Math.abs(v);
 // « DEG +4 » ; la durée du coup se lit mieux en clair : « coup rapide (75) », 100 étant le coup ordinaire
 const modLib=(k,v)=>k==='coup'?`coup ${v<0?'rapide':'lent'} (${DUR.coup+v})`:`${MODS[k][0]} ${signe(v)}${MODS[k][2]}`;
 function modHTML(d){if(d.base)return 'Arme de référence : pas de modificateur';
-  if(d.hack)return `<span style="color:var(--c1)">${d.eff}</span>`;   // hack (14g) : son effet chiffré
+  if(d.hack||d.sonar)return `<span style="color:var(--c1)">${d.eff}</span>`;   // hack (14g), Sonar (14d) : son effet chiffré
   if(d.conso)return `<span style="color:var(--c1)">${d.eff}</span> · usage unique`;
   return Object.entries(d.mod||{}).map(([k,v])=>`<span style="color:${v*MODS[k][1]>0?'var(--c1)':'var(--life)'}">${modLib(k,v)}</span>`).join(' · ');}
-const modTxt=d=>d.hack?d.eff:Object.entries(d.mod||{}).map(([k,v])=>modLib(k,v)).join(', ');
+const modTxt=d=>d.hack||d.sonar?d.eff:Object.entries(d.mod||{}).map(([k,v])=>modLib(k,v)).join(', ');
 const typeNom=d=>d.conso?'Consommable':d.hack?'Hack '+HACK_FAM[d.fam].n.toLowerCase():SLOTS[d.slot].nom;
 const accord=d=>(d.f?'e':'')+(d.pl?'s':'');   // « équipée », « utilisés »
 // total apporté par l'équipement porté sur une stat (sert à colorer le panneau Statistiques)

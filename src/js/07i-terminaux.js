@@ -76,47 +76,73 @@ function termEtat(i){const s=termSorte(i);if(!s)return null;G.term=G.term||{};le
   return m;}
 
 /* ----- Génération (appelée par niveau(), après le butin et les épaves) -----
-   1. Au moins TERM_MIN terminaux complets dans le complexe, dont un à TERM_R cases au plus du site ou d'un FABLAB, si l'artefact
+   1. Au moins TERM_MIN terminaux complets dans le complexe, dont un à TERM_R cases au plus d'un FABLAB et un du site (autant que la carte le permet), si l'artefact
       « Terminal » est permis à ce niveau (Lab → Artefacts : un joueur qui l'a coupé n'en a pas).
    2. Les actions locales de chaque terminal.
    3. Aucun terminal n'a d'action locale : un petit réduit clos est creusé derrière le mur de la salle d'un terminal, butin dedans ;
-      la CONNEXION de ce terminal fait tomber la cloison. */
+      la CONNEXION de ce terminal fait tomber la cloison. Repli garanti : réduit 2 × 2, puis porte dérobée dans un mur de la salle. */
 const TERM_MIN=2;
 function terminauxFin(){G.term={};if(!G.art)G.art={};const t=G.t,N=W*H;
   const BD=BATI_DER,site=G.sites&&G.sites[0]?idx(G.sites[0].x,G.sites[0].y):-1,dep=idx(G.px,G.py);
   const pieces=BD&&G.batis&&G.batis.length?BD.strs.flatMap(S=>S.pieces).filter(p=>p.g!=='couloir'&&p.c.length>=9):[];
   const complets=()=>{const l=[];for(const k in G.art){const i=+k;if(t[i]===TERMINAL&&termSorte(i)==='terminal')l.push(i);}return l;};
-  if(pieces.length&&artOn('terminal')){
-    const libre=i=>t[i]===FLOOR&&i!==site&&i!==dep&&!(G.items&&G.items[i]&&G.items[i].length)&&!(G.cles&&G.cles[i])&&!(G.soc&&G.soc[i]!=null)
+  if(BD&&G.batis&&G.batis.length&&artOn('terminal')){
+    const libre=(i,charge)=>t[i]===FLOOR&&i!==site&&i!==dep&&(charge||!(G.items&&G.items[i]&&G.items[i].length))&&!(G.cles&&G.cles[i])&&!(G.soc&&G.soc[i]!=null)
       &&!(G.lz&&G.lz[i])&&!(G.vit&&G.vit[i]!=null)&&!(G.pieges||[]).some(p=>p.c===i)&&artLibre(BD.B,i,site);
     const murV=i=>D4.some(([dx,dy])=>t[idx(i%W+dx,((i/W)|0)+dy)]===WALL);
     const occupee=p=>p.c.some(i=>t[i]===TERMINAL||t[i]===ANTENNA||t[i]===FABRIC);
-    const pose=p=>{const c=p.c.filter(libre);if(!c.length)return -1;const m=c.filter(murV),l=m.length?m:c,i=l[rnd(0,l.length-1)];
+    // charge : repli, la case peut porter un objet, qui roule alors à côté
+    // mur : dernier repli, la console est encastrée dans un mur simple de la salle (le passage n'est jamais coupé)
+    const murLibre=(i,P)=>{const x=i%W,y=(i/W)|0;if(t[i]!==WALL||x<2||y<2||x>=W-2||y>=H-2||(BD.B.fixe&&BD.B.fixe[i]))return false;
+      return D4.some(([dx,dy])=>P.has(idx(x+dx,y+dy))&&t[idx(x+dx,y+dy)]===FLOOR)&&!D4.some(([dx,dy])=>{const v=t[idx(x+dx,y+dy)];return v===DOOR||v===LOCK||v===SECRET;});};
+    const pose=(p,charge)=>{let c;if(charge==='mur'){const P=new Set(p.c),v=new Set();
+        for(const q of p.c)for(const [dx,dy] of D4){const j=idx(q%W+dx,((q/W)|0)+dy);if(!v.has(j)){v.add(j);if(murLibre(j,P))(c=c||[]).push(j);}}c=c||[];}
+      else c=p.c.filter(i=>libre(i,charge));
+      if(!c.length)return -1;const m=charge==='mur'?c:c.filter(murV),l=m.length?m:c,i=l[rnd(0,l.length-1)];
+      const it=G.items&&G.items[i];if(it){delete G.items[i];t[i]=TERMINAL;const j=caseSol(i%W,(i/W)|0,false);(G.items[j]=G.items[j]||[]).push(...it);}
       const pris=new Set(complets().map(j=>G.art[j]%TERM_TXT.length)),k0=rnd(0,TERM_TXT.length-1);let k=k0;
       for(let n=0;n<TERM_TXT.length&&pris.has(k%TERM_TXT.length);n++)k++;
       t[i]=TERMINAL;G.art[i]=k%TERM_TXT.length;if(G.artN)G.artN.terminal=(G.artN.terminal||0)+1;return i;};
-    // un terminal près du site ou d'un FABLAB
-    const ancres=[];if(site>=0)ancres.push(site);for(let j=0;j<N;j++)if(t[j]===FABRIC)ancres.push(j);
-    const dA=i=>Math.min(...ancres.map(a=>termD2(a,i)));
-    if(ancres.length&&!complets().some(i=>dA(i)<=TERM_R*TERM_R)){
+    // un terminal près d'un FABLAB (28 novembre 2026 : les plans ne viennent plus que des terminaux), puis près du site
+    const fab=[];for(let j=0;j<N;j++)if(t[j]===FABRIC)fab.push(j);
+    for(const ancres of [fab,site>=0?[site]:[]]){const dA=i=>Math.min(...ancres.map(a=>termD2(a,i)));
+      if(!ancres.length||complets().some(i=>dA(i)<=TERM_R*TERM_R))continue;
       const l=pieces.filter(p=>!occupee(p)||p.c.some(i=>t[i]===FABRIC)).map(p=>[p,Math.min(...p.c.map(dA))]).sort((a,b)=>a[1]-b[1]);
       for(const [p] of l)if(pose(p)>=0)break;}
     for(const p of pieces.slice().sort(()=>Math.random()-.5)){if(complets().length>=TERM_MIN)break;if(!occupee(p))pose(p);}
-    for(const p of pieces.slice().sort(()=>Math.random()-.5)){if(complets().length>=TERM_MIN)break;pose(p);}}
+    for(const p of pieces.slice().sort(()=>Math.random()-.5)){if(complets().length>=TERM_MIN)break;pose(p);}
+    // repli (28 novembre 2026) : une carte à deux salles encombrées restait sans terminal (1 sur 700 au niveau 1). Couloirs et
+    // petites pièces, puis une case qui porte un objet, puis un mur de la salle.
+    const tous=BD.strs.flatMap(S=>S.pieces).filter(p=>!pieces.includes(p));
+    for(const p of tous.sort(()=>Math.random()-.5)){if(complets().length>=TERM_MIN)break;pose(p);}
+    for(const p of pieces.concat(tous)){if(complets().length>=TERM_MIN)break;pose(p,1);}
+    for(const p of pieces.concat(tous)){if(complets().length>=TERM_MIN)break;pose(p,'mur');}}
   // les actions de chaque machine
   const pris=new Set(),mach=[];for(const k in G.art){const i=+k;if(termSorte(i))mach.push(i);}
   for(const i of mach.sort(()=>Math.random()-.5)){const s=termSorte(i);
     G.term[i]={i,s,data:0,lu:null,act:s==='terminal'?termCibles(i,pris):[],liaison:0,hack:0,bp:0};}
   const T=Object.values(G.term).filter(m=>m.s==='terminal');
-  if(T.length&&!T.some(m=>m.act.length)&&BD)for(const m of T.sort(()=>Math.random()-.5))if(termCloison(m,BD.B,pieces))break;}
+  // repli garanti (28 novembre 2026, étape 5) : réduit 3 × 3 ; sinon réduit 2 × 2 ; sinon porte dérobée dans un mur de la salle
+  if(T.length&&!T.some(m=>m.act.length)&&BD){const L=T.sort(()=>Math.random()-.5);
+    const P=BD.strs.flatMap(S=>S.pieces);
+    L.some(m=>termCloison(m,BD.B,pieces))||L.some(m=>termCloison(m,BD.B,pieces,1))||L.some(m=>termDerobee(m,BD.B,pieces))||L.some(m=>termDerobee(m,BD.B,P));}}
+// la porte dérobée de repli : un mur simple entre la salle du terminal et un sol voisin hors de la salle devient SECRET
+function termDerobee(m,B,pieces){const t=G.t,p=termPiece(m,pieces);if(!p)return false;const dans=new Set(p.c);
+  for(const f of p.c.filter(i=>t[i]===FLOOR).sort(()=>Math.random()-.5)){const fx=f%W,fy=(f/W)|0;
+    for(const [dx,dy] of D4){const cx=fx+dx,cy=fy+dy,ox=cx+dx,oy=cy+dy;if(ox<1||oy<1||ox>=W-1||oy>=H-1)continue;
+      const c=idx(cx,cy),o=idx(ox,oy);if(t[c]!==WALL||(B.fixe&&B.fixe[c])||dans.has(o)||!canWalk(t[o],true)||t[o]===SECRET)continue;
+      t[c]=SECRET;m.act.push({t:'secret',c,fait:0});return true;}}
+  return false;}
 // le réduit à cloison : 3 × 3 à 4 × 3 cases dans la masse (mur, roche), derrière un mur de la salle du terminal
-function termCloison(m,B,pieces){const t=G.t,p=pieces.find(p=>p.c.includes(m.i));if(!p)return false;
+// la salle d'un terminal (celle qu'il touche, s'il est encastré dans un mur)
+const termPiece=(m,pieces)=>pieces.find(p=>p.c.includes(m.i))||pieces.find(p=>D4.some(([dx,dy])=>p.c.includes(idx(m.i%W+dx,((m.i/W)|0)+dy))));
+function termCloison(m,B,pieces,petit){const t=G.t,p=termPiece(m,pieces);if(!p)return false;
   const plein=(x,y)=>{if(x<2||y<2||x>=W-2||y>=H-2)return false;const i=idx(x,y),v=t[i];
     return (v===WALL||v===ROCK||v===MOUNT||v===HARD)&&!(B.fixe&&B.fixe[i])&&!(G.ore&&G.ore[i])&&!(G.epI&&G.epI[i]!=null);};
   const sols=p.c.filter(i=>t[i]===FLOOR).sort(()=>Math.random()-.5);
   for(const f of sols){const fx=f%W,fy=(f/W)|0;
     for(const [dx,dy] of D4.slice().sort(()=>Math.random()-.5)){const cx=fx+dx,cy=fy+dy;if(t[idx(cx,cy)]!==WALL||!plein(cx,cy))continue;
-      const w=rnd(3,4),h=3,dec=rnd(0,(dx?h:w)-1),x0=dx>0?cx+1:dx<0?cx-w:cx-dec,y0=dy>0?cy+1:dy<0?cy-h:cy-dec;let ok=true;
+      const w=petit?2:rnd(3,4),h=petit?2:3,dec=rnd(0,(dx?h:w)-1),x0=dx>0?cx+1:dx<0?cx-w:cx-dec,y0=dy>0?cy+1:dy<0?cy-h:cy-dec;let ok=true;
       for(let y=y0-1;y<=y0+h&&ok;y++)for(let x=x0-1;x<=x0+w;x++)if(!plein(x,y)){ok=false;break;}
       if(!ok)continue;
       const sol=[];for(let y=y0;y<y0+h;y++)for(let x=x0;x<x0+w;x++){t[idx(x,y)]=FLOOR;sol.push(idx(x,y));}

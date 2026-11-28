@@ -19,6 +19,12 @@
       if(G.t.some((v,i)=>v===TERMINAL&&!termEtat(i)))min=-1;}
     ok(min>=2,`${rec} : ${(tot/K).toFixed(1)} terminaux complets par carte, ${min} au moins ; actions ${JSON.stringify(nact)}`);
     if(rec==='atterrissage')ok(loc===K,`niveau 1 : un terminal avec une action locale sur ${loc}/${K} cartes`);}
+  // repli de la génération : toutes les salles encombrées d'objets, plus aucun terminal → la génération en pose quand même deux
+  {carte('atterrissage');for(const k in G.art){const i=+k;if(G.t[i]===TERMINAL&&termSorte(i)==='terminal'){G.t[i]=FLOOR;delete G.art[k];}}
+    for(const p of BATI_DER.strs.flatMap(S=>S.pieces))for(const i of p.c)if(G.t[i]===FLOOR&&!(G.items[i]&&G.items[i].length))G.items[i]=['matiere'];
+    const n0=Object.values(G.items).flat().length;terminauxFin();const T=terms(),red=T.flatMap(m=>m.act.filter(a=>a.t==='cloison').flatMap(a=>a.sol)),
+      n1=Object.values(G.items).flat().length-red.reduce((s,j)=>s+((G.items[j]||[]).length),0);   // le butin d'un réduit creusé à l'occasion ne compte pas
+    ok(T.length>=2&&n1===n0&&T.some(m=>m.act.length),`repli : salles encombrées, ${T.length} terminaux posés quand même, objets déplacés (${n0} → ${n1}), action locale ${T.some(m=>m.act.length)?'oui':'non'}`);}
   const reprend=t=>{const v=vu[t];if(!v)return false;G=v[1];BATI_DER=v[2];W=G.w;H=G.h;computeFOV();render();return true;};
   const ferme=()=>{if(!$('terminal').hidden)closeTerminal();};
   const lignes=()=>[...$('termMenu').querySelectorAll('.tsec')].map(s=>s.querySelector('h3').textContent+':'+[...s.querySelectorAll('.tl')].map(b=>(b.disabled?'-':'')+b.dataset.a).join(','));
@@ -36,7 +42,7 @@
     const n0=G.st.liaisons||0;lance('liaison');
     ok(m.liaison===n0+1&&G.st.liaisons===n0+1&&/TENTATIVE/.test($('termOut').textContent)&&!lance('liaison'),`liaison : tentative ${m.liaison}, une seule par machine`);
     lance('hack');ok(m.hack===0&&$('termOut').querySelectorAll('.hkc').length===3,'ENCODAGE → HACK : trois cartes (étape 4, détail dans test-hacks.js)');
-    lance('bp');ok(m.bp===0&&/INDISPONIBLE/.test($('termOut').textContent),'ENCODAGE → BLUEPRINT : module indisponible (étape suivante)');
+    lance('bp');ok(m.bp===0&&$('termOut').querySelectorAll('.bpc').length===3,'ENCODAGE → BLUEPRINT : trois cartes (étape 5, détail dans test-blueprints.js)');
     k('Escape');ok($('terminal').hidden,'Échap ferme la fenêtre');
     termOuvre(m.i);ok(lignes()[0]==='DATA:-undefined','rouvert : la DATA reste lue');ferme();}
   // boîte noire
@@ -56,10 +62,12 @@
     G.art[i]=2;delete G.term;let err=null;try{termOuvre(i);ferme();termOuvre(Object.keys(G.art).map(Number).find(j=>G.t[j]===TERMINAL));ferme();termOuvre(i);}catch(e){err=e;}
     ferme();ok(!err&&G.term&&G.term[i].s==='antenne'&&/EN SERVICE/.test($('termMenu').textContent),`ancienne partie relue sans erreur${err?' : '+err:''}`);}
   // 3. actions CONNEXION
-  // grille : rare (une porte à clé passe avant) ; sans carte qui la propose, on la confie à la main au terminal le plus proche
-  if(!vu.grille)for(let k=0;k<10&&!vu.grille;k++){carte(k%2?'cavernes':'base');const n=(G.circ||[]).findIndex(c=>c.k==='socle'&&c.cib.some(q=>q.t==='grille'&&q.c.some(j=>G.t[j]===GRILLE)));
-    const T=terms();if(n<0||!T.length)continue;const c=G.circ[n].c,m=T.sort((a,b)=>termD2(a.i,c)-termD2(b.i,c))[0];m.act.push({t:'grille',k:n,fait:0});
-    vu.grille=[GEN.recette,G,BATI_DER];out.push('(grille confiée à la main à un terminal : aucune carte ne l’a proposée seule)');}
+  // grille : rare sur les cartes tirées (une porte à clé passe avant) ; cas construit à la main, toujours le même : une grille et
+  // son socle dans la salle d'un terminal, confiés à ce terminal (28 novembre 2026 : l'essai dépendait du hasard)
+  {carte('atterrissage');const m=terms()[0],p=pieces().find(p=>p.c.includes(m.i)),l=p.c.filter(i=>G.t[i]===FLOOR&&i!==m.i&&!(G.items[i]&&G.items[i].length));
+    const j=l[0],s0=l[l.length-1],n=(G.circ=G.circ||[]).length;G.soc=G.soc||{};G.t[j]=GRILLE;G.soc[s0]=n;
+    G.circ.push({k:'socle',c:s0,on:0,perm:0,cib:[{t:'grille',c:[j],sous:[FLOOR]}]});m.act.push({t:'grille',k:n,fait:0});
+    vu.grille=['atterrissage',G,BATI_DER];}
   const action=(t,verifie)=>{if(!reprend(t)){ok(false,`${t} : aucune carte ne l’a proposée`);return;}
     const m=terms().find(m=>m.act.some(a=>a.t===t&&!a.fait&&termDispo(a)));if(!m){ok(false,`${t} : déjà utilisée`);return;}
     const n=m.act.findIndex(a=>a.t===t),a=m.act[n],avant=verifie(a,true);termOuvre(m.i);

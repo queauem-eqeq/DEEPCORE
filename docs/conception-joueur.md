@@ -18,9 +18,9 @@ retouchables dans le Tile editor (groupe « Machines »).
 | **Pile énergétique** | La foreuse la pousse en avançant dessus, jamais en diagonale, sur sol libre ; **elle passe les portes**. Posée sur son **socle**, elle alimente ce qui y est relié ; retirée, tout se referme. Elle arrête les lasers. |
 | **Distributeur de pile** (l'ancien chargeur) | **La pile attend à côté de lui.** Avancer dessus la rappelle à cette place : une pile coincée ne bloque rien pour de bon. |
 | **Socle** | Posé **près de ce qu'il alimente** : devant la grille (2 à 4 pas), ou au pied du pont. La pile et son distributeur sont à 6-18 pas, dans une pièce voisine quand il y en a une. |
-| **Grille d'énergie** | Ferme l'unique entrée d'un **dépôt** (un plan, deux capsules ou une capsule et un équipement, de la Matière). Elle ne garde jamais le chemin du site. |
-| **Salle piégée** | Un butin au milieu de la pièce (plan ou équipement, capsule, Matière) ; 8 à 16 **relais cachés dans des niches** (moins si les murs manquent de place) des murs (tuile « niche », visible : le piège se lit). Ramasser l'appât les fait surgir, déjà en chasse. Ils ne lâchent rien. L'exploration automatique ne touche pas à l'appât. |
-| **Vitrines** | Un banc **bâti contre un mur de la pièce**, **trois niches côte à côte séparées par des murs vitrés** — `[niche][vitre][niche][vitre][niche]` — un lot dans chacune (un plan, un équipement, deux capsules) : **on n'en emporte qu'un**, les deux autres se verrouillent. Idée des coffres de Brogue. Refaites le 26 novembre 2026 d'après le module « Vitrine REF » du joueur : avant, c'étaient trois socles éparpillés dans la pièce, sans une seule vitre, et rien ne disait que c'était un choix. Le banc fait **deux rangées** : les niches contre le mur du fond, puis **une porte devant chacune**, les cloisons vitrées traversant les deux rangées. Ses deux bouts sont soit bâtis, soit des murs de la pièce déjà là (renfoncement de cinq, coin de six, banc de sept) ; la pièce peut avoir **jusqu'à deux entrées** et compter jusqu'à 120 cases. Ces quatre combinaisons, essayées le 26 novembre, font passer la vitrine de **1 carte sur 10 à 1 sur 3** ; n'essayer que le renfoncement et le banc complet la rendait introuvable. **L'exploration automatique ne les traverse pas et s'arrête dès qu'elle en voit une** : marcher sur une niche prendrait le lot et condamnerait les deux autres, le choix revient au joueur. |
+| **Grille d'énergie** | Ferme l'unique entrée d'un **dépôt** (trois blocs de Matière, deux capsules ou une capsule et un équipement ; jusqu'au 28 novembre 2026, un plan au lieu de deux des blocs). Elle ne garde jamais le chemin du site. |
+| **Salle piégée** | Un butin au milieu de la pièce (équipement, capsule, Matière ; plus de plan depuis le 28 novembre 2026) ; 8 à 16 **relais cachés dans des niches** (moins si les murs manquent de place) des murs (tuile « niche », visible : le piège se lit). Ramasser l'appât les fait surgir, déjà en chasse. Ils ne lâchent rien. L'exploration automatique ne touche pas à l'appât. |
+| **Vitrines** | Un banc **bâti contre un mur de la pièce**, **trois niches côte à côte séparées par des murs vitrés** — `[niche][vitre][niche][vitre][niche]` — un lot dans chacune (trois blocs de Matière — un plan jusqu'au 28 novembre 2026 —, un équipement, deux capsules) : **on n'en emporte qu'un**, les deux autres se verrouillent. Idée des coffres de Brogue. Refaites le 26 novembre 2026 d'après le module « Vitrine REF » du joueur : avant, c'étaient trois socles éparpillés dans la pièce, sans une seule vitre, et rien ne disait que c'était un choix. Le banc fait **deux rangées** : les niches contre le mur du fond, puis **une porte devant chacune**, les cloisons vitrées traversant les deux rangées. Ses deux bouts sont soit bâtis, soit des murs de la pièce déjà là (renfoncement de cinq, coin de six, banc de sept) ; la pièce peut avoir **jusqu'à deux entrées** et compter jusqu'à 120 cases. Ces quatre combinaisons, essayées le 26 novembre, font passer la vitrine de **1 carte sur 10 à 1 sur 3** ; n'essayer que le renfoncement et le banc complet la rendait introuvable. **L'exploration automatique ne les traverse pas et s'arrête dès qu'elle en voit une** : marcher sur une niche prendrait le lot et condamnerait les deux autres, le choix revient au joueur. |
 | **Station de réparation** | Une fois : vie et énergie au maximum. Le bruit met en chasse les ennemis à 12 cases. |
 | **Fabricateur** | Voir « Fabricateur ». Un par niveau, garanti. |
 
@@ -62,11 +62,19 @@ automatique ne l'ouvre jamais (les machines barrent le pas).
   RÉSEAU LOCAL ».
 - **Réduit à cloison** : si aucun terminal de la carte n'a d'action, un réduit de 3 × 3 ou 4 × 3 cases est creusé dans la
   masse derrière le mur de la salle d'un terminal, butin de pièce secrète dedans ; sa CONNEXION fait tomber la cloison
-  (gravats praticables).
+  (gravats praticables). **Repli garanti** (28 novembre 2026, une carte sur 200 n'en avait pas) : réduit de 2 × 2, sinon
+  une **porte dérobée** posée dans un mur simple de la salle (action « ouvrir la porte dérobée »).
+- **Pose garantie** : au moins deux terminaux complets, dont un à 15 cases au plus d'un **FABLAB** (les plans ne viennent
+  que des terminaux) et un du site. Salles toutes encombrées : couloirs et petites pièces, puis une case qui porte un
+  objet (l'objet roule à côté), enfin une console encastrée dans un mur de la salle. Une carte sur 700 restait sans terminal avant ce repli.
 - **RÉSEAU DU SITE** (antenne) : l'effet d'avant — brouillard levé 15 tours sur 30 cases, puis ennemis signalés.
 - **LIAISON AU NOYAU** : une tentative par machine, numérotée (`G.st.liaisons`) ; texte `liaisonTexte(niv, n)`, toujours un
   échec pour l'instant ; une ligne au journal.
-- **ENCODAGE** : branché sur `encodageHack` et `encodageBlueprint` (à venir) ; d'ici là, « MODULE D'ENCODAGE INDISPONIBLE ».
+- **ENCODAGE** : HACK (`encodageHack`, 14g, ci-dessous) et **BLUEPRINT** (`encodageBlueprint`, `14i-blueprints.js`, 28 novembre
+  2026) : **trois plans distincts encore inconnus**, de rang ≤ niveau + 1, en cartes (illustration, type, coût en Matière,
+  effet, description) ; on en choisit un, **appris tout de suite** (la capsule correspondante est identifiée) : le FABLAB sait
+  le produire. Renoncer garde les mêmes trois plans dans la machine. Moins de trois libres : ce qu'il reste ; aucun : 30 de
+  Matière à la place. Une fois par terminal. Lab → **Blueprints** : le même choix sans terminal (nouveau tirage, Matière +100).
 - Le temps : lire et encoder ne coûtent rien ; une action de CONNEXION (actions locales, réseau, liaison exceptée) prend un
   battement, compté à la fermeture de la fenêtre, quand les repères « ! » apparaissent sur les cibles.
 - État : `G.term[case]` (créé au premier besoin : une partie d'avant se recharge, antennes allumées comprises).
@@ -131,8 +139,8 @@ ni au FABLAB.
 Posé à la fin de la génération, sur toutes les recettes. **Ordre de priorité des lieux** (24 novembre 2026) :
 **pièce secrète > pièce fermée à clé > cul-de-sac > autres salles.**
 
-- **Pièces secrètes** : chacune reçoit un lot au fond (capsule, Matière, une fois sur deux un plan, une fois sur quatre
-  un Module de puissance), en plus du reste. Une « pièce secrète » est ici **tout ce qu'on n'atteint qu'en passant
+- **Pièces secrètes** : chacune reçoit un lot au fond (capsule, Matière, une fois sur deux une seconde capsule — un plan
+  jusqu'au 28 novembre 2026 —, une fois sur quatre un Module de puissance), en plus du reste. Une « pièce secrète » est ici **tout ce qu'on n'atteint qu'en passant
   une porte dérobée** : une suite de plusieurs salles derrière la même porte ne reçoit qu'un lot, dans la plus
   reculée ; une porte dérobée qui ne fait que relier deux endroits déjà accessibles (un raccourci) ne cache rien.
   **Corrigé le 24 novembre 2026** : une pièce secrète située au-delà d'un bras d'eau profonde n'était pas vue et
@@ -146,7 +154,7 @@ Posé à la fin de la génération, sur toutes les recettes. **Ordre de priorit�
   - **Autres salles** : seulement s'il reste des butins à poser ; le sol bâti le plus à l'écart du trajet, jamais
     contre une porte, à 8 cases au moins d'un autre butin.
 - **Qui reçoit quoi : une préférence, pas une règle fixe** (demande du 24 novembre 2026, pour que le meilleur butin ne
-  soit pas toujours au même genre d'endroit). Un **Module de puissance**, puis un **plan**, puis une **capsule** sont
+  soit pas toujours au même genre d'endroit). Un **Module de puissance**, puis un **équipement** (un plan jusqu'au 28 novembre 2026), puis une **capsule** sont
   tirés au sort parmi les lieux encore vides ; chaque lieu pèse selon sa priorité (`BUTIN_POIDS` : fermée à clé 6,
   cul-de-sac 1, autre salle 0,5). Les lieux restants reçoivent de la **Matière** (15).
 - Mesuré le 24 novembre 2026 (30 cartes par niveau, taille 3) : 0,6 à 0,7 butin derrière une serrure par carte, 5,2 à
@@ -157,7 +165,7 @@ Posé à la fin de la génération, sur toutes les recettes. **Ordre de priorit�
 
 Appelé **Fabricateur** jusqu'au 26 novembre 2026. Les clés internes (`FABRIC`, tuile `fabric`, `fab*`) n'ont pas changé.
 
-Premier usage de la **Matière**. Avancer sur un FABLAB ouvre une liste : **seulement les objets dont la foreuse a trouvé le plan** (sans aucun plan, il le dit et ne propose rien). Les plans se trouvent au sol, dans les dépôts, les salles piégées, les vitrines et sur les robots abattus : objets simples au niveau 1 (réparobots, batterie, fumigène), consommables avancés et accessoires au niveau 2, armes et armures au niveau 3 (un cran d'avance possible). Un plan déjà connu se recycle en 10 de Matière. Le Module de puissance ne se fabrique pas, la clé non plus (25 novembre 2026 : plus de plan de clé, les clés se trouvent). Une fabrication prend 3 battements ; l'objet est ramassé s'il y a de la place, sinon posé sous la foreuse.
+Premier usage de la **Matière**. Avancer sur un FABLAB ouvre une liste : **seulement les objets dont la foreuse a le plan** (sans aucun plan, il le dit et ne propose rien). **Depuis le 28 novembre 2026, les plans ne viennent que des terminaux** (ENCODAGE → BLUEPRINT, choix parmi 3) : plus aucun plan au sol, dans les dépôts, salles piégées, vitrines, pièces secrètes ni sur les robots. Rang d'un plan (`PLAN_RANG`) : objets simples 1 (réparobots, batterie, fumigène, balise), autres consommables et accessoires 2, armes et armures 3 ; un plan est proposé si son rang ≤ niveau + 1. **Il existe un plan de tout** ce qui n'est ni objet de départ, ni clé, ni Module de puissance, ni Matière, ni hack (25 objets). Le FABLAB est présent dès le niveau 1 (dépôt de l'Astroport), avec un terminal à 15 cases au plus. Un plan resté au sol d'une ancienne partie se ramasse encore (déjà connu : 10 de Matière). Le Module de puissance ne se fabrique pas, la clé non plus (25 novembre 2026 : plus de plan de clé, les clés se trouvent). Une fabrication prend 3 battements ; l'objet est ramassé s'il y a de la place, sinon posé sous la foreuse.
 
 - **Boutons en ligne (26 novembre 2026).** Un bouton ne porte plus que **le numéro entre crochets, le nom et le prix** — deux fois moins large qu'avant, où l'effet occupait la moitié de la place. Les boutons **se suivent sur la même ligne** et **reviennent à la ligne** quand la place manque. L'effet et la description complète restent sous l'illustration ASCII, à droite ; la fiche **défile** plutôt que de couper un texte long.
 - **En-tête (26 novembre 2026)** : la Matière en réserve, puis **« Inventaire x/20 »** et les **vingt places en quatre rangées de cinq carrés**. Un carré vide est un contour blanc d'un pixel sur fond noir ; rempli, il prend la couleur du type de l'objet qui l'occupe — **bio** pour un consommable, **monde** pour un accessoire, **bâti** pour une arme ou une armure. Les carrés sont **classés par type**, dans cet ordre. Ce qui est **porté** ne prend pas de place et ne figure donc pas dans la grille.
@@ -173,13 +181,20 @@ Premier usage de la **Matière**. Avancer sur un FABLAB ouvre une liste : **seul
 | Surrégime | 20 | Carène légère (armure) | 60 |
 | — | | Vrille rapide (arme) | 70 |
 | Camouflage optique | 24 | Trépan lourd (arme), Blindage composite (armure) | 85 |
-| **Phaseur** | **45** | | |
+| **Phaseur** | **45** | **Sonar 3 / 4 / 5 / 6 / 7** | 30 / 45 / 60 / 80 / 100 |
 | Charge sismique | **34** (le consommable qui épargne le plus de vie, voir mesures) | Accumulateur, Téléobjectif | 40 |
 
 Tous les prix se règlent dans **Lab → Items**.
 
 Repère : une carte de taille 3 porte deux gisements de Matière de 30 à 50, soit 70 à 80 par niveau, plus le butin au sol
-(2 à 4 blocs de 15) et ce que lâchent les robots : 120 à 150 par niveau en explorant tout.
+(2 à 4 blocs de 15) et ce que lâchent les robots : 120 à 150 par niveau en explorant tout (un peu plus depuis le 28 novembre 2026 :
+la Matière prend la place des plans dans les dépôts, les vitrines et le butin des robots).
+
+**Sonar** (28 novembre 2026, `sonar3` … `sonar7`, accessoire, fabriqué seulement) : les **ennemis à 3, 4, 5, 6 ou 7 cases**
+(diagonales comprises) se montrent par un **point rouge**, même hors de vue et derrière un mur — le point de l'antenne et du
+hack TRAQUE, sur la vue et la mini-carte. Plusieurs portés : le meilleur compte. Les mines posées ne renvoient pas l'onde.
+Plans : Sonar 3 dès le niveau 1, 4 au niveau 2, 5 au 4, 6 au 6, 7 au 8 (`SONAR_RANG`). Une illustration ASCII et une tuile
+au sol par version, le chiffre au centre (`o_sonar3` … `o_sonar7`). Rien à voir avec l'onde des gisements émise à l'arrivée.
 Quatre pièces nouvelles (choix de l'utilisateur, « consommables + équipement ») : **Vrille rapide** (1d4+4, coup −30,
 CRIT +5, POW 9), **Trépan lourd** (2d6+6 ; coup +25, POW 12), **Carène légère** (DEF +5, pas −10, DIS −1, POW 9),
 **Blindage composite** (DEF +25 ; pas +25, POW 12). Leurs tuiles au sol sont la tuile générique, à dessiner.
@@ -286,7 +301,7 @@ Modèle Brogue :
 ### Capsules, visée, plans (`14d-objets.js`)
 
 - **Consommables non identifiés.** Chaque sorte porte un **nom de code** tiré à chaque partie (« Capsule //KZ7-3FQ ») et la même
-  tuile de capsule au sol. Le premier usage révèle ce que c'est, pour toute la partie ; trouver le plan aussi. La clé et la
+  tuile de capsule au sol. Le premier usage révèle ce que c'est, pour toute la partie ; apprendre son plan au terminal aussi. La clé et la
   Matière sont toujours connues. Ce que la foreuse sait (plans, capsules identifiées, codes) est dans `G.st.savoir` et la
   suit d'un niveau à l'autre. **À la mort de la foreuse, toutes les capsules se dévoilent** dans l'inventaire (message dans
   le journal) ; la partie suivante repart avec de nouveaux codes.
@@ -318,11 +333,11 @@ Modèle Brogue :
 **Créature étourdie** (batterie, Court-circuit) : elle ne fait plus rien, Puces comprises. Toute sa silhouette devient un **damier d'un pixel sur deux, couleur bio et couleur bâti en quinconce**, les deux couleurs **s'échangeant à chaque battement**. **La foreuse prend le même damier quand elle est immobilisée** (tenue par un Bloqueur) ; il prime sur ses autres allures (engluée, camouflée, en surrégime).
 
 Les deux capsules néfastes (choix de l'utilisateur) font de l'identification un pari : essayer une capsule
-inconnue sur soi peut coûter cher, la lancer sur un ennemi peut le servir. Fabricables une fois le plan trouvé (12 et 16).
+inconnue sur soi peut coûter cher, la lancer sur un ennemi peut le servir. Fabricables une fois le plan appris (12 et 16).
 
 - **Butin des robots** : un robot abattu lâche parfois un objet (Broyeur 90 %, Bloqueur 60 %, Soudeur 45 %, Artilleur et
-  Englueur 35 %, Sentinelle 25 %, Torpille 10 %, Crabot 8 %, Relais 6 %, Drone 5 %, Mine 0) : Matière 40 %, capsule 35 %,
-  plan 18 %, équipement 7 %.
+  Englueur 35 %, Sentinelle 25 %, Torpille 10 %, Crabot 8 %, Relais 6 %, Drone 5 %, Mine 0) : Matière 50 %, capsule 38 %,
+  équipement 12 % (jusqu'au 28 novembre 2026 : 40 / 35 / plan 18 / 7).
 - **Lab → Items** : tout ce qui existe, avec ses valeurs modifiables (prix, effets, dés, modificateurs, POW requis, butin par
   espèce), « Rétablir » et « Enregistrer » (navigateur `np-items`, et base de l'artefact sous `items`).
 - **Allure de la foreuse** : engluée, elle prend la couleur bio ; en surrégime, la couleur danger ; camouflée, une trame.

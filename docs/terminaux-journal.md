@@ -72,7 +72,7 @@ Justification dans la fiction : ce qu'une unité a lu, l'unité suivante le reç
 Capsules, objets, armes, plug-ins de l'arme de tir (feu, glu, shotgun, laser). Certains objets existent en
 **versions de puissance croissante**, comme le Sonar (3 à 7 cases).
 
-À revoir au moment de coder : le butin des ennemis et des recoins ne contient plus de blueprint.
+Fait le 28 novembre 2026 : le butin des ennemis et des recoins ne contient plus de blueprint (`14i-blueprints.js`, Sonar 3 à 7 dans `14d-objets.js`).
 
 ### Hacks : les trois familles (validées le 28 novembre 2026)
 

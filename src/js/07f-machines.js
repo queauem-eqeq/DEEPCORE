@@ -369,7 +369,8 @@ function machines(){G.las=[];G.lz={};G.circ=[];G.soc={};G.piles={};G.mt=0;G.mach
     for(const k of [d0+1,d0+3]){t[banc.niches[k]]=VITRE;t[banc.portes[k]]=VITRE;}         // cloisons, deux cases de fond
     for(const k of [d0,d0+2,d0+4])t[banc.portes[k]]=DOOR;                                  // une porte devant chaque niche
     const bc=typeof butinCoffre==='function';
-    const lots=bc?[[planTire()],[equipTire()],[consoTire(),consoTire()]]:[['matiere'],['matiere'],['matiere']];
+    // 28 novembre 2026 : plus de plan dans une vitrine (les plans viennent des terminaux) ; à sa place, trois blocs de Matière
+    const lots=bc?[['matiere','matiere','matiere'],[equipTire()],[consoTire(),consoTire()]]:[['matiere'],['matiere'],['matiere']];
     sel.forEach((i,n)=>{G.items[i]=lots[n].slice();G.vit[i]=1;});G.choix.push({c:sel,on:1});p.mach='vitrines';return true;};
   // récompense d'une salle à lasers : un butin au fond, là où mène la traversée
   const recompense=p=>{const d=dist(),c=p.c.filter(i=>libre(i)&&d[i]>=0&&!G.lz[i]).sort((a,b)=>d[b]-d[a])[0];
