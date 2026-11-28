@@ -2,6 +2,10 @@
 /* SON_DECAL (28 novembre 2026) : retard, en secondes, ajouté aux sons joués pendant le coup d'une créature,
    pour qu'ils tombent avec l'animation étalée du coup (voir FX_RETARD, 10-rendu). */
 let SON_DECAL=0;
+/* SON_GROUPE (28 novembre 2026) : les coups d'un même groupe (attaque combinée, voir pass) ne jouent qu'un bruit de morsure et
+   un bruit de coup raté, au lieu d'un par créature qui s'empilaient. */
+let SON_GROUPE='';const SON_DEJA={};
+const sonGroupe=nom=>{if(!SON_GROUPE)return true;if(SON_DEJA[nom]===SON_GROUPE)return false;SON_DEJA[nom]=SON_GROUPE;return true;};
 let AC=null,MASTER=null,SND={on:true,vol:60},unlocked=false;
 try{const v=JSON.parse(localStorage.getItem('np-son')||'null');if(v&&typeof v.vol==='number')SND=v;}catch(e){}
 function audio(){
@@ -51,7 +55,7 @@ const SFX={
   deep(){noiz(.3,.14,900,'bandpass',0,300);tone(180,.3,'sine',.06,110);},
   drift(){noiz(.45,.12,500,'lowpass',0,1400);tone(260,.4,'sine',.05,130);},
   thud(){tone(70,.12,'square',.09,45);noiz(.08,.1,400);},
-  whoosh(){noiz(.16,.12,1200,'bandpass',0,3000);},
+  whoosh(){if(!sonGroupe('whoosh'))return;noiz(.16,.12,1200,'bandpass',0,3000);},
   blocked(){tone(110,.07,'square',.06,90);},
   crack(){noiz(.07,.3,3000,'highpass');tone(140,.1,'square',.1,60);noiz(.12,.12,900,'lowpass',.04);},
   /* Coups de combat variés (24 novembre 2026) : chaque bruit de coup existe en plusieurs versions, tirées au hasard sans
@@ -92,7 +96,7 @@ const SFX={
   start(){tone(110,.6,'sawtooth',.06,440);tone(220,.6,'square',.03,880,.05);},
   drill(k){tone(48+k*6,.12,'sawtooth',.09);noiz(.1,.12,600+k*120);},
   roar(){tone(140,.45,'sawtooth',.1,55);noiz(.35,.12,500,'lowpass',.05);},
-  bite(){const r=.92+sAlea()*.16,k=.9+sAlea()*.2;
+  bite(){if(!sonGroupe('bite'))return;const r=.92+sAlea()*.16,k=.9+sAlea()*.2;
     switch(SFX.varie('bite',4)){
       // la morsure d'origine
       case 0:tone(90*r,.15,'square',.14*k,40*r);noiz(.12,.2*k,2500*r,'highpass');tone(600*r,.08,'square',.05*k,200*r,.05);break;

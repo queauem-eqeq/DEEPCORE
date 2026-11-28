@@ -164,11 +164,12 @@ tard** : le Téléobjectif (capteur 13) voit au-delà de ce qui est affiché.
 - **Secousse adoucie (28 novembre 2026)** : la vue ne saute plus au hasard à chaque image ; elle oscille une fois et demie,
   en s'amortissant, dans une direction tirée une fois. Foreuse touchée : 3 px pendant 150 ms (critique : 5 px, 220 ms), au
   lieu de 5 px / 220 ms (9 px / 320 ms). Les explosions gardent leur force.
-- **Coups étalés (28 novembre 2026)** : les coups des créatures pendant un même tour ne s'affichent plus tous au même
-  instant. Les créatures attendent **la fin du geste de la foreuse** (élan, éclair, secousse : `finGesteForeuse`), puis
-  chacune qui montre quelque chose prend son tour, **100 ms** après la précédente (`ECART_COUP`, au plus 6 crans :
-  `RETARD_MAX`), et ses sons suivent (`SON_DECAL`, `01-sons.js`). Seul l'affichage attend (`FX_ATT`) : le tour est déjà joué, les commandes répondent
-  tout de suite. Rien n'est retardé en mouvement réduit.
+- **Attaques combinées (28 novembre 2026)** : les créatures qui frappent dans la même moitié de battement (`GROUPE_T` = 50)
+  montrent leur coup **ensemble**, en une seule attaque, avec un seul bruit de morsure et un seul bruit de coup raté
+  (`SON_GROUPE`, `01-sons.js`) ; le groupe suivant passe **130 ms** plus tard (`ECART_COUP`, 6 crans au plus : `RETARD_MAX`).
+  Le premier groupe part **juste après l'élan de la foreuse**, 60 ms avant sa fin (`finGesteForeuse`), ou tout de suite si
+  elle n'a pas frappé. Les sons suivent (`SON_DECAL`). Seul l'affichage attend (`FX_ATT`) : le tour est déjà joué, les
+  commandes répondent tout de suite. Rien n'est retardé en mouvement réduit.
 - **Effets de surface** : la plupart des effets (dégâts, soins, énergie, lasers, glu, braises, alertes, ondes, boost,
   fureur, voile, éclairs) se posent par-dessus le décor. Pendant qu'ils jouent, le décor n'est plus redessiné : une copie
   est recollée et seuls les effets sont repeints (`fxRapide`, `10-rendu.js`). Dès qu'un effet touche le décor (secousse,

@@ -162,12 +162,14 @@ function drawBoom(){const fl=1-(performance.now()-BOOM.t0)/180;
      ses sons suivent (SON_DECAL).
      Les effets en attente vivent dans FX_ATT et entrent dans FX à leur heure. Le jeu, lui, est déjà joué : les commandes
      répondent tout de suite. */
-const FX_VIF=new Set(['lunge','shake','num']),ECART_COUP=100,RETARD_MAX=6;
+const FX_VIF=new Set(['lunge','shake','num']),ECART_COUP=130,RETARD_MAX=6,GROUPE_T=50;
+let PASS_N=0;
 // Fin du geste que la foreuse vient de lancer (élan, éclair, secousse), en ms à partir de maintenant : les créatures attendent
 // qu'il soit fini pour montrer le leur (28 novembre 2026). Les chiffres de dégâts, longs, ne comptent pas.
+// Seul l'élan de la foreuse compte, et les créatures partent un peu avant sa fin (60 ms) : le combat s'enchaîne sans temps mort.
 function finGesteForeuse(){const now=performance.now();let fin=0;
-  for(const f of FX)if(now-f.t0<30&&(f.kind==='lunge'||f.kind==='flash'||f.kind==='shake'))fin=Math.max(fin,f.t0+f.dur-now);
-  return fin;}
+  for(const f of FX)if(now-f.t0<30&&f.kind==='lunge'&&f.robot)fin=Math.max(fin,f.t0+f.dur-now-60);
+  return Math.max(0,fin);}
 let FX_ATT=[],FX_RETARD=0,FX_AJOUTS=0,FX_DERNIER=-1e9;
 function fxEntre(f){f.t0=performance.now();if(f.kind==='num')f.stack=FX.filter(o=>o.kind==='num'&&o.x===f.x&&o.y===f.y&&fxP(o)<.5).length;
   FX.push(f);}
