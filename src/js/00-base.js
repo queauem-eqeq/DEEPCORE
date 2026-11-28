@@ -1,3 +1,4 @@
+const NOM_FOREUSE='F467'; // nom du modèle de la foreuse, utilisé dans les messages du journal
 let W=96,H=64;const NSITES=1,S=32;   // un seul site de forage par carte (13 novembre 2026)
 // Taille de la carte : réglage « Taille » de Génération, de 1 à 5 ; 4 = la taille d'origine (96 × 64)
 const SIZES=[null,[32,22],[48,32],[72,48],[96,64],[144,96]];
@@ -48,7 +49,7 @@ const LETTERS='ABCDE';
    lieu du rythme du navigateur (60, plus sur un écran rapide). Chaque image redessine beaucoup : trois fois moins
    d'images, trois fois moins de dessin. Les animations suivent l'horloge, pas le nombre d'images : leur durée ne change
    pas. raf20(f) remplace requestAnimationFrame(f) : il laisse passer les images trop rapprochées. */
-const FPS=20;
+const FPS=30;   // 30 images par seconde depuis le 28 novembre 2026 (demande du joueur : 20 paraissait saccadé)
 function raf20(cb){return requestAnimationFrame(function attend(now){
   if(now-(cb._img||0)<1000/FPS-4){requestAnimationFrame(attend);return;}cb._img=now;cb(now);});}
 

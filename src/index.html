@@ -56,6 +56,13 @@
   </div>
 </div>
 <!-- Fenêtre Items (Lab, 22 novembre 2026) : tous les objets, leurs valeurs modifiables, et le butin des robots. -->
+<div class="modal" id="logBig" role="dialog" aria-modal="true" aria-labelledby="lbTitle" hidden>
+  <div class="mcard" tabindex="-1">
+    <div class="mhead"><h2 id="lbTitle">Journal de bord</h2><button id="lbClose" type="button" aria-label="Fermer le journal">Fermer</button></div>
+    <p class="mnote">Texte figé : il ne bouge plus pendant que vous le sélectionnez. Fermez puis rouvrez pour voir les messages récents.</p>
+    <div class="logbig" id="lbTxt"></div>
+  </div>
+</div>
 <div class="modal" id="items" role="dialog" aria-modal="true" aria-labelledby="itTitle" hidden>
   <div class="mcard wide" tabindex="-1">
     <div class="mhead"><h2 id="itTitle">Items</h2><span class="saved" id="itMsg" role="status"></span><button id="itReset" title="Rétablir toutes les valeurs d’origine">Rétablir</button><button id="itSave">Enregistrer</button><button id="itClose" aria-label="Fermer les items">Fermer</button></div>
@@ -162,7 +169,7 @@
     <div class="camtag" id="camTag" hidden>MODE CARTE · déplacements = défilement · mini-carte : clic = recentrer, glisser = défiler · <kbd>M</kbd> pour revenir</div>
     <div class="overlay" id="overlay" hidden><div class="card" id="card"></div></div>
   </section>
-  <section class="log" aria-label="Journal de bord"><ul id="log" aria-live="polite"></ul></section>
+  <section class="log" aria-label="Journal de bord"><ul id="log" aria-live="polite"></ul><button class="logplus" id="logPlus" type="button" title="Ouvrir le journal en grand (texte fixe, sélectionnable)" aria-label="Ouvrir le journal en grand">+</button></section>
   </div>
   <aside class="col">
     <!-- 22 novembre 2026 : le haut de la colonne (barres, boutons, inventaire) reste fixe ; seul ce qui suit défile.
@@ -176,7 +183,7 @@
         <div class="bar2"><span>Énergie</span><span class="abar energy" role="meter" aria-label="Énergie" id="enT"></span><span class="bnum" id="enN"></span></div>
         <div class="bar2"><span>Matière {µ}</span><span></span><span class="bnum mat" id="matN" title="Réserve de Matière {µ} : servira à construire de l’équipement">0</span></div>
         <div class="btnrow"><button id="sprintBtn" class="pace" aria-pressed="false" title="Courir ou marcher (R) : la course double la vitesse et coûte 5 d’énergie par pas">MARCHE</button><button id="invBtn" class="pace" aria-haspopup="dialog" title="Ouvrir l’équipement (T) : armes, armures, accessoires">ÉQUIPEMENT</button></div>
-        <div class="btnrow"><button id="explBtn" class="pace" title="Exploration automatique (O) : la foreuse explore seule et s’arrête au moindre événement">EXPLORER</button><button id="restBtn" class="pace" title="Repos (P) : attendre jusqu’à l’énergie pleine">REPOS</button></div>
+        <div class="btnrow"><button id="explBtn" class="pace" title="Exploration automatique (O) : F467 explore seule et s’arrête au moindre événement">EXPLORER</button><button id="restBtn" class="pace" title="Repos (P) : attendre jusqu’à l’énergie pleine">REPOS</button></div>
         <div class="stip" id="stip" role="tooltip" hidden></div>
         <div class="effs" id="effs" role="status" aria-label="Effets en cours"></div>
       </div>
@@ -185,13 +192,16 @@
          à la ligne quand il le faut ; au survol, définition et modificateurs en cours. Au même écart que Lab/Palette/Contrôles. -->
     <details class="fold" id="fd-stats">
       <summary><h2>Stats</h2></summary>
-      <div class="hstats" id="hstats" role="group" aria-label="Statistiques de la foreuse"></div>
+      <div class="hstats" id="hstats" role="group" aria-label="Statistiques de F467"></div>
     </details>
     <details class="fold" id="fd-sac">
       <summary><h2>Inventaire</h2><span class="cnt" id="sacN" title="Places occupées sur 20 : chaque exemplaire prend une place"></span></summary>
       <div class="sac" id="sac"></div>
     </details>
     </div>
+    <!-- Fiche de la case visée (28 novembre 2026) : en inspection, au viseur du phaseur et à la visée d'une capsule, elle prend
+         la place de tout ce qui suit les statuts (Stats, Inventaire, Carte, En vue, boutons). -->
+    <div class="fiche" id="fiche" role="region" aria-label="Fiche de la case visée" hidden></div>
     <div class="coldefil">
     <!-- Carte (22 novembre 2026) : la mini-carte. Elle s'ouvre d'elle-même en mode carte (M). -->
     <details class="fold" id="fd-carte">

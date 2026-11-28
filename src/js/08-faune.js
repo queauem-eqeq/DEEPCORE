@@ -22,13 +22,13 @@ const terrestre=sp=>!sp.nage&&!sp.aqua&&!sp.vol;
 /* ---------- Horloge des créatures (25 novembre 2026) ----------
    Deux durées par espèce, en unités de temps comme pour la foreuse (100 = l'allure de base, voir l'horloge dans 09) :
    `dpas` pour un pas, `dcoup` pour un coup. **Plus petit, plus rapide.** Le terrain allonge le pas (eau peu profonde
-   ×1,5, eau profonde ×2) et jamais le coup ; les nageurs n'en souffrent pas. Avant, une seule VIT servait aux deux et
+   ×2, eau profonde ×2 : toute eau ×2 depuis le 28 novembre 2026) et jamais le coup ; les nageurs n'en souffrent pas. Avant, une seule VIT servait aux deux et
    un coup prenait toujours un battement : une créature rapide ne pouvait ni frapper en arrivant, ni frapper deux fois.
    Les tirs sur cadence (laser, glu) deviennent des coups : l'intervalle est dcoup, multiplié par sp.cadence pour la glu. */
 const ficheDe=o=>(G.beasts&&G.beasts.includes(o))?BEASTS[o.sp]:SPECIES[o.sp];
 const dpasDe=(o,sp)=>{sp=sp||ficheDe(o);
   return Math.max(10,(sp.dpas||100)*slowOf(G.t[idx(o.x,o.y)],eauLibre(sp)));};
-const dcoupDe=(o,sp)=>Math.max(10,((sp||ficheDe(o)).dcoup||100));
+const dcoupDe=(o,sp)=>Math.max(COUP_MIN,((sp||ficheDe(o)).dcoup||100));   // coup 100 au moins (07-generation)
 // Le mot qui dit une durée, pour les fiches et le journal (plus petit, plus rapide), et la cadence : combien de
 // gestes la créature fait pendant une action normale de la foreuse (100 unités).
 const motDuree=d=>d<=50?'très rapide':d<=75?'rapide':d<=100?'normal':d<=150?'lent':'très lent';
@@ -373,7 +373,17 @@ function beastFits(b,x,y){const spB=BEASTS[b.sp],mB=mouilleOk(spB,b);
   if(!(b.hunt>0)&&G.lz&&G.lz[idx(cx,cy)])return false;
   if(!(spB.vol&&v===CHASM)&&!canWalk(v,mB)||(cx===G.px&&cy===G.py)||animalAt(cx,cy))return false;const o=beastAt(cx,cy);
     if(o&&o!==b)return false;}return true;}
-const beastCache=b=>!!BEASTS[b.sp].cache&&G.t[idx(b.x,b.y)]===DEEP;   // le brochon en eau profonde : invisible, même à côté
+/* Le brochon (la Torpille) en eau profonde : invisible, même à côté. Sauf si la foreuse est elle-même en eau profonde dans
+   le même lac (28 novembre 2026) : sous l'eau, elle les voit (toujours dans son champ de vision). lacForeuse() marque l'eau
+   (peu profonde et profonde) reliée à la foreuse ; recalculé une fois par tour et par position. */
+let LAC={cle:'',m:null};
+function lacForeuse(){const cle=G.turn+'|'+G.px+'|'+G.py;if(LAC.cle===cle)return LAC.m;LAC.cle=cle;LAC.m=null;
+  if(G.t[idx(G.px,G.py)]!==DEEP)return null;const m=new Uint8Array(W*H),pile=[idx(G.px,G.py)];m[pile[0]]=1;
+  while(pile.length){const i=pile.pop(),x=i%W,y=(i-x)/W;
+    for(const [dx,dy] of DIRS){const nx=x+dx,ny=y+dy;if(nx<0||ny<0||nx>=W||ny>=H)continue;const j=idx(nx,ny),v=G.t[j];
+      if(!m[j]&&(v===DEEP||v===LIQ)){m[j]=1;pile.push(j);}}}
+  return LAC.m=m;}
+const beastCache=b=>{if(!BEASTS[b.sp].cache||G.t[idx(b.x,b.y)]!==DEEP)return false;const m=lacForeuse();return !(m&&m[idx(b.x,b.y)]);};
 const beastVisible=b=>!beastCache(b)&&!(b.camo>0&&Math.max(Math.abs(b.x-G.px),Math.abs(b.y-G.py))>1)&&(!fog||FOOT.some(([dx,dy])=>vis[idx(b.x+dx,b.y+dy)]));
 function spawnBeasts(){G.beasts=[];G.beastSeen={};G.packs={};let packId=0;
   const tryPut=(sp,x,y,pack)=>{const b=newBeast(sp,x,y,pack,-1);if(!beastFits(b,x,y))return false;G.beasts.push(b);return true;};
@@ -516,7 +526,8 @@ function hurtRobot(b,sp,o){sp=sp||BEASTS[b.sp];o=o||{};const le=LeNom(sp),nom=''
   // surrégime : toujours critique ; module de puissance : +25 % par module
   // coup critique de l'ennemi : selon sa stat CRIT
   const cr=o.sur||b.bers>0||roll(sp.crit||0),dm=Math.round(dmgDe(sp)*(cr?CRIT_X:1)*(1+.25*(b.pow||0)));
-  addFx({kind:'shake',amp:cr?9:5,dur:cr?320:220});G.st.vie=Math.max(0,G.st.vie-dm);
+  // foreuse touchée : secousse adoucie le 28 novembre 2026 (avant 5 / 9 px, 220 / 320 ms)
+  addFx({kind:'shake',amp:cr?5:3,dur:cr?220:150});G.st.vie=Math.max(0,G.st.vie-dm);
     addFx({kind:'num',x:G.px,y:G.py,txt:'-'+dm+(cr?'!':''),col:PAL['4'],dur:cr?1000:750});if(!o.laser)SFX.bite();
     sayMore(`${le}${nom} ${verbe}${o.sur?' par surprise':cr?' : coup critique':''} : −${dm} vie.`,'warn');
   if(G.st.vie<=0){G.over={dead:true};return;}}
@@ -524,9 +535,12 @@ function hurtRobot(b,sp,o){sp=sp||BEASTS[b.sp];o=o||{};const le=LeNom(sp),nom=''
 function effTick(){const E=G.eff;if(!E||G.over)return;
   if(E.poison>0){E.poison--;const dm=Math.min(G.st.vie,E.pdmg||2);G.st.vie-=dm;
     addFx({kind:'num',x:G.px,y:G.py,txt:'-'+dm,col:PAL['4'],dur:750});
-    if(G.st.vie<=0){G.over={dead:true};sayMore('Le poison achève la foreuse.','warn');return;}
+    if(G.st.vie<=0){G.over={dead:true};sayMore('Le poison achève '+NOM_FOREUSE+'.','warn');return;}
     if(!E.poison)sayMore('Le poison est éliminé.','good');}
-  if(E.glu>0&&--E.glu===0)sayMore('La glu se détache : la foreuse retrouve sa vitesse.','good');
+  // réparation et recharge réparties sur plusieurs battements (28 novembre 2026) : une part égale du reste à chaque battement
+  for(const [k,champ,mx] of [['repar','vie','vieMax'],['recharge','energie','energieMax']]){const r=E[k];if(!r)continue;
+    if(r.t>0){const p=r.v/r.t;r.v-=p;r.t--;G.st[champ]=Math.min(G.st[mx],G.st[champ]+p);}if(!(r.t>0))delete E[k];}
+  if(E.glu>0&&--E.glu===0)sayMore('La glu se détache : '+NOM_FOREUSE+' retrouve sa vitesse.','good');
   if(E.berserk>0&&--E.berserk===0)sayMore('Le surrégime retombe.','info');
   if(E.camo>0&&--E.camo===0)sayMore('Le camouflage optique s’éteint.','info');
   fumTick();}
@@ -534,15 +548,16 @@ function effTick(){const E=G.eff;if(!E||G.over)return;
    puis explose 2 à 3 battements plus tard (22 novembre 2026 ; avant 1 à 3 : à 1, elle sautait au battement suivant, sans
    laisser le temps de réagir). L'explosion frappe un carré de 3 × 3 centré sur elle, plus 5 cases tirées au hasard parmi
    les 12 qui le bordent par un côté (22 novembre 2026, voir zoneBoom) : la foreuse et toute créature qui s'y trouve. Ses dégâts sont ceux de sa fiche (dégâts min et max du Bestiaire). Détruite avant, elle n'explose pas. */
-/* Englueur (21 novembre 2026) : un jet de glu à distance. S'il touche, la foreuse est engluée 3 battements (pas deux fois plus
-   longs, voir stepDur) ; le jet lui-même ne blesse pas. */
+/* Englueur (21 novembre 2026) : un jet de glu à distance. S'il touche, la foreuse est engluée GLU_DUREE battements (pas deux
+   fois plus longs, voir stepDur) ; le jet lui-même ne blesse pas. 3 battements jusqu'au 28 novembre 2026, 6 depuis. */
+const GLU_DUREE=6;
 function glue(b,sp){const ch=hitChance(sp.pre,robotDef());engage();if(G.px!==b.x)b.dir=Math.sign(G.px-b.x);SFX.drift();
   // une boule de glu, plus un trait de laser (22 novembre 2026)
   const rate=!roll(ch),an=Math.random()*Math.PI*2,r=rate?.8:0;
     addFx({kind:'boule',ax:b.x,ay:b.y,bx:G.px+Math.cos(an)*r,by:G.py+Math.sin(an)*r,dur:320});
   if(rate){sayMore(`${LeNom(sp)} crache sa glu et rate (${ch} %).`);return;}
-  G.eff=G.eff||{};G.eff.glu=Math.max(G.eff.glu||0,3);addFx({kind:'num',x:G.px,y:G.py,txt:'glu',col:PAL['2'],dur:900});
-    sayMore(`${LeNom(sp)} englue la foreuse : elle avance deux fois moins vite pendant 3 battements.`,'warn');}
+  G.eff=G.eff||{};G.eff.glu=Math.max(G.eff.glu||0,GLU_DUREE);addFx({kind:'num',x:G.px,y:G.py,txt:'glu',col:PAL['2'],dur:900});
+    sayMore(`${LeNom(sp)} englue ${NOM_FOREUSE} : il avance deux fois moins vite pendant ${GLU_DUREE} battements.`,'warn');}
 /* Zone d'une explosion (mine, charge sismique ; 22 novembre 2026) : le carré de 3 × 3 centré sur (x, y), plus 5 cases tirées
    au hasard parmi les 12 qui le bordent par un côté (les coins du 5 × 5, qui ne le touchent que par un angle, en sont exclus).
    Rend une liste de [x, y] ; dansZone teste une case. L'effet « boom » reçoit la même liste pour dessiner les flammes. */
@@ -553,6 +568,9 @@ function zoneBoom(x,y){const out=[],bord=[];
   for(let n=0;n<BOOM_EXTRA&&bord.length;n++)out.push(bord.splice(rnd(0,bord.length-1),1)[0]);
   return out;}
 const dansZone=(z,x,y)=>z.some(c=>c[0]===x&&c[1]===y);
+/* Une mine abattue à distance (décharge de batterie, laser, onde sismique) explose ; abattue au contact par la foreuse, elle
+   éclate comme les autres sans exploser (28 novembre 2026). À appeler une fois la mine retirée de la liste. */
+function minePartie(c){if(G&&!G.over&&c&&BEASTS[c.sp]&&BEASTS[c.sp].mine)explose(c);}
 function explose(b){const sp=BEASTS[b.sp],k=G.beasts.indexOf(b);if(k>=0)G.beasts.splice(k,1);
   const zone=zoneBoom(b.x,b.y),dans=o=>dansZone(zone,o.x,o.y),vu=vis[idx(b.x,b.y)];
   addFx({kind:'boom',x:b.x,y:b.y,cases:zone,dur:420});
@@ -584,7 +602,7 @@ function explose(b){const sp=BEASTS[b.sp],k=G.beasts.indexOf(b);if(k>=0)G.beasts
    pour toucher ordinaire, et le trait rouge se voit toujours — droit sur la foreuse s'il touche, à côté s'il rate.
    La clé interne de l'espèce reste `paralyzor`, pour que les groupes déjà réglés continuent de marcher. */
 // une mine armée clignote : le rendu doit tourner
-const animVif=()=>!!(G&&((G.beasts&&G.beasts.some(b=>b.fuse>0))||(G.balises&&G.balises.length)||(typeof PONT_AN!=='undefined'&&PONT_AN.size)));
+const animVif=()=>!!(G&&(PHASE||(G.beasts&&G.beasts.some(b=>b.fuse>0))||(G.balises&&G.balises.length)||(typeof PONT_AN!=='undefined'&&PONT_AN.size)));
 /* Le battement, côté ennemis : détection, alarmes, mémoire, effets qui s'épuisent, mèche des mines, soins du
    Soudeur. Les pas et les coups se jouent sur l'horloge de chaque créature, dans beastJoue. Ce qui est décidé ici
    (b.sees, b.hunt) sert jusqu'au battement suivant. */
@@ -637,7 +655,7 @@ function beastJoue(b){const sp=BEASTS[b.sp],fits=(x,y)=>beastFits(b,x,y),mouille
   if(sp.laser&&b.hunt>0&&b.sees&&cheb(b,G.px,G.py)<=sp.laser&&los(b.x,b.y,G.px,G.py)){
     hurtRobot(b,sp,{laser:1});return dcoupDe(b,sp);}
   if(b.hunt>0&&nearRobot(b)){if(sp.bloque&&!b.tient){b.tient=1;
-    if(beastVisible(b)){sayMore(`${LeNom(sp)} agrippe la foreuse : elle ne peut plus se déplacer tant qu’il tient.`,'warn');SFX.blocked();
+    if(beastVisible(b)){sayMore(`${LeNom(sp)} agrippe ${NOM_FOREUSE} : il ne peut plus se déplacer tant que l’ennemi le tient.`,'warn');SFX.blocked();
     }}hurtRobot(b);return dcoupDe(b,sp);}
   if(b.hunt>0&&b.sees)chaseStep(b,distCarte(mouille,sp.vol),fits);
   else if(b.hunt>0&&b.search>0)searchStep(b,fits,DC,mouille);        // fouille autour du dernier point connu

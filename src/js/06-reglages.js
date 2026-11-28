@@ -1,12 +1,20 @@
 /* ---------- Viseur (curseur de la souris et du mode inspection) ---------- */
-let CURT=null,CURT_DIM=null;
+let CURT=null,CURT_DIM=null,CURT_PH=null,CURT_PHX=null;
 function rowsOf(k){const f=TF(k),[w,h]=tileDim(k),r=[];for(let y=0;y<h;y++){let l='';for(let x=0;x<w;x++)l+=f(x,y)||'.';
   r.push(l);}return r;}
 function curCanvas(rows,ink){const c=document.createElement('canvas');c.width=c.height=16;const x=c.getContext('2d');
   for(let j=0;j<16;j++)for(let i=0;i<16;i++){const ch=rows[j][i];if(ch==='.')continue;x.fillStyle=ch==='w'&&ink?ink:inkCol(ch);
     x.fillRect(i,j,1,1);}return c;}
 // viseur tel que dessiné sur une case accessible ; ses pixels blancs passent en gris sur une case inexplorée ou hors d'atteinte
-function buildCursor(){const r=rowsOf('cursor');CURT=curCanvas(r);CURT_DIM=curCanvas(r,'#8aa9a2');}
+/* Viseur du phaseur (28 novembre 2026) : le dessin du viseur habituel (mêmes pointillés, contour noir compris), mais tout en
+   couleur bio ; sur une case interdite, en rouge danger avec une croix en X d'un coin à l'autre. */
+function phaseCurseur(rows,col,croix){const c=document.createElement('canvas');c.width=c.height=16;const x=c.getContext('2d');
+  for(let j=0;j<16;j++)for(let i=0;i<16;i++){const ch=rows[j][i];if(ch==='.')continue;x.fillStyle=ch==='0'?inkCol('0'):col;x.fillRect(i,j,1,1);}
+  if(croix){x.fillStyle=inkCol('0');for(let k=2;k<=13;k++){for(const [a,b] of [[k,k],[k,15-k]]){x.fillRect(a-1,b,1,1);x.fillRect(a+1,b,1,1);}}
+    x.fillStyle=col;for(let k=3;k<=12;k++){x.fillRect(k,k,1,1);x.fillRect(k,15-k,1,1);}}
+  return c;}
+function buildCursor(){const r=rowsOf('cursor');CURT=curCanvas(r);CURT_DIM=curCanvas(r,'#8aa9a2');
+  CURT_PH=phaseCurseur(r,PAL['2'],0);CURT_PHX=phaseCurseur(r,PAL['4'],1);}
 
 /* ---------- Réglages de génération ---------- */
 // Maximums par terrain : au-delà, la planète perd son intérêt (eau : plus assez de terre ferme ; montagne : le jeu doit percer
@@ -153,7 +161,7 @@ const RECETTES={atterrissage:{n:'Niveau 1 : extérieur, montagne, complexe enfou
       ['sub','Complexe'],R_STYLE,R_PIECES,R_OUVERT,R_VERROUS,R_SECRETS]},
   cavernes:{n:'Niveau 2 : réseau de cavernes, bâtiments enchâssés',zones:true,enfoui:true,cavernes:true,sansVaisseau:true,
     titre:'Cavernes, boyaux, bâtiments',
-    aide:'Tout est sous roche : la foreuse arrive par un puits. Chaque curseur donne un centre : la carte varie autour à chaque tirage. Le sol des cavernes (eau, herbe, montagne, gouffre, rochers) se règle dans la colonne Monde. '+R_AIDE,
+    aide:'Tout est sous roche : '+NOM_FOREUSE+' arrive par un puits. Chaque curseur donne un centre : la carte varie autour à chaque tirage. Le sol des cavernes (eau, herbe, montagne, gouffre, rochers) se règle dans la colonne Monde. '+R_AIDE,
     regl:[R_AMB('cavernes'),
       ['sel','cvDispo','Disposition des zones',[['','Au hasard'],['mel','Mélangée'],['cote','Cavernes d’un côté, bâti de l’autre'],['cite','Cité au centre'],['cav','Cavernes au centre']],'',['mel','cote','cite','cav']],
       ['sub','Cavernes'],['num','cvPart','Part de cavernes (% de la carte)',10,60,32,[22,45]],['num','cvTaille','Taille des cavernes (cases)',30,800,240,[60,450]],
@@ -166,7 +174,7 @@ const RECETTES={atterrissage:{n:'Niveau 1 : extérieur, montagne, complexe enfou
       R_STYLE,R_OUVERT,R_VERROUS,R_SECRETS]},
   base:{n:'Niveau 3 : grande base, poches extérieures, tunnels',zones:true,enfoui:true,cavernes:true,base:true,sansVaisseau:true,
     titre:'Base, poches, tunnels',
-    aide:'La foreuse débouche dans une aile de la base. Les ailes sont reliées par un réseau de tunnels ; une ou deux poches de terrain naturel servent d’extérieur. Les salles-machines (lasers, ponts, piles, dépôts) se règlent ici et dans Lab → Artefacts. Chaque curseur donne un centre. '+R_AIDE,
+    aide:''+NOM_FOREUSE+' débouche dans une aile de la base. Les ailes sont reliées par un réseau de tunnels ; une ou deux poches de terrain naturel servent d’extérieur. Les salles-machines (lasers, ponts, piles, dépôts) se règlent ici et dans Lab → Artefacts. Chaque curseur donne un centre. '+R_AIDE,
     regl:[R_AMB('base'),['sel','cvDispo','Disposition',[['','Au hasard'],['mel','Ailes et poches mêlées'],['cote','Base d’un côté, poches de l’autre'],['cite','Base au centre'],['cav','Poche au centre']],'cite',['mel','cote','cite']],
       ['sub','Base'],['num','cvBati','Ailes de la base',2,6,5,[4,6]],['num','cvSurf','Surface bâtie (% de la carte)',18,45,38,[32,42]],
       ['num','cvPieces','Pièces par aile (0 : automatique)',0,25,0],['num','cvPortes','Portes par aile',1,3,2,[2,3]],['num','bsMachines','Salles-machines (% de la fréquence du Lab)',0,250,100,[70,160]],

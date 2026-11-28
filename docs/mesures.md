@@ -1063,3 +1063,39 @@ Avant, les descentes ne tenaient pas le rythme demandé sur ce PC : chaque image
 graphique ne change presque rien au coût du dessin en grille de caractères : ce sont les opérations de dessin qui coûtent.
 Avec le cache seul (même version, `DECOR_OFF` vrai puis faux) : image en jouant 4,7 à 5,0 → 3,0 à 3,2 ms ; même scène 3,7 à
 3,9 → 1,0 ms.
+
+### Combat rapproché (28 novembre 2026)
+
+Outil : `python3 outils/jeu.py DOSSIER outils/scripts/mesure-combat.js` (`window.NB` ennemis collés à la foreuse, Drones par
+défaut, coup 50 : deux coups par tour ; 30 tours, une touche toutes les 150 ms). Chromium sans carte graphique.
+
+| Drones | Calcul d'un tour (moy · p95 · pire) | Images pendant les animations |
+|---|---|---|
+| 1 | 3,7 · 8 · 15 ms | 20 par seconde |
+| 6 | 5,4 · 11 · 16 ms | 20 par seconde |
+| 8 (23 effets par tour) | 7,8 · 19 · 22 ms | 20 par seconde, image 3,6 ms |
+
+Le moteur ne rame pas, même avec plusieurs coups par tour : l'impression venait des animations à 20 images par seconde,
+et de tous les coups d'un tour affichés au même instant. Après le passage du combat à 60 images par seconde et les coups
+étalés : 8 Drones, tour 4,8 ms en moyenne (pire 14,5), image 3,3 ms en moyenne, jusqu'à 60 images par seconde pendant
+les coups.
+
+### Après la recopie des stats du 28 novembre 2026 (`outils/simul.py`, combat, vie restante sur 100)
+
+Avant → après : Broyeur seul 76 → 67 ; Broyeur + 2 Crabots 60 → 50 (98 % de victoires au lieu de 100) ; 3 Relais 86 → 91 ;
+4 Relais 82 → 88 ; un Relais 96 → 98. Les autres combats bougent d'un point au plus. Le Broyeur frappe plus fort et plus souvent
+(12-20 toutes les 150 au lieu de 10-18 toutes les 200), les Relais sont plus fragiles (10 PV au lieu de 15).
+
+### Coup 100 pour toutes les espèces, première version (28 novembre 2026, `outils/simul.py`, combat, vie restante sur 100)
+
+Comparé à la recopie du même jour : Broyeur seul 67 → 54 (99 % de victoires) ; Broyeur + 2 Crabots 50 → 38, **88 % de
+victoires** au lieu de 98 : le Broyeur, passé de 150 à 100, frappe 12-20 à chaque battement. Les autres combats bougent de deux
+points au plus (Drone et Sentinelle frappent moins souvent, Artilleur plus souvent).
+
+Version retenue, **coup 100 au moins** (Broyeur 150, Artilleur 200 gardés) : voir la ligne suivante.
+| Coup 100 au moins | Broyeur seul : vie restante 68 ; Broyeur + 2 Crabots : 48, 98 % de victoires ; Artilleur 96, Drone 98, Sentinelle 98. |
+
+### Broyeur à 18-30 de dégâts (28 novembre 2026, `outils/simul.py`)
+
+Essais : 16-26 → seul 56 de vie restante ; **18-30 (retenu) → seul 52-53, 95-96 % de victoires ; avec 2 Crabots 38, 83 %** ;
+18-28 et 75 PV → seul 43-47, 87-92 % ; avec 2 Crabots 32, 72 %.

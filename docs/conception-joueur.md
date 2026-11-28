@@ -136,7 +136,7 @@ Le jeu compte en **unités de temps**, pas en tours.
 
 - Chaque action de la foreuse a une **durée** (table `DUR` dans `09`) : pas 100, coup de foreuse 100, coup sur la
   roche 100, attendre 100.
-- Durée d'un pas = PAS × terrain (eau peu profonde 1,5 ; eau profonde 2) × 0,5 en course × 2 si la foreuse est engluée.
+- Durée d'un pas = PAS × terrain (toute eau ×2, peu profonde comme profonde, depuis le 28 novembre 2026 ; avant 1,5 en eau peu profonde) × 0,5 en course × 2 si la foreuse est engluée.
 - Le monde **bat toutes les 100 unités**. À chaque battement : la détection et la perte de trace sont tirées,
   l'énergie remonte de POW, les effets s'épuisent (étourdi, glu, mèche d'une mine), le Soudeur répare, les machines
   tournent. Une action de 50 laisse passer un battement une fois sur deux ; une action de 200 en laisse passer deux.
@@ -155,7 +155,7 @@ ni frapper deux fois. Maintenant elles comptent le temps comme la foreuse.
 - `o.pret` est l'instant où la créature pourra agir. Elle agit, l'effet est immédiat, puis elle est occupée pendant
   la durée de son action. Le temps avance jusqu'au plus proche des deux instants suivants : la créature prête la
   première, ou le prochain battement. **Rien n'est arrondi ni perdu** : le reste de temps se reporte tout seul.
-- Le terrain allonge le pas (eau peu profonde ×1,5, eau profonde ×2, sauf pour les nageurs) et **jamais le coup**.
+- Le terrain allonge le pas (toute eau ×2, sauf pour les nageurs ; statut « Ralenti ×2 » affiché tant que la foreuse est dans l'eau) et **jamais le coup**.
 - Les tirs sur cadence deviennent des coups : l'intervalle entre deux lasers est `dcoup` (Sentinelle 100, Artilleur
   150) ; la glu garde son `cadence` comme multiplicateur (Englueur 100 × 3 = 300, inchangé).
 - **Au calme** — patrouille, bande, errance, retour à terre — un pas prend au moins un battement, quelle que soit la
@@ -206,7 +206,7 @@ Modèle Brogue :
   Matière sont toujours connues. Ce que la foreuse sait (plans, capsules identifiées, codes) est dans `G.st.savoir` et la
   suit d'un niveau à l'autre. **À la mort de la foreuse, toutes les capsules se dévoilent** dans l'inventaire (message dans
   le journal) ; la partie suivante repart avec de nouveaux codes.
-- **Tout consommable se vise**, comme la charge sismique, jusqu'à 4 cases. **La visée montre toujours une seule case**
+- **Tout consommable se vise**, comme la charge sismique, jusqu'à la portée de vue (capteur), depuis le 28 novembre 2026. **La visée montre toujours une seule case**
    : une capsule inconnue ne se trahit
   pas par sa zone. La visée s'ouvre **sur la foreuse** pour les objets qui la servent **et pour toute capsule non
   identifiée** : Entrée deux fois = sur soi, quitte à faire sauter une charge sismique sous ses pieds. La charge connue
@@ -216,7 +216,7 @@ Modèle Brogue :
 | Consommable | Sur la foreuse | Sur un ennemi |
 |---|---|---|
 | Réparobots | Vie +50 | le répare de 50 PV |
-| Batterie | Énergie +50 | décharge : 12 dégâts, **étourdi 6 battements** (un Bloqueur étourdi lâche prise) |
+| Batterie | Énergie +50 | décharge : 12 dégâts, **étourdi 10 battements** (un Bloqueur étourdi lâche prise) |
 | Fumigène | nuage là où on le lance ; **les ennemis ne perdent la trace que si la foreuse est dedans** | idem |
 | Charge sismique | explose comme une mine (3 × 3 et 5 cases autour), 30 dégâts **à la foreuse aussi**, roche brisée | idem |
 | **Module de puissance** | **POW +1 pour toujours** ; chaque point de POW au-dessus du POW requis par l'arme donne **+5 % de dégâts**  | ses coups portent 25 % plus fort |
@@ -224,12 +224,12 @@ Modèle Brogue :
 | **Camouflage optique** | invisible 10 battements : vue seulement au contact, les poursuivants à distance lâchent ; **rompu par un coup ou un forage** ; « Camouflé N » sous les barres, comme « Englué N » | il disparaît 10 battements (visible au contact) |
 | **Balise** (néfaste sur soi) | une **sirène à deux tons** retentit ; tous les ennemis à 20 cases savent où est la foreuse ; **elle rompt son camouflage optique** | **lancée ailleurs, c'est un leurre posé au sol** (ci-dessous) |
 | **Court-circuit** (néfaste) | énergie à zéro | hors service 10 battements, sans dégât ; un Bloqueur lâche |
-| **Phaseur** | **elle se démonte et se reforme où l'on veut**, sur le terrain déjà découvert (ci-dessous) | **il se disperse et reparaît ailleurs sur le niveau**, à 14 cases au moins, et **perd la trace de la foreuse** ; un Bloqueur lâche |
+| **Phaseur** | **elle entre en phase et sort de phase où l'on veut**, sur le terrain déjà découvert (ci-dessous) | **il passe en phase ailleurs sur le niveau**, à 25 cases au moins, et **perd la trace de la foreuse** ; un Bloqueur lâche |
 | **Matière** (butin au sol) | +15 en réserve, dès qu'on marche dessus ; au sol, elle a le dessin des **éclats moyens** en couleur Matière  | – |
 
 **Balise posée.** Lancée ailleurs que sur la foreuse, la balise **vole jusqu'à la case visée** et s'y pose (case libre la plus proche si elle est occupée). Elle **hurle 25 battements** (« Balise N » sous les barres, point rouge clignotant). Tant qu'elle hurle, **tout ennemi à 20 cases d'elle, ou qui chasse la foreuse, la délaisse pour s'acharner sur elle** : il l'attaque au contact, les tireurs (Sentinelle, Artilleur, Englueur) lui tirent dessus à portée, les mines s'arment à côté. **Chaque coup la touche** (critique possible) ; un seul bruit d'attaque par battement. Elle a **40 PV**, barre le passage comme une créature et, **détruite, explose sur sa seule case**, sans dégâts alentour ; mines et charges sismiques l'abîment aussi. Les ennemis attirés **restent en chasse** (pas de coup par surprise sur eux) et gardent le souvenir de la foreuse ; balise éteinte ou détruite, ils reprennent la chasse (sur la foreuse s'ils la voient, sinon là où ils l'ont vue). Un ennemi frappé par la foreuse délaisse la balise. La balise posée ne rompt pas le camouflage. Valeurs réglables dans Lab → Items (rayon, durée, PV). 
 
-**Phaseur (26 novembre 2026).** Sur la foreuse, il se joue **en deux temps**. La visée courte ordinaire choisit d'abord la cible : la foreuse elle-même, ou un ennemi à 4 cases. Sur la foreuse, la capsule part aussitôt, **la foreuse se démonte pixel par pixel** et un **grand viseur** s'ouvre : il n'est plus borné à 4 cases, **la vue le suit** à travers toute la carte (Maj : cinq cases d'un coup ; un clic sur la mini-carte y porte le viseur d'un geste). Le cadre du viseur dit tout de suite si la case convient : **bio** quand la foreuse peut s'y reformer, **danger** sinon. Il faut que la case ait été **découverte** (`G.seen`) et qu'elle **porte la foreuse** — ni obstacle, ni créature, ni balise ; l'eau, elle, est permise, la foreuse patauge. Échap, ou trois cases impossibles validées de suite, **la reforme sur place** : la capsule est perdue, mais on ne reste jamais bloqué hors du monde. **La trace au sol s'arrête net** (rien ne relie les deux points), le camouflage se rompt, et **le battement ne passe qu'à l'arrivée**. Distance minimale de réapparition d'un ennemi : réglable dans Lab → Items.
+**Phaseur (26 novembre 2026).** Sur la foreuse, il se joue **en deux temps**. La visée courte ordinaire choisit d'abord la cible : la foreuse elle-même, ou un ennemi à 4 cases. Sur la foreuse, la capsule part aussitôt, **la foreuse se démonte pixel par pixel** et un **grand viseur** s'ouvre : il n'est plus borné à 4 cases, **la vue reste centrée sur la foreuse** (28 novembre 2026) et ne défile que lorsque le viseur s'approche du bord du cadre (2 cases ; la souris maintenue au bord fait défiler la vue en continu, les touches ramènent la vue d'un coup). Maj : cinq cases d'un coup. Pour viser **hors de l'écran**, un clic sur la mini-carte y porte le viseur sans déplacer la vue ; le viseur y est dessiné en carré creux. Tant que la foreuse est démontée, **une petite boule bio frémit à son emplacement** (tremblement d'un pixel de tuile) et **le pointillé du trajet habituel** (mêmes petits ronds blancs, `drawPath`) la relie au viseur, en ligne droite puisque le phasage ignore le terrain. Le viseur est **le viseur habituel** (mêmes crochets pointillés) : **bio** quand la foreuse peut s'y reformer ; sur une case impossible, **rouge danger barré d'une croix en X**. Il faut que la case ait été **découverte** (`G.seen`) et qu'elle **porte la foreuse** — ni obstacle, ni créature, ni balise ; l'eau, elle, est permise, la foreuse patauge. Échap, ou trois cases impossibles validées de suite, **la reforme sur place** : la capsule est perdue, mais on ne reste jamais bloqué hors du monde. **La trace au sol s'arrête net** (rien ne relie les deux points), le camouflage se rompt, et **le battement ne passe qu'à l'arrivée**. Distance minimale de réapparition d'un ennemi : réglable dans Lab → Items.
 
 **Créature étourdie** (batterie, Court-circuit) : elle ne fait plus rien, Puces comprises. Toute sa silhouette devient un **damier d'un pixel sur deux, couleur bio et couleur bâti en quinconce**, les deux couleurs **s'échangeant à chaque battement**. **La foreuse prend le même damier quand elle est immobilisée** (tenue par un Bloqueur) ; il prime sur ses autres allures (engluée, camouflée, en surrégime).
 
@@ -288,7 +288,7 @@ inconnue sur soi peut coûter cher, la lancer sur un ennemi peut le servir. Fabr
 | Réparobots (×2) | consommable | – | Vie +50 ; **croix rouges** autour de la foreuse |
 | Batterie (×2) | consommable | – | Énergie +50 ; **flèches bio** qui montent |
 | Fumigène (×2) | consommable | – | un **nuage de fumée** (ci-dessous) |
-| Charge sismique (×2) | consommable | – | **visée** d'une case jusqu'à 4 cases ; explosion de mine, **30 dégâts** ; bruyante |
+| Charge sismique (×2) | consommable | – | **visée** d'une case jusqu'à la portée de vue ; explosion de mine, **30 dégâts** ; bruyante |
 
 **Fumigène.** À la pose, une **galette ovale** autour de la foreuse (7 cases de large et de haut, 5 en diagonale : 37 cases). Chaque case dure de **15 à 25 battements** ; à chaque battement le nuage **gagne une à trois cases voisines** au hasard, plus brèves : il s'étend de travers, plafonné à 90 cases, puis s'efface case par case. Les ennemis qui chassaient **perdent aussitôt la trace**.
 - **Il passe au-dessus des gouffres** ; seuls les obstacles pleins l'arrêtent.
@@ -308,3 +308,8 @@ hasard, jamais deux fois la même de suite, et chaque coup est légèrement dés
 (morsure, griffe, boutoir, mâchoires), **3** pour le coup critique. Le coup sur la roche garde son bruit unique.
 Réglage : `coup`, `bite` et `crit` dans `01-sons.js`.
 
+- **Journal (28 novembre 2026)** : pas d'indications de touches dans les messages du journal (visée, phaseur, exploration) ; et pour le phaseur on parle de **phase** (« entre en phase », « sort de phase », « passe en phase »), jamais de « disperse » ni de « reforme ».
+
+- **Statuts et durées (28 novembre 2026).** Sous les boutons, la ligne de statuts affiche aussi **Surrégime N**, **Réparation N** et **Recharge N** (battements restants), comme Englué, Camouflé et Dans la fumée. Les **réparobots** et la **batterie** utilisés sur la foreuse ne rendent plus tout d'un coup : le gain est **réparti sur 5 battements** (`RECUP_TOURS`, une part égale du reste à chaque battement ; un second objet ajoute son total et repart sur 5). Sur un ennemi, la réparation reste immédiate. **Surrégime et camouflage durent 30 battements** (au lieu de 10) ; un réglage enregistré resté à 10 suit la nouvelle valeur.
+
+- **Fumée opaque (28 novembre 2026).** Le nuage du fumigène ne se dessine plus avec de la transparence : chaque pixel est opaque ou absent. On garde le dessin des tuiles de nuage (plein ou texturé au cœur, hachures de tailles, d'inclinaisons et de densités variées sur les bords). En se dissipant, ou hors de vue, les cases passent à des hachures plus claires (rayures puis pointillé).

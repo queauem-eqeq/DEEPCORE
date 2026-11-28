@@ -36,6 +36,14 @@ Partie du document de conception (sommaire et règles à ne pas casser : `concep
   L'ordre de dissolution du phaseur est tiré **sans `Math.random`** (générateur à graine fixe, `PHASE_ORD`) : l'empreinte des
   cartes ne bouge pas. Contrôle : poser les effets avec une durée très longue et un `t0` reculé les fige à mi-course le temps
   d'une capture.
+- **Bestiaire changé dans le code après une recopie** (28 novembre 2026) : `BEST_CODE_LE` (`07-generation.js`) donne l'heure du
+  dernier changement de stats fait dans le code. Un bestiaire enregistré avant (base de l'artefact, ou navigateur : `np-best` daté
+  par `np-best-le`) n'est pas repris, sinon il écraserait le changement ; un enregistrement plus récent depuis le Lab l'est.
+  **À avancer à chaque changement de stats des espèces fait dans le code.**
+- **Réglages du joueur adoptés le 28 novembre 2026** (base de l'artefact, enregistrés à 2 h 10) : **Braise** est la palette de départ
+  (`PRESET_ACTIVE`), **toujours, sauf demande contraire** : la palette active enregistrée dans la base ne se recopie pas, et
+  le jeu ne reprend plus au lancement la dernière palette choisie (ni `np-preset-active`, ni la base) : on en change en jeu ; dix dessins retouchés (bz9r, mach5, o_accu, o_batterie, o_repar, siteUnknown, vitre dans `TUILES_JOUEUR` ;
+  levier, levierOn, o_camo dans `TUILES_JOUEUR_B`) ; banque de modules de départ à 13 modules (`MODULES_DEF`). Stats : `conception-faune.md`.
 - **Réglages du joueur adoptés le 23 novembre 2026** : les dessins retouchés dans l'artefact (`reglages/courant`) sont recopiés dans
   `TUILES_JOUEUR` (`03-tuiles.js`) et `TUILES_JOUEUR_B` (`03b-tuiles-machines.js`) — bz6r, bz7r, mach5, robot_u, siteUnknown, niche,
   stationOff, chargeur, o_capsule, o_plan — et la palette **Désert** retouchée dans `PRESETS` ; **Désert** devient la palette de départ
@@ -152,8 +160,16 @@ calcul qu'à pleine résolution. Sur ordinateur, rien ne change (autant de cases
 tard** : le Téléobjectif (capteur 13) voit au-delà de ce qui est affiché.
 
 ### Rythme des animations et effets de surface (26 novembre 2026)
-- **20 images par seconde partout** (effets, fumée, explosion, intro, descentes) : `FPS` et `raf20()` dans `00-base.js`,
+- **30 images par seconde partout** (effets, fumée, explosion, intro, descentes ; 20 du 26 au 28 novembre 2026, jugé saccadé) : `FPS` et `raf20()` dans `00-base.js`,
   au lieu du rythme du navigateur (60 ou plus). Les animations suivent l'horloge : leur durée ne change pas.
+- **Sauf le combat (28 novembre 2026)** : l'élan d'un coup, la secousse et les chiffres de dégâts s'animent à
+  **60 images par seconde** (`FX_VIF`, `10-rendu.js`) ; à 20, un élan de 200 ms ne faisait que 4 images et le combat
+  paraissait saccadé (« le jeu rame »). La boucle repasse à 30 dès que ces effets sont finis.
+- **Secousse adoucie (28 novembre 2026)** : la vue ne saute plus au hasard à chaque image ; elle oscille une fois et demie,
+  en s'amortissant, dans une direction tirée une fois. Foreuse touchée : 3 px pendant 150 ms (critique : 5 px, 220 ms), au
+  lieu de 5 px / 220 ms (9 px / 320 ms). Les explosions gardent leur force.
+- Les coups étalés puis les attaques combinées du 28 novembre 2026 ont été **retirés** le même jour (`historique.md`) :
+  tous les effets d'un tour partent ensemble, comme avant.
 - **Effets de surface** : la plupart des effets (dégâts, soins, énergie, lasers, glu, braises, alertes, ondes, boost,
   fureur, voile, éclairs) se posent par-dessus le décor. Pendant qu'ils jouent, le décor n'est plus redessiné : une copie
   est recollée et seuls les effets sont repeints (`fxRapide`, `10-rendu.js`). Dès qu'un effet touche le décor (secousse,
@@ -178,6 +194,13 @@ cadre : si le site hôte refuse, le journal propose d'ouvrir le jeu dans un ongl
 
 - Le curseur système est masqué sur la carte ; le **viseur** est dessiné sur la case survolée. Dès qu'on appuie sur
   une touche, viseur, fiche et trajet disparaissent jusqu'au prochain mouvement de souris.
+- **Fiche en mode viseur (28 novembre 2026)** : en inspection (X), au viseur du phaseur et à la visée d'une capsule, la
+  fiche de la case visée passe dans la colonne, sous les statuts, et remplace tout ce qui suit (Stats, Inventaire,
+  Carte, En vue, boutons) ; seul le pavé tactile reste. Elle n'a pas de ligne d'action au phaseur ni à la visée.
+  Avant, elle disparaissait au phaseur (`busy()`). `viseCible()`, `12-souris.js`.
+- **Textes des fiches (28 novembre 2026)** : relevés de F467 en jargon machine, sans règle chiffrée ni mode d'emploi
+  (`TDESC`, `BEHAV`, gisements, sites, objets, clés). Les chiffres restent dans les stats (PV, DÉG, Toucher…) et dans la
+  ligne d'action. Les douze espèces ont leur texte (avant, huit n'en avaient pas).
 - **Survol** : fiche complète dans « En vue » — terrain et ses effets, distance, créature (état, PV, DÉG, PRE, DEF
   modifiée, durées du pas et du coup, chances Toucher / Subir, comportement), site, roche fissurée, bord indestructible, objets posés,
   « souvenir » si la case est hors de vue, et l'action du clic (« y aller · N tours », « frapper », « forer »).
@@ -262,3 +285,10 @@ sa liste et posera **en priorité**, avant de générer le reste. **Branché sur
 - **Enregistrement** : dans le navigateur à chaque modification (`np-modules`) ; « Enregistrer » l'envoie dans la base
   de l'artefact (champ `modules` de `reglages/courant` : `liste` et `nb`). Code : `14f-modules.js`.
 - **Reste à faire** : brancher les niveaux 2 (cavernes), 3 (grande base) et la recette classique.
+
+- **Journal en grand (28 novembre 2026).** Le bouton **+** en haut à droite du journal du bas ouvre une grande fenêtre qui en montre une **copie figée** : rien ne la refait toute seule (ni nouveau message, ni assombrissement par tour), si bien que l'on peut lire et **sélectionner le texte** sans qu'il se décale. Pas de bouton d'actualisation : on ferme (Échap, Fermer ou un clic à côté) et on rouvre pour voir les messages récents. Le jeu ignore les touches tant qu'elle est ouverte.
+
+**Nom du modèle dans le journal (28 novembre 2026)** : les messages du journal disent « F.467 mkIV » (constante `NOM_FOREUSE`, `00-base.js`) au lieu de « la foreuse ». Les descriptions d'objets et le Lab gardent « la foreuse ». Le journal en grand n'a plus de bouton Actualiser : fermer puis rouvrir.
+
+**Nom « F467 » partout (28 novembre 2026)** : le modèle s'appelle F467 (le prochain sera F468, jamais « mkIV »), dans le journal, les descriptions d'objets, les fiches et le Lab (constante `NOM_FOREUSE`, `00-base.js`). Le « + » du journal est de la couleur d'interface (`--c1`).
+**Sélecteur à la souris** : comme le viseur du phaseur, la vue défile d'une case toutes les 70 ms quand le pointeur reste à 2 cases du cadre (`selSouris`, `12-souris.js`) ; elle revient sur la foreuse à la sortie du pointeur, au clic ou à la première touche.

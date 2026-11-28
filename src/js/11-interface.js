@@ -17,7 +17,7 @@ function miniMove(ev){const [x,y]=miniCell(ev);camCX=Math.max(0,Math.min(W-1,Mat
   camCY=Math.max(0,Math.min(H-1,Math.round(y-miniDrag.oy)));render();}
 mv.addEventListener('pointerdown',ev=>{if(!G||!$('overlay').hidden||ev.button>0)return;ev.preventDefault();
   // visée longue du phaseur (26 novembre 2026) : la mini-carte sert à viser loin d'un seul geste, sans toucher au mode carte
-  if(PHASE){const [x,y]=miniCell(ev);phaseVers(Math.round(x),Math.round(y));return;}
+  if(PHASE){const [x,y]=miniCell(ev);phasePtr=null;phaseVers(Math.round(x),Math.round(y));return;}
   if(TRAV)stopTravel('Trajet interrompu.');if(REST)stopRest('Repos interrompu.');if(EXPL)stopExplore('Exploration interrompue.');
     if(INSPECT){INSPECT=false;$('inspTag').hidden=true;}
   if(!freeCam)setFreeCam(true);
@@ -80,7 +80,24 @@ function mini(){
   mctx.strokeRect(X(camX)+.5,Y(camY)+.5,X(camX+Math.min(W,Math.ceil(vw/S)))-X(camX)-1,Y(camY+Math.min(H,Math.ceil(vh/S)))-Y(camY)-1);
   mctx.globalAlpha=1;mctx.fillStyle='#ffffff';const pr=Math.max(2,Math.round(k*1.5));
     mctx.fillRect(Math.round((G.px+.5)*k-pr/2),Math.round((G.py+.5)*k-pr/2),pr,pr);
+  // viseur du phaseur (28 novembre 2026) : un carré creux, bio ou danger comme à l'écran, pour viser hors de la vue
+  if(PHASE){const ok=phaseConnu(PHASE.x,PHASE.y)&&phaseTient(PHASE.x,PHASE.y),q=Math.max(5,Math.round(k*3)),u=Math.max(1,Math.round(dpr)),
+    x0=Math.round((PHASE.x+.5)*k-q/2),y0=Math.round((PHASE.y+.5)*k-q/2);mctx.fillStyle=ok?PAL['2']:PAL['4'];
+    mctx.fillRect(x0,y0,q,u);mctx.fillRect(x0,y0+q-u,q,u);mctx.fillRect(x0,y0,u,q);mctx.fillRect(x0+q-u,y0,u,q);}
 }
+/* Journal en grand (28 novembre 2026) : le bouton + ouvre une copie FIGÉE du journal dans une grande fenêtre. Rien ne la refait
+   toute seule (ni nouveau message, ni assombrissement par tour) : on peut lire et sélectionner sans que le texte se décale.
+   Pas de bouton d'actualisation : on ferme et on rouvre. */
+function logBigBuild(){const lg=G&&G.log||[],blocs=[];
+  for(const e of lg){const b=blocs[blocs.length-1];if(b&&b.t===e.t)b.ev.push(e);else blocs.push({t:e.t,ev:[e]});}
+  $('lbTxt').innerHTML=blocs.map(b=>`<div class="lgl"><span class="t">T${String(b.t).padStart(3,'0')}</span><span>`+
+    b.ev.map((e,k)=>`<span class="ev ${e.c||''}">${e.m}${e.n>1?` ×${e.n}`:''}</span>`+(k<b.ev.length-1?'<span class="sep">║</span>':'')).join('')+'</span></div>').join('');}
+function logBigOpen(){if(!G)return;if(TRAV)stopTravel();if(REST)stopRest();if(EXPL)stopExplore();
+  logBigBuild();$('logBig').hidden=false;const t=$('lbTxt');t.scrollTop=t.scrollHeight;$('lbClose').focus();}
+function logBigClose(){$('logBig').hidden=true;$('logPlus').focus();render();}
+$('logPlus').addEventListener('click',logBigOpen);$('lbClose').addEventListener('click',logBigClose);
+$('logBig').addEventListener('keydown',ev=>{if(ev.key==='Escape'){ev.preventDefault();logBigClose();}ev.stopPropagation();});
+$('logBig').addEventListener('pointerdown',ev=>{if(ev.target===$('logBig'))logBigClose();});
 /* ---------- Panneau « En vue » : chaque élément visible, sans répétition ---------- */
 let ICON={};
 /* Barre ASCII : ░ sur toute la largeur, recouvert d'un calque de █ découpé à la largeur exacte (16 novembre 2026).
@@ -107,15 +124,16 @@ function seenHTML(){
   if(ans.length){const max=6;
     const calc=e=>{const tmA=terrModDe(e.sp,e.o.x,e.o.y),tmR=terrMod(G.px,G.py),me=hitChance(robotPre(),e.sp.def+tmA),
       them=e.agg?hitChance(e.sp.pre,robotDef()):null;return {tmA,tmR,me,them};};
-    const head='<div class="hd"><span></span><span title="Sa cadence : le nombre d’actions qu’elle fait pendant une action normale de la foreuse"></span><span>Vie</span><span title="Votre chance de le toucher">Toucher</span><span title="Sa chance de vous toucher">Subir</span></div>';
+    const head='<div class="hd"><span></span><span title="Sa cadence : le nombre d’actions qu’elle fait pendant une action normale de '+NOM_FOREUSE+'"></span><span>Vie</span><span title="Votre chance de le toucher">Toucher</span><span title="Sa chance de vous toucher">Subir</span></div>';
     out.push('<div class="grp">'+head+ans.slice(0,max).map(e=>{const pv=pvDe(e.sp),d=Math.max(Math.abs(e.o.x-G.px),Math.abs(e.o.y-G.py)),c=calc(e);
       const dp=Math.round(dpasDe(e.o,e.sp)),dc=dcoupDe(e.o,e.sp),cd=d<=1?dc:dp;
-      return `<div class="an${e.agg&&e.st?' hunt':''}" title="${e.sp.n}${e.st?' · '+e.st:''} · ${d} case${d>1?'s':''} · ${Math.max(0,e.hp)}/${pv} PV · pas ${dp} (${motDuree(dp)}), coup ${dc} (${motDuree(dc)})"><img src="${ICON[e.ic]||''}" alt="${e.sp.n}"><span class="cad${cd<=50?' vif':''}" title="${cd<=100?'Jusqu’à '+cadenceDe(cd).toFixed(cadenceDe(cd)%1?1:0)+' action':'Une action toutes les '+(1/cadenceDe(cd)).toFixed(1)}${cd<=100?'s par action de la foreuse':' actions de la foreuse'}">${CADGL(cd)}</span><span class="hp">${asciiBar(Math.max(0,e.hp),pv)}</span><span class="n" style="color:${chanceCol(c.me)}">${c.me} %</span><span class="n" style="color:${c.them==null?'var(--dim)':chanceCol(100-c.them)}">${c.them==null?'—':c.them+' %'}</span></div>`;}).join('')
+      return `<div class="an${e.agg&&e.st?' hunt':''}" title="${e.sp.n}${e.st?' · '+e.st:''} · ${d} case${d>1?'s':''} · ${Math.max(0,e.hp)}/${pv} PV · pas ${dp} (${motDuree(dp)}), coup ${dc} (${motDuree(dc)})"><img src="${ICON[e.ic]||''}" alt="${e.sp.n}"><span class="cad${cd<=50?' vif':''}" title="${cd<=100?'Jusqu’à '+cadenceDe(cd).toFixed(cadenceDe(cd)%1?1:0)+' action':'Une action toutes les '+(1/cadenceDe(cd)).toFixed(1)}${cd<=100?'s par action de '+NOM_FOREUSE+'':' actions de '+NOM_FOREUSE+''}">${CADGL(cd)}</span><span class="hp">${asciiBar(Math.max(0,e.hp),pv)}</span><span class="n" style="color:${chanceCol(c.me)}">${c.me} %</span><span class="n" style="color:${c.them==null?'var(--dim)':chanceCol(100-c.them)}">${c.them==null?'—':c.them+' %'}</span></div>`;}).join('')
     +(ans.length>max?`<div class="none">+ ${ans.length-max} autre${ans.length-max>1?'s':''}</div>`:'')+'</div>');
   }
-  const ins=HOV&&!busy()?inspectHTML():'';
+  const ins=HOV&&!busy()&&!viseCible()?inspectHTML(HOV):'';   // en mode viseur, la fiche est dans la colonne
   return ins+(out.join('')||'<div class="none">Rien en vue.</div>');
 }
+let FICHE_H='';
 function side(){
   const st=G.st;
 
@@ -126,7 +144,11 @@ function side(){
   // Le sous-menu Statistiques a été retiré le 15 novembre 2026 : les stats sont dans la fenêtre Équipement.
   sacDraw();
   {const E=G.eff||{},l=[];if(E.poison>0)l.push(`<span style="color:var(--life)">Poison ${E.poison}</span>`);
-    if(E.glu>0)l.push(`Englué ${E.glu}`);if(E.camo>0)l.push(`<span style="color:var(--c3)">Camouflé ${E.camo}</span>`);
+    if(E.glu>0)l.push(`Englué ${E.glu}`);
+    {const sl=SLOW[G.t[idx(G.px,G.py)]];if(sl)l.push(`Ralenti ×${sl}`);}   // dans l'eau (28 novembre 2026)
+    if(E.berserk>0)l.push(`<span style="color:var(--life)">Surrégime ${E.berserk}</span>`);
+    if(E.repar&&E.repar.t>0)l.push(`<span style="color:var(--c2)">Réparation ${E.repar.t}</span>`);
+    if(E.recharge&&E.recharge.t>0)l.push(`<span style="color:var(--armor)">Recharge ${E.recharge.t}</span>`);if(E.camo>0)l.push(`<span style="color:var(--c3)">Camouflé ${E.camo}</span>`);
     {const bt=Math.max(0,...(G.balises||[]).map(q=>q.t));if(bt>0)l.push(`<span style="color:var(--life)">Balise ${bt}</span>`);
     }/* battements restants (22 novembre 2026) */{const f=G.fum&&G.fum[idx(G.px,G.py)];
     if(f)l.push(`<span style="color:var(--c1)">Dans la fumée ${f.v}</span>`);}$('effs').innerHTML=l.join(' · ');}
@@ -149,6 +171,9 @@ function side(){
     if(h!==HSTATS_H&&$('hstats')){HSTATS_H=h;$('hstats').innerHTML=h;}if(typeof stipMaj==='function')stipMaj();}   // avalée par le commentaire depuis le 16 novembre 2026 : la matière ne s'affichait plus
   if(!$('inventaire').hidden)invDraw();
   $('msg').innerHTML=seenHTML();
+  // fiche de la case visée (28 novembre 2026) : inspection, phaseur, visée d'une capsule ; réécrite seulement si elle change
+  {const vc=viseCible(),f=$('fiche');f.closest('.col').classList.toggle('vise',!!vc);f.hidden=!vc;
+    const h=vc?inspectHTML(vc):'';if(h!==FICHE_H){FICHE_H=h;f.innerHTML=h;}}
   logDraw();
 }
 /* Journal du bas (22 novembre 2026) : il défile (molette, barre) pour relire les messages plus anciens. Il n'est refait que
@@ -189,6 +214,7 @@ const KEYS={arrowup:[0,-1],arrowdown:[0,1],arrowleft:[-1,0],arrowright:[1,0],z:[
   a:[-1,-1],e:[1,-1],w:[-1,1],c:[1,1],   // ↗ est revenue sur E le 15 novembre 2026 au soir : c'est T qui ouvre l'équipement
   '8':[0,-1],'2':[0,1],'4':[-1,0],'6':[1,0],'7':[-1,-1],'9':[1,-1],'1':[-1,1],'3':[1,1]};
 addEventListener('keydown',ev=>{
+  if(SELCAM)selStop();   // le défilement du sélecteur à la souris cesse à la première touche
   if(INTRO){ev.preventDefault();if(ev.key==='Escape'||ev.key===' '||ev.key==='Enter')skipIntro();return;}
   // mini-jeu : seul Échap passe (cela coûte de la vie)
   if(FORAGE){ev.preventDefault();if(ev.key==='Escape'||(!FORAGE.jeu&&(ev.key===' '||ev.key==='Enter')))skipForage();return;}
@@ -213,7 +239,7 @@ addEventListener('keydown',ev=>{
   /* Visée longue du phaseur (26 novembre 2026) : la foreuse est démontée, le viseur traverse toute la carte et la vue le suit.
      Shift accélère de cinq cases, comme le mode carte. Rien d'autre ne répond tant qu'elle n'est pas reformée. */
   if(PHASE){ev.preventDefault();
-    if(KEYS[k]){const st=ev.shiftKey?5:1;phaseVers(PHASE.x+KEYS[k][0]*st,PHASE.y+KEYS[k][1]*st);}
+    if(KEYS[k]){const st=ev.shiftKey?5:1;phaseVers(PHASE.x+KEYS[k][0]*st,PHASE.y+KEYS[k][1]*st);phaseDefile(1);}
     else if(k==='enter'||k===' ')phaseOk();
     else if(k==='escape')phaseRetour();
     return;}
@@ -259,7 +285,8 @@ let DB=null;
 // À l'ouverture, les réglages enregistrés en base sont rechargés (même d'un autre appareil)
 function applySaved(d){
   const num=v=>typeof v==='number'&&isFinite(v);
-  clePuce(d.bestiaire);if(d.bestiaire)BEST_LIST().forEach(e=>{const b=d.bestiaire[e.key];if(b)BFIELDS.forEach(([f])=>{if(num(b[f]))e.o[f]=b[f];});});saveBest();
+  clePuce(d.bestiaire);if(d.bestiaire&&(Date.parse(d.enregistreLe)||0)>=BEST_CODE_LE)BEST_LIST().forEach(e=>{const b=d.bestiaire[e.key];if(b)BFIELDS.forEach(([f])=>{if(num(b[f]))e.o[f]=b[f];});});
+  coupBorne();saveBest();   // coup 100 au moins (07-generation)
   if(num(d.discretion))setStealthBase(d.discretion);
   if(d.artefacts){ARTEFACTS=artefactsSains(d.artefacts);saveArtefacts();}
   if(d.items&&typeof itemsApplique==='function'){itemsApplique(d.items);saveItems();}
@@ -277,7 +304,7 @@ function applySaved(d){
   if(d.palette&&Array.isArray(d.palette.palettes)){d.palette.palettes.forEach((pp,k)=>{const t=PRESETS[k]||PRESETS.find(x=>x.n===pp.nom);if(!t)return;
       if(Array.isArray(pp.couleurs)&&pp.couleurs.length===PAL_N)t.c=pp.couleurs.slice();
       if(typeof pp.nom==='string'&&pp.nom.trim())t.n=pp.nom;});
-    savePresets();const ai=PRESETS.findIndex(x=>x.n===d.palette.active);usePreset(ai>=0?ai:PRESET_ACTIVE);}
+    savePresets();usePreset(PRESET_ACTIVE);}   // la palette active enregistrée n'est pas reprise : départ sur Braise (28 novembre 2026)
   // banque de modules (Lab → Modules, 24 novembre 2026)
   if(d.modules&&typeof modulesApplique==='function'){modulesApplique(d.modules);saveModules();}
   if(d.tuiles&&typeof d.tuiles==='object'){TILE_OV={};

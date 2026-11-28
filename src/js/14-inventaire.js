@@ -17,19 +17,19 @@ const MODS={degats:['DEG',1,''],pre:['PRE',1,''],crit:['CRIT',1,' %'],def:['DEF'
   power:['POW',1,''],vieMax:['Vie max',1,''],energieMax:['Énergie max',1,''],dis:['DIS',-1,''],detec:['DET',1,''],coup:['Coup',-1,'']};
 const ITEMS={
   foreuse:{n:'Foreuse',f:1,slot:'arme',req:10,de:{n:1,f:6,p:5},mod:{},base:1,
-    d:'L’outil d’origine de la foreuse, équilibré : c’est l’arme de référence.',
+    d:'L’outil d’origine de '+NOM_FOREUSE+', équilibré : c’est l’arme de référence.',
     art:["    █▓▓▓▓▓█    ", "   ▐▒▒▒▒▒▒▒▌   ", "    ▀▒▒▒▒▒▀    ", "     ▀▒▒▒▀     ", "      ▀▒▀      ", "       ▀       "],
     col:["....3111113....", "...211111112...", "....2111112....", ".....21112.....", "......212......", ".......2......."]},
   usine:{n:'Coque d’usine',slot:'armure',req:10,mod:{def:10},
-    d:'La coque de série, montée au départ. Sans elle, la foreuse n’a aucune défense.',
+    d:'La coque de série, montée au départ. Sans elle, '+NOM_FOREUSE+' n’a aucune défense.',
     art:["  ▄▄       ▄▄  ", "  █▓▀▀▀▀▀▀▀▓█  ", "  █▓▓▓▐█▌▓▓▓█  ", "   ▀▄▓▓▓▓▓▄▀   ", "     ▀▀▀▀▀     "],
     col:["..33.......33..", "..31333333313..", "..31113331113..", "...331111133...", ".....33333....."]},
   servo:{n:'Servomoteur',slot:'acc',mod:{pas:-25},
-    d:'Entraînement plus nerveux : la foreuse se déplace plus vite.',
+    d:'Entraînement plus nerveux : '+NOM_FOREUSE+' se déplace plus vite.',
     art:["       │       ", "    ·┌─┴─┐·    ", "  ───┤▓+▓├───  ", "    ·└─┬─┘·    ", "       │       "],
     col:[".......3.......", "....3333333....", "..33331d13333..", "....3333333....", ".......3......."]},
   optique:{n:'Téléobjectif',slot:'acc',mod:{capteur:3},
-    d:'Capteur à grande focale : la foreuse voit plus loin.',
+    d:'Capteur à grande focale : '+NOM_FOREUSE+' voit plus loin.',
     art:["     ▄▄▄▄▄     ", "   ▄▀▒▒▒▒▒▀▄   ", "   █▒▒░░░▒▒█   ", "   ▀▄▒▒▒▒▒▄▀   ", "     ▀▀▀▀▀     "],
     col:[".....11111.....", "...113333311...", "...133222331...", "...113333311...", ".....11111....."]},
   viseur:{n:'Viseur laser',slot:'acc',mod:{crit:10},
@@ -41,11 +41,11 @@ const ITEMS={
     art:["    ┌─────┐    ", "    │▒▒▒▒▒│    ", "    │     │    ", "    │█████│    ", "    └┬───┬┘    ", "     │   │     "],
     col:["....3333333....", "....3212123....", "....3.....3....", "....3111113....", "....3333333....", ".....3...3....."]},
   gyro:{n:'Gyroscope',slot:'acc',mod:{def:12},
-    d:'Stabilise les esquives : la foreuse est plus dure à toucher.',
+    d:'Stabilise les esquives : '+NOM_FOREUSE+' est plus dure à toucher.',
     art:["     ▄▀▀▀▄     ", "    █ ▄▀▄ █    ", "  ═══════════  ", "    █ ▀▄▀ █    ", "     ▀▄▄▄▀     "],
     col:[".....33333.....", "....3.111.3....", "..ddddddddddd..", "....3.111.3....", ".....33333....."]},
   stabil:{n:'Stabilisateur',slot:'acc',mod:{pre:10},
-    d:'Compense les secousses : la foreuse touche plus souvent.',
+    d:'Compense les secousses : '+NOM_FOREUSE+' touche plus souvent.',
     art:["  ▄         ▄  ", " █│█  ─┐█  █│█ ", " █│█▄▄█│█▄▄█│█ ", " █├───┬┴────┤█ ", " █│█▀█│█▀▀▀█│█ ", " █│█ █└─   █│█ "],
     col:["..3.........3..", ".313..113..313.", ".3133331333313.", ".3111111111113.", ".3133313333313.", ".313.311...313."]},
   accu:{n:'Accumulateur',slot:'acc',mod:{energieMax:40},
@@ -66,13 +66,13 @@ const ITEMS={
     art:["       ▄       ", "    █▀▀▀▀▀█    ", "   ▄█ ▒▒▒ █▄   ", "    █▄▄▄▄▄█    ", "       ▀       "],
     col:[".......3.......", "....3333333....", "...33.222.33...", "....3333333....", ".......3......."]},
   fumigene:{n:'Fumigène',conso:1,son:'smoke',eff:'Nuage opaque de 7 cases',
-    d:'Un nuage opaque autour de la foreuse : il cache la vue des deux côtés et les ennemis perdent votre trace.',
+    d:'Un nuage opaque autour de '+NOM_FOREUSE+' : il cache la vue des deux côtés et les ennemis perdent votre trace.',
     plein:st=>false,non:'',
     use:st=>{fumPose();return 'le nuage se répand';},
     art:["       ▄       ", "     ┌───┐     ", "     │   │     ", "     │▒▒▒│     ", "     │▒▒▒│     ", "     └───┘     "],
     col:[".......w.......", ".....wwwww.....", ".....w...w.....", ".....w232w.....", ".....w323w.....", ".....wwwww....."]},
   charge:{n:'Charge sismique',f:1,conso:1,eff:'30 dégâts, roche brisée, 3 × 3 et plus',
-    d:'Explose jusqu’à 4 cases, comme une mine : un carré de 3 × 3 et 5 cases autour, au hasard. 30 dégâts, la foreuse comprise si elle est dedans, et roche brisée, même la roche dure. Très bruyante.',
+    d:'Explose jusqu’à la portée de vue, comme une mine : un carré de 3 × 3 et 5 cases autour, au hasard. 30 dégâts, '+NOM_FOREUSE+' compris s’il est dedans, et roche brisée, même la roche dure. Très bruyante.',
     vise:1,plein:st=>false,non:'',
     use:st=>'',
     art:["          *    ", "        ┌─┘    ", "    ┌───┴──┐   ", "    │▓▓▓▓▓▓│   ", "    │▓▓ ▓▓▓│   ", "    └──────┘   "],
@@ -170,10 +170,13 @@ const DEVANT={u:[0,-1],r:[1,0],d:[0,1],l:[-1,0]};
 function viseeStart(i){const o=G.inv[i],c=CONSO[o.k]||{},soi=c.soi||!identifie(o.k),[dx,dy]=soi?[0,0]:DEVANT[G.face||'u'];
   VISEE={i,x:Math.max(1,Math.min(W-2,G.px+dx)),y:Math.max(1,Math.min(H-2,G.py+dy))};
   invOpen(false);SAC_NAV=false;SAC_H='';
-  say(`${ITEMS[o.k].n} : choisissez la cible (déplacement ou souris), Entrée ou clic pour valider, Échap pour annuler.${soi?' Entrée tout de suite : sur la foreuse.':''}`,'warn');render();}
-function viseeVers(x,y){if(!VISEE)return;
-  const cx=Math.max(G.px-VISEE_R,Math.min(G.px+VISEE_R,Math.max(1,Math.min(W-2,x)))),
-        cy=Math.max(G.py-VISEE_R,Math.min(G.py+VISEE_R,Math.max(1,Math.min(H-2,y))));
+  say(`${ITEMS[o.k].n} : choisissez la cible.`,'warn');render();}
+/* Portée de visée (28 novembre 2026) : la portée de vue de la foreuse (capteur), pour toutes les capsules, dans le même disque que la vue. */
+const viseePortee=()=>Math.max(1,G.st.capteur||VISEE_R);
+function viseeVers(x,y){if(!VISEE)return;const r=viseePortee();
+  let dx=Math.max(1,Math.min(W-2,x))-G.px,dy=Math.max(1,Math.min(H-2,y))-G.py;
+  const d2=dx*dx+dy*dy,max=r*r+r;if(d2>max){const f=Math.sqrt(max/d2);dx=Math.trunc(dx*f);dy=Math.trunc(dy*f);}
+  const cx=Math.max(1,Math.min(W-2,G.px+dx)),cy=Math.max(1,Math.min(H-2,G.py+dy));
   if(cx!==VISEE.x||cy!==VISEE.y){VISEE.x=cx;VISEE.y=cy;render();}}
 const viseeStop=m=>{VISEE=null;if(m)say(m);render();};
 function viseeOk(){if(!VISEE||G.over)return;const {i,x,y}=VISEE,o=G.inv[i];
@@ -183,9 +186,10 @@ function viseeOk(){if(!VISEE||G.over)return;const {i,x,y}=VISEE,o=G.inv[i];
   VISEE=null;lastAct='dig';
   let n=0,k=0,moi=0;const zone=zoneBoom(x,y);
   for(const c of [...(G.beasts||[]),...(G.animals||[])]){if(!dansZone(zone,c.x,c.y))continue;
+    if(!(G.beasts||[]).includes(c)&&!(G.animals||[]).includes(c))continue;   // déjà emportée par l'explosion d'une mine voisine
     const isB=(G.beasts||[]).includes(c),sp=isB?BEASTS[c.sp]:SPECIES[c.sp];n++;
     c.hp=(c.hp??pvDe(sp))-VISEE_DM;addFx({kind:'num',x:c.x,y:c.y,txt:'-'+VISEE_DM,col:PAL['3'],dur:900});
-    if(c.hp<=0){k++;(isB?G.beasts:G.animals).splice((isB?G.beasts:G.animals).indexOf(c),1);bleed(c.x,c.y);if(isB)butinMort(c);}
+    if(c.hp<=0){k++;(isB?G.beasts:G.animals).splice((isB?G.beasts:G.animals).indexOf(c),1);bleed(c.x,c.y);if(isB){butinMort(c);minePartie(c);}}
     else if(isB){c.hunt=1;spot(c);}else{c.aware=1;c.enraged=true;spot(c);}}
   // l'onde brise aussi la roche, la montagne et la roche dure (16 novembre 2026) : c'est le seul moyen d'entamer la roche dure
   let roches=0;
@@ -202,7 +206,7 @@ function viseeOk(){if(!VISEE||G.over)return;const {i,x,y}=VISEE,o=G.inv[i];
     addFx({kind:'num',x:G.px,y:G.py,txt:'-'+moi,col:PAL['4'],dur:1000});if(G.st.vie<=0)G.over={dead:true};}
   engage();invTake(i);sacFix();SAC_H='';
   addFx({kind:'boom',x,y,cases:zone,dur:420});addFx({kind:'shake',amp:moi?10:8,dur:300});SFX.explode();
-  say(`${neufCh?`Capsule ${savoir().codes.charge} : c’était une charge sismique. `:''}${moi?`La foreuse est prise dans l’explosion : −${moi} vie. `:''}Charge sismique : ${n?`${n} ennemi${n>1?'s':''} touché${n>1?'s':''}${k?`, ${k} abattu${k>1?'s':''}`:''}`:'personne dans la zone'}${roches?`, ${roches} case${roches>1?'s':''} de roche pulvérisée${roches>1?'s':''}`:''}.`,moi||!(n||roches)?'warn':'good');
+  say(`${neufCh?`Capsule ${savoir().codes.charge} : c’était une charge sismique. `:''}${moi?`${NOM_FOREUSE} est prise dans l’explosion : −${moi} vie. `:''}Charge sismique : ${n?`${n} ennemi${n>1?'s':''} touché${n>1?'s':''}${k?`, ${k} abattu${k>1?'s':''}`:''}`:'personne dans la zone'}${roches?`, ${roches} case${roches>1?'s':''} de roche pulvérisée${roches>1?'s':''}`:''}.`,moi||!(n||roches)?'warn':'good');
   if(consoTemps('dig'))return;
   render();}
 /* Visuel de la foreuse selon l'équipement : l'arme dessine la moitié avant (lignes 0 à 7, pointe en haut), l'armure la moitié arrière
@@ -312,18 +316,18 @@ function statVal(k,st,arme,armure,dDis){
    chaque pièce d'équipement portée, les bonus permanents (modules), puis ce qui tient à la situation (POW requis, terrain, action). */
 // valeurs de la foreuse nue ; la défense de départ (10) vient de la Coque d'usine, portée dès le début
 const ST_BASE={vieMax:100,energieMax:100,pas:0,capteur:10,degats:0,pre:100,def:0,crit:5,power:10,dis:0,coup:0,detec:3};
-const ST_DEF={vieMax:['Vie maximale','Ce que la foreuse peut encaisser avant d’être détruite.'],
+const ST_DEF={vieMax:['Vie maximale','Ce que '+NOM_FOREUSE+' peut encaisser avant d’être détruite.'],
   energieMax:['Énergie maximale','La réserve dépensée par la course (5 par pas) ; elle se recharge au repos.'],
-  pas:['Durée du pas','Le temps que prend un déplacement : 100 vaut un battement, comme pour les robots. Plus c’est bas, plus la foreuse marche vite.'],
+  pas:['Durée du pas','Le temps que prend un déplacement : 100 vaut un battement, comme pour les robots. Plus c’est bas, plus '+NOM_FOREUSE+' marche vite.'],
   capteur:['Capteur','La portée de vue, en cases.'],
   degats:['Dégâts','Ce qu’un coup retire à un robot : le dé de l’arme plus les bonus.'],
   pre:['Précision','La chance de toucher, avant la défense de la cible (toujours entre 5 et 95 %).'],
   def:['Défense','Chaque point réduit la chance d’être touché d’environ 1,3 %.'],
   crit:['Critique','La chance qu’un coup soit critique : dégâts × 3. Un coup par surprise l’est toujours.'],
   power:['Puissance','Comparée au POW requis par l’arme et par l’armure : chaque point en trop les renforce, chaque point manquant les affaiblit beaucoup.'],
-  dis:['Discrétion','La distance, en cases, à laquelle un robot peut remarquer la foreuse. Plus c’est bas, mieux c’est.'],
-  coup:['Durée du coup','Le temps que prend une attaque : 100 vaut un battement. Plus c’est bas, plus la foreuse frappe vite.'],
-  detec:['Détection','Le rayon, en cases, dans lequel la foreuse peut repérer une porte dérobée. Elle cherche à chaque battement : 15 % de chance par porte, 35 % si elle attend sur place ou se repose.']};
+  dis:['Discrétion','La distance, en cases, à laquelle un robot peut remarquer '+NOM_FOREUSE+'. Plus c’est bas, mieux c’est.'],
+  coup:['Durée du coup','Le temps que prend une attaque : 100 vaut un battement. Plus c’est bas, plus '+NOM_FOREUSE+' frappe vite.'],
+  detec:['Détection','Le rayon, en cases, dans lequel '+NOM_FOREUSE+' peut repérer une porte dérobée. Elle cherche à chaque battement : 15 % de chance par porte, 35 % si elle attend sur place ou se repose.']};
 function statInfo(k){const st=G.st,A=eqDe('arme')||null,B=eqDe('armure')||null,L=[],u=k==='crit'?' %':'',pt=n=>Math.abs(n)>1?'s':'';
   const base=k==='dis'?STEALTH_BASE:k==='coup'?DUR.coup:k==='pas'?DUR.pas:ST_BASE[k];L.push([k==='dis'?'Base (réglage du jeu)':'Base',base+u]);
   let eq=0;for(const o of G.inv||[]){const d=ITEMS[o.k];if(!o.eq||!d||!d.mod||!d.mod[k])continue;eq+=d.mod[k];L.push([d.n,signe(d.mod[k])+u]);}

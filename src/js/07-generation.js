@@ -324,10 +324,10 @@ function niveau(refait){drilling=false;
    toujours 1) : une carte « cavernes » est un niveau 2, une « base » un niveau 3, et prend la faune (fenêtre LIFE) et les
    artefacts de ce niveau. La descente reprend de là. */
 function newGame(){palNiveauRaz();SANS_VAISSEAU=false;NIV_GEN=NIV_RECETTE(GEN.recette);niveau();G.niv=NIV_GEN;   // G n'existe qu'une fois la carte générée
-  if(G.ship)say('Atterrissage confirmé. Un site de forage signalé par l’orbiteur. La foreuse est dans la soute ; la porte est à l’arrière.','info');
-  else if(G.arrivee==='base')say(`Niveau ${G.niv} : la foreuse a traversé le plafond d’une salle, dans une base enfouie. Un site de forage est signalé plus loin.`,'info');
+  if(G.ship)say('Atterrissage confirmé. Un site de forage signalé par l’orbiteur. '+NOM_FOREUSE+' est dans la soute ; la porte est à l’arrière.','info');
+  else if(G.arrivee==='base')say(`Niveau ${G.niv} : ${NOM_FOREUSE} a traversé le plafond d’une salle, dans une base enfouie. Un site de forage est signalé plus loin.`,'info');
   // arrivée par un puits
-  else say(`Niveau ${G.niv} : la foreuse a débouché dans un réseau de cavernes. Un site de forage plus bas est signalé.`,'info');}
+  else say(`Niveau ${G.niv} : ${NOM_FOREUSE} a débouché dans un réseau de cavernes. Un site de forage plus bas est signalé.`,'info');}
 // Nouvelle partie lancée par le joueur : la cinématique d'arrivée se rejoue (21 novembre 2026)
 function nouvellePartie(){newGame();started=true;$('overlay').hidden=true;render();playIntro();}
 /* Foreuse détruite → « Déployer une nouvelle foreuse » (22 novembre 2026) : on repart toujours du niveau 1 (recette
@@ -371,23 +371,35 @@ function niveauSuivant(hasard){   // hasard : un archétype monde et un archéty
   // novembre 2026 : il partait tout de suite)
   G.sonarAt=tour+(G.sonarAt||0);
   eboulis();
-  say(G.arrivee==='base'?`Niveau ${G.niv}${G.amb?' — '+G.amb:''}. La foreuse a traversé le plafond d’une salle : elle est dans une base enfouie. Un site de forage est signalé plus loin.`:`Niveau ${G.niv}${G.amb?' — '+G.amb:''}. La foreuse a percé le plafond et s'est écrasée plus bas. Un nouveau site de forage est signalé.`,'info');}
+  say(G.arrivee==='base'?`Niveau ${G.niv}${G.amb?' — '+G.amb:''}. ${NOM_FOREUSE} a traversé le plafond d’une salle : il est dans une base enfouie. Un site de forage est signalé plus loin.`:`Niveau ${G.niv}${G.amb?' — '+G.amb:''}. ${NOM_FOREUSE} a percé le plafond et s'est écrasée plus bas. Un nouveau site de forage est signalé.`,'info');}
 // devant un passage : pas de débris
 const B_PORTE=i=>!!(BATI_DER&&BATI_DER.B.porte[i])||D4.some(([dx,dy])=>{const v=G.t[idx(i%W+dx,((i/W)|0)+dy)];return v===DOOR||v===LOCK;});
 
 /* ---------- Bestiaire : édition des statistiques ---------- */
 /* Durées à la place de la Vitesse (25 novembre 2026) : « Pas » et « Coup » en unités de temps, sur les paliers
    50 / 75 / 100 / 150 / 200 — plus petit, plus rapide (voir l'horloge dans 09 et 08-faune). */
-const BFIELDS=[['dpas','Pas',25,400],['dcoup','Coup',25,400],['pv','PV',1,200],['dmin','Dégâts min',0,100],['dmax','Dégâts max',0,100],['pre','Précision',0,250],
+const BFIELDS=[['dpas','Pas',25,400],['dcoup','Coup',100,400],['pv','PV',1,200],['dmin','Dégâts min',0,100],['dmax','Dégâts max',0,100],['pre','Précision',0,250],
   ['def','Défense',0,150],['crit','Crit %',0,100]];
 const BEST_LIST=()=>[{key:'puce',o:SPECIES[0],ic:'an0r',
   role:'Suit à distance et recule ; attaque dès qu’un coup est tenté, par vous ou contre vous'},
   ...BEASTS.map((o,i)=>({key:o.bk||o.key,o,ic:'bz'+i+'r',role:o.role}))];
 const BEST_DEF={};BEST_LIST().forEach(e=>{BEST_DEF[e.key]={};BFIELDS.forEach(([f])=>BEST_DEF[e.key][f]=e.o[f]);});
-try{const b=clePuce(JSON.parse(localStorage.getItem('np-best')||'null'));
-  if(b)BEST_LIST().forEach(e=>{if(b[e.key])BFIELDS.forEach(([f])=>{if(typeof b[e.key][f]==='number')e.o[f]=b[e.key][f];});});}catch(e){}
+/* Coup 100 au moins (28 novembre 2026, demande du joueur : le double coup ne marchait pas) : aucune créature ne frappe plus
+   vite qu'un battement ; celles qui frappent plus lentement (Broyeur, Artilleur) gardent leur durée. Les durées enregistrées
+   (navigateur, base de l'artefact, Lab) sont ramenées à COUP_MIN au plus bas. */
+const COUP_MIN=100;
+const coupBorne=()=>BEST_LIST().forEach(e=>{if(!(e.o.dcoup>=COUP_MIN))e.o.dcoup=COUP_MIN;});
+/* Bestiaire du code (28 novembre 2026) : quand les stats changent dans le code après une recopie des réglages du joueur, on
+   avance BEST_CODE_LE. Un bestiaire enregistré avant cette date (base de l'artefact, navigateur) est déjà dans le code : il
+   n'est pas repris, sinon il écraserait le changement. Un nouvel enregistrement depuis le Lab est repris normalement. */
+const BEST_CODE_LE=Date.parse('2026-11-28T02:15:00Z');
+try{const b=clePuce(JSON.parse(localStorage.getItem('np-best')||'null')),
+    ok=(+localStorage.getItem('np-best-le')||0)>=BEST_CODE_LE;
+  if(b&&ok)BEST_LIST().forEach(e=>{if(b[e.key])BFIELDS.forEach(([f])=>{if(typeof b[e.key][f]==='number')e.o[f]=b[e.key][f];});});}catch(e){}
+coupBorne();
 function saveBest(){const o={};BEST_LIST().forEach(e=>{o[e.key]={};BFIELDS.forEach(([f])=>o[e.key][f]=e.o[f]);});
-  try{localStorage.setItem('np-best',JSON.stringify(o));}catch(e){}touchLocal();}
+  try{localStorage.setItem('np-best',JSON.stringify(o));localStorage.setItem('np-best-le',String(Math.max(Date.now(),BEST_CODE_LE)));
+    }catch(e){}touchLocal();}
 /* Les réglages enregistrés d'avant le 25 novembre 2026 portaient une Vitesse, qui n'existe plus : les durées
    gardent alors les valeurs du code, et le reste (PV, dégâts, précision…) reste celui du joueur. */
 try{if(localStorage.getItem('np-mig')!=='horloge1'){saveBest();

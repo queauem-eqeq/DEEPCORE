@@ -1,5 +1,5 @@
 /* ---------- Rendu ---------- */
-const cv=$('view'),ctx=cv.getContext('2d'),fcv=$('fxv'),fctx=fcv.getContext('2d');let cols=20,rows=15,camX=0,camY=0,vw=0,vh=0;
+const cv=$('view'),ctx=cv.getContext('2d'),fcv=$('fxv'),fctx=fcv.getContext('2d');let cols=20,rows=15,camX=0,camY=0,vw=0,vh=0,SELCAM=null;
 /* Tablette (26 novembre 2026) : sur un écran tactile, la vue montre au plus VUE_MAX × VUE_MAX cases. 21 = la portée de vue de
    la foreuse (capteur 10) de part et d'autre : tout ce qu'elle voit tient à l'écran. Le canevas est dessiné à la résolution
    de l'ordinateur (un point = un pixel), puis agrandi par le navigateur d'un facteur entier (VZ × densité de l'écran) :
@@ -154,14 +154,16 @@ function drawBoom(){const fl=1-(performance.now()-BOOM.t0)/180;
     ctx.arc((G.px+.5-camX)*S,(G.py+.5-camY)*S,S*1.6,0,Math.PI*2);ctx.fill();}
   ctx.globalAlpha=1;for(const q of BOOM.p){ctx.fillStyle=q.c;
     ctx.fillRect(Math.round((q.x-camX)*S/2)*2,Math.round((q.y-q.z-camY)*S/2)*2,q.sz,q.sz);}}
+/* Combat lisible (28 novembre 2026) : l'élan d'un coup, la secousse et les chiffres de dégâts s'animent à 60 images/s
+   (FX_VIF) ; tout le reste garde le pas de FPS. Les coups étalés puis groupés du même jour ont été retirés (historique.md). */
+const FX_VIF=new Set(['lunge','shake','num']);
 function addFx(f){f.t0=performance.now();if(f.kind==='num')f.stack=FX.filter(o=>o.kind==='num'&&o.x===f.x&&o.y===f.y&&fxP(o)<.5).length;
-  FX.push(f);if(!fxRaf)fxRaf=raf20(fxLoop);}
-// grains d'un effet de consommable : position dans la case et instant d'apparition, tirés une fois pour toutes
-const fxGrains=n=>Array.from({length:n},()=>({x:rnd(0,13),y:rnd(3,14),d:Math.random()*.55}));
-// une mine armée ou un paralyzor accroché gardent le rendu en marche
+  FX.push(f);if(!fxRaf)fxRaf=fxSuite();}
+// prochaine image : à 60 images/s tant qu'un effet de combat bouge, sinon au pas de FPS
+const fxSuite=()=>FX.some(f=>FX_VIF.has(f.kind))?requestAnimationFrame(fxLoop):raf20(fxLoop);
 function fxLoop(){const now=performance.now();FX=FX.filter(f=>now-f.t0<f.dur);if(antAnime())antVis();
   if(fxSurface())fxRapide();else render();
-  fxRaf=(FX.length||animVif())?raf20(fxLoop):0;}
+  fxLoop._img=now;fxRaf=(FX.length||animVif())?fxSuite():0;}
 const fxP=f=>Math.min(1,(performance.now()-f.t0)/f.dur);
 function lungeOff(match){if(reduced)return [0,0];const f=FX.find(match);if(!f)return [0,0];const k=Math.sin(Math.PI*fxP(f))*.4*S;
   return [f.dx*k,f.dy*k];}
@@ -339,13 +341,16 @@ function render(){
   if(G&&G.sonar===1&&G.turn>=(G.sonarAt||0)&&started&&!INTRO&&!BOOM&&!G.over&&$('overlay').hidden&&$('introCv').hidden)sonarStart();
   if(!G||!TL.robot)return;ensureChasmOv();ensureSolOv();
   const vc=vw/S,vr=vh/S;
-  // la vue suit le viseur du phaseur (26 novembre 2026), comme elle suit le cadre du mode carte
-  const fx0=PHASE?PHASE.x:freeCam?camCX:G.px,fy0=PHASE?PHASE.y:freeCam?camCY:G.py;
+  // pendant le phasage (28 novembre 2026) la vue reste centrée sur la foreuse, point de départ ; elle ne défile que près du bord
+  const fx0=PHASE?PHASE.cx:freeCam?camCX:SELCAM?SELCAM.cx:G.px,fy0=PHASE?PHASE.cy:freeCam?camCY:SELCAM?SELCAM.cy:G.py;
   camX=Math.max(0,Math.min(W-Math.floor(vc),fx0-Math.floor(vc/2)));camY=Math.max(0,Math.min(H-Math.floor(vr),fy0-Math.floor(vr/2)));
   ox=0;oy=0;
   ctx.globalAlpha=1;ctx.imageSmoothingEnabled=false;ctx.fillStyle=FOND;ctx.fillRect(0,0,vw,vh);
   const sh=reduced?null:FX.find(f=>f.kind==='shake');ctx.save();
-  if(sh){const a=(1-fxP(sh))*sh.amp;ctx.translate(Math.round((Math.random()*2-1)*a),Math.round((Math.random()*2-1)*a));}
+  /* Secousse (28 novembre 2026) : une oscillation amortie, une fois et demie aller-retour, dans une direction tirée une fois
+     pour toutes ; avant, un saut au hasard à chaque image, qui faisait trembler la vue par à-coups. */
+  if(sh){if(sh.ang==null)sh.ang=Math.random()*Math.PI*2;const p=fxP(sh),a=(1-p)*sh.amp*Math.sin(p*Math.PI*3);
+    ctx.translate(Math.round(Math.cos(sh.ang)*a),Math.round(Math.sin(sh.ang)*a));}
   decorVue();
   if(G.tracks)for(const k in G.tracks){const tr=G.tracks[k],age=G.turn-tr.t;if(age>=TRACK_LIFE){delete G.tracks[k];continue;}
     const i=+k;if(tr.i==null||(fog&&!vis[i]))continue;put(TL[`tk${tr.i}${tr.o}${Math.floor(Math.max(0,age)*5/TRACK_LIFE)}`],i%W,(i/W)|0,.6);}   // cinq étapes d'effacement, étalées sur TRACK_LIFE tours
@@ -421,18 +426,27 @@ function render(){
   // nuage d'un fumigène : les tuiles de nuage par-dessus le terrain et les créatures, sous la foreuse ; elles pâlissent en se dissipant
   // la fumée se voit même là où elle coupe la vue : sinon on ne verrait que les neuf cases autour de la foreuse
   if(G.fum)for(const k in G.fum){const i=+k;if(fog&&!vis[i]&&!G.seen[i])continue;const c=G.fum[k],t=TL['nuage'+c.k];
-    if(t)put(t,i%W,(i/W)|0,Math.min(1,c.v/4)*(c.k<2?.72:.5)*(vis[i]?1:.55));}
+    /* Fumée opaque (28 novembre 2026) : jamais d'alpha. On garde l'ancien dessin — des tuiles de nuage, plein au cœur, hachures
+       de tailles, d'inclinaisons et de densités variées sur les bords — mais chaque pixel est opaque ou absent. En se dissipant
+       (ou hors de vue) le nuage passe à des hachures de plus en plus claires : plein, puis rayures, puis pointillé. */
+    if(t){const x=i%W,y=(i/W)|0,v=Math.min(c.v,vis[i]?9:3);let kk=c.k;
+      if(v<=1)kk=3;else if(v<=3&&kk<2)kk=2+((x+y)%3===0?2:(x+y)%2);
+      const u=TL['nuage'+kk]||t;ctx.globalAlpha=1;ctx.drawImage(u,(x-camX)*S,(y-camY)*S,S,S);}}
   // case visée d'un consommable : « Bord croisé » rouge, toujours sur une seule case, pour ne rien trahir (22 novembre 2026)
   if(VISEE){const t=viseeTuile();ctx.globalAlpha=1;
     for(const [zx,zy] of viseeCases()){
       if(zx<0||zy<0||zx>=W||zy>=H)continue;ctx.drawImage(t,(zx-camX)*S,(zy-camY)*S,S,S);}}
-  /* Viseur du phaseur (26 novembre 2026) : un cadre d'un pixel de tuile et une croix au centre. Il dit tout de suite si la
-     case convient — bio quand la foreuse peut s'y reformer, danger quand le terrain est inconnu ou ne la porterait pas. */
-  if(PHASE){const u=S/16,ok=phaseConnu(PHASE.x,PHASE.y)&&phaseTient(PHASE.x,PHASE.y),px=(PHASE.x-camX)*S,py=(PHASE.y-camY)*S;
-    ctx.globalAlpha=1;ctx.fillStyle=ok?PAL['2']:PAL['4'];
-    for(let k=0;k<16;k++)if(k<5||k>10){ctx.fillRect(px+k*u,py,u,u);ctx.fillRect(px+k*u,py+15*u,u,u);
-      ctx.fillRect(px,py+k*u,u,u);ctx.fillRect(px+15*u,py+k*u,u,u);}
-    for(let k=6;k<10;k++){ctx.fillRect(px+k*u,py+7*u,u,u);ctx.fillRect(px+7*u,py+k*u,u,u);}}
+  /* Viseur du phaseur (28 novembre 2026) : le viseur habituel, en couleur bio quand la foreuse peut s'y reformer ; sur une case
+     inconnue ou qui ne la porterait pas, le même viseur en rouge danger barré d'une croix en X. Hors de la vue, on ne le dessine
+     pas : la mini-carte le montre. */
+  if(PHASE&&CURT_PH){const ok=phaseConnu(PHASE.x,PHASE.y)&&phaseTient(PHASE.x,PHASE.y);ctx.globalAlpha=1;
+    ctx.drawImage(ok?CURT_PH:CURT_PHX,(PHASE.x-camX)*S,(PHASE.y-camY)*S,S,S);}
+  /* Boule du phaseur (28 novembre 2026) : tant que la foreuse est démontée, une petite boule bio frémit à son emplacement ;
+     le pointillé du trajet (drawPath) la relie au viseur. Elle tremble d'un pixel de tuile, au rythme de l'animation. */
+  if(PHASE){const u=S/16,t=Math.floor(performance.now()/50),jx=reduced?0:((t*7+3)%3)-1,jy=reduced?0:((t*5+1)%3)-1,
+    bx=(PHASE.x0-camX)*S+(5+jx)*u,by=(PHASE.y0-camY)*S+(5+jy)*u;ctx.globalAlpha=1;
+    const B=['..xx..','.xxxx.','xxxxxx','xxxxxx','.xxxx.','..xx..'];
+    for(let j=0;j<6;j++)for(let i=0;i<6;i++)if(B[j][i]==='x'){ctx.fillStyle=(i===2&&j===1)?'#ffffff':PAL['2'];ctx.fillRect(bx+i*u,by+j*u,u,u);}}
   /* Phaseur : la foreuse se démonte pixel par pixel (out), ou se reforme (arrivée). Entre les deux, pendant la visée longue,
      elle n'est plus dessinée du tout — elle n'est nulle part. */
   const fph=FX.find(f=>f.kind==='phase'&&f.robot);

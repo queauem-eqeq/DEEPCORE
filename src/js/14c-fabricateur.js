@@ -22,13 +22,13 @@ Object.assign(ITEMS,{
     art:["  ▄▄▄▄▄▄▄▄▄▄▄  ", "  █▓▓▓▓▓▓▓▓▓█  ", " ▐▒▒▒▒▒▒▒▒▒▒▒▌ ", " ▐▒▒▒▒▒▒▒▒▒▒▒▌ ", "  ▀▒▒▒▒▒▒▒▒▒▀  ", "    ▀▀▀▀▀▀▀    "],
     col:["..33333333333..", "..31111111113..", ".2111111111112.", ".2111111111112.", "..21111111112..", "....2222222...."]},
   carene:{n:'Carène légère',f:1,slot:'armure',req:9,mod:{def:5,pas:-10,dis:-1},
-    d:'Une coque allégée : moins de protection, mais la foreuse va plus vite et s’entend de moins loin.',
+    d:'Une coque allégée : moins de protection, mais '+NOM_FOREUSE+' va plus vite et s’entend de moins loin.',
     art:["   ▄       ▄   ", "   █▀▀▀▀▀▀▀█   ", "   █░░░█░░░█   ", "    ▀▄░░░▄▀    ", "      ▀▀▀      "],
     col:["...3.......3...", "...333333333...", "...322232223...", "....3322233....", "......333......"]},
   // DEF +25 depuis le 22 novembre 2026 (+18 : aucun gain mesuré)
   blindage:{n:'Blindage composite',slot:'armure',req:12,mod:{def:25,pas:25},
     
-    d:'Des plaques épaisses : la foreuse encaisse bien mieux, et se traîne un peu.',
+    d:'Des plaques épaisses : '+NOM_FOREUSE+' encaisse bien mieux, et se traîne un peu.',
     art:[" ▄▄         ▄▄ ", " █▓█▀▀▀▀▀▀▀█▓█ ", " █▓▒▒▒▐█▌▒▒▒▓█ ", " █▓▒▒▒▒▒▒▒▒▒▓█ ", "  ▀▄▓▓▓▓▓▓▓▄▀  ", "    ▀▀▀▀▀▀▀    "],
     col:[".ww.........ww.", ".w3wwwwwwwww3w.", ".w31113331113w.", ".w31111111113w.", "..ww3333333ww..", "....wwwwwww...."]}});
 const FAB_PRIX={repar:18,batterie:14,fumigene:16,charge:34,accu:40,optique:40,servo:45,stabil:45,viseur:50,gyro:50,conden:55,
@@ -81,7 +81,7 @@ function fabFais(n){const l=fabListe(FAB_CASE),k=l[n];if(!k||G.over)return;FAB_S
   if(place){const avant=G.items[ici];G.items[ici]=[k];invPickup(true);if(avant&&avant.length)G.items[ici]=avant;}
   else (G.items[c]=G.items[c]||[]).push(k);
   sacFix();SAC_H='';INV_H='';pass(FAB_DUREE);computeFOV();
-  $('fabMsg').textContent=`${ITEMS[k].n} fabriqué${ITEMS[k].f?'e':''}${ITEMS[k].pl?'s':''}.`+(place?'':` Inventaire plein : l’objet est au sol${c===ici?', sous la foreuse':', à côté'}.`);
+  $('fabMsg').textContent=`${ITEMS[k].n} fabriqué${ITEMS[k].f?'e':''}${ITEMS[k].pl?'s':''}.`+(place?'':` Inventaire plein : l’objet est au sol${c===ici?', sous '+NOM_FOREUSE+'':', à côté'}.`);
   if(G.over&&G.over.dead){fabClose();dead();return;}
   fabBuild();render();}
 /* Clavier : flèches, Z/S, ou le pavé numérique (8 et 2 montent et descendent, 5 ou Entrée fabrique, 22 novembre 2026).

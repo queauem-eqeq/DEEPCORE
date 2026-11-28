@@ -51,10 +51,12 @@ function machTick(){if(!G.las||!G.las.length||G.over)return;G.mt=(G.mt||0)+1;con
   for(const k in lit){n++;const j=+k;if(vis[j]&&Math.max(Math.abs(j%W-G.px),Math.abs(((j/W)|0)-G.py))<MACH_SON)vu=true;}if(!n)return;
   if(vu&&typeof SFX!=='undefined')SFX.laser();
   for(const [liste,fiches] of [[G.beasts||[],BEASTS],[G.animals||[],SPECIES]])for(const o of [...liste]){
+    if(!liste.includes(o))continue;   // emporté par l'explosion d'une mine abattue plus tôt
     const pieds=liste===G.beasts&&typeof FOOT!=='undefined'?FOOT:[[0,0]];if(!pieds.some(([dx,dy])=>lit[idx(o.x+dx,o.y+dy)]))continue;
     o.hp=(o.hp??pvDe(fiches[o.sp]))-MACH_DM;if(vis[idx(o.x,o.y)])addFx({kind:'num',x:o.x,y:o.y,txt:'-'+MACH_DM,col:PAL['3'],dur:750});
     if(o.hp<=0){liste.splice(liste.indexOf(o),1);bleed(o.x,o.y);if(liste===G.beasts&&typeof butinMort==='function')butinMort(o);
-      if(vis[idx(o.x,o.y)])sayMore(`${LeNom(fiches[o.sp])} est détruit par un laser.`,'good');}}
+      if(vis[idx(o.x,o.y)])sayMore(`${LeNom(fiches[o.sp])} est détruit par un laser.`,'good');
+      if(liste===G.beasts&&typeof minePartie==='function')minePartie(o);}}
   if(lit[idx(G.px,G.py)]){G.st.vie=Math.max(0,G.st.vie-MACH_DM);addFx({kind:'num',x:G.px,y:G.py,txt:'-'+MACH_DM,col:PAL['4'],dur:900});
     addFx({kind:'shake',amp:5,dur:220});
     sayMore(`Laser : −${MACH_DM} vie.`,'warn');if(G.st.vie<=0)G.over={dead:true};}}
@@ -107,7 +109,7 @@ function machBump(nx,ny,dx,dy){const i=idx(nx,ny),v=G.t[i],fin=d=>{G.turn++;G.ms
     const tx=nx+dx,ty=ny+dy,j=idx(tx,ty),w=G.t[j];
     if(!pileLibre(j)){say('Pile énergétique : quelque chose l’empêche d’avancer.');SFX.blocked();render();return 'stop';}
     const p=G.piles[i];delete G.piles[i];G.t[i]=p.sous;p.sous=w;G.piles[j]=p;G.t[j]=PILE;SFX.thud();
-    say(G.soc&&G.soc[j]!=null?'La pile s’enclenche sur le socle.':'La foreuse pousse la pile énergétique.','info');socMaj();
+    say(G.soc&&G.soc[j]!=null?'La pile s’enclenche sur le socle.':''+NOM_FOREUSE+' pousse la pile énergétique.','info');socMaj();
       machZone();return 'go';}
   if(v===CHARGEUR){const e=Object.entries(G.piles||{}).find(([,p])=>p.ch===i);if(!e){say('Distributeur de pile : vide.');SFX.blocked();
     render();return 'stop';}
@@ -123,7 +125,7 @@ function machBump(nx,ny,dx,dy){const i=idx(nx,ny),v=G.t[i],fin=d=>{G.turn++;G.ms
     say(`Station de réparation : +${dv} vie, +${de} énergie. Le vacarme s’entend de loin${n?` : ${n} ennemi${n>1?'s':''} vien${n>1?'nent':'t'} voir`:''}.`,'good');return fin(200);}
   if(v===FABRIC){if(typeof fabOpen==='function')fabOpen(i);else{say('FABLAB.');render();}return 'stop';}
   if(v===GRILLE){say('Grille d’énergie : fermée. Son socle, tout près, attend une pile.');SFX.blocked();render();return 'stop';}
-  if(v===TURRET||v===PYLON){say((v===TURRET?'Tourelle laser':'Croix laser')+' : la foreuse ne l’entame pas. Une charge sismique la détruit.');
+  if(v===TURRET||v===PYLON){say((v===TURRET?'Tourelle laser':'Croix laser')+' : '+NOM_FOREUSE+' ne l’entame pas. Une charge sismique la détruit.');
     SFX.blocked();render();return 'stop';}
   return 'stop';}
 // une pile peut-elle venir sur cette case ? sol bâti ou naturel, libre de toute créature, d'objet, de clé et de site

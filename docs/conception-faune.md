@@ -91,20 +91,23 @@ plus rapide. Elles ont remplacé la VIT le 25 novembre 2026 ; les paliers sont 5
 
 | Espèce | Pas | Coup | PV | DÉG | PRE | DEF | CRIT |
 |---|---|---|---|---|---|---|---|
-| Puce | 75 | 50 | 10 | 2-3 | 80 | 20 | 2 % |
+| Puce | 75 | 100 | 10 | 1-2 | 80 | 20 | 2 % |
 | Crabot | 100 | 100 | 22 | 3-6 | 65 | 0 | 2 % |
-| Relais | 100 | 100 | 15 | 3-4 | 50 | 10 | 5 % |
+| Relais | 75 | 100 | 10 | 2-4 | 50 | 10 | 2 % |
 | Torpille | 75 | 100 | 14 | 4-5 | 80 | 20 | 2 % |
-| Broyeur | 150 | 200 | 60 | 10-18 | 60 | 0 | 0 % |
-| Mine | 50 | 100 | 12 | 20 (explosion) | — | 0 | 0 % |
-| Sentinelle | 75 | 100 | 14 | 1-2 (laser, 2 cases) | 75 | 10 | 0 % |
+| Broyeur | 150 | 150 | 60 | 18-30 | 60 | 0 | 0 % |
+| Mine | 50 | 100 | 18 | 20-30 (explosion) | — | 0 | 0 % |
+| Sentinelle | 75 | 100 | 18 | 1 (laser, 2 cases) | 70 | 10 | 0 % |
 | Bloqueur | 50 | 100 | 30 | 2-4 | 100 | 15 | 0 % |
-| Artilleur | 100 | 150 | 14 | 4-7 (laser, 5 cases) | 65 | 5 | 0 % |
-| Drone | 50 | 50 | 6 | 2-3 | 80 | 30 | 0 % |
-| Soudeur | 100 | 100 | 16 | 1-2 | 60 | 10 | 0 % |
-| Englueur | 100 | 100 | 18 | 1-2 (glu, 4 cases) | 75 | 10 | 0 % |
+| Artilleur | 75 | 200 | 14 | 4-7 (laser, 5 cases) | 65 | 5 | 0 % |
+| Drone | 50 | 100 | 6 | 2-3 | 80 | 30 | 0 % |
+| Soudeur | 150 | 100 | 16 | 1-2 | 60 | 10 | 0 % |
+| Englueur | 100 | 100 | 18 | 2 (glu, 4 cases) | 75 | 10 | 0 % |
 
-Ce sont les valeurs réglées en jeu par l'utilisateur et recopiées dans le code. Une nouvelle espèce s'ajoute à la fin de la liste (`conception.md`).
+Ce sont les valeurs réglées en jeu par l'utilisateur et recopiées dans le code (dernière relecture : 28 novembre 2026, 2 h 10). **Coup 100 au moins depuis le 28 novembre 2026** (`COUP_MIN`) : le double coup
+d'une créature rapide se lisait mal ; les plus lentes (Broyeur 150, Artilleur 200) gardent leur durée. Toute valeur plus basse
+(Lab, navigateur, base de l'artefact) est ramenée à 100.
+**Broyeur, ennemi de rang 2** (28 novembre 2026) : dégâts portés de 12-20 à **18-30** ; seul, il coûte environ la moitié de la vie. Une nouvelle espèce s'ajoute à la fin de la liste (`conception.md`).
 
 **Les articles des messages suivent le genre de l'espèce** (champ `fem`), avec élision devant une voyelle et pas de
 s au pluriel sur un nom qui en porte déjà un : « la puce », « la torpille », « le crabot », « les relais ».
@@ -119,9 +122,11 @@ s au pluriel sur un nom qui en porte déjà un : « la puce », « la torpille �
 - **Relais** : vit en bande ; chaque individu reste à 4 cases au plus du centre. **Mémoire partagée** : ce qu'un
   relais voit, tous les relais de sa bande le savent. **Seuls les relais partagent** — les autres espèces de leur
   groupe ne sont pas alertées, et aucune autre espèce ne partage.
-- **Torpille** : ne quitte jamais l'eau ; invisible dès qu'elle plonge en eau profonde.
+- **Torpille** : ne quitte jamais l'eau ; invisible dès qu'elle plonge en eau profonde. **Sauf pour une foreuse elle-même en
+  eau profonde** (28 novembre 2026) : elle voit alors, dans son champ de vision, les torpilles du **même lac** (eau reliée à la
+  sienne, peu profonde comprise) ; celles d'un autre lac restent cachées (`lacForeuse`, `08-faune.js`).
 - **Mine** : elle fonce dès qu'elle a repéré la foreuse. Arrivée **à une case**, elle **s'arme** : elle ne bouge
-  plus et **clignote**, puis **explose 2 à 3 battements plus tard**  — **20 dégâts** dans un **carré de 3 × 3, plus 5 cases tirées
+  plus et **clignote**, puis **explose 2 à 3 battements plus tard** (**abattue à distance** — décharge de batterie, laser, onde sismique — **elle explose aussitôt** ; abattue **au contact par la foreuse**, elle éclate comme les autres sans exploser, 28 novembre 2026)  — **20 dégâts** dans un **carré de 3 × 3, plus 5 cases tirées
   au hasard parmi les 12 qui le bordent par un côté** (les coins du 5 × 5 exclus), à la foreuse et à
   toute créature qui s'y trouve. Les flammes se dessinent sur toute la zone, si bien qu'aucune explosion n'a la même forme. Détruite avant, elle n'explose pas ; elle n'a pas d'autre attaque.
   **L'explosion brise la roche et la montagne tendre** du carré : elles deviennent des gravats, et le
@@ -145,7 +150,7 @@ Ajoutées à la fin de `BEASTS` (tuiles `bz6` à `bz10`, dessins de départ). St
 | **Artilleur** | Laser à 5 cases, 4-7 dégâts | `cadence:2` (un tir tous les deux battements), `recul:2` (s'écarte quand la foreuse est à 2 cases) |
 | **Drone** | Pas et coup très rapides (50) : il charge et frappe deux fois par battement ; fragile, en essaim | `vol` : gouffres et eau ne l'arrêtent pas ; partage ce qu'il voit avec sa bande |
 | **Soudeur** | Soutien | `soin:5`, `portee:4` : répare l'allié le plus abîmé à portée ; `recul:1` : fuit le contact |
-| **Englueur** | Contrôle | `glu:4` : une **boule de glu** (tuile « glu », plus un trait de laser) tous les 3 battements englue la foreuse 3 battements (pas deux fois plus longs) ; **la foreuse engluée prend la couleur bio** ; garde ses distances |
+| **Englueur** | Contrôle | `glu:4` : une **boule de glu** (tuile « glu », plus un trait de laser) tous les 3 battements englue la foreuse **6 battements** (3 avant le 28 novembre 2026 ; pas deux fois plus longs, `GLU_DUREE`) ; **une masse de glu bio, cernée de noir, noie le bas de la foreuse** (`GLU_SUR`, `14d-objets.js` ; avant, une simple teinte bio qui se confondait avec ses couleurs) ; garde ses distances |
 
  Essais : `outils/scripts/test-ennemis.js`.
 
@@ -155,7 +160,7 @@ Ajoutées à la fin de `BEASTS` (tuiles `bz6` à `bz10`, dessins de départ). St
   - **terrestres** (Broyeur, Relais, Mine, Sentinelle, Bloqueur, Artilleur, Soudeur, Englueur, Puce) : ils **ne naissent pas
     dans l'eau** et aucun **point de patrouille** n'y tombe. Ils y entrent pour **poursuivre la foreuse** ; en patrouille, ils ne la
     franchissent que si **aucun chemin à sec** ne mène à leur point ; calmes, ils **regagnent la terre la plus proche** et n'y
-    restent pas. Dans l'eau ils sont **ralentis** (×1,5) et perdent **20 de défense**. Exception gardée : le **Relais** n'y met
+    restent pas. Dans l'eau ils sont **ralentis** (×2, en eau peu profonde comme profonde, depuis le 28 novembre 2026) et perdent **20 de défense**. Exception gardée : le **Relais** n'y met
     jamais une patte, même pour poursuivre (`sec`) ;
   - **aquatiques** (Torpille) : ils **ne naissent que dans l'eau** et n'en sortent pas ; **aucun malus d'eau** (avant : −20 de
     défense et ralentie, comme les autres) ;

@@ -131,6 +131,12 @@ body{margin:0;background:var(--black);color:var(--fg);font:13px/1.45 var(--mono)
 .insp .kv{display:grid;grid-template-columns:repeat(3,1fr);gap:2px 10px;font-variant-numeric:tabular-nums}
 .insp .kv span{color:var(--dim);white-space:nowrap}.insp .kv b{font-weight:400;color:var(--fg)}
 .insp .act{color:var(--c3)}
+/* Fiche dans la colonne (28 novembre 2026) : en mode viseur, elle remplace tout ce qui suit les statuts ; seul le pavé tactile reste. */
+.fiche{flex:1 1 auto;min-height:0;overflow-y:auto;scrollbar-width:none;margin-top:15px}
+.fiche::-webkit-scrollbar{display:none}
+.fiche[hidden]{display:none}
+.col.vise #fd-stats,.col.vise #fd-sac,.col.vise .coldefil>:not(.pad){display:none}
+.col.vise .coldefil{flex:none}
 .mcard.wide{width:min(820px,100%)}
 .cur-wrap{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px;align-items:start}
 .cur-groups{display:grid;gap:14px;max-height:min(62vh,560px);overflow-y:auto;overflow-x:hidden;padding-right:4px;min-width:0}
@@ -575,3 +581,15 @@ kbd{font-family:var(--mono);color:var(--fg);border:1px solid var(--line);padding
 .itfs{display:flex;flex-wrap:wrap;gap:6px 12px}
 .itf{display:flex;align-items:center;gap:6px;color:var(--dim)}
 .itf input{width:64px;background:var(--black);color:var(--text,#fff);border:1px solid var(--line);font:inherit;padding:2px 4px}
+
+/* Journal en grand (28 novembre 2026) : une copie figée du journal, que l'on peut lire et sélectionner sans qu'elle défile. */
+.log{position:relative}
+.logplus{position:absolute;top:4px;right:20px;width:22px;height:22px;padding:0;line-height:20px;text-align:center;font-size:16px;z-index:2;color:var(--c1)}
+#logBig .mcard{width:min(1100px,100%);height:calc(100vh - 40px);height:calc(100dvh - 40px);display:flex;flex-direction:column;overflow:hidden}
+#logBig .mcard>*{flex:0 0 auto}
+#logBig .mhead{display:flex;gap:8px;align-items:center}
+#logBig .mhead h2{margin-right:auto}
+.logbig{flex:1 1 auto!important;min-height:0;overflow-y:auto;font-size:13px;line-height:1.55;-webkit-user-select:text;user-select:text;cursor:text;padding-right:6px}
+.logbig .lgl{display:grid;grid-template-columns:calc(4ch + 10px) minmax(0,1fr);color:var(--fg);overflow-wrap:anywhere;margin-bottom:2px}
+.logbig .t{color:var(--dim)}.logbig .sep{color:var(--dim);margin:0 .6ch}
+.logbig .ev.warn{color:var(--c3)}.logbig .ev.info{color:var(--c2)}.logbig .ev.good{color:var(--c1)}

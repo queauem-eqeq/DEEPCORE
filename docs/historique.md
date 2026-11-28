@@ -318,3 +318,26 @@ Ce qui a été remplacé, et pourquoi (demandes de l'utilisateur, « chaque mach
   (Lagon → Lagoon, Désert → Désert sombre, Glacier → Dark forest, Améthyste et Magma retouchées) avec **Améthyste au démarrage**,
   et la **banque de modules** (10 modules, 2 par niveau 1, 1 en cavernes et en base) devenue la banque de départ (`MODULES_DEF`).
 - Non recopié, comme toujours : la configuration d'essai (génération, taille de planète, état de la foreuse).
+
+## 28 novembre 2026 — réglages du joueur recopiés dans le code
+- Relus dans la base de l'artefact (`reglages/courant`, enregistré le 28 novembre 2026 à 2 h 10) et comparés au code dans le vrai
+  moteur (`applySaved` contre l'état du code, contrôle : plus aucune différence après recopie).
+- **Recopié** : les stats de 9 espèces sur 12 (Puce, Relais, Broyeur, Mine, Sentinelle, Artilleur, Drone, Soudeur, Englueur ; le
+  Crabot, la Torpille et le Bloqueur étaient déjà identiques) ; la batterie étourdit 10 battements au lieu de 6 ; le phaseur envoie un
+  ennemi à 25 cases au moins au lieu de 14 ; palette de départ : **Braise**, toujours, sauf demande contraire (la palette active de la base, Magma, n'est pas recopiée) ; 10 tuiles (bz9r, mach5, o_accu, o_batterie, o_repar,
+  siteUnknown, vitre, levier, levierOn, o_camo) ; la banque de modules (13 modules : « Vitrine REF » retirée, « Gouffre HUB2 »,
+  « Water HUB », « Arene BIG » et « Arene SMALL » ajoutés ; 1 au niveau 1, 2 en cavernes, 2 en base).
+- Identiques, rien à recopier : groupes et niveaux, artefacts, discrétion, prix et effets des autres objets, butin.
+- Non recopié, comme toujours : la configuration d'essai (génération, taille de planète, état de la foreuse).
+- Le pas du Soudeur, réglé à 125 (hors paliers), est porté à **150** à la demande du joueur.
+
+## 28 novembre 2026 — coups étalés, attaques combinées, double coup : retirés
+- **Coups étalés** (chaque créature montrait son coup 70 puis 100 ms après la précédente, après le geste de la foreuse) puis
+  **attaques combinées** (un groupe par demi-battement, 130 ms d'écart, un seul bruit par groupe) : essayés le 28 novembre 2026,
+  retirés le même jour à la demande du joueur : le combat paraissait en retard et le double coup ne se lisait pas.
+- **Coup 100 au moins** (`COUP_MIN`, `07-generation.js`) : plus de créature qui frappe deux fois dans un tour ; le Broyeur (150)
+  et l'Artilleur (200) gardent leur coup plus lent. D'abord toutes à 100 exactement, corrigé le même jour à la demande.
+- Gardés : 30 images/s, élan, secousse et chiffres à 60 images/s, secousse adoucie.
+- **Défaut corrigé le même jour** : de 2 h 37 à 3 h, en adoucissant la secousse, un commentaire avait avalé la ligne qui retire la vie :
+  les ennemis frappaient sans faire de dégâts (vu par `outils/simul.py` : vie restante 100 partout). La vérification
+  `outils/verifier.py` ne l'avait pas vu : son empreinte ne couvre pas les dégâts reçus.
