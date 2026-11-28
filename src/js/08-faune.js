@@ -526,6 +526,9 @@ function effTick(){const E=G.eff;if(!E||G.over)return;
     addFx({kind:'num',x:G.px,y:G.py,txt:'-'+dm,col:PAL['4'],dur:750});
     if(G.st.vie<=0){G.over={dead:true};sayMore('Le poison achève la foreuse.','warn');return;}
     if(!E.poison)sayMore('Le poison est éliminé.','good');}
+  // réparation et recharge réparties sur plusieurs battements (28 novembre 2026) : une part égale du reste à chaque battement
+  for(const [k,champ,mx] of [['repar','vie','vieMax'],['recharge','energie','energieMax']]){const r=E[k];if(!r)continue;
+    if(r.t>0){const p=r.v/r.t;r.v-=p;r.t--;G.st[champ]=Math.min(G.st[mx],G.st[champ]+p);}if(!(r.t>0))delete E[k];}
   if(E.glu>0&&--E.glu===0)sayMore('La glu se détache : la foreuse retrouve sa vitesse.','good');
   if(E.berserk>0&&--E.berserk===0)sayMore('Le surrégime retombe.','info');
   if(E.camo>0&&--E.camo===0)sayMore('Le camouflage optique s’éteint.','info');

@@ -309,3 +309,5 @@ hasard, jamais deux fois la même de suite, et chaque coup est légèrement dés
 Réglage : `coup`, `bite` et `crit` dans `01-sons.js`.
 
 - **Journal (28 novembre 2026)** : pas d'indications de touches dans les messages du journal (visée, phaseur, exploration) ; et pour le phaseur on parle de **phase** (« entre en phase », « sort de phase », « passe en phase »), jamais de « disperse » ni de « reforme ».
+
+- **Statuts et durées (28 novembre 2026).** Sous les boutons, la ligne de statuts affiche aussi **Surrégime N**, **Réparation N** et **Recharge N** (battements restants), comme Englué, Camouflé et Dans la fumée. Les **réparobots** et la **batterie** utilisés sur la foreuse ne rendent plus tout d'un coup : le gain est **réparti sur 5 battements** (`RECUP_TOURS`, une part égale du reste à chaque battement ; un second objet ajoute son total et repart sur 5). Sur un ennemi, la réparation reste immédiate. **Surrégime et camouflage durent 30 battements** (au lieu de 10) ; un réglage enregistré resté à 10 suit la nouvelle valeur.

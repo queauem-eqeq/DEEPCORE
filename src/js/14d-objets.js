@@ -10,7 +10,7 @@
    Ce que la foreuse sait (plans, capsules identifiées, noms de code) vit dans G.st.savoir : G.st suit la foreuse d'un niveau
    à l'autre. Valeurs réglables : Lab → Items (np-items). */
 const ITEM_VAL_DEF={repar:{soin:50},batterie:{energie:50,choc:12,etourdi:6},charge:{degats:30},puissance:{pow:1,deg:5},
-  berserk:{crit:50,duree:10},camo:{duree:10},balise:{rayon:20,duree:25,pv:40},court:{etourdi:10},matiere:{mat:15},
+  berserk:{crit:50,duree:30},camo:{duree:30},balise:{rayon:20,duree:25,pv:40},court:{etourdi:10},matiere:{mat:15},
   phaseur:{loin:14}};
 const ITEM_VAL_LIB={soin:'Vie rendue',energie:'Énergie rendue',choc:'Dégâts de la décharge',etourdi:'Étourdissement (battements)',degats:'Dégâts',pow:'POW gagné',deg:'Dégâts par point de POW en trop (%)',crit:'CRIT en plus (points)',duree:'Durée (battements)',rayon:'Rayon de l’appel (cases)',pv:'PV de la balise posée',mat:'Matière {µ} rendue',loin:'Distance mini où l’ennemi reparaît (cases)'};
 let ITEM_VAL=JSON.parse(JSON.stringify(ITEM_VAL_DEF));
@@ -82,10 +82,13 @@ for(const k in CONSO){const d=ITEMS[k],v={n:d.n,eff:d.eff,d:d.d,art:d.art,col:d.
   lie('d',()=>'Capsule scellée, marquage illisible. Il faut l’utiliser, ou trouver son plan, pour savoir ce qu’elle contient.');
   lie('art',()=>ART_CAPSULE.art);lie('col',()=>ART_CAPSULE.col);}
 // textes d'effet tirés des valeurs réglables
+/* Réparobots et batterie sur la foreuse (28 novembre 2026) : le gain n'est plus d'un coup, il est réparti sur RECUP_TOURS battements
+   (statuts « Réparation » et « Recharge » avec les battements restants). Sur un ennemi, la réparation reste immédiate. */
+const RECUP_TOURS=5;
 function itemTxt(){const V=ITEM_VAL,v=k=>ITEMS[k].vrai;
-  v('repar').eff=`Vie +${V.repar.soin}`;v('repar').d=`Essaim de micro-robots réparateurs : rend ${V.repar.soin} points de vie à ce qu’il touche — la foreuse, ou un ennemi.`;
-  v('batterie').eff=`Énergie +${V.batterie.energie}, ou décharge`;
-    v('batterie').d=`Sur la foreuse : rend ${V.batterie.energie} points d’énergie. Lancée sur un ennemi : ${V.batterie.choc} dégâts, et il reste étourdi ${V.batterie.etourdi} battements.`;
+  v('repar').eff=`Vie +${V.repar.soin} sur ${RECUP_TOURS} battements`;v('repar').d=`Essaim de micro-robots réparateurs : rend ${V.repar.soin} points de vie à ce qu’il touche — la foreuse (répartis sur ${RECUP_TOURS} battements) ou un ennemi (d’un coup).`;
+  v('batterie').eff=`Énergie +${V.batterie.energie} sur ${RECUP_TOURS} battements, ou décharge`;
+    v('batterie').d=`Sur la foreuse : rend ${V.batterie.energie} points d’énergie, répartis sur ${RECUP_TOURS} battements. Lancée sur un ennemi : ${V.batterie.choc} dégâts, et il reste étourdi ${V.batterie.etourdi} battements.`;
   v('fumigene').d='Un nuage opaque là où on le lance : il cache la vue des deux côtés. Si la foreuse est dedans, les ennemis perdent sa trace.';
   v('charge').eff=`${V.charge.degats} dégâts, roche brisée, 3 × 3 et plus`;v('charge').d=`Explose jusqu’à 4 cases, comme une mine : un carré de 3 × 3 et 5 cases autour, au hasard. ${V.charge.degats} dégâts, la foreuse comprise si elle est dedans, et roche brisée, même la roche dure. Très bruyante.`;
   v('puissance').eff=`POW +${V.puissance.pow}, pour toujours`;
@@ -300,14 +303,14 @@ function consoCible(i,x,y){const o=G.inv[i];if(!o)return;const k=o.k,d=ITEMS[k],
   // où elle se reforme. Le battement ne passe qu'à l'arrivée (phaseArrive), pas ici.
   if(k==='phaseur'&&moi){const neuf=identifier(k);invTake(i);sacFix();SAC_H='';phaseOuvre(neuf);return;}
   let txt='',ton='good',son=d.son;const num=(t,col)=>addFx({kind:'num',x,y,txt:t,col,dur:900});
-  if(k==='repar'){if(moi){const a=st.vie;st.vie=Math.min(st.vieMax,st.vie+V.soin);txt=`+${Math.round(st.vie-a)} PV`;
+  if(k==='repar'){if(moi){const E=G.eff=G.eff||{};E.repar={t:RECUP_TOURS,v:(E.repar?E.repar.v:0)+V.soin};txt=`réparation en cours : +${V.soin} PV sur ${RECUP_TOURS} battements`;
     addFx({kind:'soin',x,y,dur:1000,gr:fxGrains(12)});}
     else if(c){const m=pvDe(sp),a=c.hp??m;c.hp=Math.min(m,a+V.soin);txt=`${leNom(sp)} est réparé (+${c.hp-a} PV)`;ton='warn';
       num('+'+(c.hp-a),PAL['2']);addFx({kind:'soin',x,y,dur:1000,gr:fxGrains(12)});}
     else{txt='les réparobots se dispersent sans rien trouver à réparer';ton='warn';}}
   // l'énergie regagnée, en blanc comme sa barre (22 novembre 2026)
-  else if(k==='batterie'){if(moi){const a=st.energie;st.energie=Math.min(st.energieMax,st.energie+V.energie);
-    txt=`+${Math.round(st.energie-a)} énergie`;num('+'+Math.round(st.energie-a),'#ffffff');
+  else if(k==='batterie'){if(moi){const E=G.eff=G.eff||{};E.recharge={t:RECUP_TOURS,v:(E.recharge?E.recharge.v:0)+V.energie};
+    txt=`recharge en cours : +${V.energie} énergie sur ${RECUP_TOURS} battements`;
 addFx({kind:'ener',x,y,dur:1000,gr:fxGrains(12)});}
     else if(c){c.hp=(c.hp??pvDe(sp))-V.choc;num('-'+V.choc,PAL['3']);son='laser';addFx({kind:'flash',beast:c,dur:220});
       if(c.hp<=0){retire(c);txt=`la décharge détruit ${leNom(sp)}`;}
@@ -451,6 +454,9 @@ const itemsEtat=()=>{const mod={},req={},de={};for(const k in ITEMS){const d=ITE
 const ITEMS_DEF=itemsEtat();
 function itemsApplique(o){const num=v=>typeof v==='number'&&isFinite(v);if(!o||typeof o!=='object')return;
   for(const k in o.val||{})if(ITEM_VAL[k])for(const f in o.val[k])if(f in ITEM_VAL[k]&&num(o.val[k][f]))ITEM_VAL[k][f]=o.val[k][f];
+  /* 28 novembre 2026 : surrégime et camouflage passent de 10 à 30 battements. Un réglage enregistré qui vaut encore l'ancienne
+     valeur d'origine (10) n'a jamais été retouché : il suit la nouvelle valeur ; toute autre valeur est celle du joueur. */
+  for(const k of ['berserk','camo'])if(o.val&&o.val[k]&&o.val[k].duree===10)ITEM_VAL[k].duree=30;
   for(const k in o.prix||{})if(k in FAB_PRIX&&num(o.prix[k]))FAB_PRIX[k]=o.prix[k];
   for(const k in o.drops||{})if(k in DROPS&&num(o.drops[k]))DROPS[k]=o.drops[k];
   for(const k in o.mod||{})if(ITEMS[k]&&ITEMS[k].slot)for(const f in o.mod[k])if(MODS[f]&&num(o.mod[k][f]))ITEMS[k].mod[f]=o.mod[k][f];
