@@ -421,7 +421,9 @@ function render(){
   // nuage d'un fumigène : les tuiles de nuage par-dessus le terrain et les créatures, sous la foreuse ; elles pâlissent en se dissipant
   // la fumée se voit même là où elle coupe la vue : sinon on ne verrait que les neuf cases autour de la foreuse
   if(G.fum)for(const k in G.fum){const i=+k;if(fog&&!vis[i]&&!G.seen[i])continue;const c=G.fum[k],t=TL['nuage'+c.k];
-    if(t)put(t,i%W,(i/W)|0,Math.min(1,c.v/4)*(c.k<2?.72:.5)*(vis[i]?1:.55));}
+    /* Fumée en pixels opaques (28 novembre 2026) : jamais d'alpha. Plus le nuage se dissipe, moins il garde de pixels de sa tuile
+       (le même effeuillage que le phaseur) ; hors de vue, il est tenu à 55 % de pixels. */
+    if(t){ctx.globalAlpha=1;ctx.drawImage(tuilePhase(t,Math.min(1,c.v/4)*(vis[i]?1:.55)),(i%W-camX)*S,((i/W|0)-camY)*S,S,S);}}
   // case visée d'un consommable : « Bord croisé » rouge, toujours sur une seule case, pour ne rien trahir (22 novembre 2026)
   if(VISEE){const t=viseeTuile();ctx.globalAlpha=1;
     for(const [zx,zy] of viseeCases()){
