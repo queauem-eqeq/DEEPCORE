@@ -161,6 +161,9 @@ tard** : le Téléobjectif (capteur 13) voit au-delà de ce qui est affiché.
 - **Sauf le combat (28 novembre 2026)** : l'élan d'un coup, la secousse et les chiffres de dégâts s'animent à
   **60 images par seconde** (`FX_VIF`, `10-rendu.js`) ; à 20, un élan de 200 ms ne faisait que 4 images et le combat
   paraissait saccadé (« le jeu rame »). La boucle repasse à 30 dès que ces effets sont finis.
+- **Secousse adoucie (28 novembre 2026)** : la vue ne saute plus au hasard à chaque image ; elle oscille une fois et demie,
+  en s'amortissant, dans une direction tirée une fois. Foreuse touchée : 3 px pendant 150 ms (critique : 5 px, 220 ms), au
+  lieu de 5 px / 220 ms (9 px / 320 ms). Les explosions gardent leur force.
 - **Coups étalés (28 novembre 2026)** : les coups des créatures pendant un même tour ne s'affichent plus tous au même
   instant. Les créatures attendent **la fin du geste de la foreuse** (élan, éclair, secousse : `finGesteForeuse`), puis
   chacune qui montre quelque chose prend son tour, **100 ms** après la précédente (`ECART_COUP`, au plus 6 crans :

@@ -516,7 +516,7 @@ function hurtRobot(b,sp,o){sp=sp||BEASTS[b.sp];o=o||{};const le=LeNom(sp),nom=''
   // surrégime : toujours critique ; module de puissance : +25 % par module
   // coup critique de l'ennemi : selon sa stat CRIT
   const cr=o.sur||b.bers>0||roll(sp.crit||0),dm=Math.round(dmgDe(sp)*(cr?CRIT_X:1)*(1+.25*(b.pow||0)));
-  addFx({kind:'shake',amp:cr?9:5,dur:cr?320:220});G.st.vie=Math.max(0,G.st.vie-dm);
+  addFx({kind:'shake',amp:cr?5:3,dur:cr?220:150});   // foreuse touchée : secousse adoucie le 28 novembre 2026 (avant 5 / 9 px, 220 / 320 ms)G.st.vie=Math.max(0,G.st.vie-dm);
     addFx({kind:'num',x:G.px,y:G.py,txt:'-'+dm+(cr?'!':''),col:PAL['4'],dur:cr?1000:750});if(!o.laser)SFX.bite();
     sayMore(`${le}${nom} ${verbe}${o.sur?' par surprise':cr?' : coup critique':''} : −${dm} vie.`,'warn');
   if(G.st.vie<=0){G.over={dead:true};return;}}

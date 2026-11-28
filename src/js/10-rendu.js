@@ -367,7 +367,10 @@ function render(){
   ox=0;oy=0;
   ctx.globalAlpha=1;ctx.imageSmoothingEnabled=false;ctx.fillStyle=FOND;ctx.fillRect(0,0,vw,vh);
   const sh=reduced?null:FX.find(f=>f.kind==='shake');ctx.save();
-  if(sh){const a=(1-fxP(sh))*sh.amp;ctx.translate(Math.round((Math.random()*2-1)*a),Math.round((Math.random()*2-1)*a));}
+  /* Secousse (28 novembre 2026) : une oscillation amortie, une fois et demie aller-retour, dans une direction tirée une fois
+     pour toutes ; avant, un saut au hasard à chaque image, qui faisait trembler la vue par à-coups. */
+  if(sh){if(sh.ang==null)sh.ang=Math.random()*Math.PI*2;const p=fxP(sh),a=(1-p)*sh.amp*Math.sin(p*Math.PI*3);
+    ctx.translate(Math.round(Math.cos(sh.ang)*a),Math.round(Math.sin(sh.ang)*a));}
   decorVue();
   if(G.tracks)for(const k in G.tracks){const tr=G.tracks[k],age=G.turn-tr.t;if(age>=TRACK_LIFE){delete G.tracks[k];continue;}
     const i=+k;if(tr.i==null||(fog&&!vis[i]))continue;put(TL[`tk${tr.i}${tr.o}${Math.floor(Math.max(0,age)*5/TRACK_LIFE)}`],i%W,(i/W)|0,.6);}   // cinq étapes d'effacement, étalées sur TRACK_LIFE tours
