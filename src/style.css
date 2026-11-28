@@ -103,7 +103,11 @@ body{margin:0;background:var(--black);color:var(--fg);font:13px/1.45 var(--mono)
 /* ferrailleuse à l'ouvrage (28 novembre 2026) : son état, sous la ligne ; alertée, en couleur d'accent */
 .seen .an .ouv{grid-column:2/-1;font-size:10px;letter-spacing:.08em;color:var(--dim);line-height:1.3;white-space:nowrap;overflow:hidden}
 .seen .an .ouv.al{color:var(--c1)}
-.ouvrp{letter-spacing:.04em;color:var(--c1)}
+/* « En vue » : intertitre des ferrailleuses à l'ouvrage, et leurs lignes en couleur neutre (28 novembre 2026, soir) */
+.seen .ouvhd{font-size:10px;letter-spacing:.12em;color:var(--dim);border-top:1px solid var(--line);margin-top:3px;padding-top:2px}
+.seen .an.ouvr,.seen .an.ouvr .hp,.seen .an.ouvr .n{color:var(--dim)!important}
+.ouvrp{letter-spacing:.04em;color:var(--fg)}
+.ouvrp.al{color:var(--c1)}
 .seen .site{color:var(--c2)}.seen .site.k{color:var(--c3)}
 .seen .ter{color:var(--dim);line-height:1.6}
 .seen .ter b{font-weight:400;color:var(--fg)}

@@ -425,3 +425,23 @@ Ce qui a été remplacé, et pourquoi (demandes de l'utilisateur, « chaque mach
 - L'essai `test-terminaux` retombait une fois sur 300 cartes : salle de terminal close (massif, chemin de terre, module fixe), ni réduit
   ni porte dérobée possibles (graine 164). Rien n'était défait après coup : les replis restaient collés à la salle. Ajout d'un dernier
   repli `termNiche` (réduit creusé depuis n'importe quelle case praticable proche, puis de toute la carte) : 0 sur 600 cartes.
+
+## 28 novembre 2026 — chantier survie, bloc F : ferrailleuses lisibles (retour du joueur après essai)
+- Le joueur : « On ne voit pas vraiment les robots travailler sur les coques. Ils doivent rester 60 % du temps sur les coques à
+  travailler et faire ensuite un aller-retour. » ; « J'ai l'impression qu'une fois que j'ai approché une coque, tous m'attaquent. Je ne
+  comprends pas la logique hostile / pas hostile en jouant. » ; « Pour l'instant on ne fait que le niveau 1 ; les autres vont être
+  refondus en suivant l'histoire. On ne les teste plus. »
+- Diagnostic (`outils/scripts/diag-ferrailleuses.js`, 8 cartes, groupes enregistrés du joueur) : **aucune** propagation entre groupes de
+  ferrailleuses. Ce qui attaquait : les groupes du joueur restés au niveau 1 sans rôle, « Crabots » (mêmes crabots que les
+  ferrailleuses) et « Bande de relais » (ce qu'un relais voit, toute la bande le sait : jusqu'à 24 cases), qui chassent à vue sur
+  l'aire ; et l'avertissement d'un seul battement, trop court pour être compris. Côté travail : un tiers des équipes posées sur une
+  fosse vide (rien à découper), des équipes coupées du sas par un lac (le Soudeur ne nage pas : la file l'attendait sur la rive et
+  faisait demi-tour sans fin), une découpe de 6 à 12 battements contre des trajets de 100 à 150.
+- Changé : niveau 1, un groupe sans rôle posé dehors et fait d'espèces de chantier devient une équipe de ferrailleuses (règle de pose,
+  banque du joueur intacte) ; avertissement de 3 battements, retour immédiat au travail en ressortant, chasse directe à la seconde
+  intrusion dans les 20 battements ; contour du périmètre au sol ; « ! » fixe en chasse ; « En vue » en deux parties ; fiche « INDIFFÉRENT
+  TANT QUE… » ; cycle 60 % découpe / 40 % aller-retour, recalé sur l'aller-retour mesuré ; postes répartis autour de la coque ;
+  équipes en file ; quai au sec ; jamais d'équipe sur une fosse vide ; la première équipe près de l'arrivée, au travail ; phases
+  décalées au départ ; découpe franche (éclat et dix étincelles sur la plaque, à chaque action).
+- Pilote : option `--niveaux 1` (et `--reglages` pour jouer avec les groupes enregistrés du joueur). Mesures : `mesures.md`, « Niveau 1
+  après retouche des ferrailleuses ».

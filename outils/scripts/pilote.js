@@ -5,7 +5,8 @@
    et observe (vie, énergie, Matière, battements) par des enveloppes posées autour de fonctions du jeu.
 
    Deux profils :
-   - prudent : explore tout ce qui s'atteint sans forer, contourne les groupes calmes (pénalité de trajet autour d'eux), attend l'ennemi
+   - prudent : explore tout ce qui s'atteint sans forer, contourne les groupes calmes (pénalité de trajet autour d'eux) et le périmètre
+     des épaves où travaillent des ferrailleuses (il recule à l'alerte), attend l'ennemi
      plutôt que de foncer, se replie et se soigne quand la vie est basse, mine les éclats quand la vie n'est pas pleine, lit les terminaux
      (DATA, HACK, BLUEPRINT), passe au FABLAB (réparobots), utilise une station de réparation ;
    - fonceur : connaît la position du site (signal de l'orbiteur), y va tout droit en forant au besoin, frappe tout ce qui est à côté de lui
@@ -202,6 +203,10 @@ function choixPrudent(P, forer) {
     const r = p.r || 5;
     for (let y = Math.max(0, p.y - r); y <= Math.min(H - 1, p.y + r); y++) for (let x = Math.max(0, p.x - r); x <= Math.min(W - 1, p.x + r); x++)
       ev[idx(x, y)] += 12 / (1 + cheb(x, y, p.x, p.y));}
+  // (bloc F, 28 novembre 2026) le prudent connaît la règle des ferrailleuses : il contourne le périmètre des épaves où travaille une
+  // équipe (emprise + OUVR_R cases), et n'y entre plus du tout pendant 120 battements après une alerte
+  if (prud) for (const [k, e, interdit] of perimetres(P)) for (let y = e.y - OUVR_R; y <= e.y + e.h - 1 + OUVR_R; y++) for (let x = e.x - OUVR_R; x <= e.x + e.w - 1 + OUVR_R; x++)
+    if (x >= 0 && y >= 0 && x < W && y < H) ev[idx(x, y)] += interdit ? 5000 : 30;
   // destinations : cases d'où l'on découvre, butin, terminaux, FABLAB, station, éclats dans la roche
   for (let i = 0; i < W * H; i++) {if (!G.seen[i]) continue; const v = G.t[i], x = i % W, y = (i / W) | 0;
     if (v === LEVIER && !P.levFait.has(i)) {cib.add(i); but.set(i, 'levier'); continue;}   // un levier peut poser un pont, ouvrir une grille
@@ -225,6 +230,22 @@ function choixPrudent(P, forer) {
   if (best >= 0) return {c: best, k: but.get(best), D};
   return null;}
 
+// épaves vues où travaille une équipe de ferrailleuses (pas en chasse) : [k, épave, interdite]
+function perimetres(P) {const l = []; if (!G.epaves || !G.patr || typeof OUVR_R === 'undefined') return l; P.perimAl = P.perimAl || new Map();
+  G.epaves.forEach((e, k) => {if (!e.groupes || !e.groupes.length || !G.seen[idx(e.x, e.y)]) return;
+    const Ps = e.groupes.map(id => G.patr[id]).filter(Q => Q && Q.role === 'ferraille' && Q.epave === k); if (!Ps.length) return;
+    if (Ps.some(Q => Q.ouv === 'alerte')) P.perimAl.set(k, G.turn + 120);
+    if (Ps.every(Q => Q.ouv === 'hostile')) return; l.push([k, e, P.perimAl.get(k) > G.turn]);});
+  return l;}
+// le prudent dans le périmètre d'une équipe en alerte : un pas qui l'en éloigne (ou true si rien à faire)
+function sortirPerimetre(P) {if (P.profil !== 'prudent') return false; const al = perimetres(P).filter(([k, e]) => ouvrDist(e, G.px, G.py) <= OUVR_R &&
+    e.groupes.some(id => G.patr[id] && G.patr[id].ouv === 'alerte')); if (!al.length) return false;
+  let best = null, bv = -1; for (const [dx, dy] of DIRS) {const x = G.px + dx, y = G.py + dy, j = idx(x, y), v = G.t[j];
+    if (bord(x, y) || blocks(v) || v === DEEP || !diagOk(G.px, G.py, dx, dy) || occupant(x, y) || beastAt(x, y) || animalAt(x, y)) continue;
+    const s = Math.min(...al.map(([k, e]) => ouvrDist(e, x, y))); if (s > bv) {bv = s; best = j;}}
+  if (best == null || bv <= Math.min(...al.map(([k, e]) => ouvrDist(e, G.px, G.py)))) return false;
+  PIL.R.niv.reculs = (PIL.R.niv.reculs || 0) + 1; return vers(best);}
+
 function pas(P) {if (PIL.trace) PIL.trace.push([G.turn, G.px, G.py, Math.round(G.st.vie), Math.round(G.st.energie)]); if (PIL.trace && PIL.trace.length > 60) PIL.trace.shift();
   const st = G.st, N = PIL.R.niv;
   // on note les groupes rencontrés, et la position des groupes calmes
@@ -236,6 +257,7 @@ function pas(P) {if (PIL.trace) PIL.trace.push([G.turn, G.px, G.py, Math.round(G
   if (P.profil === 'prudent') {const loin = vus.filter(e => e.chasse && (e.sp.laser || e.sp.glu) && P.ignore.get(e.o) > G.turn && cheb(e.o.x, e.o.y, G.px, G.py) <= (e.sp.laser || e.sp.glu));
     if (loin.length) {const r = repli(loin); if (r != null && vers(r)) {N.replis++; return true;}}}
   P.chasseurs = ch;
+  if (!ch.length && sortirPerimetre(P)) return true;   // alerte d'une équipe : on recule (bloc F)
   equiper(); gererSac(P);
   if (G.sonar === 1 && G.turn >= (G.sonarAt || 0)) try {sonarStart();} catch (e) {}
   const prudent = P.profil === 'prudent';
@@ -376,7 +398,9 @@ window.pilotePartie = function (cfg) {
     fermerTout(); if (!$('overlay').hidden && !G.over) $('overlay').hidden = true;
     let ok = false;
     try {ok = pas(P);} catch (e) {R.niv.erreurs.push(String(e && e.stack || e).slice(0, 300)); attendre();}
-    if (P.forer) {P.forer = false; descente(R); continue;}
+    // --niveaux N (28 novembre 2026, bloc F) : la partie s'arrête à la descente du niveau N, comptée « niveau fini »
+    if (P.forer) {P.forer = false; if (cfg.niveaux && (G.niv || 1) >= cfg.niveaux) {R.niv.descente = {jeu: false, mines: 0, perdu: 0, arret: 1}; statut = 'niveau fini'; break;}
+      descente(R); continue;}
     if (!ok) attendre();
   }
   const N = R.niv; if (N) {if (N.vieFin == null) N.vieFin = Math.round(Math.max(0, G.st.vie)); finNiveau(N);}

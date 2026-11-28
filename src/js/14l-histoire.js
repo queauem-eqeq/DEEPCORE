@@ -118,7 +118,7 @@ function n1Fin(){if(!G.ship||!G.epaves||G.epaves.some(e=>e.notre))return -1;
   if(!pt)return -1;
   const av=ouvrEpave(P);if(av)av.groupes=av.groupes.filter(g=>g!==+best);
   P.epave=k;e.groupes.push(+best);for(const o of mb[best])o.epave=k;
-  P.pts=G.sas!=null?[pt,[G.sas%W,(G.sas/W)|0]]:[pt];P.k=0;P.pause=0;P.age=0;P.bh=null;P.bl=0;P.postes=null;P.pat='navette';
+  {const q=ouvrQuai(pt[0],pt[1],P.eau);P.pts=q?[pt,q]:[pt];}P.k=0;P.pause=0;P.age=0;P.bh=null;P.bl=0;P.postes=null;P.pat='navette';
   G.h1.fin=+best;return +best;}
 // la foreuse les voit autour de notre vaisseau : une ligne, une fois
 function n1FinVue(){const H=G.h1;if(H.fin==null||H.finVu)return;const e=G.epaves.find(x=>x.notre);if(!e)return;

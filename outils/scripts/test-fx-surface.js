@@ -7,11 +7,13 @@
   const h = s => { let x = 2166136261; for (let i = 0; i < s.length; i++) { x ^= s.charCodeAt(i); x = Math.imul(x, 16777619); } return x >>> 0; };
   fog = false; const b = G.beasts.find(e => beastVisible(e)) || G.beasts[0];
   if (b) { b.x = G.px + 2; b.y = G.py; }
+  // découpe d'une ferrailleuse (28 novembre 2026, soir) : la bête devient une ouvrière à l'ouvrage, le temps de l'essai
+  if (b) { b.role = 'ferraille'; if (b.gi == null) b.gi = 9999; G.patr = G.patr || {}; G.patr[b.gi] = Object.assign(G.patr[b.gi] || {}, { role: 'ferraille', ouv: '' }); }
   const x = G.px, y = G.py, gr = n => fxGrains(n);
   const CAS = {
     num: { x, y, txt: '12', col: '#ffffff', dur: 900 }, soin: { x, y, dur: 900, gr: gr(9) }, ener: { x, y, dur: 900, gr: gr(9) },
     laser: { o: b, x, y, ox: 2, oy: 1, dur: 420 }, boule: { ax: x + 2, ay: y, bx: x, by: y, dur: 320 },
-    boom: { x: x + 1, y: y + 1, cases: [[x + 1, y + 1], [x + 2, y + 1]], dur: 420 }, alerte: { o: b, dur: 900 },
+    boom: { x: x + 1, y: y + 1, cases: [[x + 1, y + 1], [x + 2, y + 1]], dur: 420 }, alerte: { o: b, dur: 900 }, etinc: { o: b, dx: 1, dy: 0, x0: b ? b.x : 0, y0: b ? b.y : 0, s: 7, dur: 2400 },
     onde: { x, y, r: 4.5, dur: 600 }, boost: { x, y, dur: 900, gr: gr(14) }, fury: { x, y, dur: 800 }, veil: { x, y, dur: 750 },
     zap: { ax: x - .5, ay: y - .5, bx: x + .5, by: y + .5, dur: 320 },
     // arme de tir (28 novembre 2026, 14m) : un projectile par arme, et les braises d'une cible qui brûle

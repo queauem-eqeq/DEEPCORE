@@ -40,9 +40,9 @@ niveau, bestiaire : rien n'est modifié ni réécrit) :
 ### Groupes de l'Astroport (niveau 1, 28 novembre 2026)
 
 - **Ferrailleuses** (`role:'ferraille'`) : *Ferrailleuses* (2-3 crabots, valeur 5), *Équipe de découpe* (2 crabots et un
-  soudeur, 7), *Essaim de récupération* (3-4 drones, 4). Dehors. Chacune naît au pied d'une épave (la moins entourée,
-  loin de l'arrivée), la retient (`G.patr[id].epave`, `o.epave` sur chaque membre, `G.epaves[k].groupes`) et fait la
-  navette entre elle et le sas du dépôt.
+  soudeur, 7), *Essaim de récupération* (3-4 drones, 4). Dehors. Chacune naît au pied d'une épave qui a une coque (voir
+  ci-dessous), la retient (`G.patr[id].epave`, `o.epave` sur chaque membre, `G.epaves[k].groupes`) et fait la navette entre
+  elle et le quai du dépôt. Au niveau 1, les groupes du joueur posés dehors et faits d'espèces de chantier le deviennent aussi.
 - **Gardes** (`role:'garde'`) : *Sentinelles du sas* (2-3 sentinelles, 4 ; tunnels et bâti, nées au sas quand elles
   naissent dans les tunnels), *Poste de garde du dépôt* (gardien et 1-2 sentinelles, 10 ; bâti). Patrouille garde ou
   territoire.
@@ -53,30 +53,57 @@ niveau, bestiaire : rien n'est modifié ni réécrit) :
   son niveau 1, et les écartés quittent son niveau 1 (pas sa banque, ni les autres niveaux). Même chose pour les modules
   (par identifiant, niveau 1 relevé à quatre modules). Essai : `outils/scripts/test-astroport.js`.
 
-### Ferrailleuses « à l'ouvrage » (28 novembre 2026)
+### Ferrailleuses « à l'ouvrage » (28 novembre 2026 ; règle revue le soir même après l'essai du joueur)
 
-Un groupe de rôle `ferraille` **ignore la foreuse** : ni la vue ni le bruit ne le mettent en chasse ; vacarme d'une station,
-balise, laser ou mine qui le touche n'y changent rien. Il travaille : halte de découpe de **6 à 12 battements** à son épave
-(chaque membre gagne un poste au contact d'une plaque de coque ; étincelles d'un pixel, grésillement discret si on le voit),
-puis la navette jusqu'au sas du dépôt, et retour. Il contourne la foreuse sans la frapper.
+**La règle, telle qu'on la joue.** Une ferrailleuse (groupe de rôle `ferraille`) **ignore la foreuse**. Elle ne devient hostile
+que pour **deux raisons**, et **seul son groupe** réagit (aucune propagation : les équipes des autres épaves continuent leur
+travail, même si l'on se bat à côté) :
+1. **On l'attaque** : coup de la foreuse, tir, capsule nuisible (charge, batterie, court-circuit, surrégime) sur elle ou un
+   membre de son groupe → tout son groupe chasse aussitôt (« ! » fixe au-dessus de chacune). Frapper une ferrailleuse à
+   l'ouvrage est un coup par surprise.
+2. **On reste dans le périmètre de SON épave** (emprise + `OUVR_R` = 3 cases), sous les yeux d'un membre (10 cases, ligne de
+   vue ; pas sous fumigène ni camouflage). À l'entrée : **avertissement** — les ouvrières qui la voient s'arrêtent et se
+   tournent vers elle, « ? » au-dessus, contour du périmètre en rouge, journal une fois : « PÉRIMÈTRE DE DÉCOUPE. MOBILES EN
+   ALERTE. RECULER. ». La foreuse a **3 battements** (`OUVR_ALERTE`) pour ressortir : ressortie, **retour immédiat au travail** ;
+   encore dedans au 3e battement, chasse (« MOBILES : DÉCOUPE INTERROMPUE. CIBLE : UNITÉ. »). Une **seconde intrusion moins de
+   20 battements** (`OUVR_RECIDIVE`) après la sortie : chasse directe, sans avertissement.
 
-- **Provocation par l'attaque** : un coup de la foreuse sur un membre, ou une capsule nuisible lancée sur lui (charge, batterie,
-  court-circuit, surrégime), et **tout le groupe** passe en chasse. Frapper une ferrailleuse à l'ouvrage est un **coup par surprise**.
-- **Provocation par l'approche** : la foreuse à **3 cases ou moins de l'emprise de leur épave** (ou dedans), vue par un membre
-  (10 cases au plus, ligne de vue ; pas sous fumigène ni camouflage). D'abord **un battement d'avertissement** : elles s'arrêtent
-  face à la foreuse, un « ? » blanc cerné de noir au-dessus d'elles (« ALERTÉE », journal : « PÉRIMÈTRE DE DÉCOUPE… MOBILES EN
-  ARRÊT »). Ressortie aussitôt : elles reprennent l'ouvrage. Restée ou avancée : chasse (« MOBILES : DÉCOUPE INTERROMPUE »).
-  Une ferrailleuse alertée n'est plus surprise.
-- Provoqué, le groupe chasse, cherche et fouille comme tout groupe ; quand plus aucun membre ne chasse, il **retourne à
-  l'ouvrage** (à l'épave d'abord) et redevient indifférent.
-- **Interface** : « À L'OUVRAGE » / « ALERTÉE » sous la ligne de la créature dans « En vue » ; fiche : « MOBILE IGNORE L'UNITÉ.
-  ACTIVITÉ : DÉCOUPE. CLASSEMENT MAINTENU : MENACE. » (sans l'œil de détection). Journal, une fois par partie : la même phrase.
-  Exploration automatique, repos et trajets ne s'arrêtent pas pour une ferrailleuse à l'ouvrage.
-- Vaut pour **tout groupe** de rôle `ferraille` ; un groupe sans épave (hors du niveau 1) n'est provoqué que par l'attaque.
-  **Lab → Groupes → Rôle** : Aucun, Ferraille, Garde (« aucun » est enregistré tel quel). Les gardes sont des ennemis ordinaires.
-- Réglages en tête de section dans `08-faune.js` : `OUVR_R` (3), `OUVR_VUE` (10), `OUVR_ALERTE` (1), `OUVR_DECOUPE` ([6, 12]).
-  Code : `ouvrTick`, `ouvrJoue`, `ouvrAttaque`, `aOuvrage`, `ouvrAlerte`, état du groupe dans `G.patr[id].ouv` ('' | 'alerte' |
-  'hostile'). Essai : `outils/scripts/test-ouvrage.js`.
+Rien d'autre ne les met en chasse : ni la vue, ni le bruit, ni le vacarme d'une station, une balise, un laser, une mine, ni le
+combat d'à côté. Provoqué, le groupe chasse, cherche et fouille comme tout groupe ; trace perdue, il **retourne à son épave** et
+redevient indifférent (la marque disparaît ; journal la première fois : « MOBILES : RETOUR À LA DÉCOUPE. »).
+
+**Le travail se voit.** Cycle de chaque groupe : **60 % du temps contre la coque** (`OUVR_PART`), 40 % en aller-retour épave →
+quai du dépôt → épave. Trajet = pas réels du chemin, au sec, au pas de la plus lente ; découpe = 1,5 × (aller-retour + halte au
+quai), au moins `OUVR_DECOUPE_MIN` (24) battements ; dès le premier retour, la découpe se recale sur l'aller-retour réellement
+fait (`P.arm`). Le groupe part et revient ensemble : la halte commence quand la dernière est arrivée, et en route aucune ne prend
+plus de 3 pas d'avance sur la plus lente (elles vont en file). À la halte, chaque ouvrière reçoit **son poste** (`o.poste`) : une
+case au contact d'une plaque de coque, les postes répartis autour de l'épave ; dans une épave éventrée ou réduite au squelette,
+une ouvrière au moins travaille à l'intérieur. Elle se tourne vers la plaque ; à chaque action, sur la plaque : un éclat en croix
+accent à cœur blanc et dix étincelles qui changent de place 12 fois par seconde (tant qu'elle coupe) ; grésillement discret si on
+la voit. En route vers le quai, elle porte une pièce (petit bloc couleur bâti au-dessus d'elle).
+- **Quai** (`ouvrQuai`) : le sas du dépôt s'il se rejoint au sec depuis l'épave ; sinon la case joignable la plus proche du sas
+  (une équipe ne traverse pas un lac : le Soudeur ne nage pas).
+- **Épaves de travail** : jamais une fosse vide ni une épave sans plaque. La première équipe posée prend l'épave éligible la plus
+  proche de l'arrivée (à 13 cases au moins, `OUVR_DEPART`) et commence au travail ; les autres, la moins entourée, chacune à un
+  moment tiré de son cycle (`ouvrDepart`) : à l'arrivée, on voit à la fois des équipes contre les coques et des navettes.
+- **Niveau 1, groupes dehors** (`ouvrRoleN1`) : un groupe posé dehors, **sans rôle**, fait seulement d'espèces de chantier
+  (crabot, drone, soudeur, relais : `OUVR_CHANTIER`) devient une équipe de ferrailleuses (épave, navette, règle ci-dessus). Dehors,
+  une créature qui ressemble à une ferrailleuse en est une ; les hostiles à vue sont les gardes, au sas et dans le dépôt. La banque
+  de groupes du joueur n'est pas modifiée (c'est la règle de pose), un rôle choisi au Lab (« aucun » compris) est respecté, et le
+  nombre de groupes posés ne change pas (la part `MENACE_NB` s'applique comme avant à ces groupes).
+- **Interface** : contour du périmètre au sol (voir `conception-interface.md`) ; « En vue » : menaces d'abord, puis l'intertitre
+  « À L'OUVRAGE » et les ouvrières en couleur neutre ; fiche, première ligne : « INDIFFÉRENT TANT QUE : PAS D'ATTAQUE, PAS
+  D'INTRUSION DANS SON PÉRIMÈTRE. » (alertée : « PÉRIMÈTRE FRANCHI. CHASSE DANS N BATTEMENTS. RECULER. »). Journal de bord :
+  page de tutoriel « FERRAILLEUSES ». Exploration automatique, repos et trajets ne s'arrêtent pas pour une ferrailleuse à
+  l'ouvrage.
+- Vaut pour **tout groupe** de rôle `ferraille` ; un groupe sans épave (hors du niveau 1, Lab) n'est provoqué que par l'attaque.
+  **Lab → Groupes → Rôle** : Aucun, Ferraille, Garde. Les gardes sont des ennemis ordinaires.
+- Réglages en tête de section dans `08-faune.js` : `OUVR_R` (3), `OUVR_VUE` (10), `OUVR_ALERTE` (3), `OUVR_RECIDIVE` (20),
+  `OUVR_PART` (0,6), `OUVR_DECOUPE_MIN` (24), `OUVR_CONTOUR` (6), `OUVR_CHANTIER`. Code : `ouvrTick`, `ouvrJoue`, `ouvrAttaque`,
+  `ouvrCycle`, `ouvrAffecte`, `ouvrDepart`, `ouvrQuai`, `ouvrRoleN1`, `aOuvrage`, `ouvrAlerte` ; état du groupe dans
+  `G.patr[id].ouv` ('' | 'alerte' | 'hostile'), `P.rec` (battement de la dernière sortie), `P.trajet`, `P.decoupe`, `P.arm`.
+  Essai : `outils/scripts/test-ouvrage.js` ; diagnostic : `outils/scripts/diag-ferrailleuses.js` ; mesure du cycle :
+  `outils/scripts/mesure-ouvrage.js`.
 
 ### Lieux, densité et valeurs mesurées
 

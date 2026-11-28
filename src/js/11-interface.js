@@ -126,10 +126,16 @@ function seenHTML(){
     const calc=e=>{const tmA=terrModDe(e.sp,e.o.x,e.o.y),tmR=terrMod(G.px,G.py),me=hitChance(robotPre(),e.sp.def+tmA),
       them=e.agg?hitChance(e.sp.pre,robotDef()):null;return {tmA,tmR,me,them};};
     const head='<div class="hd"><span></span><span title="Sa cadence : le nombre d’actions qu’elle fait pendant une action normale de '+NOM_FOREUSE+'"></span><span>Vie</span><span title="Votre chance de le toucher">Toucher</span><span title="Sa chance de vous toucher">Subir</span></div>';
-    out.push('<div class="grp">'+head+ans.slice(0,max).map(e=>{const pv=pvDe(e.sp),d=Math.max(Math.abs(e.o.x-G.px),Math.abs(e.o.y-G.py)),c=calc(e);
+    const ligne=e=>{const pv=pvDe(e.sp),d=Math.max(Math.abs(e.o.x-G.px),Math.abs(e.o.y-G.py)),c=calc(e);
       const dp=Math.round(dpasDe(e.o,e.sp)),dc=dcoupDe(e.o,e.sp),cd=d<=1?dc:dp;
-      return `<div class="an${e.agg&&e.st?' hunt':''}" title="${e.sp.n}${e.ouv?' · '+e.ouv.toLowerCase():e.st?' · '+e.st:''} · ${d} case${d>1?'s':''} · ${Math.max(0,e.hp)}/${pv} PV · pas ${dp} (${motDuree(dp)}), coup ${dc} (${motDuree(dc)})"><img src="${ICON[e.ic]||''}" alt="${e.sp.n}"><span class="cad${cd<=50?' vif':''}" title="${cd<=100?'Jusqu’à '+cadenceDe(cd).toFixed(cadenceDe(cd)%1?1:0)+' action':'Une action toutes les '+(1/cadenceDe(cd)).toFixed(1)}${cd<=100?'s par action de '+NOM_FOREUSE+'':' actions de '+NOM_FOREUSE+''}">${CADGL(cd)}</span><span class="hp">${asciiBar(Math.max(0,e.hp),pv)}</span><span class="n" style="color:${chanceCol(c.me)}">${c.me} %</span><span class="n" style="color:${c.them==null?'var(--dim)':chanceCol(100-c.them)}">${c.them==null?'—':c.them+' %'}</span>${e.ouv?`<span class="ouv${e.ouv==='ALERTÉE'?' al':''}">${e.ouv}</span>`:''}</div>`;}).join('')
-    +(ans.length>max?`<div class="none">+ ${ans.length-max} autre${ans.length-max>1?'s':''}</div>`:'')+'</div>');
+      return `<div class="an${e.agg&&e.st?' hunt':''}" title="${e.sp.n}${e.ouv?' · '+e.ouv.toLowerCase():e.st?' · '+e.st:''} · ${d} case${d>1?'s':''} · ${Math.max(0,e.hp)}/${pv} PV · pas ${dp} (${motDuree(dp)}), coup ${dc} (${motDuree(dc)})"><img src="${ICON[e.ic]||''}" alt="${e.sp.n}"><span class="cad${cd<=50?' vif':''}" title="${cd<=100?'Jusqu’à '+cadenceDe(cd).toFixed(cadenceDe(cd)%1?1:0)+' action':'Une action toutes les '+(1/cadenceDe(cd)).toFixed(1)}${cd<=100?'s par action de '+NOM_FOREUSE+'':' actions de '+NOM_FOREUSE+''}">${CADGL(cd)}</span><span class="hp">${asciiBar(Math.max(0,e.hp),pv)}</span><span class="n" style="color:${chanceCol(c.me)}">${c.me} %</span><span class="n" style="color:${c.them==null?'var(--dim)':chanceCol(100-c.them)}">${c.them==null?'—':c.them+' %'}</span>${e.ouv==='ALERTÉE'?`<span class="ouv al">${e.ouv}</span>`:''}</div>`;};
+    /* « En vue » en deux parties (28 novembre 2026) : d'abord les menaces actives (ferrailleuses alertées comprises), puis, sous
+       l'intertitre « À L'OUVRAGE », les ferrailleuses indifférentes, en couleur neutre. */
+    const men=ans.filter(e=>e.ouv!=='À L’OUVRAGE'),ouv=ans.filter(e=>e.ouv==='À L’OUVRAGE'),plus=n=>n>0?`<div class="none">+ ${n} autre${n>1?'s':''}</div>`:'';
+    const nm=Math.min(men.length,ouv.length?max-Math.min(2,ouv.length):max),no=Math.max(0,Math.min(ouv.length,max-nm));
+    out.push('<div class="grp">'+head+men.slice(0,nm).map(ligne).join('')+plus(men.length-nm)
+      +(ouv.length?`<div class="ouvhd" title="Ferrailleuses : indifférentes tant qu’on ne les attaque pas et qu’on n’entre pas dans le périmètre de leur épave">À L’OUVRAGE</div>`
+        +ouv.slice(0,no).map(e=>ligne(e).replace('<div class="an','<div class="an ouvr')).join('')+plus(ouv.length-no):'')+'</div>');
   }
   const ins=HOV&&!busy()&&!viseCible()?inspectHTML(HOV):'';   // en mode viseur, la fiche est dans la colonne
   return ins+(out.join('')||'<div class="none">Rien en vue.</div>');

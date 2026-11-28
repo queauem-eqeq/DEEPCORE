@@ -2,9 +2,13 @@
 """Pilote automatique : joue des parties entières (niveaux 1 à 3, descentes comprises) avec le vrai moteur, sans dessin.
 
     python3 outils/pilote.py [prudent|fonceur|tout] [parties] [processus] [--graine N] [--json SORTIE.json] [--plafond B] [--immortel]
-                             [--regles '{"MENACE_NB":[.6,.5,.6]}']
+                             [--regles '{"MENACE_NB":[.6,.5,.6]}'] [--niveaux N] [--reglages REGLAGES.json]
 
 --regles : remplace des valeurs de REGLES (00-base.js) dans la page avant de jouer, sans toucher à src/ (essais d'équilibrage).
+
+--niveaux N : la partie s'arrête à la descente du niveau N (comptée « niveau fini ») ; --niveaux 1 ne joue que le niveau 1.
+--reglages : un fichier JSON de réglages enregistrés (au moins {"groupes": …}, comme reglages/courant de l'artefact), appliqué
+dans la page avant de jouer comme au chargement de l'artefact (applySaved) : on joue avec les groupes du joueur.
 
 --immortel : la vie ne descend jamais sous 1 (les pertes restent comptées en entier, et l'endroit où la foreuse aurait été
 détruite est noté) ; sert à mesurer la durée d'un niveau entier quand presque toutes les parties meurent avant le noyau.
@@ -36,7 +40,7 @@ async def _lot(taches):
     out = []
     async with async_playwright() as p:
         nav = await p.chromium.launch()
-        for profil, graine, plafond, immortel, regles in taches:
+        for profil, graine, plafond, immortel, regles, niveaux, reglages in taches:
             ctx = await nav.new_context(viewport={'width': 1280, 'height': 800})
             await ctx.add_init_script("try{localStorage.setItem('np-intro','vu')}catch(e){}")   # pas de cinématique d'arrivée
             page = await ctx.new_page()
@@ -46,9 +50,12 @@ async def _lot(taches):
             await page.wait_for_function('typeof G !== "undefined" && G && G.st', timeout=60000)
             if regles:
                 await page.evaluate(f'Object.assign(REGLES, {regles})')
+            if reglages:
+                await page.evaluate('d => {APPLYING = true; try {applySaved(Object.assign({enregistreLe: new Date(0).toISOString()}, d));} finally {APPLYING = false;}}',
+                                    {k: v for k, v in reglages.items() if k in ('groupes', 'modules', 'bestiaire', 'items')})
             await page.evaluate(SCRIPT)
             try:
-                r = json.loads(await page.evaluate(f'pilotePartie({json.dumps({"profil": profil, "graine": graine, "plafond": plafond, "immortel": immortel})})'))
+                r = json.loads(await page.evaluate(f'pilotePartie({json.dumps({"profil": profil, "graine": graine, "plafond": plafond, "immortel": immortel, "niveaux": niveaux})})'))
             except Exception as e:
                 r = {'profil': profil, 'graine': graine, 'statut': 'erreur', 'erreur': str(e)[:400], 'niveaux': []}
             r['erreurs_page'] = erreurs[:]
@@ -81,7 +88,7 @@ def moy(l):
 def resume(parties):
     """chiffres agrégés d'un profil"""
     n = len(parties)
-    st = {s: sum(1 for p in parties if p['statut'] == s) for s in ('noyau', 'mort', 'bloquée', 'erreur')}
+    st = {s: sum(1 for p in parties if p['statut'] == s) for s in ('noyau', 'niveau fini', 'mort', 'bloquée', 'erreur')}
     morts = {}
     for p in parties:
         if p['statut'] == 'mort':
@@ -146,7 +153,7 @@ def resume(parties):
 
 def tableau(profil, R):
     s = R['statuts']
-    print(f"\n=== {profil} : {R['parties']} parties — noyau {s['noyau']}, morts {s['mort']}, bloquées {s['bloquée']}, erreurs {s['erreur']}")
+    print(f"\n=== {profil} : {R['parties']} parties — noyau {s['noyau']}, niveau fini {s['niveau fini']}, morts {s['mort']}, bloquées {s['bloquée']}, erreurs {s['erreur']}")
     if R['morts']:
         print('   morts :', ', '.join(f'{k} ×{v}' for k, v in R['morts'].items()))
     print('   durée totale d’une partie gagnée (médiane) :', R['durée totale (battements, noyau) médiane'], 'battements')
@@ -173,7 +180,7 @@ def main():
     immortel = '--immortel' in args
     if immortel:
         args.remove('--immortel')
-    for o in ('--graine', '--json', '--plafond', '--regles'):
+    for o in ('--graine', '--json', '--plafond', '--regles', '--niveaux', '--reglages'):
         if o in args:
             i = args.index(o)
             opt[o] = args[i + 1]
@@ -189,7 +196,9 @@ def main():
     regles = opt.get('--regles')
     if regles:
         json.loads(regles)   # refuse un texte mal formé avant de lancer les navigateurs
-    taches = [(p, g0 + k, plafond, immortel, regles) for p in profils for k in range(n)]
+    niveaux = int(opt['--niveaux']) if '--niveaux' in opt else 0
+    reglages = json.loads(pathlib.Path(opt['--reglages']).read_text(encoding='utf-8')) if '--reglages' in opt else None
+    taches = [(p, g0 + k, plafond, immortel, regles, niveaux, reglages) for p in profils for k in range(n)]
     lots = [taches[i::proc] for i in range(proc)]
     with mp.Pool(proc) as pool:
         res = [r for l in pool.map(lot, [l for l in lots if l]) for r in l]

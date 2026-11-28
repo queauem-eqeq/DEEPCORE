@@ -1,2 +1,2 @@
-atterrissage · Canyons · Coffre-fort · carte 3957e53b · faune 6ee0bfbc (13+0) · objets f4ebf1a4 · après 250 actions a5a53a67 vie 100000
+atterrissage · Canyons · Coffre-fort · carte 3957e53b · faune 431884ef (8+0) · objets cce3b486 · après 250 actions 93ea61b0 vie 99954
 classique · Pierrier · Citadelle · carte 73ba0763 · faune 4f18d5d9 (8+0) · objets 4784fece · après 250 actions 259bb4ce vie 100000

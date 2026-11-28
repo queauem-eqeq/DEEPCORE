@@ -283,9 +283,12 @@ function inspectHTML(c){const {x,y}=c||HOV;if(x<0||y<0||x>=W||y>=H)return '';con
     const ouv=aOuvrage(occ)?(ouvrAlerte(occ)?'alertée':'à l’ouvrage'):'';
     const state=ouv?ouv:isB?(occ.hunt>0?(occ.sees?'en chasse':occ.search>0?'fouille les environs':'remonte la trace'):P?(P.pause>0?'au repos':'en route'):'erre'):({attack:'attaque',flee:'recule',follow:'suit',hold:'observe',seek:'remonte la trace',search:'fouille les environs'}[occ.mode]||'n’a rien repéré');
     const me=hitChance(robotPre(),sp.def+terrModDe(sp,x,y)),them=isB||occ.mode==='attack'?hitChance(sp.pre,robotDef()):null;
-    out.push(head(ICON[isB?'bz'+occ.sp+'r':'an'+occ.sp+'r'],sp.n,`${state} · ${dt}`),
+    /* première ligne de la fiche d'une ferrailleuse (28 novembre 2026, soir) : la règle, en clair ; alertée, le compte à rebours */
+    const Pv=ouv?ouvrP(occ):null,regle=!ouv?'':ouv==='alertée'?`<p class="ouvrp al">PÉRIMÈTRE FRANCHI. CHASSE DANS ${Math.max(1,Pv&&Pv.al||1)} BATTEMENT${(Pv&&Pv.al||1)>1?'S':''}. RECULER.</p>`
+      :'<p class="ouvrp">INDIFFÉRENT TANT QUE : PAS D’ATTAQUE, PAS D’INTRUSION DANS SON PÉRIMÈTRE.</p>';
+    out.push(head(ICON[isB?'bz'+occ.sp+'r':'an'+occ.sp+'r'],sp.n,`${state} · ${dt}`),regle+
       `<div class="kv"><span>PV <b>${hp}/${pvDe(sp)}</b></span><span>DÉG <b>${dmgTxt(sp)}</b></span><span>PRE <b>${sp.pre}</b></span><span>DEF <b>${sp.def+terrModDe(sp,x,y)}</b></span><span title="Durée d’un pas sur cette case : plus petit, plus rapide">PAS <b>${Math.round(dpasDe(occ,sp))}</b></span><span title="Durée d’un coup : 50 frappe deux fois par battement, 200 une fois sur deux">COUP <b>${dcoupDe(occ,sp)}</b></span></div>`,
-      (ouv?`<p class="ouvrp">${ouv==='alertée'?'MOBILE EN ARRÊT. ORIENTATION : UNITÉ. PÉRIMÈTRE DE DÉCOUPE FRANCHI.':'MOBILE IGNORE L’UNITÉ. ACTIVITÉ : DÉCOUPE.'} CLASSEMENT MAINTENU : MENACE.</p>`:'')+
+
       (!ouv&&(isB?!(occ.hunt>0):!occ.mode)?`<p class="eye" title="Chance qu’il vous repère à chaque tour">${EYE_SVG} <b>${detectChance(occ)} %</b></p>`:''),
       `<p>Toucher <b style="color:${chanceCol(me)}">${me} %</b> · Subir <b style="color:${them==null?'var(--dim)':chanceCol(100-them)}">${them==null?'—':them+' %'}</b></p>`+
       (typeof tirChanceTxt==='function'?tirChanceTxt(occ,sp,x,y):''),

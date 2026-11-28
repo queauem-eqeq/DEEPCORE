@@ -126,6 +126,18 @@ molette ou fine barre pour remonter jusqu'aux 200 derniers messages ; un nouveau
   barre de vie ASCII, colonnes TOUCHER / SUBIR colorées). Une créature **en chasse** porte un cadre couleur monde autour de son
   icône. La colonne de l'icône fait 20 px, pas 16 : le cadre déborde de 2 px de chaque côté et la colonne défilante
   (`overflow-y:auto`) lui coupait son bord gauche (24 novembre 2026).
+  **Ferrailleuses (28 novembre 2026, soir)** : la liste est en deux parties — d'abord les menaces actives (ferrailleuses
+  alertées comprises, avec « ALERTÉE » en accent), puis un intertitre « À L'OUVRAGE » (petites capitales, couleur atténuée, filet
+  au-dessus) et les ferrailleuses indifférentes, en couleur neutre (`.an.ouvr`). Six lignes en tout ; les menaces gardent au
+  moins quatre lignes quand il y a des ouvrières ; « + N autres » par partie.
+- **Périmètre de découpe au sol (28 novembre 2026, soir)** : quand la foreuse est à 6 cases ou moins (`OUVR_CONTOUR`) d'une
+  épave où travaille une équipe, le bord du périmètre (emprise + 3 cases) est tracé : pointillé d'un pixel de tuile (4 pleins,
+  2 vides, continu d'une case à l'autre), couleur accent ; **rouge danger** quand l'équipe est en alerte ou en chasse. Opaque,
+  seulement sur les cases en vue et praticables, sous les créatures (`ouvrContour`, `10-rendu.js`, appelé dans `render()` après
+  le décor : hors du cache du décor, et dans l'image que `fxInstantane` fige). Rien autour d'une épave sans ouvriers.
+- **Marques des ferrailleuses** : « ? » fixe en alerte ; « ! » fixe en chasse (même dessin que le « ! » du repérage) ; rien à
+  l'ouvrage (on voit l'éclat de la découpe) ; en route vers le quai, la pièce portée (bloc couleur bâti cerné de noir). Fiche de
+  survol, première ligne : « INDIFFÉRENT TANT QUE : PAS D'ATTAQUE, PAS D'INTRUSION DANS SON PÉRIMÈTRE. ».
 - **En tête de colonne, au-dessus de Vie**  : trois lignes en capitales couleur monde, sans étiquette — `NIVEAU 2 · −1564 M · 96×64` (le niveau, sa profondeur et la taille de la carte ; la
   profondeur vaut 0 au niveau 1, puis la fin de chaque descente, les mêmes chiffres que le compteur PROFONDEUR des
   cinématiques de forage, qui part de la profondeur du niveau quitté : `profNiv`, 14b), puis l'**archétype monde** et

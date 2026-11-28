@@ -1334,3 +1334,40 @@ Témoin : `pilote.py fonceur 30 2 --regles '{"PILOTE_TIR":0}'` (mêmes graines, 
   l'identique, voir « Survie C ») : le tir ne lui donne que 2 parties. Valeurs des armes laissées telles quelles ; à revoir après essai.
 - `simul.py tout` : inchangé (le tir n'entre pas dans ces combats au contact) ; « RÉF. avec Forage silencieux / Tir silencieux » :
   100 % de victoires, vie restante 70 / 72.
+
+## Niveau 1 après retouche des ferrailleuses (28 novembre 2026, bloc F)
+
+Niveau 1 seul (`pilote.py tout 30 2 --niveaux 1`, graines 1000 à 1029), avec les groupes **enregistrés du joueur** (`--reglages`,
+reglages/courant lu le 28 novembre 2026 : Crabots, Bande de relais, Banc de torpilles + groupes de l'Astroport) et avec les groupes du
+code. « Avant » = commit 1dc3c8c, joué avec le même pilote (le prudent contourne désormais le périmètre des épaves occupées et recule
+à l'alerte ; le fonceur l'ignore). Niveau 1 compté fini à la descente.
+
+| Groupes du joueur | Avant | **Après** |
+|---|---|---|
+| Prudent : niveau fini / morts | 27 / 3 | **28 / 2** |
+| Prudent : vie perdue (moy · méd) | 64,6 · 45 | **60,7 · 41,5** |
+| Prudent : groupes affrontés (moy) · vie par groupe (méd) | 4,6 · 6 | **3,7 · 7** |
+| Prudent : durée (méd, battements) · fuel à la descente (moy) | 1 770 · 36 | **1 906 · 36** |
+| Fonceur : niveau fini / morts | 28 / 2 | **29 / 1** |
+| Fonceur : vie perdue (moy · méd) | 54,7 · 60 | **42,7 · 34** |
+| Fonceur : groupes affrontés · durée (méd) · fuel | 4,4 · 400 · 64 | **3,2 · 533 · 62** |
+
+| Groupes du code | Avant | **Après** |
+|---|---|---|
+| Prudent : niveau fini / morts | 24 / 6 | **26 / 4** |
+| Prudent : vie perdue (moy · méd) | 106 · 89 | **107 · 85** |
+| Prudent : groupes affrontés · vie par groupe (méd) | 2,7 · 8 | **4,1 · 13** |
+| Prudent : durée (méd) · fuel à la descente | 2 371 · 21 | **2 227 · 25** |
+| Fonceur : niveau fini / morts | 24 / 6 | **28 / 2** |
+| Fonceur : vie perdue (moy · méd) · groupes affrontés | 65,6 · 68 · 4,4 | **62,8 · 57,5 · 3,5** |
+
+- **Cycle des équipes** (`outils/scripts/mesure-ouvrage.js`, 6 cartes × 2 000 battements, foreuse au vaisseau) : part du temps contre
+  la coque par groupe — groupes du joueur : 35 groupes, moyenne **57,8 %**, médiane 59,7, D1 51,9, D9 62,6, 29 sur 35 entre 55 et 65 ;
+  groupes du code : 36 groupes, moyenne **55,6 %**, médiane 56,5, D1 50,1, D9 62,4. Trajet aller : 80 à 180 battements (le quai est loin) ;
+  découpe 250 à 550. Les écarts restants : ouvrières dont le poste est bloqué (elles attendent à côté) et cycles coupés par la fenêtre.
+- **Au départ** : la première équipe est posée sur l'épave éligible la plus proche (13 cases au moins) et commence au travail, mais la
+  vue de la foreuse (10 cases) ne l'atteint pas depuis le vaisseau : 0 ferrailleuse en vue à la sortie sur 10 cartes sur 12 ; on la voit
+  après quelques pas.
+- **Périmètres** : part de l'extérieur praticable dans un périmètre d'épave occupée, groupes du joueur : 11,7 % avant, **21 %** après
+  (ses Crabots et relais deviennent des équipes) ; groupes du code : 20 % (inchangé).
+- `simul.py tout` : inchangé (arènes sans rôle).

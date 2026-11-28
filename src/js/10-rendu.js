@@ -389,6 +389,7 @@ function render(){
   ctx.globalAlpha=1;
   // (les taches de sang ne sont plus dessinées depuis le 19 novembre 2026 : les ennemis laissent des débris)
   for(const s of G.sites){if(fog&&!G.seen[idx(s.x,s.y)])continue;put(TL.siteUnknown,s.x,s.y,!fog||vis[idx(s.x,s.y)]?1:.35);}
+  ouvrContour();   // périmètre des épaves où l'on travaille, sous les créatures (28 novembre 2026)
   // touche V : portée de discrétion de la foreuse — les cases d'où un ennemi peut vous remarquer, entourées d'un pointillé
   if(SHOWVIS&&!G.over){
     const r=G.stealth||STEALTH_BASE,cells=new Set();
@@ -490,6 +491,22 @@ function fxSurface(){return !!G&&FX_SNAP.cle===fxCle()&&!BOOM&&!INTRO&&!animVif(
   FX.every(f=>!FX_DECOR.has(f.kind));}
 function fxRapide(){ctx.save();ctx.setTransform(1,0,0,1,0,0);ctx.globalAlpha=1;ctx.globalCompositeOperation='copy';
   ctx.drawImage(FX_SNAP.cv,0,0);ctx.restore();ctx.save();fxCouche();ctx.restore();smokeKick();curseurCase();ctx.globalAlpha=1;}
+/* Périmètre de découpe (28 novembre 2026) : quand la foreuse est à OUVR_CONTOUR cases ou moins d'une épave où travaille un groupe de
+   ferrailleuses, le bord de son périmètre (emprise + OUVR_R cases) est tracé au sol : un pointillé d'un pixel de tuile, quatre pixels
+   pleins, deux vides, continu d'une case à l'autre, couleur accent ; rouge danger quand le groupe est en alerte ou en chasse. Opaque,
+   seulement sur les cases en vue et praticables. Rien autour d'une épave sans ouvriers. */
+function ouvrContour(){const vu=[];if(!G||!G.epaves||!G.patr)return vu;const u=S/16;ctx.globalAlpha=1;
+  for(let k=0;k<G.epaves.length;k++){const e=G.epaves[k];if(!e.groupes||!e.groupes.length||ouvrDist(e,G.px,G.py)>OUVR_CONTOUR)continue;
+    const Ps=e.groupes.map(id=>G.patr[id]).filter(P=>P&&P.role==='ferraille'&&P.epave===k);if(!Ps.length)continue;
+    const rouge=Ps.some(P=>P.ouv==='alerte'||P.ouv==='hostile'),T={k,rouge,n:0};vu.push(T);ctx.fillStyle=rouge?PAL['4']:PAL['1'];
+    const x0=e.x-OUVR_R,x1=e.x+e.w-1+OUVR_R,y0=e.y-OUVR_R,y1=e.y+e.h-1+OUVR_R;
+    const bord=(x,y,cote)=>{if(x<0||y<0||x>=W||y>=H)return;const i=idx(x,y);if((fog&&!vis[i])||blocks(G.t[i]))return;
+      const ox=(x-camX)*16,oy=(y-camY)*16,hor=cote<2;T.n++;
+      for(let p=0;p<16;p++){const g=(hor?x:y)*16+p;if(g%6>3)continue;
+        if(hor)ctx.fillRect((ox+p)*u,(oy+(cote?15:0))*u,u,u);else ctx.fillRect((ox+(cote===3?15:0))*u,(oy+p)*u,u,u);}};
+    for(let x=x0;x<=x1;x++){bord(x,y0,0);bord(x,y1,1);}
+    for(let y=y0;y<=y1;y++){bord(x0,y,2);bord(x1,y,3);}}
+  return vu;}   // pour les essais : [{k, rouge, n cases tracées}]
 function curseurCase(){
   if(HOV&&CURT&&!busy()){const ok=(x,y)=>{const i=idx(x,y);
     return (!fog||G.seen[i])&&(getPath()||Math.max(Math.abs(x-G.px),Math.abs(y-G.py))<=1);};
@@ -548,14 +565,28 @@ function fxCouche(){
       étincelles d'un pixel, couleur accent, qui jaillissent vers elle et changent de place douze fois par seconde. Alertée (elle
       s'arrête, la foreuse est dans le périmètre de son épave) : un « ? » blanc cerné de noir au-dessus d'elle, fixe, tant que dure
       l'avertissement — même dessin que le « ! » du repérage. Opaque, sur la grille des pixels de tuile. */
-   for(const f of FX)if(f.kind==='etinc'&&G.beasts.includes(f.o)&&vis[idx(f.o.x,f.o.y)]){const p=fxP(f),ph=reduced?0:Math.floor(p*12),
-     bx=Math.round((f.o.x-camX)*16)+7+f.dx*7,by=Math.round((f.o.y-camY)*16)+7+f.dy*7;
-     ctx.fillStyle='#ffffff';ctx.fillRect(bx*u,by*u,u,u);ctx.fillStyle=PAL['1'];
-     // elles glissent le long de la plaque, de part et d'autre du point de coupe, à 3-7 pixels : hors du corps de la ferrailleuse
+   for(const f of FX)if(f.kind==='etinc'&&G.beasts.includes(f.o)&&vis[idx(f.o.x,f.o.y)]&&f.o.x===f.x0&&f.o.y===f.y0&&aOuvrage(f.o)&&!ouvrAlerte(f.o)){
+     // découpe (revue le soir du 28 novembre 2026 : « on ne les voit pas travailler ») : sur la plaque elle-même, un éclat en croix
+     // accent à cœur blanc (grande, petite, éteinte), et dix étincelles qui changent de place 12 fois par seconde, tant qu'elle coupe
+     const ph=reduced?0:Math.floor((performance.now()-f.t0)/80),
+       bx=Math.round((f.o.x-camX)*16)+7+f.dx*9,by=Math.round((f.o.y-camY)*16)+7+f.dy*9;
+     if(reduced||ph%3!==2){const r=ph%3===0?2:1;ctx.fillStyle=PAL['1'];ctx.fillRect((bx-r)*u,by*u,(2*r+1)*u,u);ctx.fillRect(bx*u,(by-r)*u,u,(2*r+1)*u);
+       ctx.fillStyle='#ffffff';ctx.fillRect((bx-1)*u,by*u,3*u,u);ctx.fillRect(bx*u,(by-1)*u,u,3*u);}
+     ctx.fillStyle='#ffffff';ctx.fillRect(bx*u,by*u,u,u);
+     // elles glissent le long de la plaque, de part et d'autre du point de coupe, et rebondissent vers la ferrailleuse
      const tx=-f.dy,ty=f.dx,ax=-f.dx,ay=-f.dy;
-     for(let k=0;k<5;k++){const h=(ph*7+k*13+f.s*3)%35,cote=k&1?1:-1,l=(3+h%5)*cote,r=(h/5|0)%3;
+     for(let k=0;k<10;k++){const h=(ph*7+k*13+f.s*3)%35,cote=k&1?1:-1,l=(2+h%6)*cote,r=(h/5|0)%5;
        const ex=tx||ty?tx*l+ax*r:l,ey=tx||ty?ty*l+ay*r:((h/7|0)%5-2);
-       ctx.fillStyle=k?PAL['1']:'#ffffff';ctx.fillRect((bx+ex)*u,(by+ey)*u,u,u);}}
+       ctx.fillStyle=k%3?PAL['1']:'#ffffff';ctx.fillRect((bx+ex)*u,(by+ey)*u,u,u);}}
+   /* Marques d'état d'une ferrailleuse (28 novembre 2026) : en chasse, un « ! » fixe (même dessin que le repérage) tant qu'elle
+      chasse ; en route vers le quai, la pièce qu'elle porte (un petit bloc couleur bâti cerné de noir) au-dessus d'elle. */
+   for(const b of G.beasts||[]){if(b.role!=='ferraille'||!vis[idx(b.x,b.y)]||!beastVisible(b))continue;const P=ouvrP(b);if(!P)continue;
+     const px=Math.round((b.x-camX)*16),py=Math.round((b.y-camY)*16);
+     if(P.ouv==='hostile'&&b.hunt>0&&!FX.some(f=>f.kind==='alerte'&&f.o===b)){const x=px+7,y=py-12;
+       ctx.fillStyle='#000';ctx.fillRect((x-1)*u,(y-1)*u,3*u,9*u);ctx.fillStyle='#fff';ctx.fillRect(x*u,y*u,u,5*u);ctx.fillRect(x*u,(y+6)*u,u,u);}
+     else if(!P.ouv&&P.k===1&&!(P.pause>0)){const x=px+6,y=py-5;
+       ctx.fillStyle='#000';ctx.fillRect((x-1)*u,(y-1)*u,6*u,4*u);ctx.fillStyle=PAL['5'];ctx.fillRect(x*u,y*u,4*u,2*u);
+       ctx.fillStyle='#fff';ctx.fillRect(x*u,y*u,u,u);}}
    for(const b of G.beasts||[])if(b.role==='ferraille'&&ouvrAlerte(b)&&vis[idx(b.x,b.y)]&&beastVisible(b)){
      const px=Math.round((b.x-camX)*16)+6,py=Math.round((b.y-camY)*16)-10,Q=['xxx','..x','.xx','.x.','...','.x.'];
      ctx.fillStyle='#000';for(let j=0;j<6;j++)for(let i=0;i<3;i++)if(Q[j][i]==='x')ctx.fillRect((px+i-1)*u,(py+j-1)*u,3*u,3*u);
