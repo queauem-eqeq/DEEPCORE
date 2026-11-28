@@ -1148,3 +1148,69 @@ Butin redistribué : robots abattus Matière 50 % / capsule 38 % / équipement 1
 devient deux blocs de Matière ; salle piégée : un équipement ; pièce secrète (une fois sur deux) : une capsule ; vitrine : trois blocs
 de Matière ; butin d'exploration : le lot « plan » devient un équipement. `outils/simul.py tout` : détection, fuite, combat
 inchangés (le Sonar porté ne change rien au duel : 78-79 de vie restante, comme la foreuse nue).
+
+## Référence avant le chantier survie (28 novembre 2026)
+
+Mesuré avec `outils/pilote.py` (pilote automatique, vrai moteur, une graine par partie, graines 1000 à 1029) sur la branche
+`claude/2026-11-28_Version_astroport-terminaux-hacks`, avant toute règle du chantier (pas de fuel, pas de soin au repos, pas d'arme de
+tir). Deux profils : **prudent** (explore tout ce qui s'atteint sans forer, contourne les groupes calmes, attend l'ennemi au contact, se
+replie sous 30 % de vie, réparobots sous 50 %, mine les éclats sous 75 %, terminaux DATA/HACK/BLUEPRINT/CONNEXION, FABLAB → réparobots)
+et **fonceur** (connaît la position du site, y va droit en forant au besoin, frappe tout ce qui est au contact ou en travers, ne se
+soigne pas). Deux séries de 30 parties par profil : **normale** (la foreuse meurt) et **immortelle** (`--immortel` : à 0, la vie
+repart au maximum, les pertes restent comptées ; seule façon de mesurer la durée de chaque niveau sans biais de survie).
+Commandes : `python3 outils/pilote.py tout 30 2` puis la même avec `--immortel` (≈ 10 min chacune sur 2 processeurs).
+
+### Issue des parties (série normale, 30 par profil)
+
+| | Noyau atteint | Mort au niv. 1 | Mort au niv. 2 | Mort au niv. 3 | Bloquée |
+|---|---|---|---|---|---|
+| Prudent | 8 (27 %) | 2 | 13 | 6 | 1 |
+| Fonceur | 1 (3 %) | 3 | 20 | 6 | 0 |
+
+Tueurs principaux : prudent, artilleur (9), crabot (5), broyeur (2), sentinelle (2) ; fonceur, mines (7, niveau 2), crabot (9), artilleur (5).
+Le **niveau 2** (cavernes) concentre les morts : 13 prudents sur 28 arrivés et 20 fonceurs sur 27.
+
+### Durée réelle d'un niveau, en battements (réponse à la question ouverte de `arbitrage-survie.md`)
+
+Série immortelle, parties finies (médiane, 1er décile – 9e décile) :
+
+| | Niveau 1 (Astroport) | Niveau 2 (cavernes) | Niveau 3 (base) | Partie entière |
+|---|---|---|---|---|
+| Prudent | **1 216** (1 033 – 2 396) | **872** (626 – 1 243) | **915** (723 – 1 668) | **3 187** (2 548 – 5 640) |
+| Fonceur | **609** (214 – 1 441) | **847** (213 – 1 335) | **637** (143 – 1 403) | **2 079** (1 243 – 3 121) |
+
+Série normale (survivants seulement, biaisé vers les parties courtes) : prudent 1 216 / 808 / 808, partie gagnée 2 724 ; fonceur 594 / 223 / 712.
+Le prudent explore 99 % / 99 % / 95 % des cases praticables ; le fonceur 50 % / 57 % / 52 % (il explore quand le site est fermé).
+Les longues queues du niveau 1 (jusqu'à 4 300) viennent d'Astroports très étendus que le prudent visite en entier.
+
+### Vie, par niveau (série immortelle, moyenne par partie)
+
+| | Niv. 1 | Niv. 2 | Niv. 3 |
+|---|---|---|---|
+| Prudent : vie perdue | 95 | 318 | 257 |
+| Prudent : vie rendue (éclats + réparobots + station) | 76 (54 + 22) | 208 (70 + 138) | 226 (87 + 127 + 12) |
+| Prudent : groupes affrontés / sur la carte | 4,7 / 8,6 | 11,3 / 11,4 | 11,2 / 12,2 |
+| Prudent : vie perdue par groupe affronté (moy., 9e décile) | 14 (30) | 27 (55) | 20 (53) |
+| Prudent : « aurait été détruite » (parties sur 30) | 1 | 13 | 10 |
+| Fonceur : vie perdue | 57 | 167 | 127 |
+| Fonceur : vie rendue (éclats ramassés en route) | 2 | 5 | 4 |
+| Fonceur : vie perdue par groupe affronté (moy., 9e décile) | 10 (20) | 25 (59) | 17 (41) |
+
+Vie restante avant chaque descente (série normale, médiane) : prudent 92 puis 78 ; fonceur 50 puis 34. Le mini-jeu des mines (2 → 3)
+coûte 9 à 11 de vie en moyenne au pilote (évitement simple). Énergie : le prudent ne reste presque jamais à 0 (2 à 7 battements par
+niveau) ; le fonceur, qui fore en ligne droite, y passe 30 à 40 battements par niveau. Matière gagnée par le prudent : 194 / 87 / 111
+(l'Astroport est de loin le plus riche) ; terminaux utilisés 5,1 / 3,2 / 3,8 ; hacks 2,2 / 2,2 / 2,9 ; plans 2,2 / 2,2 / 2,9 ;
+FABLAB 1 par niveau.
+
+### Les rythmes arbitrés face à ces durées
+
+| Rythme arbitré | Ce qu'il donne sur un niveau médian du prudent (1 216 / 872 / 915 battements) | Sur la partie |
+|---|---|---|
+| Fuel : 1 point / 12 battements, réserve 100 (1 200 battements) | 101 / 73 / 76 points consommés | 266 points pour une partie médiane (3 187 battements), 470 au 9e décile |
+| Fuel : 4 gisements de +15/+20/+25 par carte, +30 par descente | ≈ +80 par carte si tout est miné | 100 + 3 × 80 + 2 × 30 = **400 points** disponibles (4 800 battements) |
+| Vie : +1 / 20 battements en marche | +61 / +44 / +46 | ≈ +160, contre 670 de vie perdue |
+| Vie : +1 / 4 battements au repos | un plein (100) = 400 battements = 33 points de fuel | combler le déficit des niveaux 2 et 3 (≈ 140) ≈ 560 battements, 47 points de fuel |
+
+Le tableau des cibles de `boucle-amelioration.md` n'a pas pu être rempli : ce document du projet claude.ai n'était pas lisible
+depuis la session qui a fait ces mesures (voir le rapport du bloc A). Toutes les grandeurs qu'il demande sont dans
+`pilote.py --json` (par partie et par niveau).

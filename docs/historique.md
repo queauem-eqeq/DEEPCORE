@@ -376,3 +376,9 @@ Ce qui a été remplacé, et pourquoi (demandes de l'utilisateur, « chaque mach
   F468…, `np-unite`), ferrailleuses qui prennent notre vaisseau pour épave après l'entrée au dépôt. Lignes d'ambiance des hacks
   réécrites sans « je ». « F.376 mkII » devient « mkIII » et les épaves ne sont « mkIV » qu'à partir du n° 456 (accord avec les
   journaux des anciennes unités).
+
+## 28 novembre 2026 — chantier survie, bloc A : pilote automatique
+- `outils/pilote.py` (+ `outils/scripts/pilote.js`) joue des parties entières, profils prudent et fonceur, pour mesurer avant/après
+  chaque règle du chantier survie (fuel, repos, tir). Aucune règle changée. Référence : `mesures.md`, « Référence avant le chantier survie ».
+- Trouvé en passant, **non corrigé** (bloc sans changement de jeu) : `fxGrains` n'est défini nulle part dans `src/` ; ramasser des
+  éclats blessé, utiliser des réparobots ou une station lève une erreur après le soin (la fin du geste est sautée). Le pilote la contourne.
