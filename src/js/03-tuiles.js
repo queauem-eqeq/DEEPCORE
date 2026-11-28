@@ -323,7 +323,7 @@ const BEASTS=[
      "..11........11..",
      "................",
      "................"]},
-  {n:'Englueur',key:'englueur',nb:2,role:'Crache de la glu jusqu’à 4 cases et garde ses distances : '+NOM_FOREUSE+' avance deux fois moins vite pendant 3 battements',dpas:100,dcoup:100,pv:18,dmin:2,dmax:2,pre:75,def:10,crit:0,glu:4,cadence:3,recul:2,
+  {n:'Englueur',key:'englueur',nb:2,role:'Crache de la glu jusqu’à 4 cases et garde ses distances : '+NOM_FOREUSE+' avance deux fois moins vite pendant 6 battements',dpas:100,dcoup:100,pv:18,dmin:2,dmax:2,pre:75,def:10,crit:0,glu:4,cadence:3,recul:2,
    rows:["................",
      "................",
      "................",

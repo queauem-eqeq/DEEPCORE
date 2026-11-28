@@ -150,7 +150,7 @@ Ajoutées à la fin de `BEASTS` (tuiles `bz6` à `bz10`, dessins de départ). St
 | **Artilleur** | Laser à 5 cases, 4-7 dégâts | `cadence:2` (un tir tous les deux battements), `recul:2` (s'écarte quand la foreuse est à 2 cases) |
 | **Drone** | Pas et coup très rapides (50) : il charge et frappe deux fois par battement ; fragile, en essaim | `vol` : gouffres et eau ne l'arrêtent pas ; partage ce qu'il voit avec sa bande |
 | **Soudeur** | Soutien | `soin:5`, `portee:4` : répare l'allié le plus abîmé à portée ; `recul:1` : fuit le contact |
-| **Englueur** | Contrôle | `glu:4` : une **boule de glu** (tuile « glu », plus un trait de laser) tous les 3 battements englue la foreuse 3 battements (pas deux fois plus longs) ; **la foreuse engluée prend la couleur bio** ; garde ses distances |
+| **Englueur** | Contrôle | `glu:4` : une **boule de glu** (tuile « glu », plus un trait de laser) tous les 3 battements englue la foreuse **6 battements** (3 avant le 28 novembre 2026 ; pas deux fois plus longs, `GLU_DUREE`) ; **une masse de glu bio, cernée de noir, noie le bas de la foreuse** (`GLU_SUR`, `14d-objets.js` ; avant, une simple teinte bio qui se confondait avec ses couleurs) ; garde ses distances |
 
  Essais : `outils/scripts/test-ennemis.js`.
 

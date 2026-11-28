@@ -433,6 +433,9 @@ const fumDedans=()=>!!(G.fum&&G.fum[idx(G.px,G.py)]);
 
 /* ----- La foreuse change d'allure : immobilisée (damier bio / bâti), engluée (teinte bio), camouflée (trame), en surrégime (rouge) ----- */
 const ROBOT_VAR=new WeakMap();
+const GLU_SUR=["................","................","................","................","................",
+  "..22........22..","..22........22..",".222........222.",".222........222.","2222........2222","222w2......2w222",
+  "2222222002222222","22w2222222222w22","2222222222222222","222222w222222222",".22.222..222.22."];
 function robotTuile(){const base=TL['robot_'+(G.face||'u')],E=G.eff||{};
   // tenue par un Bloqueur, donc immobilisée : le même damier bio / bâti qu'un ennemi étourdi (22 novembre 2026)
   if(base&&tenuPar())return tuileEtourdie(base);
@@ -440,6 +443,12 @@ function robotTuile(){const base=TL['robot_'+(G.face||'u')],E=G.eff||{};
   const col=mode==='glu'?PAL['2']:mode==='camo'?PAL['3']:(PAL['4']||'#ff3b3b'),cle=mode+col;let m=ROBOT_VAR.get(base);if(!m){m={};
     ROBOT_VAR.set(base,m);}if(m[cle])return m[cle];
   const c=document.createElement('canvas');c.width=c.height=16;const x=c.getContext('2d');x.drawImage(base,0,0);
+  // engluée (28 novembre 2026) : une masse de glu qui noie le bas de la foreuse et coule de ses flancs, au lieu d'une simple teinte
+  // un liseré noir autour de la glu la détache du corps de la foreuse, qui porte déjà la couleur bio
+  if(mode==='glu'){const sur=(i,j)=>i>=0&&j>=0&&i<16&&j<16&&GLU_SUR[j][i]!=='.';
+    for(let j=0;j<16;j++)for(let i=0;i<16;i++){const ch=GLU_SUR[j][i];if(ch==='.')continue;
+      const bord=!sur(i-1,j)||!sur(i+1,j)||!sur(i,j-1)||!sur(i,j+1);
+      x.fillStyle=ch==='w'?'#ffffff':(ch==='0'||bord)?'#020605':col;x.fillRect(i,j,1,1);}return m[cle]=c;}
   try{const im=x.getImageData(0,0,16,16),p=im.data,n=parseInt(col.slice(1),16),R=n>>16&255,Gv=n>>8&255,B=n&255;
     for(let j=0;j<16;j++)for(let i=0;i<16;i++){const q=(j*16+i)*4;if(!p[q+3])continue;const noir=p[q]+p[q+1]+p[q+2]<40;
       if(mode==='camo'){if(noir||(i+j)%2)p[q+3]=0;else{p[q]=R;p[q+1]=Gv;p[q+2]=B;}}

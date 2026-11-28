@@ -548,15 +548,16 @@ function effTick(){const E=G.eff;if(!E||G.over)return;
    puis explose 2 à 3 battements plus tard (22 novembre 2026 ; avant 1 à 3 : à 1, elle sautait au battement suivant, sans
    laisser le temps de réagir). L'explosion frappe un carré de 3 × 3 centré sur elle, plus 5 cases tirées au hasard parmi
    les 12 qui le bordent par un côté (22 novembre 2026, voir zoneBoom) : la foreuse et toute créature qui s'y trouve. Ses dégâts sont ceux de sa fiche (dégâts min et max du Bestiaire). Détruite avant, elle n'explose pas. */
-/* Englueur (21 novembre 2026) : un jet de glu à distance. S'il touche, la foreuse est engluée 3 battements (pas deux fois plus
-   longs, voir stepDur) ; le jet lui-même ne blesse pas. */
+/* Englueur (21 novembre 2026) : un jet de glu à distance. S'il touche, la foreuse est engluée GLU_DUREE battements (pas deux
+   fois plus longs, voir stepDur) ; le jet lui-même ne blesse pas. 3 battements jusqu'au 28 novembre 2026, 6 depuis. */
+const GLU_DUREE=6;
 function glue(b,sp){const ch=hitChance(sp.pre,robotDef());engage();if(G.px!==b.x)b.dir=Math.sign(G.px-b.x);SFX.drift();
   // une boule de glu, plus un trait de laser (22 novembre 2026)
   const rate=!roll(ch),an=Math.random()*Math.PI*2,r=rate?.8:0;
     addFx({kind:'boule',ax:b.x,ay:b.y,bx:G.px+Math.cos(an)*r,by:G.py+Math.sin(an)*r,dur:320});
   if(rate){sayMore(`${LeNom(sp)} crache sa glu et rate (${ch} %).`);return;}
-  G.eff=G.eff||{};G.eff.glu=Math.max(G.eff.glu||0,3);addFx({kind:'num',x:G.px,y:G.py,txt:'glu',col:PAL['2'],dur:900});
-    sayMore(`${LeNom(sp)} englue ${NOM_FOREUSE} : il avance deux fois moins vite pendant 3 battements.`,'warn');}
+  G.eff=G.eff||{};G.eff.glu=Math.max(G.eff.glu||0,GLU_DUREE);addFx({kind:'num',x:G.px,y:G.py,txt:'glu',col:PAL['2'],dur:900});
+    sayMore(`${LeNom(sp)} englue ${NOM_FOREUSE} : il avance deux fois moins vite pendant ${GLU_DUREE} battements.`,'warn');}
 /* Zone d'une explosion (mine, charge sismique ; 22 novembre 2026) : le carré de 3 × 3 centré sur (x, y), plus 5 cases tirées
    au hasard parmi les 12 qui le bordent par un côté (les coins du 5 × 5, qui ne le touchent que par un angle, en sont exclus).
    Rend une liste de [x, y] ; dansZone teste une case. L'effet « boom » reçoit la même liste pour dessiner les flammes. */
