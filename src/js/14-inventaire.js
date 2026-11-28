@@ -11,7 +11,10 @@
    Consommables (conso) : usage unique, empilés (n exemplaires sur une ligne).
    Dessins : art = lignes de caractères ; col = même grille, une couleur par caractère
              (w blanc · 1 accent · 2 bio · 3 monde · e énergie · r rouge · d gris · . couleur du texte). */
-const SLOTS={arme:{n:1,nom:'Arme',g:'/'},armure:{n:1,nom:'Armure',g:'['},acc:{n:3,nom:'Accessoire',g:'='}};
+/* Emplacements (28 novembre 2026, bloc D du chantier « Survie ») : l'arme de forage, l'arme de tir, l'armure et 5 objets équipables
+   (« acc », 3 jusqu'au 28 novembre 2026). Les hacks ont leurs emplacements à part (14g). Une ancienne partie qui en porterait plus
+   que la limite garde tout (rien n'est retiré) : on ne peut simplement plus en équiper d'autre avant d'être repassé sous la limite. */
+const SLOTS={arme:{n:1,nom:'Arme de forage',g:'/'},tir:{n:1,nom:'Arme de tir',g:'}'},armure:{n:1,nom:'Armure',g:'['},acc:{n:5,nom:'Accessoire',g:'='}};
 // libellé, sens favorable (+1 : plus c'est haut mieux c'est ; −1 : l'inverse), unité
 const MODS={degats:['DEG',1,''],pre:['PRE',1,''],crit:['CRIT',1,' %'],def:['DEF',1,''],pas:['Pas',-1,''],capteur:['EYE',1,''],
   power:['POW',1,''],vieMax:['Vie max',1,''],energieMax:['Énergie max',1,''],dis:['DIS',-1,''],detec:['DET',1,''],coup:['Coup',-1,'']};
@@ -87,10 +90,10 @@ const ITEMS={
 // Objets donnés au départ, non équipés (phase d'essai : plus tard ils se trouveront au sol ou sur les ennemis).
 // Le second terme est le nombre d'exemplaires d'un consommable : ils s'empilent sur une seule ligne (« ×2 »).
 // 22 novembre 2026 : plus rien n'est donné au départ, sauf l'outil et la coque. Tout se trouve ou se fabrique (14d-objets).
-const INV_TEST=[['foreuse'],['usine']];
+const INV_TEST=[['foreuse'],['usine'],['canon']];   // le canon : arme de tir de base (28 novembre 2026)
 // la foreuse est l'arme de départ, déjà équipée (ses modificateurs sont nuls : ce sont les stats de base) ;
 // la Coque d'usine est l'armure de départ, déjà équipée elle aussi : sa DEF +10 est comprise dans le def:10 de départ (07-generation)
-const invTest=()=>INV_TEST.map(([k,n])=>n?{k,eq:0,n}:{k,eq:k==='foreuse'||k==='usine'?1:0});
+const invTest=()=>INV_TEST.map(([k,n])=>n?{k,eq:0,n}:{k,eq:k==='foreuse'||k==='usine'||k==='canon'?1:0});
 // partie commencée avant un ajout d'objets : on complète le sac, et il y a toujours une arme en main
 // Les armes et armures retirées le 16 novembre 2026 n'ont plus aucune trace dans le code (19 novembre 2026) : ni dessin, ni modificateur.
 // les clés sont des objets du sac (21 novembre 2026), plus un compteur
@@ -105,6 +108,8 @@ function invMigre(){if(G.st&&G.st.cles>0){const o=G.inv.find(o=>o.k==='cle');if(
   if(!G.inv.some(o=>o.eq&&ITEMS[o.k].slot==='arme'))G.inv.find(o=>o.k==='foreuse').eq=1;
   // la Coque d'usine est portée d'origine : son DEF +10 est déjà compris dans les stats de départ, donc on la marque équipée sans appliquer son effet
   if(!G.inv.some(o=>o.eq&&ITEMS[o.k].slot==='armure'))G.inv.find(o=>o.k==='usine').eq=1;
+  // partie d'avant l'arme de tir (28 novembre 2026) : le canon a été ajouté plus haut ; il prend la main s'il n'y a aucune arme de tir
+  if(!G.inv.some(o=>o.eq&&ITEMS[o.k].slot==='tir'))G.inv.find(o=>o.k==='canon').eq=1;
   /* Partie d'avant le 26 novembre 2026 : la VIT en base 5 devient une durée de pas en base 100. On ne convertit pas
      le total (il dériverait au premier objet retiré) : on recalcule le modificateur à partir de l'équipement porté,
      ce qui donne exactement ce que la nouvelle règle aurait produit. La clé est effacée, donc cela ne se rejoue pas. */
@@ -123,11 +128,12 @@ function artHTML(d){return d.art.map((l,y)=>{let h='',x=0;const m=d.col[y]||'';
 const signe=v=>(v>0?'+':'−')+Math.abs(v);
 // « DEG +4 » ; la durée du coup se lit mieux en clair : « coup rapide (75) », 100 étant le coup ordinaire
 const modLib=(k,v)=>k==='coup'?`coup ${v<0?'rapide':'lent'} (${DUR.coup+v})`:`${MODS[k][0]} ${signe(v)}${MODS[k][2]}`;
-function modHTML(d){if(d.base)return 'Arme de référence : pas de modificateur';
-  if(d.hack||d.sonar)return `<span style="color:var(--c1)">${d.eff}</span>`;   // hack (14g), Sonar (14d) : son effet chiffré
+function modHTML(d){if(d.slot==='tir'&&typeof tirFicheHTML==='function')return tirFicheHTML(d);   // arme de tir (14m) : dégâts, énergie, portée
+  if(d.base)return 'Arme de référence : pas de modificateur';
+  if(d.hack||d.sonar||d.sil)return `<span style="color:var(--c1)">${d.eff}</span>`;   // hack (14g), Sonar (14d) : son effet chiffré
   if(d.conso)return `<span style="color:var(--c1)">${d.eff}</span> · usage unique`;
   return Object.entries(d.mod||{}).map(([k,v])=>`<span style="color:${v*MODS[k][1]>0?'var(--c1)':'var(--life)'}">${modLib(k,v)}</span>`).join(' · ');}
-const modTxt=d=>d.hack||d.sonar?d.eff:Object.entries(d.mod||{}).map(([k,v])=>modLib(k,v)).join(', ');
+const modTxt=d=>d.slot==='tir'&&typeof tirFicheTxt==='function'?tirFicheTxt(d):d.hack||d.sonar||d.sil?d.eff:Object.entries(d.mod||{}).map(([k,v])=>modLib(k,v)).join(', ');
 const typeNom=d=>d.conso?'Consommable':d.hack?'Hack '+HACK_FAM[d.fam].n.toLowerCase():SLOTS[d.slot].nom;
 const accord=d=>(d.f?'e':'')+(d.pl?'s':'');   // « équipée », « utilisés »
 // total apporté par l'équipement porté sur une stat (sert à colorer le panneau Statistiques)
@@ -144,9 +150,10 @@ const invCount=s=>G.inv.filter(o=>o.eq&&ITEMS[o.k].slot===s).length;
    qui est PORTÉ (o.eq) est gratuit. S'équiper libère donc une place, se déséquiper en reprend une (refusé si le sac est plein).
    La grille du FABLAB (4 rangées de 5 carrés) montre ces vingt places, classées par type. */
 const SAC_MAX=20;
-const sacPlaces=()=>G.inv.reduce((t,o)=>t+(o.eq?0:(o.n||1)),0);   // places occupées : un par exemplaire transporté
+const sacPlaces=()=>G.inv.reduce((t,o)=>t+(o.eq||(ITEMS[o.k]&&ITEMS[o.k].fixe)?0:(o.n||1)),0);   // le canon (fixe) ne prend jamais de place   // places occupées : un par exemplaire transporté
 // ordre de la fenêtre : l'équipement, puis les hacks actifs, puis les hacks transportés (14g)
-const invRang=o=>ITEMS[o.k].hack?(o.eq?1:2):0;
+const INV_ORD={arme:0,tir:1,armure:2,acc:3};
+const invRang=o=>ITEMS[o.k].hack?(o.eq?11:12):o.eq?(INV_ORD[ITEMS[o.k].slot]??4):10;   // porté (forage, tir, armure, objets), transporté, hacks
 const invEquipables=()=>G.inv.map((o,i)=>i).filter(i=>!ITEMS[G.inv[i].k].conso).sort((a,b)=>invRang(G.inv[a])-invRang(G.inv[b])||a-b);
 const invConsos=()=>G.inv.map((o,i)=>i).filter(i=>ITEMS[G.inv[i].k].conso);
 function invFix(){const l=invEquipables();if(!l.length){INV_SEL=-1;return;}if(!l.includes(INV_SEL))INV_SEL=l[0];}
@@ -155,6 +162,7 @@ let INV_SEL=0,INV_H=null,INV_MSG=null;   // INV_MSG : dernier message, répété
 function invSay(m,c){say(m,c);INV_MSG={m,c:c||''};}
 function invChanged(){robotTiles();computeFOV();turnStealth();render();}
 const ARME_FIXE='Il faut toujours une arme en main : équipez-en une autre pour la remplacer.';
+const CANON_FIXE='Le canon est l’arme de tir de base : il reste en place tant qu’aucune autre arme de tir ne le remplace.';
 // consommables offensifs : ennemis à r cases ou moins, et onde de choc
 const invCibles=r=>[...(G.beasts||[]),...(G.animals||[])].filter(o=>Math.max(Math.abs(o.x-G.px),Math.abs(o.y-G.py))<=r);
 /* Visée d'un consommable (16 novembre 2026 pour la charge sismique, 22 novembre pour tous).
@@ -233,10 +241,14 @@ function invEquip(i){const o=G.inv[i];if(!o||G.over)return;const d=ITEMS[o.k],e=
     consoTemps();invChanged();return;}   // un consommable coûte un battement (16 novembre 2026)
   if(d.hack&&!o.eq){const r=hackRefus(o);if(r){invSay(r,'warn');SFX.blocked();render();return;}}   // emplacements de hack, un seul Noyau (14g)
   if(o.eq){if(d.slot==='arme'){invSay(ARME_FIXE,'warn');SFX.blocked();render();return;}
+    if(d.fixe){invSay(CANON_FIXE,'warn');SFX.blocked();render();return;}
     // retiré, l'objet est transporté : il prend une place (26 novembre 2026)
     if(sacPlaces()>=SAC_MAX){invSay(`Inventaire plein (${SAC_MAX}/${SAC_MAX}) : ${d.n} retiré${e} n’aurait plus sa place. Jetez quelque chose d’abord.`,'warn');
       SFX.blocked();render();return;}
-    invApply(o,-1);o.eq=0;invSay(`${d.n} retiré${e}.`);SFX.door();invChanged();return;}
+    invApply(o,-1);o.eq=0;
+    // une arme de tir retirée : le canon de base reprend sa place (28 novembre 2026)
+    if(d.slot==='tir'){const c=G.inv.find(p=>ITEMS[p.k].fixe&&ITEMS[p.k].slot==='tir');if(c){c.eq=1;invSay(`${d.n} retiré${e} : le canon reprend sa place.`);SFX.door();invChanged();return;}}
+    invSay(`${d.n} retiré${e}.`);SFX.door();invChanged();return;}
   const sl=SLOTS[d.slot];let rem='';
   if(invCount(d.slot)>=sl.n){
     if(sl.n>1){invSay(`Les ${sl.n} emplacements d’accessoire sont pris : retirez-en un d’abord.`,'warn');SFX.blocked();render();return;}
@@ -263,7 +275,9 @@ function caseSol(x0,y0,soi){const sansObjet=i=>!(G.items&&G.items[i]&&G.items[i]
 const caseJet=()=>caseSol(G.px,G.py,false);
 function invDrop(i){const o=G.inv[i];if(!o||G.over)return;const d=ITEMS[o.k];
   if(o.eq&&d.slot==='arme'){invSay(ARME_FIXE,'warn');SFX.blocked();render();return;}
-  if(o.eq){invApply(o,-1);o.eq=0;}
+  if(d.fixe){invSay('Le canon fait partie de l’unité : il ne se jette pas.','warn');SFX.blocked();render();return;}
+  if(o.eq){invApply(o,-1);o.eq=0;
+    if(d.slot==='tir'){const c=G.inv.find(p=>ITEMS[p.k].fixe&&ITEMS[p.k].slot==='tir');if(c)c.eq=1;}}
   invTake(i);
   const c=caseJet();G.items=G.items||{};(G.items[c]=G.items[c]||[]).push(o.k);
   invSay(`${d.n} jeté${accord(d)} au sol.`);SFX.thud();invChanged();}
@@ -352,7 +366,7 @@ function statInfo(k){const st=G.st,A=eqDe('arme')||null,B=eqDe('armure')||null,L
   if(k==='pas'){const v=G.t[idx(G.px,G.py)];if(G.sprint)L.push(['En courant',fois(SPRINT_MULT)]);if(SLOW[v])L.push([v===DEEP?'En eau profonde : pas plus lents':'Dans l’eau : pas plus lents',fois(SLOW[v])]);
     if(G.eff&&G.eff.glu>0)L.push(['Engluée : pas plus lents',fois(2)]);}
   if(k==='dis'){let w=0;for(const [dx,dy] of DIRS){const x=G.px+dx,y=G.py+dy;if(x<0||y<0||x>=W||y>=H)continue;const v=G.t[idx(x,y)];if(v===ROCK||v===MOUNT||bati(v))w++;}
-    if(lastAct==='dig')L.push(['Vient de forer',fois(DIG_MULT)]);if(lastAct==='wait')L.push(['À l’arrêt',fois(.5)]);
+    if(lastAct==='dig')L.push(['Vient de forer',fois(typeof digMult==='function'?digMult():DIG_MULT)]);if(lastAct==='tir'&&typeof tirMult==='function')L.push(['Vient de tirer',fois(tirMult())]);if(lastAct==='wait')L.push(['À l’arrêt',fois(.5)]);
     if(G.t[idx(G.px,G.py)]===FLAT)L.push(['Dans les herbes basses',fois(.5)]);
     if(w)L.push([`Contre ${w} paroi${w>1?'s':''}`,signe(-Math.min(Math.ceil(w/2),WALL_MAX))]);if(lastRun)L.push(['En courant',signe(SPRINT_NOISE)]);}
   const c=statVal(k,st,A,B,0);return {t:ST_DEF[k][0],d:ST_DEF[k][1],l:L,tot:(c[1]??c[0])+u};}
@@ -376,12 +390,17 @@ function statsHTML(o){const H=invHyp(o),A=eqDe('arme')||null,B=eqDe('armure')||n
 /* Fenêtre plein écran (comme le Tile editor) : la liste à gauche, la fiche de l'objet choisi à droite. */
 function invHTML(){const inv=G.inv||[],liste=invEquipables();invFix();
   const cnt=s=>`${SLOTS[s].nom} <b>${invCount(s)}/${SLOTS[s].n}</b>`;
-  let h=`<div class="iwrap"><div class="ileft"><div class="islots"><span>${cnt('arme')}</span><span>${cnt('armure')}</span><span>${cnt('acc')}</span></div>`;
+  let h=`<div class="iwrap"><div class="ileft">`;
   const ligne=i=>{const o=inv[i],d=ITEMS[o.k],c=d.hack?` style="--hk:${HACK_FAM[d.fam].v}"`:'';
-    return `<button class="it${o.eq?' eq':''}${d.hack?' hk':''}${i===INV_SEL?' sel':''}" data-i="${i}" role="option" aria-selected="${i===INV_SEL}"${c}><i>${SLOTS[d.slot].g}</i><span>${d.n}</span><em>${typeNom(d)}</em><em class="st">${o.eq?(d.hack?'actif':'équipé'):''}</em></button>`;};
-  const eqL=liste.filter(i=>!ITEMS[inv[i].k].hack);
-  h+=eqL.length?`<div class="ilist" role="listbox" aria-label="Équipement">${eqL.map(ligne).join('')}</div>`
-    :'<p class="inone">Aucun équipement.</p>';
+    return `<button class="it${o.eq?' eq':''}${d.hack?' hk':''}${i===INV_SEL?' sel':''}" data-i="${i}" role="option" aria-selected="${i===INV_SEL}"${c}><i>${SLOTS[d.slot].g}</i><span>${d.n}</span><em>${typeNom(d)}</em><em class="st">${o.eq?(d.hack?'actif':'équipé'):d.fixe?'réserve':''}</em></button>`;};
+  /* 28 novembre 2026 (bloc D) : un cadre par emplacement, comme les hacks — FOREUSE, TIR, ARMURE, puis les 5 objets équipables ;
+     sous eux, l'équipement transporté. */
+  {const porte=s=>liste.filter(i=>!ITEMS[inv[i].k].hack&&inv[i].eq&&ITEMS[inv[i].k].slot===s),vide='<div class="hkvide">EMPLACEMENT LIBRE</div>';
+    const cadre=(t,s,n)=>{const l=porte(s);let c=`<div class="ihk ieq"><div class="ihkh">${t}${n>1?` <b>${l.length}/${n}</b>`:''}</div><div class="ilist ihks" role="listbox" aria-label="${t}">`;
+      for(let k=0;k<Math.max(n,l.length);k++)c+=k<l.length?ligne(l[k]):vide;return c+'</div></div>';};
+    h+=cadre('FOREUSE','arme',1)+cadre('TIR','tir',1)+cadre('ARMURE','armure',1)+cadre('OBJETS','acc',SLOTS.acc.n);
+    const tr=liste.filter(i=>!ITEMS[inv[i].k].hack&&!inv[i].eq);
+    h+=`<div class="ihk ieq"><div class="ihkh">TRANSPORTÉ</div>${tr.length?`<div class="ilist" role="listbox" aria-label="Équipement transporté">${tr.map(ligne).join('')}</div>`:'<p class="inone">Aucun équipement transporté.</p>'}</div>`;}
   // Section HACKS (28 novembre 2026, 14g) : un cadre par emplacement, le hack actif dedans ; puis les hacks transportés
   {const act=liste.filter(i=>ITEMS[inv[i].k].hack&&inv[i].eq),res=liste.filter(i=>ITEMS[inv[i].k].hack&&!inv[i].eq),N=SLOTS.hack.n;
     h+=`<div class="ihk"><div class="ihkh">HACKS <b>${act.length}/${N}</b></div><div class="ilist ihks" role="listbox" aria-label="Hacks">`;

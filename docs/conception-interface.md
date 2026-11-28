@@ -233,11 +233,19 @@ animaux tournés à gauche, 2ᵉ image de l'eau profonde).
 dans `np-tiles` ; « Enregistrer » les écrit dans la base et en fait la nouvelle référence (`np-tiles-base`).
 Codes des motifs : `CLAUDE.md`.
 
+### Visée de l'arme de tir (28 novembre 2026)
+
+G ou le bouton **TIR** (à côté de JOURNAL) ouvre la visée sur l'ennemi le plus proche ; Tab / Maj+Tab changent de cible, les
+flèches déplacent le viseur, Entrée ou G tire, Échap annule ; la souris vise et un clic tire ; au doigt, un appui vise, un second
+sur la même case tire. Viseur habituel couleur accent et pointillé blanc **opaque** jusqu'à la cible ; case impossible : viseur rouge
+barré du phaseur. Le bouton TIR est allumé pendant la visée ; la fiche de la case visée s'affiche dans la colonne. Sous les boutons,
+une ligne « CANON · DÉG 4–8 · ÉNER 20 · PORTÉE VUE » (rouge si l'énergie manque). Détail : `conception-joueur.md`, « Arme de tir ».
+
 ### Touches
 
 ZQSD / flèches / pavé numérique : déplacer · A E W C : diagonales · Souris : survol = inspection, clic = y aller ·
 X : inspection au clavier · R : courir / marcher · T : équipement · I : inventaire · O : exploration automatique ·
-J : journal de bord · F : forer · Espace / 5 : attendre · P : repos · V : portée de discrétion · B : brouillard · ! : son · M : mode
+J : journal de bord · G : tir (viser, Tab, Entrée) · F : forer · Espace / 5 : attendre · P : repos · V : portée de discrétion · B : brouillard · ! : son · M : mode
 carte (déplacements = défilement, Maj = plus vite, Échap ou M pour revenir ; Espace / 5 y attendent toujours, pour les
 essais, sans bouger la vue ).
 

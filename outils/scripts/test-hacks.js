@@ -1,5 +1,5 @@
 /* Hacks (28 novembre 2026, 14g) : programmes gratuits choisis parmi 3 au terminal.
-   1. Tirage : chances des familles par tranche de niveaux (2 000 propositions), jamais Tir, jamais deux fois le même.
+   1. Tirage : chances des familles par tranche de niveaux (2 000 propositions), Tir compris depuis le 28 novembre 2026, jamais deux fois le même.
    2. Emplacements : 2, 3, 4, 5 aux niveaux 1, 3, 6, 9 ; le plus profond atteint compte.
    3. Chaque hack Base agit vraiment sur ce qu'il touche ; la colonne Stats et son survol montrent la part du hack.
    4. Un seul exemplaire par sorte, un seul Noyau ; retirer range dans l'inventaire (refusé s'il est plein) ; jeter.
@@ -14,13 +14,13 @@
   const neuf=()=>{carte('atterrissage');G.inv=G.inv.filter(o=>!estHack(o.k));};
   const met=k=>{const o={k,eq:0};G.inv.push(o);invEquip(G.inv.indexOf(o));return o;};
   // 1. tirage
-  for(const [niv,att] of [[1,{base:100,noyau:0}],[5,{base:90,noyau:10}],[8,{base:60,noyau:40}]]){
+  for(const [niv,att] of [[1,{base:85,tir:15,noyau:0}],[5,{base:50,tir:40,noyau:10}],[8,{base:25,tir:35,noyau:40}]]){   // Tir proposé depuis le bloc D (28 novembre 2026)
     carte('atterrissage');G.niv=niv;G.inv=G.inv.filter(o=>!estHack(o.k));const n={base:0,tir:0,noyau:0};let dbl=0,rang=true,N=0;
     for(let k=0;k<700;k++){const l=hackTirage(niv,3);if(new Set(l.map(c=>ITEMS[c].hk)).size!==l.length)dbl++;
       for(const c of l){n[ITEMS[c].fam]++;N++;if(ITEMS[c].fam!=='noyau'&&ITEMS[c].rang!==niv)rang=false;}}
     const p=f=>Math.round(n[f]/N*1000)/10;
-    ok(n.tir===0&&dbl===0&&rang&&Math.abs(p('base')-att.base)<4&&Math.abs(p('noyau')-att.noyau)<4,
-      `tirage niveau ${niv} (${N} propositions) : Base ${p('base')} %, Noyau ${p('noyau')} % (visé ${att.base} / ${att.noyau}), Tir ${n.tir}, doublons ${dbl}, rang ${rang?'= niveau':'FAUX'}`);}
+    ok(Math.abs(p('tir')-att.tir)<4&&dbl===0&&rang&&Math.abs(p('base')-att.base)<4&&Math.abs(p('noyau')-att.noyau)<4,
+      `tirage niveau ${niv} (${N} propositions) : Base ${p('base')} %, Noyau ${p('noyau')} % (visé ${att.base} / ${att.noyau}, Tir visé ${att.tir} %), Tir ${p('tir')} %, doublons ${dbl}, rang ${rang?'= niveau':'FAUX'}`);}
   // 2. emplacements
   {const r=[1,2,3,5,6,8,9,10].map(n=>hackPlaces(n));ok(r.join()==='2,2,3,3,4,4,5,5',`emplacements par niveau 1,2,3,5,6,8,9,10 : ${r.join(', ')}`);
     neuf();G.niv=2;G.st.nivMax=6;ok(SLOTS.hack.n===4,`le plus profond atteint compte (niveau 2, déjà 6) : ${SLOTS.hack.n} emplacements`);

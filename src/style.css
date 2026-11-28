@@ -681,3 +681,8 @@ kbd{font-family:var(--mono);color:var(--fg);border:1px solid var(--line);padding
 #jdbBtn.neuf::after{content:'';display:inline-block;width:7px;height:7px;background:var(--c1);margin-left:7px;vertical-align:middle}
 #jnLabEff.conf{color:var(--life);border-color:var(--life)}
 @media (max-width:640px){.jdbwrap{grid-template-columns:1fr;grid-template-rows:auto minmax(120px,40%);overflow:hidden}.jdbliste{order:2}}
+/* Arme de tir (28 novembre 2026, bloc D) : ligne sous les boutons ; cadres d'équipement plus serrés que ceux des hacks */
+.tirinfo{font-size:11px;letter-spacing:.06em;color:var(--dim);margin-top:2px}
+.tirinfo.bas{color:var(--life)}
+.ihk.ieq{margin-top:6px;padding-top:4px}
+.ihk.ieq:first-child{margin-top:0;border-top:0;padding-top:0}

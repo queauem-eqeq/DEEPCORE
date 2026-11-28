@@ -13,11 +13,11 @@
      recyc                          énergie rendue par ennemi détruit (butinMort → hackDetruit) ;
      traque                         rayon où les ennemis en chasse se voient à travers les murs (10-rendu) ;
      symb, sursis, herit            Noyau (voir plus bas) ;
-     tirDeg, tirCout, tirBruit, tirCrit, tirPre   Tir : définis, sans effet tant que l'arme de tir n'existe pas.
+     tirDeg, tirCout, tirBruit, tirCrit, tirPre   Tir : agissent sur l'arme de tir équipée (14m-tir.js, 28 novembre 2026).
    Rang = niveau où le hack est obtenu (1 à 10), valeur tirée de l'échelle HACK_E.
    Emplacements : 2, puis +1 aux niveaux 3, 6 et 9 (le plus profond atteint, G.st.nivMax). Un seul exemplaire équipé de
    chaque sorte, un seul hack Noyau équipé. */
-const TIR_DISPO=false;                       // pas d'arme de tir : les hacks Tir ne sont jamais proposés, leur part va à Base
+const TIR_DISPO=true;                        // arme de tir en jeu depuis le 28 novembre 2026 (bloc D) : les hacks Tir sont proposés
 const HACK_E=[1,2,3,5,6,8,10,12,13,15];      // échelle par rang (CRIT : +1 % au rang 1, +5 % au 4, +10 % au 7, +15 % au 10)
 // chances des familles, par tranche de niveaux (chaque proposition tirée à part)
 const HACK_CHANCES=[[3,{base:85,tir:15,noyau:0}],[6,{base:50,tir:40,noyau:10}],[10,{base:25,tir:35,noyau:40}]];
@@ -96,7 +96,9 @@ function hackTirage(niv,n){niv=Math.max(1,Math.min(HACK_E.length,niv|0||1));cons
 
 /* ----- Effets ----- */
 const noticeCh=()=>NOTICE*Math.max(0,1+((G&&G.st&&G.st.detect)||0)/100);
-const digMult=()=>Math.max(1,DIG_MULT*(1+((G&&G.st&&G.st.bruitDig)||0)/100));
+// forage silencieux (accessoire, 28 novembre 2026) : le bruit du forage est divisé par SIL_DIV, après SOURDINE et son plancher
+const SIL_DIV=2;
+const digMult=()=>Math.max(1,DIG_MULT*(1+((G&&G.st&&G.st.bruitDig)||0)/100))/((G&&G.st&&G.st.silDig>0)?SIL_DIV:1);
 // RECYCLAGE : un ennemi détruit, par n'importe quel moyen, rend de l'énergie (une fois par ennemi)
 function hackDetruit(b){if(!b||b.recy||!G||!G.st||!(G.st.recyc>0))return;b.recy=1;const a=G.st.energie;
   G.st.energie=Math.min(G.st.energieMax,G.st.energie+G.st.recyc);const g=Math.round(G.st.energie-a);

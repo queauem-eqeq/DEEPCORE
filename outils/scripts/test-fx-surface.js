@@ -14,16 +14,20 @@
     boom: { x: x + 1, y: y + 1, cases: [[x + 1, y + 1], [x + 2, y + 1]], dur: 420 }, alerte: { o: b, dur: 900 },
     onde: { x, y, r: 4.5, dur: 600 }, boost: { x, y, dur: 900, gr: gr(14) }, fury: { x, y, dur: 800 }, veil: { x, y, dur: 750 },
     zap: { ax: x - .5, ay: y - .5, bx: x + .5, by: y + .5, dur: 320 },
+    // arme de tir (28 novembre 2026, 14m) : un projectile par arme, et les braises d'une cible qui brûle
+    ...Object.fromEntries(['canon', 'lanceflamme', 'canonglu', 'shotgun', 'laser'].map(a => ['tir:' + a,
+      { arme: a, ax: x, ay: y, bx: x + 4, by: y - 1, vol: 200, dur: 460, g: 3, mur: false, cases: null }])),
+    braise: { x: x + 2, y, dur: 600, g: 7 },
   };
   const out = [];
-  for (const [kind, f] of Object.entries(CAS)) {
+  for (const [cle, f] of Object.entries(CAS)) {const kind = cle.split(':')[0], nom = cle.replace('tir:', 'tir ');
     FX.length = 0; let T = vraiNow(); performance.now = () => T;
     try {
       render(); addFx(Object.assign({ kind }, f)); render();          // rendu complet avec l'effet : garde la copie du décor
       T += f.dur * .4; render(); const plein = h($('view').toDataURL());   // même instant, rendu complet
       const ok = fxSurface(); fxRapide(); const rapide = h($('view').toDataURL());
-      out.push(`${kind.padEnd(7)} ${!ok ? 'ÉCHEC (chemin rapide refusé)' : plein === rapide ? 'ok' : 'ÉCHEC (images différentes)'}`);
-    } catch (e) { out.push(`${kind.padEnd(7)} ÉCHEC ${String(e).slice(0, 120)}`); }
+      out.push(`${nom.padEnd(7)} ${!ok ? 'ÉCHEC (chemin rapide refusé)' : plein === rapide ? 'ok' : 'ÉCHEC (images différentes)'}`);
+    } catch (e) { out.push(`${nom.padEnd(7)} ÉCHEC ${String(e).slice(0, 120)}`); }
   }
   // un effet qui touche le décor doit refuser le chemin rapide
   FX.length = 0; addFx({ kind: 'shake', amp: 5, dur: 220 }); render();

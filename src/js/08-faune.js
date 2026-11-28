@@ -26,9 +26,11 @@ const terrestre=sp=>!sp.nage&&!sp.aqua&&!sp.vol;
    un coup prenait toujours un battement : une créature rapide ne pouvait ni frapper en arrivant, ni frapper deux fois.
    Les tirs sur cadence (laser, glu) deviennent des coups : l'intervalle est dcoup, multiplié par sp.cadence pour la glu. */
 const ficheDe=o=>(G.beasts&&G.beasts.includes(o))?BEASTS[o.sp]:SPECIES[o.sp];
+// englué par le canon à glu (o.glu, 14m-tir) : pas et coups deux fois plus longs
 const dpasDe=(o,sp)=>{sp=sp||ficheDe(o);
-  return Math.max(10,(sp.dpas||100)*slowOf(G.t[idx(o.x,o.y)],eauLibre(sp)));};
-const dcoupDe=(o,sp)=>Math.max(COUP_MIN,((sp||ficheDe(o)).dcoup||100));   // coup 100 au moins (07-generation)
+  return Math.max(10,(sp.dpas||100)*slowOf(G.t[idx(o.x,o.y)],eauLibre(sp))*(o.glu>0?TIR_GLU_X:1));};
+const TIR_GLU_X=2;
+const dcoupDe=(o,sp)=>Math.max(COUP_MIN,((sp||ficheDe(o)).dcoup||100))*(o&&o.glu>0?TIR_GLU_X:1);   // coup 100 au moins (07-generation)
 // Le mot qui dit une durée, pour les fiches et le journal (plus petit, plus rapide), et la cadence : combien de
 // gestes la créature fait pendant une action normale de la foreuse (100 unités).
 const motDuree=d=>d<=50?'très rapide':d<=75?'rapide':d<=100?'normal':d<=150?'lent':'très lent';
@@ -114,7 +116,7 @@ function voitForeuse(o,chasse){
   // camouflage optique : vue seulement au contact (22 novembre 2026)
   if(G.eff&&G.eff.camo>0&&Math.max(Math.abs(o.x-G.px),Math.abs(o.y-G.py))>1)return false;
   const d=Math.hypot(o.x-G.px,o.y-G.py);
-  const bruit=lastAct==='dig';                                          // briser une paroi s'entend à travers les parois
+  const bruit=lastAct==='dig'||lastAct==='tir';                        // briser une paroi s'entend à travers les parois ; un tir aussi (28 novembre 2026)
   if(!bruit&&!los(o.x,o.y,G.px,G.py))return false;
   if(chasse&&!o.lost){
     if(!los(o.x,o.y,G.px,G.py))return false;
@@ -128,7 +130,7 @@ function alerte(o){if(vis[idx(o.x,o.y)])addFx({kind:'alerte',o,dur:900});}
 function spot(o){o.mem=[G.px,G.py];o.search=0;o.stuck=0;o.lost=0;o.sg=null;const dx=Math.sign(G.px-o.x);if(dx)o.dir=dx;}
 /* Chance qu'un ennemi calme vous remarque ce tour-ci (affichée au survol) : plate dans la portée de
    discrétion et en ligne de vue, nulle au-delà. Voir la portée de discrétion dans 09. */
-function detectChance(o){return (Math.hypot(o.x-G.px,o.y-G.py)<=(G.stealth||STEALTH_BASE)&&(lastAct==='dig'||los(o.x,o.y,G.px,G.py)))?Math.round(noticeCh()*100):0;}
+function detectChance(o){return (Math.hypot(o.x-G.px,o.y-G.py)<=(G.stealth||STEALTH_BASE)&&(lastAct==='dig'||lastAct==='tir'||los(o.x,o.y,G.px,G.py)))?Math.round(noticeCh()*100):0;}
 function forget(o){o.mem=null;o.search=0;o.stuck=0;o.lost=0;o.sg=null;}
 // un pas vers la dernière position connue ; renvoie false quand il faut passer à la fouille
 function seekStep(o,fits,DC,m){const [mx,my]=o.mem,k=mx+','+my+','+(m?1:0),d=DC[k]||(DC[k]=distFrom(mx,my,m)),h=d[idx(o.x,o.y)];

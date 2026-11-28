@@ -3,7 +3,7 @@ const EYE_SVG='<svg class="eyeic" viewBox="0 0 11 7" width="22" height="14" shap
 /* ---------- Souris, inspection et déplacement automatique (inspirés de Brogue) ---------- */
 let HOV=null,INSPECT=false,TRAV=null,lastPT='mouse',PC={k:'',p:null};
 // pendant la visée longue du phaseur la foreuse est démontée : aucune action ne doit partir (26 novembre 2026)
-const busy=()=>!G||!!G.over||drilling||!!PHASE||!$('overlay').hidden;
+const busy=()=>!G||!!G.over||drilling||!!PHASE||!!TIR||!$('overlay').hidden;   // TIR : visée de l'arme de tir (14m)
 // créature visible sur une case (les animaux cachés par le brouillard ne bloquent pas le tracé)
 function occupant(x,y){const seenHere=!fog||vis[idx(x,y)];if(!seenHere)return null;const b=beastAt(x,y);
   return (b&&!beastCache(b)?b:null)||animalAt(x,y)||null;}
@@ -186,6 +186,7 @@ cv.addEventListener('pointerdown',ev=>{lastPT=ev.pointerType||'mouse';});
 cv.addEventListener('pointermove',ev=>{if(ev.pointerType==='touch'||!G)return;const c=cellAt(ev);if(c.x<0||c.y<0||c.x>=W||c.y>=H)return;
   if(PHASE){phaseVers(c.x,c.y);phaseSouris(ev);return;}   // visée du phaseur : la vue défile près du bord (28 novembre 2026)
   if(VISEE){viseeVers(c.x,c.y);return;}
+  if(TIR){tirVers(c.x,c.y);return;}
   selSouris(ev);
   if(!HOV||HOV.x!==c.x||HOV.y!==c.y){HOV=c;render();}});
 /* Sélecteur habituel (28 novembre 2026) : comme le viseur du phaseur, la vue défile d'une case vers le bord quand le pointeur
@@ -203,6 +204,8 @@ function selSouris(ev){if(PHASE||freeCam||INSPECT||lastPT==='touch')return;selPt
 cv.addEventListener('pointerleave',()=>{selStop();phasePtr=null;if(INSPECT||lastPT==='touch')return;if(HOV){HOV=null;render();}});
 cv.addEventListener('click',ev=>{if(PHASE){const c=cellAt(ev);phaseVers(c.x,c.y);phaseOk();return;}
   if(VISEE){const c=cellAt(ev);viseeVers(c.x,c.y);viseeOk();return;}
+  // tir : un clic vise et tire ; au doigt, un premier appui vise, un second sur la même case tire
+  if(TIR){const c=cellAt(ev);if(lastPT==='touch'&&(c.x!==TIR.x||c.y!==TIR.y)){tirVers(c.x,c.y);return;}tirVers(c.x,c.y);tirOk();return;}
   if(busy())return;if(EXPL){stopExplore('Exploration interrompue.');return;}if(REST){stopRest('Repos interrompu.');return;
     }if(TRAV){stopTravel('Trajet interrompu.');return;}
   const c=cellAt(ev);if(c.x<0||c.y<0||c.x>=W||c.y>=H)return;
@@ -214,7 +217,7 @@ cv.addEventListener('click',ev=>{if(PHASE){const c=cellAt(ev);phaseVers(c.x,c.y)
 // Fiche complète de la case visée : en tête du panneau « En vue » au survol, dans la colonne en mode viseur.
 /* 28 novembre 2026 : les textes sont le relevé de F467, en jargon machine, sans règle chiffrée ni mode d'emploi ; les
    chiffres restent dans les stats (PV, DÉG, Toucher…) et la ligne d'action. */
-const viseCible=()=>!G?null:PHASE?{x:PHASE.x,y:PHASE.y}:VISEE?{x:VISEE.x,y:VISEE.y}:INSPECT&&HOV?HOV:null;
+const viseCible=()=>!G?null:PHASE?{x:PHASE.x,y:PHASE.y}:VISEE?{x:VISEE.x,y:VISEE.y}:TIR?{x:TIR.x,y:TIR.y}:INSPECT&&HOV?HOV:null;
 const TDESC={[GROUND]:['Sol rocheux','Roche tassée. Praticable. Particules plus denses à l’approche d’une couche profonde.'],
   [ROCK]:['Rocher','Bloc isolé. Gêne le passage, pas les capteurs. Friable.'],
   [MOUNT]:['Montagne','Paroi de massif. Opaque. Forable.'],
@@ -257,7 +260,7 @@ const BEHAV={puce:'Petite unité furtive. Suit à distance, se dérobe au contac
   drone:'Unité volante, légère. Ignore failles et liquides. Arrive en essaim.',
   soudeur:'Unité de maintenance. Remet ses alliés en état et fuit le combat. Cible prioritaire.',
   englueur:'Projette une substance adhésive. Entrave les mouvements. Garde ses distances.'};
-function inspectHTML(c){const {x,y}=c||HOV;if(x<0||y<0||x>=W||y>=H)return '';const vise=!!(PHASE||VISEE);
+function inspectHTML(c){const {x,y}=c||HOV;if(x<0||y<0||x>=W||y>=H)return '';const vise=!!(PHASE||VISEE||TIR);
   const i=idx(x,y),seen=!fog||G.seen[i],see=!fog||vis[i],d=Math.max(Math.abs(x-G.px),Math.abs(y-G.py)),dt=d?`${d} case${d>1?'s':''}`:'ici';
   const head=(ic,n,ex)=>`<div class="ih">${ic?`<img src="${ic}" alt="">`:''}<b>${n}</b><span>${ex||''}</span></div>`;
   if(!seen&&G.ore&&G.ore[i]&&sonarVu(i,sonarR())){const o=G.ore[i];
@@ -284,7 +287,8 @@ function inspectHTML(c){const {x,y}=c||HOV;if(x<0||y<0||x>=W||y>=H)return '';con
       `<div class="kv"><span>PV <b>${hp}/${pvDe(sp)}</b></span><span>DÉG <b>${dmgTxt(sp)}</b></span><span>PRE <b>${sp.pre}</b></span><span>DEF <b>${sp.def+terrModDe(sp,x,y)}</b></span><span title="Durée d’un pas sur cette case : plus petit, plus rapide">PAS <b>${Math.round(dpasDe(occ,sp))}</b></span><span title="Durée d’un coup : 50 frappe deux fois par battement, 200 une fois sur deux">COUP <b>${dcoupDe(occ,sp)}</b></span></div>`,
       (ouv?`<p class="ouvrp">${ouv==='alertée'?'MOBILE EN ARRÊT. ORIENTATION : UNITÉ. PÉRIMÈTRE DE DÉCOUPE FRANCHI.':'MOBILE IGNORE L’UNITÉ. ACTIVITÉ : DÉCOUPE.'} CLASSEMENT MAINTENU : MENACE.</p>`:'')+
       (!ouv&&(isB?!(occ.hunt>0):!occ.mode)?`<p class="eye" title="Chance qu’il vous repère à chaque tour">${EYE_SVG} <b>${detectChance(occ)} %</b></p>`:''),
-      `<p>Toucher <b style="color:${chanceCol(me)}">${me} %</b> · Subir <b style="color:${them==null?'var(--dim)':chanceCol(100-them)}">${them==null?'—':them+' %'}</b></p>`,
+      `<p>Toucher <b style="color:${chanceCol(me)}">${me} %</b> · Subir <b style="color:${them==null?'var(--dim)':chanceCol(100-them)}">${them==null?'—':them+' %'}</b></p>`+
+      (typeof tirChanceTxt==='function'?tirChanceTxt(occ,sp,x,y):''),
       `<p>${BEHAV[key]||''}</p>`);}
   else out.push(head('',tn,dt));
   const s=siteAt(x,y);

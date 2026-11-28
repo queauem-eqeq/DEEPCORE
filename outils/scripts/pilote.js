@@ -54,7 +54,22 @@ window.PILOTE_FUEL_CASES = window.PILOTE_FUEL_CASES || (() => {const l = [];
 window.piloteBesoinFuel = window.piloteBesoinFuel || (P => {
   if (G.st.fuel == null || !window.PILOTE_FUEL_CASES) return null;
   const mx = G.st.fuelMax || 100; if (G.st.fuel >= mx * .4) return null; const l = window.PILOTE_FUEL_CASES(); return l.length ? l : null;});
-window.piloteTir = window.piloteTir || ((P, cibles) => false);   // arme de tir : à écrire quand elle existe (tir sur la cible la plus proche)
+/* Arme de tir (bloc D, 28 novembre 2026). Le prudent tire sur un chasseur à distance s'il lui reste de quoi courir ou forer après le
+   tir (TIR_GARDE d'énergie), puis finit au contact ; le fonceur tire dès qu'il a l'énergie du tir, en avançant (le tir passe avant le pas).
+   Cible : le chasseur en vue le plus proche qu'on peut toucher, à 2 cases ou plus (au contact, on frappe : c'est gratuit). */
+const TIR_GARDE = 15;
+window.piloteTir = window.piloteTir || ((P, cibles) => {if (typeof tirFeu !== 'function' || REGLES.PILOTE_TIR === 0) return false;   // --regles '{"PILOTE_TIR":0}' : témoin sans tir
+  const st = G.st, k = tirArme(), c = tirEnergie(k), garde = P.profil === 'prudent' ? c + TIR_GARDE : c;
+  if (st.energie < garde) return false;
+  const l = ennemisVus().filter(e => e.chasse && cheb(e.o.x, e.o.y, G.px, G.py) >= 2 && !tirRefus(e.o.x, e.o.y, k))
+    .sort((a, b) => cheb(a.o.x, a.o.y, G.px, G.py) - cheb(b.o.x, b.o.y, G.px, G.py));
+  if (!l.length) return false; const e = l[0]; if (e.o.gi != null) PIL.R.niv.grAff.add(e.o.gi);
+  return tirFeu(e.o.x, e.o.y);});
+// mesures du tir : tirs, énergie dépensée, dégâts infligés (brûlure comprise) ; dégâts au contact pour comparer
+{const f = window.tirFeu; if (f) window.tirFeu = tirFeu = function (x, y) {const N = PIL.R && PIL.R.niv, e = G.st.energie, r = f.apply(this, arguments);
+  if (r && N) {N.tirs = (N.tirs || 0) + 1; N.tirE = (N.tirE || 0) + Math.max(0, e - G.st.energie + G.st.power / POW_BASE);} return r;};}
+{const f = window.tirBlesse; if (f) window.tirBlesse = tirBlesse = function (o, dm) {const N = PIL.R && PIL.R.niv; if (N) N.tirDeg = (N.tirDeg || 0) + dm;
+  return f.apply(this, arguments);};}
 window.PILOTE_MESURES = window.PILOTE_MESURES || [];
 
 /* ---------- Mesures : enveloppes autour des fonctions du jeu ---------- */
@@ -163,7 +178,7 @@ function utilise(k) {const i = G.inv.findIndex(o => o.k === k); if (i < 0) retur
   if (fait) N.objets[k] = (N.objets[k] || 0) + 1; return fait;}
 // sac presque plein : le pilote jette d'abord l'équipement non porté, puis un exemplaire du consommable le plus nombreux (jamais réparobots ni clé)
 function gererSac(P) {if (sacPlaces() < SAC_MAX - 1) return;
-  const rang = o => {const d = ITEMS[o.k]; if (!d || o.eq || o.k === 'cle' || o.k === 'repar' || d.hack) return -1;
+  const rang = o => {const d = ITEMS[o.k]; if (!d || o.eq || o.k === 'cle' || o.k === 'repar' || d.hack || d.fixe) return -1;
     if (!d.conso) return 30; return ((o.n || 1) > 3 ? 20 : 0) + (o.n || 1);};   // puis le consommable le plus nombreux
   let i = -1, b = -1; G.inv.forEach((o, k) => {const r = rang(o); if (r > b) {b = r; i = k;}}); if (i < 0) return;
   const avant = {}; for (const c in G.items || {}) avant[c] = (G.items[c] || []).length; const k = G.inv[i].k; invDrop(i);

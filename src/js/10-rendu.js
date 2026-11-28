@@ -393,7 +393,7 @@ function render(){
   if(SHOWVIS&&!G.over){
     const r=G.stealth||STEALTH_BASE,cells=new Set();
     for(let y=Math.max(0,G.py-r);y<=Math.min(H-1,G.py+r);y++)for(let x=Math.max(0,G.px-r);x<=Math.min(W-1,G.px+r);x++){
-      const i=idx(x,y);if(Math.hypot(x-G.px,y-G.py)>r)continue;if(lastAct==='dig'||los(G.px,G.py,x,y))cells.add(i);}
+      const i=idx(x,y);if(Math.hypot(x-G.px,y-G.py)>r)continue;if(lastAct==='dig'||lastAct==='tir'||los(G.px,G.py,x,y))cells.add(i);}
     drawVisCells(cells,'#ffffff');}
   machDraw();
   drawPath();
@@ -446,6 +446,7 @@ function render(){
   if(VISEE){const t=viseeTuile();ctx.globalAlpha=1;
     for(const [zx,zy] of viseeCases()){
       if(zx<0||zy<0||zx>=W||zy>=H)continue;ctx.drawImage(t,(zx-camX)*S,(zy-camY)*S,S,S);}}
+  if(TIR&&typeof tirDessin==='function')tirDessin();   // visée de l'arme de tir (14m)
   /* Viseur du phaseur (28 novembre 2026) : le viseur habituel, en couleur bio quand la foreuse peut s'y reformer ; sur une case
      inconnue ou qui ne la porterait pas, le même viseur en rouge danger barré d'une croix en X. Hors de la vue, on ne le dessine
      pas : la mini-carte le montre. */
@@ -495,7 +496,7 @@ function curseurCase(){
     ctx.globalAlpha=1;ctx.drawImage(ok(HOV.x,HOV.y)?CURT:CURT_DIM,(HOV.x-camX)*S,(HOV.y-camY)*S,S,S);}
 }
 function fxCouche(){
-  for(const f of FX){if(f.kind!=='num')continue;const p=fxP(f),rise=reduced?0:p*14;
+  for(const f of FX){if(f.kind!=='num')continue;const p=fxP(f),rise=reduced?0:p*14;if(p<0)continue;   // chiffre d'un tir : il attend l'arrivée du projectile
     ctx.globalAlpha=p<.6?1:1-(p-.6)/.4;ctx.font='bold 14px "JetBrains Mono", ui-monospace, monospace';ctx.textAlign='center';
       ctx.textBaseline='bottom';
     const tx=(f.x-camX)*S+S/2,ty=(f.y-camY)*S-2-rise-(f.stack||0)*14;ctx.fillStyle='#000';ctx.fillText(f.txt,tx+1,ty+1);ctx.fillStyle=f.col;
@@ -604,6 +605,7 @@ function fxCouche(){
        pt.push([ax+dx*t+nx*o,ay+dy*t+ny*o]);}
      pt.push([bx,by]);
      for(let k=0;k<4;k++)traitLaser(u,pt[k][0],pt[k][1],pt[k+1][0],pt[k+1][1],f.t0+k+ph,k===3?4:2,'#ffffff');}}
+  if(typeof tirFx==='function')tirFx(S/16);   // projectiles de l'arme de tir et brûlure (14m)
   if(BOOM)drawBoom();
 }
 const mv=$('mini'),mctx=mv.getContext('2d');

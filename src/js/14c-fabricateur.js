@@ -31,15 +31,50 @@ Object.assign(ITEMS,{
     d:'Des plaques épaisses : '+NOM_FOREUSE+' encaisse bien mieux, et se traîne un peu.',
     art:[" ▄▄         ▄▄ ", " █▓█▀▀▀▀▀▀▀█▓█ ", " █▓▒▒▒▐█▌▒▒▒▓█ ", " █▓▒▒▒▒▒▒▒▒▒▓█ ", "  ▀▄▓▓▓▓▓▓▓▄▀  ", "    ▀▀▀▀▀▀▀    "],
     col:[".ww.........ww.", ".w3wwwwwwwww3w.", ".w31113331113w.", ".w31111111113w.", "..ww3333333ww..", "....wwwwwww...."]}});
+/* Arme de tir (28 novembre 2026, chantier « Survie », bloc D ; logique dans 14m-tir.js). Emplacement « tir », à part de l'arme de forage.
+   Le canon est l'arme de tir de base : donné au départ, jamais perdu (fixe : il ne prend pas de place dans l'inventaire, ne se jette pas,
+   revient en main quand on retire une autre arme de tir). Les quatre autres le remplacent quand on les équipe. Leurs chiffres (dégâts,
+   précision, énergie, portée, brûlure, glu…) sont dans ITEM_VAL (14d), réglables dans Lab → Items. Deux accessoires silencieux.
+   Les armes de tir et les silencieux ne tombent jamais en butin : blueprint au terminal, puis FABLAB. */
+Object.assign(ITEMS,{
+  canon:{n:'Canon',slot:'tir',tir:1,base:1,fixe:1,mod:{},
+    d:'CANON CINÉTIQUE DE SÉRIE. MONTÉ D’ORIGINE. PROJECTILE : MASSE DE TUNGSTÈNE. RECHARGE : SUR LA RÉSERVE D’ÉNERGIE.',
+    art:["   ▄▄▄▄▄▄      ", "  █▓▓▓▓▓▓█════ ", "  █▒▒▒▒▒▒█════ ", "   ▀█▀▀▀▀▀     ", "    ▀          "],
+    col:["...333333......", "..31111113dddd.", "..32222223dddd.", "...333333......", "....3.........."]},
+  lanceflamme:{n:'Lance-flammes',slot:'tir',tir:1,mod:{},
+    d:'BUSE À PLASMA FROID. PORTÉE COURTE. CIBLE : EN COMBUSTION APRÈS IMPACT.',
+    art:["  ▄▄▄          ", " █▒▒▒█▄▄▄▄▄ ≈≈ ", " █▒▒▒█▓▓▓▓▓█≈≈≈", "  ▀█▀       ≈≈ ", "   ▀           "],
+    col:["..333..........", ".32223333333.r1", ".32223111113r1r", "..333.......1r.", "...3..........."]},
+  canonglu:{n:'Canon à glu',f:1,slot:'tir',tir:1,mod:{},
+    d:'PROJECTEUR DE POLYMÈRE. LA CIBLE ENGLUÉE PERD LA MOITIÉ DE SA CADENCE.',
+    art:["   ▄▄▄▄▄       ", "  █░░░░░█▄▄  o ", "  █░▒▒▒░███ oOo", "   ▀█▀▀▀▀▀   o ", "    ▀          "],
+    col:["...33333.......", "..3222223333.2.", "..32111233322w2", "...333333...2..", "....3.........."]},
+  shotgun:{n:'Shotgun',slot:'tir',tir:1,mod:{},
+    d:'CANON À GRENAILLE. GERBE LARGE, PORTÉE COURTE. BRUYANT.',
+    art:[" ▄▄▄▄▄▄▄▄▄  · ·", "█▓▓▓▓▓▓▓▓═ · ·:", "█▒▒▒▒▒▒▒▒═ · · ", " ▀▀█▀▀       · ", "   ▀           "],
+    col:[".333333333..w.1", "3111111111.1.w1", "3222222223.w.1.", ".33333......w..", "...3..........."]},
+  laser:{n:'Laser',slot:'tir',tir:1,mod:{},
+    d:'ÉMETTEUR COHÉRENT. LE FAISCEAU TRAVERSE LES MOBILES ALIGNÉS. ARRÊT : PAROI.',
+    art:["    ▄▄▄▄▄      ", "  ▐█▓▓▓▓▓█▌    ", "──┤▒▒▒▒▒▒▒├━━━━", "  ▐█▓▓▓▓▓█▌    ", "    ▀▀▀▀▀      "],
+    col:["....33333......", "..3311111133...", "dd3222222213www", "..3311111133...", "....33333......"]},
+  silforage:{n:'Forage silencieux',slot:'acc',sil:1,mod:{silDig:1},eff:'BRUIT DU FORAGE ÷ 2',
+    d:'MANCHON AMORTISSEUR AUTOUR DU FORET. ONDE DE CHOC : ÉTOUFFÉE.',
+    art:["   ┌───────┐   ", "   │░░░░░░░│   ", "   │░ ▼▼▼ ░│   ", "   │░░░░░░░│   ", "   └──┬─┬──┘   "],
+    col:["...3333333.....", "...3222222.3...", "...32.111.23...", "...3222222.3...", "...33333333...."]},
+  siltir:{n:'Tir silencieux',slot:'acc',sil:1,mod:{silTir:1},eff:'BRUIT DU TIR ÷ 2',
+    d:'RÉDUCTEUR DE BOUCHE. DÉTONATION : RAMENÉE À UN CLAQUEMENT SEC.',
+    art:["  ┌─────────┐  ", "══╡▒▒▒▒▒▒▒▒▒╞══", "  └─────────┘  ", "   ░ ░ ░ ░ ░   "],
+    col:["..33333333333..", "dd32222222223dd", "..33333333333..", "...2.2.2.2.2..."]}});
 const FAB_PRIX={repar:18,batterie:14,fumigene:16,charge:34,accu:40,optique:40,servo:45,stabil:45,viseur:50,gyro:50,conden:55,
-  carene:60,vrille:70,trepan:85,blindage:85};
+  carene:60,vrille:70,trepan:85,blindage:85,lanceflamme:70,canonglu:65,shotgun:75,laser:90,silforage:45,siltir:45};
 const FAB_DUREE=300;
 let FAB_CASE=-1,FAB_SEL=0;
 // ce que propose ce fabricateur : tous les consommables, et quatre équipements à lui
 // 22 novembre 2026 : seulement les objets dont la foreuse a le plan (depuis le 28 novembre 2026 : appris aux terminaux)
 function fabListe(i){const p=savoir().plans;
   return Object.keys(FAB_PRIX).filter(k=>ITEMS[k]&&p[k]).sort((a,b)=>(ITEMS[a].conso?0:1)-(ITEMS[b].conso?0:1)||FAB_PRIX[a]-FAB_PRIX[b]);}
-const fabEffet=k=>{const d=ITEMS[k];if(d.conso)return d.eff||'';if(d.sonar)return SLOTS[d.slot].nom+' · '+d.eff;const l=[];if(d.de)l.push('dégâts '+deTxt(d.de));
+const fabEffet=k=>{const d=ITEMS[k];if(d.conso)return d.eff||'';if(d.sonar||d.sil)return SLOTS[d.slot].nom+' · '+d.eff;
+  if(d.slot==='tir'&&typeof tirFicheTxt==='function')return SLOTS.tir.nom+' · '+tirFicheTxt(d);const l=[];if(d.de)l.push('dégâts '+deTxt(d.de));
   for(const m in d.mod||{}){const v=d.mod[m],M=MODS[m];if(M)l.push(`${M[0]} ${v>0?'+':'−'}${Math.abs(v)}${M[2]||''}`);}
   return SLOTS[d.slot].nom+(l.length?' · '+l.join(' · '):'');};
 // famille d'un objet, pour la couleur de son nom (22 novembre 2026) : consommable, accessoire, arme ou armure
@@ -49,7 +84,7 @@ const fabFam=k=>{const d=ITEMS[k];return d.conso?'conso':d.slot==='acc'?'acc':'e
    Un carré vide est un contour blanc d'un pixel sur fond noir (style.css). */
 const fabFamObj=o=>{const d=ITEMS[o.k];return d.conso?'conso':d.slot==='acc'?'acc':'eq';};
 const FAB_FAM_ORD={conso:0,acc:1,eq:2};
-function sacCases(){const l=G.inv.filter(o=>!o.eq).slice().sort((a,b)=>FAB_FAM_ORD[fabFamObj(a)]-FAB_FAM_ORD[fabFamObj(b)]),c=[];
+function sacCases(){const l=G.inv.filter(o=>!o.eq&&!ITEMS[o.k].fixe).slice().sort((a,b)=>FAB_FAM_ORD[fabFamObj(a)]-FAB_FAM_ORD[fabFamObj(b)]),c=[];
   for(const o of l)for(let n=0;n<(o.n||1);n++)c.push(fabFamObj(o));
   return c.slice(0,SAC_MAX);}
 function fabGrille(){const c=sacCases(),n=$('fabSacN');

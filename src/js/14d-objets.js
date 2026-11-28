@@ -11,8 +11,16 @@
    à l'autre. Valeurs réglables : Lab → Items (np-items). */
 const ITEM_VAL_DEF={repar:{soin:50},batterie:{energie:50,choc:12,etourdi:10},charge:{degats:30},puissance:{pow:1,deg:5},
   berserk:{crit:50,duree:30},camo:{duree:30},balise:{rayon:20,duree:25,pv:40},court:{etourdi:10},matiere:{mat:15},
-  phaseur:{loin:25},fuel:{fuel:REGLES.FUEL_CELLULE}};
-const ITEM_VAL_LIB={fuel:'Fuel rendu',soin:'Vie rendue',energie:'Énergie rendue',choc:'Dégâts de la décharge',etourdi:'Étourdissement (battements)',degats:'Dégâts',pow:'POW gagné',deg:'Dégâts par point de POW en trop (%)',crit:'CRIT en plus (points)',duree:'Durée (battements)',rayon:'Rayon de l’appel (cases)',pv:'PV de la balise posée',mat:'Matière {µ} rendue',loin:'Distance mini où l’ennemi reparaît (cases)'};
+  phaseur:{loin:25},fuel:{fuel:REGLES.FUEL_CELLULE},
+  /* Armes de tir (28 novembre 2026, bloc D ; 14m-tir.js). tdeg : dégâts en % du coup de forage ; tpre : précision retirée ; tcout : énergie
+     par tir ; tport : portée en cases (0 : la vue) ; tbrule / tbruleBat : brûlure (dégâts par battement, battements) ; tglu : battements
+     englué (pas et coups deux fois plus longs) ; tloin : dégâts en % à 3 cases (shotgun) ; tbruit : bruit en % de celui du forage. */
+  canon:{tdeg:70,tpre:10,tcout:20,tport:0,tbruit:100},
+  lanceflamme:{tdeg:50,tpre:10,tcout:25,tport:5,tbruit:100,tbrule:3,tbruleBat:4},
+  canonglu:{tdeg:50,tpre:10,tcout:25,tport:0,tbruit:100,tglu:4},
+  shotgun:{tdeg:100,tpre:0,tcout:30,tport:3,tbruit:150,tloin:60},
+  laser:{tdeg:60,tpre:0,tcout:30,tport:0,tbruit:100}};
+const ITEM_VAL_LIB={tdeg:'Dégâts (% du coup de forage)',tpre:'Précision retirée',tcout:'Énergie par tir',tport:'Portée (cases, 0 : la vue)',tbrule:'Brûlure (dégâts par battement)',tbruleBat:'Brûlure (battements)',tglu:'Englué (battements)',tloin:'Dégâts à 3 cases (%)',tbruit:'Bruit (% de celui du forage)',fuel:'Fuel rendu',soin:'Vie rendue',energie:'Énergie rendue',choc:'Dégâts de la décharge',etourdi:'Étourdissement (battements)',degats:'Dégâts',pow:'POW gagné',deg:'Dégâts par point de POW en trop (%)',crit:'CRIT en plus (points)',duree:'Durée (battements)',rayon:'Rayon de l’appel (cases)',pv:'PV de la balise posée',mat:'Matière {µ} rendue',loin:'Distance mini où l’ennemi reparaît (cases)'};
 let ITEM_VAL=JSON.parse(JSON.stringify(ITEM_VAL_DEF));
 // chance qu'un robot abattu lâche un objet, par espèce (clé du Bestiaire)
 const DROPS_DEF={crabos:8,cafar:6,mastok:90,brochon:10,mine:0,paralyzor:25,gardien:60,artilleur:35,drone:5,soudeur:45,englueur:35};
@@ -217,7 +225,7 @@ const CONSO_POIDS=[['repar',REGLES.REPARO_POIDS],['fuel',4],['batterie',4],['fum
 function consoTire(){let t=CONSO_POIDS.reduce((a,c)=>a+c[1],0),r=Math.random()*t;
   for(const [k,p] of CONSO_POIDS){if((r-=p)<0)return k;}return 'repar';}
 // le Sonar ne se trouve pas : il se fabrique (plan au terminal)
-function equipTire(){const l=Object.keys(ITEMS).filter(k=>ITEMS[k].slot&&!ITEMS[k].hack&&!ITEMS[k].base&&!ITEMS[k].sonar&&k!=='usine'&&PLAN_RANG(k)<=nivCarte()+1);
+function equipTire(){const l=Object.keys(ITEMS).filter(k=>ITEMS[k].slot&&!ITEMS[k].hack&&!ITEMS[k].base&&!ITEMS[k].sonar&&!ITEMS[k].tir&&!ITEMS[k].sil&&k!=='usine'&&PLAN_RANG(k)<=nivCarte()+1);
   return l.length?l[rnd(0,l.length-1)]:'matiere';}
 // contenu d'un coffre : dépôt derrière une grille, appât d'une salle piégée, pièce secrète
 // 28 novembre 2026 : le plan d'un dépôt devient deux blocs de Matière ; celui d'une salle piégée, un équipement ; celui d'une
@@ -522,7 +530,7 @@ itemTxt();
 function saveItems(){try{localStorage.setItem('np-items',JSON.stringify(itemsEtat()));}catch(e){}touchLocal();itemTxt();
   SAC_H='';INV_H=null;}
 const ITEMS_FAM=[['Consommables',k=>CONSO[k]||k==='cle'],['Butin',k=>k==='matiere'],['Armes',k=>ITEMS[k].slot==='arme'],['Armures',
-  k=>ITEMS[k].slot==='armure'],['Accessoires',k=>ITEMS[k].slot==='acc']];
+  k=>ITEMS[k].slot==='armure'],['Armes de tir',k=>ITEMS[k].slot==='tir'],['Accessoires',k=>ITEMS[k].slot==='acc']];
 function buildItems(){TOUT_CONNU=true;
   const champ=(lib,chemin,v,min,max)=>`<label class="itf"><span>${lib}</span><input type="number" data-c="${chemin}" value="${v}" min="${min}" max="${max}" step="1"></label>`;
   let h='';

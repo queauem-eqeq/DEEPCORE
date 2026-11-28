@@ -196,7 +196,9 @@
         <div class="bar2"><span>Matière {µ}</span><span></span><span class="bnum mat" id="matN" title="Réserve de Matière {µ} : servira à construire de l’équipement">0</span></div>
         <div class="btnrow"><button id="sprintBtn" class="pace" aria-pressed="false" title="Courir ou marcher (R) : la course double la vitesse et coûte 5 d’énergie par pas">MARCHE</button><button id="invBtn" class="pace" aria-haspopup="dialog" title="Ouvrir l’équipement (T) : armes, armures, accessoires">ÉQUIPEMENT</button></div>
         <div class="btnrow"><button id="explBtn" class="pace" title="Exploration automatique (O) : F467 explore seule et s’arrête au moindre événement">EXPLORER</button><button id="restBtn" class="pace" title="Repos (P) : attendre sur place pour réparer la coque (vie +1 tous les 4 battements tant qu’il reste du fuel) et recharger l’énergie ; s’arrête si un ennemi chasse ou si le fuel baisse sous 25 %">REPOS</button></div>
-        <div class="btnrow"><button id="jdbBtn" class="pace" aria-haspopup="dialog" title="Journal de bord (J) : robots, objets, journaux, documents, hacks, tutoriel">JOURNAL</button></div>
+        <div class="btnrow"><button id="jdbBtn" class="pace" aria-haspopup="dialog" title="Journal de bord (J) : robots, objets, journaux, documents, hacks, tutoriel">JOURNAL</button><button id="tirBtn" class="pace" title="Tir (G) : viser avec l’arme de tir, Tab pour changer de cible, Entrée pour tirer">TIR</button></div>
+        <!-- arme de tir (28 novembre 2026) : arme, dégâts, énergie par tir, portée -->
+        <div class="tirinfo" id="tirInfo"></div>
         <div class="stip" id="stip" role="tooltip" hidden></div>
         <div class="effs" id="effs" role="status" aria-label="Effets en cours"></div>
       </div>
@@ -288,6 +290,7 @@
         <dl>
           <dt><kbd>I</kbd></dt><dd>inventaire, premier consommable prêt : <kbd>↑</kbd><kbd>↓</kbd> choisir, <kbd>Entrée</kbd> utiliser, <kbd>J</kbd> jeter, <kbd>I</kbd> fermer</dd>
           <dt><kbd>T</kbd></dt><dd>équipement</dd>
+          <dt><kbd>G</kbd></dt><dd>tir : viser (cible la plus proche), <kbd>Tab</kbd> cible suivante, flèches pour déplacer le viseur, <kbd>Entrée</kbd> ou <kbd>G</kbd> pour tirer, <kbd>Échap</kbd> annuler ; à la souris, un clic sur la cible</dd>
           <dt>Visée</dt><dd>déplacements ou souris, <kbd>Entrée</kbd> ou clic pour valider, <kbd>Échap</kbd> pour annuler</dd>
         </dl>
         <h3>Voir</h3>
@@ -346,4 +349,5 @@
 <script src="js/14j-textes.js"></script>
 <script src="js/14k-journal.js"></script>
 <script src="js/14l-histoire.js"></script>
+<script src="js/14m-tir.js"></script>
 <script src="js/15-intro.js"></script>

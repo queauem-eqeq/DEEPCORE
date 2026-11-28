@@ -118,6 +118,9 @@ def resume(parties):
             'vie perdue par groupe affronté (moy)': moy(vg), 'par groupe affronté (méd)': q(vg, .5),
             'par groupe affronté D9': q(vg, .9), 'groupes affrontés à plus de 70 (%)': round(100 * sum(1 for v in vg if v > 70) / len(vg)) if vg else None,
             'battements à énergie 0 (moy)': moy([l['e0'] for l in L]),
+            # arme de tir (bloc D, 28 novembre 2026)
+            'tirs (moy)': moy([l.get('tirs', 0) for l in L]), 'énergie dépensée au tir (moy)': moy([l.get('tirE', 0) for l in L]),
+            'dégâts infligés au tir (moy)': moy([l.get('tirDeg', 0) for l in L]),
             # fuel et repos (bloc B, 28 novembre 2026) ; absents des parties d'avant le fuel
             'fuel au départ (moy)': moy([l['fuelDebut'] for l in L if l.get('fuelDebut', -1) >= 0]),
             'fuel à la descente (finis, moy)': moy([l['fuelFin'] for l in finis if (l.get('fuelFin') if l.get('fuelFin') is not None else -1) >= 0]),

@@ -644,7 +644,7 @@ const TEXTES_N1 = {
       id: 'tuto_energie', titre: 'ÉNERGIE',
       lignes: [
         "FORAGE : 5 D'ÉNERGIE PAR COUP. COURSE : 5 PAR PAS.",
-        "DÉPLACEMENT ET COUPS AUX MOBILES : SANS COÛT.",
+        "DÉPLACEMENT ET COUPS AUX MOBILES : SANS COÛT. TIR : 20.",
         "ÉNERGIE 0 : FORAGE IMPOSSIBLE.",
         "RECHARGE : CONTINUE, DOUBLÉE À L'ARRÊT."
       ]
@@ -667,6 +667,17 @@ const TEXTES_N1 = {
         "REPOS : ATTENTE RÉPÉTÉE JUSQU'À VIE ET ÉNERGIE PLEINES.",
         "INTERROMPU PAR : MOBILE EN VUE, POURSUITE, COUP REÇU, FUEL SOUS 25 %.",
         "FUEL 0 : AUCUNE RÉPARATION."
+      ]
+    },
+    {
+      id: 'tuto_tir', titre: 'TIR',
+      lignes: [
+        "ARME SECONDAIRE : CANON. MONTÉ D'ORIGINE. JAMAIS PERDU.",
+        "TIR : 20 D'ÉNERGIE. DURÉE : 1 COUP. PORTÉE : CHAMP DE VUE.",
+        "PROJECTILE ARRÊTÉ PAR : PAROI, PORTE, ROCHER, PREMIER MOBILE SUR LA LIGNE.",
+        "ÉMISSION SONORE : ÉGALE AU FORAGE.",
+        "CIBLE NON ALERTÉE : IMPACT GARANTI, DÉGÂTS × 3.",
+        "AUTRES ARMES DE TIR : PLAN AU TERMINAL, FABRICATION AU FABLAB. REMPLACENT LE CANON."
       ]
     },
     {

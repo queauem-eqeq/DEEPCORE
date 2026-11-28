@@ -406,3 +406,17 @@ Ce qui a été remplacé, et pourquoi (demandes de l'utilisateur, « chaque mach
   (9e décile 78) ; dégâts 2,0 au niveau 1 → 11 prudents sur 16 morts à l'Astroport ; 0,5 / 1,2 aux niveaux 2-3 → survie correcte mais un
   groupe y coûte peu (médiane 14-15). Retenu : **0,6 / 0,4 / 0,4** et **1,4 / 1,6 / 1,6** (prudent au noyau 13 sur 30, fonceur 3 sur 30).
 - Ferrailleuses de l'Astroport non réduites ; lasers des machines et mini-jeu des descentes inchangés ; explosions de mines multipliées.
+
+## 28 novembre 2026 — chantier survie, bloc D : arme de tir, cinq emplacements d'objets, hacks Tir
+- Décision de l'utilisateur (27-28 novembre) : une arme de tir dès le départ, le **canon** (portée la vue, bruit du forage, 20 d'énergie
+  par tir) ; **pas de plug-ins** (la décision du 27 novembre, « chaque plug-in ajoute à la consommation », est remplacée) : lance-flammes,
+  canon à glu, shotgun et laser sont des armes à part entière qui remplacent le canon. Objets « forage silencieux » et « tir silencieux ».
+  Équipement : foreuse + tir + armure + **5 objets** (3 accessoires jusque-là). Fichier `14m-tir.js`.
+- Choix faits sans l'utilisateur : le canon ne prend jamais de place et ne se perd pas ; armes et silencieux hors du butin (blueprint
+  puis FABLAB seulement) ; brûlure 3 × 4 battements (pas de feu au sol) ; glu sur un ennemi = pas et coups × 2 pendant 4 battements ;
+  « bruit ÷ 2 » = la portée de discrétion de l'action divisée par 2 (15 → 8), sans plancher ; tir refusé (gratuitement) quand la ligne
+  est obstruée ; coup par surprise au tir gardé tel quel (× 3, touche toujours).
+- `TIR_DISPO` passe à vrai : les hacks Tir sont proposés selon la table (Base 85 / Tir 15 / Noyau 0 aux niveaux 1-3…) et agissent
+  sur l'arme équipée. Journal de bord : 17 sortes de hacks. Tutoriel : page TIR.
+- Mesuré (pilote, 30 parties par profil) : prudent au noyau 17 / 30 (13 au bloc C), fonceur 9 / 30 (3 au bloc C, mais 7 / 30 sur les
+  mêmes graines avec le tir coupé : l'essentiel de l'écart vient d'ailleurs). Détail : `mesures.md`, « Survie D ».

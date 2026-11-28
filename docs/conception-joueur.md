@@ -115,8 +115,8 @@ ni au FABLAB.
 | 4 à 6 | 50 % | 40 % | 10 % |
 | 7 à 10 | 25 % | 35 % | 40 % |
 
-  **Pas d'arme de tir dans le jeu** (`TIR_DISPO=false`) : les hacks Tir existent mais ne sont jamais proposés, leur part va à Base
-  (donc 100 / 0 / 0, 90 / 0 / 10, 60 / 0 / 40 aujourd'hui).
+  **Depuis le 28 novembre 2026 (bloc D), l'arme de tir existe** (`TIR_DISPO=true`) : les hacks Tir sont proposés selon la table et
+  agissent sur l'arme de tir équipée (voir « Arme de tir »). Avant, leur part allait à Base (100 / 0 / 0, 90 / 0 / 10, 60 / 0 / 40).
 
 | Hack | Famille | Effet au rang n (E = échelle) | R1 | R4 | R7 | R10 |
 |---|---|---|---|---|---|---|
@@ -353,6 +353,55 @@ Modèle Brogue :
 - **Barre de vie** au-dessus de toute créature blessée. Coup raté : « 0 » en gris. Animation : bond de l'attaquant,
   flash, chiffres flottants, tremblement d'écran quand le robot est touché ou qu'un ennemi meurt.
 
+## 6 ter. Arme de tir (`14m-tir.js`, 28 novembre 2026, chantier « Survie », bloc D)
+
+Décision de l'utilisateur (27-28 novembre, `arbitrage-survie.md` § 4) : une arme secondaire à projectiles, dès le départ ; pas de
+plug-ins, quatre armes à part entière qui **remplacent le canon** ; une seule arme de tir à la fois.
+
+- **Viser** : touche **G** ou bouton **TIR** (sous ÉQUIPEMENT) ; la visée s'ouvre sur l'ennemi en vue le plus proche qu'on peut
+  toucher. **Tab** passe à la cible suivante (Maj+Tab : précédente), les flèches déplacent le viseur, **Entrée** ou **G** tire,
+  **Échap** annule. Souris : le viseur suit le pointeur, un clic tire. Tablette : toucher la case vise, la toucher de nouveau tire.
+  Viseur habituel couleur accent et pointillé du trajet ; case impossible (hors de vue, hors de portée, ligne obstruée, la foreuse
+  elle-même) : le viseur rouge barré du phaseur, et le tir est refusé sans rien coûter. La fiche de survol d'une créature ajoute
+  « Tir (arme) NN % » et ses états (« En feu N », « Englué N »).
+- **Un tir = un coup** (durée 100). **Énergie** : 20 pour le canon ; refusé s'il n'y en a pas assez. Pas de munitions.
+- **Dégâts** : un jet du coup de forage (dés de l'arme de forage, DEG, POW, FORCE) × le pourcentage de l'arme × les hacks Tir.
+  **Précision** : celle de la foreuse moins le malus de l'arme. **Critique** (CRIT + PERFORANT) et **coup par surprise** (cible
+  qui n'a pas repéré la foreuse : touche toujours, × 3) comme au contact.
+- **Trajet** : la ligne droite (Bresenham) depuis la foreuse. Murs, portes fermées, rochers, machines arrêtent le projectile (le
+  gouffre non) ; la **première créature ou balise** sur la ligne le prend, même si ce n'est pas la cible (sauf le laser).
+- **Bruit** : celui du forage de base (× 1,5, s'entend à travers les parois ; SOURDINE ne joue pas), × 1,5 encore pour le shotgun.
+- Le tir **provoque les ferrailleuses** comme une attaque, réveille et met en chasse la cible (et rompt le camouflage).
+
+| Arme | Dégâts | Précision | Énergie | Portée | Particularité |
+|---|---|---|---|---|---|
+| **Canon** (de base, jamais perdu) | 70 % | −10 | 20 | la vue | — |
+| Lance-flammes | 50 % | −10 | 25 | 5 cases | la cible **brûle** : 3 par battement pendant 4 battements (`o.brule`, `tirTick`) |
+| Canon à glu | 50 % | −10 | 25 | la vue | la cible est **engluée 4 battements** : pas et coups deux fois plus longs (`o.glu`, `dpasDe`/`dcoupDe`) |
+| Shotgun | 100 % à 1-2 cases, 60 % à 3 | 0 | 30 | 3 cases | touche **la cible et toutes les cases voisines** ; bruit × 1,5 |
+| Laser | 60 % | 0 | 30 | la vue | **traverse** : touche chaque créature de la ligne jusqu'au mur |
+
+Valeurs dans `ITEM_VAL` (14d : `tdeg`, `tpre`, `tcout`, `tport`, `tbrule`, `tbruleBat`, `tglu`, `tloin`, `tbruit`), réglables dans
+**Lab → Items → Armes de tir**. Les fiches les donnent en clair, jamais en formule : « DÉGÂTS : 4–8 · ÉNERGIE : 20 · PORTÉE : VUE ».
+La colonne montre la même ligne sous les boutons (en rouge quand l'énergie manque).
+
+- **Le canon** est dans l'emplacement TIR au départ. Il **ne prend jamais de place** dans l'inventaire, ne se jette pas, ne se
+  retire pas. **Équiper une autre arme de tir le remplace** (il passe « réserve ») ; **retirer ou jeter cette arme le remet en main**.
+  L'arme retirée retourne dans l'inventaire (une place).
+- Les quatre armes (lance-flammes 70, canon à glu 65, shotgun 75, laser 90 de Matière) et les deux **silencieux** (45) ne s'obtiennent
+  que par **blueprint** au terminal puis **FABLAB** : ni butin, ni sol. Rang de plan : 3 pour les armes (dès le niveau 2), 2 pour les
+  silencieux.
+- **Forage silencieux** (accessoire) : bruit du forage ÷ 2 (après SOURDINE). **Tir silencieux** (accessoire) : bruit du tir ÷ 2 (après
+  SILENCE.TIR). Mesuré : portée de discrétion en forant 15 → 8, en tirant 15 → 8.
+- **Hacks Tir** : SURCHARGE (dégâts + 3E %, énergie + 2E %), SILENCE.TIR (bruit − 3E %, jamais sous le bruit d'un pas, dégâts − E %),
+  ÉCONOMIE (énergie − 2E %, dégâts − E %), PERFORANT (CRIT du tir + E %, précision − E/2), sur l'arme équipée quelle qu'elle soit.
+- **Chaque arme a son projectile et son son** (règle du 26 novembre), dessinés au pixel de tuile, opaques, sur la couche des effets
+  de surface (`tirFx` dans `fxCouche`) : canon, un obus blanc et une traînée, quatre éclats à l'impact ; lance-flammes, une langue de
+  pixels qui s'étend puis se retire, blanche à la buse, rouge au bout (et des braises sur la cible tant qu'elle brûle) ; canon à glu,
+  une boule bio en cloche qui éclate en gouttes ; shotgun, cinq plombs en gerbe puis des bouffées ; laser, un faisceau d'un seul tenant,
+  cœur blanc et liserés couleur monde. Les chiffres de dégâts attendent l'arrivée du projectile. Illustration ASCII et tuile au sol
+  (`o_canon`, `o_lanceflamme`, `o_canonglu`, `o_shotgun`, `o_laser`, `o_silforage`, `o_siltir`) pour chacun.
+
 ## 6 bis. Équipement et inventaire
 
 **Rien n'est donné au départ**, sauf la foreuse et la Coque d'usine : tout le reste se trouve ou se fabrique.
@@ -404,7 +453,11 @@ inconnue sur soi peut coûter cher, la lancer sur un ennemi peut le servir. Fabr
   espèce), « Rétablir » et « Enregistrer » (navigateur `np-items`, et base de l'artefact sous `items`).
 - **Allure de la foreuse** : engluée, elle prend la couleur bio ; en surrégime, la couleur danger ; camouflée, une trame.
 
-- **Emplacements** : 1 arme, 1 armure, 3 accessoires. **Il y a toujours une arme en main** : on ne peut ni la
+- **Emplacements** (28 novembre 2026) : **l'arme de forage, l'arme de tir, l'armure, et 5 objets équipables** (accessoires ; 3 jusque-là).
+  Les hacks ont leurs emplacements à part. Une ancienne partie qui porterait plus d'objets que la limite les garde tous : on ne peut
+  simplement plus en équiper d'autre avant d'être repassé sous la limite. La fenêtre Équipement montre un cadre par emplacement :
+  FOREUSE, TIR, ARMURE, OBJETS (5 cadres, « EMPLACEMENT LIBRE » quand il est vide), puis TRANSPORTÉ, puis HACKS.
+  **Il y a toujours une arme en main** : on ne peut ni la
   retirer ni la jeter, seulement la remplacer. **Toute arme fore la roche pareil** : l'arme ne change que le
   combat et le visuel.
 - **Deux endroits, un seul sac** : la fenêtre **Équipement** (armes, armures, accessoires) et le sous-menu

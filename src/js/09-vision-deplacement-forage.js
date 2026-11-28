@@ -50,14 +50,14 @@ let STEALTH_BASE=10;const NOTICE=.25,HUNT_MULT=2,STEALTH_MIN=2,DIG_MULT=1.5,LOSE
 try{const s=+localStorage.getItem('np-stealth');if(s>=2&&s<=30)STEALTH_BASE=s;}catch(e){}
 function setStealthBase(v){STEALTH_BASE=Math.max(2,Math.min(30,v|0));try{localStorage.setItem('np-stealth',STEALTH_BASE);
   }catch(e){}touchLocal();}
-let lastAct='move';                                   // ce que la foreuse vient de faire : 'move', 'wait' ou 'dig'
+let lastAct='move';                                   // ce que la foreuse vient de faire : 'move', 'wait', 'dig' ou 'tir' (aussi bruyant que le forage)
 let lastRun=false;                                     // ce pas a-t-il été couru ? (portée de discrétion + SPRINT_NOISE)
 // retrait maximal dû aux parois adjacentes (−2 depuis le 18 novembre 2026 ; −4 avant)
 const WALL_MAX=2;
 // flat : sur des herbes basses ; walls : parois adjacentes (0 à 8) : retrait = parois ÷ 2 arrondi au supérieur, au plus WALL_MAX
 function stealthCalc(base,act,flat,walls,run,dm){
   let r=base;
-  if(act==='dig')r=Math.ceil(r*(dm||DIG_MULT));   // dm : hack SOURDINE (digMult, 14g)
+  if(act==='dig'||act==='tir')r=Math.ceil(r*(dm||DIG_MULT));   // dm : hack SOURDINE (digMult, 14g) ; tir : tirMult (14m), forage et tir silencieux
   if(act==='wait')r=Math.ceil(r/2);
   if(flat)r=Math.ceil(r/2);                           // herbes basses : couvert
   r=Math.max(STEALTH_MIN,r-Math.min(Math.ceil(walls/2),WALL_MAX));
@@ -65,7 +65,7 @@ function stealthCalc(base,act,flat,walls,run,dm){
 function stealthRange(act){
   let walls=0;for(const [dx,dy] of DIRS){const x=G.px+dx,y=G.py+dy;if(x<0||y<0||x>=W||y>=H)continue;const v=G.t[idx(x,y)];
     if(v===ROCK||v===MOUNT||bati(v))walls++;}
-  return stealthCalc(Math.max(STEALTH_MIN,STEALTH_BASE+(G.st.dis||0)),act,G.t[idx(G.px,G.py)]===FLAT,walls,lastRun,typeof digMult==='function'?digMult():DIG_MULT);}
+  return stealthCalc(Math.max(STEALTH_MIN,STEALTH_BASE+(G.st.dis||0)),act,G.t[idx(G.px,G.py)]===FLAT,walls,lastRun,act==='tir'&&typeof tirMult==='function'?tirMult():typeof digMult==='function'?digMult():DIG_MULT);}
 function turnStealth(){G.stealth=stealthRange(lastAct);}
 
 /* ---------- Horloge (13 novembre 2026, horloge par créature le 25 novembre 2026) ----------
@@ -113,7 +113,7 @@ function pass(d,wait){const fin=(G.time||0)+d;
     else{G.time=G.bat;G.bat+=TICK;battement(wait);}}    // le battement du monde (égalité : il passe d'abord)
   G.time=fin;
   if(!G.over)turnStealth();}                            // une action rapide peut ne faire battre personne : la portée affichée reste juste
-function battement(wait){if(wait)drift(true);const av=portesPrises();animalsAct();beastsAct();machTick();
+function battement(wait){if(wait)drift(true);const av=portesPrises();animalsAct();beastsAct();if(typeof tirTick==='function')tirTick();machTick();
   portesBruit(av);effTick();regen(wait);chercheSecrets(wait);}   // la foreuse cherche les portes dérobées à chaque battement (07b)
 function toggleSprint(){if(!G||G.over)return;
   if(!G.sprint&&G.st.energie<coutE(SPRINT_COST)){say(`Énergie insuffisante pour courir (${Math.floor(G.st.energie)}/${SPRINT_COST}).`,'warn');

@@ -259,6 +259,12 @@ addEventListener('keydown',ev=>{
     else if(k==='enter'||k===' ')viseeOk();
     else if(k==='escape')viseeStop('Charge sismique annulée.');
     return;}
+  if(TIR){ev.preventDefault();                                    // visée de l'arme de tir (14m) : rien d'autre ne répond
+    if(KEYS[k])tirVers(TIR.x+KEYS[k][0],TIR.y+KEYS[k][1]);
+    else if(k==='tab')tirCycle(ev.shiftKey?-1:1);
+    else if(k==='enter'||k===' '||k==='g')tirOk();
+    else if(k==='escape')tirStop('Tir annulé.');
+    return;}
   if(TRAV||REST||EXPL){if(!['shift','control','alt','meta'].includes(k)){ev.preventDefault();stopTravel('Trajet interrompu.');
     stopRest('Repos interrompu.');stopExplore('Exploration interrompue.');}return;}
   if(k==='v'){ev.preventDefault();toggleVision();return;}
@@ -282,6 +288,7 @@ addEventListener('keydown',ev=>{
     }else if(k==='p'){ev.preventDefault();startRest();}else if(k==='t'){ev.preventDefault();invToggle();
     }else if(k==='j'){ev.preventDefault();jnOuvre();   // journal de bord (14k, 28 novembre 2026)
     }else if(k==='i'){ev.preventDefault();sacNav(true);}else if(k==='o'){ev.preventDefault();startExplore();
+    }else if(k==='g'){ev.preventDefault();tirStart();   // arme de tir (14m, 28 novembre 2026)
     }else if(k===' '||k==='5'||k==='.'||ev.code==='Numpad5'){ev.preventDefault();waitTurn();}
 });
 $('pad').addEventListener('click',ev=>{const b=ev.target.closest('button[data-d]');if(!b||!$('overlay').hidden)return;const [dx,dy]=b.dataset.d.split(',').map(Number);if(freeCam)panCam(dx*2,dy*2);else tryMove(dx,dy);});

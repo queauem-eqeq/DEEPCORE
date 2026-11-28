@@ -1303,3 +1303,34 @@ Les graines 2000 à 2015 donnent des Astroports bien plus durs pour le pilote, m
   × 1,4 / 1,6 / 1,6 ≈ 15 / 34 / 30 et 32 / 106 / 88.
 - `simul.py tout` (dégâts du niveau 1, × 1,4) : détection et fuite inchangées ; combat : Mastok seul 79 % de victoires / 45 PV restants
   (95 % / 51 avant), Mastok + 2 Crabos 50 % / 33 (86 % / 36), 2 Crabos 100 % / 78, RÉF. (2 Crabos + 1 Vipérin) 100 % / 71.
+
+## Survie D (28 novembre 2026) : arme de tir
+
+Pilote (`outils/scripts/pilote.js`, `piloteTir`) : le prudent tire sur le chasseur en vue le plus proche, à 2 cases ou plus, s'il lui
+reste 15 d'énergie après le tir, puis finit au contact ; le fonceur tire dès qu'il a l'énergie du tir. Arme : le canon seul (le pilote
+n'équipe pas d'autre arme de tir). Mêmes graines (1000 à 1029). Valeurs des armes : celles du coordinateur, inchangées.
+Témoin : `pilote.py fonceur 30 2 --regles '{"PILOTE_TIR":0}'` (mêmes graines, tir coupé).
+
+| | Survie C | **Survie D** | Cible |
+|---|---|---|---|
+| Prudent : noyau atteint (normale) | 13 / 30 | **17 / 30** (57 %) | 5 à 6 sur 10 — tenue |
+| Fonceur : noyau atteint | 3 / 30 | **9 / 30** (30 %) ; **7 / 30 avec le tir coupé** | 1 sur 10 au plus — dépassée, surtout hors du tir |
+| Prudent : morts par niveau (normale) | 4 / 8 / 5 | **4 / 7 / 2** | – |
+| Prudent, groupe affronté, normale : médiane / D9 | 13/38 · 21/76 · 17,5/69 | **7/23 · 14/72 · 16/58** | méd. 25-40, D9 < 70 |
+| Fonceur, groupe affronté : médiane / D9 | 11/27 · 19/67 · 14/38 | **8/23 · 15,5/50 · 10/30** | – |
+| Prudent : durée d'un niveau (immortel, médiane) | 1 707 / 928 / 1 202 | **1 619 / 867 / 974** | – |
+| Prudent : vie perdue par niveau (immortel, médiane) | 72 / 191 / 206 | **50 / 131 / 169** | – |
+| Prudent : « aurait été détruite » (immortel, parties) | – | **4 / 8 / 9** | – |
+| Prudent : fuel à la descente (normale, moy., D1) | 39 (19) · 54 (42) · 49 (41) | **41 (16) · 51 (28) · 46 (38)** | – |
+| Prudent : tirs par niveau / énergie au tir / dégâts au tir (normale, moy.) | – | **13 / 268 / 80 · 12 / 232 / 69 · 16 / 310 / 94** | – |
+| Fonceur : idem | – | **6 / 128 / 41 · 4,5 / 90 / 29 · 6 / 126 / 40** | – |
+| Battements à énergie 0 (prudent · fonceur) | – | **2 / 0,6 / 8,5 · 21 / 23 / 14** | – |
+| Artilleur : pire perte en un niveau (prudent, immortel) | 35 058 (graine 1028, duel sans fin) | **55** | duel réglé |
+
+- **L'artilleur se règle au tir** : plus aucun duel sans fin (pire niveau : 55 PV contre lui, graine 1011, niveau 3) ; en série normale,
+  1 mort sur 13 lui revient chez le prudent. Soudeur et englueur ne coûtent presque plus rien (0 à 0,3 PV par partie).
+- **Le prudent** gagne 4 parties ; les groupes coûtent moins (médiane 7 / 14 / 16) : la cible « un tiers de vie » s'éloigne encore.
+- **Le fonceur** sort de la cible, mais le témoin sans tir fait 7 / 30 sur les mêmes graines (les niveaux 2 et 3 ne se rejouent pas à
+  l'identique, voir « Survie C ») : le tir ne lui donne que 2 parties. Valeurs des armes laissées telles quelles ; à revoir après essai.
+- `simul.py tout` : inchangé (le tir n'entre pas dans ces combats au contact) ; « RÉF. avec Forage silencieux / Tir silencieux » :
+  100 % de victoires, vie restante 70 / 72.

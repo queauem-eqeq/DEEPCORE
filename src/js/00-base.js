@@ -80,6 +80,8 @@ let VISEE=null;   // visée d'une charge sismique en cours : {i, x, y} — voir 
 /* Visée longue du phaseur (26 novembre 2026) : {x, y} — la foreuse est démontée, on choisit où elle se reforme, n'importe où
    sur le terrain déjà découvert. La vue suit le viseur (10-rendu), qui n'est donc plus borné à VISEE_R cases. Voir 14d-objets.js. */
 let PHASE=null;
+// Visée de l'arme de tir (28 novembre 2026, bloc D) : {x, y} — case visée ; voir 14m-tir.js
+let TIR=null;
 const CRIT_X=3;   // dégâts d'un coup critique
 const $=id=>document.getElementById(id);
 // Horodatage de la dernière retouche faite dans ce navigateur (palettes, tuiles, génération, faune, bestiaire) :
