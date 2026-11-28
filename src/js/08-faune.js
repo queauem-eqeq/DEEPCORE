@@ -373,7 +373,17 @@ function beastFits(b,x,y){const spB=BEASTS[b.sp],mB=mouilleOk(spB,b);
   if(!(b.hunt>0)&&G.lz&&G.lz[idx(cx,cy)])return false;
   if(!(spB.vol&&v===CHASM)&&!canWalk(v,mB)||(cx===G.px&&cy===G.py)||animalAt(cx,cy))return false;const o=beastAt(cx,cy);
     if(o&&o!==b)return false;}return true;}
-const beastCache=b=>!!BEASTS[b.sp].cache&&G.t[idx(b.x,b.y)]===DEEP;   // le brochon en eau profonde : invisible, même à côté
+/* Le brochon (la Torpille) en eau profonde : invisible, même à côté. Sauf si la foreuse est elle-même en eau profonde dans
+   le même lac (28 novembre 2026) : sous l'eau, elle les voit (toujours dans son champ de vision). lacForeuse() marque l'eau
+   (peu profonde et profonde) reliée à la foreuse ; recalculé une fois par tour et par position. */
+let LAC={cle:'',m:null};
+function lacForeuse(){const cle=G.turn+'|'+G.px+'|'+G.py;if(LAC.cle===cle)return LAC.m;LAC.cle=cle;LAC.m=null;
+  if(G.t[idx(G.px,G.py)]!==DEEP)return null;const m=new Uint8Array(W*H),pile=[idx(G.px,G.py)];m[pile[0]]=1;
+  while(pile.length){const i=pile.pop(),x=i%W,y=(i-x)/W;
+    for(const [dx,dy] of DIRS){const nx=x+dx,ny=y+dy;if(nx<0||ny<0||nx>=W||ny>=H)continue;const j=idx(nx,ny),v=G.t[j];
+      if(!m[j]&&(v===DEEP||v===LIQ)){m[j]=1;pile.push(j);}}}
+  return LAC.m=m;}
+const beastCache=b=>{if(!BEASTS[b.sp].cache||G.t[idx(b.x,b.y)]!==DEEP)return false;const m=lacForeuse();return !(m&&m[idx(b.x,b.y)]);};
 const beastVisible=b=>!beastCache(b)&&!(b.camo>0&&Math.max(Math.abs(b.x-G.px),Math.abs(b.y-G.py))>1)&&(!fog||FOOT.some(([dx,dy])=>vis[idx(b.x+dx,b.y+dy)]));
 function spawnBeasts(){G.beasts=[];G.beastSeen={};G.packs={};let packId=0;
   const tryPut=(sp,x,y,pack)=>{const b=newBeast(sp,x,y,pack,-1);if(!beastFits(b,x,y))return false;G.beasts.push(b);return true;};

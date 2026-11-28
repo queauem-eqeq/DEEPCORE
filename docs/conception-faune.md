@@ -119,7 +119,9 @@ s au pluriel sur un nom qui en porte déjà un : « la puce », « la torpille �
 - **Relais** : vit en bande ; chaque individu reste à 4 cases au plus du centre. **Mémoire partagée** : ce qu'un
   relais voit, tous les relais de sa bande le savent. **Seuls les relais partagent** — les autres espèces de leur
   groupe ne sont pas alertées, et aucune autre espèce ne partage.
-- **Torpille** : ne quitte jamais l'eau ; invisible dès qu'elle plonge en eau profonde.
+- **Torpille** : ne quitte jamais l'eau ; invisible dès qu'elle plonge en eau profonde. **Sauf pour une foreuse elle-même en
+  eau profonde** (28 novembre 2026) : elle voit alors, dans son champ de vision, les torpilles du **même lac** (eau reliée à la
+  sienne, peu profonde comprise) ; celles d'un autre lac restent cachées (`lacForeuse`, `08-faune.js`).
 - **Mine** : elle fonce dès qu'elle a repéré la foreuse. Arrivée **à une case**, elle **s'arme** : elle ne bouge
   plus et **clignote**, puis **explose 2 à 3 battements plus tard** (**abattue à distance** — décharge de batterie, laser, onde sismique — **elle explose aussitôt** ; abattue **au contact par la foreuse**, elle éclate comme les autres sans exploser, 28 novembre 2026)  — **20 dégâts** dans un **carré de 3 × 3, plus 5 cases tirées
   au hasard parmi les 12 qui le bordent par un côté** (les coins du 5 × 5 exclus), à la foreuse et à
