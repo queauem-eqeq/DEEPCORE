@@ -25,6 +25,13 @@
     const n0=Object.values(G.items).flat().length;terminauxFin();const T=terms(),red=T.flatMap(m=>m.act.filter(a=>a.t==='cloison').flatMap(a=>a.sol)),
       n1=Object.values(G.items).flat().length-red.reduce((s,j)=>s+((G.items[j]||[]).length),0);   // le butin d'un réduit creusé à l'occasion ne compte pas
     ok(T.length>=2&&n1===n0&&T.some(m=>m.act.length),`repli : salles encombrées, ${T.length} terminaux posés quand même, objets déplacés (${n0} → ${n1}), action locale ${T.some(m=>m.act.length)?'oui':'non'}`);}
+  // dernier repli (bloc E, 28 novembre 2026) : la graine 164 donnait une salle close de toutes parts, sans réduit ni porte dérobée ;
+  // termNiche creuse alors le réduit depuis n'importe quelle case praticable proche. Contrôle : action locale, réduit clos, butin dedans.
+  {const vrai=Math.random;let a=164;Math.random=()=>{a=(a+0x6D2B79F5)|0;let t=Math.imul(a^(a>>>15),1|a);t=(t+Math.imul(t^(t>>>7),61|t))^t;return ((t^(t>>>14))>>>0)/4294967296;};
+    carte('atterrissage');Math.random=vrai;const T=terms();ok(T.some(m=>m.act.length),`graine 164 (salle close) : action locale ${T.some(m=>m.act.length)?'oui':'non'}`);
+    const m=T[0];m.act=[];const r=termNiche(m,BATI_DER&&BATI_DER.B,TERM_R),a2=m.act[0];
+    const clos=a2&&a2.t==='cloison'&&a2.sol.every(j=>D4.every(([dx,dy])=>{const q=idx(j%W+dx,((j/W)|0)+dy);return a2.sol.includes(q)||q===a2.c||!canWalk(G.t[q],true);}));
+    ok(r&&clos&&termDispo(a2)&&a2.sol.some(j=>(G.items[j]||[]).length),`dernier repli : réduit ${a2?a2.sol.length:0} cases creusé, clos ${clos?'oui':'non'}, butin dedans`);}
   const reprend=t=>{const v=vu[t];if(!v)return false;G=v[1];BATI_DER=v[2];W=G.w;H=G.h;computeFOV();render();return true;};
   const ferme=()=>{if(!$('terminal').hidden)closeTerminal();};
   const lignes=()=>[...$('termMenu').querySelectorAll('.tsec')].map(s=>s.querySelector('h3').textContent+':'+[...s.querySelectorAll('.tl')].map(b=>(b.disabled?'-':'')+b.dataset.a).join(','));

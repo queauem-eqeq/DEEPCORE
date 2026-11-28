@@ -64,6 +64,8 @@ automatique ne l'ouvre jamais (les machines barrent le pas).
   masse derrière le mur de la salle d'un terminal, butin de pièce secrète dedans ; sa CONNEXION fait tomber la cloison
   (gravats praticables). **Repli garanti** (28 novembre 2026, une carte sur 200 n'en avait pas) : réduit de 2 × 2, sinon
   une **porte dérobée** posée dans un mur simple de la salle (action « ouvrir la porte dérobée »).
+  En dernier recours (bloc E), pour une salle close de toutes parts : le réduit (3 × 3, 2 × 2, puis 1 case) est creusé depuis la case
+  praticable la plus proche du terminal, à 15 cases au plus, sinon n'importe où sur la carte (`termNiche`).
 - **Pose garantie** : au moins deux terminaux complets, dont un à 15 cases au plus d'un **FABLAB** (les plans ne viennent
   que des terminaux) et un du site. Salles toutes encombrées : couloirs et petites pièces, puis une case qui porte un
   objet (l'objet roule à côté), enfin une console encastrée dans un mur de la salle. Une carte sur 700 restait sans terminal avant ce repli.

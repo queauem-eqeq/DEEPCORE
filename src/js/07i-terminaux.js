@@ -80,7 +80,8 @@ function termEtat(i){const s=termSorte(i);if(!s)return null;G.term=G.term||{};le
       « Terminal » est permis à ce niveau (Lab → Artefacts : un joueur qui l'a coupé n'en a pas).
    2. Les actions locales de chaque terminal.
    3. Aucun terminal n'a d'action locale : un petit réduit clos est creusé derrière le mur de la salle d'un terminal, butin dedans ;
-      la CONNEXION de ce terminal fait tomber la cloison. Repli garanti : réduit 2 × 2, puis porte dérobée dans un mur de la salle. */
+      la CONNEXION de ce terminal fait tomber la cloison. Repli garanti : réduit 2 × 2, puis porte dérobée dans un mur de la salle,
+      puis réduit creusé depuis n'importe quelle case praticable proche du terminal (termNiche), puis de toute la carte. */
 const TERM_MIN=2;
 function terminauxFin(){G.term={};if(!G.art)G.art={};const t=G.t,N=W*H;
   const BD=BATI_DER,site=G.sites&&G.sites[0]?idx(G.sites[0].x,G.sites[0].y):-1,dep=idx(G.px,G.py);
@@ -125,7 +126,29 @@ function terminauxFin(){G.term={};if(!G.art)G.art={};const t=G.t,N=W*H;
   // repli garanti (28 novembre 2026, étape 5) : réduit 3 × 3 ; sinon réduit 2 × 2 ; sinon porte dérobée dans un mur de la salle
   if(T.length&&!T.some(m=>m.act.length)&&BD){const L=T.sort(()=>Math.random()-.5);
     const P=BD.strs.flatMap(S=>S.pieces);
-    L.some(m=>termCloison(m,BD.B,pieces))||L.some(m=>termCloison(m,BD.B,pieces,1))||L.some(m=>termDerobee(m,BD.B,pieces))||L.some(m=>termDerobee(m,BD.B,P));}}
+    L.some(m=>termCloison(m,BD.B,pieces))||L.some(m=>termCloison(m,BD.B,pieces,1))||L.some(m=>termDerobee(m,BD.B,pieces))||L.some(m=>termDerobee(m,BD.B,P))
+      // dernier repli (28 novembre 2026, bloc E) : une salle close de toutes parts (massif, chemin, module fixe) n'avait ni réduit ni
+      // porte dérobée (graine 164, 1 carte sur 300). Le réduit est alors creusé depuis n'importe quelle case praticable à TERM_R
+      // cases du terminal, puis de toute la carte, 3 × 3 → 2 × 2 → 1 × 1, tous les décalages essayés.
+      ||L.some(m=>termNiche(m,BD.B,TERM_R))||L.some(m=>termNiche(m,BD.B,0));}}
+// le réduit du dernier repli : depuis une case praticable (la plus proche du terminal d'abord), derrière une paroi pleine
+function termNiche(m,B,r){const t=G.t,N=W*H,R2=r*r;
+  const plein=(x,y)=>{if(x<2||y<2||x>=W-2||y>=H-2)return false;const i=idx(x,y),v=t[i];
+    return (v===WALL||v===ROCK||v===MOUNT||v===HARD)&&!(B&&B.fixe&&B.fixe[i])&&!(G.ore&&G.ore[i])&&!(G.epI&&G.epI[i]!=null);};
+  const L=[];for(let j=0;j<N;j++)if(canWalk(t[j],false)&&t[j]!==SECRET&&t[j]!==TERMINAL&&(!r||termD2(m.i,j)<=R2))L.push(j);
+  L.sort((a,b)=>termD2(m.i,a)-termD2(m.i,b));
+  for(const [w,h] of [[3,3],[2,2],[1,1]])for(const f of L){const fx=f%W,fy=(f/W)|0;
+    for(const [dx,dy] of D4){const cx=fx+dx,cy=fy+dy;if(!plein(cx,cy))continue;
+      for(let dec=0;dec<(dx?h:w);dec++){const x0=dx>0?cx+1:dx<0?cx-w:cx-dec,y0=dy>0?cy+1:dy<0?cy-h:cy-dec;let ok=true;
+        for(let y=y0-1;y<=y0+h&&ok;y++)for(let x=x0-1;x<=x0+w;x++)if(!plein(x,y)){ok=false;break;}
+        if(!ok)continue;
+        const sol=[];for(let y=y0;y<y0+h;y++)for(let x=x0;x<x0+w;x++){t[idx(x,y)]=FLOOR;sol.push(idx(x,y));}
+        const c=idx(cx,cy);t[c]=WALL;G.items=G.items||{};
+        const l=sol.slice().sort((a,b)=>termD2(c,b)-termD2(c,a)),k=typeof butinCoffre==='function'?butinCoffre('secret'):['matiere'];
+        k.forEach((o,n)=>{const j=l[Math.min(n,l.length-1)];(G.items[j]=G.items[j]||[]).push(o);});
+        if(G.butinN)G.butinN.secret=(G.butinN.secret||0)+1;
+        m.act.push({t:'cloison',c,sol,fait:0});return true;}}}
+  return false;}
 // la porte dérobée de repli : un mur simple entre la salle du terminal et un sol voisin hors de la salle devient SECRET
 function termDerobee(m,B,pieces){const t=G.t,p=termPiece(m,pieces);if(!p)return false;const dans=new Set(p.c);
   for(const f of p.c.filter(i=>t[i]===FLOOR).sort(()=>Math.random()-.5)){const fx=f%W,fy=(f/W)|0;

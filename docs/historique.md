@@ -420,3 +420,8 @@ Ce qui a été remplacé, et pourquoi (demandes de l'utilisateur, « chaque mach
   sur l'arme équipée. Journal de bord : 17 sortes de hacks. Tutoriel : page TIR.
 - Mesuré (pilote, 30 parties par profil) : prudent au noyau 17 / 30 (13 au bloc C), fonceur 9 / 30 (3 au bloc C, mais 7 / 30 sur les
   mêmes graines avec le tir coupé : l'essentiel de l'écart vient d'ailleurs). Détail : `mesures.md`, « Survie D ».
+
+## 28 novembre 2026 — chantier survie, bloc E : terminal à action locale garanti au niveau 1
+- L'essai `test-terminaux` retombait une fois sur 300 cartes : salle de terminal close (massif, chemin de terre, module fixe), ni réduit
+  ni porte dérobée possibles (graine 164). Rien n'était défait après coup : les replis restaient collés à la salle. Ajout d'un dernier
+  repli `termNiche` (réduit creusé depuis n'importe quelle case praticable proche, puis de toute la carte) : 0 sur 600 cartes.
