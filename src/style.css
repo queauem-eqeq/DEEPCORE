@@ -97,6 +97,10 @@ body{margin:0;background:var(--black);color:var(--fg);font:13px/1.45 var(--mono)
 .seen .an.hunt img{outline:1px solid var(--c3);outline-offset:1px}
 .seen .an .st{font-size:11px;color:var(--dim);font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden}
 .seen .an .hp{color:var(--c2);white-space:nowrap;overflow:hidden;font-size:12px;line-height:1}
+/* ferrailleuse à l'ouvrage (28 novembre 2026) : son état, sous la ligne ; alertée, en couleur d'accent */
+.seen .an .ouv{grid-column:2/-1;font-size:10px;letter-spacing:.08em;color:var(--dim);line-height:1.3;white-space:nowrap;overflow:hidden}
+.seen .an .ouv.al{color:var(--c1)}
+.ouvrp{letter-spacing:.04em;color:var(--c1)}
 .seen .site{color:var(--c2)}.seen .site.k{color:var(--c3)}
 .seen .ter{color:var(--dim);line-height:1.6}
 .seen .ter b{font-weight:400;color:var(--fg)}

@@ -46,8 +46,8 @@ function stopTravel(m){if(!TRAV)return;clearTimeout(TRAV.tm);TRAV=null;if(m)sayM
 // Un pas par tour ; le trajet s'arrête au moindre imprévu
 function travelEvent(T){
   if(G.st.vie<T.vie)return 'Trajet interrompu : '+NOM_FOREUSE+' est attaquée.';
-  for(const b of G.beasts||[])if(vis[idx(b.x,b.y)]&&!T.seen.has(b))return `Trajet interrompu : ${BEASTS[b.sp].n.toLowerCase()} en vue.`;
-  for(const a of G.animals||[])if(vis[idx(a.x,a.y)]&&!T.seen.has(a))return `Trajet interrompu : ${SPECIES[a.sp].n.toLowerCase()} en vue.`;
+  for(const b of G.beasts||[])if(vis[idx(b.x,b.y)]&&!T.seen.has(b)&&!aOuvrage(b))return `Trajet interrompu : ${BEASTS[b.sp].n.toLowerCase()} en vue.`;
+  for(const a of G.animals||[])if(vis[idx(a.x,a.y)]&&!T.seen.has(a)&&!aOuvrage(a))return `Trajet interrompu : ${SPECIES[a.sp].n.toLowerCase()} en vue.`;
   if(G.sites.filter(s=>s.seen).length>T.sites)return 'Trajet interrompu : site de forage repéré.';
   if(T.i<T.path.length&&siteAt(G.px,G.py))return 'Trajet interrompu : site de forage atteint.';
   return null;}
@@ -98,7 +98,7 @@ function exploreScan(E,deep){const N=W*H,prev=new Int32Array(N).fill(-2),q=[idx(
   return null;}
 function exploreEvent(E){
   if(G.st.vie<E.vie)return ''+NOM_FOREUSE+' est attaquée';
-  let nv=null;for(const e of [...(G.beasts||[]),...(G.animals||[])])if(vis[idx(e.x,e.y)]&&!EXPL_VUS.has(e)){EXPL_VUS.add(e);nv=nv||e;}
+  let nv=null;for(const e of [...(G.beasts||[]),...(G.animals||[])])if(vis[idx(e.x,e.y)]&&!EXPL_VUS.has(e)&&!aOuvrage(e)){EXPL_VUS.add(e);nv=nv||e;}
   if(nv)return `${(G.beasts.includes(nv)?BEASTS:SPECIES)[nv.sp].n.toLowerCase()} en vue`;
   if((G.beasts||[]).some(b=>b.hunt>0&&vis[idx(b.x,b.y)]))return 'un ennemi vous chasse';
   // des vitrines en vue : on s'arrête, le choix revient au joueur
@@ -142,8 +142,8 @@ const REST_MAX=400;                                   // garde-fou : jamais plus
 const visibles=()=>{const s=new Set();for(const e of [...(G.beasts||[]),...(G.animals||[])])if(vis[idx(e.x,e.y)])s.add(e);return s;};
 function restEvent(T){
   if(G.st.vie<T.vie)return ''+NOM_FOREUSE+' est attaquée';
-  for(const b of G.beasts||[])if(vis[idx(b.x,b.y)]&&!T.seen.has(b))return `${BEASTS[b.sp].n.toLowerCase()} en vue`;
-  for(const a of G.animals||[])if(vis[idx(a.x,a.y)]&&!T.seen.has(a))return `${SPECIES[a.sp].n.toLowerCase()} en vue`;
+  for(const b of G.beasts||[])if(vis[idx(b.x,b.y)]&&!T.seen.has(b)&&!aOuvrage(b))return `${BEASTS[b.sp].n.toLowerCase()} en vue`;
+  for(const a of G.animals||[])if(vis[idx(a.x,a.y)]&&!T.seen.has(a)&&!aOuvrage(a))return `${SPECIES[a.sp].n.toLowerCase()} en vue`;
   for(const b of G.beasts||[])if(b.hunt>0&&vis[idx(b.x,b.y)])return `${BEASTS[b.sp].n.toLowerCase()} vous a repéré`;
   for(const a of G.animals||[])if(a.aware&&vis[idx(a.x,a.y)])return `${SPECIES[a.sp].n.toLowerCase()} vous a repéré`;
   return null;}
@@ -266,11 +266,13 @@ function inspectHTML(c){const {x,y}=c||HOV;if(x<0||y<0||x>=W||y>=H)return '';con
   else if(occ){const isB=(G.beasts||[]).includes(occ),sp=isB?BEASTS[occ.sp]:SPECIES[occ.sp],key=isB?sp.key:'puce',
     hp=Math.max(0,occ.hp??pvDe(sp));
     const P=isB&&sp.pack&&G.packs?G.packs[occ.pack]:null;
-    const state=isB?(occ.hunt>0?(occ.sees?'en chasse':occ.search>0?'fouille les environs':'remonte la trace'):P?(P.pause>0?'au repos':'en route'):'erre'):({attack:'attaque',flee:'recule',follow:'suit',hold:'observe',seek:'remonte la trace',search:'fouille les environs'}[occ.mode]||'n’a rien repéré');
+    const ouv=aOuvrage(occ)?(ouvrAlerte(occ)?'alertée':'à l’ouvrage'):'';
+    const state=ouv?ouv:isB?(occ.hunt>0?(occ.sees?'en chasse':occ.search>0?'fouille les environs':'remonte la trace'):P?(P.pause>0?'au repos':'en route'):'erre'):({attack:'attaque',flee:'recule',follow:'suit',hold:'observe',seek:'remonte la trace',search:'fouille les environs'}[occ.mode]||'n’a rien repéré');
     const me=hitChance(robotPre(),sp.def+terrModDe(sp,x,y)),them=isB||occ.mode==='attack'?hitChance(sp.pre,robotDef()):null;
     out.push(head(ICON[isB?'bz'+occ.sp+'r':'an'+occ.sp+'r'],sp.n,`${state} · ${dt}`),
       `<div class="kv"><span>PV <b>${hp}/${pvDe(sp)}</b></span><span>DÉG <b>${dmgTxt(sp)}</b></span><span>PRE <b>${sp.pre}</b></span><span>DEF <b>${sp.def+terrModDe(sp,x,y)}</b></span><span title="Durée d’un pas sur cette case : plus petit, plus rapide">PAS <b>${Math.round(dpasDe(occ,sp))}</b></span><span title="Durée d’un coup : 50 frappe deux fois par battement, 200 une fois sur deux">COUP <b>${dcoupDe(occ,sp)}</b></span></div>`,
-      ((isB?!(occ.hunt>0):!occ.mode)?`<p class="eye" title="Chance qu’il vous repère à chaque tour">${EYE_SVG} <b>${detectChance(occ)} %</b></p>`:''),
+      (ouv?`<p class="ouvrp">${ouv==='alertée'?'MOBILE EN ARRÊT. ORIENTATION : UNITÉ. PÉRIMÈTRE DE DÉCOUPE FRANCHI.':'MOBILE IGNORE L’UNITÉ. ACTIVITÉ : DÉCOUPE.'} CLASSEMENT MAINTENU : MENACE.</p>`:'')+
+      (!ouv&&(isB?!(occ.hunt>0):!occ.mode)?`<p class="eye" title="Chance qu’il vous repère à chaque tour">${EYE_SVG} <b>${detectChance(occ)} %</b></p>`:''),
       `<p>Toucher <b style="color:${chanceCol(me)}">${me} %</b> · Subir <b style="color:${them==null?'var(--dim)':chanceCol(100-them)}">${them==null?'—':them+' %'}</b></p>`,
       `<p>${BEHAV[key]||''}</p>`);}
   else out.push(head('',tn,dt));

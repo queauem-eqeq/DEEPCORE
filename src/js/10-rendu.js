@@ -533,6 +533,22 @@ function fxCouche(){
      px=Math.round((f.o.x-camX)*16)+7,py=Math.round((f.o.y-camY)*16)-10-(reduced?2:Math.min(2,Math.floor(p*12)));
      ctx.fillStyle='#000';ctx.fillRect((px-1)*u,(py-1)*u,3*u,9*u);ctx.fillStyle='#fff';ctx.fillRect(px*u,py*u,u,5*u);
        ctx.fillRect(px*u,(py+6)*u,u,u);ctx.fillStyle=PAL['1'];}
+   /* Ferrailleuses à l'ouvrage (28 novembre 2026). Découpe : un point blanc là où la ferrailleuse touche la coque, et trois
+      étincelles d'un pixel, couleur accent, qui jaillissent vers elle et changent de place douze fois par seconde. Alertée (elle
+      s'arrête, la foreuse est dans le périmètre de son épave) : un « ? » blanc cerné de noir au-dessus d'elle, fixe, tant que dure
+      l'avertissement — même dessin que le « ! » du repérage. Opaque, sur la grille des pixels de tuile. */
+   for(const f of FX)if(f.kind==='etinc'&&G.beasts.includes(f.o)&&vis[idx(f.o.x,f.o.y)]){const p=fxP(f),ph=reduced?0:Math.floor(p*12),
+     bx=Math.round((f.o.x-camX)*16)+7+f.dx*7,by=Math.round((f.o.y-camY)*16)+7+f.dy*7;
+     ctx.fillStyle='#ffffff';ctx.fillRect(bx*u,by*u,u,u);ctx.fillStyle=PAL['1'];
+     // elles glissent le long de la plaque, de part et d'autre du point de coupe, à 3-7 pixels : hors du corps de la ferrailleuse
+     const tx=-f.dy,ty=f.dx,ax=-f.dx,ay=-f.dy;
+     for(let k=0;k<5;k++){const h=(ph*7+k*13+f.s*3)%35,cote=k&1?1:-1,l=(3+h%5)*cote,r=(h/5|0)%3;
+       const ex=tx||ty?tx*l+ax*r:l,ey=tx||ty?ty*l+ay*r:((h/7|0)%5-2);
+       ctx.fillStyle=k?PAL['1']:'#ffffff';ctx.fillRect((bx+ex)*u,(by+ey)*u,u,u);}}
+   for(const b of G.beasts||[])if(b.role==='ferraille'&&ouvrAlerte(b)&&vis[idx(b.x,b.y)]&&beastVisible(b)){
+     const px=Math.round((b.x-camX)*16)+6,py=Math.round((b.y-camY)*16)-10,Q=['xxx','..x','.xx','.x.','...','.x.'];
+     ctx.fillStyle='#000';for(let j=0;j<6;j++)for(let i=0;i<3;i++)if(Q[j][i]==='x')ctx.fillRect((px+i-1)*u,(py+j-1)*u,3*u,3*u);
+     ctx.fillStyle='#fff';for(let j=0;j<6;j++)for(let i=0;i<3;i++)if(Q[j][i]==='x')ctx.fillRect((px+i)*u,(py+j)*u,u,u);}
    for(const f of FX)if(f.kind==='sonar'){const R=fxP(f)*f.r*16,cx=Math.round((f.x+.5-camX)*16),cy=Math.round((f.y+.5-camY)*16),
      w=Math.ceil(vw/u),h=Math.ceil(vh/u),q=R*Math.SQRT1_2;
      const dot=(px,py)=>{if(px>=0&&py>=0&&px<w&&py<h)ctx.fillRect(px*u,py*u,u,u);};

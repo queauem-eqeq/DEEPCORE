@@ -140,7 +140,8 @@ function tryMove(dx,dy){if(PHASE)return;   // foreuse démontée : elle ne march
   const bz=beastAt(nx,ny);
   // surprise : ne vous a pas repéré
   if(bz){const sp=BEASTS[bz.sp];G.turn++;G.msg=null;engage();camoCasse();bz.leurre=0;
-    /* frappé, il oublie la balise */const sur=!(bz.hunt>0),cr=sur||roll((G.st.crit??5)+critBonus());
+    /* frappé, il oublie la balise */const sur=!(bz.hunt>0)&&!ouvrAlerte(bz),cr=sur||roll((G.st.crit??5)+critBonus());
+    ouvrAttaque(bz);   // une ferrailleuse frappée : tout son groupe quitte l'ouvrage (coup par surprise si elle travaillait)
     {const ch=hitChance(robotPre(),sp.def+terrModDe(sp,nx,ny));if(!sur&&!roll(ch)){if(!bz.hunt)alerte(bz);bz.hunt=1;spot(bz);
       addFx({kind:'lunge',robot:true,dx,dy,dur:180});addFx({kind:'num',x:nx,y:ny,txt:'0',col:'#8aa9a2',dur:750});
       say(`${NOM_FOREUSE} rate ${leNom(sp)} (${ch} %).`);SFX.whoosh();pass(coupDur());computeFOV();render();if(G.over&&G.over.dead)dead();return;}}
@@ -154,7 +155,7 @@ function tryMove(dx,dy){if(PHASE)return;   // foreuse démontée : elle ne march
     else{say(`${tag}${NOM_FOREUSE} percute ${leNom(sp)} : −${dm} PV (${bz.hp}/${pvDe(sp)}).`,'warn');SFX.coup();}
     pass(coupDur());computeFOV();render();if(G.over&&G.over.dead)dead();return;}
   const an=animalAt(nx,ny);
-  if(an){const sp=SPECIES[an.sp];G.turn++;G.msg=null;engage();camoCasse();const sur=!an.aware,cr=sur||roll((G.st.crit??5)+critBonus());
+  if(an){const sp=SPECIES[an.sp];G.turn++;G.msg=null;engage();camoCasse();const sur=!an.aware,cr=sur||roll((G.st.crit??5)+critBonus());ouvrAttaque(an);
     {const ch=hitChance(robotPre(),sp.def+terrModDe(sp,nx,ny));if(!sur&&!roll(ch)){an.aware=1;an.enraged=true;spot(an);
       addFx({kind:'lunge',robot:true,dx,dy,dur:180});addFx({kind:'num',x:nx,y:ny,txt:'0',col:'#8aa9a2',dur:750});
       say(`${NOM_FOREUSE} rate ${leNom(sp)} (${ch} %).`);SFX.whoosh();pass(coupDur());computeFOV();render();if(G.over&&G.over.dead)dead();return;}}

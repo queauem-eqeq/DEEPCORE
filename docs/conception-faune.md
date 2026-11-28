@@ -36,6 +36,31 @@ et maximal, et porte une **valeur de menace** fixée à la main.
   son niveau 1, et les écartés quittent son niveau 1 (pas sa banque, ni les autres niveaux). Même chose pour les modules
   (par identifiant, niveau 1 relevé à quatre modules). Essai : `outils/scripts/test-astroport.js`.
 
+### Ferrailleuses « à l'ouvrage » (28 novembre 2026)
+
+Un groupe de rôle `ferraille` **ignore la foreuse** : ni la vue ni le bruit ne le mettent en chasse ; vacarme d'une station,
+balise, laser ou mine qui le touche n'y changent rien. Il travaille : halte de découpe de **6 à 12 battements** à son épave
+(chaque membre gagne un poste au contact d'une plaque de coque ; étincelles d'un pixel, grésillement discret si on le voit),
+puis la navette jusqu'au sas du dépôt, et retour. Il contourne la foreuse sans la frapper.
+
+- **Provocation par l'attaque** : un coup de la foreuse sur un membre, ou une capsule nuisible lancée sur lui (charge, batterie,
+  court-circuit, surrégime), et **tout le groupe** passe en chasse. Frapper une ferrailleuse à l'ouvrage est un **coup par surprise**.
+- **Provocation par l'approche** : la foreuse à **3 cases ou moins de l'emprise de leur épave** (ou dedans), vue par un membre
+  (10 cases au plus, ligne de vue ; pas sous fumigène ni camouflage). D'abord **un battement d'avertissement** : elles s'arrêtent
+  face à la foreuse, un « ? » blanc cerné de noir au-dessus d'elles (« ALERTÉE », journal : « PÉRIMÈTRE DE DÉCOUPE… MOBILES EN
+  ARRÊT »). Ressortie aussitôt : elles reprennent l'ouvrage. Restée ou avancée : chasse (« MOBILES : DÉCOUPE INTERROMPUE »).
+  Une ferrailleuse alertée n'est plus surprise.
+- Provoqué, le groupe chasse, cherche et fouille comme tout groupe ; quand plus aucun membre ne chasse, il **retourne à
+  l'ouvrage** (à l'épave d'abord) et redevient indifférent.
+- **Interface** : « À L'OUVRAGE » / « ALERTÉE » sous la ligne de la créature dans « En vue » ; fiche : « MOBILE IGNORE L'UNITÉ.
+  ACTIVITÉ : DÉCOUPE. CLASSEMENT MAINTENU : MENACE. » (sans l'œil de détection). Journal, une fois par partie : la même phrase.
+  Exploration automatique, repos et trajets ne s'arrêtent pas pour une ferrailleuse à l'ouvrage.
+- Vaut pour **tout groupe** de rôle `ferraille` ; un groupe sans épave (hors du niveau 1) n'est provoqué que par l'attaque.
+  **Lab → Groupes → Rôle** : Aucun, Ferraille, Garde (« aucun » est enregistré tel quel). Les gardes sont des ennemis ordinaires.
+- Réglages en tête de section dans `08-faune.js` : `OUVR_R` (3), `OUVR_VUE` (10), `OUVR_ALERTE` (1), `OUVR_DECOUPE` ([6, 12]).
+  Code : `ouvrTick`, `ouvrJoue`, `ouvrAttaque`, `aOuvrage`, `ouvrAlerte`, état du groupe dans `G.patr[id].ouv` ('' | 'alerte' |
+  'hostile'). Essai : `outils/scripts/test-ouvrage.js`.
+
 ### Lieux, densité et valeurs mesurées
 
 - **Trois lieux** (`lieuDe`) : l'**extérieur** (terrain naturel, poches et cavernes comprises), le **bâti** (sol des bâtiments) et les **tunnels**. Le budget de chaque niveau est réparti entre eux (`GROUPES.niv[n].part`, fenêtre LIFE, en % du budget) : niveau 1 : 75 / 20 / 5 ; niveau 2 : 80 / 18 / 2 ; niveau 3 : 35 / 60 / 5 (extérieur / bâti / tunnels), ramenées à 100. Un lieu absent de la carte rend sa part aux autres ; un lieu ne reçoit jamais plus de **trois fois sa part de surface** (`PART_PLAFOND`).

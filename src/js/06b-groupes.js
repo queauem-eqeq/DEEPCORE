@@ -26,6 +26,8 @@ const LIEUX=[['ext','Extérieur'],['bati','Bâti'],['tunnel','Tunnels']];
    dans le dépôt. Le rôle se lit dans g.role (et sur chaque créature posée, o.role). Écartés du niveau 1 : les groupes à mines,
    Broyeur, artilleurs, englueur et les puces en masse (GR_ASTRO_HORS). */
 const GR_ROLES=['ferraille','garde'];
+// Lab → Groupes, réglage du rôle (28 novembre 2026). « aucun » : ennemi ordinaire, même pour un groupe de l'Astroport.
+const GR_ROLES_UI=[['aucun','Aucun'],['ferraille','Ferraille (à l’ouvrage)'],['garde','Garde']];
 const GR_ASTRO=[
   {"cout":5,"f":1,"m":[{"k":"crabos","max":3,"min":2}],"n":"Ferrailleuses","on":1,"pats":["navette"],"lieux":["ext"],"role":"ferraille"},
   {"cout":7,"f":1,"m":[{"k":"crabos","max":2,"min":2},{"k":"soudeur","max":1,"min":1}],"n":"Équipe de découpe","on":1,"pats":["navette"],"lieux":["ext"],"role":"ferraille"},
@@ -91,7 +93,7 @@ function groupesSains(d){const ks=ESPECES().map(e=>e[0]),
   n=(v,mn,mx,df)=>Number.isFinite(+v)&&v!==''&&v!=null?Math.max(mn,Math.min(mx,Math.round(+v))):df;
   if(!d||!Array.isArray(d.liste))return null;
   const liste=d.liste.slice(0,40).map(g=>({n:String(g.n||'Groupe').slice(0,30),
-    role:GR_ROLES.includes(g.role)?g.role:((GR_ASTRO.find(x=>x.n===g.n)||{}).role||''),lieux:[...new Set(Array.isArray(g.lieux)?g.lieux:[])].filter(v=>LIEUX.some(l=>l[0]===v)),cout:n(g.cout,1,500,1),on:g.on?1:0,f:[0,1,2].includes(+g.f)?+g.f:1,
+    role:GR_ROLES.includes(g.role)||g.role==='aucun'?g.role:((GR_ASTRO.find(x=>x.n===g.n)||{}).role||''),lieux:[...new Set(Array.isArray(g.lieux)?g.lieux:[])].filter(v=>LIEUX.some(l=>l[0]===v)),cout:n(g.cout,1,500,1),on:g.on?1:0,f:[0,1,2].includes(+g.f)?+g.f:1,
     // liste vide permise : le style est alors tiré parmi tous
     pats:[...new Set(Array.isArray(g.pats)?g.pats:[g.pat||'errance'])].filter(v=>PATS.some(p=>p[0]===v)),
     m:(Array.isArray(g.m)?g.m:[]).map(m=>m&&m.k===ANC_PUCE?Object.assign({},m,{k:'puce'}):m).filter(m=>m&&ks.includes(m.k)).slice(0,6).map(m=>{const a=n(m.min,0,20,1),b=n(m.max,1,20,Math.max(1,a));return {k:m.k,min:Math.min(a,b),max:Math.max(a,b)};})}));
@@ -141,6 +143,8 @@ function buildGroupes(){const E=ESPECES(),ic=k=>ICON[k==='puce'?'an0r':'bz'+BEAS
       ${g.pats.length<PATS.length?`<select data-f="addp" aria-label="Ajouter une patrouille"><option value="">+ Ajouter…</option>${PATS.filter(([v])=>!g.pats.includes(v)).map(([v,l])=>`<option value="${v}">${l}</option>`).join('')}</select>`:''}</div>
     <h3>Lieux <span>${(g.lieux||[]).length?'seulement là':'partout'}</span></h3>
     <div class="grow">${LIEUX.map(([v,l])=>`<label class="gon"><input type="checkbox" data-f="lieu" data-v="${v}"${(g.lieux||[]).includes(v)?' checked':''}>${l}</label>`).join('')}</div>
+    <h3>Rôle <span>${g.role==='ferraille'?'ignore la foreuse, sauf attaque ou approche':g.role==='garde'?'ennemi ordinaire, au sas':'ennemi ordinaire'}</span></h3>
+    <div class="grow"><select data-f="role" aria-label="Rôle du groupe">${GR_ROLES_UI.map(([v,l])=>`<option value="${v}"${(g.role&&g.role!=='aucun'?g.role:'aucun')===v?' selected':''}>${l}</option>`).join('')}</select></div>
     <h3>Composition <span>effectif : ${grEffectif(g)}</span></h3>
     <div class="gmb">${g.m.map((m,j)=>`<div class="gm" data-m="${j}"><img src="${ic(m.k)}" alt=""><select data-f="k" aria-label="Espèce">${E.map(([k,l])=>`<option value="${k}"${k===m.k?' selected':''}>${grEsc(l)}</option>`).join('')}</select>
       <input type="number" data-f="min" min="0" max="20" step="1" value="${m.min}" aria-label="Effectif minimal"><span>à</span><input type="number" data-f="max" min="1" max="20" step="1" value="${m.max}" aria-label="Effectif maximal"><button class="gx" data-a="delm" aria-label="Retirer cette espèce du groupe" title="Retirer cette espèce">×</button></div>`).join('')||'<p class="mnote">Groupe vide : il ne sera pas posé.</p>'}</div>
@@ -194,6 +198,7 @@ $('grEdit').addEventListener('change',e=>{const t=e.target,g=GROUPES.liste[GR_SE
   else if(f==='cout')g.cout=nb(1,500);else if(f==='addp'){if(t.value&&!g.pats.includes(t.value))g.pats.push(t.value);
     }else if(f==='on')g.on=t.checked?1:0;
   else if(f==='lieu'){g.lieux=(g.lieux||[]).filter(v=>v!==t.dataset.v);if(t.checked)g.lieux.push(t.dataset.v);}
+  else if(f==='role')g.role=GR_ROLES.includes(t.value)?t.value:'aucun';   // « aucun » est gardé tel quel : sinon le rôle par défaut du groupe reviendrait
   saveGroupes();buildGroupes();});
 $('grEdit').addEventListener('click',e=>{const q=e.target.closest('button[data-fq]');if(q&&GROUPES.liste[GR_SEL]){GROUPES.liste[GR_SEL].f=+q.dataset.fq;saveGroupes();buildGroupes();const n=$('grEdit').querySelector(`button[data-fq="${q.dataset.fq}"]`);if(n)n.focus();return;}
   const t=e.target.closest('button[data-a]');if(!t)return;const L=GROUPES.liste,g=L[GR_SEL],a=t.dataset.a;if(!g)return;

@@ -1110,3 +1110,11 @@ Essais : 16-26 → seul 56 de vie restante ; **18-30 (retenu) → seul 52-53, 95
 - **Temps** (`mesure-perf.js`, même hasard) : génération 197 ms (taille 3, avant) → 246 ms (taille 4, Astroport ; 316 en taille 4
   avant l'Astroport) ; tour complet 6,3 → 8,3 ms en moyenne (p95 13,5 → 18) ; rendu 1,4 → 1,5 ms ; mémoire 15 → 45 Mo.
 - `outils/simul.py tout` : détection, fuite et combat inchangés (règles de combat non touchées).
+
+### Ferrailleuses à l'ouvrage (28 novembre 2026)
+
+- **Niveau 1** (12 cartes, ambiances tirées, groupes par défaut) : 27,8 créatures par carte, dont **16,5 à l'ouvrage (59 %)**,
+  5,3 gardes et 6,0 autres ; les périmètres de découpe (3 cases autour des épaves tenues) couvrent **20 %** de l'extérieur praticable.
+  Dehors, la menace active tombe donc à peu près au tiers de ce qu'elle était.
+- `test-ouvrage.js` : provoqué par un coup puis semé (fumigène), un groupe redevient indifférent en 24 battements.
+- `outils/simul.py tout` : détection, fuite et combat inchangés (arènes sans rôle).

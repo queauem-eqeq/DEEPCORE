@@ -260,6 +260,79 @@ function patInit(g,id,mb){const o=mb[0],P={pat:g.pat,hx:o.x,hy:o.y,k:0,pause:0,a
 function patRole(g,id,mb,epv){const P=G.patr[id];if(!P)return;P.role=g.role;for(const o of mb)o.role=g.role;
   if(g.role==='ferraille'&&epv>=0&&G.epaves[epv]){const e=G.epaves[epv];P.epave=epv;e.groupes.push(+id);for(const o of mb)o.epave=epv;
     const a=[P.hx,P.hy];P.pat='navette';P.pts=G.sas!=null?[a,[G.sas%W,(G.sas/W)|0]]:[a,...patPoints(P,1,8,16)];P.k=0;}}
+/* ---------- Ferrailleuses « à l'ouvrage » (28 novembre 2026) ----------
+   Une créature d'un groupe de rôle 'ferraille' IGNORE la foreuse : ni vue ni bruit ne la mettent en chasse, rien ne l'en distrait
+   (vacarme d'une station, balise, laser, mine). Elle travaille : quelques battements de découpe contre la coque de son épave
+   (étincelles, petit bruit si on la voit), puis la navette épave → sas du dépôt, et retour. Elle contourne la foreuse sans la frapper.
+   Le groupe est PROVOQUÉ (P.ouv = 'hostile') quand la foreuse
+     – frappe l'un de ses membres, ou lui lance une capsule nuisible (charge, batterie, court-circuit, surrégime) : ouvrAttaque ;
+     – s'approche de leur épave (OUVR_R cases ou moins de son emprise, ou dedans), sous les yeux d'un membre (OUVR_VUE cases, ligne de
+       vue) : d'abord un avertissement (P.ouv = 'alerte', OUVR_ALERTE battement(s) : elles s'arrêtent et se tournent vers elle, un « ? »
+       au-dessus d'elles) ; si la foreuse ressort aussitôt, elles reprennent l'ouvrage ; si elle reste ou avance, chasse.
+   Provoqué, le groupe chasse comme tout groupe (chasse, recherche, oubli). Quand plus aucun membre ne chasse, il retourne à l'ouvrage,
+   indifférent de nouveau (retour à l'épave). Les gardes (rôle 'garde') sont des ennemis ordinaires. */
+const OUVR_R=3,              // rayon de provocation autour de l'emprise de l'épave
+  OUVR_VUE=10,               // il faut qu'un membre du groupe voie la foreuse, à cette distance au plus
+  OUVR_ALERTE=1,             // battements d'avertissement avant la chasse
+  OUVR_DECOUPE=[6,12];       // battements de découpe contre la coque, à chaque passage à l'épave
+const ouvrP=o=>o&&o.role==='ferraille'&&o.gi!=null&&G.patr?G.patr[o.gi]||null:null;
+// indifférente : ferrailleuse dont le groupe n'a pas été provoqué (à l'ouvrage, ou alertée)
+const aOuvrage=o=>{const P=ouvrP(o);return !!P&&P.ouv!=='hostile';};
+const ouvrAlerte=o=>{const P=ouvrP(o);return !!P&&P.ouv==='alerte';};
+const ouvrEpave=P=>P&&P.epave!=null&&P.epave>=0&&G.epaves?G.epaves[P.epave]||null:null;
+// distance (en cases, Tchebychev) d'un point à l'emprise d'une épave : 0 dedans
+const ouvrDist=(e,x,y)=>Math.max(e.x-x,0,x-(e.x+e.w-1),e.y-y,y-(e.y+e.h-1));
+function ouvrProvoque(id,zone){const P=G.patr&&G.patr[id];if(!P||P.ouv==='hostile')return;P.ouv='hostile';P.al=0;let vu=false;
+  for(const o of [...(G.beasts||[]),...(G.animals||[])]){if(o.gi!==+id||o.role!=='ferraille')continue;
+    if(G.beasts.includes(o)){if(!o.hunt)alerte(o);o.hunt=1;o.leurre=0;}else{if(!o.aware)alerte(o);o.aware=1;o.enraged=true;}
+    spot(o);if(vis[idx(o.x,o.y)])vu=true;}
+  if(vu&&zone){sayMore('MOBILES : DÉCOUPE INTERROMPUE. CIBLE : UNITÉ.','warn');SFX.spot();}}
+// la foreuse frappe (ou vise d'une capsule nuisible) une ferrailleuse : tout son groupe passe en chasse
+function ouvrAttaque(o){const P=ouvrP(o);if(P&&P.ouv!=='hostile')ouvrProvoque(o.gi,false);}
+// une fois par battement, avant la détection
+function ouvrTick(){if(!G.patr||G.over)return;const mb={};
+  for(const o of [...(G.beasts||[]),...(G.animals||[])])if(o.role==='ferraille'&&o.gi!=null&&G.patr[o.gi])(mb[o.gi]=mb[o.gi]||[]).push(o);
+  const cache=G.eff&&(G.eff.fum>0||G.eff.camo>0);
+  for(const id in mb){const P=G.patr[id],m=mb[id];
+    if(P.ouv==='hostile'){   // chasse et fouille finies : retour à l'ouvrage, à l'épave d'abord
+      if(!m.some(o=>o.hunt>0||o.aware||o.leurre)){P.ouv='';P.k=0;P.pause=0;P.age=0;P.bh=null;P.bl=0;
+        if(m.some(o=>vis[idx(o.x,o.y)]))logPush('MOBILES : RETOUR À L’ACTIVITÉ. DÉCOUPE.','info');}
+      continue;}
+    // à l'ouvrage, rien ne les met en chasse : on efface ce que le vacarme, une balise ou un coup perdu ont pu y mettre
+    for(const o of m)if(o.hunt>0||o.aware||o.leurre){o.hunt=0;o.aware=0;o.enraged=false;o.leurre=0;forget(o);}
+    const e=ouvrEpave(P),
+      dedans=!!e&&!cache&&ouvrDist(e,G.px,G.py)<=OUVR_R&&m.some(o=>cheb(o,G.px,G.py)<=OUVR_VUE&&los(o.x,o.y,G.px,G.py));
+    if(!dedans){if(P.ouv==='alerte'){P.ouv='';P.al=0;}}
+    else if(P.ouv!=='alerte'){P.ouv='alerte';P.al=OUVR_ALERTE;
+      for(const o of m){const dx=Math.sign(G.px-o.x);if(dx)o.dir=dx;}
+      if(m.some(o=>vis[idx(o.x,o.y)])){sayMore(`PÉRIMÈTRE DE DÉCOUPE : ${epNom(e)}. MOBILES EN ARRÊT. ORIENTATION : UNITÉ.`,'warn');SFX.blocked();}}
+    else if(--P.al<=0)ouvrProvoque(id,true);
+    // la première fois qu'une ferrailleuse en vue, à OUVR_VUE cases au plus, ignore la foreuse
+    if(!G.ouvrVu&&P.ouv!=='hostile'&&m.some(o=>vis[idx(o.x,o.y)]&&cheb(o,G.px,G.py)<=OUVR_VUE)){G.ouvrVu=1;
+      logPush('MOBILE IGNORE L’UNITÉ. ACTIVITÉ : DÉCOUPE. CLASSEMENT MAINTENU : MENACE.','info');}}}
+/* Le travail d'une ferrailleuse calme, à la place du pas de patrouille (rend true si elle a joué) : alertée, elle s'arrête face à
+   la foreuse ; en halte à son épave (P.k = 0), elle rejoint la coque puis la découpe. Ailleurs, la navette ordinaire. */
+let OUVR_SON=-1;
+// une plaque de coque de l'épave k au contact orthogonal de (x,y) : sa direction [dx, dy], ou null
+const ouvrCoque=(k,x,y)=>{for(const [dx,dy] of [[0,-1],[0,1],[-1,0],[1,0]]){const i=idx(x+dx,y+dy);if(G.epI&&G.epI[i]===k&&blocks(G.t[i]))return [dx,dy];}return null;};
+function ouvrJoue(o,fits){const P=ouvrP(o);if(!P||P.ouv==='hostile')return false;
+  if(P.ouv==='alerte'){const dx=Math.sign(G.px-o.x);if(dx)o.dir=dx;return true;}
+  const e=ouvrEpave(P);if(!e||!(P.pause>0)||P.k!==0)return false;
+  // les postes de découpe : cases praticables au contact (orthogonal) d'une plaque de coque de l'épave ; à défaut, le bord de l'emprise
+  if(!P.postes){P.postes=[];for(let y=e.y-1;y<=e.y+e.h;y++)for(let x=e.x-1;x<=e.x+e.w;x++)
+    if(x>0&&y>0&&x<W-1&&y<H-1&&canWalk(G.t[idx(x,y)],true)&&ouvrCoque(P.epave,x,y))P.postes.push(idx(x,y));}
+  const pr=P.postes.length?(x,y)=>Math.min(...P.postes.map(c=>Math.max(Math.abs(c%W-x),Math.abs(((c/W)|0)-y)))):(x,y)=>Math.max(0,ouvrDist(e,x,y)-1);
+  const d=pr(o.x,o.y);
+  if(d>0){let best=null,bv=d;for(const [dx,dy] of DIRS){const x=o.x+dx,y=o.y+dy;if(!fits(x,y)||!diagOk(o.x,o.y,dx,dy))continue;
+      const v=pr(x,y);if(v<bv){bv=v;best=[x,y,dx];}}
+    if(best){o.x=best[0];o.y=best[1];if(best[2])o.dir=best[2];}return true;}
+  // à son poste : face à la plaque, des étincelles là où elle coupe
+  const c=ouvrCoque(P.epave,o.x,o.y)||[Math.sign(Math.max(e.x,Math.min(e.x+e.w-1,o.x))-o.x),Math.sign(Math.max(e.y,Math.min(e.y+e.h-1,o.y))-o.y)],
+    [dx,dy]=c;
+  if(dx)o.dir=dx;
+  if(vis[idx(o.x,o.y)]&&beastVisible(o)&&Math.random()<.7){addFx({kind:'etinc',o,dx,dy,s:rnd(0,99),dur:700});
+    if(OUVR_SON!==G.turn){OUVR_SON=G.turn;if(SFX.decoupe)SFX.decoupe();}}
+  return true;}
 // une fois par battement : chaque groupe en patrouille regarde s'il est arrivé, fait sa halte, choisit le point suivant
 function patTick(){PATD={};PAT_BT++;if(!G.patr||G.over)return;const mb={};
   for(const o of [...(G.beasts||[]),...(G.animals||[])])if(o.gi!=null)(mb[o.gi]=mb[o.gi]||[]).push(o);
@@ -273,7 +346,7 @@ function patTick(){PATD={};PAT_BT++;if(!G.patr||G.over)return;const mb={};
         P.age=0;P.bh=null;P.bl=0;}
       continue;}
     const d=patD(P),h=Math.min(...m.map(o=>{const v=d[idx(o.x,o.y)];return v<0?9999:v;}));
-    if(h<=P.sp||++P.age>90){P.pause=P.pat==='ronde'?rnd(3,6):P.pat==='navette'?rnd(2,5):P.pat==='territoire'?rnd(8,20):P.pat==='garde'?rnd(15,40):P.pat==='sentinelle'?rnd(40,80):9999;P.bh=null;P.bl=0;}
+    if(h<=P.sp||++P.age>90){P.pause=P.role==='ferraille'&&P.k===0&&P.epave>=0?rnd(OUVR_DECOUPE[0],OUVR_DECOUPE[1]):P.pat==='ronde'?rnd(3,6):P.pat==='navette'?rnd(2,5):P.pat==='territoire'?rnd(8,20):P.pat==='garde'?rnd(15,40):P.pat==='sentinelle'?rnd(40,80):9999;P.bh=null;P.bl=0;}
     /* Demi-tour, en dernier recours (20 novembre 2026) : un groupe qui n'avance plus vers son point depuis PAT_BLOC battements
        malgré l'échange de places (patSwap) — un ennemi en chasse ou une mine armée lui barre le passage — renonce et
        repart vers son point précédent (ronde, sentinelle) ou s'en choisit un autre (territoire). */
@@ -319,11 +392,11 @@ const patDe=o=>{const P=G.patr&&G.patr[o.gi];return P?P.pat:null;};
    l'horloge de chaque bête, dans animalJoue. L'humeur décidée ici sert jusqu'au battement suivant. */
 function animalsAct(){
   turnStealth();distReset();
-  if(G&&!G.over)patTick();
+  if(G&&!G.over){patTick();ouvrTick();}   // ferrailleuses à l'ouvrage : avant toute détection
   if(!G.animals||G.over)return;let fled=null,swarm=null;
   // Puce étourdie par une batterie : comme les autres robots, elle ne fait rien (22 novembre 2026 ; avant, elle n’en tenait pas compte)
   for(const a of G.animals){if(G.over)break;if(a.stun>0){a.stun--;continue;}
-    const sp=SPECIES[a.sp],sees=voitForeuse(a,!!a.aware);
+    const sp=SPECIES[a.sp],sees=aOuvrage(a)?false:voitForeuse(a,!!a.aware);
     if(sees){if(!a.aware)alerte(a);a.aware=1;spot(a);}
     else if(a.aware&&a.search>0&&--a.search===0){a.aware=0;a.enraged=false;forget(a);}   // fouille terminée : il oublie
     else if(a.aware&&!a.mem)a.aware=0;
@@ -438,7 +511,7 @@ function poseGroupe(g,gi,id,cases){{const l=g.pats&&g.pats.length?g.pats:g.pat?[
         else{const sp=BEASTS[s],b=newBeast(s,x,y,(sp.pack||g.pat==='voyage')?id:-1,gi);b.gi=id;if(!beastFits(b,x,y))continue;
           G.beasts.push(b);posB.push(b);put=true;}}
       if(!put){ok=false;break;}}
-    if(ok){patInit(g,id,[...posB,...posA]);if(g.role)patRole(g,id,[...posB,...posA],epv);return true;}
+    if(ok){patInit(g,id,[...posB,...posA]);if(GR_ROLES.includes(g.role))patRole(g,id,[...posB,...posA],epv);return true;}
     G.animals=G.animals.filter(a=>!posA.includes(a));G.beasts=G.beasts.filter(b=>!posB.includes(b));}
   return false;}
 let NIV_GEN=1;   // niveau de la descente en cours de génération (posé par newGame et niveauSuivant) : la menace monte avec lui
@@ -630,7 +703,7 @@ function beastsAct(){
   for(const b of G.beasts){if(G.over)break;const sp=BEASTS[b.sp];
     if(b.bers>0)b.bers--;if(b.camo>0)b.camo--;if(b.tient&&!nearRobot(b))b.tient=0;
     if(b.stun>0){b.stun--;continue;}                                                 // étourdi par une batterie : il ne fait rien
-    const sees=voitForeuse(b,b.hunt>0);
+    const sees=aOuvrage(b)?false:voitForeuse(b,b.hunt>0);   // à l'ouvrage, elle ne voit pas la foreuse (ouvrTick)
     if(sees){if(!b.hunt&&sp.alarm)alarms.push(b);if(!b.hunt&&beastVisible(b))charged=charged||sp;if(!b.hunt)alerte(b);b.hunt=1;spot(b);
       if(G.px!==b.x)b.dir=Math.sign(G.px-b.x);
       // seuls les relais partagent ce qu'un des leurs voit — pas les autres espèces de leur groupe (20 novembre 2026)
@@ -680,7 +753,7 @@ function beastJoue(b){const sp=BEASTS[b.sp],fits=(x,y)=>beastFits(b,x,y),mouille
   else if(b.hunt>0&&b.mem)seekStep(b,fits,DC,mouille);
   else{   // au calme : patrouille, retour à terre d'un terrestre, bande ou errance — un pas par battement au plus,
           // quelle que soit la vitesse de l'espèce (règle du 20 novembre 2026, conservée telle quelle)
-    if(!patMove(b,fits)&&!sortEau(b,sp,fits)){if(b.pack>=0&&patDe(b)!=='errance')packMove(b);else errStep(b,fits);}
+    if(!ouvrJoue(b,fits)&&!patMove(b,fits)&&!sortEau(b,sp,fits)){if(b.pack>=0&&patDe(b)!=='errance')packMove(b);else errStep(b,fits);}
     return Math.max(TICK,dpasDe(b,sp));}
   return dpasDe(b,sp);}
 // Plus de réparation automatique : seule l'énergie se recharge à chaque battement.

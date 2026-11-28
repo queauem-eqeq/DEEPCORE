@@ -82,6 +82,8 @@ const SFX={
     noiz(.6,.18,600,'bandpass',.25,200);},
   break(){noiz(.45,.35,1500,'lowpass',0,200);tone(95,.35,'sawtooth',.12,35);noiz(.2,.15,3500,'highpass',.05);},
   spot(){tone(880,.07,'square',.05);tone(1320,.09,'square',.05,null,.08);},
+  // découpe d'une ferrailleuse contre une coque (28 novembre 2026) : grésillement bref et discret, seulement si on la voit
+  decoupe(){const r=.9+Math.random()*.2;noiz(.05,.03,5200*r,'highpass');tone(2600*r,.03,'square',.008,1900*r);},
   // sonar : « blip blip » répété pendant toute la durée du balayage (s, en secondes)
   sonar(s){const n=Math.max(3,Math.ceil(s/.62));for(let i=0;i<n;i++){tone(1480,.13,'sine',.09,1380,i*.62);
     tone(1480,.11,'sine',.045,1380,i*.62+.17);}},

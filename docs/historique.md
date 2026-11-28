@@ -350,3 +350,7 @@ Ce qui a été remplacé, et pourquoi (demandes de l'utilisateur, « chaque mach
   nouveautés s'y ajoutent une fois (marqueur `astro`). Le curseur « Taille » du menu Monde ne règle plus que GÉNÉRER LA
   CARTE.
 
+- Ferrailleuses « à l'ouvrage » : les groupes de rôle `ferraille` ignorent la foreuse (découpe à leur épave, navette vers le
+  sas) tant qu'on ne les attaque pas et qu'on n'approche pas de leur épave (3 cases ; un battement d'avertissement, « ? »).
+  Provoqué, le groupe chasse puis retourne à l'ouvrage. Rôle réglable dans Lab → Groupes. Un temps envisagé : chasse directe à
+  l'entrée du périmètre ; gardé l'avertissement d'un battement, plus lisible.

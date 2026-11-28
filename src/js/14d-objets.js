@@ -312,9 +312,9 @@ function consoCible(i,x,y){const o=G.inv[i];if(!o)return;const k=o.k,d=ITEMS[k],
   else if(k==='batterie'){if(moi){const E=G.eff=G.eff||{};E.recharge={t:RECUP_TOURS,v:(E.recharge?E.recharge.v:0)+V.energie};
     txt=`recharge en cours : +${V.energie} énergie sur ${RECUP_TOURS} battements`;
 addFx({kind:'ener',x,y,dur:1000,gr:fxGrains(12)});}
-    else if(c){c.hp=(c.hp??pvDe(sp))-V.choc;num('-'+V.choc,PAL['3']);son='laser';addFx({kind:'flash',beast:c,dur:220});
+    else if(c){ouvrAttaque(c);c.hp=(c.hp??pvDe(sp))-V.choc;num('-'+V.choc,PAL['3']);son='laser';addFx({kind:'flash',beast:c,dur:220});
       if(c.hp<=0){retire(c);txt=`la décharge détruit ${leNom(sp)}`;}
-      else{c.stun=V.etourdi;if(b){b.hunt=1;spot(b);}else{an.aware=1;spot(an);
+      else{c.stun=V.etourdi;ouvrAttaque(c);if(b){b.hunt=1;spot(b);}else{an.aware=1;spot(an);
         }txt=`${leNom(sp)} est électrisé : −${V.choc} PV, étourdi ${V.etourdi} battements`;}engage();}
     else{txt='la décharge se perd dans le sol';ton='warn';}}
   else if(k==='fumigene'){fumPose(x,y);txt=fumDedans()?'le nuage se répand, les ennemis perdent votre trace':'le nuage se répand là-bas';}
@@ -325,7 +325,7 @@ addFx({kind:'ener',x,y,dur:1000,gr:fxGrains(12)});}
     else{txt='le module grille sans rien alimenter';ton='warn';}}
   else if(k==='berserk'){if(moi){G.eff.berserk=V.duree;txt=`surrégime : CRIT +${V.crit} pendant ${V.duree} battements`;
     addFx({kind:'fury',x,y,dur:800});}
-    else if(b){b.bers=V.duree;b.hunt=1;spot(b);
+    else if(b){b.bers=V.duree;ouvrAttaque(b);b.hunt=1;spot(b);
       txt=`${leNom(sp)} passe en surrégime : ses coups sont critiques pendant ${V.duree} battements`;ton='warn';num('!!',PAL['3']);
       addFx({kind:'fury',x,y,dur:800});}
     else{txt='la dose se perd';ton='warn';}}
@@ -338,7 +338,7 @@ addFx({kind:'ener',x,y,dur:1000,gr:fxGrains(12)});}
   else if(k==='balise'){
     if(moi){const camo=G.eff&&G.eff.camo>0;if(camo)G.eff.camo=0;let n=0;
       /* sur la foreuse : tous savent où il est, et le camouflage se rompt */
-      for(const e of G.beasts||[])if(Math.max(Math.abs(e.x-x),Math.abs(e.y-y))<=V.rayon&&!(e.stun>0)){e.hunt=1;e.leurre=0;spot(e);n++;}
+      for(const e of G.beasts||[])if(Math.max(Math.abs(e.x-x),Math.abs(e.y-y))<=V.rayon&&!(e.stun>0)&&!aOuvrage(e)){e.hunt=1;e.leurre=0;spot(e);n++;}
       addFx({kind:'shake',amp:4,dur:250});txt=`la balise hurle sur ${NOM_FOREUSE} : ${n} ennemi${n>1?'s':''} alentour ${n>1?'savent':'sait'} où il est`+(camo?' ; le camouflage optique se rompt':'');ton='warn';}
     else{const q=balisePose(x,y);
       txt=`la balise tombe au sol et hurle : ${q} ennemi${q>1?'s':''} l’${q>1?'oublient':'oublie'} pour elle, pendant ${V.duree} battements`;}}
@@ -353,7 +353,7 @@ addFx({kind:'ener',x,y,dur:1000,gr:fxGrains(12)});}
     else{txt='le champ de phase se referme sur le vide';ton='warn';}}
   else if(k==='court'){if(moi){st.energie=0;txt='surtension : l’énergie tombe à zéro';ton='warn';addFx({kind:'shake',amp:5,dur:250});
     addFx({kind:'zap',ax:x-.5,ay:y-.5,bx:x+.5,by:y+.5,dur:320});addFx({kind:'zap',ax:x+.5,ay:y-.5,bx:x-.5,by:y+.5,dur:320});}
-    else if(b){b.stun=V.etourdi;b.tient=0;txt=`${leNom(sp)} est hors service pendant ${V.etourdi} battements`;num('HS',PAL['3']);
+    else if(b){b.stun=V.etourdi;b.tient=0;ouvrAttaque(b);txt=`${leNom(sp)} est hors service pendant ${V.etourdi} battements`;num('HS',PAL['3']);
       addFx({kind:'zap',ax:G.px,ay:G.py,bx:x,by:y,dur:320});addFx({kind:'flash',beast:b,dur:220});}
     else{txt='la surtension se perd dans le sol';ton='warn';}}
   const neuf=identifier(k);invTake(i);sacFix();SAC_H='';
@@ -375,7 +375,7 @@ function balisePose(x,y){const V=ITEM_VAL.balise;G.balises=G.balises||[];
   return baliseAppel(q);}
 // les ennemis à portée, ou en chasse, passent sur la balise : ils oublient la foreuse
 function baliseAppel(q){const V=ITEM_VAL.balise;let n=0;
-  for(const e of G.beasts||[]){if(e.leurre===q.id){n++;continue;}if(e.stun>0)continue;
+  for(const e of G.beasts||[]){if(e.leurre===q.id){n++;continue;}if(e.stun>0||aOuvrage(e))continue;   // à l'ouvrage : la balise ne les distrait pas
     // en chasse, souvenir gardé
     if(Math.max(Math.abs(e.x-q.x),Math.abs(e.y-q.y))<=V.rayon||e.hunt>0){e.leurre=q.id;e.hunt=1;e.search=0;e.tient=0;n++;}}
   return n;}
