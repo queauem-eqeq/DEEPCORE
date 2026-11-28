@@ -398,3 +398,11 @@ Ce qui a été remplacé, et pourquoi (demandes de l'utilisateur, « chaque mach
 - **Bug corrigé : `fxGrains`** (grains des effets de consommables), perdue avec la PR #58 (commit `753b007`) : éclats ramassés blessé,
   réparobots et station levaient une `ReferenceError` et la fin du geste sautait. Rétablie dans `10-rendu.js` ; le pilote ne la
   contourne plus ; `test-survie.js` joue ces gestes jusqu'au bout.
+
+## 28 novembre 2026 — chantier survie, bloc C : ennemis moins nombreux, plus dangereux
+- Décision de l'utilisateur : nombre × 0,6, dégâts × 1,6, recalés par simulation sur « un groupe affronté de face ≈ un tiers de la
+  vie ». Deux réglages par niveau dans `REGLES` (`MENACE_NB`, `MENACE_DEG`), par-dessus les réglages du joueur.
+- Essayé au pilote (séries de 14 à 16 parties) : 0,6 / 1,6 partout → prudent au noyau 3 sur 14, groupes du niveau 3 trop coûteux
+  (9e décile 78) ; dégâts 2,0 au niveau 1 → 11 prudents sur 16 morts à l'Astroport ; 0,5 / 1,2 aux niveaux 2-3 → survie correcte mais un
+  groupe y coûte peu (médiane 14-15). Retenu : **0,6 / 0,4 / 0,4** et **1,4 / 1,6 / 1,6** (prudent au noyau 13 sur 30, fonceur 3 sur 30).
+- Ferrailleuses de l'Astroport non réduites ; lasers des machines et mini-jeu des descentes inchangés ; explosions de mines multipliées.

@@ -28,6 +28,8 @@ Ne jamais lire un fichier en entier : y chercher la section utile (mot-clé).
 - `conception-joueur.md` : machines, butin, fabricateur, foreuse, horloge, combat, équipement, inventaire, capsules.
 - `conception-descente.md` : objectifs, cinématique d'intro, cinématique de forage, seconde descente (mini-jeu des mines).
 - `conception-interface.md` : direction visuelle, interface, souris, éditeur de tuiles, touches, sauvegarde des réglages.
+- `boucle-amelioration.md` : la boucle d'amélioration (ordre des chantiers, tableau des cibles : survie, vie par niveau, coût d'un groupe).
+- `arbitrage-survie.md` : les arbitrages du chantier survie (fuel, vie qui remonte, ennemis moins nombreux et plus dangereux).
 
 Documents d'histoire (recopiés du projet claude.ai le 28 novembre 2026 ; **ils font foi** pour l'histoire, le niveau 1, les terminaux, hacks et journal de bord, et les fiches de robots ; rien n'y est encore codé) :
 

@@ -1249,3 +1249,57 @@ se rejouent pas à l'identique (voir la référence) ; deux séries normales du 
   sont exclues des chiffres ci-dessus.
 - `simul.py tout` : détection, fuite et combat inchangés (1 Broyeur 95 % / 51 PV, Mastok + 2 Crabos 86 % / 36 PV) ; un combat dure
   trop peu pour que la vie qui remonte en marche compte.
+
+## Survie C (28 novembre 2026) : ennemis moins nombreux, plus dangereux
+
+`REGLES.MENACE_NB` = 0,6 / 0,4 / 0,4 et `REGLES.MENACE_DEG` = 1,4 / 1,6 / 1,6 (niveaux 1, 2, 3), par-dessus les réglages du joueur.
+Mêmes graines (1000 à 1029) et commandes que « Survie B » ; les essais de réglage passent par `pilote.py --regles '{…}'` sans toucher à `src/`.
+
+**Essais de dégrossissage** (14 à 16 parties par profil, série normale ; N = MENACE_NB, D = MENACE_DEG, par niveau) :
+
+| Réglage | Graines | Prudent au noyau | Fonceur au noyau | Groupe affronté, prudent : médiane / 9e décile (niv. 1 · 2 · 3) |
+|---|---|---|---|---|
+| N 0,6 partout, D 1,6 partout (consigne) | 1000 | 3 / 14 | 2 / 14 | 15/47 · 15/70 · 24/78 |
+| N 0,6/0,5/0,5, D 1,6/1,2/1,2 | 1000 | 5 / 16 | 3 / 16 | 17/48 · 15/58 · 14/41 |
+| **N 0,6/0,4/0,4, D 1,4/1,6/1,6** | 1000 | **6 / 16** | 2 / 16 | 12/40 · 23/69 · 13/68 |
+| N 0,6/0,4/0,4, D 2,0/1,6/1,6 | 2000 | 2 / 16 (11 morts au niv. 1) | 2 / 16 | 27/66 · 16/115 · 17/55 |
+| N 0,6/0,4/0,4, D 1,3/1,6/1,6 | 2000 | 3 / 16 (9 morts au niv. 1) | 2 / 16 | 16/36 · 15/43 · 17/49 |
+| Survie B (N 1, D 1), pour comparer | 2000 | 2 / 16 (7 morts au niv. 1) | – | 11/28 · 12/51 · 12/50 |
+
+Les graines 2000 à 2015 donnent des Astroports bien plus durs pour le pilote, même sans le bloc C (7 morts sur 16 au niveau 1).
+
+**Réglage retenu, 30 parties par profil :**
+
+| | Référence | Survie B | **Survie C** | Cible |
+|---|---|---|---|---|
+| Prudent : noyau atteint (normale) | 8 / 30 | 6 puis 4 / 30 | **13 / 30** (43 %) | 5 à 6 sur 10 — presque |
+| Fonceur : noyau atteint | 1 / 30 | 2 / 30 | **3 / 30** (10 %) | 1 sur 10 au plus — tenue |
+| Prudent : morts par niveau (normale) | 2 / 13 / 6 | – | **4 / 8 / 5** (dont 2 à sec et 1 laser au niv. 3) | – |
+| Groupes sur la carte (prudent) | 8,6 / 11,4 / 12,2 | – | **7,8 / 4,6 / 5,2** (ferrailleuses comprises au niv. 1) | – |
+| Groupes affrontés (prudent) | 4,7 / 11,3 / 11,2 | – | **3,4 / 4,0 / 4,4** | – |
+| Groupe affronté, prudent, normale : médiane / moy. / D9 | – | – | **13 / 19 / 38 · 21 / 33 / 76 · 17,5 / 29 / 69** | méd. 25-40, D9 < 70 |
+| Idem, série immortelle (hors partie 1028) | moy. / D9 : 14/30 · 27/55 · 20/53 | – | **14 / 19 / 38 · 29 / 61 / 103 · 18 / 31 / 63** | – |
+| Groupes affrontés à plus de 70 PV (prudent, normale) | – | – | **1 % · 13 % · 10 %** | – |
+| Fonceur, groupe affronté : médiane / D9 | moy. / D9 : 10/20 · 25/59 · 17/41 | – | **11 / 27 · 19 / 67 · 14 / 38** | – |
+| Prudent : vie perdue par niveau (immortel, finis, médiane) | moy. 95 / 318 / 257 | 58 / 304 / 293 | **72 / 191 / 206** | « fini entamé mais vivant » |
+| Prudent : vie à la fin du niveau (normale, finis, moy.) | 92 puis 78 (méd.) | – | **91 / 89 / 90** | – |
+| Prudent : durée d'un niveau (immortel, médiane) | 1 216 / 872 / 915 | 1 590 / 1 300 / 1 308 | **1 707 / 928 / 1 202** | – |
+| Prudent : battements au repos par niveau (immortel) | – | 102 / 418 / 369 | **142 / 270 / 311** | – |
+| Prudent : fuel à la descente (normale, moy., D1) | – | 46 (5) · 43 (4) · 42 (0) | **39 (19) · 54 (42) · 49 (41)** | – |
+| Prudent : niveaux passés à sec (normale) | – | 0 / 2 / 7 sur 26 | **1 / 1 / 2** ; 2 morts à sec au niv. 3 | « rester longtemps coûte » — tenue |
+| Fonceur : fuel à la descente (normale, moy.) | – | 66 · 49 · 55 | **67 · 58 · 53**, jamais à sec | – |
+
+- **Survie** : le prudent passe de 4-6 à 13 noyaux sur 30. Les morts ne sont plus massées au niveau 2 (8 sur 17) ; au niveau 3, trois sur
+  cinq ne viennent pas des ennemis (fuel à sec ×2, laser de machine ×1). Le fonceur reste à 1 sur 10.
+- **Coût d'un groupe** : la médiane reste sous la cible (13 / 21 / 17) parce que beaucoup de groupes affrontés sont faibles (sentinelles,
+  relais, drones) ; le 9e décile est à la limite (69-76) parce que quelques groupes coûtent trois à cinq fois plus que les autres
+  (Broyeur, Batterie d'artilleurs, Large crabot groupe, Mines & Sentinelles : 45 à 60 PV au banc **en dégâts de base**). Un seul
+  multiplicateur ne peut pas resserrer cet écart : monter les dégâts pour remonter la médiane tue au 9e décile.
+- **Duel sans fin contre l'artilleur** (série immortelle) : graine 1028, niveau 2, 35 058 PV perdus contre un artilleur (il recule et
+  tire, le pilote ne l'atteint jamais) ; graine 1022, 1 595. C'est l'IA de l'artilleur (recul) contre un joueur sans arme de tir, pas le nombre.
+- **Fuel** : avec moins de combats et moins de repos, le prudent finit ses niveaux avec plus de fuel qu'en B (D1 19 / 42 / 41) : le
+  fuel contraint encore les longues parties (2 morts à sec au niveau 3) mais moins qu'en B.
+- Banc (`outils/cout_groupes.py`, foreuse de série, assaut, 300 groupes par niveau, dégâts de base) : médiane 11 / 21 / 19, D9 23 / 66 / 55 ;
+  × 1,4 / 1,6 / 1,6 ≈ 15 / 34 / 30 et 32 / 106 / 88.
+- `simul.py tout` (dégâts du niveau 1, × 1,4) : détection et fuite inchangées ; combat : Mastok seul 79 % de victoires / 45 PV restants
+  (95 % / 51 avant), Mastok + 2 Crabos 50 % / 33 (86 % / 36), 2 Crabos 100 % / 78, RÉF. (2 Crabos + 1 Vipérin) 100 % / 71.

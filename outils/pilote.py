@@ -2,6 +2,9 @@
 """Pilote automatique : joue des parties entières (niveaux 1 à 3, descentes comprises) avec le vrai moteur, sans dessin.
 
     python3 outils/pilote.py [prudent|fonceur|tout] [parties] [processus] [--graine N] [--json SORTIE.json] [--plafond B] [--immortel]
+                             [--regles '{"MENACE_NB":[.6,.5,.6]}']
+
+--regles : remplace des valeurs de REGLES (00-base.js) dans la page avant de jouer, sans toucher à src/ (essais d'équilibrage).
 
 --immortel : la vie ne descend jamais sous 1 (les pertes restent comptées en entier, et l'endroit où la foreuse aurait été
 détruite est noté) ; sert à mesurer la durée d'un niveau entier quand presque toutes les parties meurent avant le noyau.
@@ -33,7 +36,7 @@ async def _lot(taches):
     out = []
     async with async_playwright() as p:
         nav = await p.chromium.launch()
-        for profil, graine, plafond, immortel in taches:
+        for profil, graine, plafond, immortel, regles in taches:
             ctx = await nav.new_context(viewport={'width': 1280, 'height': 800})
             await ctx.add_init_script("try{localStorage.setItem('np-intro','vu')}catch(e){}")   # pas de cinématique d'arrivée
             page = await ctx.new_page()
@@ -41,6 +44,8 @@ async def _lot(taches):
             page.on('pageerror', lambda e: erreurs.append(str(e)[:300]))
             await page.goto(JEU)
             await page.wait_for_function('typeof G !== "undefined" && G && G.st', timeout=60000)
+            if regles:
+                await page.evaluate(f'Object.assign(REGLES, {regles})')
             await page.evaluate(SCRIPT)
             try:
                 r = json.loads(await page.evaluate(f'pilotePartie({json.dumps({"profil": profil, "graine": graine, "plafond": plafond, "immortel": immortel})})'))
@@ -103,14 +108,15 @@ def resume(parties):
             'battements (finis) médiane': q([l['bat'] for l in finis], .5), 'D1': q([l['bat'] for l in finis], .1),
             'D9': q([l['bat'] for l in finis], .9),
             'vie au départ (moy)': moy([l['vieDebut'] for l in L]),
-            'vie perdue (moy)': moy(perdu), 'vie rendue (moy)': moy([sum(l['rendu'].values()) for l in L]),
+            'vie perdue (moy)': moy(perdu), 'vie perdue (méd)': q(perdu, .5), 'vie rendue (moy)': moy([sum(l['rendu'].values()) for l in L]),
             'rendue par source (moy/partie)': {s: round(v / len(L), 1) for s, v in sorted(rendu_src.items(), key=lambda x: -x[1])},
             'perdue par source (moy/partie)': {s: round(v / len(L), 1) for s, v in sorted(perdu_src.items(), key=lambda x: -x[1])[:8]},
             'vie à la fin du niveau (finis, moy)': moy([l['vieFin'] for l in finis]),
             'descente : vie perdue (moy)': moy([l['descente']['perdu'] for l in finis if l.get('descente')]),
             'groupes sur la carte (moy)': moy([l['groupesNiveau'] for l in L]),
             'groupes vus (moy)': moy([l['grVus'] for l in L]), 'groupes affrontés (moy)': moy([l['grAff'] for l in L]),
-            'vie perdue par groupe affronté (moy)': moy(vg), 'par groupe affronté D9': q(vg, .9),
+            'vie perdue par groupe affronté (moy)': moy(vg), 'par groupe affronté (méd)': q(vg, .5),
+            'par groupe affronté D9': q(vg, .9), 'groupes affrontés à plus de 70 (%)': round(100 * sum(1 for v in vg if v > 70) / len(vg)) if vg else None,
             'battements à énergie 0 (moy)': moy([l['e0'] for l in L]),
             # fuel et repos (bloc B, 28 novembre 2026) ; absents des parties d'avant le fuel
             'fuel au départ (moy)': moy([l['fuelDebut'] for l in L if l.get('fuelDebut', -1) >= 0]),
@@ -164,7 +170,7 @@ def main():
     immortel = '--immortel' in args
     if immortel:
         args.remove('--immortel')
-    for o in ('--graine', '--json', '--plafond'):
+    for o in ('--graine', '--json', '--plafond', '--regles'):
         if o in args:
             i = args.index(o)
             opt[o] = args[i + 1]
@@ -177,7 +183,10 @@ def main():
     proc = int(args[2]) if len(args) > 2 else 4
     g0 = int(opt.get('--graine', 1000))
     plafond = int(opt.get('--plafond', 8000))
-    taches = [(p, g0 + k, plafond, immortel) for p in profils for k in range(n)]
+    regles = opt.get('--regles')
+    if regles:
+        json.loads(regles)   # refuse un texte mal formé avant de lancer les navigateurs
+    taches = [(p, g0 + k, plafond, immortel, regles) for p in profils for k in range(n)]
     lots = [taches[i::proc] for i in range(proc)]
     with mp.Pool(proc) as pool:
         res = [r for l in pool.map(lot, [l for l in lots if l]) for r in l]

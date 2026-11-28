@@ -518,7 +518,11 @@ let NIV_GEN=1;   // niveau de la descente en cours de génération (posé par ne
 const lieuDe=i=>{const v=G.t[i];return G.tun&&G.tun[i]?'tunnel':(v===FLOOR||v===DOOR||(v===BRIDGE&&G.pb&&G.pb[i]))?'bati':'ext';};
 function spawnGroupes(){G.animals=[];G.fauna=[];G.pool=[0];G.beasts=[];G.beastSeen={};G.packs={};G.patr={};
   // budget et groupes du niveau de profondeur (fenêtre LIFE)
-  const NV=nivDe(NIV_GEN),total=Math.round(NV.budget*W*H/(96*64)*(NIVEAUX[nivBorne(NIV_GEN)].dens||1));let id=0;const rate={},pose={};
+  const NV=nivDe(NIV_GEN),total=Math.round(NV.budget*W*H/(96*64)*(NIVEAUX[nivBorne(NIV_GEN)].dens||1));let id=0;const rate={},pose={},saute={};
+  /* Ennemis moins nombreux (bloc C du chantier survie, 28 novembre 2026) : le budget est dépensé comme avant, mais seule une part
+     REGLES.MENACE_NB des groupes hostiles achetés (gardes, groupes sans rôle) est posée ; les autres sont payés et sautés. Les
+     ferrailleuses sont toutes posées : le décor vivant de l'Astroport ne change pas, ni les réglages du joueur. */
+  const kNb=menaceNb(NIV_GEN);let dette=Math.random();
   // cases praticables de chaque lieu, et part du budget qui lui revient : la répartition du niveau (fenêtre LIFE), ramenée à 100 sur les
   // lieux présents ; un lieu ne dépasse pas PART_PLAFOND fois sa part de surface, le surplus va aux autres à proportion de leur part
   const cases={ext:[],bati:[],tunnel:[]};for(let i=0;i<W*H;i++)if(canWalk(G.t[i],true))cases[lieuDe(i)].push(i);
@@ -535,11 +539,15 @@ function spawnGroupes(){G.animals=[];G.fauna=[];G.pool=[0];G.beasts=[];G.beastSe
       if(!ok.length)break;
       // tirage pondéré par la fréquence du groupe : − deux fois moins souvent, + deux fois plus
       const pds=ok.map(([g])=>[.5,1,2][g.f??1]);let tir=Math.random()*pds.reduce((a,b)=>a+b,0),ki=0;while(ki<ok.length-1&&(tir-=pds[ki])>0)ki++;
-      const [g,gi]=ok[ki],r=poseGroupe(g,gi,id,cases[l]);
+      const [g,gi]=ok[ki],hostile=g.role!=='ferraille';
+      if(hostile&&kNb<1){dette+=kNb;if(dette<1){const c=Math.max(1,g.cout);reste-=c;lieux[l].dep+=c;depense+=c;saute[g.n]=(saute[g.n]||0)+1;continue;}
+        dette-=1;}
+      const r=poseGroupe(g,gi,id,cases[l]);
+      if(r!==true&&hostile&&kNb<1)dette+=1;   // pas posé : la place reste due au prochain groupe hostile
       if(r===true){const c=Math.max(1,g.cout);reste-=c;lieux[l].dep+=c;depense+=c;id++;pose[g.n]=(pose[g.n]||0)+1;
         }else if(r!=='vide')rate[gi+l]=(rate[gi+l]||0)+1;}
     report=Math.min(reste,4);}   // un petit reste passe au lieu suivant ; un gros reste (aucun groupe ne convient à ce lieu) est perdu
-  G.menace={total,reste:total-depense,pose,lieux};}
+  G.menace={total,reste:total-depense,pose,saute,lieux,kNb};}
 function robotDist(m){return distFrom(G.px,G.py,m);}
 // distance pour qui vole : l'eau et les gouffres se franchissent
 function distFromVol(tx,ty){const d=new Int16Array(W*H).fill(-1),q=[idx(tx,ty)];d[q[0]]=0;

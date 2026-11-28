@@ -19,7 +19,14 @@ const REGLES={
   COURSE_ENERGIE:5,        // énergie d'un pas de course
   MODULE_VIE_MAX:10,       // Module de puissance : vie maximale en plus (la vie courante monte d'autant)
   SYMB_VIE:2,              // hack SYMBIOSE : récupération de vie multipliée
-  SYMB_FUEL:1.5};          // hack SYMBIOSE : baisse du fuel multipliée
+  SYMB_FUEL:1.5,           // hack SYMBIOSE : baisse du fuel multipliée
+  /* Ennemis moins nombreux, plus dangereux (bloc C du chantier survie, 28 novembre 2026). Une valeur par niveau (1, 2, 3),
+     appliquée PAR-DESSUS les réglages du joueur (groupes, budgets par niveau, bestiaire : rien n'est réécrit). Voir menaceNb,
+     menaceDeg, degReels (plus bas) et spawnGroupes (08-faune). */
+  // Recalés au pilote (docs/mesures.md, « Survie C ») depuis 0,6 / 1,6 partout : aux niveaux 2 et 3, 0,4 garde le prudent en vie
+  // sans baisser les dégâts ; au niveau 1, 1,4 (à 2,0, le prudent meurt une fois sur deux dès l'Astroport).
+  MENACE_NB:[.6,.4,.4],    // part des groupes hostiles (gardes, sans rôle) achetés qui sont posés ; les ferrailleuses restent toutes
+  MENACE_DEG:[1.4,1.6,1.6]};// dégâts des créatures (coups, tirs, explosions de mines) multipliés ; lasers et pièges des machines inchangés
 /* Numéro d'unité (28 novembre 2026, histoire : chaque partie est l'unité suivante). F467 à la première partie, puis +1 à chaque
    destruction de la foreuse (pas à une partie recommencée). Gardé dans np-unite (et dans la base de l'artefact, avec le journal de
    bord : 14l-histoire.js). NOM_FOREUSE est VIVANT : il change au début d'une partie (uniteApplique, 14l) ; les textes construits au
@@ -57,6 +64,14 @@ const NIVEAUX=[null,
   {recette:'cavernes',part:{ext:80,bati:18,tunnel:2},taille:3},
   {recette:'base',part:{ext:35,bati:60,tunnel:5},taille:3}];
 const NIV_MAX=NIVEAUX.length-1,NIVS=NIVEAUX.map((_,i)=>i).slice(1),nivBorne=n=>Math.max(1,Math.min(NIV_MAX,n||1));
+/* Multiplicateurs de menace du niveau n (REGLES.MENACE_NB, REGLES.MENACE_DEG). Niveau 0 : dégâts de base (banc de combat, mesures
+   de la valeur des groupes). degReels : la fourchette de dégâts d'une espèce telle qu'elle frappe au niveau n (G.niv par défaut) ;
+   dmgDe (07-generation) tire dedans, et les fiches (survol, journal de bord, Bestiaire) l'affichent. */
+const menaceVal=(v,n)=>{const x=Array.isArray(v)?v[nivBorne(n)-1]:v;return typeof x==='number'&&isFinite(x)&&x>0?x:1;};
+const menaceNb=n=>Math.min(1,menaceVal(REGLES.MENACE_NB,n));
+const menaceDeg=n=>n===0?1:menaceVal(REGLES.MENACE_DEG,n);
+const degReels=(sp,n)=>{const k=menaceDeg(n===undefined?(typeof G!=='undefined'&&G?G.niv:1):n);
+  return [Math.round(sp.dmin*k),Math.round(sp.dmax*k)];};
 const RECETTE_NIV=n=>NIVEAUX[nivBorne(n)].recette,   // la recette de chaque niveau de la descente
   NIV_RECETTE=r=>Math.max(1,NIVEAUX.findIndex(v=>v&&v.recette===r));   // et l'inverse (recette « classique » : niveau 1)
 const DIRN=['est','ouest','sud','nord','sud-est','nord-est','sud-ouest','nord-ouest'];

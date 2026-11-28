@@ -459,6 +459,9 @@ kbd{font-family:var(--mono);color:var(--fg);border:1px solid var(--line);padding
 .btab td input{width:100%;font:inherit;color:var(--fg);background:var(--void);border:1px solid var(--line);padding:2px 4px;text-align:right}
 .btab .brole td{font-size:11px;color:var(--dim);vertical-align:top;padding-top:8px}
 .btab .brole th{vertical-align:top;padding-top:8px}
+.btab .breel td{font-size:11px;color:var(--dim);vertical-align:top;padding-top:6px;white-space:nowrap}
+.btab .breel td b{color:var(--c1)}
+.btab .breel th{vertical-align:top;padding-top:6px}
 
 /* Artefacts, terminal et sélecteur de fréquence [− = +] (20 novembre 2026) */
 #artefacts .mcard{width:min(640px,100%)}

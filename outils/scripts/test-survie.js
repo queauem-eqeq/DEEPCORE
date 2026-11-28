@@ -8,6 +8,9 @@
    7. Module de puissance : POW +1 et vie max +10 (vie courante +10). Forage : 5 d'énergie.
    8. Ancienne partie sans fuel : relue, jauge pleine. Réglages d'objets enregistrés sans cellule : la cellule est là, les leurs gardés.
    9. fxGrains : réparobots, station et éclats ramassés blessé vont au bout du geste, sans erreur.
+   10. Bloc C (ennemis moins nombreux, plus dangereux) : REGLES.MENACE_NB réduit les groupes hostiles posés, pas les ferrailleuses,
+       sans toucher aux réglages enregistrés (budget du joueur gardé) ; REGLES.MENACE_DEG multiplie les coups et les explosions de
+       mines ; survol, journal de bord et Bestiaire montrent les vrais dégâts.
    Une ligne par essai : « ok » ou « ÉCHEC ». */
 (async () => {
   const out=[],sauve=JSON.parse(JSON.stringify(GEN));
@@ -101,6 +104,37 @@
     if(i<0)ok(true,'station : aucune sur les cartes essayées (essai sauté)');
     else{G.art=G.art||{};delete G.art[i];G.st.vie=40;err='';try{machBump(i%W,(i/W)|0,1,0);}catch(e){err=e.message;}
       ok(!err&&G.st.vie===G.st.vieMax,`station de réparation : sans erreur${err?' — '+err:''}`);}}
+  // 10. bloc C : nombre et dégâts
+  {const R0={nb:REGLES.MENACE_NB,deg:REGLES.MENACE_DEG},grRole=g=>(GROUPES.liste.find(x=>x.n===g)||{}).role;
+    const compte=(nb,n)=>{REGLES.MENACE_NB=nb;let h=0,f=0;for(let k=0;k<n;k++){spawnGroupes();
+        for(const [g,v] of Object.entries(G.menace.pose))(grRole(g)==='ferraille'?(f+=v):(h+=v));}return {h:h/n,f:f/n};};
+    // réglages enregistrés simulés : le joueur a mis 150 au budget du niveau 2
+    carte('cavernes');const avant=JSON.stringify(GROUPES),ls0=localStorage.getItem('np-groupes'),b0=GROUPES.niv[2].budget;GROUPES.niv[2].budget=150;
+    const a=compte([1,1,1],8),bb=compte([1,.4,1],8),tot=G.menace.total;
+    ok(bb.h>0&&bb.h<a.h*.6&&bb.h>a.h*.2,`niveau 2 : groupes hostiles posés ${a.h.toFixed(1)} → ${bb.h.toFixed(1)} avec MENACE_NB 0,4 (sautés : ${Object.values(G.menace.saute).reduce((x,y)=>x+y,0)})`);
+    ok(GROUPES.niv[2].budget===150&&tot===Math.round(150*W*H/(96*64)),`budget du joueur gardé (150 → total ${tot} sur cette carte), rien de réécrit`);
+    GROUPES.niv[2].budget=b0;ok(JSON.stringify(GROUPES)===avant&&localStorage.getItem('np-groupes')===ls0,'groupes et réglages enregistrés intacts après le peuplement');
+    carte('atterrissage');const c=compte([1,1,1],6),d=compte([.4,.4,.4],6);
+    ok(c.f>0&&Math.abs(d.f-c.f)<=Math.max(1,c.f*.25)&&d.h<c.h,`Astroport : ferrailleuses ${c.f.toFixed(1)} → ${d.f.toFixed(1)} (inchangées), gardes ${c.h.toFixed(1)} → ${d.h.toFixed(1)}`);
+    REGLES.MENACE_NB=R0.nb;
+    // dégâts
+    neuf();REGLES.MENACE_DEG=[1.4,1.6,1.6];G.niv=2;const cr=BEASTS.find(b=>b.key==='crabos'),c0=[cr.dmin,cr.dmax,cr.crit];Object.assign(cr,{dmin:3,dmax:6,crit:0});
+    const [mn,mx]=degReels(cr);ok(mn===5&&mx===10,`crabot 3-6 au niveau 2 (× 1,6) : ${mn}-${mx}`);
+    const ti=[];for(let k=0;k<300;k++)ti.push(dmgDe(cr));ok(Math.min(...ti)===5&&Math.max(...ti)===10,`dmgDe tire entre ${Math.min(...ti)} et ${Math.max(...ti)}`);
+    const v=voisin(),b={sp:BEASTS.indexOf(cr),x:G.px+v[0],y:G.py+v[1],hp:22,hunt:1,dir:1,mp:0};G.beasts=[b];const pertes=[];
+    for(let k=0;k<60;k++){G.st.vie=G.st.vieMax=500;G.over=null;hurtRobot(b,cr);const p=500-G.st.vie;if(p>0)pertes.push(p);}
+    ok(pertes.length&&Math.min(...pertes)>=5&&Math.max(...pertes)<=10&&Math.max(...pertes)>6,`coups reçus d'un crabot au niveau 2 : ${Math.min(...pertes)} à ${Math.max(...pertes)} (base 3-6)`);
+    G.niv=0;ok(degReels(cr)[1]===6,'niveau 0 (banc, dégâts de base) : 3-6');G.niv=1;ok(degReels(cr)[1]===8,'niveau 1 (× 1,4) : 4-8');G.niv=2;
+    const mi=BEASTS.findIndex(x=>x.mine),ms=BEASTS[mi],[m1,m2]=degReels(ms),mpert=[];
+    for(let k=0;k<20;k++){G.st.vie=500;G.over=null;const m={sp:mi,x:G.px+v[0],y:G.py+v[1],hp:5,hunt:1,dir:1,mp:0};G.beasts=[m];explose(m);mpert.push(500-G.st.vie);}
+    ok(Math.min(...mpert)>=m1&&Math.max(...mpert)<=m2&&m2>ms.dmax,`explosion de mine au niveau 2 : ${Math.min(...mpert)} à ${Math.max(...mpert)} (base ${ms.dmin}-${ms.dmax})`);
+    // fiches
+    G.st.vie=G.st.vieMax=100;G.beasts=[b];b.hp=22;computeFOV();const h=inspectHTML({x:b.x,y:b.y});
+    ok(/DÉG <b>5-10<\/b>/.test(h),`survol : « ${(h.match(/DÉG <b>[^<]*<\/b>/)||['?'])[0]} »`);
+    const jl=jnStatsLignes(cr).join(' ');ok(/DÉGÂTS : 5–10 \(NIV\. 2\)/.test(jl),`journal de bord, palier Stats : « ${jl.match(/DÉGÂTS[^.]*\./)} »`);
+    BEST_SEL=['crabos'];openBest();const cell=$('breel-crabos');const tx=cell?cell.textContent:'';closeBest();
+    ok(/niv\. 1 : 4-8/.test(tx)&&/niv\. 2 : 5-10/.test(tx)&&/niv\. 3 : 5-10/.test(tx),`Bestiaire, « Dégâts en jeu » : ${tx}`);
+    Object.assign(cr,{dmin:c0[0],dmax:c0[1],crit:c0[2]});REGLES.MENACE_DEG=R0.deg;G.beasts=[];G.over=null;}
   }catch(e){ok(false,'exception : '+(e&&e.stack||e).toString().slice(0,300));}
   genRemet(sauve);
   return out.join('\n');

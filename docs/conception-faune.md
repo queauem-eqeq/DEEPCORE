@@ -20,6 +20,23 @@ et maximal, et porte une **valeur de menace** fixée à la main.
 - Mémorisé dans le navigateur (`np-groupes`) et dans l'enregistrement des réglages.
 - Les effectifs par espèce (`LIFE`, `spawnAnimals`, `spawnBeasts`) ne servent plus qu'au banc de combat et aux mesures.
 
+### Moins nombreux, plus dangereux (chantier survie, bloc C, 28 novembre 2026)
+
+Deux réglages par niveau dans `REGLES` (`00-base.js`), appliqués **par-dessus** les réglages du joueur (groupes, budgets par
+niveau, bestiaire : rien n'est modifié ni réécrit) :
+- **`MENACE_NB` = 0,6 / 0,4 / 0,4** (niveaux 1, 2, 3) : le budget est dépensé comme avant, mais seule cette part des groupes
+  **hostiles** achetés (gardes, groupes sans rôle) est posée ; les autres sont payés et sautés (`G.menace.saute`). Les
+  **ferrailleuses** sont toutes posées : le décor vivant de l'Astroport ne change pas.
+- **`MENACE_DEG` = 1,4 / 1,6 / 1,6** : dégâts des créatures multipliés au niveau en cours (`degReels`, `dmgDe`) : coups au contact,
+  tirs (sentinelle, artilleur), **explosions de mines** (sur la foreuse comme sur les autres créatures et les balises). Inchangés :
+  lasers et pièges des machines, glu (sans dégâts), charge lancée par la foreuse, mini-jeu des descentes.
+- La fiche de survol, le palier Stats du journal de bord (avec « NIV. n » quand le multiplicateur change d'un niveau à l'autre) et la
+  ligne « Dégâts en jeu » du Bestiaire (lecture seule, un chiffre par niveau) montrent les **vrais** dégâts ; les champs du
+  Bestiaire restent les valeurs de base.
+- Banc de combat : réglage « Dégâts des ennemis » (`cfg.niv` : 0 = base, valeur par défaut ; 1 à 3 = ceux du niveau). La valeur des
+  groupes (`valeur_groupes.py`) se mesure en dégâts de base : c'est la monnaie du budget, le nombre est réduit à part.
+- Recalé au pilote automatique sur la cible « un groupe de face ≈ un tiers de la vie » (`mesures.md`, « Survie C »).
+
 ### Groupes de l'Astroport (niveau 1, 28 novembre 2026)
 
 - **Ferrailleuses** (`role:'ferraille'`) : *Ferrailleuses* (2-3 crabots, valeur 5), *Équipe de découpe* (2 crabots et un

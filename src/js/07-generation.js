@@ -291,11 +291,12 @@ function genPlanet(){
    dans le menu Monde. La descente en 5 niveaux, ses six biomes, ses archétypes de monde, son budget de menace par
    niveau et les cartes d'essai ont été retirés ce jour-là, à la demande de l'utilisateur : le jeu se règle maintenant
    entièrement depuis le menu Monde, et REGEN tire une nouvelle carte avec les mêmes réglages. */
-// pvDe / dmgDe : points de vie et dégâts d'une espèce tels que le jeu les lit. Aujourd'hui ce sont les valeurs du Bestiaire, sans modification ;
+// pvDe / dmgDe : points de vie et dégâts d'une espèce tels que le jeu les lit (PV : ceux du Bestiaire ; dégâts : voir plus bas) ;
 // ces deux fonctions restent le seul endroit à changer si l'on veut un jour les faire varier.
 // dégâts d'une créature : tirés à chaque coup entre dmin et dmax (16 novembre 2026 ; une valeur fixe avant)
-const pvDe=sp=>sp.pv,dmgDe=sp=>sp.dmin+Math.floor(Math.random()*(sp.dmax-sp.dmin+1)),
-  dmgTxt=sp=>sp.dmin===sp.dmax?''+sp.dmin:sp.dmin+'-'+sp.dmax;
+// 28 novembre 2026 (bloc C du chantier survie) : les dégâts sont ceux du niveau en cours (degReels, 00-base : Bestiaire × REGLES.MENACE_DEG).
+const pvDe=sp=>sp.pv,dmgDe=sp=>{const [a,b]=degReels(sp);return a+Math.floor(Math.random()*(Math.max(a,b)-a+1));},
+  dmgTxt=(sp,n)=>{const [a,b]=degReels(sp,n);return a===b?''+a:a+'-'+b;};
 // Gisements pour une carte de taille 2 ; les autres tailles en proportion de leur surface.
 const GISEMENTS={metal:3,mat:1};
 let SANS_VAISSEAU=false;
@@ -425,12 +426,15 @@ try{if(localStorage.getItem('np-mig')!=='horloge1'){saveBest();
    espèces choisies, côte à côte dans un tableau — une ligne par statistique — pour les modifier et les comparer.
    Un clic dans la liste ajoute ou retire une espèce ; la cinquième choisie remplace la plus ancienne. */
 let BEST_SEL=null;
+// dégâts en jeu de chaque niveau (bloc C du chantier survie, 28 novembre 2026) : lecture seule, sous les champs du Bestiaire
+const bestReel=o=>NIVS.map(n=>`<span>niv. ${n} : <b>${dmgTxt(o,n)}</b></span>`).join('<br>');
 function buildBest(){const L=BEST_LIST();
   if(!BEST_SEL)BEST_SEL=L.slice(0,4).map(e=>e.key);BEST_SEL=BEST_SEL.filter(k=>L.some(e=>e.key===k));
   const S=BEST_SEL.map(k=>L.find(e=>e.key===k));
   $('bestSide').innerHTML=L.map(e=>{const n=BEST_SEL.indexOf(e.key);return `<button class="bli${n>=0?' sel':''}" data-k="${e.key}" aria-pressed="${n>=0}"><img src="${ICON[e.ic]||''}" alt=""><b>${e.o.n}</b><span>${n>=0?n+1:''}</span></button>`;}).join('');
   $('bestList').innerHTML=!S.length?'<p class="mnote">Choisissez jusqu’à quatre espèces dans la liste.</p>':`<table class="btab"><thead><tr><th></th>${S.map(e=>`<th scope="col"><img src="${ICON[e.ic]||''}" alt=""><b>${e.o.n}</b><button class="gx" data-x="${e.key}" aria-label="Retirer ${e.o.n} de la comparaison" title="Retirer">×</button></th>`).join('')}</tr></thead>
     <tbody>${BFIELDS.map(([f,l,mn,mx])=>`<tr><th scope="row">${l}</th>${S.map(e=>`<td><input type="number" id="bf-${e.key}-${f}" data-k="${e.key}" data-f="${f}" min="${mn}" max="${mx}" step="1" value="${e.o[f]}" aria-label="${l} : ${e.o.n}"></td>`).join('')}</tr>`).join('')}
+    <tr class="breel"><th scope="row" title="Dégâts min et max multipliés par la menace de chaque niveau (REGLES.MENACE_DEG) : c’est ce qui frappe en jeu">Dégâts en jeu</th>${S.map(e=>`<td id="breel-${e.key}">${bestReel(e.o)}</td>`).join('')}</tr>
     <tr class="brole"><th scope="row">Rôle</th>${S.map(e=>`<td>${e.role}</td>`).join('')}</tr></tbody></table>`;}
 function bestToggle(k){const i=BEST_SEL.indexOf(k);if(i>=0)BEST_SEL.splice(i,1);else{BEST_SEL.push(k);
   if(BEST_SEL.length>4)BEST_SEL.shift();}buildBest();}

@@ -366,6 +366,7 @@ $('bestList').addEventListener('change',e=>{const t=e.target;
   // toutes les créatures l'étaient — baisser les PV du drone à 6 mettait les broyeurs à 6)
   if(t.dataset.f==='pv'&&G){for(const a of G.animals||[])if(SPECIES[a.sp]===ent.o&&a.hp>v)a.hp=v;
     for(const b of G.beasts||[])if(BEASTS[b.sp]===ent.o&&b.hp>v)b.hp=v;}
+  if(t.dataset.f==='dmin'||t.dataset.f==='dmax'){const c=$('breel-'+t.dataset.k);if(c)c.innerHTML=bestReel(ent.o);}
   saveBest();});
 $('bestReset').onclick=()=>{BEST_LIST().forEach(e=>Object.assign(e.o,BEST_DEF[e.key]));saveBest();buildBest();};
 const saveSnd=()=>{try{localStorage.setItem('np-son',JSON.stringify(SND));}catch(e){}};

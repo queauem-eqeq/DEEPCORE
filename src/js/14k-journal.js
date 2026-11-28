@@ -143,7 +143,11 @@ function jnReleve(m){const b=(G.beasts||[]).filter(o=>!BEASTS[o.sp].mine),gr=new
 function jnRobotData(k){const niv=G.niv||1,p=jnMonte(k,niv);if(!p)return null;const sp=jnEspece(k),T=jnFicheTx(k)||{};
   const l=p==='s'?jnStatsLignes(sp):p==='c'?[T.role||'',...(T.comportement||[])]:[...(T.origine||[])];
   return {type:'robot',id:'r:'+k,titre:'FICHE : '+jnNomR(k),lignes:l.filter(Boolean),maj:JN_PAL_NOM[p],page:1};}
-function jnStatsLignes(sp){return [`VIE : ${pvDe(sp)}.`,`DÉGÂTS : ${sp.dmin}–${sp.dmax}.`,`PRÉCISION : ${sp.pre}.`,`DÉFENSE : ${sp.def||0}.`,
+/* Dégâts réels (bloc C du chantier survie, 28 novembre 2026) : ceux du niveau en cours (Bestiaire × REGLES.MENACE_DEG) ; le niveau est
+   précisé quand le multiplicateur change d'un niveau à l'autre. */
+const jnDeg=sp=>{const n=(typeof G!=='undefined'&&G&&G.niv)||1,[a,b]=degReels(sp,n);
+  return `${a}–${b}`+(new Set(NIVS.map(menaceDeg)).size>1?` (NIV. ${nivBorne(n)})`:'');};
+function jnStatsLignes(sp){return [`VIE : ${pvDe(sp)}.`,`DÉGÂTS : ${jnDeg(sp)}.`,`PRÉCISION : ${sp.pre}.`,`DÉFENSE : ${sp.def||0}.`,
   `DURÉE DU PAS : ${sp.dpas}.`,`DURÉE DU COUP : ${sp.dcoup}.`];}
 function jnPageData(t,n){const L=jnLignes(t,n);jnPage(t.id,n);
   return {type:t.source||(jnTuto().includes(t)?'tutoriel':'document'),id:t.id,titre:L.titre,lignes:L.lignes,analyse:L.analyse,page:1};}
@@ -209,7 +213,7 @@ const jnIcone=k=>k==='puce'?'an0r':'bz'+BEASTS.findIndex(b=>b.key===k)+'r';
 // fiche d'un robot : sa tuile agrandie, puis les quatre paliers l'un sous l'autre
 function jnFicheRobot(k){const r=JN.rob[k]||{},sp=jnEspece(k),T=jnFicheTx(k),st=jnStats(r),man=`<p class="jman">${JN_MANQUE}</p>`,
     sec=(n,t,ok,h)=>`<section class="jpal${ok?'':' manque'}"><h4>${n} · ${t}</h4>${ok?h:man}</section>`;
-  const tab=[['VIE',pvDe(sp)],['DÉGÂTS',`${sp.dmin}–${sp.dmax}`],['PRÉCISION',sp.pre],['DÉFENSE',sp.def||0],['PAS',sp.dpas],['COUP',sp.dcoup]];
+  const tab=[['VIE',pvDe(sp)],['DÉGÂTS',jnDeg(sp)],['PRÉCISION',sp.pre],['DÉFENSE',sp.def||0],['PAS',sp.dpas],['COUP',sp.dcoup]];
   return `<div class="jfhead"><img class="jsil" src="${ICON[jnIcone(k)]||''}" alt="Silhouette : ${jnE(sp.n)}"><div><h3>${jnE(jnNomR(k))}</h3>`+
     `<p>CLASSEMENT : <b class="jmen">MENACE</b></p><p class="jdim">DESTRUCTIONS : ${r.det||0}</p></div></div>`+
     sec(0,'CONTACT',true,`<p>SIGNATURE : MÉTAL. MOBILE.</p>`)+
