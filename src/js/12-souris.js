@@ -200,81 +200,94 @@ cv.addEventListener('click',ev=>{if(PHASE){const c=cellAt(ev);phaseVers(c.x,c.y)
   if(lastPT==='touch'&&(!HOV||HOV.x!==c.x||HOV.y!==c.y)){HOV=c;render();return;}
   if(INSPECT){INSPECT=false;$('inspTag').hidden=true;}if(freeCam)setFreeCam(false);
   HOV=c;goTo(c.x,c.y);});
-// Fiche complète de la case survolée, affichée en tête du panneau « En vue »
-const TDESC={[GROUND]:['Sol rocheux','Praticable. Les points au sol se densifient à l’approche d’un site de forage.'],
-  [ROCK]:['Rocher','Infranchissable, ne bloque pas la vue. Cède en 2 coups de foreuse et laisse des gravats.'],
-  [MOUNT]:['Montagne','Infranchissable et opaque. Cède en 2 coups de foreuse, sauf en bordure de carte.'],
-  [HARD]:['Roche dure','Le cœur des massifs : infranchissable et opaque, et '+NOM_FOREUSE+' n’y peut rien. Seule une charge sismique la brise. Pas de métal à l’intérieur.'],
-  [WALL]:['Mur bâti','Infranchissable et opaque. '+NOM_FOREUSE+' ne l’entame pas : seule une charge sismique l’ouvre. Compte comme une paroi pour la discrétion.'],
-  [FLOOR]:['Sol bâti','Praticable. L’intérieur d’une structure.'],
-  [DOOR]:['Porte','Praticable. Fermée, elle cache la vue ; elle s’ouvre quand on s’y tient et se referme derrière soi.'],
-  [SECRET]:['Mur bâti','Infranchissable et opaque. '+NOM_FOREUSE+' ne l’entame pas : seule une charge sismique l’ouvre. Compte comme une paroi pour la discrétion.'],
-  [LOCK]:['Porte verrouillée','Infranchissable et opaque tant qu’elle est fermée. Une clé l’ouvre (avancer dessus) ; une charge sismique la détruit.'],
-  [MACHINE]:['Machine hors d’usage','Infranchissable, mais on voit par-dessus. Une charge sismique la réduit en gravats.'],
-  [ANTENNA]:['Antenne','Avancer dessus l’allume : elle reste allumée et tient en vue un disque de 30 cases de large. Infranchissable, ne coupe pas la vue.'],
-  [TERMINAL]:['Terminal','Avancer dessus affiche son texte. Infranchissable, ne coupe pas la vue.'],
-  [TURRET]:['Tourelle laser','Encastrée dans le mur, elle tire un rayon droit à travers la pièce, à son propre rythme, sans prévenir. Le rayon touche toujours : 10 dégâts, pour '+NOM_FOREUSE+' comme pour les ennemis. Une pile énergétique l’arrête. Une charge sismique la détruit.'],
-  [PYLON]:['Croix laser','Ce pylône éclaire ses quatre cases voisines, à son propre rythme, sans prévenir : 10 dégâts pour qui s’y tient. Les cases en diagonale sont sûres. Une charge sismique le détruit.'],
-  [PILE]:['Pile énergétique',''+NOM_FOREUSE+' la pousse en avançant dessus (jamais en diagonale). Posée sur un socle, elle alimente ce qui y est relié. Elle arrête les lasers.'],
-  [LEVIER]:['Levier','Avancer dessus l’actionne : il déploie un pont ou coupe les lasers de sa salle.'],
-  [GRILLE]:['Grille d’énergie','Infranchissable tant que son socle n’est pas alimenté par une pile. On voit au travers. Une charge sismique la détruit.'],
-  [STATION]:['Station de réparation','Avancer dessus remet la vie et l’énergie au maximum, une seule fois. Le bruit attire les ennemis à 12 cases.'],
-  [CHARGEUR]:['Distributeur de pile','Sa pile attend à côté de lui. Avancer dessus la rappelle : utile si elle est coincée.'],
-  [FABRIC]:['FABLAB','Avancer dessus ouvre la liste de fabrication : des objets contre de la Matière {µ}.'],
-  [VITRE]:['Mur vitré','Infranchissable, mais on voit au travers, dans les deux sens : les créatures aussi. '+NOM_FOREUSE+' ne l’entame pas : seule une charge sismique l’ouvre.'],
-  [PILLAR]:['Pilier','Infranchissable et opaque : il coupe la ligne de vue. Compte comme une paroi pour la discrétion.'],
-  [LIQ]:['Eau peu profonde','Praticable par tous. Défense −20 pour qui s’y trouve ; pas deux fois plus lent, sauf pour les crabos qui nagent.'],
-  [DEEP]:['Eau profonde','Praticable par tous. Défense −20, pas deux fois plus lent (sauf crabos), et le courant fait dévier '+NOM_FOREUSE+'. Les créatures, elles, nagent droit.'],
-  [GRASS]:['Herbes hautes','Praticables mais opaques. Défense +12 pour qui s’y cache. Elles se couchent au passage.'],
-  [FLAT]:['Herbes basses','Ne bloquent pas la vue. Vous y êtes deux fois plus discret.'],
-  [CHASM]:['Gouffre','Infranchissable. Ne bloque pas la vue.'],[BRIDGE]:['Pont','Praticable. Permet de franchir un gouffre.'],
-  [RUBBLE]:['Gravats','Praticables. Restes d’une roche brisée.'],
-  [SHIP]:['Coque du vaisseau','Infranchissable et indestructible, ne bloque pas la vue. Le cargo qui a déposé '+NOM_FOREUSE+'.'],
-  [DECK]:['Soute du vaisseau','Praticable. '+NOM_FOREUSE+' peut toujours y revenir ; la porte est à l’arrière.']};
-const BEHAV={puce:'Suit '+NOM_FOREUSE+' à 2 ou 3 cases et recule au contact. Dès qu’elle est attaquée ou attaque, même si le coup rate, tous ceux qui la suivent passent à l’attaque et ne reculent plus.',
-  crabos:'Chasse '+NOM_FOREUSE+' dès qu’il la voit et l’attaque au contact. Abandonne environ 8 tours après l’avoir perdue de vue.',
-  cafar:'Va en groupe : ce qu’un relais voit, tout le groupe le sait.',
-  mastok:'Machine lente et massive : beaucoup de points de vie, des coups très lourds. Mieux vaut l’éviter ou la fuir.'};
-function inspectHTML(){const {x,y}=HOV;if(x<0||y<0||x>=W||y>=H)return '';
+// Fiche complète de la case visée : en tête du panneau « En vue » au survol, dans la colonne en mode viseur.
+/* 28 novembre 2026 : les textes sont le relevé de F467, en jargon machine, sans règle chiffrée ni mode d'emploi ; les
+   chiffres restent dans les stats (PV, DÉG, Toucher…) et la ligne d'action. */
+const viseCible=()=>!G?null:PHASE?{x:PHASE.x,y:PHASE.y}:VISEE?{x:VISEE.x,y:VISEE.y}:INSPECT&&HOV?HOV:null;
+const TDESC={[GROUND]:['Sol rocheux','Roche tassée. Praticable. Particules plus denses à l’approche d’une couche profonde.'],
+  [ROCK]:['Rocher','Bloc isolé. Gêne le passage, pas les capteurs. Friable.'],
+  [MOUNT]:['Montagne','Paroi de massif. Opaque. Forable.'],
+  [HARD]:['Roche dure','Cœur du massif. Densité hors normes : la foreuse glisse dessus. Seule une onde de choc pourrait la fendre.'],
+  [WALL]:['Mur bâti','Alliage de construction, origine non répertoriée. Hors de portée de la foreuse. Un explosif, peut-être.'],
+  [FLOOR]:['Sol bâti','Dalle artificielle. Quelque chose a construit ici.'],
+  [DOOR]:['Porte','Battant automatique. Réagit à la présence, se referme derrière.'],
+  [SECRET]:['Mur bâti','Alliage de construction, origine non répertoriée. Hors de portée de la foreuse. Un explosif, peut-être.'],
+  [LOCK]:['Porte verrouillée','Battant scellé. Serrure codée. Il existe une clé. Ou un explosif.'],
+  [MACHINE]:['Machine hors d’usage','Carcasse mécanique. Inerte. Les capteurs passent par-dessus.'],
+  [ANTENNA]:['Antenne','Relais de communication en veille. Un contact pourrait le réveiller.'],
+  [TERMINAL]:['Terminal','Console de données. Encore alimentée. Lecture possible au contact.'],
+  [TURRET]:['Tourelle laser','Émetteur encastré. Cycle de tir irrégulier, aucun signal préalable. Observer avant de traverser.'],
+  [PYLON]:['Croix laser','Pylône émetteur. Balaie ses abords par intermittence. Les angles semblent épargnés.'],
+  [PILE]:['Pile énergétique','Cellule d’énergie mobile. Se déplace par poussée. Format compatible avec les socles du secteur.'],
+  [LEVIER]:['Levier','Commande mécanique reliée à cette salle. Fonction : à vérifier.'],
+  [GRILLE]:['Grille d’énergie','Barrière active, alimentée par un socle. Transparente aux capteurs.'],
+  [STATION]:['Station de réparation','Poste de maintenance compatible. Réserve unique. Le cycle de réparation est bruyant.'],
+  [CHARGEUR]:['Distributeur de pile','Délivre une cellule d’énergie. Peut rappeler la sienne.'],
+  [FABRIC]:['FABLAB','Unité de fabrication. Accepte la Matière {µ}. Protocole d’échange compatible.'],
+  [VITRE]:['Mur vitré','Paroi transparente : les capteurs la traversent, dans les deux sens. Résiste à la foreuse.'],
+  [PILLAR]:['Pilier','Élément porteur. Opaque. Bon écran contre les capteurs adverses.'],
+  [LIQ]:['Eau peu profonde','Liquide. Freine la progression. Châssis exposé.'],
+  [DEEP]:['Eau profonde','Liquide, courant instable : la trajectoire dérive. Châssis exposé.'],
+  [GRASS]:['Herbes hautes','Végétation dense. Masque, dans les deux sens. Bonne couverture.'],
+  [FLAT]:['Herbes basses','Végétation rase. Étouffe la signature des mouvements.'],
+  [CHASM]:['Gouffre','Faille. Fond non détecté. Infranchissable.'],[BRIDGE]:['Pont','Passerelle au-dessus de la faille. Structure stable.'],
+  [RUBBLE]:['Gravats','Débris de roche. Praticables.'],
+  [SHIP]:['Coque du vaisseau','Cargo de largage. Point d’arrivée. Blindage intact.'],
+  [DECK]:['Soute du vaisseau','Intérieur du cargo. Retour toujours possible.']};
+const BEHAV={puce:'Petite unité furtive. Suit à distance, se dérobe au contact. Rarement seule : en frapper une réveille les autres.',
+  crabos:'Unité de chasse. Prend la trace dès qu’elle repère une cible, ne la lâche pas de sitôt.',
+  cafar:'Unité de liaison. Se déplace en bande. Ce que l’une perçoit, toutes le savent.',
+  mastok:'Masse lourde, blindage épais. Lente. Un seul impact peut suffire. Éviter.',
+  brochon:'Signature aquatique. Disparaît des capteurs en eau profonde. Ne quitte pas l’eau.',
+  mine:'Charge explosive autonome. Se colle à sa cible avant de détoner. Ne pas rester près.',
+  paralyzor:'Poste de garde. Émetteur à courte portée, tire sur ce qu’il voit.',
+  gardien:'Unité d’interception. Rapide, peu dangereuse en soi, mais son champ immobilise. À neutraliser d’abord.',
+  artilleur:'Plateforme de tir à longue portée. Cadence lente. Recule quand on la serre de près.',
+  drone:'Unité volante, légère. Ignore failles et liquides. Arrive en essaim.',
+  soudeur:'Unité de maintenance. Remet ses alliés en état et fuit le combat. Cible prioritaire.',
+  englueur:'Projette une substance adhésive. Entrave les mouvements. Garde ses distances.'};
+function inspectHTML(c){const {x,y}=c||HOV;if(x<0||y<0||x>=W||y>=H)return '';const vise=!!(PHASE||VISEE);
   const i=idx(x,y),seen=!fog||G.seen[i],see=!fog||vis[i],d=Math.max(Math.abs(x-G.px),Math.abs(y-G.py)),dt=d?`${d} case${d>1?'s':''}`:'ici';
   const head=(ic,n,ex)=>`<div class="ih">${ic?`<img src="${ic}" alt="">`:''}<b>${n}</b><span>${ex||''}</span></div>`;
   if(!seen&&G.ore&&G.ore[i]&&sonarVu(i,sonarR())){const o=G.ore[i];
-    return `<div class="insp">${head('','Gisement détecté',dt)}<p><b>${oreMat(o)?'Matière {µ}':'Éclats de métal'}</b> · repéré par le sonar : ${oreMat(o)?`+${ORE_PV[oreLv(o)]} en réserve`:`+${ORE_PV[oreLv(o)]} PV`}. ${oreSol(o)?'Au sol.':'Pris dans la roche : il faudra forer.'}</p></div>`;}
-  if(!seen)return `<div class="insp">${head('','Zone inexplorée',dt)}<p>Aucune donnée : ${NOM_FOREUSE} n’est jamais passée à portée de ce secteur.</p></div>`;
+    return `<div class="insp">${head('','Gisement détecté',dt)}<p>Écho sonar : <b>${oreMat(o)?'Matière {µ}':'éclats de métal'}</b>, ${oreSol(o)?'au sol':'pris dans la roche'}.</p></div>`;}
+  if(!seen)return `<div class="insp">${head('','Zone inexplorée',dt)}<p>Aucune donnée. Secteur jamais balayé par les capteurs.</p></div>`;
   const out=[],t=G.t[i];let [tn,td]=TDESC[t]||['Terrain',''];const border=x===0||y===0||x===W-1||y===H-1;
   // Une niche de salle piégée repérée se nomme par ce qu'elle cache ; cachée, c'est un mur ordinaire.
   {const nc=G.niche&&G.niche[i];
-    if(nc===1)[tn,td]=['Niche fermée','Un relais s’y tient caché. Il surgira quand on ramassera l’appât de la salle.'];
-    else if(nc===2)[tn,td]=['Niche ouverte','Le relais qui s’y tenait en est sorti.'];}
+    if(nc===1)[tn,td]=['Niche fermée','Cavité dans la paroi. Présence mécanique en veille. Elle attend quelque chose.'];
+    else if(nc===2)[tn,td]=['Niche ouverte','Cavité vide. Ce qui s’y tenait est sorti.'];}
   const occ=see?occupant(x,y):null;
-  if(d===0){const st=G.st;out.push(head(ICON.robot_r,'Foreuse U-7',dt),
-    `<div class="kv"><span>Vie <b>${Math.ceil(st.vie)}/${st.vieMax}</b></span><span>Énergie <b>${Math.floor(st.energie)}/${st.energieMax}</b></span><span>DEF <b>${robotDef()}</b></span></div>`);}
+  if(d===0){const st=G.st;out.push(head(ICON.robot_r,NOM_FOREUSE,dt),
+    `<div class="kv"><span>Vie <b>${Math.ceil(st.vie)}/${st.vieMax}</b></span><span>Énergie <b>${Math.floor(st.energie)}/${st.energieMax}</b></span><span>DEF <b>${robotDef()}</b></span></div>`,
+    '<p>Unité de forage autonome. Mission en cours.</p>');}
   else if(occ){const isB=(G.beasts||[]).includes(occ),sp=isB?BEASTS[occ.sp]:SPECIES[occ.sp],key=isB?sp.key:'puce',
     hp=Math.max(0,occ.hp??pvDe(sp));
     const P=isB&&sp.pack&&G.packs?G.packs[occ.pack]:null;
-    const state=isB?(occ.hunt>0?(occ.sees?'en chasse':occ.search>0?'fouille les environs':'se dirige vers votre dernière position connue'):P?(P.pause>0?'au repos':'en route'):'erre'):({attack:'attaque',flee:'recule',follow:'suit',hold:'observe',seek:'se dirige vers votre dernière position connue',search:'fouille les environs'}[occ.mode]||'ne vous a pas repéré');
+    const state=isB?(occ.hunt>0?(occ.sees?'en chasse':occ.search>0?'fouille les environs':'remonte la trace'):P?(P.pause>0?'au repos':'en route'):'erre'):({attack:'attaque',flee:'recule',follow:'suit',hold:'observe',seek:'remonte la trace',search:'fouille les environs'}[occ.mode]||'n’a rien repéré');
     const me=hitChance(robotPre(),sp.def+terrModDe(sp,x,y)),them=isB||occ.mode==='attack'?hitChance(sp.pre,robotDef()):null;
     out.push(head(ICON[isB?'bz'+occ.sp+'r':'an'+occ.sp+'r'],sp.n,`${state} · ${dt}`),
       `<div class="kv"><span>PV <b>${hp}/${pvDe(sp)}</b></span><span>DÉG <b>${dmgTxt(sp)}</b></span><span>PRE <b>${sp.pre}</b></span><span>DEF <b>${sp.def+terrModDe(sp,x,y)}</b></span><span title="Durée d’un pas sur cette case : plus petit, plus rapide">PAS <b>${Math.round(dpasDe(occ,sp))}</b></span><span title="Durée d’un coup : 50 frappe deux fois par battement, 200 une fois sur deux">COUP <b>${dcoupDe(occ,sp)}</b></span></div>`,
       ((isB?!(occ.hunt>0):!occ.mode)?`<p class="eye" title="Chance qu’il vous repère à chaque tour">${EYE_SVG} <b>${detectChance(occ)} %</b></p>`:''),
       `<p>Toucher <b style="color:${chanceCol(me)}">${me} %</b> · Subir <b style="color:${them==null?'var(--dim)':chanceCol(100-them)}">${them==null?'—':them+' %'}</b></p>`,
-      `<p>${BEHAV[key]}</p>`);}
+      `<p>${BEHAV[key]||''}</p>`);}
   else out.push(head('',tn,dt));
   const s=siteAt(x,y);
-  if(s)out.push(`<p><b>Site de forage</b> · ${s.known?'détecté. [F] pour forer.':'non analysé : placez '+NOM_FOREUSE+' dessus.'}</p>`);
+  if(s)out.push(`<p><b>Site de forage</b> · ${s.known?'couche profonde confirmée. Descente possible.':'signature probable. Analyse sur place requise.'}</p>`);
   const om=G.ore&&G.ore[i];
-  if(om&&oreMat(om))out.push(oreSol(om)?`<p><b>Matière {µ}</b> · placez ${NOM_FOREUSE} dessus pour la ramasser : +${ORE_PV[oreLv(om)]} en réserve.</p>`:`<p><b>Matière {µ} prise dans la montagne</b> · brisez la paroi pour la faire tomber (+${ORE_PV[oreLv(om)]}).</p>`);
-  else if(om&&oreSol(om))out.push(`<p><b>Éclats de métal ${ORE_NOM[oreLv(om)]}</b> · placez ${NOM_FOREUSE} dessus pour les ramasser : +${ORE_PV[oreLv(om)]} PV.</p>`);
-  else if(om)out.push('<p><b>Éclats de métal '+ORE_NOM[oreLv(om)]+' pris dans la montagne</b> · brisez la paroi pour les faire tomber (+'+ORE_PV[oreLv(om)]+' PV).</p>');
-  if(G.cles&&G.cles[i])out.push('<p>Une clé : passer dessus pour la ramasser.</p>');
+  if(om&&oreMat(om))out.push(oreSol(om)?'<p><b>Matière {µ}</b> · au sol. Récupérable au passage.</p>':'<p><b>Matière {µ}</b> · prise dans la paroi. Forer pour la libérer.</p>');
+  else if(om&&oreSol(om))out.push(`<p><b>Éclats de métal ${ORE_NOM[oreLv(om)]}</b> · au sol. Métal assimilable, récupérable au passage.</p>`);
+  else if(om)out.push(`<p><b>Éclats de métal ${ORE_NOM[oreLv(om)]}</b> · pris dans la paroi. Forer pour les libérer.</p>`);
+  if(G.cles&&G.cles[i])out.push('<p><b>Clé</b> · codée pour une serrure du secteur.</p>');
   const sol=G.items&&G.items[i];
-  if(sol&&sol.length)out.push(`<p><b>${sol.length>1?'Objets au sol':'Objet au sol'}</b> · ${sol.map(k=>ITEMS[k].n).join(', ')} · placez ${NOM_FOREUSE} dessus pour ramasser.</p>`);
+  if(sol&&sol.length)out.push(`<p><b>${sol.length>1?'Objets au sol':'Objet au sol'}</b> · ${sol.map(k=>ITEMS[k].n).join(', ')}. Récupérable au passage.</p>`);
   if(d!==0&&occ||d===0)out.push(`<p><b>${tn}</b> · ${td}</p>`);else out.push(`<p>${td}</p>`);
-  const dm=G.dmg&&G.dmg[i];if(dm&&(t===ROCK||t===MOUNT))out.push('<p>Fissurée : encore 1 coup pour la briser.</p>');
-  if(border&&(t===ROCK||t===MOUNT))out.push('<p>Bord de la carte : indestructible.</p>');
-  if(!see)out.push('<p>Hors de vue : souvenir du dernier passage.</p>');
+  const dm=G.dmg&&G.dmg[i];if(dm&&(t===ROCK||t===MOUNT))out.push('<p>Structure fissurée : sur le point de céder.</p>');
+  if(border&&(t===ROCK||t===MOUNT))out.push('<p>Paroi d’ancrage du secteur. Insensible à la foreuse.</p>');
+  if(!see)out.push('<p>Hors de portée des capteurs : données du dernier passage.</p>');
   let act='';
-  if(d===0)act=s?'<kbd>F</kbd> ou clic : forer ce site.':'';
+  if(vise)act='';   // phaseur, capsule : pas de ligne d'action (le clic valide la visée)
+  else if(d===0)act=s?'<kbd>F</kbd> ou clic : forer ce site.':'';
   else if(d===1&&occ)act='Clic : frapper avec '+NOM_FOREUSE+'.';
   else if(d===1&&t===LOCK)act=nbCles()>0?'Clic : ouvrir avec une clé.':'';
   else if(d===1&&(t===HARD||t===VITRE||bati(t)))act='';

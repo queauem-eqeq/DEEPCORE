@@ -131,6 +131,12 @@ body{margin:0;background:var(--black);color:var(--fg);font:13px/1.45 var(--mono)
 .insp .kv{display:grid;grid-template-columns:repeat(3,1fr);gap:2px 10px;font-variant-numeric:tabular-nums}
 .insp .kv span{color:var(--dim);white-space:nowrap}.insp .kv b{font-weight:400;color:var(--fg)}
 .insp .act{color:var(--c3)}
+/* Fiche dans la colonne (28 novembre 2026) : en mode viseur, elle remplace tout ce qui suit les statuts ; seul le pavé tactile reste. */
+.fiche{flex:1 1 auto;min-height:0;overflow-y:auto;scrollbar-width:none;margin-top:15px}
+.fiche::-webkit-scrollbar{display:none}
+.fiche[hidden]{display:none}
+.col.vise #fd-stats,.col.vise #fd-sac,.col.vise .coldefil>:not(.pad){display:none}
+.col.vise .coldefil{flex:none}
 .mcard.wide{width:min(820px,100%)}
 .cur-wrap{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px;align-items:start}
 .cur-groups{display:grid;gap:14px;max-height:min(62vh,560px);overflow-y:auto;overflow-x:hidden;padding-right:4px;min-width:0}
