@@ -1079,3 +1079,9 @@ Le moteur ne rame pas, même avec plusieurs coups par tour : l'impression venait
 et de tous les coups d'un tour affichés au même instant. Après le passage du combat à 60 images par seconde et les coups
 étalés : 8 Drones, tour 4,8 ms en moyenne (pire 14,5), image 3,3 ms en moyenne, jusqu'à 60 images par seconde pendant
 les coups.
+
+### Après la recopie des stats du 28 novembre 2026 (`outils/simul.py`, combat, vie restante sur 100)
+
+Avant → après : Broyeur seul 76 → 67 ; Broyeur + 2 Crabots 60 → 50 (98 % de victoires au lieu de 100) ; 3 Relais 86 → 91 ;
+4 Relais 82 → 88 ; un Relais 96 → 98. Les autres combats bougent d'un point au plus. Le Broyeur frappe plus fort et plus souvent
+(12-20 toutes les 150 au lieu de 10-18 toutes les 200), les Relais sont plus fragiles (10 PV au lieu de 15).

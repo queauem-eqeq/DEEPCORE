@@ -19,7 +19,7 @@ const PRESETS=[   // c : accent, bio, monde, danger, bâti ; palettes du joueur 
 // Les palettes prédéfinies sont modifiables : la palette sélectionnée suit les sélecteurs de couleur
 const PRESETS_DEF=PRESETS.map(p=>({n:p.n,c:p.c.slice()}));
 const palDe=c=>({'1':c[0],'2':c[1],'3':c[2],'4':c[3],'5':c[4]});
-let PRESET_ACTIVE=4;   // Améthyste, la palette choisie par le joueur (25 novembre 2026 ; Désert le 23)
+let PRESET_ACTIVE=7;   // Magma, la palette choisie par le joueur (28 novembre 2026 ; Améthyste le 25, Désert le 23)
 try{const sv=JSON.parse(localStorage.getItem('np-presets')||'null');
   // une entrée est soit les cinq couleurs (ancien format), soit {n, c} : le nom de la palette est modifiable depuis le 24 novembre 2026
   if(Array.isArray(sv))sv.forEach((e,i)=>{if(!PRESETS[i])return;const c=Array.isArray(e)?e:e&&e.c;

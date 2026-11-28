@@ -9,9 +9,9 @@
    5. Matière au sol (butin d'exploration), Module de puissance (POW +1 pour toujours), Surrégime, Camouflage optique.
    Ce que la foreuse sait (plans, capsules identifiées, noms de code) vit dans G.st.savoir : G.st suit la foreuse d'un niveau
    à l'autre. Valeurs réglables : Lab → Items (np-items). */
-const ITEM_VAL_DEF={repar:{soin:50},batterie:{energie:50,choc:12,etourdi:6},charge:{degats:30},puissance:{pow:1,deg:5},
+const ITEM_VAL_DEF={repar:{soin:50},batterie:{energie:50,choc:12,etourdi:10},charge:{degats:30},puissance:{pow:1,deg:5},
   berserk:{crit:50,duree:30},camo:{duree:30},balise:{rayon:20,duree:25,pv:40},court:{etourdi:10},matiere:{mat:15},
-  phaseur:{loin:14}};
+  phaseur:{loin:25}};
 const ITEM_VAL_LIB={soin:'Vie rendue',energie:'Énergie rendue',choc:'Dégâts de la décharge',etourdi:'Étourdissement (battements)',degats:'Dégâts',pow:'POW gagné',deg:'Dégâts par point de POW en trop (%)',crit:'CRIT en plus (points)',duree:'Durée (battements)',rayon:'Rayon de l’appel (cases)',pv:'PV de la balise posée',mat:'Matière {µ} rendue',loin:'Distance mini où l’ennemi reparaît (cases)'};
 let ITEM_VAL=JSON.parse(JSON.stringify(ITEM_VAL_DEF));
 // chance qu'un robot abattu lâche un objet, par espèce (clé du Bestiaire)

@@ -91,20 +91,20 @@ plus rapide. Elles ont remplacé la VIT le 25 novembre 2026 ; les paliers sont 5
 
 | Espèce | Pas | Coup | PV | DÉG | PRE | DEF | CRIT |
 |---|---|---|---|---|---|---|---|
-| Puce | 75 | 50 | 10 | 2-3 | 80 | 20 | 2 % |
+| Puce | 75 | 75 | 10 | 1-2 | 80 | 20 | 2 % |
 | Crabot | 100 | 100 | 22 | 3-6 | 65 | 0 | 2 % |
-| Relais | 100 | 100 | 15 | 3-4 | 50 | 10 | 5 % |
+| Relais | 75 | 100 | 10 | 2-4 | 50 | 10 | 2 % |
 | Torpille | 75 | 100 | 14 | 4-5 | 80 | 20 | 2 % |
-| Broyeur | 150 | 200 | 60 | 10-18 | 60 | 0 | 0 % |
-| Mine | 50 | 100 | 12 | 20 (explosion) | — | 0 | 0 % |
-| Sentinelle | 75 | 100 | 14 | 1-2 (laser, 2 cases) | 75 | 10 | 0 % |
+| Broyeur | 150 | 150 | 60 | 12-20 | 60 | 0 | 0 % |
+| Mine | 50 | 100 | 18 | 20-30 (explosion) | — | 0 | 0 % |
+| Sentinelle | 75 | 50 | 18 | 1 (laser, 2 cases) | 70 | 10 | 0 % |
 | Bloqueur | 50 | 100 | 30 | 2-4 | 100 | 15 | 0 % |
-| Artilleur | 100 | 150 | 14 | 4-7 (laser, 5 cases) | 65 | 5 | 0 % |
-| Drone | 50 | 50 | 6 | 2-3 | 80 | 30 | 0 % |
-| Soudeur | 100 | 100 | 16 | 1-2 | 60 | 10 | 0 % |
-| Englueur | 100 | 100 | 18 | 1-2 (glu, 4 cases) | 75 | 10 | 0 % |
+| Artilleur | 75 | 200 | 14 | 4-7 (laser, 5 cases) | 65 | 5 | 0 % |
+| Drone | 50 | 75 | 6 | 2-3 | 80 | 30 | 0 % |
+| Soudeur | 125 | 100 | 16 | 1-2 | 60 | 10 | 0 % |
+| Englueur | 100 | 100 | 18 | 2 (glu, 4 cases) | 75 | 10 | 0 % |
 
-Ce sont les valeurs réglées en jeu par l'utilisateur et recopiées dans le code. Une nouvelle espèce s'ajoute à la fin de la liste (`conception.md`).
+Ce sont les valeurs réglées en jeu par l'utilisateur et recopiées dans le code (dernière relecture : 28 novembre 2026, 2 h 10). Le pas du Soudeur, 125, sort des paliers : c'est le réglage du joueur, gardé tel quel. Une nouvelle espèce s'ajoute à la fin de la liste (`conception.md`).
 
 **Les articles des messages suivent le genre de l'espèce** (champ `fem`), avec élision devant une voyelle et pas de
 s au pluriel sur un nom qui en porte déjà un : « la puce », « la torpille », « le crabot », « les relais ».

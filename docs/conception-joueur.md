@@ -216,7 +216,7 @@ Modèle Brogue :
 | Consommable | Sur la foreuse | Sur un ennemi |
 |---|---|---|
 | Réparobots | Vie +50 | le répare de 50 PV |
-| Batterie | Énergie +50 | décharge : 12 dégâts, **étourdi 6 battements** (un Bloqueur étourdi lâche prise) |
+| Batterie | Énergie +50 | décharge : 12 dégâts, **étourdi 10 battements** (un Bloqueur étourdi lâche prise) |
 | Fumigène | nuage là où on le lance ; **les ennemis ne perdent la trace que si la foreuse est dedans** | idem |
 | Charge sismique | explose comme une mine (3 × 3 et 5 cases autour), 30 dégâts **à la foreuse aussi**, roche brisée | idem |
 | **Module de puissance** | **POW +1 pour toujours** ; chaque point de POW au-dessus du POW requis par l'arme donne **+5 % de dégâts**  | ses coups portent 25 % plus fort |
@@ -224,7 +224,7 @@ Modèle Brogue :
 | **Camouflage optique** | invisible 10 battements : vue seulement au contact, les poursuivants à distance lâchent ; **rompu par un coup ou un forage** ; « Camouflé N » sous les barres, comme « Englué N » | il disparaît 10 battements (visible au contact) |
 | **Balise** (néfaste sur soi) | une **sirène à deux tons** retentit ; tous les ennemis à 20 cases savent où est la foreuse ; **elle rompt son camouflage optique** | **lancée ailleurs, c'est un leurre posé au sol** (ci-dessous) |
 | **Court-circuit** (néfaste) | énergie à zéro | hors service 10 battements, sans dégât ; un Bloqueur lâche |
-| **Phaseur** | **elle entre en phase et sort de phase où l'on veut**, sur le terrain déjà découvert (ci-dessous) | **il passe en phase ailleurs sur le niveau**, à 14 cases au moins, et **perd la trace de la foreuse** ; un Bloqueur lâche |
+| **Phaseur** | **elle entre en phase et sort de phase où l'on veut**, sur le terrain déjà découvert (ci-dessous) | **il passe en phase ailleurs sur le niveau**, à 25 cases au moins, et **perd la trace de la foreuse** ; un Bloqueur lâche |
 | **Matière** (butin au sol) | +15 en réserve, dès qu'on marche dessus ; au sol, elle a le dessin des **éclats moyens** en couleur Matière  | – |
 
 **Balise posée.** Lancée ailleurs que sur la foreuse, la balise **vole jusqu'à la case visée** et s'y pose (case libre la plus proche si elle est occupée). Elle **hurle 25 battements** (« Balise N » sous les barres, point rouge clignotant). Tant qu'elle hurle, **tout ennemi à 20 cases d'elle, ou qui chasse la foreuse, la délaisse pour s'acharner sur elle** : il l'attaque au contact, les tireurs (Sentinelle, Artilleur, Englueur) lui tirent dessus à portée, les mines s'arment à côté. **Chaque coup la touche** (critique possible) ; un seul bruit d'attaque par battement. Elle a **40 PV**, barre le passage comme une créature et, **détruite, explose sur sa seule case**, sans dégâts alentour ; mines et charges sismiques l'abîment aussi. Les ennemis attirés **restent en chasse** (pas de coup par surprise sur eux) et gardent le souvenir de la foreuse ; balise éteinte ou détruite, ils reprennent la chasse (sur la foreuse s'ils la voient, sinon là où ils l'ont vue). Un ennemi frappé par la foreuse délaisse la balise. La balise posée ne rompt pas le camouflage. Valeurs réglables dans Lab → Items (rayon, durée, PV). 
